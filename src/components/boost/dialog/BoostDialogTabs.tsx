@@ -4,27 +4,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, CheckCircle2, PlusCircle, Loader2, ZapOff, Zap } from 'lucide-react';
+import { BoostStatus, BoostEligibility, HermesBoostStatus } from '@/types/boost';
 import BoostEligibilityCheck from './BoostEligibilityCheck';
 import BoostPackages from './BoostPackages';
-import HermesBoostInfo from './HermesBoostInfo';
 import BoostActivePackage from './BoostActivePackage';
-import { BoostStatus, BoostEligibility, HermesBoostStatus } from '@/types/boost';
+import HermesBoostInfo from './HermesBoostInfo';
 
 interface BoostDialogTabsProps {
   activeTab: string;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
-  isLoading: boolean;
   boostStatus: BoostStatus;
   eligibility: BoostEligibility;
   hermesBoostStatus?: HermesBoostStatus;
   boostPackages: any[];
   selectedPackage: string | null;
-  onSelectPackage: (packageId: string) => void;
+  setSelectedPackage: (packageId: string) => void;
   formatBoostDuration: (duration: string) => string;
   getBoostPrice: () => number;
-  onPurchase: () => Promise<void>;
-  onCancel: () => Promise<void>;
+  handlePurchase: () => Promise<void>;
+  handleCancel: () => Promise<void>;
   handleDialogClose: () => void;
+  boostAnalytics?: any;
   dailyBoostUsage: number;
   dailyBoostLimit: number;
   loading: boolean;
@@ -33,18 +33,18 @@ interface BoostDialogTabsProps {
 const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   activeTab,
   setActiveTab,
-  isLoading,
   boostStatus,
   eligibility,
   hermesBoostStatus,
   boostPackages,
   selectedPackage,
-  onSelectPackage,
+  setSelectedPackage,
   formatBoostDuration,
   getBoostPrice,
-  onPurchase,
-  onCancel,
+  handlePurchase,
+  handleCancel,
   handleDialogClose,
+  boostAnalytics,
   dailyBoostUsage,
   dailyBoostLimit,
   loading
@@ -61,12 +61,12 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   } : undefined;
   
   // Handle purchase button click
-  const handlePurchase = async () => {
+  const onPurchase = async () => {
     if (!selectedPackage) return;
     
     setPurchaseLoading(true);
     try {
-      await onPurchase();
+      await handlePurchase();
     } catch (error) {
       console.error("Purchase error:", error);
     } finally {
@@ -75,10 +75,10 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   };
   
   // Handle cancel button click
-  const handleCancel = async () => {
+  const onCancel = async () => {
     setCancelLoading(true);
     try {
-      await onCancel();
+      await handleCancel();
     } catch (error) {
       console.error("Cancel error:", error);
     } finally {
@@ -101,7 +101,7 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
         <TabsList>
           <TabsTrigger 
             value="packages" 
-            disabled={isLoading}
+            disabled={loading}
             className="flex items-center gap-1"
           >
             <PlusCircle className="h-4 w-4" />
@@ -109,7 +109,7 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
           </TabsTrigger>
           <TabsTrigger 
             value="active" 
-            disabled={isLoading || !boostStatus.isActive}
+            disabled={loading || !boostStatus.isActive}
             className="flex items-center gap-1"
           >
             <Zap className="h-4 w-4" />
@@ -126,24 +126,24 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
       
       <BoostEligibilityCheck 
         eligibility={eligibility}
-        loading={isLoading} 
+        loading={loading} 
       />
       
       <TabsContent value="packages" className="mt-6">
         <BoostPackages
           packages={boostPackages}
           selectedPackage={selectedPackage}
-          onSelectPackage={onSelectPackage}
-          formatBoostDuration={formatBoostDuration}
+          onSelectPackage={setSelectedPackage}
+          formatDuration={formatBoostDuration}
           getBoostPrice={getBoostPrice}
           dailyBoostUsage={dailyBoostUsage}
           dailyBoostLimit={dailyBoostLimit}
-          disabled={!eligibility.isEligible || isLoading}
+          disabled={!eligibility.isEligible || loading}
         />
         
         <div className="flex justify-end mt-6">
           <Button
-            onClick={handlePurchase}
+            onClick={onPurchase}
             disabled={
               !eligibility.isEligible || 
               !selectedPackage || 
@@ -182,7 +182,7 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
             <div className="flex justify-end mt-6">
               <Button 
                 variant="destructive" 
-                onClick={handleCancel}
+                onClick={onCancel}
                 disabled={cancelLoading}
               >
                 {cancelLoading ? (

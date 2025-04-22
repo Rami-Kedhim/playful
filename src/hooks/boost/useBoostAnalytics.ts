@@ -3,8 +3,22 @@
  * AnalyticsData interface for boost-related analytics
  */
 export interface AnalyticsData {
-  impressions: number;
-  clicks: number;
+  impressions: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  clicks: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
   engagementRate: number;
   conversionRate: number;
   boostEfficiency: number;
@@ -57,8 +71,22 @@ export const useBoostAnalytics = (profileId: string) => {
     // This would fetch from an API in a real application
     // Mock data for now
     return {
-      impressions: 234,
-      clicks: 45,
+      impressions: {
+        today: 234,
+        yesterday: 180,
+        weeklyAverage: 200,
+        withBoost: 280,
+        withoutBoost: 120,
+        increase: 133
+      },
+      clicks: {
+        today: 45,
+        yesterday: 30,
+        weeklyAverage: 35,
+        withBoost: 50,
+        withoutBoost: 25,
+        increase: 100
+      },
       engagementRate: 19.2,
       conversionRate: 5.3,
       boostEfficiency: 78,

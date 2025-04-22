@@ -1,17 +1,18 @@
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Check, Zap } from "lucide-react";
-import { BoostPackage } from "@/types/boost";
+import React from 'react';
+import { RadioGroup } from '@/components/ui/radio-group';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Check, Zap } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { BoostPackage } from '@/types/boost';
 
 interface BoostPackagesProps {
   packages: BoostPackage[];
   selectedPackage: string | null;
   onSelectPackage: (packageId: string) => void;
-  formatBoostDuration: (duration: string) => string;
-  getBoostPrice: () => number;
+  formatDuration: (duration: string) => string;
+  getBoostPrice?: () => number;
   dailyBoostUsage?: number;
   dailyBoostLimit?: number;
   disabled?: boolean;
@@ -21,93 +22,82 @@ const BoostPackages = ({
   packages,
   selectedPackage,
   onSelectPackage,
-  formatBoostDuration,
+  formatDuration,
   getBoostPrice,
   dailyBoostUsage = 0,
-  dailyBoostLimit = 3,
+  dailyBoostLimit = 4,
   disabled = false
 }: BoostPackagesProps) => {
-  const remainingBoosts = dailyBoostLimit - dailyBoostUsage;
+  if (!packages || packages.length === 0) {
+    return (
+      <div className="p-6 text-center">
+        <p className="text-muted-foreground">No boost packages available</p>
+      </div>
+    );
+  }
   
   return (
-    <div className="space-y-4">
-      {remainingBoosts <= 0 && (
-        <div className="bg-destructive/10 p-3 rounded text-sm mb-4">
-          You've reached your daily boost limit. Try again tomorrow.
+    <div>
+      {dailyBoostUsage > 0 && dailyBoostLimit > 0 && (
+        <div className="mb-4 text-sm">
+          <p className="text-muted-foreground">
+            Daily boost usage: <span className="font-medium">{dailyBoostUsage}/{dailyBoostLimit}</span>
+          </p>
         </div>
       )}
       
-      <div className="text-sm text-muted-foreground mb-2">
-        {remainingBoosts > 0 ? (
-          <span>You have <b>{remainingBoosts}</b> boost{remainingBoosts !== 1 ? 's' : ''} remaining today</span>
-        ) : (
-          <span>Daily boost limit reached</span>
-        )}
-      </div>
-      
-      <RadioGroup 
-        value={selectedPackage || ""} 
+      <RadioGroup
+        value={selectedPackage || undefined}
         onValueChange={onSelectPackage}
-        disabled={disabled || remainingBoosts <= 0}
+        className="space-y-3"
+        disabled={disabled}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {packages.map((pkg) => (
-            <Card 
-              key={pkg.id}
-              className={`relative cursor-pointer ${
-                selectedPackage === pkg.id ? 'border-primary' : ''
-              }`}
-              onClick={() => !disabled && onSelectPackage(pkg.id)}
-            >
-              {selectedPackage === pkg.id && (
-                <div className="absolute -top-2 -right-2 h-5 w-5 bg-primary text-white rounded-full flex items-center justify-center">
-                  <Check className="h-3 w-3" />
-                </div>
+        {packages.map((pkg) => (
+          <Card
+            key={pkg.id}
+            className={cn(
+              "cursor-pointer border-2 transition-colors",
+              pkg.id === selectedPackage 
+                ? "border-primary/70 bg-primary/5" 
+                : "hover:border-muted-foreground/20"
+            )}
+            onClick={() => !disabled && onSelectPackage(pkg.id)}
+          >
+            <CardHeader className="p-4 pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center">
+                  <Zap className={cn(
+                    "h-4 w-4 mr-2",
+                    pkg.id === selectedPackage ? "text-primary" : "text-muted-foreground"
+                  )} />
+                  {pkg.name}
+                </CardTitle>
+                <Badge variant="outline">
+                  {formatDuration(pkg.duration)}
+                </Badge>
+              </div>
+              <CardDescription>
+                {pkg.description || "Boost your visibility and get more views"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              {pkg.features && pkg.features.length > 0 && (
+                <ul className="text-sm space-y-1.5 mt-2">
+                  {pkg.features.map((feature, index) => (
+                    <li key={index} className="flex items-start">
+                      <Check className="h-4 w-4 mr-2 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-muted-foreground">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
               )}
               
-              <CardContent className="p-4">
-                <div className="flex items-start space-x-3">
-                  <RadioGroupItem value={pkg.id} id={pkg.id} className="mt-1" />
-                  <div className="flex-1">
-                    <Label 
-                      htmlFor={pkg.id}
-                      className="text-base font-medium flex items-center cursor-pointer"
-                    >
-                      <Zap className="h-4 w-4 mr-2 text-yellow-500" />
-                      {pkg.name}
-                    </Label>
-                    
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-sm text-muted-foreground">
-                        Duration: {formatBoostDuration(pkg.duration)}
-                      </span>
-                      <span className="font-medium">
-                        {pkg.price_ubx} UBX
-                      </span>
-                    </div>
-                    
-                    {pkg.description && (
-                      <p className="text-sm text-muted-foreground mt-2">
-                        {pkg.description}
-                      </p>
-                    )}
-                    
-                    {pkg.features && pkg.features.length > 0 && (
-                      <ul className="mt-3 space-y-1">
-                        {pkg.features.map((feature, index) => (
-                          <li key={index} className="text-xs flex items-start">
-                            <span className="text-primary mr-1 mt-1">•</span>
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              <div className="mt-3 text-sm font-medium">
+                Price: {pkg.price_ubx} UBX
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </RadioGroup>
     </div>
   );

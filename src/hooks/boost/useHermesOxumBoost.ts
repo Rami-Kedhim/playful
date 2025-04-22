@@ -3,42 +3,58 @@ import { useState, useEffect } from 'react';
 import { HermesBoostStatus } from '@/types/boost';
 
 /**
- * Hook for using the combined Hermes and Oxum systems for boost functionality
+ * Hook for tracking and managing Hermes-Oxum boost status
  */
-export const useHermesOxumBoost = (profileId: string) => {
+export const useHermesOxumBoost = (profileId?: string) => {
   const [hermesStatus, setHermesStatus] = useState<HermesBoostStatus>({
-    position: 3,
-    activeUsers: 125,
-    estimatedVisibility: 65,
-    lastUpdateTime: new Date().toISOString()
+    position: 0,
+    activeUsers: 0,
+    estimatedVisibility: 0,
+    lastUpdateTime: new Date().toISOString(),
+    isActive: false
   });
-  
-  const [oxumPriceValidation, setOxumPriceValidation] = useState({
-    isValid: true,
-    recommendedPrice: 50
-  });
-  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch Hermes boost status
   useEffect(() => {
-    // In a real app, this would call APIs to get status from both systems
-    const timer = setTimeout(() => {
-      setHermesStatus({
-        position: Math.floor(Math.random() * 5) + 1,
-        activeUsers: Math.floor(Math.random() * 200) + 50,
-        estimatedVisibility: Math.floor(Math.random() * 40) + 40,
-        lastUpdateTime: new Date().toISOString()
-      });
+    const fetchHermesStatus = async () => {
+      if (!profileId) return;
       
-      setOxumPriceValidation({
-        isValid: Math.random() > 0.1,
-        recommendedPrice: Math.floor(Math.random() * 30) + 40
-      });
-    }, 5000);
+      setLoading(true);
+      try {
+        // Simulate API call with mock data
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const isProfileBoosted = Math.random() > 0.6; // 40% chance of being boosted
+        
+        setHermesStatus({
+          isActive: isProfileBoosted,
+          position: Math.floor(Math.random() * 20) + 1,
+          activeUsers: Math.floor(Math.random() * 500) + 100,
+          estimatedVisibility: Math.floor(Math.random() * 50) + 20,
+          lastUpdateTime: new Date().toISOString(),
+          boostScore: Math.floor(Math.random() * 100),
+          effectivenessScore: Math.floor(Math.random() * 100)
+        });
+      } catch (err) {
+        console.error('Error fetching Hermes boost status:', err);
+        setError('Failed to fetch boost status');
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    return () => clearTimeout(timer);
+    fetchHermesStatus();
+    
+    // Refresh status every 5 minutes
+    const interval = setInterval(fetchHermesStatus, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, [profileId]);
-  
+
   return {
     hermesStatus,
-    oxumPriceValidation,
+    loading,
+    error
   };
 };

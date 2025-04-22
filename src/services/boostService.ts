@@ -1,164 +1,211 @@
 
-import { BoostStatus, BoostEligibility, BoostAnalytics } from "@/types/boost";
-import { GLOBAL_UBX_RATE } from "@/utils/oxum/globalPricing";
+import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
+import { BoostStatus, BoostEligibility, BoostPackage } from '@/types/boost';
+import { AnalyticsData } from '@/hooks/boost/useBoostAnalytics';
 
-// Mock implementation of boost service
+// Mock data
+const mockBoostPackages = [
+  {
+    id: "boost-1",
+    name: "24-Hour Boost",
+    description: "Standard boost for 24 hours",
+    duration: "24:00:00",
+    price_ubx: GLOBAL_UBX_RATE,
+    features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking"]
+  },
+  {
+    id: "boost-2",
+    name: "Weekend Boost",
+    description: "3-day visibility boost",
+    duration: "72:00:00",
+    price_ubx: GLOBAL_UBX_RATE * 2.5,
+    features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking", "Extended duration"]
+  },
+  {
+    id: "boost-3",
+    name: "Weekly Boost",
+    description: "7-day premium visibility",
+    duration: "168:00:00",
+    price_ubx: GLOBAL_UBX_RATE * 5,
+    features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking", "Extended duration", "Premium placement"]
+  }
+];
+
+// In-memory store for active boosts
+const activeBoosts: Record<string, BoostStatus> = {};
+
+// Simulated service
 export const boostService = {
-  /**
-   * Fetch available boost packages
-   */
-  fetchBoostPackages: async () => {
-    // In a real app, this would make an API call
-    return [
-      {
-        id: "boost-1",
-        name: "1-Hour Boost",
-        duration: "01:00:00",
-        price_ubx: GLOBAL_UBX_RATE,
-        description: "Quick visibility boost",
-        features: ["Top search position", "Featured badge"]
-      },
-      {
-        id: "boost-3",
-        name: "3-Hour Boost",
-        duration: "03:00:00",
-        price_ubx: GLOBAL_UBX_RATE,
-        description: "Standard visibility boost",
-        features: ["Top search position", "Featured badge", "Profile highlighting"]
-      },
-      {
-        id: "boost-24",
-        name: "24-Hour Boost",
-        duration: "24:00:00",
-        price_ubx: GLOBAL_UBX_RATE,
-        description: "Full day visibility boost",
-        features: ["Top search position", "Featured badge", "Profile highlighting", "Priority in all listings"]
-      }
-    ];
-  },
-
-  /**
-   * Fetch active boost for a profile
-   */
-  fetchActiveBoost: async (profileId: string): Promise<BoostStatus | null> => {
-    // Mock implementation - randomly have active boosts
-    const isActive = Math.random() > 0.5;
-    
-    if (!isActive) {
-      return null;
-    }
-    
-    const now = new Date();
-    const expiresAt = new Date(now.getTime() + (Math.floor(Math.random() * 3) + 1) * 60 * 60 * 1000);
-    const totalDuration = expiresAt.getTime() - now.getTime();
-    const elapsed = Math.random() * totalDuration;
-    const progress = Math.round((elapsed / totalDuration) * 100);
-    
-    return {
-      isActive: true,
-      activeBoostId: "boost-1",
-      startTime: now,
-      endTime: expiresAt,
-      timeRemaining: `${Math.floor((expiresAt.getTime() - now.getTime()) / (1000 * 60))} minutes`,
-      progress,
-      remainingTime: `${Math.floor((expiresAt.getTime() - now.getTime()) / (1000 * 60))} minutes`,
-      expiresAt,
-      boostPackage: {
-        id: "boost-1",
-        name: "1-Hour Boost",
-        duration: "01:00:00",
-        price_ubx: GLOBAL_UBX_RATE,
-        description: "Quick visibility boost",
-        features: ["Top search position", "Featured badge"]
-      },
-      pulseData: {
-        type: "standard",
-        intensity: 75
-      }
-    };
-  },
-
-  /**
-   * Check boost eligibility for a profile
-   */
-  checkBoostEligibility: async (profileId: string): Promise<BoostEligibility> => {
-    // In a real app, check actual eligibility criteria
-    return {
-      isEligible: true
-    };
-  },
-
-  /**
-   * Purchase a boost
-   */
-  purchaseBoost: async (profileId: string, packageId: string) => {
-    // In a real app, make an API call to purchase
-    console.log(`Purchasing boost ${packageId} for profile ${profileId}`);
-    
-    // Simulate success most of the time
-    if (Math.random() > 0.1) {
-      return {
-        success: true,
-        boostId: `boost-${Date.now()}`,
-      };
-    } else {
-      return {
-        success: false,
-        message: "Failed to process payment"
-      };
-    }
-  },
-
-  /**
-   * Cancel active boost
-   */
-  cancelBoost: async (profileId: string, boostId: string) => {
-    // In a real app, make an API call to cancel
-    console.log(`Cancelling boost ${boostId} for profile ${profileId}`);
-    
-    // Simulate success most of the time
-    if (Math.random() > 0.1) {
-      return {
-        success: true
-      };
-    } else {
-      return {
-        success: false,
-        message: "Failed to cancel boost"
-      };
-    }
+  // Fetch available boost packages
+  fetchBoostPackages: async (): Promise<BoostPackage[]> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return [...mockBoostPackages];
   },
   
-  /**
-   * Fetch boost analytics
-   */
-  fetchBoostAnalytics: async (profileId: string): Promise<BoostAnalytics> => {
-    // In a real app, this would fetch real analytics data
+  // Check if profile has an active boost
+  fetchActiveBoost: async (profileId: string): Promise<BoostStatus> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    if (activeBoosts[profileId]) {
+      return activeBoosts[profileId];
+    }
+    
+    // 30% chance of having an active boost (for demo/testing)
+    const hasActiveBoost = Math.random() > 0.7;
+    
+    if (hasActiveBoost) {
+      const hoursRemaining = Math.floor(Math.random() * 23) + 1;
+      const expiresAt = new Date(Date.now() + hoursRemaining * 60 * 60 * 1000);
+      
+      const boostPackage = mockBoostPackages[0];
+      
+      const activeBoost: BoostStatus = {
+        isActive: true,
+        packageId: boostPackage.id,
+        packageName: boostPackage.name,
+        startTime: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+        endTime: expiresAt.toISOString(),
+        expiresAt: expiresAt,
+        remainingTime: `${hoursRemaining} hours remaining`,
+        timeRemaining: `${hoursRemaining} hours remaining`,
+        progress: Math.round((24 - hoursRemaining) / 24 * 100),
+        boostPackage: boostPackage,
+        profileId
+      };
+      
+      activeBoosts[profileId] = activeBoost;
+      return activeBoost;
+    }
+    
+    return { isActive: false };
+  },
+  
+  // Check if profile is eligible for boosting
+  checkBoostEligibility: async (profileId: string): Promise<BoostEligibility> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 150));
+    
+    // Most profiles are eligible (for demo purposes)
+    const isEligible = Math.random() > 0.1;
+    
+    if (isEligible) {
+      return {
+        isEligible: true,
+        reason: "",
+        reasons: []
+      };
+    }
+    
+    // Random ineligibility reason
+    const reasons = [
+      "Profile completeness is below the required threshold (min. 70% required)",
+      "Insufficient UBX balance",
+      "Profile has pending review flags",
+      "Account needs verification"
+    ];
+    
+    const reasonIndex = Math.floor(Math.random() * reasons.length);
+    
     return {
-      additionalViews: Math.floor(Math.random() * 500) + 100,
-      engagementIncrease: Math.floor(Math.random() * 30) + 10,
-      rankingPosition: Math.floor(Math.random() * 10) + 1,
-      views: {
-        today: Math.floor(Math.random() * 200) + 50,
-        yesterday: Math.floor(Math.random() * 180) + 40,
-        weeklyAverage: Math.floor(Math.random() * 150) + 60,
-        withBoost: Math.floor(Math.random() * 300) + 100,
+      isEligible: false,
+      reason: reasons[reasonIndex],
+      reasons: [reasons[reasonIndex]]
+    };
+  },
+  
+  // Purchase a boost
+  purchaseBoost: async (profileId: string, boostPackageId: string): Promise<{success: boolean; message: string}> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Find the selected package
+    const selectedPackage = mockBoostPackages.find(pkg => pkg.id === boostPackageId);
+    
+    if (!selectedPackage) {
+      return {
+        success: false,
+        message: "Selected boost package not found"
+      };
+    }
+    
+    // Always succeed for demo purposes
+    const hours = parseInt(selectedPackage.duration.split(':')[0]);
+    const expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000);
+    
+    const activeBoost: BoostStatus = {
+      isActive: true,
+      packageId: selectedPackage.id,
+      packageName: selectedPackage.name,
+      startTime: new Date().toISOString(),
+      endTime: expiresAt.toISOString(),
+      expiresAt: expiresAt,
+      remainingTime: `${hours} hours remaining`,
+      timeRemaining: `${hours} hours remaining`,
+      progress: 0,
+      boostPackage: selectedPackage,
+      profileId
+    };
+    
+    activeBoosts[profileId] = activeBoost;
+    
+    return {
+      success: true,
+      message: `${selectedPackage.name} activated successfully!`
+    };
+  },
+  
+  // Cancel an active boost
+  cancelBoost: async (profileId: string): Promise<{success: boolean; message: string}> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    if (!activeBoosts[profileId] || !activeBoosts[profileId].isActive) {
+      return {
+        success: false,
+        message: "No active boost to cancel"
+      };
+    }
+    
+    // Remove the active boost
+    delete activeBoosts[profileId];
+    
+    return {
+      success: true,
+      message: "Boost cancelled successfully"
+    };
+  },
+  
+  // Fetch analytics for an active boost
+  fetchBoostAnalytics: async (profileId: string): Promise<AnalyticsData> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 400));
+    
+    // Generate realistic mock data
+    return {
+      impressions: {
+        today: Math.floor(Math.random() * 200) + 100,
+        yesterday: Math.floor(Math.random() * 200) + 80,
+        weeklyAverage: Math.floor(Math.random() * 150) + 100,
+        withBoost: Math.floor(Math.random() * 300) + 200,
         withoutBoost: Math.floor(Math.random() * 150) + 50,
-        increase: Math.floor(Math.random() * 50) + 20
+        increase: Math.floor(Math.random() * 100) + 50
       },
       clicks: {
-        today: Math.floor(Math.random() * 50) + 10,
-        yesterday: Math.floor(Math.random() * 45) + 8,
-        weeklyAverage: Math.floor(Math.random() * 40) + 12,
-        withBoost: Math.floor(Math.random() * 80) + 20,
-        withoutBoost: Math.floor(Math.random() * 40) + 10,
-        increase: Math.floor(Math.random() * 30) + 15
+        today: Math.floor(Math.random() * 50) + 20,
+        yesterday: Math.floor(Math.random() * 40) + 15,
+        weeklyAverage: Math.floor(Math.random() * 35) + 20,
+        withBoost: Math.floor(Math.random() * 60) + 30,
+        withoutBoost: Math.floor(Math.random() * 30) + 10,
+        increase: Math.floor(Math.random() * 150) + 50
       },
-      searchRanking: {
-        withoutBoost: Math.floor(Math.random() * 20) + 10,
-        withBoost: Math.floor(Math.random() * 8) + 1,
-        improvement: Math.floor(Math.random() * 15) + 5
-      }
+      engagementRate: Math.random() * 20 + 5,
+      conversionRate: Math.random() * 10 + 1,
+      boostEfficiency: Math.random() * 30 + 60,
+      additionalViews: Math.floor(Math.random() * 150) + 50,
+      engagementIncrease: Math.floor(Math.random() * 40) + 10,
+      rankingPosition: Math.floor(Math.random() * 10) + 1
     };
   }
 };

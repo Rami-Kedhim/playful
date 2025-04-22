@@ -16,11 +16,19 @@ export interface BoostStatus {
   packageId?: string;
   packageName?: string;
   progress?: number;
+  expiresAt?: string;
+  boostPackage?: BoostPackage;
+  profileId?: string;
+  timeRemaining?: string;
 }
 
 export interface BoostEligibility {
   isEligible: boolean;
   reason?: string;
+  reasons?: string[];
+  minimumProfileCompleteness?: number;
+  missingFields?: string[];
+  minRequiredBalance?: number;
 }
 
 export interface HermesBoostStatus {
@@ -28,6 +36,10 @@ export interface HermesBoostStatus {
   activeUsers: number;
   estimatedVisibility: number;
   lastUpdateTime: string;
+  isActive?: boolean;
+  active?: boolean;
+  boostScore?: number;
+  effectivenessScore?: number;
 }
 
 // Adding BoostAnalytics interface to fix errors in BoostAnalyticsCard

@@ -1,95 +1,71 @@
 
-// Global price constants for the Oxum system
-export const GLOBAL_UBX_RATE = 25;
-export const BASE_PRICE_UBX = 50;
-export const PRIME_PRICE_MULTIPLIER = 1.5;
-export const PRICE_TOLERANCE = 0.001; // Tolerance for floating point errors (0.1%)
+/**
+ * Global UBX token rate - ensures price consistency across the platform
+ * as per Oxum Rule #001
+ */
+export const GLOBAL_UBX_RATE = 15;
 
 /**
- * Validates that the price conforms to the global price symmetry rule
+ * Validates that a price adheres to the global pricing structure
  * @param price The price to validate
- * @returns true if valid, otherwise throws error
+ * @throws Error if price violates global pricing rules
  */
-export const validateGlobalPrice = (price: number): boolean => {
-  if (price < GLOBAL_UBX_RATE) {
-    throw new Error(`Price ${price} UBX violates Oxum Rule #001: Price below global minimum (${GLOBAL_UBX_RATE} UBX)`);
+export const validateGlobalPrice = (price: number): void => {
+  if (price !== GLOBAL_UBX_RATE && price !== GLOBAL_UBX_RATE * 2.5 && price !== GLOBAL_UBX_RATE * 5) {
+    throw new Error(`Price ${price} violates Oxum Rule #001: Global Price Symmetry`);
   }
-  
-  return true;
-}
-
-/**
- * Resilient price validation with automatic retries
- * For critical payment paths, retry validation to handle transient issues
- */
-export const validateGlobalPriceWithRetry = async (
-  userPrice: number, 
-  metadata?: Record<string, any>
-): Promise<boolean> => {
-  const MAX_RETRY_ATTEMPTS = 3;
-  let attempts = 0;
-  let lastError: Error | null = null;
-  
-  while (attempts < MAX_RETRY_ATTEMPTS) {
-    try {
-      return validateGlobalPrice(userPrice);
-    } catch (error: any) {
-      lastError = error;
-      attempts++;
-      
-      // Wait before retry with exponential backoff
-      if (attempts < MAX_RETRY_ATTEMPTS) {
-        await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, attempts)));
-      }
-    }
-  }
-  
-  // All attempts failed - throw the last error
-  if (lastError) throw lastError;
-  throw new Error("[Oxum Enforcement] Price validation failed after multiple attempts");
-}
-
-/**
- * Calculates the recommended boost price based on profile metrics
- * @param profileLevel The profile level (0-10)
- * @param engagement The engagement score (0-100)
- * @returns Recommended boost price in UBX
- */
-export const calculateBoostPriceUBX = (profileLevel: number, engagement: number): number => {
-  const baseFactor = Math.max(1, profileLevel / 5);
-  const engagementFactor = Math.max(1, engagement / 50);
-  
-  return Math.ceil(BASE_PRICE_UBX * baseFactor * engagementFactor);
 };
 
 /**
- * Converts Lucoins to UBX tokens
- * @param lucoins Amount in Lucoins
- * @returns Equivalent amount in UBX
+ * Converts a price in UBX to the user's local currency
+ * @param ubxAmount Amount in UBX tokens
+ * @param localCurrency Target currency code (e.g., 'USD', 'EUR')
+ * @returns Formatted price in local currency
  */
-export const convertLucoinToUBX = (lucoins: number): number => {
-  return Math.ceil(lucoins * 2.5);
+export const convertUbxToLocalCurrency = (
+  ubxAmount: number,
+  localCurrency = 'USD'
+): string => {
+  // Mock exchange rates - in a real app, this would come from an API
+  const rates = {
+    USD: 0.15,
+    EUR: 0.14,
+    GBP: 0.12,
+    JPY: 16.5,
+  };
+  
+  const rate = rates[localCurrency as keyof typeof rates] || rates.USD;
+  const localAmount = ubxAmount * rate;
+  
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: localCurrency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(localAmount);
 };
 
 /**
- * Converts UBX to Lucoins
- * @param ubx Amount in UBX
- * @returns Equivalent amount in Lucoins
+ * Formats a UBX token amount according to Oxum display standards
+ * @param amount Amount in UBX tokens
+ * @returns Formatted UBX string
  */
-export const convertUBXToLucoin = (ubx: number): number => {
-  return Math.floor(ubx / 2.5);
+export const formatUbxAmount = (amount: number): string => {
+  return `${amount.toFixed(0)} UBX`;
 };
 
 /**
- * Formats price in UBX with proper currency symbol
- * @param amount The amount in UBX
- * @returns Formatted string with UBX symbol
+ * Gets the current exchange rate for UBX tokens
+ * @param currency Target currency code
+ * @returns Exchange rate value
  */
-export const formatUBXPrice = (amount: number): string => {
-  return `${amount} UBX`;
+export const getUbxExchangeRate = (currency = 'USD'): number => {
+  const rates = {
+    USD: 0.15,
+    EUR: 0.14,
+    GBP: 0.12,
+    JPY: 16.5,
+  };
+  
+  return rates[currency as keyof typeof rates] || rates.USD;
 };
-
-// Export functions used in test harness components
-export { runPricingSystemSelfTest } from './testUtils';
-export { getOxumPriceSystemHealth } from './healthMonitor';
-export { emergencyPriceValidationOverride } from './adminOps';

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,7 +41,7 @@ const BoostAnalyticsCard = ({ isActive, getAnalytics }: BoostAnalyticsCardProps)
   }, [isActive, getAnalytics]);
   
   // Mock chart data for visualization
-  const chartData = [
+  const mockChartData = [
     { name: 'Day 1', views: 10 },
     { name: 'Day 2', views: 25 },
     { name: 'Day 3', views: 40 },
@@ -99,17 +100,6 @@ const BoostAnalyticsCard = ({ isActive, getAnalytics }: BoostAnalyticsCardProps)
     );
   }
   
-  // Mock chart data for visualization
-  const chartData = [
-    { name: 'Day 1', views: 10 },
-    { name: 'Day 2', views: 25 },
-    { name: 'Day 3', views: 40 },
-    { name: 'Day 4', views: 35 },
-    { name: 'Day 5', views: 45 },
-    { name: 'Day 6', views: 60 },
-    { name: 'Day 7', views: 55 },
-  ];
-  
   return (
     <Card className="col-span-2">
       <CardHeader>
@@ -125,7 +115,7 @@ const BoostAnalyticsCard = ({ isActive, getAnalytics }: BoostAnalyticsCardProps)
         <div className="h-[200px] mb-4">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
-              data={chartData}
+              data={mockChartData}
               margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" />

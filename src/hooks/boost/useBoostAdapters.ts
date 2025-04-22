@@ -1,76 +1,91 @@
 
-import { BoostStatus, BoostEligibility, BoostPackage } from "@/types/boost";
+import { BoostStatus, BoostEligibility, BoostPackage } from '@/types/boost';
 
 /**
- * Adapts the BoostStatus to ensure all required fields have values
+ * Adapts the BoostStatus from one format to another to ensure compatibility
  */
-export const adaptBoostStatus = (status: any): BoostStatus => {
+export const adaptBoostStatus = (boostStatus: any): BoostStatus => {
   return {
-    isActive: status?.isActive || false,
-    startTime: status?.startTime || undefined,
-    endTime: status?.endTime || undefined,
-    remainingTime: status?.remainingTime || undefined,
-    packageId: status?.packageId || undefined,
-    packageName: status?.packageName || undefined,
-    progress: status?.progress || 0
+    isActive: boostStatus?.isActive || false,
+    startTime: boostStatus?.startTime || '',
+    endTime: boostStatus?.endTime || '',
+    remainingTime: boostStatus?.timeRemaining || boostStatus?.remainingTime || '',
+    packageId: boostStatus?.activeBoostId || boostStatus?.packageId || '',
+    packageName: boostStatus?.packageName || '',
+    progress: boostStatus?.progress !== undefined ? boostStatus.progress : 0,
+    expiresAt: boostStatus?.endTime || boostStatus?.expiresAt || '',
+    timeRemaining: boostStatus?.timeRemaining || '',
+    profileId: boostStatus?.profileId || '',
+    boostPackage: boostStatus?.boostPackage || undefined
   };
 };
 
 /**
- * Adapts the BoostEligibility to ensure all required fields have values
+ * Adapts the BoostEligibility from one format to another to ensure compatibility
  */
 export const adaptBoostEligibility = (eligibility: any): BoostEligibility => {
   return {
     isEligible: eligibility?.isEligible || eligibility?.eligible || false,
-    reason: eligibility?.reason || eligibility?.ineligibilityReason || undefined
+    reason: eligibility?.reason || (eligibility?.reasons?.[0] || ''),
+    reasons: eligibility?.reasons || (eligibility?.reason ? [eligibility.reason] : []),
+    minimumProfileCompleteness: eligibility?.minimumProfileCompleteness || 0,
+    missingFields: eligibility?.missingFields || [],
+    minRequiredBalance: eligibility?.minRequiredBalance || 0
   };
 };
 
 /**
- * Adapts the BoostPackages array to ensure all required fields have values
+ * Adapts the BoostPackages array from one format to another to ensure compatibility
  */
 export const adaptBoostPackages = (packages: any[]): BoostPackage[] => {
-  if (!packages || !Array.isArray(packages)) return [];
+  if (!packages || !Array.isArray(packages)) {
+    return [];
+  }
   
-  return packages.map(pkg => ({
-    id: pkg.id || `pkg-${Math.random().toString(36).substring(2, 9)}`,
-    name: pkg.name || "Unnamed Package",
-    duration: pkg.duration || "24:00:00",
-    price_ubx: pkg.price_ubx || pkg.price || 50,
-    description: pkg.description,
-    features: pkg.features
+  return packages.map((pkg) => ({
+    id: pkg.id || '',
+    name: pkg.name || '',
+    duration: pkg.duration || '',
+    price_ubx: pkg.price || pkg.price_ubx || 0,
+    description: pkg.description || '',
+    features: pkg.features || []
   }));
 };
 
 /**
- * Adapts the formatBoostDuration function
+ * Adapts duration formatting functions to ensure compatibility
  */
-export const adaptFormatBoostDuration = (formatFn: (duration: string) => string) => {
+export const adaptFormatBoostDuration = (
+  formatFunction: ((hours: number) => string) | ((duration: string) => string)
+) => {
   return (duration: string): string => {
-    try {
-      return formatFn(duration);
-    } catch (e) {
-      // Default formatting if the original function fails
-      const [hours, minutes] = duration.split(':');
-      if (hours === "24") return "24 hours";
-      if (hours === "48") return "2 days";
-      if (hours === "72") return "3 days";
-      if (hours === "168") return "1 week";
-      return `${hours} hours`;
+    if (typeof duration === 'string') {
+      // Convert HH:MM:SS format to hours for original function
+      if (duration.includes(':')) {
+        const [hours, minutes] = duration.split(':').map(Number);
+        return formatFunction(hours + minutes / 60);
+      }
+      // If it's a string but not in time format, assume it's already formatted
+      return duration;
     }
+    // If it's a number, call the original formatter
+    return formatFunction(duration);
   };
 };
 
 /**
- * Adapts the getBoostPrice function
+ * Adapts price calculation functions to ensure compatibility
  */
-export const adaptGetBoostPrice = (priceFn: () => number) => {
+export const adaptGetBoostPrice = (priceFunction: any) => {
   return (): number => {
     try {
-      return priceFn();
+      if (typeof priceFunction === 'function') {
+        return priceFunction();
+      }
+      return 15; // Default price
     } catch (e) {
-      // Default price if the original function fails
-      return 50;
+      console.error('Error in price calculation:', e);
+      return 15; // Default fallback price
     }
   };
 };
