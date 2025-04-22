@@ -1,6 +1,5 @@
 
-// Fix AIProfile property naming: use created_at instead of createdAt
-// Remove gender property, fix literal according to AIProfile type
+// Fix removing extra category property as it does not exist on AIProfile
 
 import { AIProfile, ProcessingStatus } from '@/types/ai-profile';
 
@@ -66,7 +65,6 @@ export const aiModelGeneratorService = {
                     interests: ['chatting', 'learning', 'fun'],
                     isVerified: true,
                     created_at: new Date().toISOString(),
-                    category: 'AI Companion',
                     rating: 4.5,
                     review_count: 100,
                     price: 0,

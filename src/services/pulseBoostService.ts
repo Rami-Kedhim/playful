@@ -11,7 +11,7 @@ export const getPulsePackages = async (): Promise<BoostPackage[]> => {
         name: pb.name,
         description: pb.description || '',
         duration: typeof pb.duration === 'string' ? pb.duration : '00:00:00',
-        price_ubx: pb.costUBX ?? 0,
+        price_ubx: typeof (pb.costUBX) === 'number' ? pb.costUBX : 0,
         price: pb.price || 0,
         features: pb.features || [],
         boost_power: pb.boost_power ?? 0,
@@ -37,4 +37,3 @@ export const cancelActiveBoost = async (userId: string): Promise<boolean> => {
     }, 1000);
   });
 };
-

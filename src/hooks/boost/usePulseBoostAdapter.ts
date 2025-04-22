@@ -46,7 +46,11 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     fn: (pkg: BoostPackage) => number
   ) => (pkg: BoostPackage): number => {
     if (pkg.price_ubx !== undefined && pkg.price_ubx !== null) {
-      return Number(pkg.price_ubx);
+      if (typeof pkg.price_ubx === 'string') {
+        const parsed = Number(pkg.price_ubx);
+        return isNaN(parsed) ? (fn ? fn(pkg) : 0) : parsed;
+      }
+      return pkg.price_ubx;
     }
     if (fn) {
       return fn(pkg);
@@ -59,9 +63,9 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     return value * UBX_RATE;
   };
 
-  const getColorForBoostPower = (boost_power: number): string => {
-    if (boost_power >= 200) return '#ec4899';
-    if (boost_power >= 100) return '#8b5cf6';
+  const getColorForBoostPower = (boostPower: number): string => {
+    if (boostPower >= 200) return '#ec4899';
+    if (boostPower >= 100) return '#8b5cf6';
     return '#60a5fa';
   };
 
@@ -88,9 +92,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       duration: durationStr,
       durationMinutes,
       price: typeof pkg.price === 'number' ? pkg.price : 0,
-      costUBX: typeof pkg.price_ubx === 'number'
-        ? pkg.price_ubx
-        : Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),
+      costUBX: typeof pkg.price_ubx === 'number' ? pkg.price_ubx : Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),
       visibility,
       color: getColorForBoostPower(boostPowerNum),
       badgeColor: getColorForBoostPower(boostPowerNum),

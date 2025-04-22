@@ -1,5 +1,5 @@
 
-// Fix profileMapping to match UberPersona type properties and fix LivecamModel fields
+// Fix profileMapping to use correct LivecamModel property names and fix casing
 
 import { Escort } from '@/types/Escort';
 import { ContentCreator } from '@/types/creator';
@@ -195,4 +195,3 @@ const generateHilbertVector = (id: string, dimension: number = 4): number[] => {
 
   return vector;
 };
-

@@ -12,7 +12,7 @@ export interface AIProfileGeneratorOptions {
   interests: string[];
   isVerified: boolean;
   createdAt: string;
-  category: string;
+  // Removed category as it does not exist in AIProfile
   rating: number;
   reviewCount: number;
   price: number;
@@ -39,7 +39,6 @@ export const generateAIProfile = async (
     interests: options.interests,
     isVerified: options.isVerified,
     created_at: options.createdAt,
-    category: options.category,
     rating: options.rating,
     review_count: options.reviewCount,
     price: options.price,
@@ -49,4 +48,3 @@ export const generateAIProfile = async (
 
   return aiProfile;
 };
-
