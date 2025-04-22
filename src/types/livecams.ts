@@ -20,6 +20,7 @@ export interface Livecam {
   featured?: boolean;
   description?: string;
   previewVideoUrl?: string;
+  profileImageUrl?: string;
 }
 
 export interface LivecamModel {
@@ -43,6 +44,8 @@ export interface LivecamModel {
   previewVideoUrl?: string;
   isPopular?: boolean;
   category?: string; // Adding missing property
+  age?: number; // Added based on usage in code
+  streamUrl?: string; // Added based on usage in code
 }
 
 export interface LivecamSettings {

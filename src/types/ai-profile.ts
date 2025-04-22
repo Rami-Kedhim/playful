@@ -2,66 +2,38 @@
 export interface AIProfile {
   id: string;
   name: string;
-  gender: string;
-  age: number;
-  bio: string;
-  personality: string;
+  description?: string;
   avatarUrl?: string;
-  avatar_url?: string; // For compatibility with API responses
+  avatar_url?: string;
+  personality?: string;
+  createdAt: string | Date;
+  created_at?: string | Date;
+  // Properties accessed in code but not in original definition
   location?: string;
   interests?: string[];
-  tags?: string[];
-  isVerified?: boolean;
-  createdAt?: string;
-  created_at?: string; // For compatibility with API responses
-  category?: string;
-  rating?: number;
-  reviewCount?: number;
-  price?: number;
-  isPremium?: boolean;
-  attributes?: Record<string, any>;
-  preferences?: Record<string, any>;
-  voiceId?: string;
   boost_status?: {
     isActive: boolean;
     expiresAt?: string;
   };
   availability_status?: string;
-  
-  // Additional properties used in other components
-  displayName?: string;
-  description?: string;
-  thumbnailUrl?: string;
-  imageUrl?: string;
-  type?: string;
-  gallery_images?: string[];
-  lucoin_image_price?: number;
-  lucoin_chat_price?: number;
-  subscription_price?: number;
-  premium_content_count?: number;
-  livecam_enabled?: boolean;
 }
 
 export interface AIMessage {
   id: string;
-  senderId: string;
-  receiverId: string;
+  role: 'user' | 'assistant' | 'system';
   content: string;
-  timestamp: string;
-  isAI: boolean;
-  attachments?: Array<{
-    type: string;
-    url: string;
-  }>;
-  status?: 'sent' | 'delivered' | 'read';
-  metadata?: {
-    requires_payment?: boolean;
-    payment_status?: 'pending' | 'completed';
-    price?: number;
-    [key: string]: any;
-  };
-  sender?: string; // For backward compatibility
-  has_read?: boolean; // For backward compatibility
+  timestamp: Date;
+  is_ai?: boolean;
+  created_at?: string | Date;
+  requires_payment?: boolean;
+  payment_status?: 'pending' | 'completed' | 'failed';
+  price?: number;
+  has_read?: boolean;
+  senderId?: string;
+  receiverId?: string;
+  isAI?: boolean;
+  sender?: string; // Backward compatibility
+  conversation_id?: string; // Backward compatibility
 }
 
 export interface AIConversation {
@@ -74,20 +46,17 @@ export interface AIConversation {
   ai_profile?: AIProfile;
 }
 
-export interface AIModelGeneratorOptions {
-  prompt: string;
-  style?: string;
-  count?: number;
-  maxTokens?: number;
-  temperature?: number;
-  onSuccess?: (profiles: AIProfile[]) => void;
-}
-
 export enum ProcessingStatus {
   IDLE = 'idle',
   PENDING = 'pending',
   PROCESSING = 'processing',
   COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled'
+  FAILED = 'failed'
+}
+
+export interface ProcessingStatusDetails {
+  status: ProcessingStatus;
+  message?: string;
+  completedCount?: number;
+  totalCount?: number;
 }
