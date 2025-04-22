@@ -1,202 +1,220 @@
-import { useState, useEffect } from 'react';
+
+import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, CheckCircle2, PlusCircle, Loader2, ZapOff, Zap } from 'lucide-react';
-import { BoostStatus, BoostEligibility, HermesBoostStatus } from '@/types/boost';
-import BoostEligibilityCheck from './BoostEligibilityCheck';
-import BoostPackages from './BoostPackages';
-import BoostActivePackage from './BoostActivePackage';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, Clock, Award, Activity, Info } from 'lucide-react';
+import BoostPackages from '../BoostPackages';
 import HermesBoostInfo from './HermesBoostInfo';
+import BoostActivePackage from './BoostActivePackage';
+import { cx } from 'class-variance-authority';
+
+// Import the types from the types file
 import { BoostDialogTabsProps } from '../types';
 
 const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   activeTab,
   setActiveTab,
+  loading,
   boostStatus,
   eligibility,
-  hermesBoostStatus,
-  hermesStatus,
   boostPackages,
   selectedPackage,
   setSelectedPackage,
+  handleBoost,
+  handleCancel,
+  dailyBoostUsage,
+  dailyBoostLimit,
+  hermesStatus,
   formatBoostDuration,
   getBoostPrice,
   handlePurchase,
-  handleBoost,
-  handleCancel,
   handleDialogClose,
-  boostAnalytics,
-  dailyBoostUsage,
-  dailyBoostLimit,
-  loading
+  boostAnalytics
 }) => {
-  const [purchaseLoading, setPurchaseLoading] = useState(false);
-  const [cancelLoading, setCancelLoading] = useState(false);
-  
-  // Create safe HermesBoostStatus object with all required properties
-  const hermesData = hermesBoostStatus || hermesStatus || {
-    position: 0,
-    activeUsers: 0,
-    estimatedVisibility: 0,
-    lastUpdateTime: new Date().toISOString()
-  };
-  
-  // Handle purchase button click
-  const onPurchase = async () => {
-    if (!selectedPackage) return;
-    
-    setPurchaseLoading(true);
-    try {
-      await handlePurchase();
-    } catch (error) {
-      console.error("Purchase error:", error);
-    } finally {
-      setPurchaseLoading(false);
+  // Format duration using the prop or fallback to internal function
+  const formatDuration = formatBoostDuration || ((duration: string): string => {
+    const [hours, minutes] = duration.split(':').map(Number);
+    if (hours >= 24) {
+      const days = Math.floor(hours / 24);
+      return `${days} ${days === 1 ? 'day' : 'days'}`;
     }
-  };
-  
-  // Handle cancel button click
-  const onCancel = async () => {
-    setCancelLoading(true);
-    try {
-      await handleCancel();
-    } catch (error) {
-      console.error("Cancel error:", error);
-    } finally {
-      setCancelLoading(false);
-    }
-  };
-  
-  // Set active tab when boost status changes
-  useEffect(() => {
-    if (boostStatus.isActive) {
-      setActiveTab("active");
-    } else {
-      setActiveTab("packages");
-    }
-  }, [boostStatus.isActive, setActiveTab]);
-  
-  return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <div className="flex justify-between items-center mb-6">
-        <TabsList>
-          <TabsTrigger 
-            value="packages" 
-            disabled={loading}
-            className="flex items-center gap-1"
-          >
-            <PlusCircle className="h-4 w-4" />
-            <span>Packages</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="active" 
-            disabled={loading || !boostStatus.isActive}
-            className="flex items-center gap-1"
-          >
-            <Zap className="h-4 w-4" />
-            <span>Active Boost</span>
-          </TabsTrigger>
-        </TabsList>
-        
-        {boostStatus.isActive && (
-          <Badge variant="secondary" className="px-2 py-1 text-xs">
-            Active
-          </Badge>
-        )}
-      </div>
-      
-      <BoostEligibilityCheck 
-        eligibility={eligibility}
-        loading={loading} 
-      />
-      
-      <TabsContent value="packages" className="mt-6">
-        <BoostPackages
-          packages={boostPackages}
-          selectedId={selectedPackage}
-          onSelect={setSelectedPackage}
-          formatDuration={formatBoostDuration || ((d) => d)}
-          dailyUsage={dailyBoostUsage}
-          dailyLimit={dailyBoostLimit}
-          disabled={!eligibility.isEligible || loading}
-          getBoostPrice={getBoostPrice}
-          selectedPackage={selectedPackage}
-          onSelectPackage={setSelectedPackage}
-        />
-        
-        <div className="flex justify-end mt-6">
-          <Button
-            onClick={onPurchase}
-            disabled={
-              !eligibility.isEligible || 
-              !selectedPackage || 
-              purchaseLoading || 
-              dailyBoostUsage >= dailyBoostLimit
-            }
-            className="ml-auto"
-          >
-            {purchaseLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              <>
-                <Zap className="mr-2 h-4 w-4" />
-                Apply Boost ({getBoostPrice()} UBX)
-              </>
-            )}
-          </Button>
-        </div>
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+  });
 
-        <div className="mt-8">
-          <HermesBoostInfo 
-            hermesStatus={hermesData} 
-          />
-        </div>
-      </TabsContent>
-      
-      <TabsContent value="active" className="mt-6">
-        {boostStatus.isActive ? (
+  return (
+    <Tabs
+      defaultValue="boost"
+      value={activeTab}
+      onValueChange={setActiveTab}
+      className="w-full space-y-5"
+    >
+      <TabsList className="grid grid-cols-3">
+        <TabsTrigger value="boost" disabled={loading}>
+          Boost Now
+        </TabsTrigger>
+        <TabsTrigger value="analytics" disabled={loading || !boostStatus?.isActive}>
+          Analytics
+        </TabsTrigger>
+        <TabsTrigger value="settings" disabled={loading}>
+          Settings
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="boost">
+        {!eligibility.isEligible && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Not Eligible</AlertTitle>
+            <AlertDescription>
+              {eligibility.reason || 'You are not eligible for boosting at this time.'}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {boostStatus?.isActive ? (
           <div className="space-y-6">
-            <BoostActivePackage 
-              boostStatus={boostStatus}
-            />
-            
-            <div className="flex justify-end mt-6">
-              <Button 
-                variant="destructive" 
-                onClick={onCancel}
-                disabled={cancelLoading}
-              >
-                {cancelLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Cancelling...
-                  </>
-                ) : (
-                  <>
-                    <ZapOff className="mr-2 h-4 w-4" />
-                    Cancel Boost
-                  </>
-                )}
-              </Button>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold flex items-center">
+                  <Activity className="mr-2 h-5 w-5 text-green-500" />
+                  Active Boost
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <BoostActivePackage
+                  boostStatus={boostStatus}
+                  hermesData={{
+                    position: hermesStatus.position,
+                    activeUsers: hermesStatus.activeUsers,
+                    estimatedVisibility: hermesStatus.estimatedVisibility,
+                    lastUpdateTime: hermesStatus.lastUpdateTime
+                  }}
+                />
+
+                <div className="mt-6">
+                  <Button
+                    onClick={handleCancel}
+                    variant="destructive"
+                    disabled={loading}
+                    className="w-full"
+                  >
+                    {loading ? "Cancelling..." : "Cancel Boost"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold">
+                  Boost Metrics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <HermesBoostInfo 
+                  hermesStatus={hermesStatus}
+                />
+              </CardContent>
+            </Card>
           </div>
         ) : (
-          <div className="p-6 text-center">
-            <p className="text-muted-foreground">No active boost</p>
-            <Button 
-              variant="secondary" 
-              onClick={() => setActiveTab("packages")}
-              className="mt-2"
-            >
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Get a Boost
-            </Button>
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold flex items-center">
+                  <Clock className="mr-2 h-5 w-5" />
+                  Boost Packages
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <BoostPackages
+                  packages={boostPackages}
+                  selectedId={selectedPackage}
+                  onSelect={setSelectedPackage}
+                  formatDuration={formatDuration}
+                  getBoostPrice={getBoostPrice}
+                  dailyUsage={dailyBoostUsage}
+                  dailyLimit={dailyBoostLimit}
+                  disabled={!eligibility.isEligible || loading}
+                />
+
+                <div className="mt-6">
+                  <Button
+                    onClick={handlePurchase || handleBoost}
+                    variant="default"
+                    disabled={!eligibility.isEligible || loading || !selectedPackage}
+                    className="w-full"
+                  >
+                    {loading ? "Processing..." : "Activate Boost"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold flex items-center">
+                  <Award className="mr-2 h-5 w-5" />
+                  Visibility Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <HermesBoostInfo 
+                  hermesStatus={hermesStatus}
+                />
+              </CardContent>
+            </Card>
           </div>
         )}
+      </TabsContent>
+
+      <TabsContent value="analytics">
+        <Card>
+          <CardHeader>
+            <CardTitle>Boost Performance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center p-6">
+              <p className="text-muted-foreground">
+                Analytics data is being processed. Check back soon.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="settings">
+        <Card>
+          <CardHeader>
+            <CardTitle>Boost Settings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span>Auto-renew boost</span>
+                <div className="flex h-6 w-11 rounded-full bg-gray-200 p-1 transition-all dark:bg-gray-700">
+                  <div className="h-4 w-4 rounded-full bg-white transition-all"></div>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span>Receive boost notifications</span>
+                <div className="flex h-6 w-11 rounded-full bg-primary p-1 transition-all">
+                  <div className="h-4 w-4 translate-x-5 rounded-full bg-white transition-all"></div>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span>Show boost badge on profile</span>
+                <div className="flex h-6 w-11 rounded-full bg-primary p-1 transition-all">
+                  <div className="h-4 w-4 translate-x-5 rounded-full bg-white transition-all"></div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </TabsContent>
     </Tabs>
   );

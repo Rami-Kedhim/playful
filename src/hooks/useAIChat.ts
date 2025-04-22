@@ -1,140 +1,111 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState, useCallback, useEffect } from 'react';
 import { AIMessage, AIConversation } from '@/types/ai-profile';
-import { toast } from '@/components/ui/use-toast';
-import { 
-  startAIConversation, 
-  getAIConversationWithMessages 
-} from '@/services/ai/aiConversationsService';
-import { 
-  sendMessageToAI,
-  markMessageAsRead
-} from '@/services/ai/aiMessagesService';
 
-export const useAIChat = (aiProfileId: string) => {
-  const { user } = useAuth();
-  const [conversation, setConversation] = useState<AIConversation | null>(null);
-  const [messages, setMessages] = useState<AIMessage[]>([]);
-  const [loadingConversation, setLoadingConversation] = useState(true);
-  const [sendingMessage, setSendingMessage] = useState(false);
+interface UseAIChatOptions {
+  aiProfileId: string;
+  initialMessages?: AIMessage[];
+}
+
+interface UseAIChatReturn {
+  messages: AIMessage[];
+  isLoading: boolean;
+  error: string | null;
+  sendMessage: (content: string) => Promise<void>;
+  clearMessages: () => void;
+  markAllAsRead: () => void;
+  hasUnread: boolean;
+}
+
+export const useAIChat = ({ aiProfileId, initialMessages = [] }: UseAIChatOptions): UseAIChatReturn => {
+  const [messages, setMessages] = useState<AIMessage[]>(initialMessages);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasUnread, setHasUnread] = useState(false);
 
-  // Initialize or fetch existing conversation
+  // Check for unread messages
   useEffect(() => {
-    const initConversation = async () => {
-      if (!user || !aiProfileId) return;
-      
-      setLoadingConversation(true);
-      setError(null);
-      
-      try {
-        const conversationData = await startAIConversation(user.id, aiProfileId);
-        if (conversationData) {
-          setConversation(conversationData);
-          
-          // If the conversation exists and has an ID, fetch messages
-          if (conversationData.id) {
-            const fullConversation = await getAIConversationWithMessages(conversationData.id);
-            if (fullConversation) {
-              setMessages(fullConversation.messages || []);
-            }
-          }
-        }
-      } catch (err: any) {
-        console.error("Error initializing AI conversation:", err);
-        setError('Failed to start conversation with AI profile');
-        toast({
-          title: "Conversation Error",
-          description: "Couldn't connect with the AI profile. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoadingConversation(false);
-      }
-    };
-    
-    initConversation();
-  }, [user, aiProfileId]);
+    const unreadCount = messages.filter(msg => msg.role === 'assistant' && msg.has_read === false).length;
+    setHasUnread(unreadCount > 0);
+  }, [messages]);
 
-  // Send a message and get AI response
-  const sendMessage = useCallback(async (content: string) => {
-    if (!user || !conversation?.id || !content.trim() || sendingMessage) {
-      return false;
-    }
+  const generateResponse = async (userMessage: string): Promise<string> => {
+    // Simulate AI response generation with some delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    setSendingMessage(true);
+    // Simple response generator - in production, this would call an API
+    const responses = [
+      "I'm so glad you reached out to me! What would you like to talk about next?",
+      "That's interesting! Tell me more about your preferences?",
+      "I've been thinking about what you said. Would you like to explore that idea further?",
+      "I'm enjoying our conversation. What else is on your mind?",
+      "That's a fascinating perspective. I'd love to hear more about it."
+    ];
+    
+    return responses[Math.floor(Math.random() * responses.length)];
+  };
+
+  const sendMessage = useCallback(async (content: string) => {
+    if (!content.trim()) return;
+    
+    setIsLoading(true);
     setError(null);
     
     try {
-      const aiResponse = await sendMessageToAI(
-        user.id,
-        conversation.id,
+      // Add user message
+      const userMessage: AIMessage = {
+        id: `msg-${Date.now()}-user`,
         content,
-        aiProfileId
-      );
+        role: 'user',
+        timestamp: new Date()
+      };
       
-      // Refresh the messages list
-      if (conversation.id) {
-        const updatedConversation = await getAIConversationWithMessages(conversation.id);
-        if (updatedConversation) {
-          setMessages(updatedConversation.messages || []);
-        }
-      }
+      setMessages(prev => [...prev, userMessage]);
       
-      return true;
+      // Generate AI response
+      const responseContent = await generateResponse(content);
+      
+      // Add AI response
+      const aiMessage: AIMessage = {
+        id: `msg-${Date.now()}-ai`,
+        content: responseContent,
+        role: 'assistant',
+        timestamp: new Date(),
+        has_read: false
+      };
+      
+      setMessages(prev => [...prev, aiMessage]);
     } catch (err: any) {
-      console.error("Error sending message:", err);
-      setError('Failed to send message');
-      toast({
-        title: "Message failed",
-        description: "Your message couldn't be delivered. Please try again.",
-        variant: "destructive",
-      });
-      return false;
+      setError(err.message || 'Failed to send message');
     } finally {
-      setSendingMessage(false);
+      setIsLoading(false);
     }
-  }, [user, conversation, aiProfileId, sendingMessage]);
-  
-  // Mark messages as read when user opens conversation
-  useEffect(() => {
-    const markMessagesAsRead = async () => {
-      if (!messages.length) return;
-      
-      const unreadMessages = messages.filter(msg => msg.is_ai && !msg.has_read);
-      
-      for (const message of unreadMessages) {
-        await markMessageAsRead(message.id);
-      }
-    };
-    
-    if (user && conversation) {
-      markMessagesAsRead();
-    }
-  }, [user, conversation, messages]);
-  
-  // Function to refresh the conversation after unlocking a message
-  const refreshConversation = useCallback(async () => {
-    if (!conversation?.id) return;
-    
-    try {
-      const updatedConversation = await getAIConversationWithMessages(conversation.id);
-      if (updatedConversation) {
-        setMessages(updatedConversation.messages || []);
-      }
-    } catch (err) {
-      console.error("Error refreshing conversation:", err);
-    }
-  }, [conversation]);
+  }, []);
+
+  const clearMessages = useCallback(() => {
+    setMessages([]);
+  }, []);
+
+  const markAllAsRead = useCallback(() => {
+    setMessages(prev => 
+      prev.map(msg => 
+        msg.role === 'assistant' && msg.has_read === false
+          ? { ...msg, has_read: true }
+          : msg
+      )
+    );
+    setHasUnread(false);
+  }, []);
 
   return {
-    conversation,
     messages,
-    sendMessage,
-    sendingMessage,
-    loadingConversation,
+    isLoading,
     error,
-    refreshConversation
+    sendMessage,
+    clearMessages,
+    markAllAsRead,
+    hasUnread
   };
 };
+
+export default useAIChat;

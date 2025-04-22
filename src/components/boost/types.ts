@@ -1,3 +1,4 @@
+
 import { BoostStatus, BoostEligibility, BoostPackage } from "@/types/boost";
 
 export interface BoostButtonProps {
@@ -44,12 +45,13 @@ export interface BoostDialogTabsProps {
   dailyBoostLimit: number;
   hermesStatus: any;
   
-  hermesBoostStatus?: any;
+  // Add missing properties
   formatBoostDuration?: (duration: string) => string;
   getBoostPrice?: () => number;
   handlePurchase?: () => Promise<void>;
   handleDialogClose?: () => void;
   boostAnalytics?: any;
+  hermesBoostStatus?: any;
 }
 
 export interface BoostPackagesProps {
@@ -60,7 +62,8 @@ export interface BoostPackagesProps {
   dailyUsage: number;
   dailyLimit: number;
   disabled?: boolean;
-  boostPackages?: BoostPackage[];
+  
+  // Add missing properties
   selectedPackage?: string;
   setSelectedPackage?: (packageId: string) => void;
   onSelectPackage?: (packageId: string) => void;
@@ -74,6 +77,8 @@ export interface HermesBoostInfoProps {
     estimatedVisibility: number;
     lastUpdateTime: string;
   };
+  
+  // Add missing properties
   status?: {
     position: any;
     activeUsers: any;
@@ -90,6 +95,8 @@ export interface HermesBoostInfoProps {
 
 export interface BoostActivePackageProps {
   boostStatus: BoostStatus;
+  
+  // Add missing property
   hermesData?: {
     position: any;
     activeUsers: any;

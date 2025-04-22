@@ -1,187 +1,87 @@
 
-import { useState, useEffect } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { useBoostManager } from '@/hooks/boost/useBoostManager';
+import { Card } from '@/components/ui/card';
+import BoostDialogContainer from '@/components/boost/BoostDialogContainer';
+import { useAuth } from '@/hooks/auth/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { oxum } from '@/core/Oxum';
 import { 
-  useBoostManager, formatBoostDuration
-} from "@/hooks/boost";
-import { AnalyticsData } from "@/hooks/boost/useBoostAnalytics";
-import BoostStatus from "./BoostStatus";
-import BoostAnalytics from "./BoostAnalytics";
-import { toast } from "@/components/ui/use-toast";
-import {
-  adaptBoostStatus,
-  adaptBoostEligibility,
-  adaptBoostPackages,
-  adaptFormatBoostDuration,
-  adaptGetBoostPrice
-} from "@/hooks/boost/useBoostAdapters";
+  adaptFormatBoostDuration 
+} from '@/hooks/boost/useBoostAdapters';
 
-interface BoostManagerContainerProps {
-  creatorId: string;
-  profileCompleteness: number;
-  isVerified: boolean;
-  rating: number;
-  profileCreatedDate: Date;
-  country: string;
-  role: 'verified' | 'regular' | 'AI';
-  ubxBalance: number;
-}
+const BoostManagerContainer = ({ profileId }: { profileId?: string }) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [activeProfileId, setActiveProfileId] = useState<string>('');
 
-const BoostManagerContainer = ({
-  creatorId,
-  profileCompleteness,
-  isVerified,
-  rating,
-  profileCreatedDate,
-  country,
-  role,
-  ubxBalance
-}: BoostManagerContainerProps) => {
-  
-  const {
-    boostStatus: managerBoostStatus,
-    eligibility: managerEligibility,
-    boostPackages: managerBoostPackages,
-    selectedPackage: managerSelectedPackage,
-    setSelectedPackage: managerSetSelectedPackage,
-    fetchBoostPackages,
-    getBoostPrice: managerGetBoostPrice,
-    purchaseBoost,
-    cancelBoost,
-    loading,
-    error,
-    getBoostAnalytics,
-    dailyBoostUsage,
-    dailyBoostLimit
-  } = useBoostManager(creatorId);
-  
-  // Adapt types to match expected interfaces
-  const boostStatus = adaptBoostStatus(managerBoostStatus);
-  const eligibility = adaptBoostEligibility(managerEligibility);
-  const boostPackages = adaptBoostPackages(managerBoostPackages);
-  
-  // Make sure eligibility has the 'eligible' property for backward compatibility
-  const adaptedEligibility = {
-    eligible: eligibility.isEligible !== undefined ? eligibility.isEligible : false,
-    reason: eligibility.reason
-  };
-  
-  // Use the updated adapter function
-  const formatBoostDurationAdapter = adaptFormatBoostDuration(formatBoostDuration);
-  const getBoostPrice = adaptGetBoostPrice(managerGetBoostPrice);
+  const userId = profileId || user?.id;
 
-  // Handle selected package conversion
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
-
-  // Update selected package when manager selected package changes
   useEffect(() => {
-    if (managerSelectedPackage) {
-      setSelectedPackage(managerSelectedPackage.id);
-    } else {
-      setSelectedPackage(null);
+    if (userId) {
+      setActiveProfileId(userId);
     }
-  }, [managerSelectedPackage]);
+  }, [userId]);
 
-  // Handle package selection
-  const handlePackageSelect = (packageId: string) => {
-    const pkg = managerBoostPackages.find(p => p.id === packageId);
-    if (pkg) {
-      managerSetSelectedPackage(pkg);
+  const handleBoostSuccess = async () => {
+    toast({
+      title: "Boost Applied",
+      description: "Your profile boost has been successfully applied!",
+    });
+
+    // Connect to Oxum's boost allocation for real-time boost updates
+    const matrix = [
+      [0.6, 0.2, 0.1],
+      [0.3, 0.7, 0.4],
+      [0.1, 0.1, 0.5]
+    ];
+
+    // Use Oxum's boost allocation algorithm
+    try {
+      const allocationVector = oxum.boostAllocationEigen(matrix);
+      console.log("Boost allocation vector:", allocationVector);
+    } catch (e) {
+      console.error("Failed to calculate boost allocation:", e);
     }
-  };
-  
-  useEffect(() => {
-    fetchBoostPackages();
-  }, [fetchBoostPackages]);
-  
-  const getAnalyticsWrapper = async (): Promise<AnalyticsData | null> => {
-    return await getBoostAnalytics();
-  };
-  
-  const handleBoostPurchase = async () => {
-    if (!selectedPackage) {
-      toast({
-        title: "Please select a boost package",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Find the manager package object from the selected package ID
-    const packageToBoost = managerBoostPackages.find(p => p.id === selectedPackage);
-    
-    if (!packageToBoost) {
-      toast({
-        title: "Package not found",
-        description: "The selected package could not be found",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    const success = await purchaseBoost(packageToBoost);
-    
-    if (success) {
-      toast({
-        title: "Boost Purchased",
-        description: "Your profile has been boosted successfully!",
-      });
-    }
-  };
-  
-  const handleCancelBoost = async () => {
-    const confirmed = window.confirm("Are you sure you want to cancel your active boost?");
-    
-    if (confirmed) {
-      const success = await cancelBoost();
-      
-      if (success) {
-        toast({
-          title: "Boost Cancelled",
-          description: "Your profile boost has been cancelled",
-        });
-      }
-    }
+
+    return true;
   };
 
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          {error}
-        </AlertDescription>
-      </Alert>
-    );
-  }
-  
+  const formatDuration = adaptFormatBoostDuration((duration: string) => {
+    const [hours, minutes] = duration.split(':').map(Number);
+    return hours >= 24 ? 
+      `${Math.floor(hours / 24)} days` : 
+      `${hours} hours`;
+  });
+
   return (
-    <div className="space-y-6">
-      <BoostStatus
-        boostStatus={boostStatus}
-        eligibility={adaptedEligibility}
-        profileCompleteness={profileCompleteness}
-        rating={rating}
-        country={country}
-        role={role}
-        ubxBalance={ubxBalance}
-        boostPackages={boostPackages}
-        selectedPackage={selectedPackage}
-        onSelectPackage={handlePackageSelect}
-        onPurchase={handleBoostPurchase}
-        onCancel={handleCancelBoost}
-        getBoostPrice={getBoostPrice}
-        loading={loading}
-      />
-      
-      <BoostAnalytics 
-        isActive={boostStatus.isActive} 
-        getAnalytics={getAnalyticsWrapper}
-        creatorId={creatorId}
-      />
-    </div>
+    <Card className="p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+        <div>
+          <h3 className="text-xl font-semibold">Profile Boosting</h3>
+          <p className="text-muted-foreground">Increase your profile visibility</p>
+        </div>
+        
+        <div className="mt-4 sm:mt-0">
+          <BoostDialogContainer 
+            profileId={activeProfileId} 
+            onSuccess={handleBoostSuccess}
+            buttonText="Manage Boost"
+            buttonVariant="default"
+          />
+        </div>
+      </div>
+
+      <div className="p-4 bg-muted/50 rounded-md">
+        <h4 className="font-medium mb-2">PULSE Boost</h4>
+        <p className="text-sm text-muted-foreground">
+          Boost your profile visibility in search results and recommendations.
+          Our Precision Upgrade Layer for Scalable Exposure (PULSE) system uses
+          advanced algorithms to maximize your profile's reach.
+        </p>
+      </div>
+    </Card>
   );
 };
 

@@ -1,429 +1,466 @@
 
-import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Progress } from "@/components/ui/progress";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AIProfile } from "@/types/ai-profile";
-import { useAIModelGenerator } from "@/hooks/ai/useAIModelGenerator";
-import { Badge } from "@/components/ui/badge";
-import { User, Zap, Plus, Check, Loader2 } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
+import { Toggle } from '@/components/ui/toggle';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Progress } from '@/components/ui/progress';
+import { useToast } from '@/hooks/use-toast';
+import { useAIModelGenerator } from '@/hooks/ai/useAIModelGenerator';
+import { AIProfile, AIGenerationOptions, ProcessingStatus } from '@/types/ai-profile';
+import { Loader2, Check, Brain, BarChart3, Users, Sparkles, Upload } from 'lucide-react';
 
-const AIModelGenerationDashboard = () => {
-  const [activeTab, setActiveTab] = useState("generate");
-  const [modelCount, setModelCount] = useState(10);
-  const [selectedPersonalities, setSelectedPersonalities] = useState<string[]>([
-    "flirty", "playful", "dominant", "shy", "professional"
-  ]);
-  const [ageRange, setAgeRange] = useState<[number, number]>([21, 35]);
-  const [targetRegions, setTargetRegions] = useState<string[]>([
-    "United States", "United Kingdom", "Europe", "Asia", "Australia"
-  ]);
-  const [selectedModels, setSelectedModels] = useState<AIProfile[]>([]);
-  
-  const {
-    generateModels,
+const AIModelGenerationDashboard: React.FC = () => {
+  const { toast } = useToast();
+  const { 
+    generateModels, 
     processModelsWithHermesOxum,
-    generatedModels,
-    processingStatus,
-    isGenerating,
-    isProcessing
+    generatedModels, 
+    processingStatus, 
+    isGenerating, 
+    isProcessing 
   } = useAIModelGenerator();
-  
-  const handleGenerateModels = async () => {
-    const models = await generateModels({
-      count: modelCount,
-      personalityTypes: selectedPersonalities as ('flirty' | 'shy' | 'dominant' | 'playful' | 'professional')[],
-      ageRange: {
-        min: ageRange[0],
-        max: ageRange[1]
-      },
-      regions: targetRegions
-    });
-    
-    setSelectedModels(models);
-    if (models.length > 0) {
-      setActiveTab("review");
+
+  const [count, setCount] = useState<number>(5);
+  const [ageRange, setAgeRange] = useState<[number, number]>([21, 45]);
+  const [selectedPersonalities, setSelectedPersonalities] = useState<string[]>([]);
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+
+  const personalities = ['flirty', 'shy', 'dominant', 'playful', 'professional'];
+  const regions = ['North America', 'Europe', 'Asia', 'South America', 'Australia'];
+
+  const handleGenerate = async () => {
+    try {
+      // Pass all options to the generator
+      const options: AIGenerationOptions = {
+        count,
+        personalityTypes: selectedPersonalities.length > 0 ? 
+          selectedPersonalities as any : undefined,
+        ageRange: {
+          min: ageRange[0],
+          max: ageRange[1]
+        },
+        regions: selectedRegions.length > 0 ? selectedRegions : undefined
+      };
+      
+      const results = await generateModels(options);
+      
+      toast({
+        title: "AI Models Generated",
+        description: `Successfully generated ${results.length} AI models.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Generation Failed",
+        description: "Failed to generate AI models.",
+        variant: "destructive",
+      });
     }
   };
-  
-  const handleProcessModels = async () => {
-    if (selectedModels.length === 0) return;
-    
-    const success = await processModelsWithHermesOxum(selectedModels);
-    if (success) {
-      setActiveTab("processing");
+
+  const handleProcess = async () => {
+    if (generatedModels.length === 0) {
+      toast({
+        title: "No Models to Process",
+        description: "Please generate models first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const result = await processModelsWithHermesOxum();
+      
+      if (result.status === 'completed') {
+        toast({
+          title: "Processing Complete",
+          description: `Successfully processed ${result.completedCount} AI models.`,
+        });
+      } else if (result.status === 'error') {
+        toast({
+          title: "Processing Failed",
+          description: result.message || "An error occurred during processing.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Processing Failed",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
     }
   };
-  
-  const handlePersonalityChange = (personality: string) => {
+
+  const togglePersonality = (personality: string) => {
     setSelectedPersonalities(prev => 
       prev.includes(personality) 
         ? prev.filter(p => p !== personality)
         : [...prev, personality]
     );
   };
-  
-  const handleRegionChange = (region: string) => {
-    setTargetRegions(prev => 
+
+  const toggleRegion = (region: string) => {
+    setSelectedRegions(prev => 
       prev.includes(region) 
         ? prev.filter(r => r !== region)
         : [...prev, region]
     );
   };
-  
+
+  const getProgressColor = () => {
+    if (processingStatus.status === 'error') return 'bg-destructive';
+    if (processingStatus.status === 'completed') return 'bg-green-500';
+    return undefined; // default color
+  };
+
+  // Filter personality and region data down to more compact form for display
+  const getPersonalityDistribution = (): Record<string, number> => {
+    if (generatedModels.length === 0) return {};
+    
+    // Initialize with zeros for all known personalities 
+    const distCount: Record<string, number> = {};
+    personalities.forEach(p => distCount[p] = 0);
+    
+    // Count occurrences of each personality
+    generatedModels.forEach(model => {
+      if (model.personality && typeof model.personality === 'string') {
+        const personality = model.personality.toLowerCase();
+        if (personalities.includes(personality)) {
+          distCount[personality] = (distCount[personality] || 0) + 1;
+        }
+      }
+    });
+    
+    return distCount;
+  };
+
+  const getRegionDistribution = (): Record<string, number> => {
+    if (generatedModels.length === 0) return {};
+    
+    const distCount: Record<string, number> = {};
+    regions.forEach(r => distCount[r] = 0);
+    
+    // Use location (country) as a proxy for region
+    generatedModels.forEach(model => {
+      if (model.location) {
+        // Simplified mapping - in a real app would be more sophisticated
+        let region = 'Other';
+        
+        if (model.country?.includes('US') || model.country?.includes('Canada')) {
+          region = 'North America';
+        } else if (model.country?.includes('Europe')) {
+          region = 'Europe';
+        }
+        
+        distCount[region] = (distCount[region] || 0) + 1;
+      }
+    });
+    
+    return distCount;
+  };
+
   return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-3xl font-bold mb-6">Hermes+Oxum AI Model Generator</h1>
+    <div className="container mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">AI Model Generation Dashboard</h1>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 mb-8">
-          <TabsTrigger value="generate">1. Generate Models</TabsTrigger>
-          <TabsTrigger value="review">2. Review & Deploy</TabsTrigger>
-          <TabsTrigger value="processing">3. Processing</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="generate">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Model Generation Settings</CardTitle>
-                <CardDescription>
-                  Configure the AI models you want to generate
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="model-count">Number of AI Models</Label>
-                    <div className="flex items-center gap-4 mt-2">
-                      <Slider 
-                        id="model-count"
-                        min={1} 
-                        max={100} 
-                        step={1}
-                        value={[modelCount]}
-                        onValueChange={([value]) => setModelCount(value)}
-                        className="flex-1"
-                      />
-                      <Input 
-                        type="number" 
-                        min={1}
-                        max={100}
-                        value={modelCount}
-                        onChange={(e) => setModelCount(parseInt(e.target.value) || 10)}
-                        className="w-20"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label>Age Range</Label>
-                    <div className="flex items-center gap-4 mt-2">
-                      <Slider 
-                        min={18} 
-                        max={50} 
-                        step={1}
-                        value={ageRange}
-                        onValueChange={(value) => setAgeRange([value[0], value[1]])}
-                        className="flex-1"
-                      />
-                      <div className="flex items-center gap-2">
-                        <span>{ageRange[0]}</span>
-                        <span>-</span>
-                        <span>{ageRange[1]}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <Label className="block mb-3">Personality Types</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {["flirty", "shy", "dominant", "playful", "professional"].map((personality) => (
-                      <div key={personality} className="flex items-center gap-2">
-                        <Checkbox 
-                          id={`personality-${personality}`}
-                          checked={selectedPersonalities.includes(personality)}
-                          onCheckedChange={() => handlePersonalityChange(personality)}
-                        />
-                        <Label htmlFor={`personality-${personality}`} className="capitalize">
-                          {personality}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <Label className="block mb-3">Target Regions</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {["United States", "United Kingdom", "Europe", "Asia", "Australia"].map((region) => (
-                      <div key={region} className="flex items-center gap-2">
-                        <Checkbox 
-                          id={`region-${region}`}
-                          checked={targetRegions.includes(region)}
-                          onCheckedChange={() => handleRegionChange(region)}
-                        />
-                        <Label htmlFor={`region-${region}`}>
-                          {region}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  onClick={handleGenerateModels} 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Brain className="mr-2 h-5 w-5" /> Generation
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="count">Number of Models: {count}</Label>
+                <Slider 
+                  id="count" 
+                  min={1} 
+                  max={50} 
+                  step={1} 
+                  value={[count]}
+                  onValueChange={(v) => setCount(v[0])}
                   disabled={isGenerating}
-                  className="w-full"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="mr-2 h-4 w-4" />
-                      Generate {modelCount} AI Models
-                    </>
-                  )}
-                </Button>
-              </CardFooter>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Advanced Settings</CardTitle>
-                <CardDescription>
-                  Configure advanced settings for Hermes+Oxum processing
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <Label htmlFor="optimization-level">Optimization Level</Label>
-                  <Select defaultValue="standard">
-                    <SelectTrigger id="optimization-level">
-                      <SelectValue placeholder="Select optimization level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="minimal">Minimal - Faster Processing</SelectItem>
-                      <SelectItem value="standard">Standard - Balanced</SelectItem>
-                      <SelectItem value="aggressive">Aggressive - Better Results</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="content-generation">Content Generation</Label>
-                  <Select defaultValue="basic">
-                    <SelectTrigger id="content-generation">
-                      <SelectValue placeholder="Select content level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="minimal">Basic (3 photos)</SelectItem>
-                      <SelectItem value="basic">Standard (10 photos, 2 videos)</SelectItem>
-                      <SelectItem value="premium">Premium (20 photos, 5 videos)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="seo-optimization" checked={true} />
-                  <Label htmlFor="seo-optimization">Enable SEO optimization</Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="multi-language" />
-                  <Label htmlFor="multi-language">Generate multi-language profiles</Label>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="review">
-          <Card>
-            <CardHeader>
-              <CardTitle>Review Generated Models</CardTitle>
-              <CardDescription>
-                Review and process the generated AI models
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-6">
-                <h3 className="font-medium mb-2">Generated Models ({generatedModels.length})</h3>
-                <div className="border rounded-md overflow-hidden">
-                  <table className="w-full">
-                    <thead className="bg-muted">
-                      <tr>
-                        <th className="p-2 text-left">Name</th>
-                        <th className="p-2 text-left">Age</th>
-                        <th className="p-2 text-left">Location</th>
-                        <th className="p-2 text-left">Personality</th>
-                        <th className="p-2 text-left">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {generatedModels.slice(0, 5).map((model) => (
-                        <tr key={model.id} className="border-t">
-                          <td className="p-2">{model.name}</td>
-                          <td className="p-2">{model.age}</td>
-                          <td className="p-2">{model.location}</td>
-                          <td className="p-2">
-                            <Badge variant="outline" className="capitalize">
-                              {model.personality.type}
-                            </Badge>
-                          </td>
-                          <td className="p-2">
-                            <Badge className="bg-amber-500">Ready</Badge>
-                          </td>
-                        </tr>
-                      ))}
-                      {generatedModels.length > 5 && (
-                        <tr className="border-t">
-                          <td colSpan={5} className="p-2 text-center text-muted-foreground">
-                            + {generatedModels.length - 5} more models
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                  className="my-2"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="age-range">Age Range: {ageRange[0]} - {ageRange[1]}</Label>
+                <Slider
+                  id="age-range"
+                  min={18}
+                  max={65}
+                  step={1}
+                  value={ageRange}
+                  onValueChange={setAgeRange}
+                  disabled={isGenerating}
+                  className="my-2"
+                />
+              </div>
+              
+              <div>
+                <Label className="block mb-2">Personality Types:</Label>
+                <div className="flex flex-wrap gap-2">
+                  {personalities.map(personality => (
+                    <Toggle
+                      key={personality}
+                      pressed={selectedPersonalities.includes(personality)}
+                      onPressedChange={() => togglePersonality(personality)}
+                      disabled={isGenerating}
+                      variant="outline"
+                      size="sm"
+                      className="capitalize"
+                    >
+                      {personality}
+                    </Toggle>
+                  ))}
                 </div>
               </div>
-            </CardContent>
-            <CardFooter className="flex gap-4">
-              <Button variant="outline" onClick={() => setActiveTab("generate")}>
-                Back to Settings
-              </Button>
+              
+              <div>
+                <Label className="block mb-2">Regions:</Label>
+                <div className="flex flex-wrap gap-2">
+                  {regions.map(region => (
+                    <Toggle
+                      key={region}
+                      pressed={selectedRegions.includes(region)}
+                      onPressedChange={() => toggleRegion(region)}
+                      disabled={isGenerating}
+                      variant="outline"
+                      size="sm"
+                    >
+                      {region}
+                    </Toggle>
+                  ))}
+                </div>
+              </div>
+              
               <Button 
-                onClick={handleProcessModels}
-                disabled={generatedModels.length === 0 || isProcessing}
-                className="ml-auto"
+                onClick={handleGenerate} 
+                disabled={isGenerating}
+                className="w-full"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                    Generating...
+                  </>
+                ) : (
+                  <>Generate Models</>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Sparkles className="mr-2 h-5 w-5" /> Hermes-Oxum Processing
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <Label className="block mb-2">Processing Status:</Label>
+                <div className="bg-muted p-3 rounded-md">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm">
+                      {processingStatus.status === 'processing' && 'Processing...'}
+                      {processingStatus.status === 'completed' && 'Processing Complete'}
+                      {processingStatus.status === 'error' && 'Processing Failed'}
+                      {processingStatus.status === 'idle' && 'Ready to Process'}
+                    </span>
+                    <span className="text-sm font-medium">
+                      {processingStatus.completedCount}/{processingStatus.totalCount}
+                    </span>
+                  </div>
+                  <Progress 
+                    value={processingStatus.totalCount ? (processingStatus.completedCount / processingStatus.totalCount) * 100 : 0} 
+                    className={`h-2 ${getProgressColor()}`}
+                  />
+                  {processingStatus.message && (
+                    <p className="text-xs text-muted-foreground mt-2">{processingStatus.message}</p>
+                  )}
+                </div>
+              </div>
+              
+              <div>
+                <Label className="block mb-2">Neural Processing Options:</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Toggle
+                    variant="outline"
+                    size="sm"
+                    disabled={isProcessing}
+                  >
+                    Visual Enhancement
+                  </Toggle>
+                  <Toggle
+                    variant="outline"
+                    size="sm"
+                    disabled={isProcessing}
+                  >
+                    Personality Matrix
+                  </Toggle>
+                  <Toggle
+                    variant="outline"
+                    size="sm"
+                    disabled={isProcessing}
+                  >
+                    Knowledge Base
+                  </Toggle>
+                  <Toggle
+                    variant="outline"
+                    size="sm"
+                    disabled={isProcessing}
+                  >
+                    Emotion Engine
+                  </Toggle>
+                </div>
+              </div>
+              
+              <Button 
+                onClick={handleProcess} 
+                variant="default" 
+                disabled={isProcessing || generatedModels.length === 0}
+                className="w-full"
               >
                 {isProcessing ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
                     Processing...
                   </>
                 ) : (
-                  <>
-                    <Zap className="mr-2 h-4 w-4" />
-                    Process with Hermes+Oxum
-                  </>
+                  <>Process with Hermes-Oxum</>
                 )}
               </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
+            </div>
+          </CardContent>
+        </Card>
         
-        <TabsContent value="processing">
-          <Card>
-            <CardHeader>
-              <CardTitle>Processing Models</CardTitle>
-              <CardDescription>
-                Hermes+Oxum is processing and deploying your AI models
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <BarChart3 className="mr-2 h-5 w-5" /> Statistics
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
               <div>
-                <div className="flex justify-between mb-2">
-                  <span>Processing Progress</span>
-                  <span>
-                    {processingStatus.completedCount} / {processingStatus.totalCount} models
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Total Models</span>
+                  <span className="font-medium">{generatedModels.length}</span>
+                </div>
+                <Progress value={Math.min(generatedModels.length / 50 * 100, 100)} className="h-2" />
+              </div>
+              
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Processed</span>
+                  <span className="font-medium">
+                    {processingStatus.completedCount}/{generatedModels.length}
                   </span>
                 </div>
                 <Progress 
-                  value={(processingStatus.completedCount / processingStatus.totalCount) * 100} 
+                  value={generatedModels.length ? (processingStatus.completedCount / generatedModels.length) * 100 : 0} 
                   className="h-2"
                 />
               </div>
               
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mr-3">
-                    <Check className="h-4 w-4 text-white" />
+              <div className="border-t pt-4 mt-4">
+                <h4 className="text-sm font-medium mb-2">Personality Distribution:</h4>
+                {generatedModels.length > 0 ? (
+                  <div className="space-y-1">
+                    {Object.entries(getPersonalityDistribution()).map(([type, count]) => (
+                      <div key={type} className="flex justify-between text-sm">
+                        <span className="capitalize">{type}</span>
+                        <span>{count}</span>
+                      </div>
+                    ))}
                   </div>
-                  <div>
-                    <p className="font-medium">Model Generation</p>
-                    <p className="text-sm text-muted-foreground">
-                      {processingStatus.totalCount} models generated
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center">
-                  {processingStatus.completedCount === processingStatus.totalCount ? (
-                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mr-3">
-                      <Check className="h-4 w-4 text-white" />
-                    </div>
-                  ) : (
-                    <div className="w-6 h-6 rounded-full border-2 border-muted-foreground border-t-primary animate-spin mr-3" />
-                  )}
-                  <div>
-                    <p className="font-medium">Content Generation</p>
-                    <p className="text-sm text-muted-foreground">
-                      {processingStatus.completedCount} of {processingStatus.totalCount} models processed
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center">
-                  {processingStatus.completedCount === processingStatus.totalCount ? (
-                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mr-3">
-                      <Check className="h-4 w-4 text-white" />
-                    </div>
-                  ) : (
-                    <div className="w-6 h-6 rounded-full border-2 border-muted border-t-transparent mr-3" />
-                  )}
-                  <div>
-                    <p className="font-medium">SEO Optimization</p>
-                    <p className="text-sm text-muted-foreground">
-                      {processingStatus.completedCount} of {processingStatus.totalCount} models optimized
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center">
-                  {processingStatus.completedCount === processingStatus.totalCount ? (
-                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mr-3">
-                      <Check className="h-4 w-4 text-white" />
-                    </div>
-                  ) : (
-                    <div className="w-6 h-6 rounded-full border-2 border-muted border-t-transparent mr-3" />
-                  )}
-                  <div>
-                    <p className="font-medium">Deployment</p>
-                    <p className="text-sm text-muted-foreground">
-                      {processingStatus.completedCount} of {processingStatus.totalCount} models deployed
-                    </p>
-                  </div>
-                </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No models generated yet</p>
+                )}
               </div>
-            </CardContent>
-            <CardFooter>
-              {processingStatus.completedCount === processingStatus.totalCount ? (
-                <Button className="w-full">
-                  <User className="mr-2 h-4 w-4" />
-                  View Deployed Models
-                </Button>
-              ) : (
-                <Button disabled className="w-full">
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </Button>
-              )}
-            </CardFooter>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              
+              <div className="border-t pt-4 mt-4">
+                <h4 className="text-sm font-medium mb-2">Region Distribution:</h4>
+                {generatedModels.length > 0 ? (
+                  <div className="space-y-1">
+                    {Object.entries(getRegionDistribution())
+                      .filter(([region, count]) => count > 0)
+                      .map(([region, count]) => (
+                        <div key={region} className="flex justify-between text-sm">
+                          <span>{region}</span>
+                          <span>{count}</span>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No models generated yet</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Users className="mr-2 h-5 w-5" /> Generated Models
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {generatedModels.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {generatedModels.map(model => (
+                <Card key={model.id} className="overflow-hidden">
+                  <div className="aspect-square bg-muted relative">
+                    <img 
+                      src={model.avatarUrl || model.imageUrl} 
+                      alt={model.name} 
+                      className="object-cover h-full w-full"
+                    />
+                    {model.personality && (
+                      <div className="absolute top-2 right-2 bg-background/80 text-xs px-2 py-1 rounded">
+                        {model.personality}
+                      </div>
+                    )}
+                  </div>
+                  <CardContent className="p-3">
+                    <h3 className="font-medium text-sm truncate">{model.name}</h3>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {model.age ? `${model.age} • ` : ''}{model.country || model.location}
+                    </p>
+                    <div className="mt-2 flex items-center justify-between">
+                      <span className="text-xs bg-muted px-2 py-0.5 rounded">
+                        {processingStatus.status === 'completed' ? (
+                          <Check className="h-3 w-3 inline mr-1 text-green-500" />
+                        ) : (
+                          <span className="h-2 w-2 rounded-full bg-amber-500 inline-block mr-1"></span>
+                        )}
+                        {processingStatus.status === 'completed' ? 'Processed' : 'Pending'}
+                      </span>
+                      <span className="text-xs text-muted-foreground">ID: {model.id.substring(0, 6)}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No models generated yet. Use the panel above to create AI models.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

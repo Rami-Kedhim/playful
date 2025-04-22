@@ -1,179 +1,163 @@
-// Creating a temporary mock implementation for this component
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Zap } from "lucide-react";
-import { useBoostContext } from "@/contexts/BoostContext";
-import { formatDistance } from "date-fns";
-import BoostDialogTabs from "./dialog/BoostDialogTabs";
-import { HermesBoostStatus, BoostDialogContainerProps } from "./types";
 
-const BoostDialogContainer = ({
+import React, { useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import BoostDialogTabs from "./dialog/BoostDialogTabs";
+import { useBoost } from "@/contexts/BoostContext";
+import { useBoostManager } from "@/hooks/boost/useBoostManager";
+import { useAuth } from "@/hooks/auth/useAuth";
+
+export interface BoostDialogContainerProps {
+  profileId: string;
+  onSuccess?: () => Promise<boolean>;
+  buttonProps?: { text?: string; variant?: string; size?: string };
+  open?: boolean;
+  setOpen?: (open: boolean) => void;
+  buttonText?: string;
+  buttonVariant?: string;
+  buttonSize?: string;
+}
+
+const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
   profileId,
   onSuccess,
   buttonProps,
-  open,
-  setOpen,
+  open: propOpen,
+  setOpen: propSetOpen,
   buttonText = "Boost Profile",
-  buttonVariant = "outline",
-  buttonSize = "sm"
-}: BoostDialogContainerProps) => {
-  const [dialogOpen, setDialogOpen] = useState(open || false);
-  const [activeTab, setActiveTab] = useState("packages");
-  const [hermesBoostStatus, setHermesBoostStatus] = useState<HermesBoostStatus | undefined>(undefined);
+  buttonVariant = "default",
+  buttonSize = "default"
+}) => {
+  const [open, setOpen] = useState(propOpen || false);
+  const [activeTab, setActiveTab] = useState("boost");
+  const { user } = useAuth();
   
+  // Use controlled or uncontrolled open state based on props
+  const dialogOpen = propOpen !== undefined ? propOpen : open;
+  const setDialogOpen = propSetOpen || setOpen;
+
   const {
     boostStatus,
-    isLoading,
+    eligibility,
+    boostPackages,
     dailyBoostUsage,
     dailyBoostLimit,
+    loading: boostLoading,
     purchaseBoost,
     cancelBoost,
-  } = useBoostContext();
+  } = useBoostManager(profileId || user?.id);
 
-  // Handle external open state if provided
-  useEffect(() => {
-    if (open !== undefined) {
-      setDialogOpen(open);
-    }
-  }, [open]);
+  // Mock Hermes boost status for now
+  const hermesStatus = {
+    position: 5,
+    activeUsers: 120,
+    estimatedVisibility: 85,
+    lastUpdateTime: new Date().toISOString()
+  };
 
-  // Handle close event both internally and externally
-  const handleOpenChange = (newOpen: boolean) => {
-    setDialogOpen(newOpen);
-    if (setOpen) {
-      setOpen(newOpen);
-    }
-  };
-  
-  // Mock boost packages for demo purposes
-  const boostPackages = [
-    {
-      id: "boost-1",
-      name: "Quick Boost",
-      duration: "06:00:00",
-      price_ubx: 25,
-      description: "Get a 6-hour visibility boost",
-      features: ["Top of search results", "Featured profile badge"]
-    },
-    {
-      id: "boost-2",
-      name: "Daily Boost",
-      duration: "24:00:00",
-      price_ubx: 50,
-      description: "Get a full day visibility boost",
-      features: ["Extended visibility", "Priority in feeds"]
-    },
-    {
-      id: "boost-3",
-      name: "Weekend Boost",
-      duration: "72:00:00",
-      price_ubx: 120,
-      description: "Maximum visibility for 3 days",
-      features: ["Maximum exposure", "Featured everywhere", "Analytics report"]
-    }
-  ];
-  
-  const [selectedPackage, setSelectedPackage] = useState<string>("");
-  
-  // Mock eligibility for demo purposes
-  const eligibility = {
-    isEligible: true,
-    reason: ""
-  };
-  
+  const [selectedPackage, setSelectedPackage] = useState("");
+
   useEffect(() => {
-    if (dialogOpen) {
-      // Mock fetching Hermes boost status
-      setHermesBoostStatus({
-        position: 3,
-        activeUsers: 125,
-        estimatedVisibility: 65,
-        lastUpdateTime: new Date().toISOString(),
-        timeRemaining: 16 * 60 + 32, // 16h 32m in minutes
-        boostScore: 85,
-        effectivenessScore: 75
-      });
+    // Set default selected package if packages exist and none is selected
+    if (boostPackages.length > 0 && !selectedPackage) {
+      setSelectedPackage(boostPackages[0].id);
     }
-  }, [dialogOpen]);
-  
-  // Format boost duration for display
+  }, [boostPackages, selectedPackage]);
+
+  // Format duration string helper function
   const formatBoostDuration = (duration: string): string => {
-    // Parse HH:MM:SS format
-    const [hours, minutes] = duration.split(":").map(Number);
-    
+    const [hours, minutes] = duration.split(':').map(Number);
     if (hours >= 24) {
       const days = Math.floor(hours / 24);
-      return `${days} day${days !== 1 ? 's' : ''}`;
+      return `${days} ${days === 1 ? 'day' : 'days'}`;
     }
-    
-    return `${hours} hour${hours !== 1 ? 's' : ''}`;
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
   };
-  
-  // Get boost price based on selected package
+
+  // Get price from selected package
   const getBoostPrice = (): number => {
-    const pkg = boostPackages.find(p => p.id === selectedPackage);
-    return pkg ? pkg.price_ubx : 0;
+    const selectedPkg = boostPackages.find(pkg => pkg.id === selectedPackage);
+    return selectedPkg?.price_ubx || 0;
   };
-  
-  // Handle purchasing boost
+
+  // Handle boost purchase
+  const handlePurchase = async (): Promise<void> => {
+    const selectedPkg = boostPackages.find(pkg => pkg.id === selectedPackage);
+    if (!selectedPkg) return;
+
+    const result = await purchaseBoost(selectedPkg);
+    
+    if (result && onSuccess) {
+      await onSuccess();
+    }
+
+    if (result) {
+      setDialogOpen(false);
+    }
+  };
+
+  // Handle boost cancellation
   const handleBoost = async (): Promise<void> => {
-    const success = await purchaseBoost(selectedPackage);
-    
-    if (success && onSuccess) {
-      onSuccess();
-      setActiveTab("active");
+    if (boostStatus?.isActive) {
+      await cancelBoost();
+    } else {
+      await handlePurchase();
     }
   };
-  
-  // Handle cancelling boost
+
+  // Handle boost cancel
   const handleCancel = async (): Promise<void> => {
-    const success = await cancelBoost();
-    
-    if (success && onSuccess) {
-      onSuccess();
-      setActiveTab("packages");
+    const result = await cancelBoost();
+    if (result && onSuccess) {
+      await onSuccess();
     }
   };
-  
-  // Handle closing dialog
+
+  // Dialog close handler
   const handleDialogClose = () => {
-    handleOpenChange(false);
+    setDialogOpen(false);
   };
-  
+
   return (
-    <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center">
-            <Zap className="h-5 w-5 mr-2 text-yellow-500" />
-            Boost Your Profile
-          </DialogTitle>
-        </DialogHeader>
-        
-        <BoostDialogTabs
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          boostStatus={boostStatus}
-          eligibility={eligibility}
-          hermesStatus={hermesBoostStatus}
-          boostPackages={boostPackages}
-          selectedPackage={selectedPackage}
-          setSelectedPackage={setSelectedPackage}
-          formatBoostDuration={formatBoostDuration}
-          getBoostPrice={getBoostPrice}
-          handleBoost={handleBoost}
-          handlePurchase={handlePurchase}
-          handleCancel={handleCancel}
-          handleDialogClose={handleDialogClose}
-          dailyBoostUsage={dailyBoostUsage}
-          dailyBoostLimit={dailyBoostLimit}
-          loading={isLoading}
-          hermesBoostStatus={hermesBoostStatus}
-          boostAnalytics={undefined}
-        />
-      </DialogContent>
-    </Dialog>
+    <>
+      <Button
+        onClick={() => setDialogOpen(true)}
+        variant={buttonProps?.variant || buttonVariant as any}
+        size={buttonProps?.size || buttonSize as any}
+      >
+        {buttonProps?.text || buttonText}
+      </Button>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">PULSE Boost System</DialogTitle>
+          </DialogHeader>
+          
+          <BoostDialogTabs
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            boostStatus={boostStatus}
+            eligibility={eligibility}
+            boostPackages={boostPackages}
+            selectedPackage={selectedPackage}
+            setSelectedPackage={setSelectedPackage}
+            handleBoost={handleBoost}
+            handleCancel={handleCancel}
+            dailyBoostUsage={dailyBoostUsage}
+            dailyBoostLimit={dailyBoostLimit}
+            hermesStatus={hermesStatus}
+            loading={boostLoading}
+            
+            // Add the missing props
+            formatBoostDuration={formatBoostDuration}
+            getBoostPrice={getBoostPrice}
+            handlePurchase={handlePurchase}
+            handleDialogClose={handleDialogClose}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

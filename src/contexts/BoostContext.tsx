@@ -1,149 +1,123 @@
 
-// Import required hooks
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { BoostStatus, BoostPackage } from '@/types/boost';
-import { AnalyticsData } from '@/hooks/boost/useBoostAnalytics';
-import { useBoostManager } from '@/hooks/boost';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { toast } from '@/components/ui/use-toast';
+import { useBoostManager, BoostStatus, BoostEligibility, BoostPackage } from '@/hooks/boost/useBoostManager';
+import { useAuth } from '@/hooks/auth/useAuth';
 
-// Define the context interface
-export interface BoostContextType {
-  boostStatus: BoostStatus;
-  boostAnalytics: AnalyticsData | null;
-  isLoading: boolean;
-  purchaseBoost: (packageId: string) => Promise<boolean>;
-  cancelBoost: () => Promise<boolean>;
-  fetchAnalytics: () => Promise<AnalyticsData | null>;
-  dailyBoostUsage: number;
-  dailyBoostLimit: number;
-  error?: string;
+// Enhanced BoostStatus type to include missing properties
+interface EnhancedBoostStatus extends BoostStatus {
+  progress?: number;
+  packageId?: string;
+  packageName?: string;
+  profileId?: string;
+  activeBoostId?: string;
+  expiresAt?: string;
 }
 
-// Create context with default values
-export const BoostContext = createContext<BoostContextType | undefined>(undefined);
+interface BoostContextType {
+  isActive: boolean;
+  boostStatus: EnhancedBoostStatus | null;
+  eligibility: BoostEligibility;
+  boostPackages: BoostPackage[];
+  dailyBoostUsage: number;
+  dailyBoostLimit: number;
+  loading: boolean;
+  error: string | null;
+  purchaseBoost: (pkg: BoostPackage) => Promise<boolean>;
+  cancelBoost: () => Promise<boolean>;
+}
 
-// Provider component
+const BoostContext = createContext<BoostContextType | undefined>(undefined);
+
+export const useBoost = () => {
+  const context = useContext(BoostContext);
+  if (context === undefined) {
+    throw new Error('useBoost must be used within a BoostProvider');
+  }
+  return context;
+};
+
 export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
-  const [isLoading, setIsLoading] = useState(false); // Fix: Define isLoading state
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
   
-  // Get the current user ID (this would ideally come from an auth context)
-  const userId = "current-user-id"; // Placeholder
-  
-  // Use the boost manager hook
   const {
-    boostStatus: managerBoostStatus,
-    eligibility,
-    purchaseBoost: purchaseLegacyBoost,
-    cancelBoost: cancelLegacyBoost,
-    loading,
-    error,
-    getBoostAnalytics,
-    dailyBoostUsage,
-    dailyBoostLimit
-  } = useBoostManager(userId);
-  
-  // Fetch analytics on load and when boost status changes
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!managerBoostStatus.isActive) {
-        setIsLoading(false); // Fix: Use setIsLoading instead of setLoading
-        return;
-      }
-      
-      try {
-        const data = await getBoostAnalytics();
-        if (data) {
-          setAnalyticsData(data);
-        }
-      } catch (err) {
-        console.error("Error fetching analytics:", err);
-      }
-    };
-    
-    fetchData();
-  }, [managerBoostStatus.isActive, getBoostAnalytics]);
-  
-  // Function to fetch analytics on demand
-  const fetchAnalytics = async () => {
-    try {
-      const data = await getBoostAnalytics();
-      if (data) {
-        setAnalyticsData(data);
-      }
-      return data;
-    } catch (err) {
-      console.error("Error fetching analytics:", err);
-      return null;
-    }
-  };
-  
-  // Create a safe BoostStatus that doesn't access potentially undefined properties
-  const boostStatus: BoostStatus = {
-    isActive: !!managerBoostStatus.isActive,
-    // Only add progress if it exists
-    ...(managerBoostStatus.progress !== undefined && { progress: managerBoostStatus.progress }),
-    // Handle date formatting
-    startTime: managerBoostStatus.startTime ? 
-      (typeof managerBoostStatus.startTime === 'string' ? 
-        managerBoostStatus.startTime : 
-        managerBoostStatus.startTime.toISOString()) : 
-      undefined,
-    endTime: managerBoostStatus.endTime ? 
-      (typeof managerBoostStatus.endTime === 'string' ? 
-        managerBoostStatus.endTime : 
-        managerBoostStatus.endTime.toISOString()) : 
-      undefined,
-    timeRemaining: managerBoostStatus.timeRemaining,
-    // Only add these properties if they exist
-    ...(managerBoostStatus.packageId && { packageId: managerBoostStatus.packageId }),
-    ...(managerBoostStatus.packageName && { packageName: managerBoostStatus.packageName }),
-    ...(managerBoostStatus.profileId && { profileId: managerBoostStatus.profileId }),
-  };
-  
-  // Adapt purchaseBoost to accept packageId string
-  const purchaseBoost = async (packageId: string): Promise<boolean> => {
-    // In a real app, we'd fetch the package from API or find it in state
-    const mockPackage: any = { // Fix: Use any type temporarily to resolve type compatibility issues
-      id: packageId,
-      name: "Standard Boost",
-      duration: "24:00:00",
-      price_ubx: 15,
-      description: "Standard boost package",
-      features: []
-    };
-    
-    try {
-      return await purchaseLegacyBoost(mockPackage);
-    } catch (error) {
-      console.error("Failed to purchase boost:", error);
-      return false;
-    }
-  };
-  
-  const value: BoostContextType = {
     boostStatus,
-    isLoading: loading, // Use existing loading state from useBoostManager
-    error,
+    eligibility,
+    boostPackages,
     dailyBoostUsage,
     dailyBoostLimit,
+    loading: boostLoading,
+    error,
     purchaseBoost,
-    cancelBoost: cancelLegacyBoost,
-    boostAnalytics: analyticsData,
-    fetchAnalytics
-  };
-  
+    cancelBoost
+  } = useBoostManager(user?.id);
+
+  const isActive = boostStatus?.isActive || false;
+
+  // Enhanced status that includes the missing properties
+  const enhancedStatus: EnhancedBoostStatus | null = boostStatus ? {
+    ...boostStatus,
+    progress: boostStatus.progress || 50, // Default progress value if missing
+    packageId: boostStatus.packageId || '',
+    packageName: boostStatus.packageName || 'Standard Boost',
+    profileId: boostStatus.profileId || user?.id,
+    activeBoostId: boostStatus.activeBoostId || '',
+    expiresAt: boostStatus.expiresAt || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+  } : null;
+
   return (
-    <BoostContext.Provider value={value}>
+    <BoostContext.Provider value={{
+      isActive,
+      boostStatus: enhancedStatus,
+      eligibility,
+      boostPackages,
+      dailyBoostUsage,
+      dailyBoostLimit,
+      loading: loading || boostLoading,
+      error,
+      purchaseBoost: async (pkg: BoostPackage) => {
+        try {
+          const result = await purchaseBoost(pkg);
+          if (result) {
+            toast({
+              title: "Boost activated",
+              description: `Your ${pkg.name} boost is now active!`,
+            });
+          }
+          return result;
+        } catch (err) {
+          console.error("Error purchasing boost:", err);
+          toast({
+            title: "Error",
+            description: "Failed to purchase boost. Please try again.",
+            variant: "destructive",
+          });
+          return false;
+        }
+      },
+      cancelBoost: async () => {
+        try {
+          const result = await cancelBoost();
+          if (result) {
+            toast({
+              title: "Boost cancelled",
+              description: "Your boost has been cancelled.",
+            });
+          }
+          return result;
+        } catch (err) {
+          console.error("Error cancelling boost:", err);
+          toast({
+            title: "Error",
+            description: "Failed to cancel boost. Please try again.",
+            variant: "destructive",
+          });
+          return false;
+        }
+      }
+    }}>
       {children}
     </BoostContext.Provider>
   );
-};
-
-// Hook for easy context consumption
-export const useBoostContext = () => {
-  const context = useContext(BoostContext);
-  if (context === undefined) {
-    throw new Error('useBoostContext must be used within a BoostProvider');
-  }
-  return context;
 };
