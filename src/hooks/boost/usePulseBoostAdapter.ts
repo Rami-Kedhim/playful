@@ -72,16 +72,20 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const seconds = Number(durationParts[2]) || 0;
 
     // Calculate durationMinutes as number
-    // Correct calculation of total minutes (include seconds converted to decimal fraction)
-    // Note: seconds/60 is decimal fraction, Math.floor doesn't make sense here for seconds
+    // Note: seconds/60 is decimal fraction
     const durationMinutes: number = (hours * 60) + minutes + (seconds / 60);
 
     let visibility: PulseBoost['visibility'] = 'homepage';
 
-    // Ensure boost_power is number, parse from string if needed
-    const boostPowerNum: number = typeof pkg.boost_power === 'number'
-      ? pkg.boost_power
-      : (typeof pkg.boost_power === 'string' ? Number(pkg.boost_power) : 50);
+    // Parse boost_power to number safely
+    const boostPowerRaw = pkg.boost_power;
+    let boostPowerNum: number = 50; // default
+    if (typeof boostPowerRaw === 'number') {
+      boostPowerNum = boostPowerRaw;
+    } else if (typeof boostPowerRaw === 'string') {
+      const parsed = Number(boostPowerRaw);
+      boostPowerNum = isNaN(parsed) ? 50 : parsed;
+    }
 
     if (boostPowerNum >= 200) {
       visibility = 'global';
@@ -91,10 +95,15 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       visibility = 'homepage';
     }
 
-    // Ensure visibility_increase is number, parse from string if needed
-    const visibilityIncreaseNum: number = typeof pkg.visibility_increase === 'number'
-      ? pkg.visibility_increase
-      : (typeof pkg.visibility_increase === 'string' ? Number(pkg.visibility_increase) : 50);
+    // Parse visibility_increase to number safely
+    const visibilityIncreaseRaw = pkg.visibility_increase;
+    let visibilityIncreaseNum: number = 50; // default
+    if (typeof visibilityIncreaseRaw === 'number') {
+      visibilityIncreaseNum = visibilityIncreaseRaw;
+    } else if (typeof visibilityIncreaseRaw === 'string') {
+      const parsed = Number(visibilityIncreaseRaw);
+      visibilityIncreaseNum = isNaN(parsed) ? 50 : parsed;
+    }
 
     return {
       id: pkg.id,
