@@ -33,7 +33,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     return "Less than a minute";
   };
 
-  const parseNumberValue = (val: any, fallback: number): number => {
+  const parseNumberValue = (val: unknown, fallback: number): number => {
     if (typeof val === 'number') return val;
     if (typeof val === 'string') {
       const parsed = Number(val);
@@ -85,11 +85,11 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const durationMinutes: number = (validHours * 60) + validMinutes + (validSeconds / 60);
 
     // Parse boost power as number safely
-    const boostPowerRaw = (pkg as any).boost_power ?? (pkg as any).boostPower;
+    const boostPowerRaw: unknown = (pkg as any).boost_power ?? (pkg as any).boostPower;
     const boostPowerNum: number = parseNumberValue(boostPowerRaw, 50);
 
     // Parse visibility increase as number safely
-    const visibilityIncreaseRaw = (pkg as any).visibility_increase ?? (pkg as any).visibilityIncrease;
+    const visibilityIncreaseRaw: unknown = (pkg as any).visibility_increase ?? (pkg as any).visibilityIncrease;
     const visibilityIncreaseNum: number = parseNumberValue(visibilityIncreaseRaw, 50);
 
     let visibility: PulseBoost['visibility'] = 'homepage';
