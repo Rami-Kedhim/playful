@@ -17,7 +17,9 @@ export const generateAIProfile = async (options: { [key: string]: any } = {}): P
     country: options.country || 'United States',
     location: options.country || 'United States',
     language: options.language || 'English',
-    personality: options.personality || 'Friendly and engaging',
+    personality: {
+      type: options.personality || 'Friendly and engaging',
+    },
     interests: options.interests || ['conversation', 'helping users'],
     tags: options.tags || ['ai', 'companion'],
     category: options.category || 'Assistant',
@@ -26,7 +28,11 @@ export const generateAIProfile = async (options: { [key: string]: any } = {}): P
     lucoin_chat_price: options.lucoin_chat_price || Math.floor(Math.random() * 10) + 5,
     lucoin_image_price: options.lucoin_image_price || Math.floor(Math.random() * 20) + 10,
     subscription_price: options.subscription_price || Math.floor(Math.random() * 50) + 20,
-    premium_content_count: options.premium_content_count || Math.floor(Math.random() * 30),
+    premium_content_count: {
+      photos: options.premium_photos || Math.floor(Math.random() * 30),
+      videos: options.premium_videos || Math.floor(Math.random() * 10),
+      messages: options.premium_messages || Math.floor(Math.random() * 50)
+    },
     gallery_images: options.gallery_images || [
       'https://via.placeholder.com/400?text=AI+Gallery+1',
       'https://via.placeholder.com/400?text=AI+Gallery+2',

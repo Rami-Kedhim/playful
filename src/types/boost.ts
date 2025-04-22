@@ -20,6 +20,7 @@ export interface BoostStatus {
 export interface BoostEligibility {
   isEligible: boolean;
   reason: string;
+  // No reasons property - using reason instead
 }
 
 export interface BoostPackage extends BoostManagerPackage {
@@ -71,4 +72,7 @@ export interface BoostAnalytics {
     change: number;
   };
   trending: boolean;
+  additionalViews: number;
+  engagementIncrease: number;
+  rankingPosition: number;
 }

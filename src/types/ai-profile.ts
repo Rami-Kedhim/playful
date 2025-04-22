@@ -8,7 +8,10 @@ export interface AIProfile {
   age?: number;
   country?: string;
   language?: string;
-  personality?: string;
+  personality?: {
+    type?: string;
+    [key: string]: any;
+  };
   interests?: string[];
   tags?: string[];
   category?: string;
@@ -25,7 +28,12 @@ export interface AIProfile {
   lucoin_image_price?: number;
   boost_status?: any;
   subscription_price?: number;
-  premium_content_count?: number;
+  premium_content_count?: {
+    photos?: number;
+    videos?: number;
+    messages?: number;
+    [key: string]: number | undefined;
+  };
   gallery_images?: string[];
   livecam_enabled?: boolean;
   profileStats?: {

@@ -49,6 +49,7 @@ export interface BoostPackagesProps {
   dailyUsage: number;
   dailyLimit: number;
   disabled?: boolean;
+  getBoostPrice?: () => number; // Add the missing getBoostPrice prop
 }
 
 export interface HermesBoostInfoProps {

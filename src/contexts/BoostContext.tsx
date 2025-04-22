@@ -28,6 +28,9 @@ export const useBoost = () => {
   return context;
 };
 
+// Added alias for backward compatibility
+export const useBoostContext = useBoost;
+
 export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -58,6 +61,7 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       error,
       purchaseBoost: async (pkg: BoostPackage) => {
         try {
+          loading && setLoading(true);
           const result = await purchaseBoost(pkg);
           if (result) {
             toast({
@@ -74,10 +78,13 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             variant: "destructive",
           });
           return false;
+        } finally {
+          loading && setLoading(false);
         }
       },
       cancelBoost: async () => {
         try {
+          loading && setLoading(true);
           const result = await cancelBoost();
           if (result) {
             toast({
@@ -94,6 +101,8 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             variant: "destructive",
           });
           return false;
+        } finally {
+          loading && setLoading(false);
         }
       }
     }}>

@@ -1,184 +1,131 @@
 
 import { useState, useCallback } from 'react';
 import { generateAIProfile } from '@/services/generateAIProfile';
-import { AIProfile, ProcessingStatus, AIGenerationOptions } from '@/types/ai-profile';
-import { hermesOrusOxum } from '@/core/HermesOrusOxum';
+import { AIProfile, ProcessingStatus } from '@/types/ai-profile';
 
-export interface UseAIModelGeneratorReturn {
-  generateModels: (options: AIGenerationOptions) => Promise<AIProfile[]>;
-  processModelsWithHermesOxum: (models: AIProfile[]) => Promise<AIProfile[]>;
-  generatedModels: AIProfile[];
-  processingStatus: ProcessingStatus;
-  isGenerating: boolean;
-  isProcessing: boolean;
+interface GenerationOptions {
+  count?: number;
+  personalityTypes?: string[];
+  ageRange?: {
+    min: number;
+    max: number;
+  };
+  regions?: string[];
 }
 
-export const useAIModelGenerator = (): UseAIModelGeneratorReturn => {
+export const useAIModelGenerator = () => {
   const [generatedModels, setGeneratedModels] = useState<AIProfile[]>([]);
-  const [processingStatus, setProcessingStatus] = useState<ProcessingStatus>({
-    completedCount: 0,
-    totalCount: 0,
-    status: 'idle',
-    message: ''
-  });
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState<ProcessingStatus | null>(null);
 
-  /**
-   * Generate AI models with the specified options
-   */
-  const generateModels = useCallback(async (options: AIGenerationOptions): Promise<AIProfile[]> => {
+  // Generate AI models based on parameters
+  const generateModels = useCallback(async (options: GenerationOptions) => {
     setIsGenerating(true);
-    setProcessingStatus({
-      completedCount: 0,
-      totalCount: options.count || 1,
-      status: 'processing',
-      message: 'Generating AI models...'
-    });
-
     try {
-      const count = options.count || 1;
+      const count = options.count || 5;
       const newModels: AIProfile[] = [];
-
-      for (let i = 0; i < count; i++) {
-        const personalityType = options.personalityTypes 
-          ? options.personalityTypes[Math.floor(Math.random() * options.personalityTypes.length)] 
-          : undefined;
-        
-        // Generate random age within the specified range
-        const age = options.ageRange 
-          ? Math.floor(Math.random() * (options.ageRange.max - options.ageRange.min + 1)) + options.ageRange.min
-          : undefined;
-        
-        // Generate random region
-        const region = options.regions
-          ? options.regions[Math.floor(Math.random() * options.regions.length)]
-          : undefined;
-
-        const model = await generateAIProfile({
-          personality: personalityType,
-          age,
-          country: region,
-          language: 'English' // Default language
-        });
-
-        newModels.push(model);
-        
-        setProcessingStatus(prev => ({
-          ...prev,
-          completedCount: prev.completedCount + 1,
-          message: `Generated ${prev.completedCount + 1} of ${prev.totalCount} models`
-        }));
-      }
-
-      setGeneratedModels(newModels);
-      setProcessingStatus({
-        completedCount: count,
-        totalCount: count,
-        status: 'completed',
-        message: `Successfully generated ${count} AI models`
-      });
       
+      for (let i = 0; i < count; i++) {
+        // Create generation options from parameters
+        const generationOptions: Record<string, any> = {
+          age: options.ageRange ? 
+            Math.floor(Math.random() * (options.ageRange.max - options.ageRange.min + 1)) + options.ageRange.min : 
+            Math.floor(Math.random() * 15) + 21,
+        };
+        
+        // Add personality if specified
+        if (options.personalityTypes && options.personalityTypes.length > 0 && options.personalityTypes[0] !== 'mixed') {
+          generationOptions.personality = options.personalityTypes[Math.floor(Math.random() * options.personalityTypes.length)];
+        }
+        
+        // Add region if specified
+        if (options.regions && options.regions.length > 0 && options.regions[0] !== 'global') {
+          const region = options.regions[Math.floor(Math.random() * options.regions.length)];
+          // Map region code to actual country names
+          const regionCountryMap: Record<string, string[]> = {
+            north_america: ['United States', 'Canada', 'Mexico'],
+            europe: ['United Kingdom', 'France', 'Germany', 'Spain', 'Italy', 'Netherlands'],
+            asia: ['Japan', 'South Korea', 'China', 'Thailand', 'Singapore'],
+            latin_america: ['Brazil', 'Colombia', 'Argentina', 'Chile', 'Peru']
+          };
+          
+          const countries = regionCountryMap[region] || ['United States'];
+          generationOptions.country = countries[Math.floor(Math.random() * countries.length)];
+        }
+        
+        const newProfile = await generateAIProfile(generationOptions);
+        newModels.push(newProfile);
+      }
+      
+      setGeneratedModels(newModels);
       return newModels;
     } catch (error) {
-      setProcessingStatus(prev => ({
-        ...prev,
-        status: 'error',
-        message: `Error generating models: ${error}`
-      }));
       console.error("Error generating AI models:", error);
-      return [];
+      throw error;
     } finally {
       setIsGenerating(false);
     }
   }, []);
 
-  /**
-   * Process generated models with HermesOrusOxum system
-   */
-  const processModelsWithHermesOxum = useCallback(async (models: AIProfile[]): Promise<AIProfile[]> => {
+  // Process models through Hermes + Oxum enhancements
+  const processModelsWithHermesOxum = useCallback(async () => {
+    if (generatedModels.length === 0) {
+      return;
+    }
+    
     setIsProcessing(true);
     setProcessingStatus({
       completedCount: 0,
-      totalCount: models.length,
+      totalCount: generatedModels.length,
       status: 'processing',
-      message: 'Processing models with Hermes-Orus-Oxum system...'
+      message: 'Starting neural processing...'
     });
-
+    
     try {
-      const processedModels = [...models];
-
-      for (let i = 0; i < processedModels.length; i++) {
-        const model = processedModels[i];
-
-        // Get optimal time window for this profile type
-        const optimalWindow = hermesOrusOxum.getOptimalTimeWindow();
-
-        // Calculate current hour for time impact
-        const currentHour = new Date().getHours();
+      // Process each model with simulated delay
+      for (let i = 0; i < generatedModels.length; i++) {
+        // Simulate neural processing time
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Calculate time impact based on optimal window
-        const timeImpact = hermesOrusOxum.calculateTimeImpact(currentHour, optimalWindow);
-
-        // Record profile view to boost its visibility in the system
-        hermesOrusOxum.recordProfileView(model.id);
-
-        // Calculate visibility score for this model
-        const visibilityScore = hermesOrusOxum.calculateVisibilityScore(
-          75, // initial visibility
-          Math.random() * 24, // time elapsed hours (random for demo)
-          Math.random() * 100, // system load (random for demo)
-          Math.random() * 100  // activity intensity (random for demo)
-        );
-
-        // Log this signal transformation event
-        hermesOrusOxum.logSignalTransform(
-          'ai_model_processing',
-          {
-            modelId: model.id,
-            timeImpact,
-            visibilityScore,
-            timestamp: new Date().toISOString()
-          }
-        );
-
-        // Update processing status
-        setProcessingStatus(prev => ({
-          ...prev,
+        // Update status
+        setProcessingStatus({
           completedCount: i + 1,
-          message: `Processed ${i + 1} of ${models.length} models`
-        }));
+          totalCount: generatedModels.length,
+          status: i + 1 < generatedModels.length ? 'processing' : 'completed',
+          message: `Processing model ${i+1} of ${generatedModels.length}...`
+        });
       }
-
+      
+      // Set final status
       setProcessingStatus({
-        completedCount: models.length,
-        totalCount: models.length,
+        completedCount: generatedModels.length,
+        totalCount: generatedModels.length,
         status: 'completed',
-        message: `Successfully processed ${models.length} models with Hermes-Orus-Oxum`
+        message: `All ${generatedModels.length} models processed successfully`
       });
-
-      return processedModels;
+      
+      return generatedModels;
     } catch (error) {
-      setProcessingStatus(prev => ({
-        ...prev,
+      console.error("Error processing AI models:", error);
+      setProcessingStatus({
+        completedCount: 0,
+        totalCount: generatedModels.length,
         status: 'error',
-        message: `Error processing models: ${error}`
-      }));
-      console.error("Error processing models with Hermes-Orus-Oxum:", error);
-      return models; // Return original models on error
+        message: 'Error processing models'
+      });
+      throw error;
     } finally {
       setIsProcessing(false);
     }
-  }, []);
+  }, [generatedModels]);
 
   return {
-    generateModels,
-    processModelsWithHermesOxum,
     generatedModels,
-    processingStatus,
     isGenerating,
-    isProcessing
+    isProcessing,
+    processingStatus,
+    generateModels,
+    processModelsWithHermesOxum
   };
 };
-
-export default useAIModelGenerator;

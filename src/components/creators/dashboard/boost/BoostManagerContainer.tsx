@@ -6,15 +6,14 @@ import BoostDialogContainer from '@/components/boost/BoostDialogContainer';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { oxum } from '@/core/Oxum';
-import { 
-  adaptFormatBoostDuration 
-} from '@/hooks/boost/useBoostAdapters';
+import { useBoostAdapters } from '@/hooks/boost/useBoostAdapters';
 
 const BoostManagerContainer = ({ profileId }: { profileId?: string }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [activeProfileId, setActiveProfileId] = useState<string>('');
+  const { adaptFormatBoostDuration, formatBoostDuration } = useBoostAdapters(profileId || user?.id || '');
 
   const userId = profileId || user?.id;
 
@@ -48,6 +47,7 @@ const BoostManagerContainer = ({ profileId }: { profileId?: string }) => {
     return true;
   };
 
+  // Apply our own custom formatter using the adapter
   const formatDuration = adaptFormatBoostDuration((duration: string) => {
     const [hours, minutes] = duration.split(':').map(Number);
     return hours >= 24 ? 
