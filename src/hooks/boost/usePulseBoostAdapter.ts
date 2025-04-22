@@ -90,6 +90,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const boostPowerRaw = (pkg as any).boost_power ?? (pkg as any).boostPower;
     const visibilityIncreaseRaw = (pkg as any).visibility_increase ?? (pkg as any).visibilityIncrease;
 
+    // Ensure boostPower and visibilityIncrease are numbers (fix string-to-number issue)
     const boostPowerNum = parseNumberValue(boostPowerRaw, 50);
     const visibilityIncreaseNum = parseNumberValue(visibilityIncreaseRaw, 50);
 

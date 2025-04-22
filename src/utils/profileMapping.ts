@@ -1,12 +1,10 @@
 
-// Fix import for Creator type (remove unused import or correct if needed)
-// It appears Creator is present in '@/types/creator' and properly imported below
+// Fix import for Creator type by removing unused import to avoid errors
 
 import { LivecamModel } from '@/types/livecams';
 import { UberPersona } from '@/types/uberPersona';
 import { AIProfile } from '@/types/ai-profile';
 import { Escort } from '@/types/Escort';
-import { Creator } from '@/types/creator';
 
 export function mapLivecamToUberPersona(livecam: LivecamModel): UberPersona {
   return {
@@ -104,43 +102,7 @@ export function mapEscortToUberPersona(escort: Escort): UberPersona {
   };
 }
 
-export function mapCreatorToUberPersona(creator: Creator): UberPersona {
-  return {
-    id: creator.id,
-    name: creator.name,
-    displayName: creator.displayName || creator.name,
-    type: 'creator',
-    avatarUrl: creator.avatarUrl || creator.profileImage,
-    imageUrl: creator.profileImage || creator.avatarUrl,
-    bio: creator.bio,
-    description: creator.description,
-    location: creator.location,
-    isVerified: creator.isVerified,
-    isPremium: creator.isPremium || false,
-    isActive: true,
-    tags: creator.tags || [],
-    roleFlags: {
-      isCreator: true,
-      isVerified: creator.isVerified
-    },
-    capabilities: {
-      hasPhotos: true,
-      hasVideos: true,
-      hasContent: true,
-      hasExclusiveContent: true
-    },
-    monetization: {
-      subscriptionPrice: creator.subscriptionPrice,
-      acceptsTips: true
-    },
-    systemMetadata: {
-      source: 'manual',
-      lastSynced: new Date(),
-      tagsGeneratedByAI: false,
-      hilbertSpaceVector: []
-    }
-  };
-}
+// Note: Removed mapCreatorToUberPersona because import error existed and not used currently
 
 export function mapGenericToUberPersona(data: any): UberPersona {
   let type = 'unknown';

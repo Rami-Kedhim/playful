@@ -11,12 +11,12 @@ export const getBoostPackages = async (): Promise<BoostPackage[]> => {
       .from('boost_packages')
       .select('*')
       .order('price', { ascending: true });
-    
+
     if (error) {
       console.error('Error fetching boost packages:', error);
       return [];
     }
-    
+
     return data as BoostPackage[];
   } catch (error) {
     console.error('Error in getBoostPackages:', error);
@@ -87,7 +87,7 @@ export const purchaseBoost = async (
         p_profile_id: profileId,
         p_package_id: packageId
       });
-    
+
     if (error) {
       console.error('Error purchasing boost:', error);
       toast.error('Failed to purchase boost', {
@@ -98,11 +98,11 @@ export const purchaseBoost = async (
         message: error.message
       };
     }
-    
+
     toast.success('Boost purchased successfully!', {
       description: 'Your profile visibility has been increased.'
     });
-    
+
     return {
       success: true,
       message: 'Boost purchased successfully'
@@ -127,7 +127,7 @@ export const cancelBoost = async (
       .rpc('cancel_profile_boost', { 
         p_profile_id: profileId
       });
-    
+
     if (error) {
       console.error('Error canceling boost:', error);
       toast.error('Failed to cancel boost', {
@@ -138,9 +138,9 @@ export const cancelBoost = async (
         message: error.message
       };
     }
-    
+
     toast.success('Boost canceled successfully');
-    
+
     return {
       success: true,
       message: 'Boost canceled successfully'
@@ -196,12 +196,12 @@ export const getDailyBoostUsage = async (
       .rpc('get_daily_boost_usage', { 
         p_profile_id: profileId
       });
-    
+
     if (error) {
       console.error('Error fetching daily boost usage:', error);
       return { used: 0, limit: 3 }; // Default values
     }
-    
+
     return {
       used: data.used || 0,
       limit: data.limit || 3
