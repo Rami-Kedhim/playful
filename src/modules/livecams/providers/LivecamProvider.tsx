@@ -36,7 +36,7 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Mock data with properly typed Livecam objects, removed non-existing properties
+      // Mock data with properly typed Livecam objects, removed 'region' properties
       const mockLivecams: Livecam[] = [
         {
           id: '1',
@@ -52,7 +52,6 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
           rating: 4.9,
           price: 55,
           category: 'Dance',
-          region: 'US',
           language: 'English',
           description: 'Join my livestream for dance and fitness routines!'
         },
@@ -70,7 +69,6 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
           rating: 4.7,
           price: 45,
           category: 'Gaming',
-          region: 'CA',
           language: 'English',
           description: 'RPG gaming streams every evening'
         },
@@ -88,7 +86,6 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
           rating: 4.8,
           price: 50,
           category: 'Music',
-          region: 'UK',
           language: 'English',
           description: 'Piano performances and music theory'
         }
@@ -109,8 +106,6 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
   }, []);
   
   // Filter featured and popular livecams
-  // Removed filtering by featured because 'featured' not on Livecam type
-  // Provide an example filtering by rating > 4.7 instead for featured
   const featuredLivecams = livecams.filter(livecam => livecam.rating !== undefined && livecam.rating > 4.7);
   const popularLivecams = [...livecams].sort((a, b) => b.viewerCount - a.viewerCount).slice(0, 5);
   
@@ -129,3 +124,4 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
     </LivecamContext.Provider>
   );
 };
+

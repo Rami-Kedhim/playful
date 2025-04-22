@@ -38,17 +38,14 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
   const adaptGetPulseBoostPrice = (
     fn: (pkg: BoostPackage) => number
   ) => (pkg: BoostPackage): number => {
-    // If the package has an explicit UBX price, use that
     if (pkg.price_ubx !== undefined && pkg.price_ubx !== null) {
       return pkg.price_ubx;
     }
 
-    // If our adapter function is provided, use that
     if (fn) {
       return fn(pkg);
     }
 
-    // Fall back to regular price or 0
     return pkg.price || 0;
   };
 
@@ -68,13 +65,14 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
   // Convert a standard boost package to a pulse boost
   const convertToPulseBoost = (pkg: BoostPackage): PulseBoost => {
     const durationParts = pkg.duration?.split(':') || ['0', '0', '0'];
-    const hours = parseInt(durationParts[0], 10) || 0;
-    const minutes = parseInt(durationParts[1], 10) || 0;
+    // Ensure parsing to number to prevent TS errors
+    const hours = Number(durationParts[0]) || 0;
+    const minutes = Number(durationParts[1]) || 0;
+    const seconds = Number(durationParts[2]) || 0;
 
-    // Calculate the duration in minutes with correct type and fallback
-    const durationMinutes = hours * 60 + minutes;
+    // Calculate durationMinutes as number
+    const durationMinutes = hours * 60 + minutes + Math.floor(seconds / 60);
 
-    // Determine the visibility level string matching PulseBoost visibility union
     let visibility: PulseBoost['visibility'] = 'homepage';
     if (pkg.boost_power !== undefined && pkg.boost_power !== null) {
       if (pkg.boost_power >= 200) {
@@ -86,7 +84,6 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       }
     }
 
-    // Ensure visibility_increase is a number (number expected)
     const visibilityIncreaseNum = Number(pkg.visibility_increase) || 50;
 
     return {
@@ -114,3 +111,4 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 };
 
 export default usePulseBoostAdapter;
+
