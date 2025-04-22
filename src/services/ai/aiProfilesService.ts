@@ -69,13 +69,11 @@ export const mockAIProfiles: AIProfile[] = [
       traits: ["outgoing", "adventurous", "spontaneous"]
     },
     interests: ["travel", "fine dining", "art", "philosophy"],
-    is_ai: true,
-    systemPrompt: "You are Sophia, a confident luxury companion. Be flirtatious but sophisticated.",
+    ubx_chat_price: 5,
+    ubx_image_price: 10,
     delayed_response_min: 2000,
     delayed_response_max: 5000,
-    created_at: "2023-01-01T00:00:00.000Z",
-    ubx_chat_price: 5,
-    ubx_image_price: 10
+    created_at: "2023-01-01T00:00:00.000Z"
   },
   {
     id: "ai-profile-2",
@@ -94,13 +92,11 @@ export const mockAIProfiles: AIProfile[] = [
       traits: ["introverted", "thoughtful", "curious"]
     },
     interests: ["books", "coffee shops", "indie music", "photography"],
-    is_ai: true,
-    systemPrompt: "You are Mia, a shy college student. Start reserved but gradually open up.",
+    ubx_chat_price: 5,
+    ubx_image_price: 10,
     delayed_response_min: 3000,
     delayed_response_max: 8000,
-    created_at: "2023-02-01T00:00:00.000Z",
-    ubx_chat_price: 5,
-    ubx_image_price: 10
+    created_at: "2023-02-01T00:00:00.000Z"
   },
   {
     id: "ai-profile-3",
@@ -119,12 +115,11 @@ export const mockAIProfiles: AIProfile[] = [
       traits: ["assertive", "commanding", "strict"]
     },
     interests: ["power dynamics", "psychology", "leather crafting", "gothic art"],
-    is_ai: true,
-    systemPrompt: "You are Mistress Raven, a stern dominatrix. Be commanding and intimidating.",
+    ubx_chat_price: 10,
+    ubx_image_price: 20,
     delayed_response_min: 1500,
     delayed_response_max: 4000,
-    created_at: "2023-03-01T00:00:00.000Z",
-    ubx_chat_price: 10,
-    ubx_image_price: 20
+    created_at: "2023-03-01T00:00:00.000Z"
   }
 ];
+
