@@ -1,118 +1,126 @@
-import { GLOBAL_UBX_RATE } from './constants';
-import { validateGlobalPrice } from './globalPricing';
-import { OxumPriceAnalytics } from '@/services/analytics/oxumPriceAnalytics';
-import { OxumNotificationService } from '@/services/notifications/oxumNotificationService';
+// Validation utilities for Oxum protocol
+import { OxumValidationError } from './errors';
+import { OxumValidationContext, ValidationResult } from './types';
+
+// Constants for validation rules
+const MAX_PRICE_DELTA = 0.15; // 15% maximum price deviation
+const MIN_TRANSACTION_VALUE = 0.01; // Minimum transaction value in UBX
+const MAX_TRANSACTION_VALUE = 100000; // Maximum transaction value in UBX
 
 /**
- * Resilient Price Comparison with tolerance
- * Compares user price with target price allowing for small floating point deviations
+ * Validates a price against the Oxum global pricing rules
+ * @param price The price to validate
+ * @param context Optional validation context
+ * @returns True if valid, throws OxumValidationError if invalid
  */
-export function compareWithTolerance(userPrice: number, targetPrice: number): boolean {
-  // Calculate allowed deviation range
-  const deviation = Math.abs(userPrice - targetPrice);
-  const percentDeviation = (deviation / targetPrice);
-  
-  const PRICE_TOLERANCE = 0.001; // Tolerance for floating point errors (0.1%)
-  
-  // Check if within tolerance
-  return percentDeviation <= PRICE_TOLERANCE;
-}
-
-/**
- * Validate price against the global price rule
- * Core validation function for Oxum Rule #001: Global Price Symmetry
- */
-export function validateGlobalPriceExtended(userPrice: number, metadata?: Record<string, any>): boolean {
-  try {
-    // Log the price check event
-    OxumPriceAnalytics.logPriceEvent(
-      'price_check',
-      userPrice,
-      metadata,
-      GLOBAL_UBX_RATE
-    );
-    
-    // Primary validation: Exact match with tolerance
-    const isValid = compareWithTolerance(userPrice, GLOBAL_UBX_RATE);
-    
-    if (!isValid) {
-      recordValidationFailure();
-      
-      // Log the violation
-      OxumPriceAnalytics.logPriceEvent(
-        'price_violation',
-        userPrice,
-        {
-          ...metadata,
-          difference: userPrice - GLOBAL_UBX_RATE,
-          percentDifference: ((userPrice - GLOBAL_UBX_RATE) / GLOBAL_UBX_RATE) * 100
-        },
-        GLOBAL_UBX_RATE
-      );
-      
-      // Trigger notification
-      OxumNotificationService.notifyViolation();
-      
-      throw new Error("[Oxum Enforcement] Invalid boosting price detected. Violation of Rule #001.");
-    }
-    
-    // If validation successful, update health tracking
-    recordSuccessfulValidation();
-    
-    return true;
-  } catch (error: any) {
-    // Log validation error
-    console.error("[Oxum] Price validation error:", error);
-    
-    // Rethrow the error
-    throw error;
+export function validateGlobalPrice(
+  price: number,
+  context?: OxumValidationContext
+): boolean {
+  if (typeof price !== 'number' || isNaN(price)) {
+    console.log('Validation failed: Price must be a valid number');
+    throw new OxumValidationError('Price must be a valid number');
   }
+
+  if (price < MIN_TRANSACTION_VALUE) {
+    console.log(`Validation failed: Price ${price} is below minimum threshold ${MIN_TRANSACTION_VALUE}`);
+    throw new OxumValidationError(`Price ${price} is below minimum threshold ${MIN_TRANSACTION_VALUE}`);
+  }
+
+  if (price > MAX_TRANSACTION_VALUE) {
+    console.log(`Validation failed: Price ${price} exceeds maximum threshold ${MAX_TRANSACTION_VALUE}`);
+    throw new OxumValidationError(`Price ${price} exceeds maximum threshold ${MAX_TRANSACTION_VALUE}`);
+  }
+
+  // Additional context-specific validations
+  if (context?.marketReference && typeof context.marketReference === 'number') {
+    const delta = Math.abs(price - context.marketReference) / context.marketReference;
+    if (delta > MAX_PRICE_DELTA) {
+      console.log(`Validation failed: Price ${price} deviates from market reference ${context.marketReference} by ${(delta * 100).toFixed(2)}%`);
+      throw new OxumValidationError(`Price deviates from market reference by ${(delta * 100).toFixed(2)}%`);
+    }
+  }
+
+  console.log(`Validation succeeded: Price ${price} is valid`);
+  return true;
 }
 
 /**
- * Resilient price validation with automatic retries
- * For critical payment paths, retry validation to handle transient issues
+ * Validates a transaction against Oxum protocol rules
+ * @param transaction The transaction to validate
+ * @returns Validation result object
  */
-export async function validateGlobalPriceWithRetryUtil(
-  userPrice: number, 
-  metadata?: Record<string, any>
-): Promise<boolean> {
-  const MAX_RETRY_ATTEMPTS = 3;
-  let attempts = 0;
-  let lastError: Error | null = null;
-  
-  while (attempts < MAX_RETRY_ATTEMPTS) {
-    try {
-      return validateGlobalPriceExtended(userPrice, {
-        ...metadata,
-        retryAttempt: attempts
-      });
-    } catch (error: any) {
-      lastError = error;
-      attempts++;
-      
-      // Wait before retry with exponential backoff
-      if (attempts < MAX_RETRY_ATTEMPTS) {
-        await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, attempts)));
+export function validateTransaction(transaction: any): ValidationResult {
+  const result: ValidationResult = {
+    valid: true,
+    errors: []
+  };
+
+  try {
+    // Check if transaction has required fields
+    if (!transaction.amount || typeof transaction.amount !== 'number') {
+      result.valid = false;
+      result.errors.push('Transaction must have a valid amount');
+    }
+
+    // Validate price if present
+    if (transaction.price) {
+      try {
+        validateGlobalPrice(transaction.price);
+      } catch (error) {
+        result.valid = false;
+        if (error instanceof OxumValidationError) {
+          result.errors.push(error.message);
+        } else {
+          result.errors.push('Invalid price in transaction');
+        }
       }
     }
+
+    // Check for required metadata
+    if (!transaction.metadata || typeof transaction.metadata !== 'object') {
+      result.valid = false;
+      result.errors.push('Transaction must include metadata');
+    }
+
+    console.log('Transaction validation completed:', result.valid ? 'Success' : 'Failed');
+    return result;
+  } catch (error) {
+    console.error('Unexpected error during transaction validation:', error);
+    result.valid = false;
+    result.errors.push('Unexpected validation error');
+    return result;
   }
-  
-  // All attempts failed - log critical error and throw
-  OxumPriceAnalytics.logPriceEvent(
-    'critical_price_failure',
-    userPrice,
-    {
-      ...metadata,
-      attempts,
-      error: lastError?.message
-    },
-    GLOBAL_UBX_RATE
-  );
-  
-  // Notify about critical failure
-  OxumNotificationService.notifyCriticalFailure(`Price validation failed after ${attempts} attempts`);
-  
-  if (lastError) throw lastError;
-  throw new Error("[Oxum Enforcement] Price validation failed after multiple attempts");
+}
+
+/**
+ * Validates a boost package against Oxum protocol rules
+ * @param boostPackage The boost package to validate
+ * @returns True if valid, throws OxumValidationError if invalid
+ */
+export function validateBoostPackage(boostPackage: any): boolean {
+  if (!boostPackage || typeof boostPackage !== 'object') {
+    console.log('Validation failed: Invalid boost package object');
+    throw new OxumValidationError('Invalid boost package object');
+  }
+
+  if (!boostPackage.id) {
+    console.log('Validation failed: Boost package missing ID');
+    throw new OxumValidationError('Boost package missing ID');
+  }
+
+  if (!boostPackage.price && !boostPackage.price_ubx) {
+    console.log('Validation failed: Boost package missing price');
+    throw new OxumValidationError('Boost package missing price');
+  }
+
+  // Validate price if present
+  if (boostPackage.price_ubx) {
+    validateGlobalPrice(Number(boostPackage.price_ubx));
+  } else if (boostPackage.price) {
+    validateGlobalPrice(Number(boostPackage.price));
+  }
+
+  console.log(`Validation succeeded: Boost package ${boostPackage.id} is valid`);
+  return true;
 }

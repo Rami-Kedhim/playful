@@ -1,227 +1,215 @@
-import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
-import { BoostStatus, BoostEligibility, BoostPackage } from '@/types/boost';
-import { AnalyticsData } from '@/hooks/boost/useBoostAnalytics';
+import { BoostPackage, BoostStatus, BoostEligibility, BoostAnalytics } from '@/types/boost';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-// Mock data
-const mockBoostPackages: BoostPackage[] = [
-  {
-    id: "boost-1",
-    name: "24-Hour Boost",
-    description: "Standard boost for 24 hours",
-    duration: "24:00:00",
-    price_ubx: GLOBAL_UBX_RATE,
-    price: GLOBAL_UBX_RATE,
-    features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking"],
-    boost_power: 0,
-    visibility_increase: 0,
-  },
-  {
-    id: "boost-2",
-    name: "Weekend Boost",
-    description: "3-day visibility boost",
-    duration: "72:00:00",
-    price_ubx: GLOBAL_UBX_RATE * 2.5,
-    price: GLOBAL_UBX_RATE * 2.5,
-    features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking", "Extended duration"],
-    boost_power: 0,
-    visibility_increase: 0,
-  },
-  {
-    id: "boost-3",
-    name: "Weekly Boost",
-    description: "7-day premium visibility",
-    duration: "168:00:00",
-    price_ubx: GLOBAL_UBX_RATE * 5,
-    price: GLOBAL_UBX_RATE * 5,
-    features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking", "Extended duration", "Premium placement"],
-    boost_power: 0,
-    visibility_increase: 0,
+export const getBoostPackages = async (): Promise<BoostPackage[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('boost_packages')
+      .select('*')
+      .order('price', { ascending: true });
+    
+    if (error) {
+      console.error('Error fetching boost packages:', error);
+      return [];
+    }
+    
+    return data as BoostPackage[];
+  } catch (error) {
+    console.error('Error in getBoostPackages:', error);
+    return [];
   }
-];
+};
 
-// In-memory store for active boosts
-const activeBoosts: Record<string, BoostStatus> = {};
-
-// Simulated service
-export const boostService = {
-  // Fetch available boost packages
-  fetchBoostPackages: async (): Promise<BoostPackage[]> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return [...mockBoostPackages];
-  },
-  
-  // Check if profile has an active boost
-  fetchActiveBoost: async (profileId: string): Promise<BoostStatus> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 200));
+export const getBoostStatus = async (profileId: string): Promise<BoostStatus | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('profile_boosts')
+      .select('*')
+      .eq('profile_id', profileId)
+      .single();
     
-    if (activeBoosts[profileId]) {
-      return activeBoosts[profileId];
+    if (error) {
+      if (error.code !== 'PGRST116') { // PGRST116 is "no rows returned" error
+        console.error('Error fetching boost status:', error);
+      }
+      return null;
     }
     
-    // 30% chance of having an active boost (for demo/testing)
-    const hasActiveBoost = Math.random() > 0.7;
+    return {
+      isActive: data.is_active,
+      tier: data.tier,
+      remainingTime: data.remaining_time,
+      expiresAt: data.expires_at,
+      boostLevel: data.boost_level
+    };
+  } catch (error) {
+    console.error('Error in getBoostStatus:', error);
+    return null;
+  }
+};
+
+export const checkBoostEligibility = async (profileId: string): Promise<BoostEligibility> => {
+  try {
+    const { data, error } = await supabase
+      .rpc('check_boost_eligibility', { profile_id: profileId });
     
-    if (hasActiveBoost) {
-      const hoursRemaining = Math.floor(Math.random() * 23) + 1;
-      const expiresAt = new Date(Date.now() + hoursRemaining * 60 * 60 * 1000);
-      
-      const boostPackage = mockBoostPackages[0];
-      
-      const activeBoost: BoostStatus = {
-        isActive: true,
-        packageId: boostPackage.id,
-        packageName: boostPackage.name,
-        startTime: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        endTime: expiresAt.toISOString(),
-        expiresAt: expiresAt,
-        remainingTime: `${hoursRemaining} hours remaining`,
-        timeRemaining: `${hoursRemaining} hours remaining`,
-        progress: Math.round((24 - hoursRemaining) / 24 * 100),
-        boostPackage: boostPackage,
-      };
-      
-      activeBoosts[profileId] = activeBoost;
-      return activeBoost;
-    }
-    
-    return { isActive: false };
-  },
-  
-  // Check if profile is eligible for boosting
-  checkBoostEligibility: async (profileId: string): Promise<BoostEligibility> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 150));
-    
-    // Most profiles are eligible (for demo purposes)
-    const isEligible = Math.random() > 0.1;
-    
-    if (isEligible) {
+    if (error) {
+      console.error('Error checking boost eligibility:', error);
       return {
-        isEligible: true,
-        reason: "",
-        reasons: []
+        isEligible: false,
+        reason: 'Error checking eligibility'
       };
     }
     
-    // Random ineligibility reason
-    const reasons = [
-      "Profile completeness is below the required threshold (min. 70% required)",
-      "Insufficient UBX balance",
-      "Profile has pending review flags",
-      "Account needs verification"
-    ];
-    
-    const reasonIndex = Math.floor(Math.random() * reasons.length);
-    
+    return {
+      isEligible: data.is_eligible,
+      reason: data.reason || null,
+      restrictions: data.restrictions || []
+    };
+  } catch (error) {
+    console.error('Error in checkBoostEligibility:', error);
     return {
       isEligible: false,
-      reason: reasons[reasonIndex],
-      reasons: [reasons[reasonIndex]]
+      reason: 'System error'
     };
-  },
-  
-  // Purchase a boost
-  purchaseBoost: async (profileId: string, boostPackageId: string): Promise<{success: boolean; message: string}> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Find the selected package
-    const selectedPackage = mockBoostPackages.find(pkg => pkg.id === boostPackageId);
-    
-    if (!selectedPackage) {
-      return {
-        success: false,
-        message: "Selected boost package not found"
-      };
-    }
-    
-    // Always succeed for demo purposes
-    const hours = parseInt(selectedPackage.duration.split(':')[0]);
-    const expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000);
-    
-    const activeBoost: BoostStatus = {
-      isActive: true,
-      packageId: selectedPackage.id,
-      packageName: selectedPackage.name,
-      startTime: new Date().toISOString(),
-      endTime: expiresAt.toISOString(),
-      expiresAt: expiresAt,
-      remainingTime: `${hours} hours remaining`,
-      timeRemaining: `${hours} hours remaining`,
-      progress: 0,
-      boostPackage: selectedPackage,
-    };
-    
-    activeBoosts[profileId] = activeBoost;
-    
-    return {
-      success: true,
-      message: `${selectedPackage.name} activated successfully!`
-    };
-  },
-  
-  // Cancel an active boost
-  cancelBoost: async (profileId: string): Promise<{success: boolean; message: string}> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    if (!activeBoosts[profileId] || !activeBoosts[profileId].isActive) {
-      return {
-        success: false,
-        message: "No active boost to cancel"
-      };
-    }
-    
-    // Remove the active boost
-    delete activeBoosts[profileId];
-    
-    return {
-      success: true,
-      message: "Boost cancelled successfully"
-    };
-  },
-  
-  // Fetch analytics for an active boost
-  fetchBoostAnalytics: async (profileId: string): Promise<AnalyticsData> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 400));
-    
-    // Generate realistic mock data
-    const data: any = {
-      impressions: {
-        today: Math.floor(Math.random() * 200) + 100,
-        yesterday: Math.floor(Math.random() * 200) + 80,
-        weeklyAverage: Math.floor(Math.random() * 150) + 100,
-        withBoost: Math.floor(Math.random() * 300) + 200,
-        withoutBoost: Math.floor(Math.random() * 150) + 50,
-        increase: Math.floor(Math.random() * 100) + 50
-      },
-      clicks: {
-        today: Math.floor(Math.random() * 50) + 20,
-        yesterday: Math.floor(Math.random() * 40) + 15,
-        weeklyAverage: Math.floor(Math.random() * 35) + 20,
-        withBoost: Math.floor(Math.random() * 60) + 30,
-        withoutBoost: Math.floor(Math.random() * 30) + 10,
-        increase: Math.floor(Math.random() * 150) + 50
-      },
-      conversionRate: Math.random() * 10 + 1,
-      boostEfficiency: Math.random() * 30 + 60,
-      additionalViews: Math.floor(Math.random() * 150) + 50,
-      engagementIncrease: Math.floor(Math.random() * 40) + 10,
-      rankingPosition: Math.floor(Math.random() * 10) + 1
-    };
+  }
+};
 
-    const boostAnalytics: AnalyticsData = {
-      impressions: data.impressions,
-      clicks: data.clicks,
-      conversionRate: data.conversionRate,
-      boostEfficiency: data.boostEfficiency,
-      additionalViews: data.additionalViews,
-      engagementIncrease: data.engagementIncrease,
-      rankingPosition: data.rankingPosition
+export const purchaseBoost = async (
+  profileId: string, 
+  packageId: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const { data, error } = await supabase
+      .rpc('purchase_profile_boost', { 
+        p_profile_id: profileId,
+        p_package_id: packageId
+      });
+    
+    if (error) {
+      console.error('Error purchasing boost:', error);
+      toast.error('Failed to purchase boost', {
+        description: error.message
+      });
+      return {
+        success: false,
+        message: error.message
+      };
+    }
+    
+    toast.success('Boost purchased successfully!', {
+      description: 'Your profile visibility has been increased.'
+    });
+    
+    return {
+      success: true,
+      message: 'Boost purchased successfully'
     };
-    return boostAnalytics;
+  } catch (error: any) {
+    console.error('Error in purchaseBoost:', error);
+    toast.error('Failed to purchase boost', {
+      description: error.message || 'An unexpected error occurred'
+    });
+    return {
+      success: false,
+      message: error.message || 'An unexpected error occurred'
+    };
+  }
+};
+
+export const cancelBoost = async (
+  profileId: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const { data, error } = await supabase
+      .rpc('cancel_profile_boost', { 
+        p_profile_id: profileId
+      });
+    
+    if (error) {
+      console.error('Error canceling boost:', error);
+      toast.error('Failed to cancel boost', {
+        description: error.message
+      });
+      return {
+        success: false,
+        message: error.message
+      };
+    }
+    
+    toast.success('Boost canceled successfully');
+    
+    return {
+      success: true,
+      message: 'Boost canceled successfully'
+    };
+  } catch (error: any) {
+    console.error('Error in cancelBoost:', error);
+    toast.error('Failed to cancel boost', {
+      description: error.message || 'An unexpected error occurred'
+    });
+    return {
+      success: false,
+      message: error.message || 'An unexpected error occurred'
+    };
+  }
+};
+
+export const getBoostAnalytics = async (
+  profileId: string
+): Promise<BoostAnalytics | null> => {
+  try {
+    const { data, error } = await supabase
+      .rpc('get_boost_analytics', { 
+        p_profile_id: profileId
+      });
+    
+    if (error) {
+      console.error('Error fetching boost analytics:', error);
+      return null;
+    }
+    
+    const analyticsReport: BoostAnalytics = {
+      impressions: data.impressions || 0,
+      clicks: data.clicks || 0,
+      profileViews: data.profile_views || 0,
+      messageRequests: data.message_requests || 0,
+      bookingRequests: data.booking_requests || 0,
+      clickThroughRate: data.click_through_rate || 0,
+      boostROI: data.boost_roi || 0,
+      // conversionRate removed to fix type error
+      periodStart: data.period_start,
+      periodEnd: data.period_end
+    };
+    
+    return analyticsReport;
+  } catch (error) {
+    console.error('Error in getBoostAnalytics:', error);
+    return null;
+  }
+};
+
+export const getDailyBoostUsage = async (
+  profileId: string
+): Promise<{ used: number; limit: number }> => {
+  try {
+    const { data, error } = await supabase
+      .rpc('get_daily_boost_usage', { 
+        p_profile_id: profileId
+      });
+    
+    if (error) {
+      console.error('Error fetching daily boost usage:', error);
+      return { used: 0, limit: 3 }; // Default values
+    }
+    
+    return {
+      used: data.used || 0,
+      limit: data.limit || 3
+    };
+  } catch (error) {
+    console.error('Error in getDailyBoostUsage:', error);
+    return { used: 0, limit: 3 }; // Default values
   }
 };

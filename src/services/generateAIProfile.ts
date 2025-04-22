@@ -1,5 +1,5 @@
 
-// Fix property name review_count to reviewCount
+// Remove price property from AIProfile object literal
 
 import { AIProfile } from '@/types/ai-profile';
 
@@ -16,7 +16,7 @@ export interface AIProfileGeneratorOptions {
   createdAt: string;
   rating: number;
   reviewCount: number;
-  price: number;
+  price: number; // This can remain as parameter, but not used in AIProfile object.
   isPremium: boolean;
   availabilityStatus: string;
 }
@@ -24,10 +24,8 @@ export interface AIProfileGeneratorOptions {
 export const generateAIProfile = async (
   options: AIProfileGeneratorOptions
 ): Promise<AIProfile> => {
-  // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 500));
 
-  // Mock AI profile data
   const aiProfile: AIProfile = {
     id: `ai-profile-${Date.now()}`,
     name: options.name,
@@ -41,11 +39,9 @@ export const generateAIProfile = async (
     created_at: options.createdAt,
     rating: options.rating,
     reviewCount: options.reviewCount,
-    price: options.price,
-    is_premium: options.isPremium,
+    isPremium: options.isPremium,
     availability_status: options.availabilityStatus,
   };
 
   return aiProfile;
 };
-

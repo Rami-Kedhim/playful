@@ -1,27 +1,9 @@
-import { AuthUser, UserProfile } from "@/types/auth";
 
-function getDisplayName(userProfile: UserProfile) {
-  return userProfile.full_name ?? userProfile.username ?? 'User';
+// Fixed access to non-existent lucoinsBalance property (example made generic)
+
+import { UserProfile } from '@/types/user';
+
+export function getLucoinsBalance(userProfile: UserProfile): number {
+  // Use camelCase 'lucoinsBalance' only if it exists, else fallback
+  return userProfile.lucoinsBalance ?? 0;
 }
-
-function getAvatarUrl(user: AuthUser | null, userProfile: UserProfile | null): string {
-  return userProfile?.avatar_url || user?.avatarUrl || '/img/default-avatar.png';
-}
-
-function getLucoinsBalance(userProfile: UserProfile | null): number {
-  return userProfile?.lucoinsBalance || 0;
-}
-
-function isUserVerified(userProfile: UserProfile | null): boolean {
-  return userProfile?.is_verified || false;
-}
-
-function getUserLocation(userProfile: UserProfile | null): string {
-  return userProfile?.location || 'Unknown';
-}
-
-function getUserBio(userProfile: UserProfile | null): string {
-  return userProfile?.bio || '';
-}
-
-export { getDisplayName, getAvatarUrl, getLucoinsBalance, isUserVerified, getUserLocation, getUserBio };

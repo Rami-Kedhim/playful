@@ -78,10 +78,14 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const minutes = parseNumberValue(minutesStr, 0);
     const seconds = parseNumberValue(secondsStr, 0);
 
+    // Use numbers, not strings, here
     const durationMinutes = (hours * 60) + minutes + (seconds / 60);
 
-    const boostPowerNum = parseNumberValue((pkg as any).boost_power ?? (pkg as any).boostPower ?? 50, 50);
-    const visibilityIncreaseNum = parseNumberValue((pkg as any).visibility_increase ?? (pkg as any).visibilityIncrease ?? 50, 50);
+    const boostPowerRaw = (pkg as any).boost_power ?? (pkg as any).boostPower;
+    const visibilityIncreaseRaw = (pkg as any).visibility_increase ?? (pkg as any).visibilityIncrease;
+
+    const boostPowerNum = parseNumberValue(boostPowerRaw, 50);
+    const visibilityIncreaseNum = parseNumberValue(visibilityIncreaseRaw, 50);
 
     let visibility: PulseBoost['visibility'] = 'homepage';
     if (boostPowerNum >= 200) visibility = 'global';
@@ -112,4 +116,3 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 };
 
 export default usePulseBoostAdapter;
-

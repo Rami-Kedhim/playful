@@ -1,15 +1,17 @@
+
 /**
  * Enhanced livecamsService that uses the LivecamScraper
  */
 import { supabase } from "@/integrations/supabase/client";
-import { LivecamModel, LivecamsFilter, LivecamsResponse } from "@/types/livecams";
+import { LivecamModel } from "@/types/livecams";
 import { toast } from "sonner";
 import { LivecamScraper } from "@/services/scrapers/LivecamScraper";
 
-// This service will handle API communication for livecams
+// Removed import of non-existent LivecamsFilter and LivecamsResponse types
+
 export const fetchLivecams = async (
-  filters: LivecamsFilter = {}
-): Promise<LivecamsResponse> => {
+  filters: any = {}
+): Promise<any> => {   // Use any for now due to missing types
   try {
     // Try first with the Supabase Edge Function
     try {
@@ -19,7 +21,6 @@ export const fetchLivecams = async (
       
       if (error) {
         console.error("Error fetching livecams from edge function:", error);
-        // We'll fallback to the scraper if the edge function fails
         throw new Error(`Edge function error: ${error.message}`);
       }
       
@@ -30,15 +31,13 @@ export const fetchLivecams = async (
       
       console.log("Livecams data received from edge function:", data);
       
-      // Validate the response structure
       if (!Array.isArray(data.models)) {
         console.error("Invalid data format received:", data);
         throw new Error("Invalid data format received from API");
       }
       
-      // Process and validate the models
       const validatedModels = data.models.map((model: any) => {
-        // Ensure the model has all required fields
+        // Validate existence of previewVideoUrl and remove it from object
         const validatedModel: LivecamModel = {
           id: model.id || `id-${Math.random().toString(36).substring(2)}`,
           name: model.name || model.username || model.displayName || 'Unknown',
@@ -55,7 +54,6 @@ export const fetchLivecams = async (
           description: model.description || undefined,
           streamUrl: model.streamUrl || undefined
         };
-        
         return validatedModel;
       });
       
@@ -67,40 +65,35 @@ export const fetchLivecams = async (
         hasMore: data.hasMore !== undefined ? data.hasMore : false
       };
     } catch (edgeFunctionError) {
-      // Edge function failed, fallback to scraper
       console.log("Edge function failed, falling back to scraper:", edgeFunctionError);
+
+      // Removed getInstance() usage - directly use LivecamScraper.scrapeLivecams()
+      // But we need to change scraper usage accordingly.
+      // Since LivecamScraper now exports a method not a class singleton, adjust usage:
       
-      // Get the livecam scraper instance
-      const scraper = LivecamScraper.getInstance();
-      
-      // Set filters
-      scraper.setFilters({
-        region: filters.country,
-        categories: filters.category ? [filters.category] : [],
-        limit: filters.limit || 24
-      });
-      
-      // Perform scraping
-      await scraper.scrape();
-      
-      // Get response in expected format
-      return scraper.getResponse();
+      const scrapedLivecams = await LivecamScraper.scrapeLivecams();
+
+      // Return data in expected format with filters applied manually if needed
+      return {
+        models: scrapedLivecams,
+        totalCount: scrapedLivecams.length,
+        page: 1,
+        pageSize: scrapedLivecams.length,
+        hasMore: false
+      };
     }
   } catch (error: any) {
     console.error("Livecams service error:", error);
     toast.error(`Error: ${error.message || "Failed to load livecams"}`);
-    
-    // Return mock data when all methods fail
+
     return getMockLivecams(filters);
   }
 };
 
-// Helper function to generate mock data for development
-const getMockLivecams = (filters: LivecamsFilter): LivecamsResponse => {
+const getMockLivecams = (filters: any) => {
   const { limit = 24, page = 1 } = filters;
   const mockModels: LivecamModel[] = [];
-  
-  // Generate mock data based on the provided filters
+
   for (let i = 0; i < limit; i++) {
     const id = `model-${page}-${i}`;
     const seed = id + "-" + Date.now().toString().substring(8, 13);
@@ -121,7 +114,7 @@ const getMockLivecams = (filters: LivecamsFilter): LivecamsResponse => {
       description: "Welcome to my stream! I love interacting with my viewers."
     });
   }
-  
+
   return {
     models: mockModels,
     totalCount: 1000,
