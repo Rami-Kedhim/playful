@@ -52,6 +52,7 @@ export const usePulseBoost = (profileId?: string) => {
   useEffect(() => {
     const loadBoostData = async () => {
       setIsLoading(true);
+      setError(null);
       try {
         // Mock user economy data
         const mockUserEconomy = {
@@ -190,3 +191,4 @@ export const usePulseBoost = (profileId?: string) => {
 };
 
 export default usePulseBoost;
+

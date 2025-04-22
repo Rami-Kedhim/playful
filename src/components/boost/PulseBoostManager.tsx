@@ -36,6 +36,9 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
 
   return (
     <div className="space-y-4">
+      {pulseBoostPackages.length === 0 && (
+        <div className="text-center text-muted-foreground">No pulse boosts available.</div>
+      )}
       {pulseBoostPackages.map((pkg) => {
         // Safely access visibility with fallback
         const visibility = pkg?.visibility_increase !== undefined
@@ -55,7 +58,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
               name: pkg.name,
               description: pkg.description,
               durationMinutes: 0, // Could parse duration if needed
-              visibility: 'homepage', // default or map from package
+              visibility: visibility,
               costUBX: costUBX,
               color: pkg.color || '#3b82f6',
               badgeColor: pkg.color || '#3b82f6',
@@ -63,8 +66,18 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
             }}
             isActive={isActive(pkg.id)}
             timeRemaining={timeRemaining}
-            onActivate={() => purchaseBoost(pkg)}
-            onCancel={() => cancelBoost()}
+            onActivate={async () => {
+              const success = await purchaseBoost(pkg);
+              if (!success) {
+                console.error('Failed to activate boost:', pkg.name);
+              }
+            }}
+            onCancel={async () => {
+              const success = await cancelBoost();
+              if (!success) {
+                console.error('Failed to cancel boost');
+              }
+            }}
             userBalance={userEconomy.ubxBalance}
             disabled={false}
           />
@@ -75,3 +88,4 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
 };
 
 export default PulseBoostManager;
+
