@@ -1,4 +1,3 @@
-
 // Fix import casing and convert all Escort imports to exact casing from '@/types/Escort'
 // Fix height type to string, ensure conversion is applied always.
 // Fix typings on mapEscortsToUberPersonas to accept correct Escort type and compatible.
@@ -59,6 +58,28 @@ const getAIPersonas = (allPersonas: UberPersona[]) => filterByTypeFlag(allPerson
 
 const getBoostedPersonas = (allPersonas: UberPersona[]): UberPersona[] =>
   allPersonas.filter(p => p.monetization?.boostingActive || p.roleFlags?.isFeatured);
+
+const getBoostStatus = (persona: UberPersona) => {
+  // Use optional chaining for all potential undefined properties
+  if (persona?.monetization?.boostingActive && persona?.roleFlags?.isFeatured) {
+    return {
+      isActive: true,
+      tier: 'premium',
+      remainingTime: '2 days'
+    };
+  }
+  
+  // Use default value if boost_status is missing
+  return persona?.boost_status || {
+    isActive: false,
+    tier: 'none',
+    remainingTime: '0'
+  };
+};
+
+const getIsFeatured = (persona: UberPersona) => {
+  return persona?.roleFlags?.isFeatured || false;
+};
 
 const rankPersonas = (personas: UberPersona[], boostFactor = 1.0) => {
   const copy = [...personas];
@@ -205,4 +226,3 @@ export const useUberEcosystemContext = () => {
 };
 
 export default UberEcosystemContext;
-

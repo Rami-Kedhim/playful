@@ -53,8 +53,8 @@ const LivecamFeatured: React.FC<LivecamFeaturedProps> = ({
           <Card key={livecam.id} className="overflow-hidden">
             <div className="aspect-video relative group">
               <img 
-                src={livecam.previewVideoUrl || (livecam as any).previewUrl || livecam.thumbnailUrl || ''} 
-                alt={livecam.name}
+                src={livecam.previewVideoUrl || livecam.thumbnailUrl || ''} 
+                alt={livecam.displayName || livecam.name || livecam.username}
                 className="w-full h-full object-cover"
               />
               
@@ -69,7 +69,7 @@ const LivecamFeatured: React.FC<LivecamFeaturedProps> = ({
               )}
               
               <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black to-transparent">
-                <h3 className="text-white font-medium text-lg">{livecam.name}</h3>
+                <h3 className="text-white font-medium text-lg">{livecam.displayName || livecam.name || livecam.username}</h3>
                 <div className="flex justify-between text-white text-xs">
                   <div className="flex items-center">
                     <Users className="h-3 w-3 mr-1" />
@@ -88,7 +88,7 @@ const LivecamFeatured: React.FC<LivecamFeaturedProps> = ({
             <CardContent className="p-4">
               <div className="flex justify-between">
                 <div className="text-sm">
-                  <>{livecam.tags && livecam.tags.slice(0, 2).map((tag, i) => (
+                  <>{(livecam.tags || []).slice(0, 2).map((tag, i) => (
                     <Badge key={i} variant="outline" className="mr-1 text-xs">
                       {tag}
                     </Badge>
@@ -109,4 +109,3 @@ const LivecamFeatured: React.FC<LivecamFeaturedProps> = ({
 };
 
 export default LivecamFeatured;
-

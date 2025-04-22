@@ -13,7 +13,10 @@ const BoostManagerContainer = ({ profileId }: { profileId?: string }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [activeProfileId, setActiveProfileId] = useState<string>('');
-  const { adaptFormatBoostDuration, formatBoostDuration } = useBoostAdapters(profileId || user?.id || '');
+  const { 
+    adaptFormatBoostDuration, 
+    formatBoostDuration 
+  } = useBoostAdapters(profileId || user?.id || '');
 
   const userId = profileId || user?.id;
 

@@ -37,17 +37,24 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [loading, setLoading] = useState(false);
   
   const {
-    boostStatus,
-    eligibility,
-    boostPackages,
+    boostStatus: rawBoostStatus,
+    eligibility: rawEligibility,
+    boostPackages: rawPackages,
     dailyBoostUsage,
     dailyBoostLimit,
     loading: boostLoading,
     error,
     purchaseBoost,
-    cancelBoost
+    cancelBoost,
+    adaptBoostStatus,
+    adaptBoostEligibility,
+    adaptBoostPackages
   } = useBoostAdapters(user?.id || '');
 
+  // Apply adapters to convert types
+  const boostStatus = adaptBoostStatus(rawBoostStatus);
+  const eligibility = adaptBoostEligibility(rawEligibility || { isEligible: false, reason: 'Unknown' });
+  const boostPackages = adaptBoostPackages(rawPackages || []);
   const isActive = boostStatus?.isActive || false;
 
   return (

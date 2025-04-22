@@ -14,6 +14,7 @@ export interface UberPersona {
   availability?: {
     nextAvailable?: string;
     schedule?: Record<string, string[]>;
+    isAvailable?: boolean;
   };
   stats?: {
     rating?: number;
@@ -25,11 +26,13 @@ export interface UberPersona {
     isAI?: boolean;
     isVerified?: boolean;
     isCreator?: boolean;
+    isFeatured?: boolean;
   };
   monetization?: {
     subscriptionPrice?: number;
     meetingPrice?: number;
     acceptsLucoin?: boolean;
+    boostingActive?: boolean;
   };
   premium_content_count?: {
     photos?: number;
@@ -44,4 +47,27 @@ export interface UberPersona {
   gallery_images?: string[];
   livecam_enabled?: boolean;
   boost_status?: any;
+  boost?: any;
+  systemMetadata?: {
+    version?: string;
+    lastSynced?: Date;
+    personalityIndex?: number;
+    statusFlags?: {
+      needsModeration?: boolean;
+      hasPendingUpdates?: boolean;
+    };
+  };
+  aiAttributes?: {
+    personality?: string;
+    voiceType?: string;
+    responseStyle?: string;
+  };
+  isPremium?: boolean;
+  isOnline?: boolean;
+  isLocked?: boolean;
+  rating?: number;
+  followerCount?: number;
+  verificationLevel?: string;
+  onlinePercentage?: number;
+  streamQuality?: string;
 }

@@ -1,11 +1,12 @@
+
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useBoostContext } from "@/contexts/BoostContext";
+import { useBoost } from "@/contexts/BoostContext";
 import BoostDialogHeader from "@/components/boost/dialog/BoostDialogHeader";
 import BoostDialogTabs from "@/components/boost/dialog/BoostDialogTabs";
 import BoostInfoTooltip from "@/components/boost/dialog/BoostInfoTooltip";
-import { useBoostManager, formatBoostDuration } from "@/hooks/boost";
-import { useEffect, useState } from "react";
-import { toast } from "@/hooks/use-toast";
+import { useBoostManager } from "@/hooks/boost";
+import { toast } from "@/components/ui/use-toast";
 import { useBoostAdapters } from "@/hooks/boost/useBoostAdapters";
 import { useHermesOxumBoost } from "@/hooks/boost/useHermesOxumBoost";
 
@@ -22,7 +23,7 @@ const BoostProfileDialog = ({
   open,
   setOpen
 }: BoostProfileDialogProps) => {
-  const { boostStatus: contextBoostStatus } = useBoostContext();
+  const { boostStatus: contextBoostStatus } = useBoost();
   const [activeTab, setActiveTab] = useState<string>("packages");
   const [boostAnalytics, setBoostAnalytics] = useState<any>(null);
   const profileId = contextBoostStatus?.profileId || '';
@@ -31,13 +32,9 @@ const BoostProfileDialog = ({
     boostStatus: managerBoostStatus, 
     eligibility: managerEligibility,
     boostPackages: managerBoostPackages, 
-    selectedPackage: managerSelectedPackage, 
-    setSelectedPackage: managerSetSelectedPackage,
-    fetchBoostPackages, 
-    getBoostPrice: managerGetBoostPrice, 
+    loading,
     purchaseBoost,
     cancelBoost,
-    loading,
     getBoostAnalytics,
     dailyBoostUsage,
     dailyBoostLimit,
@@ -45,51 +42,53 @@ const BoostProfileDialog = ({
     adaptBoostEligibility,
     adaptBoostPackages,
     adaptFormatBoostDuration,
-    adaptGetBoostPrice
+    adaptGetBoostPrice,
+    fetchBoostPackages
   } = useBoostAdapters(profileId);
 
   const { hermesStatus: hermesBoostStatus } = useHermesOxumBoost(profileId);
 
+  // Convert data using adapters
   const boostStatus = adaptBoostStatus(managerBoostStatus);
   const eligibility = adaptBoostEligibility(managerEligibility);
   const boostPackages = adaptBoostPackages(managerBoostPackages);
   
   // Use updated adapter function
-  const formatBoostDurationAdapter = adaptFormatBoostDuration(formatBoostDuration);
-  const getBoostPrice = adaptGetBoostPrice(managerGetBoostPrice);
+  const formatBoostDurationAdapter = adaptFormatBoostDuration((duration: string) => {
+    const [hours, minutes] = duration.split(':').map(Number);
+    return hours >= 24 ? 
+      `${Math.floor(hours / 24)} days` : 
+      `${hours} hours`;
+  });
+  
+  const getBoostPrice = adaptGetBoostPrice(() => 15);
 
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (managerSelectedPackage) {
-      setSelectedPackage(managerSelectedPackage.id);
-    } else {
-      setSelectedPackage(null);
-    }
-  }, [managerSelectedPackage]);
-
-  const handlePackageSelect = (packageId: string) => {
-    const pkg = managerBoostPackages.find(p => p.id === packageId);
-    if (pkg) {
-      managerSetSelectedPackage(pkg);
-    }
-  };
-
-  useEffect(() => {
     if (open) {
-      fetchBoostPackages();
-      if (boostStatus.isActive) {
+      if (fetchBoostPackages) {
+        fetchBoostPackages();
+      }
+      if (boostStatus.isActive && getBoostAnalytics) {
         fetchAnalytics();
       }
     }
   }, [open, boostStatus.isActive, fetchBoostPackages]);
 
   const fetchAnalytics = async () => {
-    const analytics = await getBoostAnalytics();
-    if (analytics) {
-      setBoostAnalytics(analytics);
+    if (getBoostAnalytics) {
+      const analytics = await getBoostAnalytics();
+      if (analytics) {
+        setBoostAnalytics(analytics);
+      }
+      return analytics;
     }
-    return analytics;
+    return null;
+  };
+
+  const handlePackageSelect = (packageId: string) => {
+    setSelectedPackage(packageId);
   };
 
   const handlePurchase = async (): Promise<void> => {
@@ -102,7 +101,7 @@ const BoostProfileDialog = ({
       return;
     }
 
-    const packageToBoost = managerBoostPackages.find(p => p.id === selectedPackage);
+    const packageToBoost = boostPackages.find(p => p.id === selectedPackage);
     
     if (!packageToBoost) {
       toast({
@@ -156,7 +155,6 @@ const BoostProfileDialog = ({
           formatBoostDuration={formatBoostDurationAdapter}
           getBoostPrice={getBoostPrice}
           boostAnalytics={boostAnalytics}
-          hermesBoostStatus={hermesBoostStatus}
         />
         
         <BoostInfoTooltip />

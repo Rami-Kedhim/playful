@@ -1,9 +1,11 @@
+
 import React from "react";
 import { LivecamModel } from "@/types/livecams";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Eye, Users, MapPin, Tag, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Eye, Users, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface LivecamCardProps {
@@ -52,21 +54,21 @@ export const SimpleLivecamCard = ({ model }: { model: LivecamModel }) => {
   );
 };
 
-export const LivecamCard = ({ model }: { model: LivecamModel }) => {
+export const LivecamCard = ({ model }: LivecamCardProps) => {
   // Create a proper Livecam object that fully implements the interface
   const livecamData = {
     id: model.id,
     username: model.username,
     name: model.name || model.displayName || model.username,
     thumbnailUrl: model.thumbnailUrl,
-    imageUrl: model.imageUrl,
+    imageUrl: model.imageUrl || model.thumbnailUrl,
     isLive: model.isLive,
     isStreaming: model.isStreaming,
     viewerCount: model.viewerCount,
     region: model.region || '',
     language: model.language || '',
     tags: model.tags || [],
-    category: model.category || '',
+    category: model.category || (model.categories && model.categories.length > 0 ? model.categories[0] : ''),
     rating: model.rating || 0,
     price: model.price || 0
   };
@@ -99,10 +101,10 @@ export const LivecamCard = ({ model }: { model: LivecamModel }) => {
           </h3>
         </Link>
         <div className="mt-2 flex flex-wrap gap-1 text-xs">
-          {livecamData.region && (
+          {model.country && (
             <div className="flex items-center text-muted-foreground mr-2">
               <MapPin className="mr-1 h-3 w-3" />
-              <span>{livecamData.region}</span>
+              <span>{model.country}</span>
             </div>
           )}
 
@@ -126,3 +128,5 @@ export const LivecamCard = ({ model }: { model: LivecamModel }) => {
     </Card>
   );
 };
+
+export default LivecamCard;

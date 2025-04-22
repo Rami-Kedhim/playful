@@ -51,7 +51,7 @@ const LiveTrendingBar: React.FC<LiveTrendingBarProps> = ({
               <div className="relative h-[120px]">
                 <img 
                   src={cam.thumbnailUrl || "https://via.placeholder.com/220x120"} 
-                  alt={cam.name}
+                  alt={cam.displayName || cam.name || cam.username}
                   className="w-full h-full object-cover"
                 />
                 
@@ -69,7 +69,7 @@ const LiveTrendingBar: React.FC<LiveTrendingBarProps> = ({
                 )}
                 
                 <div className="absolute bottom-2 left-3">
-                  <h3 className="text-white font-medium">{cam.name}</h3>
+                  <h3 className="text-white font-medium">{cam.displayName || cam.name || cam.username}</h3>
                   <div className="flex text-white/80 text-xs items-center">
                     <Users className="h-3 w-3 mr-1" />
                     <span>{cam.viewerCount || 0}</span>

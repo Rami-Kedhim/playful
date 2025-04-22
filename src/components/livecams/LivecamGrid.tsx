@@ -1,9 +1,10 @@
+
 import React from "react";
 import { LivecamModel } from "@/types/livecams";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, MapPin, Flag, Tag } from "lucide-react";
+import { Eye, MapPin, Flag, Tag, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
