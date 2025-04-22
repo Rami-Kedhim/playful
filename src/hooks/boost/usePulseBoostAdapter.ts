@@ -1,4 +1,6 @@
 
+// Fixed typing and ensured all number fields are properly typed
+
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
 interface UsePulseBoostAdapterResult {
@@ -88,14 +90,14 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const seconds = parseNumberValue(secondsNum, 0);
 
     // Use numbers, not strings, here
-    const durationMinutes = (hours * 60) + minutes + (seconds / 60);
+    const durationMinutes: number = (hours * 60) + minutes + (seconds / 60);
 
     const boostPowerRaw = (pkg as any).boost_power ?? (pkg as any).boostPower;
     const visibilityIncreaseRaw = (pkg as any).visibility_increase ?? (pkg as any).visibilityIncrease;
 
     // Ensure boostPower and visibilityIncrease are numbers (fix string-to-number issue)
-    const boostPowerNum = parseNumberValue(boostPowerRaw, 50);
-    
+    const boostPowerNum: number = parseNumberValue(boostPowerRaw, 50);
+
     let visibilityIncreaseNum: number = 50;
     if (typeof visibilityIncreaseRaw === 'string') {
       const parsedVis = Number(visibilityIncreaseRaw);
@@ -113,7 +115,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       name: pkg.name,
       description: pkg.description || `${pkg.name} visibility boost for your profile`,
       duration: durationStr,
-      durationMinutes,
+      durationMinutes: durationMinutes,
       price: typeof pkg.price === 'number' ? pkg.price : 0,
       costUBX: typeof (pkg as any).price_ubx === 'number'
         ? (pkg as any).price_ubx
@@ -136,3 +138,4 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 };
 
 export default usePulseBoostAdapter;
+
