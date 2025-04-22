@@ -1,132 +1,71 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { AIConversation, AIMessage } from "@/types/ai-profile";
-import { v4 as uuidv4 } from 'uuid';
-import { mockAIProfiles } from "./aiProfilesService";
+import { AIConversation } from '@/types/ai-profile';
 
-/**
- * Start or continue a conversation with an AI profile
- */
-export const startAIConversation = async (
-  userId: string,
-  aiProfileId: string
-): Promise<AIConversation> => {
+export const fetchConversation = async (conversationId: string): Promise<AIConversation> => {
   try {
-    // Check if conversation already exists - using any to bypass type issues
-    const { data: existingConversation, error: queryError } = await supabase
-      .from('ai_conversations' as any)
-      .select('*')
-      .eq('user_id', userId)
-      .eq('ai_profile_id', aiProfileId)
-      .single() as any;
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
     
-    if (queryError && queryError.code !== 'PGRST116') { // PGRST116 means no rows returned
-      throw queryError;
-    }
-    
-    if (existingConversation) {
-      return existingConversation as AIConversation;
-    }
-    
-    // Create new conversation - using any to bypass type issues
-    const { data: newConversation, error: insertError } = await supabase
-      .from('ai_conversations' as any)
-      .insert({
-        user_id: userId,
-        ai_profile_id: aiProfileId,
-        status: 'active'
-      })
-      .select()
-      .single() as any;
-    
-    if (insertError) {
-      throw insertError;
-    }
-    
-    return {
-      ...newConversation,
-      messages: []
-    } as AIConversation;
-  } catch (error: any) {
-    console.error("Error starting AI conversation:", error);
-    
-    // For development, return a mock conversation
-    const mockConversationId = uuidv4();
-    return {
-      id: mockConversationId,
-      user_id: userId,
-      ai_profile_id: aiProfileId,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      status: 'active',
-      messages: [],
-      ai_profile: mockAIProfiles.find(p => p.id === aiProfileId) || undefined
+    // Mock data
+    const mockConversation: AIConversation = {
+      id: conversationId,
+      user_id: 'current-user-id',
+      ai_profile_id: 'ai-profile-id',
+      created_at: new Date(Date.now() - 24 * 3600000).toISOString(),
+      updated_at: new Date(Date.now() - 1 * 3600000).toISOString(),
+      messages: [
+        {
+          id: 'msg1',
+          senderId: 'current-user-id',
+          receiverId: 'ai-profile-id',
+          content: 'Hello there!',
+          timestamp: new Date(Date.now() - 2 * 3600000).toISOString(),
+          isAI: false
+        },
+        {
+          id: 'msg2',
+          senderId: 'ai-profile-id',
+          receiverId: 'current-user-id',
+          content: 'Hi! How can I help you today?',
+          timestamp: new Date(Date.now() - 1.9 * 3600000).toISOString(),
+          isAI: true
+        }
+      ]
     };
+    
+    return mockConversation;
+  } catch (error) {
+    console.error('Error fetching conversation:', error);
+    throw new Error('Failed to fetch conversation');
   }
 };
 
-/**
- * Get messages for an AI conversation
- */
-export const getAIConversationMessages = async (
-  conversationId: string
-): Promise<AIMessage[]> => {
+export const getConversations = async (userId: string): Promise<AIConversation[]> => {
   try {
-    const { data, error } = await supabase
-      .from('ai_messages' as any)
-      .select('*')
-      .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true }) as any;
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
     
-    if (error) {
-      throw error;
-    }
+    // Mock data
+    const mockConversations: AIConversation[] = [
+      {
+        id: 'conv1',
+        user_id: userId,
+        ai_profile_id: 'ai1',
+        created_at: new Date(Date.now() - 24 * 3600000).toISOString(),
+        updated_at: new Date(Date.now() - 1 * 3600000).toISOString()
+      },
+      {
+        id: 'conv2',
+        user_id: userId,
+        ai_profile_id: 'ai2',
+        created_at: new Date(Date.now() - 48 * 3600000).toISOString(),
+        updated_at: new Date(Date.now() - 12 * 3600000).toISOString()
+      }
+    ];
     
-    return data as AIMessage[];
-  } catch (error: any) {
-    console.error("Error fetching AI messages:", error);
-    return [];
-  }
-};
-
-/**
- * Get a conversation with all its messages
- */
-export const getAIConversationWithMessages = async (
-  conversationId: string
-): Promise<AIConversation | null> => {
-  try {
-    // Get the conversation - using any to bypass type issues
-    const { data: conversation, error: convError } = await supabase
-      .from('ai_conversations' as any)
-      .select(`
-        *,
-        ai_profile:ai_profiles(*)
-      `)
-      .eq('id', conversationId)
-      .single() as any;
-    
-    if (convError) {
-      throw convError;
-    }
-    
-    // Get the messages - using any to bypass type issues
-    const { data: messages, error: msgError } = await supabase
-      .from('ai_messages' as any)
-      .select('*')
-      .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true }) as any;
-    
-    if (msgError) {
-      throw msgError;
-    }
-    
-    return {
-      ...conversation,
-      messages: messages
-    } as AIConversation;
-  } catch (error: any) {
-    console.error("Error fetching AI conversation:", error);
-    return null;
+    return mockConversations;
+  } catch (error) {
+    console.error('Error fetching conversations:', error);
+    throw new Error('Failed to fetch conversations');
   }
 };

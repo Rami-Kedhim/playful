@@ -9,13 +9,20 @@ const BoostButton = (props: Omit<BoostButtonProps, 'variant'> & { variant?: stri
   
   // Only pass variant if it's one of the allowed values
   const allowedVariants = ['link', 'default', 'destructive', 'outline', 'secondary', 'ghost'];
-  const safeVariant = variant && allowedVariants.includes(variant) ? 
-    variant as 'link' | 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' : 
-    undefined;
+  
+  // Convert variant to allowed type or use default
+  let safeVariant: 'link' | 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | undefined;
+  
+  if (variant && allowedVariants.includes(variant)) {
+    safeVariant = variant as 'link' | 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
+  } else {
+    // If variant is not allowed, default to 'default'
+    safeVariant = 'default';
+  }
   
   const safeProps = {
     ...restProps,
-    ...(safeVariant ? { variant: safeVariant } : {})
+    variant: safeVariant
   } as BoostButtonProps;
   
   return <RefactoredBoostButton {...safeProps} />;

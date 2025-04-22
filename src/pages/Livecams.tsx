@@ -1,6 +1,4 @@
 
-// Fix: Type error related to Livecam and LivecamModel mismatch
-
 import React, { useState } from 'react';
 import { useLivecamContext } from '@/modules/livecams/providers/LivecamProvider';
 import LivecamCard from '@/components/livecams/LivecamCard';
@@ -10,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
+import { Livecam, LivecamModel } from '@/types/livecams';
 
 const Livecams = () => {
   const { livecams, loading, error } = useLivecamContext();
@@ -18,7 +17,7 @@ const Livecams = () => {
   const [sortBy, setSortBy] = useState('relevance');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Fix - Provide full LivecamModel with required thumbnailUrl property
+  // Filter livecams based on search and category
   const filteredLivecams = livecams
     ? livecams.filter(livecam =>
         livecam.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -26,6 +25,7 @@ const Livecams = () => {
       )
     : [];
 
+  // Sort livecams based on selected criteria
   const sortedLivecams = [...filteredLivecams].sort((a, b) => {
     if (sortBy === 'relevance') {
       return 0;
@@ -112,21 +112,39 @@ const Livecams = () => {
           ) : error ? (
             <p>Error: {error}</p>
           ) : sortedLivecams.length > 0 ? (
-            sortedLivecams.map(livecam => (
-              <LivecamCard 
-                key={livecam.id} 
-                model={{
-                  ...livecam,
-                  displayName: livecam.displayName || livecam.name || 'Unnamed',
-                  imageUrl: livecam.imageUrl || livecam.profileImage || livecam.thumbnailUrl || '',
-                  thumbnailUrl: livecam.thumbnailUrl || livecam.previewImage || livecam.imageUrl || ''
-                }}
-                showBoostControls={false}
-                isBoosted={false}
-                onBoost={() => false}
-                onCancelBoost={() => false}
-              />
-            ))
+            sortedLivecams.map(livecam => {
+              // Convert Livecam to LivecamModel with all required properties
+              const livecamModel: LivecamModel = {
+                id: livecam.id,
+                name: livecam.name || '',
+                displayName: livecam.displayName || livecam.name || 'Unnamed',
+                username: livecam.username || '',
+                description: livecam.description || '',
+                imageUrl: livecam.imageUrl || livecam.profileImage || '',
+                thumbnailUrl: livecam.thumbnailUrl || livecam.previewImage || livecam.imageUrl || '',
+                isLive: livecam.isLive,
+                isStreaming: livecam.isStreaming,
+                viewerCount: livecam.viewerCount,
+                country: livecam.region || '',
+                categories: livecam.tags || [],
+                rating: livecam.rating || 0,
+                price: livecam.price || 0,
+                language: livecam.language || 'English',
+                region: livecam.region || '',
+                tags: livecam.tags || []
+              };
+              
+              return (
+                <LivecamCard 
+                  key={livecam.id} 
+                  model={livecamModel}
+                  showBoostControls={false}
+                  isBoosted={false}
+                  onBoost={() => false}
+                  onCancelBoost={() => false}
+                />
+              );
+            })
           ) : (
             <p>No livecams found.</p>
           )}
@@ -137,4 +155,3 @@ const Livecams = () => {
 };
 
 export default Livecams;
-

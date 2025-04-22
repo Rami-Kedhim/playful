@@ -74,6 +74,13 @@ const BoostProfileDialog: React.FC<BoostProfileDialogProps> = ({
     );
   }
   
+  // Find the selected package safely
+  const getSelectedPackagePrice = () => {
+    if (!selectedPackage) return 0;
+    const pkg = boostPackages.find(p => p.id === selectedPackage);
+    return pkg ? getBoostPrice(pkg) : 0;
+  };
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[500px]">
@@ -104,7 +111,7 @@ const BoostProfileDialog: React.FC<BoostProfileDialogProps> = ({
           dailyBoostLimit={dailyBoostLimit}
           hermesStatus={hermesStatus}
           formatBoostDuration={formatBoostDuration}
-          getBoostPrice={() => selectedPackage ? getBoostPrice(boostPackages.find(p => p.id === selectedPackage) || {}) : 0}
+          getBoostPrice={getSelectedPackagePrice}
           handleDialogClose={() => setOpen(false)}
           onBoostSuccess={onSuccess}
         />

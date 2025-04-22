@@ -1,70 +1,53 @@
 
-export interface LivecamModel {
-  id: string;
-  username: string;
-  name: string; 
-  displayName?: string;
-  thumbnailUrl: string;
-  imageUrl: string;
-  previewVideoUrl?: string;
-  isLive: boolean;
-  isStreaming: boolean;
-  viewerCount: number;
-  region: string;
-  country?: string;
-  language: string;
-  tags: string[];
-  category: string;
-  categories?: string[];
-  rating: number;
-  price: number;
-  isPopular?: boolean;
-  profileUrl?: string;
-  age?: number;
-  description?: string;
-  streamUrl?: string;
-  boosted?: boolean;
-  boostScore?: number;
-  featured?: boolean;
-}
-
 export interface Livecam {
   id: string;
-  username: string;
   name: string;
-  thumbnailUrl: string;
+  username: string;
+  displayName?: string;
   imageUrl: string;
+  thumbnailUrl: string;
+  previewImage?: string;
+  profileImage?: string;
   isLive: boolean;
   isStreaming: boolean;
   viewerCount: number;
+  tags?: string[];
+  rating?: number;
+  price?: number;
+  category?: string;
   region: string;
   language: string;
-  tags: string[];
-  category: string;
-  rating: number;
-  price?: number;
-  profileImageUrl?: string;
+  featured?: boolean;
+  description?: string;
+  previewVideoUrl?: string;
 }
 
-export interface LivecamCategory {
+export interface LivecamModel {
   id: string;
   name: string;
-  slug: string;
-  count: number;
+  username: string;
+  displayName: string;
+  description: string;
+  imageUrl: string;
+  thumbnailUrl: string;
+  isLive: boolean;
+  isStreaming: boolean;
+  viewerCount: number;
+  country: string;
+  categories: string[];
+  rating: number;
+  price: number;
+  language: string;
+  region: string;
+  tags: string[];
+  previewVideoUrl?: string;
+  isPopular?: boolean;
 }
 
-export interface LivecamFilter {
-  category?: string;
-  tag?: string;
-  region?: string;
-  language?: string;
-  isLive?: boolean;
-  sort?: 'popular' | 'newest' | 'rating';
-}
-
-export interface BoostableLivecamsOptions {
-  limit?: number;
-  filter?: LivecamFilter;
-  includeOffline?: boolean;
-  boostOnly?: boolean;
+export interface LivecamSettings {
+  streamQuality: 'auto' | 'low' | 'medium' | 'high' | 'hd';
+  autoPlayEnabled: boolean;
+  notificationsEnabled: boolean;
+  chatEnabled: boolean;
+  showViewerCount: boolean;
 }

@@ -45,7 +45,10 @@ const BoostStatusCard: React.FC<BoostStatusCardProps> = ({
     let expiresAtDisplay = 'Unknown';
     if (boostStatus.expiresAt) {
       try {
-        const expiresDate = new Date(boostStatus.expiresAt);
+        const expiresDate = typeof boostStatus.expiresAt === 'string' 
+          ? new Date(boostStatus.expiresAt)
+          : boostStatus.expiresAt;
+          
         expiresAtDisplay = expiresDate.toLocaleDateString(undefined, {
           month: 'short',
           day: 'numeric',
@@ -53,8 +56,8 @@ const BoostStatusCard: React.FC<BoostStatusCardProps> = ({
           minute: '2-digit'
         });
       } catch (e) {
-        // If expiresAt is not a valid date string, just display it as is
-        expiresAtDisplay = boostStatus.expiresAt;
+        // If expiresAt is not a valid date string, use a fallback
+        expiresAtDisplay = String(boostStatus.expiresAt);
       }
     }
     

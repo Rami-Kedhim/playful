@@ -25,6 +25,28 @@ export interface UsePulseBoostAdapterReturn {
   dailyBoostLimit: number;
 }
 
+// Helper function to convert duration string to minutes
+function convertDurationToMinutes(duration: string): number {
+  const parts = duration.split(':').map(Number);
+  if (parts.length === 3) {
+    return parts[0] * 60 + parts[1]; // Hours to minutes + minutes
+  }
+  return 60; // Default to 60 minutes
+}
+
+// Format minutes to human readable
+function formatMinutesToHumanReadable(minutes: number): string {
+  if (minutes < 60) {
+    return `${minutes} minutes`;
+  } else if (minutes < 1440) {
+    const hours = minutes / 60;
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+  } else {
+    const days = Math.floor(minutes / 1440);
+    return `${days} ${days === 1 ? 'day' : 'days'}`;
+  }
+}
+
 /**
  * Adapter hook that provides the legacy boost API but uses the new Pulse Boost system
  */
@@ -46,8 +68,8 @@ export const usePulseBoostAdapter = (profileId?: string): UsePulseBoostAdapterRe
   const convertedBoostPackages = PULSE_BOOSTS.map(pulseBoost => ({
     id: pulseBoost.id,
     name: pulseBoost.name,
-    duration: convertMinutesToDurationString(pulseBoost.durationMinutes),
-    price_ubx: pulseBoost.costUBX,
+    duration: convertMinutesToDurationString(pulseBoost.durationMinutes || 60),
+    price_ubx: pulseBoost.costUBX || 15,
     description: pulseBoost.description || 'Boost your visibility',
     features: [
       `Visibility: ${(pulseBoost as any).visibility?.replace('_', ' ') || 'Standard'}`,
@@ -62,19 +84,6 @@ export const usePulseBoostAdapter = (profileId?: string): UsePulseBoostAdapterRe
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00`;
-  }
-  
-  // Format minutes to human readable
-  function formatMinutesToHumanReadable(minutes: number): string {
-    if (minutes < 60) {
-      return `${minutes} minutes`;
-    } else if (minutes < 1440) {
-      const hours = minutes / 60;
-      return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
-    } else {
-      const days = Math.floor(minutes / 1440);
-      return `${days} ${days === 1 ? 'day' : 'days'}`;
-    }
   }
   
   // Check eligibility for boosting
@@ -174,12 +183,13 @@ export const usePulseBoostAdapter = (profileId?: string): UsePulseBoostAdapterRe
     // Simulate analytics data
     return Promise.resolve({
       viewsIncrease: Math.floor(Math.random() * 50) + 20,
-      engagementRate: (Math.random() * 0.3 + 0.1).toFixed(2),
-      impressions: Math.floor(Math.random() * 200) + 100,
-      rankingImprovement: Math.floor(Math.random() * 8) + 3,
-      additionalViews: Math.floor(Math.random() * 100) + 50,
-      engagementIncrease: Math.floor(Math.random() * 30) + 10,
-      rankingPosition: Math.floor(Math.random() * 10) + 1
+      engagementRate: 0.15,
+      rankingPosition: Math.floor(Math.random() * 10) + 1,
+      impressions: {
+        withBoost: 324,
+        withoutBoost: 120,
+        increase: 170
+      }
     });
   };
   

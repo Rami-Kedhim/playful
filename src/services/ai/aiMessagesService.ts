@@ -1,253 +1,120 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { AIMessage } from "@/types/ai-profile";
-import { toast } from "@/components/ui/use-toast";
+import { AIMessage, AIConversation } from '@/types/ai-profile';
 
-/**
- * Send a message to an AI profile and get a response
- */
-export const sendMessageToAI = async (
-  userId: string,
-  conversationId: string,
-  messageContent: string,
-  aiProfileId: string
-): Promise<AIMessage | null> => {
+interface MessagePayload {
+  content: string;
+  profileId: string;
+}
+
+interface MessageResponse {
+  success: boolean;
+  message?: string;
+  messages?: AIMessage[];
+  conversation?: AIConversation;
+}
+
+export const sendMessage = async (payload: MessagePayload): Promise<MessageResponse> => {
   try {
-    // First, save user message to database - using any to bypass type issues
-    const userMessage: Partial<AIMessage> = {
-      conversation_id: conversationId,
-      sender_id: userId,
-      content: messageContent,
-      is_ai: false,
-      has_read: true
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Create a mock user message
+    const userMessage: AIMessage = {
+      id: `user-${Date.now()}`,
+      senderId: 'current-user-id',
+      receiverId: payload.profileId,
+      content: payload.content,
+      timestamp: new Date().toISOString(),
+      isAI: false
     };
     
-    const { data: savedUserMessage, error: userMessageError } = await supabase
-      .from('ai_messages' as any)
-      .insert(userMessage)
-      .select('*')
-      .single() as any;
+    // Create a mock AI response
+    const aiResponse: AIMessage = {
+      id: `ai-${Date.now()}`,
+      senderId: payload.profileId,
+      receiverId: 'current-user-id',
+      content: `This is an AI response to: "${payload.content}"`,
+      timestamp: new Date().toISOString(),
+      isAI: true
+    };
     
-    if (userMessageError) {
-      console.error("Error saving user message:", userMessageError);
-      toast({
-        title: "Message failed",
-        description: "Your message couldn't be saved. Please try again.",
-        variant: "destructive",
-      });
-      throw userMessageError;
-    }
-    
-    // Get AI response from edge function
-    const { data: aiResponse, error: aiResponseError } = await supabase.functions.invoke(
-      'generate-ai-content',
-      {
-        body: {
-          user_id: userId,
-          conversation_id: conversationId,
-          user_message: messageContent,
-          ai_profile_id: aiProfileId,
-          type: 'message'
-        }
-      }
-    );
-    
-    if (aiResponseError) {
-      console.error("Error getting AI response:", aiResponseError);
-      toast({
-        title: "AI response failed",
-        description: "Could not get a response from the AI. Please try again.",
-        variant: "destructive",
-      });
-      throw aiResponseError;
-    }
-    
-    if (aiResponse.error) {
-      toast({
-        title: "AI response error",
-        description: aiResponse.error,
-        variant: "destructive",
-      });
-      return null;
-    }
-    
-    const aiMessage = aiResponse.message;
-    
-    // Handle payment requirement
-    if (aiResponse.requiresPayment) {
-      toast({
-        title: "Payment required",
-        description: `This response requires ${aiResponse.price} Lucoins to view`,
-      });
-      
-      // Save AI message to database - using any to bypass type issues
-      await supabase
-        .from('ai_messages' as any)
-        .insert({
-          conversation_id: conversationId,
-          sender_id: aiProfileId,
-          content: "This message requires payment to view. Please unlock it to continue the conversation.",
-          is_ai: true,
-          has_read: false,
-          requires_payment: true,
-          price: aiResponse.price,
-          payment_status: 'pending'
-        });
-      
-      return {
-        id: `temp-payment-${Date.now()}`,
-        conversation_id: conversationId,
-        sender_id: aiProfileId,
-        content: "This message requires payment to view. Please unlock it to continue the conversation.",
+    // Return both messages
+    return {
+      success: true,
+      messages: [userMessage, aiResponse],
+      conversation: {
+        id: 'mock-conversation-id',
+        user_id: 'current-user-id',
+        ai_profile_id: payload.profileId,
         created_at: new Date().toISOString(),
-        is_ai: true,
-        has_read: false,
-        requires_payment: true,
-        price: aiResponse.price,
-        payment_status: 'pending'
-      } as AIMessage;
-    }
-    
-    // Save AI message to database - using any to bypass type issues
-    const { data: savedAiMessage, error: saveError } = await supabase
-      .from('ai_messages' as any)
-      .insert({
-        conversation_id: conversationId,
-        sender_id: aiProfileId,
-        content: aiMessage.content,
-        is_ai: true,
-        has_read: false,
-        requires_payment: false,
-        payment_status: 'completed'
-      })
-      .select('*')
-      .single() as any;
-    
-    if (saveError) {
-      console.error("Error saving AI message:", saveError);
-      toast({
-        title: "Failed to save response",
-        description: "The AI response was received but couldn't be saved",
-        variant: "destructive",
-      });
-      // Return unsaved message so conversation can continue
-      return aiMessage;
-    }
-    
-    return savedAiMessage as AIMessage;
-  } catch (error: any) {
-    console.error("Error in sendMessageToAI:", error);
-    toast({
-      title: "Message error",
-      description: error.message || "Something went wrong. Please try again.",
-      variant: "destructive",
-    });
-    return null;
+        updated_at: new Date().toISOString(),
+        messages: [userMessage, aiResponse]
+      }
+    };
+  } catch (error) {
+    console.error('Error sending message:', error);
+    return {
+      success: false,
+      message: 'Failed to send message'
+    };
   }
 };
 
-/**
- * Mark an AI message as read
- */
-export const markMessageAsRead = async (messageId: string): Promise<boolean> => {
+export const fetchMessages = async (profileId: string): Promise<{
+  messages: AIMessage[];
+  conversation: AIConversation;
+}> => {
   try {
-    const { error } = await supabase
-      .from('ai_messages' as any)
-      .update({ has_read: true })
-      .eq('id', messageId);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
     
-    if (error) {
-      console.error("Error marking message as read:", error);
-      return false;
-    }
+    // Mock data
+    const mockMessages: AIMessage[] = [
+      {
+        id: 'msg1',
+        senderId: 'current-user-id',
+        receiverId: profileId,
+        content: 'Hello there!',
+        timestamp: new Date(Date.now() - 3600000).toISOString(),
+        isAI: false
+      },
+      {
+        id: 'msg2',
+        senderId: profileId,
+        receiverId: 'current-user-id',
+        content: 'Hi! How can I help you today?',
+        timestamp: new Date(Date.now() - 3500000).toISOString(),
+        isAI: true
+      }
+    ];
+    
+    const mockConversation: AIConversation = {
+      id: 'mock-conversation-id',
+      user_id: 'current-user-id',
+      ai_profile_id: profileId,
+      created_at: new Date(Date.now() - 3600000).toISOString(),
+      updated_at: new Date(Date.now() - 3500000).toISOString(),
+      messages: mockMessages
+    };
+    
+    return {
+      messages: mockMessages,
+      conversation: mockConversation
+    };
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    throw new Error('Failed to fetch messages');
+  }
+};
+
+export const markMessagesAsRead = async (messageIds: string[]): Promise<boolean> => {
+  try {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     return true;
   } catch (error) {
-    console.error("Error in markMessageAsRead:", error);
-    return false;
-  }
-};
-
-/**
- * Pay for a premium AI message to unlock it
- */
-export const unlockPaidMessage = async (
-  userId: string,
-  messageId: string
-): Promise<boolean> => {
-  try {
-    // Get message details first - using any to bypass type issues
-    const { data: message, error: fetchError } = await supabase
-      .from('ai_messages' as any)
-      .select('*')
-      .eq('id', messageId)
-      .single() as any;
-    
-    if (fetchError || !message) {
-      console.error("Error fetching message:", fetchError);
-      toast({
-        title: "Message not found",
-        description: "Could not find the message to unlock",
-        variant: "destructive",
-      });
-      return false;
-    }
-    
-    // Process payment using user's Lucoin balance
-    const { data: paymentResult, error: paymentError } = await supabase.functions.invoke(
-      'process-ai-payment',
-      {
-        body: {
-          user_id: userId,
-          item_id: messageId,
-          item_type: 'message',
-          amount: message.price
-        }
-      }
-    );
-    
-    if (paymentError || (paymentResult && paymentResult.error)) {
-      const errorMessage = paymentResult?.error || paymentError?.message || "Payment failed";
-      toast({
-        title: "Payment failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      return false;
-    }
-    
-    // Update message status - using any to bypass type issues
-    const { error: updateError } = await supabase
-      .from('ai_messages' as any)
-      .update({ 
-        payment_status: 'completed' 
-      })
-      .eq('id', messageId);
-    
-    if (updateError) {
-      console.error("Error updating message status:", updateError);
-      toast({
-        title: "Status update failed",
-        description: "Payment processed but message status could not be updated",
-        variant: "destructive",
-      });
-      // Payment was processed, so still return true
-      return true;
-    }
-    
-    toast({
-      title: "Message unlocked",
-      description: "You can now view this message",
-    });
-    
-    return true;
-  } catch (error: any) {
-    console.error("Error unlocking paid message:", error);
-    toast({
-      title: "Unlock failed",
-      description: error.message || "Something went wrong unlocking this message",
-      variant: "destructive",
-    });
+    console.error('Error marking messages as read:', error);
     return false;
   }
 };

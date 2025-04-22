@@ -10,18 +10,28 @@ export interface AIMessage {
   payment_status?: 'pending' | 'completed' | 'failed';
   price?: number;
   has_read?: boolean;
+  senderId?: string;
+  receiverId?: string;
+  isAI?: boolean;
 }
 
 export interface AIProfile {
   id: string;
   name: string;
   avatar_url?: string;
+  avatarUrl?: string;
   personality?: {
     type: 'flirty' | 'shy' | 'dominant' | 'playful' | string;
   };
   location?: string;
   lucoin_chat_price?: number;
   lucoin_image_price?: number;
+  interests?: string[];
+  availability_status?: string;
+  boost_status?: {
+    isActive: boolean;
+    expiresAt?: string;
+  };
 }
 
 export interface AIConversation {

@@ -165,7 +165,7 @@ const AIModelGenerationDashboard: React.FC<AIModelGenerationDashboardProps> = ({
               <Progress value={progress} className="h-2" />
               <p className="text-xs text-muted-foreground mt-1">
                 {processingStatus.status === ProcessingStatus.PROCESSING ? 
-                  'Processing... Please wait.' : processingStatus.message}
+                  'Processing... Please wait.' : processingStatus.message || ''}
               </p>
             </div>
           )}
@@ -173,7 +173,7 @@ const AIModelGenerationDashboard: React.FC<AIModelGenerationDashboardProps> = ({
           {error && (
             <div className="bg-red-500/10 text-red-500 p-3 rounded-md text-sm mt-4 flex items-start gap-2">
               <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
-              <span>Error: {error.message}</span>
+              <span>Error: {typeof error === 'string' ? error : error.message || 'An unknown error occurred'}</span>
             </div>
           )}
 

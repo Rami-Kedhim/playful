@@ -7,14 +7,28 @@ interface AnalyticsData {
     withBoost: number;
     withoutBoost: number;
     increase: number;
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
   };
   interactions: {
     withBoost: number;
     withoutBoost: number;
     increase: number;
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
   };
   rankingPosition: number;
   viewsIncrease: number;
+  clicks?: {
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
+  };
 }
 
 export const useBoostOperations = (profileId: string) => {
@@ -41,7 +55,32 @@ export const useBoostOperations = (profileId: string) => {
       // Simulate analytics data fetch
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      const analyticsData: BoostAnalytics = {
+      const analyticsData: BoostAnalytics & {
+        impressions: {
+          today: number;
+          yesterday: number;
+          weeklyAverage: number;
+          withBoost: number;
+          withoutBoost: number;
+          increase: number;
+        };
+        interactions: {
+          today: number;
+          yesterday: number;
+          weeklyAverage: number;
+          withBoost: number;
+          withoutBoost: number;
+          increase: number;
+        };
+        clicks: {
+          today: number;
+          yesterday: number;
+          weeklyAverage: number;
+          withBoost: number;
+          withoutBoost: number;
+          increase: number;
+        };
+      } = {
         impressions: {
           today: 432,
           yesterday: 287,

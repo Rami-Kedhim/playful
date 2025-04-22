@@ -1,142 +1,138 @@
 
-// Added required isVerified boolean property to mock livecams to fix TS errors
-
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { Livecam } from '@/types/livecam';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { Livecam, LivecamModel } from '@/types/livecams';
 
 interface LivecamContextType {
   livecams: Livecam[];
+  featuredLivecams: Livecam[];
+  popularLivecams: Livecam[];
   loading: boolean;
   error: string | null;
-  featuredLivecams: Livecam[];
-  liveLivecams: Livecam[];
-  getLivecamById: (id: string) => Livecam | undefined;
-  refreshLivecams: () => Promise<void>;
+  refreshLivecams: () => void;
 }
 
 const LivecamContext = createContext<LivecamContextType | undefined>(undefined);
 
-const MOCK_LIVECAMS: Livecam[] = [
-  {
-    id: '1',
-    name: 'Luna',
-    username: 'luna_cam',
-    profileImage: '/images/livecams/luna.jpg',
-    viewerCount: 1250,
-    tags: ['chatty', 'gaming'],
-    featured: true,
-    isLive: true,
-    category: 'Casual',
-    previewImage: '/images/livecams/luna_preview.jpg',
-    rating: 4.5,
-    price: 19.99,
-    roomType: 'private',
-    languages: ['English', 'Spanish'],
-    isVerified: true
-  },
-  {
-    id: '2',
-    name: 'Max',
-    username: 'max_live',
-    profileImage: '/images/livecams/max.jpg',
-    viewerCount: 850,
-    tags: ['music', 'singing'],
-    featured: false,
-    isLive: false,
-    category: 'Music',
-    previewImage: '/images/livecams/max_preview.jpg',
-    rating: 4.0,
-    price: 15.99,
-    roomType: 'public',
-    languages: ['English'],
-    isVerified: false
-  },
-  {
-    id: '3',
-    name: 'Nova',
-    username: 'nova_star',
-    profileImage: '/images/livecams/nova.jpg',
-    viewerCount: 200,
-    tags: ['art', 'painting'],
-    featured: false,
-    isLive: true,
-    category: 'Art',
-    previewImage: '/images/livecams/nova_preview.jpg',
-    rating: 4.8,
-    price: 29.99,
-    roomType: 'private',
-    languages: ['English', 'French'],
-    isVerified: true
+export const useLivecamContext = () => {
+  const context = useContext(LivecamContext);
+  if (context === undefined) {
+    throw new Error('useLivecamContext must be used within a LivecamProvider');
   }
-];
+  return context;
+};
 
-export const LivecamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+interface LivecamProviderProps {
+  children: ReactNode;
+}
+
+export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) => {
   const [livecams, setLivecams] = useState<Livecam[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadLivecams = async () => {
-      try {
-        setLoading(true);
-        setLivecams(MOCK_LIVECAMS);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load livecams');
-        console.error('Error loading livecams:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadLivecams();
-  }, []);
-
-  const getFeaturedLivecams = () => {
-    return livecams.filter(livecam => livecam.featured);
-  };
-
-  const getLiveLivecams = () => {
-    return livecams.filter(livecam => livecam.isLive);
-  };
-
-  const getLivecamById = (id: string) => {
-    return livecams.find(livecam => livecam.id === id);
-  };
-
-  const refreshLivecams = async () => {
+  
+  const fetchLivecams = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      setLivecams(MOCK_LIVECAMS);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Mock data with properly typed Livecam objects
+      const mockLivecams: Livecam[] = [
+        {
+          id: '1',
+          name: 'Sophia',
+          username: 'sophialive',
+          displayName: 'Sophia Live',
+          imageUrl: 'https://example.com/sophia.jpg',
+          thumbnailUrl: 'https://example.com/sophia-thumb.jpg',
+          previewImage: 'https://example.com/sophia-preview.jpg',
+          profileImage: 'https://example.com/sophia-profile.jpg',
+          isLive: true,
+          isStreaming: true,
+          viewerCount: 425,
+          tags: ['dance', 'fitness'],
+          rating: 4.9,
+          price: 55,
+          category: 'Dance',
+          region: 'US',
+          language: 'English',
+          featured: true,
+          description: 'Join my livestream for dance and fitness routines!'
+        },
+        {
+          id: '2',
+          name: 'Emma',
+          username: 'emmagaming',
+          displayName: 'Emma Gaming',
+          imageUrl: 'https://example.com/emma.jpg',
+          thumbnailUrl: 'https://example.com/emma-thumb.jpg',
+          previewImage: 'https://example.com/emma-preview.jpg',
+          profileImage: 'https://example.com/emma-profile.jpg',
+          isLive: true,
+          isStreaming: true,
+          viewerCount: 318,
+          tags: ['gaming', 'rpg'],
+          rating: 4.7,
+          price: 45,
+          category: 'Gaming',
+          region: 'CA',
+          language: 'English',
+          featured: false,
+          description: 'RPG gaming streams every evening'
+        },
+        {
+          id: '3',
+          name: 'Mia',
+          username: 'miamusic',
+          displayName: 'Mia Music',
+          imageUrl: 'https://example.com/mia.jpg',
+          thumbnailUrl: 'https://example.com/mia-thumb.jpg',
+          previewImage: 'https://example.com/mia-preview.jpg',
+          profileImage: 'https://example.com/mia-profile.jpg',
+          isLive: false,
+          isStreaming: false,
+          viewerCount: 0,
+          tags: ['music', 'piano'],
+          rating: 4.8,
+          price: 50,
+          category: 'Music',
+          region: 'UK',
+          language: 'English',
+          featured: true,
+          description: 'Piano performances and music theory'
+        }
+      ];
+      
+      setLivecams(mockLivecams);
       setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to refresh livecams');
+    } catch (err) {
+      console.error('Error fetching livecams:', err);
+      setError('Failed to load livecams');
     } finally {
       setLoading(false);
     }
   };
-
-  const contextValue: LivecamContextType = {
-    livecams,
-    loading,
-    error,
-    featuredLivecams: getFeaturedLivecams(),
-    liveLivecams: getLiveLivecams(),
-    getLivecamById,
-    refreshLivecams
-  };
-
+  
+  useEffect(() => {
+    fetchLivecams();
+  }, []);
+  
+  // Filter featured and popular livecams
+  const featuredLivecams = livecams.filter(livecam => livecam.featured);
+  const popularLivecams = [...livecams].sort((a, b) => b.viewerCount - a.viewerCount).slice(0, 5);
+  
   return (
-    <LivecamContext.Provider value={contextValue}>
+    <LivecamContext.Provider
+      value={{
+        livecams,
+        featuredLivecams,
+        popularLivecams,
+        loading,
+        error,
+        refreshLivecams: fetchLivecams
+      }}
+    >
       {children}
     </LivecamContext.Provider>
   );
-};
-
-export const useLivecamContext = (): LivecamContextType => {
-  const context = useContext(LivecamContext);
-  if (!context) {
-    throw new Error('useLivecamContext must be used within a LivecamProvider');
-  }
-  return context;
 };

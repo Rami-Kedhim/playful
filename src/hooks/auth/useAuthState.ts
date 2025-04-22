@@ -7,11 +7,19 @@ export const useAuthState = () => {
   const { user } = useAuth();
 
   const isAdmin = useCallback((userObj: User | null) => {
-    return userObj?.roles?.includes('admin') || false;
+    // Check if user has admin role regardless of the format
+    if (!userObj || !userObj.roles) return false;
+    return userObj.roles.some(role => 
+      typeof role === 'string' ? role === 'admin' : role.name === 'admin'
+    );
   }, []);
 
   const isCreator = useCallback((userObj: User | null) => {
-    return userObj?.roles?.includes('creator') || false;
+    // Check if user has creator role regardless of the format
+    if (!userObj || !userObj.roles) return false;
+    return userObj.roles.some(role => 
+      typeof role === 'string' ? role === 'creator' : role.name === 'creator'
+    );
   }, []);
 
   return {

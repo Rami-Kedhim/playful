@@ -7,10 +7,13 @@ export interface AIProfile {
   bio: string;
   personality: string;
   avatarUrl?: string;
+  avatar_url?: string; // For compatibility with API responses
+  location?: string;
+  interests?: string[];
   tags?: string[];
   isVerified?: boolean;
   createdAt?: string;
-  createdBy?: string;
+  created_at?: string; // For compatibility with API responses
   category?: string;
   rating?: number;
   reviewCount?: number;
@@ -19,6 +22,11 @@ export interface AIProfile {
   attributes?: Record<string, any>;
   preferences?: Record<string, any>;
   voiceId?: string;
+  boost_status?: {
+    isActive: boolean;
+    expiresAt?: string;
+  };
+  availability_status?: string;
   
   // Additional properties used in other components
   displayName?: string;
@@ -52,6 +60,18 @@ export interface AIMessage {
     price?: number;
     [key: string]: any;
   };
+  sender?: string; // For backward compatibility
+  has_read?: boolean; // For backward compatibility
+}
+
+export interface AIConversation {
+  id: string;
+  user_id: string;
+  ai_profile_id: string;
+  created_at: string | Date;
+  updated_at: string | Date;
+  messages?: AIMessage[];
+  ai_profile?: AIProfile;
 }
 
 export interface AIModelGeneratorOptions {

@@ -2,7 +2,16 @@
 import { useState, useEffect } from 'react';
 import { BoostAnalytics } from '@/types/boost';
 
-export interface AnalyticsData extends BoostAnalytics {}
+export interface AnalyticsData extends Omit<BoostAnalytics, 'impressions'> {
+  impressions: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+  };
+}
 
 export const useBoostAnalytics = (profileId: string) => {
   const [data, setData] = useState<AnalyticsData | null>(null);
@@ -19,7 +28,7 @@ export const useBoostAnalytics = (profileId: string) => {
         await new Promise(resolve => setTimeout(resolve, 800));
         
         // Mock data
-        const mockData: BoostAnalytics = {
+        const mockData: AnalyticsData = {
           impressions: {
             today: 324,
             yesterday: 217,

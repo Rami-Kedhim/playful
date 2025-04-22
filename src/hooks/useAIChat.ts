@@ -1,140 +1,139 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { AIMessage, AIConversation } from '@/types/ai-profile';
+import { AIMessage, AIProfile, AIConversation } from '@/types/ai-profile';
+import { fetchMessages, sendMessage } from '@/services/ai/aiMessagesService';
 
-interface AIMessageInput {
-  content: string;
-  attachments?: { type: string, url: string }[];
+interface UseAIChatProps {
+  profileId: string;
+  initialMessages?: AIMessage[];
+  onMessageSent?: (message: AIMessage) => void;
+  onMessageReceived?: (message: AIMessage) => void;
 }
 
-export const useAIChat = (profileId: string) => {
-  const [messages, setMessages] = useState<AIMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+export const useAIChat = ({
+  profileId,
+  initialMessages = [],
+  onMessageSent,
+  onMessageReceived
+}: UseAIChatProps) => {
+  const [messages, setMessages] = useState<AIMessage[]>(initialMessages);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [conversation, setConversation] = useState<AIConversation | null>(null);
-
-  // Fetch conversation history
-  const fetchConversation = useCallback(async () => {
-    setIsLoading(true);
+  
+  const loadMessages = useCallback(async () => {
+    if (!profileId) return;
+    
+    setLoading(true);
     setError(null);
     
     try {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+      const result = await fetchMessages(profileId);
       
-      const mockConversation: AIConversation = {
-        id: `conv-${Date.now()}`,
-        profileId,
-        userId: 'current-user-id',
-        messages: [
-          {
-            id: '1',
-            content: 'Hello! How can I assist you today?',
-            sender: profileId,
-            isAI: true,
-            timestamp: new Date().toISOString(),
-            role: 'assistant',
-            has_read: true
-          }
-        ],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+      if (result.messages) {
+        setMessages(result.messages);
+      }
+      
+      if (result.conversation) {
+        setConversation(result.conversation);
+      }
+    } catch (err) {
+      console.error('Error loading messages:', err);
+      setError('Failed to load messages');
+    } finally {
+      setLoading(false);
+    }
+  }, [profileId]);
+  
+  useEffect(() => {
+    loadMessages();
+  }, [loadMessages]);
+  
+  const sendUserMessage = async (content: string) => {
+    if (!profileId || !content.trim()) return null;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Create user message object
+      const userMessage: AIMessage = {
+        id: `temp-${Date.now()}`,
+        senderId: 'current-user', // This will be replaced by the actual user ID on the server
+        receiverId: profileId,
+        content,
+        timestamp: new Date().toISOString(),
+        isAI: false,
+        status: 'sent'
       };
       
-      setConversation(mockConversation);
-      setMessages(mockConversation.messages);
+      // Optimistically update UI
+      setMessages(prev => [...prev, userMessage]);
+      if (onMessageSent) onMessageSent(userMessage);
       
-      return mockConversation;
+      // Send message to server
+      const response = await sendMessage({
+        content,
+        profileId
+      });
+      
+      // Update messages with server response
+      if (response && response.messages) {
+        setMessages(response.messages);
+        
+        // Find AI response if any
+        const aiResponse = response.messages.find(msg => 
+          msg.isAI && !messages.some(existingMsg => existingMsg.id === msg.id)
+        );
+        
+        if (aiResponse && onMessageReceived) {
+          onMessageReceived(aiResponse);
+        }
+      }
+      
+      return response;
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to fetch conversation');
-      setError(error);
-      console.error('Error fetching conversation:', error);
+      console.error('Error sending message:', err);
+      setError('Failed to send message');
       return null;
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, [profileId]);
+  };
   
-  // Send message to AI
-  const sendMessage = useCallback(async (messageInput: AIMessageInput) => {
-    setIsLoading(true);
-    setError(null);
+  const markMessagesAsRead = useCallback(async () => {
+    // Find unread messages
+    const unreadMessages = messages.filter(msg => 
+      msg.isAI && !(msg.has_read || msg.status === 'read')
+    );
+    
+    if (unreadMessages.length === 0) return;
     
     try {
-      // Create user message
-      const userMessage: AIMessage = {
-        id: `msg-${Date.now()}`,
-        content: messageInput.content,
-        sender: 'user-id',
-        isAI: false,
-        timestamp: new Date().toISOString(),
-        attachments: messageInput.attachments,
-        role: 'user',
-        has_read: true
-      };
+      // Update locally first
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.isAI && !(msg.has_read || msg.status === 'read')
+            ? { ...msg, has_read: true, status: 'read' }
+            : msg
+        )
+      );
       
-      // Add user message to state
-      setMessages(prev => [...prev, userMessage]);
-      
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Create AI response
-      const aiResponse: AIMessage = {
-        id: `msg-${Date.now() + 1}`,
-        content: `This is an AI response to "${messageInput.content}"`,
-        sender: profileId,
-        isAI: true,
-        timestamp: new Date().toISOString(),
-        role: 'assistant',
-        has_read: true
-      };
-      
-      // Add AI response to state
-      setMessages(prev => [...prev, aiResponse]);
-      
-      return aiResponse;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to send message');
-      setError(error);
-      console.error('Error sending message:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [profileId]);
-  
-  // Mark messages as read
-  const markAsRead = useCallback(async () => {
-    try {
-      const unreadMessages = messages.filter(msg => msg.isAI && !msg.has_read);
-      
-      if (unreadMessages.length > 0) {
-        // In a real app, this would make an API call to update the database
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.isAI && !msg.has_read ? { ...msg, has_read: true } : msg
-          )
-        );
-      }
+      // TODO: Add API call to mark messages as read on server
+      // await markAsRead(unreadMessages.map(msg => msg.id));
     } catch (err) {
       console.error('Error marking messages as read:', err);
     }
   }, [messages]);
-
-  // Initialize conversation on mount
-  useEffect(() => {
-    fetchConversation();
-  }, [fetchConversation]);
-
+  
   return {
     messages,
-    isLoading,
+    loading,
     error,
     conversation,
-    fetchConversation,
-    sendMessage,
-    markAsRead
+    sendMessage: sendUserMessage,
+    loadMessages,
+    markAsRead: markMessagesAsRead
   };
 };
 
