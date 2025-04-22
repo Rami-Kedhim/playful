@@ -1,4 +1,3 @@
-
 import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 import { BoostStatus, BoostEligibility, BoostPackage } from '@/types/boost';
 import { AnalyticsData } from '@/hooks/boost/useBoostAnalytics';
@@ -11,6 +10,7 @@ const mockBoostPackages = [
     description: "Standard boost for 24 hours",
     duration: "24:00:00",
     price_ubx: GLOBAL_UBX_RATE,
+    price: GLOBAL_UBX_RATE,
     features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking"]
   },
   {
@@ -19,6 +19,7 @@ const mockBoostPackages = [
     description: "3-day visibility boost",
     duration: "72:00:00",
     price_ubx: GLOBAL_UBX_RATE * 2.5,
+    price: GLOBAL_UBX_RATE * 2.5,
     features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking", "Extended duration"]
   },
   {
@@ -27,6 +28,7 @@ const mockBoostPackages = [
     description: "7-day premium visibility",
     duration: "168:00:00",
     price_ubx: GLOBAL_UBX_RATE * 5,
+    price: GLOBAL_UBX_RATE * 5,
     features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking", "Extended duration", "Premium placement"]
   }
 ];
