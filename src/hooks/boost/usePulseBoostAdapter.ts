@@ -1,5 +1,5 @@
 
-// Fix type assignment error by ensuring numeric types for boostPower, visibilityIncrease and parsing duration parts as numbers (hours, minutes, seconds)
+// Fix type assignment errors by ensuring numeric values are correctly parsed from strings
 
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
@@ -74,7 +74,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const durationStr = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
     const parts = durationStr.split(':');
 
-    // Explicitly cast to number for hours, minutes, seconds
+    // Explicitly cast to number for hours, minutes, seconds for duration calculation
     const hours = parseNumberValue(parts[0] || '0', 0);
     const minutes = parseNumberValue(parts[1] || '0', 0);
     const seconds = parseNumberValue(parts[2] || '0', 0);
@@ -94,10 +94,12 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     let priceNum: number = 0;
     if (typeof pkg.price === 'number') priceNum = pkg.price;
     else if (typeof pkg.price === 'string') {
+      // Parse string price to number safely
       const parsedPrice = Number(pkg.price);
       priceNum = isNaN(parsedPrice) ? 0 : parsedPrice;
     }
 
+    // Ensure costUBX is number and parsed safely, fallback to convertToUBX(priceNum)
     let costUBXNum: number = 0;
     if (typeof (pkg as any).price_ubx === 'number') costUBXNum = (pkg as any).price_ubx;
     else if (typeof (pkg as any).price_ubx === 'string') {
