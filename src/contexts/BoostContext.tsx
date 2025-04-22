@@ -1,4 +1,3 @@
-
 import React, { createContext, ReactNode, useEffect, useState } from 'react';
 import { BoostPackage, BoostStatus, BoostEligibility } from '@/types/boost';
 import { useAuth } from '@/hooks/auth';
@@ -41,7 +40,6 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
   const [dailyBoostUsage, setDailyBoostUsage] = useState(0);
   const [dailyBoostLimit, setDailyBoostLimit] = useState(5);
 
-  // Format the boost duration from a string like "24:00:00" to "1 day"
   const formatBoostDuration = (duration: string): string => {
     const [hours, minutes] = duration.split(':').map(Number);
     if (hours >= 24) {
@@ -51,14 +49,11 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
     return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
   };
 
-  // Refresh the boost status
   const refreshBoostStatus = async (profileId?: string): Promise<void> => {
     if (!user && !profileId) return;
     
     try {
       setLoading(true);
-      // This would be an API call in a real implementation
-      // For now, simulate a status
       const mockStatus: BoostStatus = {
         isActive: false,
         startTime: '',
@@ -75,22 +70,18 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
     }
   };
 
-  // Activate a boost for a profile
   const boostProfile = async (profileId: string, packageId: string): Promise<boolean> => {
     try {
       setLoading(true);
       
-      // In a real implementation, this would be an API call
       console.log(`Boosting profile ${profileId} with package ${packageId}`);
       
-      // Find the selected package
       const selectedPackage = boostPackages.find(pkg => pkg.id === packageId);
       
       if (!selectedPackage) {
         throw new Error("Selected package not found");
       }
       
-      // Simulate a successful boost activation
       const now = new Date();
       const durationParts = selectedPackage.duration.split(':').map(Number);
       const hours = durationParts[0] || 0;
@@ -99,12 +90,12 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
       
       setBoostStatus({
         isActive: true,
-        packageId: packageId,
-        packageName: selectedPackage.name,
         startTime: now.toISOString(),
         endTime: endTime.toISOString(),
         remainingTime: selectedPackage.duration,
+        timeRemaining: selectedPackage.duration,
         boostPackage: selectedPackage,
+        packageName: selectedPackage.name,
         profileId: profileId
       });
       
@@ -120,12 +111,10 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
     }
   };
 
-  // Cancel an active boost
   const cancelBoost = async (): Promise<boolean> => {
     try {
       setLoading(true);
       
-      // In a real implementation, this would be an API call
       console.log("Cancelling boost");
       
       setBoostStatus({
@@ -145,7 +134,6 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
     }
   };
 
-  // Initialize by refreshing boost status when user changes
   useEffect(() => {
     if (user) {
       refreshBoostStatus(user.id);

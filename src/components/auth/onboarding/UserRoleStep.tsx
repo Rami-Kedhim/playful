@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -65,9 +64,9 @@ export const UserRoleStep: React.FC<UserRoleStepProps> = ({ onNext }) => {
   const handleGenerateAvatars = async (settings: AIAvatarSettings) => {
     setIsGenerating(true);
     try {
-      // Transform the settings to match aiAvatarService expected format
-      const serviceSettings = {
-        gender: settings.gender,
+      const avatarGender = settings.gender;
+      const avatarSettings: AIAvatarSettings = {
+        gender: avatarGender as "male" | "female" | "non-binary",
         style: settings.style,
         ageRange: settings.ageRange,
         age: settings.age,
@@ -79,7 +78,7 @@ export const UserRoleStep: React.FC<UserRoleStepProps> = ({ onNext }) => {
         background: settings.background
       };
       
-      const avatars = await generateAIAvatars(serviceSettings);
+      const avatars = await generateAIAvatars(avatarSettings);
       setGeneratedAvatars(avatars);
     } finally {
       setIsGenerating(false);

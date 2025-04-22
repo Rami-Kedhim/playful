@@ -1,4 +1,3 @@
-
 export interface LivecamModel {
   id: string;
   displayName: string;
@@ -13,6 +12,7 @@ export interface LivecamModel {
   rating?: number;
   language?: string;
   country?: string;
+  category?: string; // Add this missing property
   categories?: string[];
   tags?: string[];
   age?: number;
@@ -27,4 +27,8 @@ export interface LivecamCardProps {
   onBoost?: () => boolean;
   onCancelBoost?: () => boolean;
   showBoostControls?: boolean;
+}
+
+export interface Livecam extends LivecamModel {
+  // Add any specific properties for Livecam type
 }

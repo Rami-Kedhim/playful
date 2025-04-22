@@ -83,7 +83,7 @@ export const AIAvatarGenerator: React.FC<AIAvatarGeneratorProps> = ({
       // Process UBX transaction for premium avatar generation
       const success = await processTransaction({
         amount: -10, // Cost in UBX tokens
-        transaction_type: "avatar_generation", // Using the correct property name
+        transactionType: "ai_avatar_generation", // Fixed from transaction_type to transactionType
         description: "Premium AI avatar generation"
       });
       

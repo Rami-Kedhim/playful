@@ -1,4 +1,3 @@
-
 export interface BoostPackage {
   id: string;
   name: string;
@@ -50,6 +49,9 @@ export interface BoostStatus {
   packageName?: string;
   boostPackage?: BoostPackage;
   pulseData?: any;
+  timeRemaining?: string;
+  packageId?: string;
+  profileId?: string;
 }
 
 export interface BoostStats {
@@ -122,6 +124,26 @@ export interface PulseBoost {
   visibility?: string;
   costUBX?: number;
   price?: number;
+  price_ubx?: number;
   badgeColor?: string;
   color?: string;
+}
+
+export interface BoostDialogTabsProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  loading: boolean;
+  boostStatus: BoostStatus;
+  eligibility: BoostEligibility;
+  boostPackages: BoostPackage[];
+  selectedPackage: string;
+  setSelectedPackage: (id: string) => void;
+  handleBoost: () => void;
+  handleCancel: () => Promise<boolean>;
+  dailyBoostUsage: number;
+  dailyBoostLimit: number;
+  hermesStatus: HermesBoostStatus;
+  formatBoostDuration?: (duration: string) => string;
+  getBoostPrice?: () => number;
+  handleDialogClose: () => void;
 }

@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   username: string;
@@ -15,6 +14,9 @@ export interface User {
   user_metadata?: Record<string, any>;
   lucoinsBalance?: number;
   roles?: UserRole[];
+  ubxBalance?: number;
+  bio?: string;
+  created_at?: string;
 }
 
 export interface UserProfile {
@@ -35,17 +37,15 @@ export interface UserProfile {
   sexual_orientation?: string;
 }
 
-// Add AuthResult type needed for SignInForm and SignUpForm
 export interface AuthResult {
   success: boolean;
   message?: string;
   user?: User;
   token?: string;
   error?: string;
-  session?: any; // Add session property
+  session?: any;
 }
 
-// Add these types needed for Auth components
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -58,10 +58,8 @@ export interface RegisterCredentials {
   confirmPassword: string;
 }
 
-// Add UserRole enum for AuthPage
 export type UserRole = string | { name: string };
 
-// AI Avatar Generator settings
 export interface AIAvatarSettings {
   gender: "male" | "female" | "non-binary" | string;
   style: string;
