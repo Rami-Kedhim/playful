@@ -77,25 +77,23 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 
     let visibility: PulseBoost['visibility'] = 'homepage';
 
-    // Ensure boost_power is number
+    // Ensure boost_power is number, parse from string if needed
     const boostPowerNum: number = typeof pkg.boost_power === 'number'
       ? pkg.boost_power
-      : (pkg.boost_power ? Number(pkg.boost_power) : 50);
+      : (typeof pkg.boost_power === 'string' ? Number(pkg.boost_power) : 50);
 
-    if (pkg.boost_power !== undefined && pkg.boost_power !== null) {
-      if (boostPowerNum >= 200) {
-        visibility = 'global';
-      } else if (boostPowerNum >= 100) {
-        visibility = 'search';
-      } else {
-        visibility = 'homepage';
-      }
+    if (boostPowerNum >= 200) {
+      visibility = 'global';
+    } else if (boostPowerNum >= 100) {
+      visibility = 'search';
+    } else {
+      visibility = 'homepage';
     }
 
-    // Ensure visibility_increase is number
+    // Ensure visibility_increase is number, parse from string if needed
     const visibilityIncreaseNum: number = typeof pkg.visibility_increase === 'number'
       ? pkg.visibility_increase
-      : (pkg.visibility_increase ? Number(pkg.visibility_increase) : 50);
+      : (typeof pkg.visibility_increase === 'string' ? Number(pkg.visibility_increase) : 50);
 
     return {
       id: pkg.id,

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { AIProfile } from "@/types/ai-profile";
 
@@ -65,8 +66,7 @@ export const mockAIProfiles: AIProfile[] = [
     ],
     personality: {
       type: "flirty",
-      traits: ["outgoing", "adventurous", "spontaneous"],
-      responseStyle: "flirtatious and direct"
+      traits: ["outgoing", "adventurous", "spontaneous"]
     },
     interests: ["travel", "fine dining", "art", "philosophy"],
     is_ai: true,
@@ -74,8 +74,8 @@ export const mockAIProfiles: AIProfile[] = [
     delayed_response_min: 2000,
     delayed_response_max: 5000,
     created_at: "2023-01-01T00:00:00.000Z",
-    lucoin_chat_price: 5,
-    lucoin_image_price: 10
+    ubx_chat_price: 5,
+    ubx_image_price: 10
   },
   {
     id: "ai-profile-2",
@@ -91,8 +91,7 @@ export const mockAIProfiles: AIProfile[] = [
     ],
     personality: {
       type: "shy",
-      traits: ["introverted", "thoughtful", "curious"],
-      responseStyle: "shy yet increasingly open"
+      traits: ["introverted", "thoughtful", "curious"]
     },
     interests: ["books", "coffee shops", "indie music", "photography"],
     is_ai: true,
@@ -100,8 +99,8 @@ export const mockAIProfiles: AIProfile[] = [
     delayed_response_min: 3000,
     delayed_response_max: 8000,
     created_at: "2023-02-01T00:00:00.000Z",
-    lucoin_chat_price: 5,
-    lucoin_image_price: 10
+    ubx_chat_price: 5,
+    ubx_image_price: 10
   },
   {
     id: "ai-profile-3",
@@ -117,8 +116,7 @@ export const mockAIProfiles: AIProfile[] = [
     ],
     personality: {
       type: "dominant",
-      traits: ["assertive", "commanding", "strict"],
-      responseStyle: "dominant and demanding"
+      traits: ["assertive", "commanding", "strict"]
     },
     interests: ["power dynamics", "psychology", "leather crafting", "gothic art"],
     is_ai: true,
@@ -126,7 +124,7 @@ export const mockAIProfiles: AIProfile[] = [
     delayed_response_min: 1500,
     delayed_response_max: 4000,
     created_at: "2023-03-01T00:00:00.000Z",
-    lucoin_chat_price: 10,
-    lucoin_image_price: 20
+    ubx_chat_price: 10,
+    ubx_image_price: 20
   }
 ];
