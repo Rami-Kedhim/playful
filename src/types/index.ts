@@ -1,11 +1,6 @@
-// Fix duplicated export of NeuralModel by re-exporting only once
+export * from './AIProfile';
+export * from './boost';
+export * from './livecam';
+// Explicit imports to avoid ambiguity
+export { NeuralModel } from './UberPersona'; // explicitly export NeuralModel once
 export * from './UberPersona';
-export * from './neural/NeuralSystemMetrics';
-export * from './Escort';
-export * from './auth';
-
-export interface ContactInfo {
-  phone?: string;
-  email?: string;
-  website?: string;
-}

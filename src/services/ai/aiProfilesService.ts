@@ -41,7 +41,11 @@ export const getAIProfileById = async (profileId: string): Promise<AIProfile | n
       return mockAIProfiles.find(p => p.id === profileId) || null;
     }
 
-    return data as AIProfile;
+    // Changed `is_verified` to `isVerified`
+    return {
+      ...data,
+      isVerified: data.is_verified,
+    } as AIProfile;
   } catch (error) {
     console.error("Error in getAIProfileById:", error);
     return mockAIProfiles.find(p => p.id === profileId) || null;
@@ -72,12 +76,12 @@ export const mockAIProfiles: AIProfile[] = [
     ubx_chat_price: 5,
     ubx_image_price: 10,
     created_at: "2023-01-01T00:00:00.000Z",
-    is_verified: true,
+    isVerified: true,
     category: "AI Companion",
     rating: 4.5,
-    review_count: 100,
+    reviewCount: 100,
     price: 0,
-    is_premium: false,
+    isPremium: false,
     availability_status: "available",
   },
   {
@@ -100,12 +104,12 @@ export const mockAIProfiles: AIProfile[] = [
     ubx_chat_price: 5,
     ubx_image_price: 10,
     created_at: "2023-02-01T00:00:00.000Z",
-    is_verified: false,
+    isVerified: false,
     category: "AI Companion",
     rating: 4,
-    review_count: 50,
+    reviewCount: 50,
     price: 0,
-    is_premium: false,
+    isPremium: false,
     availability_status: "available",
   },
   {
@@ -128,12 +132,12 @@ export const mockAIProfiles: AIProfile[] = [
     ubx_chat_price: 10,
     ubx_image_price: 20,
     created_at: "2023-03-01T00:00:00.000Z",
-    is_verified: true,
+    isVerified: true,
     category: "AI Companion",
     rating: 5,
-    review_count: 75,
+    reviewCount: 75,
     price: 0,
-    is_premium: false,
+    isPremium: false,
     availability_status: "available",
   }
 ];

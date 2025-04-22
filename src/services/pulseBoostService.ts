@@ -1,5 +1,5 @@
 
-// Fix property references for PulseBoost fields to remove non-existing ones
+// Fix usage of PulseBoost properties and correct property names
 
 import { BoostPackage } from '@/types/boost';
 import { PulseBoost } from '@/types/pulse-boost';
@@ -13,7 +13,7 @@ export const getPulsePackages = async (): Promise<BoostPackage[]> => {
         name: pb.name,
         description: pb.description || '',
         duration: typeof pb.duration === 'string' ? pb.duration : '00:00:00',
-        price_ubx: pb.price_ubx ?? 0,
+        price_ubx: (pb as any).price_ubx ?? 0,
         price: pb.price || 0,
         features: pb.features || [],
       }));
@@ -37,4 +37,3 @@ export const cancelActiveBoost = async (userId: string): Promise<boolean> => {
     }, 1000);
   });
 };
-

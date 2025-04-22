@@ -1,5 +1,5 @@
 
-// Fix string-to-number assignments in parsing durations and properties to match types expected by PulseBoost
+// Fix all string-to-number conversions for duration parts and properties to ensure correct typing
 
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
@@ -80,8 +80,10 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const seconds = parseNumberValue(secondsStr, 0);
 
     const durationMinutes = (hours * 60) + minutes + (seconds / 60);
-    const boostPowerNum = parseNumberValue((pkg as any).boost_power ?? pkg.boost_power, 50); // fallback for typo
-    const visibilityIncreaseNum = parseNumberValue((pkg as any).visibility_increase ?? pkg.visibility_increase, 50);
+
+    // Use any cast for boost_power and visibility_increase to read numbers or strings gracefully
+    const boostPowerNum = parseNumberValue((pkg as any).boost_power ?? (pkg as any).boostPower ?? 50, 50);
+    const visibilityIncreaseNum = parseNumberValue((pkg as any).visibility_increase ?? (pkg as any).visibilityIncrease ?? 50, 50);
 
     let visibility: PulseBoost['visibility'] = 'homepage';
     if (boostPowerNum >= 200) visibility = 'global';
@@ -112,4 +114,3 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 };
 
 export default usePulseBoostAdapter;
-

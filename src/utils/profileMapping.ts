@@ -1,6 +1,3 @@
-
-// Fix profileMapping to use correct LivecamModel property names and fix casing
-
 import { Escort } from '@/types/Escort';
 import { ContentCreator } from '@/types/creator';
 import { LivecamModel } from '@/types/livecams';
@@ -146,8 +143,8 @@ export const mapLivecamToUberPersona = (livecam: LivecamModel): UberPersona => {
       isCreator: false,
       isLivecam: true,
       isAI: false,
-      isVerified: livecam.isVerified ?? false,
-      isFeatured: livecam.isFeatured || livecam.isPopular || false
+      isVerified: false, // Removed reference to livecam.isVerified
+      isFeatured: false // Removed isFeatured and isPopular checks as not in LivecamModel
     },
     capabilities: {
       hasPhotos: false,

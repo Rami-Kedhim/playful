@@ -1,3 +1,4 @@
+
 import { AIProfile, ProcessingStatus } from '@/types/ai-profile';
 
 export interface AIModelGeneratorOptions {
@@ -64,7 +65,7 @@ export const aiModelGeneratorService = {
                     created_at: new Date().toISOString(),
                     rating: 4.5,
                     reviewCount: 100,
-                    price: 0,
+                    // Removed invalid 'price' property
                     is_premium: false,
                     availability_status: 'available',
                   };

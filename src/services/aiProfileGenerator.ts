@@ -1,4 +1,3 @@
-
 import { AIProfile } from "@/types/ai-profile";
 
 const PERSONALITY_TYPES = ['friendly', 'flirty', 'shy', 'confident', 'mysterious'] as const;
@@ -84,7 +83,6 @@ function generateBio(name: string, personality: PersonalityType, traits: string[
 }
 
 export function generateAIProfile(): AIProfile {
-  // Use a local copy of the array instead of using the readonly constant directly
   const personalityTypes = [...PERSONALITY_TYPES] as PersonalityType[];
   const type = getRandomElement(personalityTypes);
   const name = getRandomElement(NAMES_FEMALE);
@@ -97,13 +95,8 @@ export function generateAIProfile(): AIProfile {
   const now = new Date();
   const id = Math.random().toString(36).substring(2, 15);
   
-  // For now, we'll use placeholder images
-  const avatarIndex = Math.floor(Math.random() * 10) + 1;
-  const avatarUrl = `https://images.unsplash.com/photo-15${Math.floor(Math.random() * 1000000)}?fit=crop&w=500&h=500`;
-  
   let personalityTypeForAI: "flirty" | "shy" | "dominant" | "playful" | "professional";
   
-  // Map our personality types to the allowed types in the AIProfile interface
   switch(type) {
     case 'flirty':
       personalityTypeForAI = 'flirty';
@@ -127,7 +120,7 @@ export function generateAIProfile(): AIProfile {
     age,
     location,
     bio: generateBio(name, type, traits, interests),
-    avatar_url: avatarUrl,
+    avatar_url: `https://images.unsplash.com/photo-15${Math.floor(Math.random() * 1000000)}?fit=crop&w=500&h=500`,
     gallery_images: [
       `https://images.unsplash.com/photo-15${Math.floor(Math.random() * 1000000)}?fit=crop&w=800&h=1000`,
       `https://images.unsplash.com/photo-15${Math.floor(Math.random() * 1000000)}?fit=crop&w=800&h=1000`
@@ -137,15 +130,10 @@ export function generateAIProfile(): AIProfile {
       traits
     },
     interests,
-    is_ai: true,
-    systemPrompt: `You are ${name}, a ${type} person with interests in ${interests.join(', ')}. ${backstory}`,
-    delayed_response_min: 2000,
-    delayed_response_max: 5000,
+    isAI: true,
     created_at: now.toISOString(),
-    lucoin_chat_price: 5,
-    lucoin_image_price: 10,
     availability_status: Math.random() > 0.3 ? 'online' : 'offline'
-  };
+  } as AIProfile;
 }
 
 export function generateMultipleProfiles(count: number): AIProfile[] {
