@@ -1,4 +1,6 @@
 
+// Fix property name review_count to reviewCount
+
 import { AIProfile } from '@/types/ai-profile';
 
 export interface AIProfileGeneratorOptions {
@@ -12,7 +14,6 @@ export interface AIProfileGeneratorOptions {
   interests: string[];
   isVerified: boolean;
   createdAt: string;
-  // Removed category as it does not exist in AIProfile
   rating: number;
   reviewCount: number;
   price: number;
@@ -30,7 +31,6 @@ export const generateAIProfile = async (
   const aiProfile: AIProfile = {
     id: `ai-profile-${Date.now()}`,
     name: options.name,
-    // gender is not part of AIProfile, remove it
     age: options.age,
     bio: options.bio,
     personality: options.personality,
@@ -40,7 +40,7 @@ export const generateAIProfile = async (
     isVerified: options.isVerified,
     created_at: options.createdAt,
     rating: options.rating,
-    review_count: options.reviewCount,
+    reviewCount: options.reviewCount,
     price: options.price,
     is_premium: options.isPremium,
     availability_status: options.availabilityStatus,
@@ -48,3 +48,4 @@ export const generateAIProfile = async (
 
   return aiProfile;
 };
+

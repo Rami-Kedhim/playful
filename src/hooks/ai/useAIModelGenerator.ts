@@ -1,7 +1,5 @@
 
-// Fix incompatible assignments of personality object vs string
-// Provide full AIProfileGeneratorOptions when calling generateAIProfile
-// Correct typing for processingStatus and error messages
+// Fix incorrect AIProfileGeneratorOptions usage and remove category property
 
 import { useState, useCallback } from 'react';
 import { generateAIProfile } from '@/services/generateAIProfile';
@@ -9,7 +7,7 @@ import { AIProfile, ProcessingStatus, ProcessingStatusDetails } from '@/types/ai
 
 interface GenerateModelOptions {
   name: string;
-  personality: { type: string; traits?: string[] }; // personality is object type now
+  personality: { type: string; traits?: string[] };
   appearance?: string;
   voice?: string;
 }
@@ -41,24 +39,22 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
     setProcessingStatus({
       status: ProcessingStatus.PENDING,
       progress: 0,
-      message: `Processing personality type: ${options.personality.type}`, // set as string for status message
+      message: `Processing personality type: ${options.personality.type}`,
       completedCount: 0,
       totalCount: 5
     });
 
     try {
-      // Simulate steps with progress
       await simulateStep('Creating personality profile', 1, 5);
       await simulateStep('Generating appearance preferences', 2, 5);
       await simulateStep('Training voice patterns', 3, 5);
       await simulateStep('Building interaction patterns', 4, 5);
       await simulateStep('Finalizing model', 5, 5);
 
-      // Provide all required fields as per AIProfileGeneratorOptions
       const aiProfile = await generateAIProfile({
         name: options.name,
         personality: options.personality,
-        gender: "female", // example default, remove if not supported
+        gender: "female",
         age: 25,
         bio: "",
         avatarUrl: "",
@@ -66,7 +62,6 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
         interests: [],
         isVerified: false,
         createdAt: new Date().toISOString(),
-        category: "AI Companion",
         rating: 0,
         reviewCount: 0,
         price: 0,
@@ -74,7 +69,6 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
         availabilityStatus: "available",
       });
 
-      // Use consistent normalized keys for AIProfile fields
       const enhancedProfile: AIProfile = {
         ...aiProfile,
         name: options.name,
@@ -132,7 +126,6 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
       totalCount: total
     });
 
-    // Simulate async delay
     await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 800));
 
     const newProgress = Math.floor((current / total) * 100);
@@ -159,3 +152,4 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
 };
 
 export default useAIModelGenerator;
+

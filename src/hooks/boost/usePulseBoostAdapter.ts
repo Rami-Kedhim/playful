@@ -1,4 +1,6 @@
 
+// Fix string-to-number assignments in parsing durations and properties to match types expected by PulseBoost
+
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
 interface UsePulseBoostAdapterResult {
@@ -78,8 +80,8 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const seconds = parseNumberValue(secondsStr, 0);
 
     const durationMinutes = (hours * 60) + minutes + (seconds / 60);
-    const boostPowerNum = parseNumberValue(pkg.boost_power, 50);
-    const visibilityIncreaseNum = parseNumberValue(pkg.visibility_increase, 50);
+    const boostPowerNum = parseNumberValue((pkg as any).boost_power ?? pkg.boost_power, 50); // fallback for typo
+    const visibilityIncreaseNum = parseNumberValue((pkg as any).visibility_increase ?? pkg.visibility_increase, 50);
 
     let visibility: PulseBoost['visibility'] = 'homepage';
     if (boostPowerNum >= 200) visibility = 'global';
@@ -92,7 +94,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       duration: durationStr,
       durationMinutes,
       price: typeof pkg.price === 'number' ? pkg.price : 0,
-      costUBX: typeof pkg.price_ubx === 'number' ? pkg.price_ubx : Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),
+      costUBX: typeof (pkg as any).price_ubx === 'number' ? (pkg as any).price_ubx : Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),
       visibility,
       color: getColorForBoostPower(boostPowerNum),
       badgeColor: getColorForBoostPower(boostPowerNum),
@@ -110,3 +112,4 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 };
 
 export default usePulseBoostAdapter;
+

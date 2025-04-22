@@ -1,6 +1,3 @@
-
-// Fix removing extra category property as it does not exist on AIProfile
-
 import { AIProfile, ProcessingStatus } from '@/types/ai-profile';
 
 export interface AIModelGeneratorOptions {
@@ -66,7 +63,7 @@ export const aiModelGeneratorService = {
                     isVerified: true,
                     created_at: new Date().toISOString(),
                     rating: 4.5,
-                    review_count: 100,
+                    reviewCount: 100,
                     price: 0,
                     is_premium: false,
                     availability_status: 'available',

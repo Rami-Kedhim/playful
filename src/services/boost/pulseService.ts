@@ -1,4 +1,6 @@
 
+// Fix property references for PulseBoost fields to remove non-existing ones
+
 import { BoostPackage } from '@/types/boost';
 import { PulseBoost } from '@/types/pulse-boost';
 import { PULSE_BOOSTS } from '@/constants/pulseBoostConfig';
@@ -11,11 +13,9 @@ export const getPulsePackages = async (): Promise<BoostPackage[]> => {
         name: pb.name,
         description: pb.description || '',
         duration: typeof pb.duration === 'string' ? pb.duration : '00:00:00',
-        price_ubx: pb.costUBX ?? 0,
+        price_ubx: pb.price_ubx ?? 0,
         price: pb.price || 0,
         features: pb.features || [],
-        boost_power: pb.boost_power ?? 0,
-        visibility_increase: pb.visibility_increase ?? 0,
       }));
       resolve(adaptedPackages);
     }, 500);
