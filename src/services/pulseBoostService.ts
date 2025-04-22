@@ -1,6 +1,6 @@
 
 import { ActiveBoost, PulseBoost, UserEconomy } from "@/types/pulse-boost";
-import { PULSE_BOOSTS } from "@/constants/pulseBoostConfig";
+import { PULSE_BOOSTS } from "@/constants/pulseBoostConfig"; // Updated import to use named export
 import { toast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 

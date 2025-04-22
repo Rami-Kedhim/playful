@@ -69,4 +69,7 @@ export const pulseBoosts: PulseBoost[] = [
   }
 ];
 
+// Add PULSE_BOOSTS constant for backward compatibility
+export const PULSE_BOOSTS = pulseBoosts;
+
 export default pulseBoosts;

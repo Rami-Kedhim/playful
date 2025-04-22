@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { usePulseBoost } from "@/hooks/boost/usePulseBoost";
-import { pulseBoosts } from "@/constants/pulseBoostConfig";
+import { pulseBoosts } from "@/constants/pulseBoostConfig"; // Updated import
 import { AlertCircle, ChevronRight, Clock, Zap } from "lucide-react";
 import PulseBoostCard from "./PulseBoostCard";
 import { formatDistanceToNow } from "date-fns";
