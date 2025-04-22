@@ -1,10 +1,9 @@
 
-// NOTE: Fixed access to visibility property on BoostPackage by using optional chaining and default value
-
 import React from 'react';
 import usePulseBoost from '@/hooks/boost/usePulseBoost';
 import PulseBoostCard from '@/components/boost/PulseBoostCard';
 import usePulseBoostAdapter from '@/hooks/boost/usePulseBoostAdapter';
+import { BoostPackage } from '@/types/boost';
 
 interface PulseBoostManagerProps {
   profileId?: string;
@@ -59,8 +58,8 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
             }}
             isActive={isActive(pkg.id)}
             timeRemaining={activeBoosts.find(b => b.boostId === pkg.id)?.timeRemaining}
-            onActivate={purchaseBoost}
-            onCancel={cancelBoost}
+            onActivate={() => purchaseBoost(pkg)}
+            onCancel={() => cancelBoost()} 
             userBalance={userEconomy.ubxBalance}
             disabled={false}
           />
@@ -71,4 +70,3 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
 };
 
 export default PulseBoostManager;
-

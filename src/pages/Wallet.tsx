@@ -1,7 +1,16 @@
+
 import { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import WalletConnect from '@/components/solana/WalletConnect';
+import { Button } from '@/components/ui/button';
+import UBXRechargeDialog from '@/components/profile/settings/UBXRechargeDialog';
+import UBXPackageDialog from '@/components/profile/settings/UBXPackageDialog';
+import UBXBalance from '@/components/profile/settings/UBXBalance';
+import SolanaWalletPanel from '@/components/wallet/SolanaWalletPanel';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Zap, Shield, Gift, ExternalLink, History } from 'lucide-react';
 
 const Wallet = () => {
   const { user, profile } = useAuth();

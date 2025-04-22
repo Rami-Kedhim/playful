@@ -57,12 +57,14 @@ export const usePulseBoost = (profileId?: string) => {
               ...boostStatus,
               startTime: startTimeDate,
               endTime: endTimeDate,
+              expiresAt: endTimeDate || new Date(),
               pulseData: {
                 boostType: boostPackage.name,
                 visibility: boostPackage.id === 'basic' ? 'homepage' :
                             boostPackage.id === 'premium' ? 'search' : 'global',
                 coverage: boostPackage.visibility_increase || 50
-              }
+              },
+              isActive: true
             };
 
             setEnhancedBoostStatus(enhancedStatus);
@@ -119,4 +121,3 @@ export const usePulseBoost = (profileId?: string) => {
 };
 
 export default usePulseBoost;
-

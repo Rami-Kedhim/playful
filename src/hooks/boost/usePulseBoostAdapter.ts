@@ -93,14 +93,12 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       description: pkg.description || `${pkg.name} visibility boost for your profile`,
       duration: pkg.duration,
       durationMinutes,
-      price: pkg.price,
-      costUBX: pkg.price_ubx || Math.round(convertToUBX(pkg.price)),
+      price: typeof pkg.price === 'number' ? pkg.price : 0,
+      costUBX: pkg.price_ubx || Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),
       visibility,
       color: getColorForBoostPower(pkg.boost_power || 50),
       badgeColor: getColorForBoostPower(pkg.boost_power || 50),
       features: pkg.features || [],
-      // We do not pass boost_power to PulseBoost as it causes typing errors
-      // Remove boost_power property to satisfy PulseBoost interface
       visibility_increase: pkg.visibility_increase || 50
     };
   };
@@ -114,4 +112,3 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 };
 
 export default usePulseBoostAdapter;
-
