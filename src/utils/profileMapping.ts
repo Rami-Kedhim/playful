@@ -9,11 +9,11 @@ import { UberPersona } from '@/types/UberPersona';
 export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
   return {
     id: escort.id,
-    name: escort.name,
-    type: 'escort',
+    name: escort.name, // added name to fix typing error
+    type: 'escort', // added type to fix typing error
     username: escort.name.toLowerCase().replace(/\s+/g, '_'),
     displayName: escort.name,
-    avatarUrl: escort.avatarUrl || escort.avatar || escort.images?.[0] || '',
+    avatarUrl: escort.avatarUrl || escort.avatar || (escort.images && escort.images.length > 0 ? escort.images[0] : ''),
     location: escort.location || '',
     languages: (escort.languages && escort.languages.length > 0) ? escort.languages : ['English'],
     bio: escort.bio || escort.description || '',
@@ -146,16 +146,16 @@ export const mapLivecamToUberPersona = (livecam: LivecamModel): UberPersona => {
       isCreator: false,
       isLivecam: true,
       isAI: false,
-      isVerified: livecam.is_verified ?? false,
-      isFeatured: livecam.is_featured || livecam.is_popular || false
+      isVerified: livecam.isVerified ?? false,
+      isFeatured: livecam.isFeatured || livecam.isPopular || false
     },
     capabilities: {
       hasPhotos: false,
-      hasVideos: !!livecam.preview_video_url,
+      hasVideos: !!livecam.previewVideoUrl,
       hasStories: false,
       hasChat: true,
       hasBooking: false,
-      hasLiveStream: livecam.is_live || livecam.is_streaming || false,
+      hasLiveStream: livecam.isLive || livecam.isStreaming || false,
       hasExclusiveContent: false,
       hasContent: false,
       hasRealMeets: false,
@@ -173,14 +173,13 @@ export const mapLivecamToUberPersona = (livecam: LivecamModel): UberPersona => {
       rating: livecam.rating || 0,
       reviewCount: 0,
       responseTime: 0.9,
-      viewCount: livecam.viewer_count || 0,
+      viewCount: livecam.viewerCount || 0,
       favoriteCount: 0
     },
     systemMetadata: {
       source: 'scraped',
       tagsGeneratedByAI: false,
       hilbertSpaceVector: generateHilbertVector(livecam.id),
-      // `boostScore` removed to avoid type errors
     }
   };
 };

@@ -64,7 +64,7 @@ export const aiModelGeneratorService = {
                     avatar_url: '/images/ai-avatar.png',
                     location: 'Virtual',
                     interests: ['chatting', 'learning', 'fun'],
-                    is_verified: true,
+                    isVerified: true,
                     created_at: new Date().toISOString(),
                     category: 'AI Companion',
                     rating: 4.5,

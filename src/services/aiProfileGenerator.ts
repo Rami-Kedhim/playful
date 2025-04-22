@@ -134,8 +134,7 @@ export function generateAIProfile(): AIProfile {
     ],
     personality: {
       type: personalityTypeForAI,
-      traits,
-      responseStyle: `${type}, ${voiceType}, expressive`
+      traits
     },
     interests,
     is_ai: true,

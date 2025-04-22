@@ -1,3 +1,4 @@
+
 import { AIProfile } from '@/types/ai-profile';
 
 export interface AIProfileGeneratorOptions {
@@ -29,14 +30,14 @@ export const generateAIProfile = async (
   const aiProfile: AIProfile = {
     id: `ai-profile-${Date.now()}`,
     name: options.name,
-    gender: options.gender,
+    // gender is not part of AIProfile, remove it
     age: options.age,
     bio: options.bio,
     personality: options.personality,
     avatar_url: options.avatarUrl,
     location: options.location,
     interests: options.interests,
-    is_verified: options.isVerified,
+    isVerified: options.isVerified,
     created_at: options.createdAt,
     category: options.category,
     rating: options.rating,
@@ -48,3 +49,4 @@ export const generateAIProfile = async (
 
   return aiProfile;
 };
+

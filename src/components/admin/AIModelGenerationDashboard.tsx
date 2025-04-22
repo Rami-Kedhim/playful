@@ -48,7 +48,7 @@ const AIModelGenerationDashboard: React.FC<AIModelGenerationDashboardProps> = ({
     
     generateModel({
       name: modelName,
-      personality: personalityType,
+      personality: { type: personalityType, traits: [] },
       appearance,
       voice: voiceType
     });
