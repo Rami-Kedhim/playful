@@ -1,10 +1,5 @@
 
-// Fixed UberCore to use optional chaining and update types according to UberPersona.
-// Removed calls to non-existent neuralServiceRegistry methods.
-// Adjusted systemMetadata to only known optional properties.
-// Added isActive and type properties where checked.
-
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersona } from '@/types/uberPersona';
 import { UberCoreSettings } from '@/services/neural/types/UberCoreService';
 import neuralServiceRegistry from './registry/NeuralServiceRegistry';
 
@@ -23,8 +18,8 @@ export class UberCore {
   public isAvailable(persona: UberPersona): boolean {
     if (!persona) return false;
 
-    const availability = persona.availability?.schedule;
-    return (persona.isActive ?? false) && !!availability;
+    // Used .isActive optionally
+    return (persona.isActive ?? false) && !!persona.availability?.schedule;
   }
 
   public async initialize(): Promise<boolean> {
@@ -49,7 +44,6 @@ export class UberCore {
       ...newSettings
     };
 
-    // Removed call to optimizeResourceAllocation - method does not exist
     console.info('UberCore settings updated:', this.settings);
   }
 
@@ -62,7 +56,6 @@ export class UberCore {
       return true;
     }
 
-    // Removed call to neuralServiceRegistry.shutdown - method does not exist
     this.initialized = false;
     return true;
   }
@@ -77,10 +70,12 @@ export class UberCore {
 
       if (!processedPersona.systemMetadata) {
         processedPersona.systemMetadata = {
-          // Removed 'version' due to type incompatibility
+          source: 'manual',
           lastSynced: new Date(),
-          personalityIndex: Math.random(),
-          statusFlags: processedPersona.systemMetadata?.statusFlags ?? {}
+          tagsGeneratedByAI: false,
+          hilbertSpaceVector: [],
+          personalityIndex: undefined,
+          statusFlags: undefined
         };
       }
 
@@ -94,7 +89,6 @@ export class UberCore {
         case 'ai':
           break;
         default:
-          // no action
           break;
       }
 
@@ -140,7 +134,7 @@ export class UberCore {
 
     const isPremium = persona.isPremium === true;
 
-    const useNeural = persona.systemMetadata?.statusFlags?.needsModeration === true || 
+    const useNeural = persona.systemMetadata?.statusFlags?.needsModeration === true ||
                       persona.systemMetadata?.personalityIndex !== undefined;
 
     return isPremium || useNeural;

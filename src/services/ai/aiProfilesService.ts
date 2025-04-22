@@ -67,7 +67,6 @@ export const mockAIProfiles: AIProfile[] = [
     isVerified: true,
     rating: 4.5,
     reviewCount: 100,
-    price: 0,
     isPremium: false,
     availability_status: "available",
   },
@@ -94,7 +93,6 @@ export const mockAIProfiles: AIProfile[] = [
     isVerified: false,
     rating: 4,
     reviewCount: 50,
-    price: 0,
     isPremium: false,
     availability_status: "available",
   },
@@ -121,7 +119,6 @@ export const mockAIProfiles: AIProfile[] = [
     isVerified: true,
     rating: 5,
     reviewCount: 75,
-    price: 0,
     isPremium: false,
     availability_status: "available",
   }

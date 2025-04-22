@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersona } from '@/types/uberPersona';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock } from 'lucide-react';
