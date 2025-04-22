@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,6 @@ import BoostActivePackage from './dialog/BoostActivePackage';
 import { BoostStatus, BoostEligibility } from '@/types/boost';
 import { BoostDialogTabsProps } from './types';
 
-// Update the component with the correct property names
 const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   activeTab: initialActiveTab,
   setActiveTab: externalSetActiveTab,
@@ -38,11 +36,9 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
   
-  // Use either the external or internal tab state
   const activeTab = initialActiveTab || internalActiveTab;
   const setActiveTab = externalSetActiveTab || setInternalActiveTab;
   
-  // Create compatible eligibility object using isEligible instead of eligible
   const compatibleEligibility: BoostEligibility = {
     isEligible: eligibility.isEligible !== undefined ? eligibility.isEligible : false,
     reason: eligibility.reason,
@@ -52,13 +48,11 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
     minRequiredBalance: eligibility.minRequiredBalance
   };
   
-  // Ensure boostStatus has all required properties
   const compatibleStatus: BoostStatus = {
     ...boostStatus,
     progress: boostStatus.progress || 0
   };
   
-  // Use hermesBoostStatus if provided, otherwise use hermesStatus
   const safeHermesStatus = hermesBoostStatus || hermesStatus || {
     position: 0,
     activeUsers: 0,
@@ -66,7 +60,6 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
     lastUpdateTime: new Date().toISOString(),
   };
   
-  // Use the provided purchase function or create a wrapper
   const handlePurchaseWrapper = async () => {
     if (handlePurchase) {
       return handlePurchase();
@@ -85,7 +78,6 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
     }
   };
   
-  // Use the provided cancel function or create a wrapper
   const handleCancelWrapper = async () => {
     if (handleCancel) {
       return handleCancel();
@@ -101,7 +93,6 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
     }
   };
   
-  // Format duration if not provided externally
   const formatDuration = formatBoostDuration || ((duration: string) => {
     const [hours, minutes] = duration.split(":").map(Number);
     if (hours >= 24) {
@@ -111,13 +102,11 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
     return `${hours} hour${hours !== 1 ? 's' : ''}`;
   });
   
-  // Calculate boost price if not provided externally
   const calculateBoostPrice = getBoostPrice || (() => {
     const pkg = boostPackages.find(p => p.id === selectedPackage);
     return pkg ? pkg.price_ubx : 0;
   });
   
-  // Set active tab when boost status changes
   React.useEffect(() => {
     if (boostStatus.isActive) {
       setActiveTab("active");
@@ -195,7 +184,9 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
         </div>
 
         <div className="mt-8">
-          <HermesBoostInfo hermesStatus={safeHermesStatus} />
+          <HermesBoostInfo 
+            hermesStatus={safeHermesStatus}
+          />
         </div>
       </TabsContent>
       

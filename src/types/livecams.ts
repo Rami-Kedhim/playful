@@ -10,7 +10,7 @@ export interface LivecamModel {
   streamUrl?: string;
   price?: number;
   
-  // Adding properties that were missing based on error messages
+  // Adding properties needed across various components
   username?: string;
   previewVideoUrl?: string;
   isPopular?: boolean;
@@ -24,6 +24,9 @@ export interface LivecamModel {
   boosted?: boolean;
   boostScore?: number;
   language?: string;
+  region?: string;
+  isStreaming?: boolean;
+  age?: number;
 }
 
 export interface Livecam {

@@ -1,271 +1,175 @@
+import { useState, useEffect, useCallback } from 'react';
+import { BoostStatus, BoostEligibility } from '@/types/boost';
 
-import { useState, useEffect, useCallback } from "react";
-import { BoostStatus, BoostPackage } from "@/types/boost";
-import { calculateRemainingTime, formatBoostDuration } from "@/utils/boostCalculator";
-import { toast } from "@/hooks/use-toast";
-
-export interface BoostStatusOptions {
-  mockMode?: boolean;
-  mockActiveChance?: number;
-  dailyBoostLimit?: number;
-  boostDuration?: string;
+interface ProfileData {
+  profileCompleteness: number;
+  isVerified: boolean;
+  rating: number;
+  profileCreatedDate: Date;
+  country: string;
+  role: 'verified' | 'regular' | 'AI';
+  ubxBalance: number;
 }
 
-const defaultOptions: BoostStatusOptions = {
-  mockMode: true,
-  mockActiveChance: 0.5,
-  dailyBoostLimit: 4,
-  boostDuration: "03:00:00", // 3 hours
+interface BoostOptions {
+  mockActiveChance?: number;
+  dailyBoostLimit?: number;
+}
+
+const formatTimeRemaining = (ms: number): string => {
+  const seconds = Math.floor((ms / 1000) % 60);
+  const minutes = Math.floor((ms / (1000 * 60)) % 60);
+  const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
+  const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+
+  let result = '';
+  if (days > 0) result += `${days}d `;
+  if (hours > 0) result += `${hours}h `;
+  if (minutes > 0) result += `${minutes}m `;
+  result += `${seconds}s`;
+
+  return result;
 };
 
-/**
- * Base hook for handling boost status functionality
- * Can be used for both creator and client contexts
- */
-export const useBoostStatusBase = (profileId?: string, options: BoostStatusOptions = defaultOptions) => {
-  const [boostStatus, setBoostStatus] = useState<BoostStatus>({
-    isActive: false,
-    progress: 0,
-    remainingTime: ''
-  });
-  const [loading, setLoading] = useState(true);
+export const useBoostStatusBase = (profileId?: string, options: BoostOptions = {}) => {
+  const { mockActiveChance = 0.3, dailyBoostLimit = 4 } = options;
+  const [boostStatus, setBoostStatus] = useState<BoostStatus>({ isActive: false });
+  const [eligibility, setEligibility] = useState<BoostEligibility>({ isEligible: false });
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [dailyBoostUsage, setDailyBoostUsage] = useState<number>(0);
-  const [eligibility, setEligibility] = useState<{ eligible: boolean; reason?: string }>({ eligible: false });
-  const [profileData, setProfileData] = useState<any>(null);
-  
-  const dailyBoostLimit = options.dailyBoostLimit || 4;
+  const [dailyBoostUsage, setDailyBoostUsage] = useState(0);
 
-  /**
-   * Fetch boost status from API or mock data
-   */
+  const startDate = new Date();  // or from API
+  const startTimeIso = startDate.toISOString();  // Convert to string
+
+  const mockBoostData = useCallback(() => {
+    const isActive = Math.random() < mockActiveChance;
+    const endTime = new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(); // 6 hours from now
+    return {
+      isActive,
+      startTime: startTimeIso,
+      endTime: endTime,
+      packageId: 'mock-package',
+      packageName: 'Mock Boost',
+      progress: 50,
+      timeRemaining: '5h 59m'
+    };
+  }, [mockActiveChance, startTimeIso]);
+
   const fetchBoostStatus = useCallback(async () => {
-    if (!profileId) {
-      setLoading(false);
-      return;
-    }
-
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      
-      // In mock mode, randomly determine if there's an active boost
-      const mockActiveBoost = Math.random() > (1 - (options.mockActiveChance || 0.5));
-      
-      if (mockActiveBoost) {
-        // Create mock expiry date based on configured boost duration
-        const expiryDate = new Date();
-        const durationStr = options.boostDuration || "03:00:00";
-        const [hours, minutes, seconds] = durationStr.split(':').map(Number);
-        const durationMs = ((hours * 60 + minutes) * 60 + seconds) * 1000;
-        expiryDate.setTime(expiryDate.getTime() + durationMs);
-        
-        // Create mock boost package
-        const mockBoostPackage: BoostPackage = {
-          id: "boost-standard",
-          name: "Standard Boost",
-          duration: durationStr,
-          price: 15,
-          price_ubx: 15,
-          description: "Standard visibility boost for limited time",
-          features: ["Top search results", "Featured badge", "Profile highlighting"]
-        };
-        
-        // Calculate progress based on elapsed time
-        const totalDurationMs = durationMs;
-        const elapsedMs = totalDurationMs - (expiryDate.getTime() - new Date().getTime());
-        const progress = Math.max(0, Math.min(100, (elapsedMs / totalDurationMs) * 100));
-        
-        setBoostStatus({
-          isActive: true,
-          expiresAt: expiryDate,
-          boostPackage: mockBoostPackage,
-          remainingTime: calculateRemainingTime(expiryDate),
-          progress: progress
-        });
-        
-        // Set daily boost usage (random number between 1 and dailyBoostLimit)
-        setDailyBoostUsage(Math.floor(Math.random() * (dailyBoostLimit - 1)) + 1);
-      } else {
-        setBoostStatus({
-          isActive: false,
-          progress: 0,
-          remainingTime: ''
-        });
-        
-        // Random daily boost usage (0 or small number)
-        setDailyBoostUsage(Math.floor(Math.random() * 2));
-      }
-      
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching boost status:", err);
-      setError("Failed to fetch boost status");
-    } finally {
-      setLoading(false);
-    }
-  }, [profileId, options.mockActiveChance, options.boostDuration, dailyBoostLimit]);
-
-  /**
-   * Check profile eligibility for boosting
-   */
-  const checkEligibility = useCallback(async () => {
-    if (!profileId) {
-      setEligibility({ eligible: false, reason: "No profile ID provided" });
-      return;
-    }
-
-    try {
-      // In a real app, this would call an API to check eligibility
-      const mockProfile = {
-        id: profileId,
-        completeness: 75,
-        rating: 4.2,
-        isVerified: true,
-        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-        lastBoost: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-      };
-      
-      setProfileData(mockProfile);
-      
-      const profileAge = (Date.now() - mockProfile.createdAt.getTime()) / (1000 * 60 * 60 * 24);
-      
-      let eligibilityResult;
-      
-      if (!mockProfile.isVerified) {
-        eligibilityResult = { 
-          eligible: false,
-          reason: "Only verified profiles can use the boost feature"
-        };
-      } else if (dailyBoostUsage >= dailyBoostLimit) {
-        eligibilityResult = { 
-          eligible: false,
-          reason: `You've reached the daily limit of ${dailyBoostLimit} boosts`
-        };
-      } else {
-        // In a real app, use isEligibleForBoosting utility
-        eligibilityResult = { 
-          eligible: true 
-        };
-      }
-      
-      setEligibility(eligibilityResult);
-    } catch (err: any) {
-      console.error("Error checking eligibility:", err);
-      setEligibility({ eligible: false, reason: err.message || "Failed to check eligibility" });
-    }
-  }, [profileId, dailyBoostUsage, dailyBoostLimit]);
-
-  /**
-   * Start a timer to update remaining time and progress
-   */
-  const startBoostTimer = useCallback(() => {
-    // Fix the timer type by using NodeJS.Timeout
-    const timer = setInterval(() => {
-      if (boostStatus.isActive && boostStatus.expiresAt) {
-        setBoostStatus(prev => {
-          if (!prev.expiresAt) return prev;
-          
-          const now = new Date();
-          
-          // If boost has expired, deactivate it
-          if (prev.expiresAt <= now) {
-            clearInterval(timer);
-            return {
-              isActive: false,
-              progress: 100,
-              remainingTime: 'Expired'
-            };
-          }
-          
-          // Otherwise update remaining time and progress
-          const totalDuration = prev.boostPackage?.duration || "03:00:00";
-          const [hours, minutes, seconds] = totalDuration.split(':').map(Number);
-          const durationMs = ((hours * 60 + minutes) * 60 + seconds) * 1000;
-          
-          const remainingMs = prev.expiresAt.getTime() - now.getTime();
-          const elapsedMs = durationMs - remainingMs;
-          const progress = Math.min(100, (elapsedMs / durationMs) * 100);
-          
-          return {
-            ...prev,
-            remainingTime: calculateRemainingTime(prev.expiresAt),
-            progress
-          };
-        });
-      }
-    }, 60000); // Update every minute
-    
-    return timer;
-  }, [boostStatus.isActive, boostStatus.expiresAt]);
-
-  /**
-   * Cancel an active boost
-   */
-  const cancelBoost = async (): Promise<boolean> => {
-    if (!profileId || !boostStatus.isActive) {
-      return false;
-    }
-
-    try {
-      setLoading(true);
-      
-      // In a real app, this would call an API to cancel the boost
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setBoostStatus({
-        isActive: false,
-        progress: 0,
-        remainingTime: ''
-      });
-      
-      toast({
-        title: "Boost Cancelled",
-        description: "Your profile boost has been cancelled",
-      });
-      
-      return true;
+      const mockData = mockBoostData();
+      setBoostStatus(mockData);
     } catch (err: any) {
-      console.error("Error cancelling boost:", err);
-      
-      toast({
-        title: "Error",
-        description: err.message || "Failed to cancel boost",
-        variant: "destructive"
-      });
-      
-      return false;
+      setError(err.message || 'Failed to fetch boost status');
     } finally {
       setLoading(false);
     }
-  };
-  
-  /**
-   * Format a duration string
-   */
-  const formatDuration = (durationStr: string): string => {
-    return formatBoostDuration(durationStr);
-  };
-  
-  // Initial fetch on mount
+  }, [mockBoostData]);
+
+  const checkEligibility = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const mockProfileData: ProfileData = {
+        profileCompleteness: 75,
+        isVerified: true,
+        rating: 4.5,
+        profileCreatedDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        country: 'US',
+        role: 'verified',
+        ubxBalance: 150
+      };
+      setProfileData(mockProfileData);
+
+      const isEligible = isEligibleForBoosting(mockProfileData);
+      setEligibility({ isEligible, reason: isEligible ? undefined : 'Not eligible' });
+    } catch (err: any) {
+      setError(err.message || 'Failed to check eligibility');
+      setEligibility({ isEligible: false, reason: err.message || 'Failed to check eligibility' });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (profileId) {
       fetchBoostStatus();
       checkEligibility();
     }
   }, [profileId, fetchBoostStatus, checkEligibility]);
-  
-  // Setup timer if boost is active
-  useEffect(() => {
-    let timer: NodeJS.Timeout | undefined;
+
+  const activeBoost = boostStatus.isActive ? boostStatus : null;
+
+  const checkIfBoostExpired = () => {
+    if (!activeBoost || !activeBoost.endTime) return false;
     
-    if (boostStatus.isActive && boostStatus.expiresAt) {
-      timer = startBoostTimer();
+    const endTimeDate = new Date(activeBoost.endTime);
+    const now = new Date();
+    
+    return now >= endTimeDate;
+  };
+
+  const calculateBoostTimeRemaining = () => {
+    if (!activeBoost || !activeBoost.endTime) return "";
+    
+    const endTimeDate = new Date(activeBoost.endTime);
+    const now = new Date();
+    
+    // If already expired
+    if (now >= endTimeDate) return "Expired";
+    
+    const remainingMs = endTimeDate.getTime() - now.getTime();
+    return formatTimeRemaining(remainingMs);
+  };
+
+  const calculateBoostProgress = () => {
+    if (!activeBoost || !activeBoost.startTime || !activeBoost.endTime) return 0;
+    
+    const startTimeDate = new Date(activeBoost.startTime);
+    const endTimeDate = new Date(activeBoost.endTime);
+    const now = new Date();
+
+    const totalDuration = endTimeDate.getTime() - startTimeDate.getTime();
+    const elapsed = now.getTime() - startTimeDate.getTime();
+    return (elapsed / totalDuration) * 100;
+  };
+
+  const cancelBoost = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setBoostStatus({ isActive: false });
+      toast({
+        title: "Success",
+        description: "Boost cancelled successfully",
+      });
+    } catch (err: any) {
+      setError(err.message || 'Failed to cancel boost');
+      toast({
+        title: "Error",
+        description: err.message || "An error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-    
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [boostStatus.isActive, boostStatus.expiresAt, startBoostTimer]);
+  }, []);
+
+  const formatDuration = (durationStr: string): string => {
+    const [hours, minutes] = durationStr.split(':').map(Number);
+    return `${hours} hours ${minutes} minutes`;
+  };
 
   return {
     boostStatus,
@@ -281,4 +185,12 @@ export const useBoostStatusBase = (profileId?: string, options: BoostStatusOptio
     cancelBoost,
     formatDuration
   };
+};
+
+const isEligibleForBoosting = (profile: ProfileData): boolean => {
+  return profile.profileCompleteness > 50 && profile.ubxBalance > 100;
+};
+
+const getCurrentTimeSlot = (): number => {
+  return new Date().getHours();
 };

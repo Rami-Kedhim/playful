@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { LivecamModel } from "@/types/livecams";
 import { useToast } from "@/components/ui/use-toast";
@@ -25,6 +24,24 @@ const fetchLivecamDetails = async (username: string): Promise<LivecamModel | nul
   };
 };
 
+const mapToLivecam = (data: any): any => {
+  return {
+    id: data.id,
+    username: data.username,
+    name: data.name,
+    imageUrl: data.imageUrl || data.thumbnailUrl,
+    thumbnailUrl: data.thumbnailUrl || data.imageUrl,
+    isLive: data.isStreaming || false,
+    isStreaming: data.isStreaming || false,
+    viewerCount: data.viewerCount || 0,
+    region: data.region || 'Unknown',
+    language: data.language || 'English',
+    tags: data.tags || [],
+    category: data.category || '',
+    rating: data.rating || 0
+  };
+};
+
 export const useLivecamDetail = (livecamId: string | undefined) => {
   const { toast } = useToast();
   const [livecam, setLivecam] = useState<LivecamModel | null>(null);
@@ -36,7 +53,6 @@ export const useLivecamDetail = (livecamId: string | undefined) => {
   const [isChatActive, setIsChatActive] = useState(false);
   const [recentTips, setRecentTips] = useState<{username: string, amount: number}[]>([]);
 
-  // Load livecam data
   useEffect(() => {
     const loadLivecamData = async () => {
       if (!livecamId) return;
@@ -44,7 +60,7 @@ export const useLivecamDetail = (livecamId: string | undefined) => {
       setLoading(true);
       try {
         const livecamData = await fetchLivecamDetails(livecamId);
-        setLivecam(livecamData);
+        setLivecam(mapToLivecam(livecamData));
         
         if (livecamData) {
           const status = livecamBoost.checkBoostStatus(livecamData.id);
@@ -56,8 +72,6 @@ export const useLivecamDetail = (livecamId: string | undefined) => {
             });
           }
           
-          // Check if user is following this livecam (mock implementation)
-          // In a real app, this would check against user data in a database
           const mockFollowedStreams = localStorage.getItem('followedStreams');
           const followedStreams = mockFollowedStreams ? JSON.parse(mockFollowedStreams) : [];
           setIsFollowing(followedStreams.includes(livecamData.id));
@@ -78,7 +92,6 @@ export const useLivecamDetail = (livecamId: string | undefined) => {
     loadLivecamData();
   }, [livecamId, toast]);
 
-  // Update viewer count periodically for live streams
   useEffect(() => {
     if (!livecam || !livecam.isLive) return;
     
@@ -99,12 +112,9 @@ export const useLivecamDetail = (livecamId: string | undefined) => {
     return () => clearInterval(interval);
   }, [livecam]);
 
-  // Handle follow/unfollow actions
   const handleToggleFollow = useCallback(() => {
     if (!livecam) return;
     
-    // Mock implementation using localStorage
-    // In a real app, this would be an API call to update user preferences in a database
     const mockFollowedStreams = localStorage.getItem('followedStreams');
     const followedStreams = mockFollowedStreams ? JSON.parse(mockFollowedStreams) : [];
     
@@ -127,7 +137,6 @@ export const useLivecamDetail = (livecamId: string | undefined) => {
     }
   }, [livecam, isFollowing, toast]);
 
-  // Handle boost actions
   const handleBoost = useCallback(() => {
     if (!livecam) return;
     

@@ -1,4 +1,3 @@
-
 // Creating a temporary mock implementation for this component
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -10,10 +9,11 @@ import BoostDialogTabs from "./dialog/BoostDialogTabs";
 import { HermesBoostStatus, BoostDialogContainerProps } from "./types";
 
 const BoostDialogContainer = ({
+  profileId,
+  onSuccess,
+  buttonProps,
   open,
   setOpen,
-  onSuccess,
-  profileId,
   buttonText = "Boost Profile",
   buttonVariant = "outline",
   buttonSize = "sm"
@@ -117,7 +117,7 @@ const BoostDialogContainer = ({
   };
   
   // Handle purchasing boost
-  const handlePurchase = async (): Promise<void> => {
+  const handleBoost = async (): Promise<void> => {
     const success = await purchaseBoost(selectedPackage);
     
     if (success && onSuccess) {
@@ -156,18 +156,21 @@ const BoostDialogContainer = ({
           setActiveTab={setActiveTab}
           boostStatus={boostStatus}
           eligibility={eligibility}
-          hermesBoostStatus={hermesBoostStatus}
+          hermesStatus={hermesBoostStatus}
           boostPackages={boostPackages}
           selectedPackage={selectedPackage}
           setSelectedPackage={setSelectedPackage}
           formatBoostDuration={formatBoostDuration}
           getBoostPrice={getBoostPrice}
+          handleBoost={handleBoost}
           handlePurchase={handlePurchase}
           handleCancel={handleCancel}
           handleDialogClose={handleDialogClose}
           dailyBoostUsage={dailyBoostUsage}
           dailyBoostLimit={dailyBoostLimit}
           loading={isLoading}
+          hermesBoostStatus={hermesBoostStatus}
+          boostAnalytics={undefined}
         />
       </DialogContent>
     </Dialog>

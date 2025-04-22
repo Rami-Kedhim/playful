@@ -1,18 +1,13 @@
 
+// Fix the import to use the correct export name
 import { useContext } from 'react';
-import { useUberPersonaContext } from '@/contexts/UberPersonaContext';
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersonaContext } from '@/contexts/UberPersonaContext';
 
-/**
- * Custom hook to access UberPersona data and operations
- */
 export const useUberPersona = () => {
-  const context = useUberPersonaContext();
-  
+  const context = useContext(UberPersonaContext);
   if (!context) {
     throw new Error('useUberPersona must be used within a UberPersonaProvider');
   }
-  
   return context;
 };
 

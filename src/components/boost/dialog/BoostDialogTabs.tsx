@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -17,12 +16,14 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   boostStatus,
   eligibility,
   hermesBoostStatus,
+  hermesStatus,
   boostPackages,
   selectedPackage,
   setSelectedPackage,
   formatBoostDuration,
   getBoostPrice,
   handlePurchase,
+  handleBoost,
   handleCancel,
   handleDialogClose,
   boostAnalytics,
@@ -34,12 +35,12 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   const [cancelLoading, setCancelLoading] = useState(false);
   
   // Create safe HermesBoostStatus object with all required properties
-  const hermesData = hermesBoostStatus ? {
-    position: hermesBoostStatus.position || 0,
-    activeUsers: hermesBoostStatus.activeUsers || 10,
-    estimatedVisibility: hermesBoostStatus.estimatedVisibility || 50,
-    lastUpdateTime: hermesBoostStatus.lastUpdateTime || new Date().toISOString()
-  } : undefined;
+  const hermesData = hermesBoostStatus || hermesStatus || {
+    position: 0,
+    activeUsers: 0,
+    estimatedVisibility: 0,
+    lastUpdateTime: new Date().toISOString()
+  };
   
   // Handle purchase button click
   const onPurchase = async () => {
@@ -113,13 +114,15 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
       <TabsContent value="packages" className="mt-6">
         <BoostPackages
           packages={boostPackages}
-          selectedPackage={selectedPackage || ''}
-          onSelectPackage={setSelectedPackage}
-          formatDuration={formatBoostDuration}
-          getBoostPrice={getBoostPrice}
-          dailyBoostUsage={dailyBoostUsage}
-          dailyBoostLimit={dailyBoostLimit}
+          selectedId={selectedPackage}
+          onSelect={setSelectedPackage}
+          formatDuration={formatBoostDuration || ((d) => d)}
+          dailyUsage={dailyBoostUsage}
+          dailyLimit={dailyBoostLimit}
           disabled={!eligibility.isEligible || loading}
+          getBoostPrice={getBoostPrice}
+          selectedPackage={selectedPackage}
+          onSelectPackage={setSelectedPackage}
         />
         
         <div className="flex justify-end mt-6">
@@ -148,7 +151,9 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
         </div>
 
         <div className="mt-8">
-          <HermesBoostInfo hermesData={hermesData} />
+          <HermesBoostInfo 
+            hermesStatus={hermesData} 
+          />
         </div>
       </TabsContent>
       
@@ -157,7 +162,6 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
           <div className="space-y-6">
             <BoostActivePackage 
               boostStatus={boostStatus}
-              hermesData={hermesData}
             />
             
             <div className="flex justify-end mt-6">
