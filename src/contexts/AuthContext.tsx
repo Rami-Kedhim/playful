@@ -18,7 +18,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
@@ -34,7 +33,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ? mapSupabaseUserToUser(session.user) : null);
@@ -50,13 +48,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Helper to map SupabaseUser to our User type
   const mapSupabaseUserToUser = (supabaseUser: SupabaseUser): User => {
     return {
       id: supabaseUser.id,
       email: supabaseUser.email ?? '',
       username: supabaseUser.user_metadata?.username,
-      name: supabaseUser.user_metadata?.full_name || supabaseUser.name,
+      name: supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || '',
       role: supabaseUser.user_metadata?.role,
       isVerified: supabaseUser.user_metadata?.isVerified,
       profileImageUrl: supabaseUser.user_metadata?.profileImageUrl ?? supabaseUser.user_metadata?.avatar_url,
@@ -185,7 +182,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw error;
       }
 
-      // Update local profile state
       setProfile(prev => prev ? { ...prev, ...data } : null);
       return true;
     } catch (error: any) {
@@ -194,9 +190,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  /**
-   * Alias methods for compatibility with different component usages
-   */
   const login = async (email: string, password: string): Promise<AuthResult> => {
     try {
       await signIn({ email, password });
@@ -227,7 +220,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Role checking function
   const checkRole = (role: string): boolean => {
     if (!profile) return false;
 

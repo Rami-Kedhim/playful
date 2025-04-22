@@ -10,7 +10,8 @@ import { AlertCircle, Clock, Zap } from "lucide-react";
 import PulseBoostCard from "./PulseBoostCard";
 import { formatDistanceToNow } from "date-fns";
 import UBXWallet from "../wallet/UBXWallet";
-import { BoostPackage, PulseBoost } from "@/types/boost";
+import { BoostPackage } from "@/types/boost";
+import { PulseBoost } from "@/types/pulse-boost";
 
 interface PulseBoostManagerProps {
   profileId?: string;
@@ -34,8 +35,8 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
     name: boost.name,
     description: boost.description || '',
     durationMinutes: 24 * 60, // Default 24 hours in minutes
-    visibility: boost.id === 'basic' ? 'homepage' : (boost.id === 'premium' ? 'search' : 'global'),
-    costUBX: boost.price_ubx || boost.price,
+    visibility: boost.visibility as PulseBoost['visibility'] || 'homepage',
+    costUBX: boost.price_ubx || boost.price || 0,
     badgeColor: boost.color || '#3b82f6',
     color: boost.color || '#3b82f6',
     duration: boost.duration,
@@ -192,3 +193,4 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
 };
 
 export default PulseBoostManager;
+

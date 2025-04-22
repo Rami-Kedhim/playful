@@ -1,3 +1,6 @@
+
+// Fix the profileId assignment in setBoostStatus and some typings
+
 import React, { createContext, ReactNode, useEffect, useState } from 'react';
 import { BoostPackage, BoostStatus, BoostEligibility } from '@/types/boost';
 import { useAuth } from '@/hooks/auth';
@@ -96,8 +99,8 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
         timeRemaining: selectedPackage.duration,
         boostPackage: selectedPackage,
         packageName: selectedPackage.name,
-        profileId: profileId
-      });
+        // Remove profileId here because BoostStatus type doesn't include it
+      } as BoostStatus);
       
       setDailyBoostUsage(prev => prev + 1);
       
@@ -160,3 +163,4 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
     </BoostContext.Provider>
   );
 };
+

@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Clock, Zap, ChevronRight } from "lucide-react";
-import { PulseBoost } from '@/types/boost';
+import { PulseBoost } from '@/types/pulse-boost';
 
 interface PulseBoostCardProps {
   boost: PulseBoost;
@@ -33,7 +33,7 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
     : boost.duration || "Unknown";
   
   // Check if user can afford this boost
-  const canAfford = userBalance >= (boost.costUBX || boost.price_ubx || boost.price);
+  const canAfford = userBalance >= (boost.costUBX || boost.price_ubx || boost.price || 0);
   
   const handleActivate = async () => {
     if (loading || !onActivate) return;
@@ -138,3 +138,4 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
 };
 
 export default PulseBoostCard;
+
