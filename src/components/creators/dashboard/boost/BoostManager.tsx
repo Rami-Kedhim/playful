@@ -1,5 +1,6 @@
 
-import { BoostManagerContainer } from "./BoostManagerContainer";
+import React from 'react';
+import BoostManagerContainer from "./BoostManagerContainer";
 
 export interface BoostManagerProps {
   profileId?: string;

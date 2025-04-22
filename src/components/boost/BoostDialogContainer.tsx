@@ -17,6 +17,11 @@ export interface BoostDialogContainerProps {
   buttonText?: string;
   buttonVariant?: string;
   buttonSize?: string;
+  buttonProps?: {
+    text: string;
+    variant: string;
+    size: string;
+  };
   open?: boolean;
   setOpen?: (open: boolean) => void;
 }
@@ -27,9 +32,15 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
   buttonText = "Boost Profile",
   buttonVariant = "default",
   buttonSize = "default",
+  buttonProps,
   open: externalOpen,
   setOpen: setExternalOpen,
 }) => {
+  // Use buttonProps if provided, otherwise use individual props
+  const finalButtonText = buttonProps?.text || buttonText;
+  const finalButtonVariant = buttonProps?.variant || buttonVariant;
+  const finalButtonSize = buttonProps?.size || buttonSize;
+
   const [internalOpen, setInternalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("packages");
   const {
@@ -97,8 +108,8 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={buttonVariant as any} size={buttonSize as any}>
-          {buttonText}
+        <Button variant={finalButtonVariant as any} size={finalButtonSize as any}>
+          {finalButtonText}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">

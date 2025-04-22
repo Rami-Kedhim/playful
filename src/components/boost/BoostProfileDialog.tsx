@@ -22,7 +22,7 @@ const BoostProfileDialog = ({
 }: BoostProfileDialogProps) => {
   // Create a wrapper function that accepts the boolean result and calls onSuccess
   const handleSuccess = async () => {
-    await onSuccess();
+    onSuccess();
     return true; // Return true to satisfy the Promise<boolean> requirement
   };
 
@@ -30,11 +30,9 @@ const BoostProfileDialog = ({
     <BoostDialogContainer
       profileId={profileId}
       onSuccess={handleSuccess}
-      buttonProps={{
-        text: buttonText,
-        variant: buttonVariant,
-        size: buttonSize
-      }}
+      buttonText={buttonText}
+      buttonVariant={buttonVariant}
+      buttonSize={buttonSize}
     />
   );
 };

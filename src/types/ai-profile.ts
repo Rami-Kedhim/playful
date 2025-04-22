@@ -46,4 +46,43 @@ export interface AIProfile {
     messages?: number;
     [key: string]: number | undefined;
   };
+  // Additional properties needed by AI components
+  age?: number;
+  location?: string;
+  country?: string;
+  avatar_url?: string;
+  avatarUrl?: string;
+  interests?: string[];
+  gallery_images?: string[];
+  lucoin_chat_price?: number;
+  lucoin_image_price?: number;
+  subscription_price?: number;
+  livecam_enabled?: boolean;
+  boost_status?: any;
+  boost?: any;
+}
+
+// Add ProcessingStatus enum for AI model generation
+export enum ProcessingStatus {
+  IDLE = 'idle',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  PENDING = 'pending',
+  CANCELLED = 'cancelled'
+}
+
+// Add AIMessage interface for AI message components
+export interface AIMessage {
+  id: string;
+  content: string;
+  sender: string;
+  timestamp: string;
+  isAI: boolean;
+  attachments?: {
+    type: string;
+    url: string;
+  }[];
+  status?: 'sent' | 'delivered' | 'read' | 'failed';
+  metadata?: Record<string, any>;
 }

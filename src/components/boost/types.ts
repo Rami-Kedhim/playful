@@ -1,21 +1,19 @@
 
-import { BoostStatus, BoostEligibility, BoostPackage, HermesBoostStatus } from "@/types/boost";
-
-export interface BoostButtonProps {
-  text?: string;
-  variant?: string;
-  size?: string;
-}
+import { BoostPackage, BoostStatus, BoostEligibility, HermesBoostStatus } from '@/types/boost';
 
 export interface BoostDialogContainerProps {
   profileId: string;
   onSuccess?: () => Promise<boolean>;
-  buttonProps?: BoostButtonProps;
-  open?: boolean;
-  setOpen?: (open: boolean) => void;
   buttonText?: string;
   buttonVariant?: string;
   buttonSize?: string;
+  buttonProps?: {
+    text: string;
+    variant: string;
+    size: string;
+  };
+  open?: boolean;
+  setOpen?: (open: boolean) => void;
 }
 
 export interface BoostDialogTabsProps {
@@ -26,47 +24,29 @@ export interface BoostDialogTabsProps {
   eligibility: BoostEligibility;
   boostPackages: BoostPackage[];
   selectedPackage: string;
-  setSelectedPackage: (packageId: string) => void;
-  handleBoost: () => Promise<void>;
-  handleCancel: () => Promise<void>;
+  setSelectedPackage: (id: string) => void;
+  handleBoost: () => void;
+  handleCancel: () => Promise<boolean>;
   dailyBoostUsage: number;
   dailyBoostLimit: number;
   hermesStatus: HermesBoostStatus;
-  
-  // Additional properties
   formatBoostDuration?: (duration: string) => string;
   getBoostPrice?: () => number;
-  handlePurchase?: () => Promise<void>;
-  handleDialogClose?: () => void;
-  boostAnalytics?: any;
+  handleDialogClose: () => void;
 }
 
-export interface BoostPackagesProps {
-  packages: BoostPackage[];
-  selectedId: string;
-  onSelect: (id: string) => void;
-  formatDuration: (duration: string) => string;
-  dailyUsage: number;
-  dailyLimit: number;
-  disabled?: boolean;
-  getBoostPrice?: () => number; // Add the missing getBoostPrice prop
-}
-
-export interface HermesBoostInfoProps {
-  hermesStatus: {
-    position: number;
-    activeUsers: number;
-    estimatedVisibility: number;
-    lastUpdateTime: string;
-  };
-}
-
-export interface BoostActivePackageProps {
+export interface UseBoostManagerResult {
+  loading: boolean;
+  error: string | null;
   boostStatus: BoostStatus;
-  hermesData?: {
-    position: any;
-    activeUsers: any;
-    estimatedVisibility: any;
-    lastUpdateTime: any;
-  };
+  eligibility: BoostEligibility;
+  boostPackages: BoostPackage[];
+  dailyBoostUsage: number;
+  dailyBoostLimit: number;
+  purchaseBoost: (pkg: BoostPackage) => Promise<boolean>;
+  cancelBoost: () => Promise<boolean>;
+  formatBoostDuration: (duration: string) => string;
+  getBoostAnalytics: () => Promise<any>;
+  fetchBoostPackages: () => Promise<BoostPackage[]>;
+  adaptGetBoostPrice: (fn: (pkg: BoostPackage) => number) => (pkg: BoostPackage) => number;
 }
