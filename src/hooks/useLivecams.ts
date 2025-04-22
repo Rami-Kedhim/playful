@@ -1,6 +1,15 @@
 
-import { useContext } from 'react';
-import { LivecamContextType, Livecam } from '@/types/livecams';
+import React, { useContext } from 'react';
+import { Livecam } from '@/types/livecams';
+
+// Create the LivecamContextType interface
+export interface LivecamContextType {
+  livecams: Livecam[];
+  loadingLivecams: boolean;
+  error: string | null;
+  fetchLivecams: () => Promise<void>;
+  getLivecamById?: (id: string) => Livecam | undefined;
+}
 
 // Create a dummy context since we don't know the actual LivecamContext structure
 const LivecamContext = React.createContext<LivecamContextType | undefined>(undefined);

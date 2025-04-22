@@ -2,129 +2,90 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/hooks/auth/useAuthContext';
 
 interface ResetPasswordFormProps {
-  onComplete?: () => void;
+  token?: string;
 }
 
-const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onComplete }) => {
+const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ token }) => {
   const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSent, setIsSent] = useState(false);
-  const { toast } = useToast();
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   const auth = useAuth();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!email) {
-      toast({
-        title: "Error",
-        description: "Please enter your email address",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsSubmitting(true);
+    setLoading(true);
+    setError(null);
     
     try {
-      // Use resetPassword if available, fall back to sendPasswordResetEmail
-      let result;
-      
-      if (auth.resetPassword) {
-        result = await auth.resetPassword(email);
-        if (result && result.success) {
-          setIsSent(true);
-        } else {
-          throw new Error(result?.error || "Failed to send reset email");
-        }
-      } else if (auth.sendPasswordResetEmail) {
-        const success = await auth.sendPasswordResetEmail(email);
-        if (success) {
-          setIsSent(true);
-        } else {
-          throw new Error("Failed to send reset email");
-        }
+      if (token) {
+        // If we have a token, we're resetting the password
+        await auth.resetPassword(token, password);
       } else {
-        throw new Error("Reset password function not available");
+        // If no token, we're requesting a reset email
+        await auth.requestPasswordReset(email, window.location.origin);
       }
-      
-      toast({
-        title: "Reset link sent",
-        description: "Check your email for password reset instructions",
-      });
-      
-      if (onComplete) {
-        onComplete();
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to send reset email. Please try again.",
-        variant: "destructive",
-      });
+      setSuccess(true);
+    } catch (err: any) {
+      setError(err.message || 'An error occurred');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
-
-  if (isSent) {
+  
+  if (success) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Check your email</CardTitle>
-          <CardDescription>
-            We've sent you a password reset link. Please check your inbox.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            If you don't see the email, check your spam folder. The link will expire after 24 hours.
-          </p>
-          <Button 
-            variant="outline" 
-            className="mt-4 w-full"
-            onClick={() => setIsSent(false)}
-          >
-            Send another link
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="text-center">
+        <h3 className="text-lg font-medium">Request Sent</h3>
+        <p className="mt-2 text-muted-foreground">
+          {token ? 'Your password has been reset successfully.' : 'Check your email for a reset link.'}
+        </p>
+      </div>
     );
   }
-
+  
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Reset your password</CardTitle>
-        <CardDescription>
-          Enter your email address and we'll send you a link to reset your password
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="name@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Sending..." : "Send reset link"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="p-3 text-sm border rounded bg-red-50 border-red-200 text-red-600">
+          {error}
+        </div>
+      )}
+      
+      {!token ? (
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <Label htmlFor="password">New Password</Label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+      )}
+      
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? 'Processing...' : token ? 'Reset Password' : 'Send Reset Email'}
+      </Button>
+    </form>
   );
 };
 

@@ -12,6 +12,9 @@ export interface BoostContextType {
     isActive: boolean;
     expiresAt?: string;
   } | null;
+  dailyBoostUsage?: number;
+  dailyBoostLimit?: number;
+  cancelBoost?: () => Promise<boolean>;
 }
 
 const defaultValue: BoostContextType = {
@@ -20,7 +23,10 @@ const defaultValue: BoostContextType = {
   boostProfile: async () => false,
   loading: false,
   error: null,
-  boostStatus: null
+  boostStatus: null,
+  dailyBoostUsage: 0,
+  dailyBoostLimit: 5,
+  cancelBoost: async () => false
 };
 
 export const BoostContext = createContext<BoostContextType>(defaultValue);
@@ -35,6 +41,8 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [boostStatus, setBoostStatus] = useState<{ isActive: boolean; expiresAt?: string } | null>(null);
+  const [dailyBoostUsage, setDailyBoostUsage] = useState(0);
+  const [dailyBoostLimit, setDailyBoostLimit] = useState(5);
 
   useEffect(() => {
     // Fetch boost packages
@@ -129,6 +137,7 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
       setBoostStatus(newBoostStatus);
       setIsActive(true);
       setLoading(false);
+      setDailyBoostUsage(prev => prev + 1);
       
       return true;
     } catch (err: any) {
@@ -139,8 +148,38 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
     }
   };
 
+  const cancelBoost = async (): Promise<boolean> => {
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setBoostStatus({
+        isActive: false
+      });
+      setIsActive(false);
+      setLoading(false);
+      return true;
+    } catch (err: any) {
+      console.error('Error cancelling boost:', err);
+      setError(err.message || 'Failed to cancel boost');
+      setLoading(false);
+      return false;
+    }
+  };
+
   return (
-    <BoostContext.Provider value={{ isActive, packages, boostProfile, loading, error, boostStatus }}>
+    <BoostContext.Provider value={{ 
+      isActive, 
+      packages, 
+      boostProfile, 
+      loading, 
+      error, 
+      boostStatus, 
+      dailyBoostUsage,
+      dailyBoostLimit,
+      cancelBoost
+    }}>
       {children}
     </BoostContext.Provider>
   );
