@@ -91,50 +91,54 @@ export const usePulseBoost = (profileId?: string) => {
             };
 
             setEnhancedBoostStatus(enhancedStatus);
+            console.debug("Enhanced boost status set:", enhancedStatus);
           } else {
             setEnhancedBoostStatus({ isActive: false });
           }
         } else if (boostStatus?.isActive && boostStatus.packageId) {
           const boostPackage = packages.find(pkg => pkg.id === boostStatus.packageId);
 
-          if (boostPackage) {
-            const startTimeDate = boostStatus.startTime instanceof Date
-              ? boostStatus.startTime
-              : (boostStatus.startTime ? new Date(boostStatus.startTime) : new Date());
-            const endTimeDate = boostStatus.endTime instanceof Date
-              ? boostStatus.endTime
-              : (boostStatus.endTime ? new Date(boostStatus.endTime) : undefined);
-
-            const mockActiveBoost: ActiveBoost = {
-              boostId: boostStatus.packageId,
-              startedAt: startTimeDate,
-              expiresAt: endTimeDate,
-              timeRemaining: boostStatus.remainingTime || '00:00:00',
-              boostDetails: boostPackage,
-            };
-
-            setActiveBoosts([mockActiveBoost]);
-
-            const enhancedStatus: EnhancedBoostStatus = {
-              ...boostStatus,
-              startTime: startTimeDate,
-              endTime: endTimeDate,
-              expiresAt: endTimeDate || new Date(),
-              pulseData: {
-                boostType: boostPackage.name,
-                visibility: boostPackage.id === 'basic' ? 'homepage' :
-                            boostPackage.id === 'premium' ? 'search' : 'global',
-                coverage: boostPackage.visibility_increase || 50
-              },
-              isActive: true
-            };
-
-            setEnhancedBoostStatus(enhancedStatus);
-          } else {
+          if (!boostPackage) {
             console.warn('Boost package not found for boostStatus.packageId:', boostStatus.packageId);
             setEnhancedBoostStatus({ isActive: false });
             setActiveBoosts([]);
+            setIsLoading(false);
+            return;
           }
+
+          const startTimeDate = boostStatus.startTime instanceof Date
+            ? boostStatus.startTime
+            : (boostStatus.startTime ? new Date(boostStatus.startTime) : new Date());
+          const endTimeDate = boostStatus.endTime instanceof Date
+            ? boostStatus.endTime
+            : (boostStatus.endTime ? new Date(boostStatus.endTime) : undefined);
+
+          const mockActiveBoost: ActiveBoost = {
+            boostId: boostStatus.packageId,
+            startedAt: startTimeDate,
+            expiresAt: endTimeDate,
+            timeRemaining: boostStatus.remainingTime || '00:00:00',
+            boostDetails: boostPackage,
+          };
+
+          setActiveBoosts([mockActiveBoost]);
+
+          const enhancedStatus: EnhancedBoostStatus = {
+            ...boostStatus,
+            startTime: startTimeDate,
+            endTime: endTimeDate,
+            expiresAt: endTimeDate || new Date(),
+            pulseData: {
+              boostType: boostPackage.name,
+              visibility: boostPackage.id === 'basic' ? 'homepage' :
+                          boostPackage.id === 'premium' ? 'search' : 'global',
+              coverage: boostPackage.visibility_increase || 50
+            },
+            isActive: true
+          };
+
+          setEnhancedBoostStatus(enhancedStatus);
+          console.debug("Enhanced boost status set from boostStatus:", enhancedStatus);
         } else {
           setActiveBoosts([]);
           setEnhancedBoostStatus({ isActive: false });
@@ -186,4 +190,3 @@ export const usePulseBoost = (profileId?: string) => {
 };
 
 export default usePulseBoost;
-

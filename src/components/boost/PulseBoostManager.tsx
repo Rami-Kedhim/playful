@@ -42,6 +42,11 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
           ? `${pkg.visibility_increase}% increased visibility`
           : 'Standard visibility';
 
+        // Ensure costUBX fallback to 0 safely
+        const costUBX = pkg.price_ubx ?? 0;
+
+        const timeRemaining = activeBoosts.find(b => b.boostId === pkg.id)?.timeRemaining;
+
         return (
           <PulseBoostCard
             key={pkg.id}
@@ -51,15 +56,15 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
               description: pkg.description,
               durationMinutes: 0, // Could parse duration if needed
               visibility: 'homepage', // default or map from package
-              costUBX: pkg.price_ubx || 0,
+              costUBX: costUBX,
               color: pkg.color || '#3b82f6',
               badgeColor: pkg.color || '#3b82f6',
               features: pkg.features || []
             }}
             isActive={isActive(pkg.id)}
-            timeRemaining={activeBoosts.find(b => b.boostId === pkg.id)?.timeRemaining}
+            timeRemaining={timeRemaining}
             onActivate={() => purchaseBoost(pkg)}
-            onCancel={() => cancelBoost()} 
+            onCancel={() => cancelBoost()}
             userBalance={userEconomy.ubxBalance}
             disabled={false}
           />
