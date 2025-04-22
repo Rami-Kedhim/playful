@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
 import { useAuth } from './useAuthContext';
-import { User, UserRole } from '@/types/auth';
+import { User } from '@/types/auth';
 
 export const useAuthState = () => {
   const { user } = useAuth();

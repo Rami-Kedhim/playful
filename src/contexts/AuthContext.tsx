@@ -1,7 +1,6 @@
-
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '@/types/auth';
+import { User, UserRole } from '@/types/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -10,15 +9,17 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
-  // Added missing properties
   isAuthenticated: boolean;
   logout: () => Promise<void>;
   checkRole: (role: string) => boolean;
   updateUserProfile: (data: any) => Promise<boolean>;
+  resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
+  sendPasswordResetEmail: (email: string) => Promise<{ success: boolean; error?: string }>;
   refreshProfile: () => Promise<void>;
   profile: any; // Mock profile data
   updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
   userRoles: string[];
+  clearError: () => void;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -34,8 +35,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [profile, setProfile] = useState(null);
   const [userRoles, setUserRoles] = useState<string[]>([]);
 
+  const clearError = () => setError(null);
+
   useEffect(() => {
-    // Check active sessions and sets the user
     const getSession = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       
@@ -44,7 +46,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
       
       if (session?.user) {
-        // Enhance user with additional properties
         const enhancedUser = {
           ...session.user,
           username: session.user.user_metadata?.username || session.user.email?.split('@')[0],
@@ -57,7 +58,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         } as User;
         
         setUser(enhancedUser);
-        setUserRoles(enhancedUser.roles || [enhancedUser.role || 'user']);
+        setUserRoles(getRolesAsStrings(enhancedUser.roles || [enhancedUser.role || 'user']));
       } else {
         setUser(null);
       }
@@ -67,11 +68,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     getSession();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (session?.user) {
-          // Enhance user with additional properties
           const enhancedUser = {
             ...session.user,
             username: session.user.user_metadata?.username || session.user.email?.split('@')[0],
@@ -84,7 +83,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           } as User;
           
           setUser(enhancedUser);
-          setUserRoles(enhancedUser.roles || [enhancedUser.role || 'user']);
+          setUserRoles(getRolesAsStrings(enhancedUser.roles || [enhancedUser.role || 'user']));
         } else {
           setUser(null);
         }
@@ -97,6 +96,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
   }, []);
 
+  const getRolesAsStrings = (roles: Array<string | { name: string }>) => {
+    return roles.map(role => {
+      if (typeof role === 'string') {
+        return role;
+      }
+      return role.name;
+    });
+  };
+
   const signIn = async (email: string, password: string) => {
     try {
       setError(null);
@@ -107,7 +115,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return { success: false, error: error.message };
       }
 
-      // Enhance user with additional properties
       const enhancedUser = {
         ...data.user,
         username: data.user?.user_metadata?.username || data.user?.email?.split('@')[0],
@@ -120,7 +127,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       } as User;
       
       setUser(enhancedUser);
-      setUserRoles(enhancedUser.roles || [enhancedUser.role || 'user']);
+      setUserRoles(getRolesAsStrings(enhancedUser.roles || [enhancedUser.role || 'user']));
       return { success: true };
     } catch (err: any) {
       setError(err.message);
@@ -154,20 +161,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  // Added function to match the required interface
   const logout = async () => {
     return signOut();
   };
 
-  // Add checkRole function
   const checkRole = (requiredRole: string) => {
     if (!user) return false;
     
-    const userRoles = user.roles || [user.role || 'user'];
+    const userRoles = getRolesAsStrings(user.roles || [user.role || 'user']);
     return userRoles.includes(requiredRole);
   };
 
-  // Add updateUserProfile function
   const updateUserProfile = async (data: any): Promise<boolean> => {
     try {
       const { error } = await supabase.auth.updateUser({
@@ -182,7 +186,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return false;
       }
 
-      // Update the local user state with the new data
       if (user) {
         const updatedUser = {
           ...user,
@@ -206,22 +209,47 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return false;
     }
   };
-  
-  // Add refreshProfile function
+
+  const resetPassword = async (token: string, newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(token, {
+        password: newPassword
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const sendPasswordResetEmail = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
   const refreshProfile = async (): Promise<void> => {
     try {
-      // This would normally fetch user profile from the database
       console.log("Refreshing user profile");
-      // For now, do nothing
     } catch (err) {
       console.error("Error refreshing profile:", err);
     }
   };
-  
-  // Add updatePassword function
+
   const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
     try {
-      // This would be implemented with Supabase
       console.log("Updating password");
       return true;
     } catch (err) {
@@ -238,7 +266,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       signIn, 
       signUp, 
       signOut,
-      // Added properties
       isAuthenticated: !!user,
       logout,
       checkRole,
@@ -246,14 +273,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       profile,
       refreshProfile,
       updatePassword,
-      userRoles
+      userRoles,
+      resetPassword,
+      sendPasswordResetEmail,
+      clearError
     }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Export a hook for easier use of the auth context
 export const useAuth = () => {
   const context = React.useContext(AuthContext);
   if (context === null) {

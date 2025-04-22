@@ -1,124 +1,149 @@
 
-import React, { createContext, useContext, useState } from 'react';
-import { toast } from '@/components/ui/use-toast';
-import { useBoostAdapters } from '@/hooks/boost/useBoostAdapters';
-import { BoostStatus, BoostEligibility, BoostPackage, BoostAnalytics } from '@/types/boost';
-import { useAuth } from '@/hooks/auth/useAuth';
+import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { BoostPackage } from '@/types/boost';
 
-interface BoostContextType {
+export interface BoostContextType {
   isActive: boolean;
-  isLoading: boolean;
-  boostStatus: BoostStatus | null;
-  eligibility: BoostEligibility;
-  boostPackages: BoostPackage[];
-  dailyBoostUsage: number;
-  dailyBoostLimit: number;
+  packages: BoostPackage[];
+  boostProfile: (profileId: string, packageId: string) => Promise<boolean>;
   loading: boolean;
   error: string | null;
-  boostAnalytics: BoostAnalytics | null;
-  purchaseBoost: (pkg: BoostPackage) => Promise<boolean>;
-  cancelBoost: () => Promise<boolean>;
+  boostStatus: {
+    isActive: boolean;
+    expiresAt?: string;
+  } | null;
 }
 
-const BoostContext = createContext<BoostContextType | undefined>(undefined);
-
-export const useBoost = () => {
-  const context = useContext(BoostContext);
-  if (context === undefined) {
-    throw new Error('useBoost must be used within a BoostProvider');
-  }
-  return context;
+const defaultValue: BoostContextType = {
+  isActive: false,
+  packages: [],
+  boostProfile: async () => false,
+  loading: false,
+  error: null,
+  boostStatus: null
 };
 
-// Added alias for backward compatibility
-export const useBoostContext = useBoost;
+export const BoostContext = createContext<BoostContextType>(defaultValue);
 
-export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+interface BoostProviderProps {
+  children: ReactNode;
+}
+
+export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
+  const [isActive, setIsActive] = useState(false);
+  const [packages, setPackages] = useState<BoostPackage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [boostAnalytics, setBoostAnalytics] = useState<BoostAnalytics | null>(null);
-  
-  const {
-    boostStatus: rawBoostStatus,
-    eligibility: rawEligibility,
-    boostPackages: rawPackages,
-    dailyBoostUsage,
-    dailyBoostLimit,
-    loading: boostLoading,
-    error,
-    purchaseBoost,
-    cancelBoost,
-    adaptBoostStatus,
-    adaptBoostEligibility,
-    adaptBoostPackages
-  } = useBoostAdapters(user?.id || '');
+  const [error, setError] = useState<string | null>(null);
+  const [boostStatus, setBoostStatus] = useState<{ isActive: boolean; expiresAt?: string } | null>(null);
 
-  // Apply adapters to convert types
-  const boostStatus = adaptBoostStatus(rawBoostStatus);
-  const eligibility = adaptBoostEligibility(rawEligibility || { isEligible: false, reason: 'Unknown' });
-  const boostPackages = adaptBoostPackages(rawPackages || []);
-  const isActive = boostStatus?.isActive || false;
+  useEffect(() => {
+    // Fetch boost packages
+    const fetchPackages = async () => {
+      setLoading(true);
+      try {
+        // Mock data for demo purposes
+        const mockPackages: BoostPackage[] = [
+          {
+            id: "1",
+            name: "1 Hour Boost",
+            description: "Increase your profile visibility for 1 hour",
+            price: 5,
+            price_lucoin: 50,
+            duration: "1:00:00",
+            features: ["Top of search results", "Featured badge"]
+          },
+          {
+            id: "2",
+            name: "24 Hour Boost",
+            description: "Increase your profile visibility for 24 hours",
+            price: 20,
+            price_lucoin: 200,
+            duration: "24:00:00",
+            features: ["Top of search results", "Featured badge", "Homepage feature"]
+          },
+          {
+            id: "3",
+            name: "7 Day Boost",
+            description: "Increase your profile visibility for 7 days",
+            price: 100,
+            price_lucoin: 1000,
+            duration: "168:00:00",
+            features: ["Top of search results", "Featured badge", "Homepage feature", "Priority notifications"]
+          }
+        ];
+        
+        setPackages(mockPackages);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching boost packages:', err);
+        setError('Failed to fetch boost packages');
+        setLoading(false);
+      }
+    };
+
+    fetchPackages();
+
+    // Check if profile is currently boosted
+    const checkBoostStatus = async () => {
+      // Mock boost status for now
+      const mockStatus = {
+        isActive: Math.random() > 0.5,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      };
+      
+      setBoostStatus(mockStatus);
+      setIsActive(mockStatus.isActive);
+    };
+    
+    checkBoostStatus();
+  }, []);
+
+  const boostProfile = async (profileId: string, packageId: string): Promise<boolean> => {
+    setLoading(true);
+    try {
+      // Mock successful boost
+      console.log(`Boosting profile ${profileId} with package ${packageId}`);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const selectedPackage = packages.find(pkg => pkg.id === packageId);
+      
+      if (!selectedPackage) {
+        throw new Error('Invalid package selection');
+      }
+      
+      // Set boost as active with expiry based on package duration
+      const now = new Date();
+      const durationParts = selectedPackage.duration.split(':').map(Number);
+      const hours = durationParts[0] || 0;
+      const minutes = durationParts[1] || 0;
+      
+      const expiryDate = new Date(now.getTime() + (hours * 60 * 60 * 1000) + (minutes * 60 * 1000));
+      
+      const newBoostStatus = {
+        isActive: true,
+        expiresAt: expiryDate.toISOString()
+      };
+      
+      setBoostStatus(newBoostStatus);
+      setIsActive(true);
+      setLoading(false);
+      
+      return true;
+    } catch (err: any) {
+      console.error('Error boosting profile:', err);
+      setError(err.message || 'Failed to boost profile');
+      setLoading(false);
+      return false;
+    }
+  };
 
   return (
-    <BoostContext.Provider value={{
-      isActive,
-      isLoading: loading || boostLoading,
-      boostStatus,
-      eligibility,
-      boostPackages,
-      dailyBoostUsage,
-      dailyBoostLimit,
-      loading: loading || boostLoading,
-      error,
-      boostAnalytics,
-      purchaseBoost: async (pkg: BoostPackage) => {
-        try {
-          loading && setLoading(true);
-          const result = await purchaseBoost(pkg);
-          if (result) {
-            toast({
-              title: "Boost activated",
-              description: `Your ${pkg.name} boost is now active!`,
-            });
-          }
-          return result;
-        } catch (err) {
-          console.error("Error purchasing boost:", err);
-          toast({
-            title: "Error",
-            description: "Failed to purchase boost. Please try again.",
-            variant: "destructive",
-          });
-          return false;
-        } finally {
-          loading && setLoading(false);
-        }
-      },
-      cancelBoost: async () => {
-        try {
-          loading && setLoading(true);
-          const result = await cancelBoost();
-          if (result) {
-            toast({
-              title: "Boost cancelled",
-              description: "Your boost has been cancelled.",
-            });
-          }
-          return result;
-        } catch (err) {
-          console.error("Error cancelling boost:", err);
-          toast({
-            title: "Error",
-            description: "Failed to cancel boost. Please try again.",
-            variant: "destructive",
-          });
-          return false;
-        } finally {
-          loading && setLoading(false);
-        }
-      }
-    }}>
+    <BoostContext.Provider value={{ isActive, packages, boostProfile, loading, error, boostStatus }}>
       {children}
     </BoostContext.Provider>
   );
 };
+
+export const useBoost = () => useContext(BoostContext);

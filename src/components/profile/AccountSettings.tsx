@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,9 +51,15 @@ const AccountSettings = () => {
     }
   };
 
-  // Get user roles from the Auth object directly
+  const formatRoleName = (role: string | { name: string }) => {
+    if (typeof role === 'string') {
+      return role.charAt(0).toUpperCase() + role.slice(1);
+    }
+    return role.name.charAt(0).toUpperCase() + role.name.slice(1);
+  };
+
   const userRoles = user?.roles || [user?.role || "user"];
-  const roleLabels = userRoles.map(role => role.charAt(0).toUpperCase() + role.slice(1)).join(", ");
+  const roleLabels = userRoles.map(formatRoleName).join(", ");
 
   return (
     <Card className="w-full">

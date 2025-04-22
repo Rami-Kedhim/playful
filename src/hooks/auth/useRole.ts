@@ -1,7 +1,7 @@
 
 import { useMemo } from 'react';
 import { useAuth } from './useAuthContext';
-import { UserRole } from '@/types/auth';
+import type { UserRole } from '@/types/auth';
 
 interface UseRoleReturn {
   hasRole: (role: string) => boolean;
@@ -24,7 +24,7 @@ export const useRole = (): UseRoleReturn => {
     if (!user) return [];
     
     if (user.roles && Array.isArray(user.roles)) {
-      return user.roles;
+      return user.roles.map(role => typeof role === 'string' ? role : role.name);
     }
     
     return user.role ? [user.role] : [];
@@ -38,7 +38,7 @@ export const useRole = (): UseRoleReturn => {
   
   // Check if user has admin role (shorthand)
   const isAdmin = useMemo(() => {
-    return hasRole(UserRole.ADMIN);
+    return hasRole('admin');
   }, [user, checkRole]);
   
   // Check if user has all of the specified roles
@@ -55,7 +55,7 @@ export const useRole = (): UseRoleReturn => {
   
   // Check if user can access admin features - admin or moderator
   const canAccessAdminFeatures = useMemo(() => {
-    return hasRole(UserRole.ADMIN) || hasRole(UserRole.MODERATOR);
+    return hasRole('admin') || hasRole('moderator');
   }, [hasRole]);
   
   return {
@@ -63,10 +63,10 @@ export const useRole = (): UseRoleReturn => {
     hasAllRoles,
     hasAnyRole,
     isAdmin,
-    isModerator: hasRole(UserRole.MODERATOR),
-    isUser: hasRole(UserRole.USER),
-    isCreator: hasRole(UserRole.CREATOR),
-    isEscort: hasRole(UserRole.ESCORT),
+    isModerator: hasRole('moderator'),
+    isUser: hasRole('user'),
+    isCreator: hasRole('creator'),
+    isEscort: hasRole('escort'),
     roles,
     canAccessAdminFeatures
   };

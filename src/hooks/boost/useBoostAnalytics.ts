@@ -1,9 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import { BoostAnalytics } from '@/types/boost';
 
-// Update the impressions type to be an object instead of a number
-export interface AnalyticsData extends Omit<BoostAnalytics, 'impressions'> {
+export interface BoostAnalytics {
   impressions: {
     today: number;
     yesterday: number;
@@ -20,6 +18,15 @@ export interface AnalyticsData extends Omit<BoostAnalytics, 'impressions'> {
     withoutBoost: number;
     increase: number;
   };
+  rank: {
+    current: number;
+    previous: number;
+    change: number;
+  };
+  trending: boolean;
+  additionalViews: number;
+  engagementIncrease: number;
+  rankingPosition: number;
   clicks: {
     today: number;
     yesterday: number;
@@ -29,6 +36,8 @@ export interface AnalyticsData extends Omit<BoostAnalytics, 'impressions'> {
     increase: number;
   };
 }
+
+export type AnalyticsData = BoostAnalytics;
 
 export const useBoostAnalytics = (profileId: string) => {
   const [data, setData] = useState<AnalyticsData | null>(null);

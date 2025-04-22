@@ -25,6 +25,8 @@ export interface User {
     isActive: boolean;
     expiresAt?: string;
   };
+  // Additional fields needed by the app
+  createdAt?: string | Date;
 }
 
 export interface UserProfile {
@@ -70,6 +72,9 @@ export interface AuthUser {
 export interface AuthResult {
   success: boolean;
   error?: string | null;
+  user?: User;
+  message?: string;
+  token?: string;
 }
 
 export interface AuthContextType {
@@ -88,6 +93,9 @@ export interface AuthContextType {
   refreshProfile: () => Promise<void>;
   updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
   userRoles: string[];
+  // Additional required methods
+  resetPassword?: (token: string, newPassword: string) => Promise<AuthResult>;
+  sendPasswordResetEmail?: (email: string) => Promise<AuthResult>;
 }
 
 export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';

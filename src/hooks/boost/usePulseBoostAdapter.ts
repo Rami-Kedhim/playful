@@ -1,9 +1,10 @@
+
 import { BoostPackage } from '@/types/boost';
 
-// Add the missing properties to BoostPackage type in your adapter
+// Create extended interfaces for the adapter
 interface AdaptedBoostPackage extends BoostPackage {
-  durationMinutes: number;
-  costUBX: number;
+  durationMinutes?: number;
+  costUBX?: number;
 }
 
 export const useBoostAdapters = (profileId: string) => {
@@ -20,11 +21,13 @@ export const useBoostAdapters = (profileId: string) => {
     return `${Math.floor(minutes / 1440)} days`;
   };
 
-  // Fix the formatDuration function to use the proper properties
+  // Fix the formatDuration function to handle standard packages
   const formatDuration = (pkg: BoostPackage): string => {
-    // Check if we're dealing with the native package format or an adapted one
-    if ((pkg as AdaptedBoostPackage).durationMinutes) {
-      const minutes = (pkg as AdaptedBoostPackage).durationMinutes;
+    const adaptedPkg = pkg as AdaptedBoostPackage;
+    
+    // Check if we're dealing with the adapted package format
+    if (adaptedPkg.durationMinutes !== undefined) {
+      const minutes = adaptedPkg.durationMinutes;
       if (minutes < 60) return `${minutes} minutes`;
       if (minutes < 1440) return `${Math.floor(minutes / 60)} hours`;
       return `${Math.floor(minutes / 1440)} days`;
@@ -41,10 +44,12 @@ export const useBoostAdapters = (profileId: string) => {
     }
   };
 
-  // Fix the getBoostPrice function to use the proper properties
+  // Fix the getBoostPrice function to handle multiple price formats
   const getBoostPrice = (pkg: BoostPackage): number => {
-    if ((pkg as AdaptedBoostPackage).costUBX !== undefined) {
-      return (pkg as AdaptedBoostPackage).costUBX;
+    const adaptedPkg = pkg as AdaptedBoostPackage;
+    
+    if (adaptedPkg.costUBX !== undefined) {
+      return adaptedPkg.costUBX;
     }
     return pkg.price_lucoin || pkg.price || 0;
   };

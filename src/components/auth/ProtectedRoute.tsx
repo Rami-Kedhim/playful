@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { UserRole } from "@/types/auth";
+import type { UserRole } from "@/types/auth";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -27,8 +27,12 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
 
   // If allowedRoles is specified, check if user has one of the allowed roles
   if (allowedRoles && allowedRoles.length > 0 && user) {
-    const userRoles = user.roles || [user.role as UserRole || UserRole.USER];
-    const hasAllowedRole = allowedRoles.some(role => userRoles.includes(role as UserRole));
+    const userRoles = user.roles || [user.role || 'user'];
+    const hasAllowedRole = allowedRoles.some(role => {
+      // Check against string roles or role objects
+      const userRoleStrings = userRoles.map(r => typeof r === 'string' ? r : r.name);
+      return userRoleStrings.includes(role);
+    });
     
     if (!hasAllowedRole) {
       // User doesn't have required role, redirect to access-denied
