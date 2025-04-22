@@ -1,5 +1,5 @@
 
-// Fix language -> languages for UberPersona and remove usage of missing LivecamModel fields
+// Fix profileMapping to match UberPersona type properties and fix LivecamModel fields
 
 import { Escort } from '@/types/Escort';
 import { ContentCreator } from '@/types/creator';
@@ -9,11 +9,13 @@ import { UberPersona } from '@/types/UberPersona';
 export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
   return {
     id: escort.id,
+    name: escort.name,
+    type: 'escort',
     username: escort.name.toLowerCase().replace(/\s+/g, '_'),
     displayName: escort.name,
     avatarUrl: escort.avatarUrl || escort.avatar || escort.images?.[0] || '',
     location: escort.location || '',
-    languages: (escort.languages && escort.languages.length > 0) ? escort.languages : ['English'], // fix property name
+    languages: (escort.languages && escort.languages.length > 0) ? escort.languages : ['English'],
     bio: escort.bio || escort.description || '',
     age: escort.age || 0,
     ethnicity: escort.ethnicity || '',
@@ -66,11 +68,13 @@ export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
 export const mapCreatorToUberPersona = (creator: ContentCreator): UberPersona => {
   return {
     id: creator.id,
+    name: creator.name,
+    type: 'creator',
     username: creator.username || creator.name.toLowerCase().replace(/\s+/g, '_'),
     displayName: creator.name,
     avatarUrl: creator.avatarUrl || creator.profileImage || creator.imageUrl || '',
     location: creator.location || '',
-    languages: (creator.languages && creator.languages.length > 0) ? creator.languages : ['English'], // fix property name
+    languages: (creator.languages && creator.languages.length > 0) ? creator.languages : ['English'],
     bio: creator.bio || creator.description || '',
     age: creator.age || 0,
     ethnicity: creator.ethnicity || '',
@@ -124,6 +128,8 @@ export const mapCreatorToUberPersona = (creator: ContentCreator): UberPersona =>
 export const mapLivecamToUberPersona = (livecam: LivecamModel): UberPersona => {
   return {
     id: livecam.id,
+    name: livecam.name || livecam.username || '',
+    type: 'livecam',
     username: livecam.username || (livecam.name ? livecam.name.toLowerCase().replace(/\s+/g, '_') : ''),
     displayName: livecam.displayName || livecam.name || '',
     avatarUrl: livecam.imageUrl || livecam.thumbnailUrl || '',
@@ -140,16 +146,16 @@ export const mapLivecamToUberPersona = (livecam: LivecamModel): UberPersona => {
       isCreator: false,
       isLivecam: true,
       isAI: false,
-      isVerified: livecam.isVerified || false,
-      isFeatured: livecam.isFeatured || livecam.isPopular || false
+      isVerified: livecam.is_verified ?? false,
+      isFeatured: livecam.is_featured || livecam.is_popular || false
     },
     capabilities: {
       hasPhotos: false,
-      hasVideos: !!livecam.previewVideoUrl,
+      hasVideos: !!livecam.preview_video_url,
       hasStories: false,
       hasChat: true,
       hasBooking: false,
-      hasLiveStream: livecam.isLive || livecam.isStreaming || false,
+      hasLiveStream: livecam.is_live || livecam.is_streaming || false,
       hasExclusiveContent: false,
       hasContent: false,
       hasRealMeets: false,
@@ -167,14 +173,14 @@ export const mapLivecamToUberPersona = (livecam: LivecamModel): UberPersona => {
       rating: livecam.rating || 0,
       reviewCount: 0,
       responseTime: 0.9,
-      viewCount: livecam.viewerCount || 0,
+      viewCount: livecam.viewer_count || 0,
       favoriteCount: 0
     },
     systemMetadata: {
       source: 'scraped',
       tagsGeneratedByAI: false,
       hilbertSpaceVector: generateHilbertVector(livecam.id),
-      boostScore: livecam.boostScore // Add but could be problematic depending on UberPersona type
+      // `boostScore` removed to avoid type errors
     }
   };
 };
@@ -190,3 +196,4 @@ const generateHilbertVector = (id: string, dimension: number = 4): number[] => {
 
   return vector;
 };
+

@@ -1,4 +1,6 @@
 
+// Remove gender and other non-existent fields from AIProfile literal to fix type errors
+
 import { AIProfile, ProcessingStatus } from '@/types/ai-profile';
 
 export interface AIModelGeneratorOptions {
@@ -43,7 +45,6 @@ export const aiModelGeneratorService = {
       };
 
       try {
-        // Simulate generating the model
         updateProgress('Initializing', 5);
         setTimeout(() => {
           updateProgress('Configuring Personality', 15);
@@ -57,21 +58,19 @@ export const aiModelGeneratorService = {
                   const generatedModel: AIProfile = {
                     id: 'ai-model-' + Date.now(),
                     name: options.name,
-                    gender: 'female',
-                    age: 25,
-                    bio: 'A friendly AI companion',
+                    bio: '',
                     personality: options.personality,
                     avatar_url: '/images/ai-avatar.png',
                     location: 'Virtual',
                     interests: ['chatting', 'learning', 'fun'],
-                    is_verified: true,
-                    created_at: new Date().toISOString(),
+                    isVerified: true,
+                    createdAt: new Date().toISOString(),
                     category: 'AI Companion',
                     rating: 4.5,
-                    review_count: 100,
+                    reviewCount: 100,
                     price: 0,
-                    is_premium: false,
-                    availability_status: 'available',
+                    isPremium: false,
+                    availabilityStatus: 'available',
                   };
                   updateProgress('Model Ready', 0);
                   resolve(generatedModel);
@@ -87,5 +86,4 @@ export const aiModelGeneratorService = {
     });
   }
 };
-
 

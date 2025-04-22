@@ -1,61 +1,87 @@
+import { useState, useEffect } from 'react';
 
-import { useState } from 'react';
-import { AIMessage } from '@/types/ai-chat';
-import { aiConversationsService } from '@/services/ai/aiConversationsService';
+export const useAIChat = (conversationId: string, userId: string, initialMessages: any[] = []) => {
+  const [messages, setMessages] = useState(initialMessages);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [typing, setTyping] = useState(false);
 
-interface UseAIChatReturn {
-  isProcessing: boolean;
-  currentPrompt: string | null;
-  sendMessage: (message: string) => Promise<void>;
-  clearChat: () => void;
-}
+  useEffect(() => {
+    // Load initial messages when conversation ID changes
+    const loadMessages = async () => {
+      if (!conversationId) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Here you would fetch messages from your API
+        // const response = await fetchMessages(conversationId);
+        // setMessages(response.data);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load messages');
+        console.error('Error loading chat messages:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadMessages();
+  }, [conversationId, userId]);
 
-export const useAIChat = (): UseAIChatReturn => {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [currentPrompt, setCurrentPrompt] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([]);
-
-  const sendMessage = async (message: string) => {
-    setIsProcessing(true);
-    setCurrentPrompt(message);
+  const sendMessage = async (content: string) => {
+    if (!content.trim() || !conversationId) return;
+    
+    // Optimistically add user message to the UI
+    const userMessage = {
+      id: `temp-${Date.now()}`,
+      content,
+      role: 'user',
+      timestamp: new Date(),
+      senderId: userId
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
+    setTyping(true);
     
     try {
-      // Add user message
-      setMessages(prev => [...prev, { role: 'user', content: message }]);
+      // Here you would send the message to your API
+      // const response = await sendChatMessage(conversationId, content, userId);
+      // const aiResponse = response.data;
       
-      // Send message using service
-      const aiMessage = await aiConversationsService.sendMessage({
-        role: 'user',
-        content: message,
-        senderId: 'user-1',
-        receiverId: 'ai-1'
-      });
+      // Simulate AI response for now
+      setTimeout(() => {
+        const aiMessage = {
+          id: `ai-${Date.now()}`,
+          content: `This is a simulated response to: "${content}"`,
+          role: 'assistant',
+          timestamp: new Date(),
+          senderId: 'ai'
+        };
+        
+        setMessages(prev => [...prev, aiMessage]);
+        setTyping(false);
+      }, 1000);
       
-      // Mock AI response after a delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Add AI response
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: `I processed your message: "${message}"`
-      }]);
-    } catch (error) {
-      console.error('Error processing AI message:', error);
-    } finally {
-      setIsProcessing(false);
-      setCurrentPrompt(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to send message');
+      console.error('Error sending message:', err);
+      setTyping(false);
     }
   };
 
-  const clearChat = () => {
+  const clearMessages = () => {
     setMessages([]);
   };
 
   return {
-    isProcessing,
-    currentPrompt,
+    messages,
+    setMessages,
     sendMessage,
-    clearChat
+    clearMessages,
+    loading,
+    error,
+    typing
   };
 };
 

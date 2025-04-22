@@ -5,7 +5,7 @@ import { AIProfile, ProcessingStatus, ProcessingStatusDetails } from '@/types/ai
 
 interface GenerateModelOptions {
   name: string;
-  personality: { type: string; traits?: string[] }; // personality should be object type
+  personality: { type: string; traits?: string[] }; // personality is object type now
   appearance?: string;
   voice?: string;
 }
@@ -37,39 +37,45 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
     setProcessingStatus({
       status: ProcessingStatus.PENDING,
       progress: 0,
-      message: { type: options.personality.type, traits: options.personality.traits || [] }, // fix type to object
+      message: { type: options.personality.type, traits: options.personality.traits || [] }, // this should be object here, not string
       completedCount: 0,
       totalCount: 5
     });
 
     try {
-      // Step 1: Initialize personality profile
+      // Simulate steps with progress
       await simulateStep('Creating personality profile', 1, 5);
-
-      // Step 2: Generate appearance preferences
       await simulateStep('Generating appearance preferences', 2, 5);
-
-      // Step 3: Training voice patterns
       await simulateStep('Training voice patterns', 3, 5);
-
-      // Step 4: Building conversation history
       await simulateStep('Building interaction patterns', 4, 5);
-
-      // Step 5: Finalizing model
       await simulateStep('Finalizing model', 5, 5);
 
-      // Generate the AI profile
+      // We must provide full AIProfileGeneratorOptions as expected by generateAIProfile
       const aiProfile = await generateAIProfile({
         name: options.name,
         personality: options.personality,
+        gender: "female", // example default
+        age: 25,
+        bio: "",
+        avatarUrl: "",
+        location: "",
+        interests: [],
+        isVerified: false,
+        createdAt: new Date().toISOString(),
+        category: "AI Companion",
+        rating: 0,
+        reviewCount: 0,
+        price: 0,
+        isPremium: false,
+        availabilityStatus: "available",
       });
 
-      // Add display name for consistency with the type
+      // Use normalized property keys consistent with AIProfile
       const enhancedProfile: AIProfile = {
         ...aiProfile,
         displayName: options.name,
         description: aiProfile.description || `AI companion with ${options.personality.type} personality.`,
-        personality: options.personality, // make sure personality is object not string
+        personality: options.personality, // keep as object
       };
 
       setGeneratedModel(enhancedProfile);
@@ -123,7 +129,7 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
       totalCount: total
     });
 
-    // Simulate processing time
+    // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 800));
 
     const newProgress = Math.floor((current / total) * 100);

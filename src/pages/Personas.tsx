@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { UberPersona } from '@/types/UberPersona';
 import UberPersonaGrid from '@/components/personas/UberPersonaGrid';
-import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
+import { mapEscortToUberPersona } from '@/utils/profileMapping';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import EnhancedAppLayout from '@/components/layout/EnhancedAppLayout';
-import usePersonaFilter, { FilterOptions } from '@/hooks/usePersonaFilter';
+import usePersonaFilter from '@/hooks/usePersonaFilter';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -26,7 +26,7 @@ const PersonasPage: React.FC = () => {
           await loadEscorts(true);
         }
 
-        const mappedPersonas = mapEscortsToUberPersonas(state.escorts);
+        const mappedPersonas = state.escorts.map(escort => mapEscortToUberPersona(escort));
         setAllPersonas(mappedPersonas);
 
         updateFilterOptions({

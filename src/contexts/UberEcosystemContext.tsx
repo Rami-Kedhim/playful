@@ -1,3 +1,6 @@
+
+// Fix import of mapEscortToUberPersona and fix types for escorts mapping
+
 import React, {
   createContext,
   useContext,
@@ -8,7 +11,7 @@ import React, {
 import { Escort } from '@/types/Escort';
 import { UberPersona } from '@/types/UberPersona';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
-import { mapEscortToUberPersona } from '@/utils/profileMapping'; // fixed import here
+import { mapEscortToUberPersona } from '@/utils/profileMapping';
 import { uberCoreInstance } from '@/services/neural/UberCore';
 
 export interface HilbertSpace {
@@ -117,8 +120,15 @@ const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) =>
         setLoading(true);
         await uberCoreInstance.initialize();
         if (escorts && escorts.length > 0) {
-          // Map each escort individually
-          const mappedPersonas = escorts.map(e => mapEscortToUberPersona(e));
+          // Map each escort with required id and name added to CompatibleEscort to match Escort
+          const sanitizedEscorts: CompatibleEscort[] = escorts.map(e => ({
+            id: e.id,
+            name: e.name,
+            ...e,
+            height: e.height !== undefined && e.height !== null ? e.height.toString() : '',
+          })) as CompatibleEscort[];
+
+          const mappedPersonas = sanitizedEscorts.map(e => mapEscortToUberPersona(e as Escort));
           setAllPersonas(mappedPersonas);
         }
         setHilbertSpace({
@@ -218,3 +228,4 @@ export const useUberEcosystemContext = () => {
 };
 
 export default UberEcosystemContext;
+

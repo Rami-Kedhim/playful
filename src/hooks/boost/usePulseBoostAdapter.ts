@@ -1,4 +1,6 @@
 
+// Fix incorrect types by parsing string fields to number for PulseBoost properties
+
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
 interface UsePulseBoostAdapterResult {
@@ -34,18 +36,24 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     return "Less than a minute";
   };
 
-  // Adapt a price getter function to handle our package formats
+  const parseNumberValue = (val: any, fallback: number): number => {
+    if (typeof val === 'number') return val;
+    if (typeof val === 'string') {
+      const parsed = Number(val);
+      return isNaN(parsed) ? fallback : parsed;
+    }
+    return fallback;
+  };
+
   const adaptGetPulseBoostPrice = (
     fn: (pkg: BoostPackage) => number
   ) => (pkg: BoostPackage): number => {
     if (pkg.price_ubx !== undefined && pkg.price_ubx !== null) {
-      return pkg.price_ubx;
+      return Number(pkg.price_ubx);
     }
-
     if (fn) {
       return fn(pkg);
     }
-
     return pkg.price || 0;
   };
 
@@ -72,21 +80,13 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const seconds = Number(durationParts[2]) || 0;
 
     // Calculate durationMinutes as number
-    // Note: seconds/60 is decimal fraction
     const durationMinutes: number = (hours * 60) + minutes + (seconds / 60);
 
+    // Parse boost_power safely to number
+    const boostPowerNum = parseNumberValue(pkg.boost_power, 50);
+
+    // Determine visibility
     let visibility: PulseBoost['visibility'] = 'homepage';
-
-    // Parse boost_power to number safely
-    const boostPowerRaw = pkg.boost_power;
-    let boostPowerNum: number = 50; // default
-    if (typeof boostPowerRaw === 'number') {
-      boostPowerNum = boostPowerRaw;
-    } else if (typeof boostPowerRaw === 'string') {
-      const parsed = Number(boostPowerRaw);
-      boostPowerNum = isNaN(parsed) ? 50 : parsed;
-    }
-
     if (boostPowerNum >= 200) {
       visibility = 'global';
     } else if (boostPowerNum >= 100) {
@@ -95,31 +95,24 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       visibility = 'homepage';
     }
 
-    // Parse visibility_increase to number safely
-    const visibilityIncreaseRaw = pkg.visibility_increase;
-    let visibilityIncreaseNum: number = 50; // default
-    if (typeof visibilityIncreaseRaw === 'number') {
-      visibilityIncreaseNum = visibilityIncreaseRaw;
-    } else if (typeof visibilityIncreaseRaw === 'string') {
-      const parsed = Number(visibilityIncreaseRaw);
-      visibilityIncreaseNum = isNaN(parsed) ? 50 : parsed;
-    }
+    // Parse visibility_increase safely to number
+    const visibilityIncreaseNum = parseNumberValue(pkg.visibility_increase, 50);
 
     return {
       id: pkg.id,
       name: pkg.name,
       description: pkg.description || `${pkg.name} visibility boost for your profile`,
       duration: durationStr,
-      durationMinutes: durationMinutes, // number type here
+      durationMinutes: durationMinutes,
       price: typeof pkg.price === 'number' ? pkg.price : 0,
       costUBX: typeof pkg.price_ubx === 'number'
         ? pkg.price_ubx
-        : Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)), // number type here
+        : Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),
       visibility,
       color: getColorForBoostPower(boostPowerNum),
       badgeColor: getColorForBoostPower(boostPowerNum),
       features: pkg.features || [],
-      visibility_increase: visibilityIncreaseNum // number type here
+      visibility_increase: visibilityIncreaseNum
     };
   };
 
