@@ -1,8 +1,6 @@
 
-// Fix usage of 'previewImage' property, which does not exist on type 'Livecam', remove or replace with 'imageUrl'
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Livecam, LivecamModel } from '@/types/livecams';
+import { Livecam } from '@/types/livecams';
 
 interface LivecamContextType {
   livecams: Livecam[];
@@ -38,7 +36,7 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Mock data with properly typed Livecam objects
+      // Mock data with properly typed Livecam objects, removed non-existing properties
       const mockLivecams: Livecam[] = [
         {
           id: '1',
@@ -47,8 +45,6 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
           displayName: 'Sophia Live',
           imageUrl: 'https://example.com/sophia.jpg',
           thumbnailUrl: 'https://example.com/sophia-thumb.jpg',
-          // Removed previewImage
-          profileImage: 'https://example.com/sophia-profile.jpg',
           isLive: true,
           isStreaming: true,
           viewerCount: 425,
@@ -58,7 +54,6 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
           category: 'Dance',
           region: 'US',
           language: 'English',
-          featured: true,
           description: 'Join my livestream for dance and fitness routines!'
         },
         {
@@ -68,8 +63,6 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
           displayName: 'Emma Gaming',
           imageUrl: 'https://example.com/emma.jpg',
           thumbnailUrl: 'https://example.com/emma-thumb.jpg',
-          // Removed previewImage
-          profileImage: 'https://example.com/emma-profile.jpg',
           isLive: true,
           isStreaming: true,
           viewerCount: 318,
@@ -79,7 +72,6 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
           category: 'Gaming',
           region: 'CA',
           language: 'English',
-          featured: false,
           description: 'RPG gaming streams every evening'
         },
         {
@@ -89,8 +81,6 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
           displayName: 'Mia Music',
           imageUrl: 'https://example.com/mia.jpg',
           thumbnailUrl: 'https://example.com/mia-thumb.jpg',
-          // Removed previewImage
-          profileImage: 'https://example.com/mia-profile.jpg',
           isLive: false,
           isStreaming: false,
           viewerCount: 0,
@@ -100,7 +90,6 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
           category: 'Music',
           region: 'UK',
           language: 'English',
-          featured: true,
           description: 'Piano performances and music theory'
         }
       ];
@@ -120,7 +109,9 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
   }, []);
   
   // Filter featured and popular livecams
-  const featuredLivecams = livecams.filter(livecam => livecam.featured);
+  // Removed filtering by featured because 'featured' not on Livecam type
+  // Provide an example filtering by rating > 4.7 instead for featured
+  const featuredLivecams = livecams.filter(livecam => livecam.rating !== undefined && livecam.rating > 4.7);
   const popularLivecams = [...livecams].sort((a, b) => b.viewerCount - a.viewerCount).slice(0, 5);
   
   return (
@@ -138,4 +129,3 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
     </LivecamContext.Provider>
   );
 };
-

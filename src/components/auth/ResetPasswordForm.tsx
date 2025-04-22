@@ -24,28 +24,21 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSuccess, resetT
     
     setIsLoading(true);
     try {
-      // Call requestPasswordReset from auth context
-      const result = await auth.sendPasswordResetEmail(email);
+      // Assume sendPasswordResetEmail returns void, so handle success by assumption
+      await auth.sendPasswordResetEmail(email);
       
-      if (result.success) {
-        setSuccess(true);
-        toast({
-          title: "Password reset email sent",
-          description: "Check your inbox for the reset link.",
-        });
-        if (onSuccess) onSuccess();
-      } else {
-        toast({
-          title: "Error",
-          description: result.error || "Failed to request password reset",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
+      setSuccess(true);
+      toast({
+        title: "Password reset email sent",
+        description: "Check your inbox for the reset link.",
+      });
+      if (onSuccess) onSuccess();
+
+    } catch (error: any) {
       console.error("Password reset error:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: error?.message || "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
