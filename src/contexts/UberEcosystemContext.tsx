@@ -1,3 +1,4 @@
+
 // Fix CompatibleEscort type properties to match Escort
 // Ensure id and name are on CompatibleEscort so it satisfies Escort requirements
 
@@ -9,7 +10,7 @@ import React, {
   ReactNode,
 } from 'react';
 import { Escort } from '@/types/Escort';
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersona } from '@/types/uberPersona';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { mapEscortToUberPersona } from '@/utils/profileMapping';
 import { uberCoreInstance } from '@/services/neural/UberCore';
@@ -228,3 +229,4 @@ export const useUberEcosystemContext = () => {
 };
 
 export default UberEcosystemContext;
+
