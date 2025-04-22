@@ -1,5 +1,5 @@
 
-// Fix incorrect types by parsing string fields to number for PulseBoost properties
+// Fix string-to-number conversions for duration and price related fields
 
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
@@ -11,7 +11,6 @@ interface UsePulseBoostAdapterResult {
 }
 
 export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterResult => {
-  // Format the pulse boost duration to readable string
   const formatPulseDuration = (duration: string): string => {
     const [hoursStr, minutesStr, secondsStr] = duration.split(':');
     const hours = Number(hoursStr);
@@ -37,8 +36,8 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
   };
 
   const parseNumberValue = (val: any, fallback: number): number => {
-    if (typeof val === 'number') return val;
-    if (typeof val === 'string') {
+    if (typeof val === "number") return val;
+    if (typeof val === "string") {
       const parsed = Number(val);
       return isNaN(parsed) ? fallback : parsed;
     }
@@ -57,53 +56,39 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     return pkg.price || 0;
   };
 
-  // Convert USD to UBX at a fixed rate (for example purposes)
   const convertToUBX = (value: number): number => {
     const UBX_RATE = 10; // 1 USD = 10 UBX
     return value * UBX_RATE;
   };
 
-  // Get a color for the boost level
   const getColorForBoostPower = (boost_power: number): string => {
-    if (boost_power >= 200) return '#ec4899'; // Pink for premium
-    if (boost_power >= 100) return '#8b5cf6'; // Purple for standard
-    return '#60a5fa'; // Blue for basic
+    if (boost_power >= 200) return '#ec4899';
+    if (boost_power >= 100) return '#8b5cf6';
+    return '#60a5fa';
   };
 
-  // Convert a standard boost package to a pulse boost
   const convertToPulseBoost = (pkg: BoostPackage): PulseBoost => {
-    // Ensure duration is string and parse numbers
-    const durationStr: string = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
-    const durationParts = durationStr.split(':');
-    const hours = Number(durationParts[0]) || 0;
-    const minutes = Number(durationParts[1]) || 0;
-    const seconds = Number(durationParts[2]) || 0;
+    const durationStr = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
+    const [hoursStr, minutesStr, secondsStr] = durationStr.split(':');
 
-    // Calculate durationMinutes as number
-    const durationMinutes: number = (hours * 60) + minutes + (seconds / 60);
+    const hours = parseNumberValue(hoursStr, 0);
+    const minutes = parseNumberValue(minutesStr, 0);
+    const seconds = parseNumberValue(secondsStr, 0);
 
-    // Parse boost_power safely to number
+    const durationMinutes = (hours * 60) + minutes + (seconds / 60);
     const boostPowerNum = parseNumberValue(pkg.boost_power, 50);
-
-    // Determine visibility
-    let visibility: PulseBoost['visibility'] = 'homepage';
-    if (boostPowerNum >= 200) {
-      visibility = 'global';
-    } else if (boostPowerNum >= 100) {
-      visibility = 'search';
-    } else {
-      visibility = 'homepage';
-    }
-
-    // Parse visibility_increase safely to number
     const visibilityIncreaseNum = parseNumberValue(pkg.visibility_increase, 50);
+
+    let visibility: PulseBoost['visibility'] = 'homepage';
+    if (boostPowerNum >= 200) visibility = 'global';
+    else if (boostPowerNum >= 100) visibility = 'search';
 
     return {
       id: pkg.id,
       name: pkg.name,
       description: pkg.description || `${pkg.name} visibility boost for your profile`,
       duration: durationStr,
-      durationMinutes: durationMinutes,
+      durationMinutes,
       price: typeof pkg.price === 'number' ? pkg.price : 0,
       costUBX: typeof pkg.price_ubx === 'number'
         ? pkg.price_ubx

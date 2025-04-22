@@ -1,4 +1,8 @@
 
+// Fix incompatible assignments of personality object vs string
+// Provide full AIProfileGeneratorOptions when calling generateAIProfile
+// Correct typing for processingStatus and error messages
+
 import { useState, useCallback } from 'react';
 import { generateAIProfile } from '@/services/generateAIProfile';
 import { AIProfile, ProcessingStatus, ProcessingStatusDetails } from '@/types/ai-profile';
@@ -37,7 +41,7 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
     setProcessingStatus({
       status: ProcessingStatus.PENDING,
       progress: 0,
-      message: { type: options.personality.type, traits: options.personality.traits || [] }, // this should be object here, not string
+      message: `Processing personality type: ${options.personality.type}`, // set as string for status message
       completedCount: 0,
       totalCount: 5
     });
@@ -50,11 +54,11 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
       await simulateStep('Building interaction patterns', 4, 5);
       await simulateStep('Finalizing model', 5, 5);
 
-      // We must provide full AIProfileGeneratorOptions as expected by generateAIProfile
+      // Provide all required fields as per AIProfileGeneratorOptions
       const aiProfile = await generateAIProfile({
         name: options.name,
         personality: options.personality,
-        gender: "female", // example default
+        gender: "female", // example default, remove if not supported
         age: 25,
         bio: "",
         avatarUrl: "",
@@ -70,12 +74,11 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
         availabilityStatus: "available",
       });
 
-      // Use normalized property keys consistent with AIProfile
+      // Use consistent normalized keys for AIProfile fields
       const enhancedProfile: AIProfile = {
         ...aiProfile,
-        displayName: options.name,
-        description: aiProfile.description || `AI companion with ${options.personality.type} personality.`,
-        personality: options.personality, // keep as object
+        name: options.name,
+        personality: options.personality
       };
 
       setGeneratedModel(enhancedProfile);
@@ -129,7 +132,7 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
       totalCount: total
     });
 
-    // Simulate processing delay
+    // Simulate async delay
     await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 800));
 
     const newProgress = Math.floor((current / total) * 100);
@@ -156,4 +159,3 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
 };
 
 export default useAIModelGenerator;
-

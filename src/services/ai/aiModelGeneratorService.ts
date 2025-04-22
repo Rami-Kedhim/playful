@@ -1,5 +1,6 @@
 
-// Remove gender and other non-existent fields from AIProfile literal to fix type errors
+// Fix AIProfile property naming: use created_at instead of createdAt
+// Remove gender property, fix literal according to AIProfile type
 
 import { AIProfile, ProcessingStatus } from '@/types/ai-profile';
 
@@ -63,14 +64,14 @@ export const aiModelGeneratorService = {
                     avatar_url: '/images/ai-avatar.png',
                     location: 'Virtual',
                     interests: ['chatting', 'learning', 'fun'],
-                    isVerified: true,
-                    createdAt: new Date().toISOString(),
+                    is_verified: true,
+                    created_at: new Date().toISOString(),
                     category: 'AI Companion',
                     rating: 4.5,
-                    reviewCount: 100,
+                    review_count: 100,
                     price: 0,
-                    isPremium: false,
-                    availabilityStatus: 'available',
+                    is_premium: false,
+                    availability_status: 'available',
                   };
                   updateProgress('Model Ready', 0);
                   resolve(generatedModel);
@@ -86,4 +87,3 @@ export const aiModelGeneratorService = {
     });
   }
 };
-

@@ -1,5 +1,6 @@
 
-// Fix import of mapEscortToUberPersona and fix types for escorts mapping
+// Fix CompatibleEscort type properties to match Escort
+// Ensure id and name are on CompatibleEscort so it satisfies Escort requirements
 
 import React, {
   createContext,
@@ -103,6 +104,8 @@ const UberEcosystemContext = createContext<UberPersonaContextType | undefined>(u
 
 interface CompatibleEscort extends Omit<Escort, 'height'> {
   height?: string;
+  id: string;
+  name: string;
 }
 
 const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) => {
@@ -120,15 +123,13 @@ const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) =>
         setLoading(true);
         await uberCoreInstance.initialize();
         if (escorts && escorts.length > 0) {
-          // Map each escort with required id and name added to CompatibleEscort to match Escort
           const sanitizedEscorts: CompatibleEscort[] = escorts.map(e => ({
+            ...e,
             id: e.id,
             name: e.name,
-            ...e,
             height: e.height !== undefined && e.height !== null ? e.height.toString() : '',
-          })) as CompatibleEscort[];
-
-          const mappedPersonas = sanitizedEscorts.map(e => mapEscortToUberPersona(e as Escort));
+          }));
+          const mappedPersonas = sanitizedEscorts.map(e => mapEscortToUberPersona(e));
           setAllPersonas(mappedPersonas);
         }
         setHilbertSpace({
@@ -228,4 +229,3 @@ export const useUberEcosystemContext = () => {
 };
 
 export default UberEcosystemContext;
-
