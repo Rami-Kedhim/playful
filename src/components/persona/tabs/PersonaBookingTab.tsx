@@ -1,9 +1,10 @@
 
+// Fixed import casing to match filename (uberPersona.ts)
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, DollarSign } from 'lucide-react';
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersona } from '@/types/uberPersona';
 
 interface PersonaBookingTabProps {
   persona: UberPersona;
@@ -13,7 +14,6 @@ const PersonaBookingTab: React.FC<PersonaBookingTabProps> = ({ persona }) => {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
   
-  // Get meeting price safely considering new UberPersona type structure
   const getMeetingPrice = () => {
     if (persona.monetization && typeof persona.monetization === 'object') {
       return persona.monetization.meetingPrice ?? 0;
@@ -23,13 +23,11 @@ const PersonaBookingTab: React.FC<PersonaBookingTabProps> = ({ persona }) => {
   
   const meetingPrice = getMeetingPrice();
   
-  // Generate available dates (just for demo)
   const availableDates = [
     '2023-08-01', '2023-08-02', '2023-08-03', 
     '2023-08-04', '2023-08-05', '2023-08-06'
   ];
   
-  // Generate available times (just for demo)
   const availableTimes = [
     '10:00 AM', '11:00 AM', '1:00 PM', 
     '2:00 PM', '4:00 PM', '7:00 PM'

@@ -1,4 +1,3 @@
-
 // Fix CompatibleEscort type properties to match Escort
 // Ensure id and name are on CompatibleEscort so it satisfies Escort requirements
 
@@ -69,8 +68,8 @@ const getBoostStatus = (persona: UberPersona) => {
     };
   }
   
-  // Use default value if boost_status is missing
-  return persona?.boost_status || {
+  // Use default value if boostStatus is missing
+  return persona?.boostStatus || {
     isActive: false,
     tier: 'none',
     remainingTime: '0'
