@@ -97,7 +97,7 @@ const OxumTestHarness: React.FC = () => {
                 />
               </div>
               
-              {testResults.failedTests.length > 0 && (
+              {testResults.failedTests && testResults.failedTests.length > 0 && (
                 <div>
                   <p className="text-sm font-medium mb-2">Failed Tests</p>
                   <ul className="list-disc pl-5">

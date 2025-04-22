@@ -1,136 +1,132 @@
 
-import React, { useState } from "react";
-import { LivecamModel } from "@/types/livecams";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Zap, Info } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import { formatDistanceToNow } from "date-fns";
-import { GLOBAL_UBX_RATE } from "@/utils/oxum/globalPricing";
-import UBXPriceDisplay from "@/components/oxum/UBXPriceDisplay";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/components/ui/use-toast';
+import { Rocket, TrendingUp, Star, Clock } from 'lucide-react';
+import UBXPriceDisplay from '@/components/oxum/UBXPriceDisplay';
+import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 
+// This is a simplified version for demonstration purposes
 interface LivecamBoostPanelProps {
-  model: LivecamModel;
-  isBoosted?: boolean;
-  boostStatus?: {
-    timeRemaining?: number;
-    intensity?: number;
-  } | null;
-  onBoost?: () => void;
-  onCancelBoost?: () => void;
+  livecamId: string;
+  isCurrentlyBoosted?: boolean;
+  boostRank?: number;
+  viewerIncreasePercent?: number;
 }
 
-const LivecamBoostPanel: React.FC<LivecamBoostPanelProps> = ({ 
-  model,
-  isBoosted = false,
-  boostStatus = null,
-  onBoost = () => {},
-  onCancelBoost = () => {}
+const LivecamBoostPanel: React.FC<LivecamBoostPanelProps> = ({
+  livecamId,
+  isCurrentlyBoosted = false,
+  boostRank = 0,
+  viewerIncreasePercent = 0,
 }) => {
-  const [boostIntensity, setBoostIntensity] = useState<number[]>([50]);
-  
-  // Calculate time remaining in format like "2 hours 30 minutes"
-  const getTimeRemaining = () => {
-    if (!boostStatus?.timeRemaining) return "None";
-    
-    // Convert to milliseconds and add to current time to get end time
-    const endTime = new Date(Date.now() + boostStatus.timeRemaining * 1000);
-    return formatDistanceToNow(endTime, { addSuffix: false });
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleBoost = async () => {
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        title: "Boost activated!",
+        description: "Your livecam is now boosted for 24 hours.",
+      });
+    } catch (error) {
+      toast({
+        title: "Boost failed",
+        description: "There was an error boosting your livecam.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (isCurrentlyBoosted) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center text-base font-medium">
+            <Rocket className="mr-2 h-5 w-5 text-primary" />
+            Boost Active
+            <Badge variant="outline" className="ml-auto">
+              Rank #{boostRank}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span>Boost Effectiveness</span>
+              <span className="font-medium text-green-500">+{viewerIncreasePercent}% viewers</span>
+            </div>
+            <Progress value={75} className="h-2" />
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span>Time Remaining</span>
+              <span className="font-medium">16h 32m</span>
+            </div>
+            <Progress value={68} className="h-2" />
+          </div>
+          
+          <div className="rounded-lg bg-muted p-3">
+            <div className="flex items-center gap-2 text-sm">
+              <TrendingUp className="h-4 w-4 text-green-500" />
+              <span>Your livecam is getting <strong>42%</strong> more visibility</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-medium text-gray-400">
-            Stream Boost
-          </h3>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-4 w-4 text-gray-400" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-xs">
-                  Boost this stream to increase its visibility in search results and on the homepage.
-                  Higher boost intensity gives greater visibility.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base font-medium flex items-center">
+          <Rocket className="mr-2 h-5 w-5" />
+          Boost Your Livecam
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Star className="h-4 w-4 text-amber-500" />
+            <span className="text-sm">Appear at the top of search results</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-green-500" />
+            <span className="text-sm">Get up to 300% more viewers</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-blue-500" />
+            <span className="text-sm">Boost lasts for 24 hours</span>
+          </div>
         </div>
         
-        {isBoosted && boostStatus ? (
-          <div className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm">Boost Active</span>
-                <span className="text-sm font-medium text-green-500">
-                  {boostStatus.intensity}% Power
-                </span>
-              </div>
-              <Progress value={boostStatus.intensity} className="h-2" />
-            </div>
-            
-            <div className="bg-muted/40 rounded-md p-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Time Remaining:</span>
-                <span className="font-medium">{getTimeRemaining()}</span>
-              </div>
-              <div className="flex justify-between text-sm mt-1">
-                <span className="text-muted-foreground">Viewers Gained:</span>
-                <span className="font-medium text-green-500">+{Math.round(boostStatus.intensity / 2)}</span>
-              </div>
-            </div>
-            
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={onCancelBoost}
-            >
-              Cancel Boost
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm">Boost Intensity</span>
-                <span className="text-sm font-medium">{boostIntensity[0]}%</span>
-              </div>
-              <Slider
-                defaultValue={[50]}
-                max={100}
-                step={10}
-                onValueChange={setBoostIntensity}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between text-sm mb-4">
-              <span>Cost:</span>
-              <UBXPriceDisplay 
-                isGlobalPrice={true}
-                showConversion={true}
-                size="sm"
-              />
-            </div>
-            
-            <Button 
-              className="w-full" 
-              onClick={onBoost}
-            >
-              <Zap className="h-4 w-4 mr-2" />
-              Boost Stream
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center justify-between rounded-lg bg-muted p-3">
+          <span className="text-sm font-medium">Price:</span>
+          <UBXPriceDisplay amount={GLOBAL_UBX_RATE} size="sm" showConversion isGlobalPrice />
+        </div>
+        
+        <Button 
+          className="w-full" 
+          onClick={handleBoost}
+          disabled={loading}
+        >
+          {loading ? "Processing..." : "Boost Now"}
+        </Button>
+        
+        <div className="text-center text-xs text-muted-foreground">
+          Boost automatically renews unless disabled
+        </div>
       </CardContent>
     </Card>
   );

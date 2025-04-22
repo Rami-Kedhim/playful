@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { validateGlobalPrice, validateGlobalPriceWithRetry, GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 import { OxumNotificationService } from '@/services/notifications/oxumNotificationService';
@@ -78,7 +79,7 @@ export const processUBXTransaction = async (params: TransactionParams): Promise<
     return {
       success: true,
       message: "Transaction processed successfully",
-      newBalance: 0 // This should be replaced with actual balance in the real implementation
+      newBalance: data?.new_balance || 0
     };
   } catch (err: any) {
     console.error('UBX transaction service error:', err);

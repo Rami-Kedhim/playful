@@ -1,4 +1,3 @@
-
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -10,16 +9,13 @@ import HomePage from "./pages/HomePage";
 import Wallet from "./pages/Wallet";
 import UpdatedWallet from "./pages/UpdatedWallet";
 import PulseBoost from "./pages/PulseBoost";
-// Fix the path to match the actual filename casing
 import LivecamPage from "./pages/LivecamPage";
 
-// Create stub providers for missing contexts
 const createStubContextFile = () => {
   const StubProvider = ({ children }: { children: React.ReactNode }) => <>{children}</>;
   return { StubProvider };
 };
 
-// Create stub providers for missing contexts
 const { StubProvider: ModalProvider } = createStubContextFile();
 const { StubProvider: SocketProvider } = createStubContextFile();
 const { StubProvider: UberPersonaProvider } = createStubContextFile();
@@ -32,7 +28,6 @@ const { StubProvider: UberCoreProvider } = createStubContextFile();
 const { StubProvider: OxumProvider } = createStubContextFile();
 const { StubProvider: HermesProvider } = createStubContextFile();
 
-// Lazy loaded pages
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -50,7 +45,6 @@ const LivecamDetail = lazy(() => import('./pages/LivecamDetail'));
 const AIModelPage = lazy(() => import('./pages/AIModelPage'));
 const AIModelDetail = lazy(() => import('./pages/AIModelDetail'));
 
-// Create a client
 const queryClient = new QueryClient();
 
 function App() {

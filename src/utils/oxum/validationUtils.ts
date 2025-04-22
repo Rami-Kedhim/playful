@@ -1,5 +1,6 @@
 
-import { GLOBAL_UBX_RATE, PRICE_TOLERANCE } from './constants';
+import { GLOBAL_UBX_RATE } from './constants';
+import { validateGlobalPrice } from './globalPricing';
 import { OxumPriceAnalytics } from '@/services/analytics/oxumPriceAnalytics';
 import { OxumNotificationService } from '@/services/notifications/oxumNotificationService';
 import { recordSuccessfulValidation, recordValidationFailure } from './healthMonitor';
@@ -13,6 +14,8 @@ export function compareWithTolerance(userPrice: number, targetPrice: number): bo
   const deviation = Math.abs(userPrice - targetPrice);
   const percentDeviation = (deviation / targetPrice);
   
+  const PRICE_TOLERANCE = 0.001; // Tolerance for floating point errors (0.1%)
+  
   // Check if within tolerance
   return percentDeviation <= PRICE_TOLERANCE;
 }
@@ -21,7 +24,7 @@ export function compareWithTolerance(userPrice: number, targetPrice: number): bo
  * Validate price against the global price rule
  * Core validation function for Oxum Rule #001: Global Price Symmetry
  */
-export function validateGlobalPrice(userPrice: number, metadata?: Record<string, any>): boolean {
+export function validateGlobalPriceExtended(userPrice: number, metadata?: Record<string, any>): boolean {
   try {
     // Log the price check event
     OxumPriceAnalytics.logPriceEvent(
@@ -72,7 +75,7 @@ export function validateGlobalPrice(userPrice: number, metadata?: Record<string,
  * Resilient price validation with automatic retries
  * For critical payment paths, retry validation to handle transient issues
  */
-export async function validateGlobalPriceWithRetry(
+export async function validateGlobalPriceWithRetryUtil(
   userPrice: number, 
   metadata?: Record<string, any>
 ): Promise<boolean> {
@@ -82,7 +85,7 @@ export async function validateGlobalPriceWithRetry(
   
   while (attempts < MAX_RETRY_ATTEMPTS) {
     try {
-      return validateGlobalPrice(userPrice, {
+      return validateGlobalPriceExtended(userPrice, {
         ...metadata,
         retryAttempt: attempts
       });
