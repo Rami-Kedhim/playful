@@ -7,6 +7,16 @@ export interface UberCoreStatus {
   processorLoad: number;
 }
 
+export interface UberCoreSettings {
+  boostingEnabled: boolean;
+  boostingAlgorithm: string;
+  orderByBoost: boolean;
+  autonomyLevel: number;
+  resourceAllocation: number;
+  hilbertDimension: number;
+  aiEnhancementLevel: number;
+}
+
 export interface UberCoreService {
   getStatus(): Promise<UberCoreStatus>;
   configure(config: Record<string, any>): Promise<boolean>;

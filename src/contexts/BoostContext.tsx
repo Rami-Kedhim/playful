@@ -1,22 +1,13 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import { useBoostManager, BoostStatus, BoostEligibility, BoostPackage } from '@/hooks/boost/useBoostManager';
+import { useBoostAdapters } from '@/hooks/boost/useBoostAdapters';
+import { BoostStatus, BoostEligibility, BoostPackage } from '@/types/boost';
 import { useAuth } from '@/hooks/auth/useAuth';
-
-// Enhanced BoostStatus type to include missing properties
-interface EnhancedBoostStatus extends BoostStatus {
-  progress?: number;
-  packageId?: string;
-  packageName?: string;
-  profileId?: string;
-  activeBoostId?: string;
-  expiresAt?: string;
-}
 
 interface BoostContextType {
   isActive: boolean;
-  boostStatus: EnhancedBoostStatus | null;
+  boostStatus: BoostStatus | null;
   eligibility: BoostEligibility;
   boostPackages: BoostPackage[];
   dailyBoostUsage: number;
@@ -51,25 +42,14 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     error,
     purchaseBoost,
     cancelBoost
-  } = useBoostManager(user?.id);
+  } = useBoostAdapters(user?.id || '');
 
   const isActive = boostStatus?.isActive || false;
-
-  // Enhanced status that includes the missing properties
-  const enhancedStatus: EnhancedBoostStatus | null = boostStatus ? {
-    ...boostStatus,
-    progress: boostStatus.progress || 50, // Default progress value if missing
-    packageId: boostStatus.packageId || '',
-    packageName: boostStatus.packageName || 'Standard Boost',
-    profileId: boostStatus.profileId || user?.id,
-    activeBoostId: boostStatus.activeBoostId || '',
-    expiresAt: boostStatus.expiresAt || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-  } : null;
 
   return (
     <BoostContext.Provider value={{
       isActive,
-      boostStatus: enhancedStatus,
+      boostStatus,
       eligibility,
       boostPackages,
       dailyBoostUsage,

@@ -3,8 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import BoostDialogTabs from "./dialog/BoostDialogTabs";
-import { useBoost } from "@/contexts/BoostContext";
-import { useBoostManager } from "@/hooks/boost/useBoostManager";
+import { useBoostAdapters } from "@/hooks/boost/useBoostAdapters";
 import { useAuth } from "@/hooks/auth/useAuth";
 
 export interface BoostDialogContainerProps {
@@ -45,7 +44,8 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
     loading: boostLoading,
     purchaseBoost,
     cancelBoost,
-  } = useBoostManager(profileId || user?.id);
+    getBoostPrice
+  } = useBoostAdapters(profileId || user?.id || '');
 
   // Mock Hermes boost status for now
   const hermesStatus = {
@@ -72,12 +72,6 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
       return `${days} ${days === 1 ? 'day' : 'days'}`;
     }
     return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
-  };
-
-  // Get price from selected package
-  const getBoostPrice = (): number => {
-    const selectedPkg = boostPackages.find(pkg => pkg.id === selectedPackage);
-    return selectedPkg?.price_ubx || 0;
   };
 
   // Handle boost purchase
@@ -148,8 +142,6 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
             dailyBoostLimit={dailyBoostLimit}
             hermesStatus={hermesStatus}
             loading={boostLoading}
-            
-            // Add the missing props
             formatBoostDuration={formatBoostDuration}
             getBoostPrice={getBoostPrice}
             handlePurchase={handlePurchase}

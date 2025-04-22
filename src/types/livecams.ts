@@ -1,76 +1,54 @@
+
 export interface LivecamModel {
   id: string;
-  displayName?: string;
-  name: string; // Required property
-  imageUrl?: string;
+  username: string;
+  name: string;
   thumbnailUrl: string;
-  category?: string;
-  viewerCount?: number;
-  isLive?: boolean;
-  streamUrl?: string;
-  price?: number;
-  
-  // Adding properties needed across various components
-  username?: string;
+  imageUrl: string;
   previewVideoUrl?: string;
+  isLive: boolean;
+  isStreaming: boolean;
+  viewerCount: number;
+  region: string;
+  language: string;
+  tags: string[];
+  category: string;
+  rating: number;
+  price: number;
   isPopular?: boolean;
-  rating?: number;
-  tags?: string[];
-  profileImage?: string;
-  previewImage?: string;
-  country?: string;
-  categories?: string[];
-  description?: string;
-  boosted?: boolean;
-  boostScore?: number;
-  language?: string;
-  region?: string;
-  isStreaming?: boolean;
+  profileUrl?: string;
   age?: number;
 }
 
 export interface Livecam {
   id: string;
-  name: string; // Required property
-  username?: string;
+  username: string;
+  name: string;
   thumbnailUrl: string;
+  imageUrl: string;
   isLive: boolean;
+  isStreaming: boolean;
   viewerCount: number;
-  tags?: string[];
+  region: string;
+  language: string;
+  tags: string[];
+  category: string;
+  rating: number;
   price?: number;
-  rating?: number;
+}
+
+export interface LivecamCategory {
+  id: string;
+  name: string;
+  slug: string;
+  count: number;
+}
+
+export interface LivecamFilter {
   category?: string;
-  profileImageUrl?: string;
-  age?: number;
-  location?: string;
-  description?: string;
-  languages?: string[];
-  categories?: string[];
-  lastActive?: string;
-  nextScheduled?: string;
-  featured?: boolean;
-  roomType?: string;
-  isVerified?: boolean;
-}
-
-export interface LivecamsFilter {
-  limit?: number;
-  page?: number;
-  country?: string;
-  category?: string;
-  isStreaming?: boolean;
-}
-
-export interface LivecamsResponse {
-  models: LivecamModel[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  hasMore: boolean;
-}
-
-export interface BoostableLivecamsOptions {
-  limit?: number;
-  onlyBoosted?: boolean;
-  onlyLive?: boolean;
+  tag?: string;
+  region?: string;
+  language?: string;
+  isLive?: boolean;
+  sort?: 'popular' | 'newest' | 'rating';
 }

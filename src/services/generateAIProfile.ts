@@ -33,6 +33,11 @@ export const generateAIProfile = async (options: { [key: string]: any } = {}): P
       'https://via.placeholder.com/400?text=AI+Gallery+3',
     ],
     livecam_enabled: options.livecam_enabled !== undefined ? options.livecam_enabled : Math.random() > 0.5,
+    profileStats: options.profileStats || {
+      photos: Math.floor(Math.random() * 50) + 10,
+      videos: Math.floor(Math.random() * 20) + 5,
+      messages: Math.floor(Math.random() * 1000) + 100
+    },
     createdAt: new Date(),
     updatedAt: new Date()
   };

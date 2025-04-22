@@ -28,6 +28,11 @@ export interface AIProfile {
   premium_content_count?: number;
   gallery_images?: string[];
   livecam_enabled?: boolean;
+  profileStats?: {
+    photos: number;
+    videos: number;
+    messages: number;
+  };
 }
 
 // AI Message interface

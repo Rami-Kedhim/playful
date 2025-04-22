@@ -1,177 +1,168 @@
 
-import { useState, useEffect } from 'react';
-import { BoostStatus, BoostEligibility } from '@/types/boost';
-import { differenceInSeconds, parseISO } from 'date-fns';
+import { useState, useEffect, useCallback } from 'react';
+import { BoostStatus, BoostPackage, BoostEligibility } from '@/types/boost';
+import { formatDistanceToNow } from 'date-fns';
 
-export interface UseBoostStatusBaseOptions {
-  profileId?: string;
-  apiUrl?: string;
+export interface UseBoostStatusBaseProps {
+  profileId: string;
+  initialStatus?: BoostStatus;
+  initialEligibility?: BoostEligibility;
+  initialPackages?: BoostPackage[];
+  
+  // API functions - these would be replaced with actual API calls in a real implementation
+  fetchBoostStatus?: (profileId: string) => Promise<BoostStatus>;
+  fetchEligibility?: (profileId: string) => Promise<BoostEligibility>;
+  fetchBoostPackages?: () => Promise<BoostPackage[]>;
+  activateBoost?: (profileId: string, packageId: string) => Promise<BoostStatus>;
+  deactivateBoost?: (profileId: string) => Promise<boolean>;
 }
 
 export interface UseBoostStatusBaseResult {
   boostStatus: BoostStatus;
   loading: boolean;
   error: string | null;
-  fetchBoostStatus: () => Promise<BoostStatus | null>;
-  startRefreshInterval: () => void;
-  stopRefreshInterval: () => void;
+  refreshStatus: () => Promise<void>;
 }
 
-export const useBoostStatusBase = (options: UseBoostStatusBaseOptions = {}): UseBoostStatusBaseResult => {
-  const [boostStatus, setBoostStatus] = useState<BoostStatus>({ isActive: false });
-  const [loading, setLoading] = useState<boolean>(false);
+export const useBoostStatusBase = ({
+  profileId,
+  initialStatus,
+  initialEligibility = { isEligible: true, reason: '' },
+  initialPackages = [],
+  fetchBoostStatus,
+  fetchEligibility,
+  fetchBoostPackages,
+  activateBoost,
+  deactivateBoost
+}: UseBoostStatusBaseProps): UseBoostStatusBaseResult => {
+  // State
+  const [boostStatus, setBoostStatus] = useState<BoostStatus>(initialStatus || {
+    isActive: false,
+    startTime: '',
+    endTime: '',
+    remainingTime: '0',
+  } as BoostStatus);
+  
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [intervalId, setIntervalId] = useState<number | null>(null);
 
-  const { profileId, apiUrl = 'https://api.example.com/boost' } = options;
-
-  // Helper function to parse date strings safely
-  const parseDate = (dateString: string | Date | undefined): Date | null => {
-    if (!dateString) return null;
-    
-    if (dateString instanceof Date) {
-      return dateString;
-    }
-    
-    try {
-      return parseISO(dateString);
-    } catch (e) {
-      console.error('Error parsing date:', e);
-      return null;
-    }
+  // Convert Date objects to ISO strings for consistent storage
+  const ensureDateString = (date: string | Date | undefined): string => {
+    if (!date) return '';
+    if (date instanceof Date) return date.toISOString();
+    return date;
   };
 
-  const fetchBoostStatus = async (): Promise<BoostStatus | null> => {
-    if (!profileId) return null;
+  // Refresh the boost status
+  const refreshStatus = useCallback(async () => {
+    if (!profileId || !fetchBoostStatus) return;
 
     setLoading(true);
-    setError(null);
-
     try {
-      // Simulation of API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Generate fake data for the demo
-      const now = new Date();
-      const active = Math.random() > 0.7;
-
-      const status: BoostStatus = active
-        ? {
-            isActive: true,
-            startTime: new Date(now.getTime() - 3600000).toISOString(), // 1 hour ago
-            endTime: new Date(now.getTime() + 7200000).toISOString(), // 2 hours from now
-            remainingTime: 7200, // seconds
-            progress: 33, // percent
-            packageId: 'boost-1h',
-            packageName: '1 Hour Boost',
-            profileId: profileId,
-            activeBoostId: `boost-${Math.random().toString(36).substring(2, 10)}`,
-            expiresAt: new Date(now.getTime() + 7200000).toISOString()
-          }
-        : { isActive: false };
-
-      setBoostStatus(status);
-      return status;
-    } catch (e) {
-      const message = e instanceof Error ? e.message : 'Unknown error occurred';
-      setError(message);
-      return null;
+      const statusData = await fetchBoostStatus(profileId);
+      
+      // Convert any Date objects to ISO strings for consistency
+      const normalizedStatus: BoostStatus = {
+        ...statusData,
+        startTime: ensureDateString(statusData.startTime),
+        endTime: ensureDateString(statusData.endTime),
+        expiresAt: ensureDateString(statusData.expiresAt),
+      };
+      
+      setBoostStatus(normalizedStatus);
+    } catch (err) {
+      console.error('Error fetching boost status:', err);
+      setError('Failed to fetch boost status');
+      
+      // Reset to inactive status on error
+      setBoostStatus(prev => ({
+        isActive: false,
+        remainingTime: '0',
+        startTime: prev.startTime,
+        endTime: prev.endTime,
+        packageId: prev.packageId,
+        packageName: prev.packageName,
+        progress: prev.progress,
+        expiresAt: prev.expiresAt,
+        boostPackage: prev.boostPackage,
+        profileId: prev.profileId,
+        timeRemaining: prev.timeRemaining,
+        activeBoostId: prev.activeBoostId
+      }));
     } finally {
       setLoading(false);
     }
-  };
+  }, [profileId, fetchBoostStatus]);
 
-  // Update remaining time if boost is active
+  // Initial data fetch
   useEffect(() => {
-    if (!boostStatus.isActive || !boostStatus.endTime) return;
+    if (initialStatus) return; // Skip if initial data was provided
+    refreshStatus();
+  }, [initialStatus, refreshStatus]);
 
-    const endTimeDate = parseDate(boostStatus.endTime);
-    if (!endTimeDate) return;
+  // Update remaining time for active boosts
+  useEffect(() => {
+    if (!boostStatus.isActive) return;
 
     const updateRemainingTime = () => {
-      const now = new Date();
-      
-      if (endTimeDate <= now) {
-        setBoostStatus(prev => ({ ...prev, isActive: false, remainingTime: 0 }));
-        stopRefreshInterval();
-        return;
-      }
-
-      const remainingSeconds = differenceInSeconds(endTimeDate, now);
-      const progress = calculateProgress(boostStatus.startTime, boostStatus.endTime);
-      
-      setBoostStatus(prev => ({
-        ...prev,
-        remainingTime: remainingSeconds,
-        progress
-      }));
+      setBoostStatus(prev => {
+        if (!prev.endTime) return prev;
+        
+        try {
+          const endTime = new Date(prev.endTime);
+          const now = new Date();
+          
+          if (now >= endTime) {
+            // Boost has expired
+            return {
+              ...prev,
+              isActive: false,
+              remainingTime: '0',
+            };
+          }
+          
+          const diff = endTime.getTime() - now.getTime(); // in milliseconds
+          const seconds = Math.floor(diff / 1000);
+          
+          return {
+            ...prev,
+            remainingTime: seconds.toString(),
+            timeRemaining: formatDistanceToNow(endTime, { addSuffix: false }),
+            progress: calculateProgress(prev.startTime, prev.endTime)
+          };
+        } catch (e) {
+          console.error('Error updating remaining time:', e);
+          return prev;
+        }
+      });
     };
-
+    
     // Calculate progress percentage
-    const calculateProgress = (startTimeStr?: string, endTimeStr?: string): number => {
-      if (!startTimeStr || !endTimeStr) return 0;
-      
-      const startTime = parseDate(startTimeStr);
-      const endTime = parseDate(endTimeStr);
-      
-      if (!startTime || !endTime) return 0;
-      
-      const totalDuration = differenceInSeconds(endTime, startTime);
-      if (totalDuration <= 0) return 0;
-      
-      const elapsed = differenceInSeconds(new Date(), startTime);
-      const progress = Math.min(Math.round((elapsed / totalDuration) * 100), 100);
-      
-      return progress;
+    const calculateProgress = (startTime: string, endTime: string): number => {
+      try {
+        const start = new Date(startTime).getTime();
+        const end = new Date(endTime).getTime();
+        const now = Date.now();
+        
+        const total = end - start;
+        const elapsed = now - start;
+        
+        return Math.min(100, Math.max(0, Math.round((elapsed / total) * 100)));
+      } catch (e) {
+        return 0;
+      }
     };
-
-    // Update immediately and then set interval
+    
     updateRemainingTime();
-    const timer = window.setInterval(updateRemainingTime, 1000);
+    const interval = setInterval(updateRemainingTime, 1000);
     
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, [boostStatus.isActive, boostStatus.endTime, boostStatus.startTime]);
-
-  // Refresh status periodically
-  const startRefreshInterval = () => {
-    if (intervalId) {
-      window.clearInterval(intervalId);
-    }
-    
-    // Refresh every minute
-    const id = window.setInterval(() => {
-      fetchBoostStatus();
-    }, 60000);
-    
-    setIntervalId(Number(id));
-  };
-
-  const stopRefreshInterval = () => {
-    if (intervalId) {
-      window.clearInterval(intervalId);
-      setIntervalId(null);
-    }
-  };
-
-  // Initial fetch
-  useEffect(() => {
-    if (profileId) {
-      fetchBoostStatus().then(() => startRefreshInterval());
-    }
-    
-    return () => {
-      stopRefreshInterval();
-    };
-  }, [profileId]);
+    return () => clearInterval(interval);
+  }, [boostStatus.isActive, boostStatus.endTime]);
 
   return {
     boostStatus,
     loading,
     error,
-    fetchBoostStatus,
-    startRefreshInterval,
-    stopRefreshInterval
+    refreshStatus
   };
 };

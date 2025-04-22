@@ -1,37 +1,39 @@
 
-export interface BoostPackage {
-  id: string;
-  name: string;
-  duration: string;
-  price_ubx: number;
-  description?: string;
-  features?: string[];
-  price?: number;
-}
+import { BoostPackage as BoostManagerPackage } from '@/hooks/boost/useBoostManager';
 
+// Enhanced BoostStatus type with all required fields
 export interface BoostStatus {
   isActive: boolean;
-  startTime?: string;
-  endTime?: string;
-  remainingTime?: string;
+  startTime: string;
+  endTime: string;
+  remainingTime: string;
+  progress?: number;
   packageId?: string;
   packageName?: string;
-  progress?: number;
-  expiresAt?: string;
-  boostPackage?: BoostPackage;
   profileId?: string;
   timeRemaining?: string;
-  activeBoostId?: string; // Add for cancelBoost
+  activeBoostId?: string;
+  expiresAt?: string;
+  boostPackage?: BoostPackage;
 }
 
 export interface BoostEligibility {
   isEligible: boolean;
-  eligible?: boolean; // For backward compatibility
-  reason?: string;
-  reasons?: string[];
-  minimumProfileCompleteness?: number;
-  missingFields?: string[];
-  minRequiredBalance?: number;
+  reason: string;
+}
+
+export interface BoostPackage extends BoostManagerPackage {
+  id: string;
+  name: string;
+  description: string;
+  duration: string;
+  price_ubx: number;
+  boost_power: number;
+  visibility_increase: number;
+  image_url?: string;
+  is_featured?: boolean;
+  badge_color?: string;
+  icon?: string;
 }
 
 export interface HermesBoostStatus {
@@ -55,7 +57,7 @@ export interface BoostAnalytics {
     withoutBoost?: number;
     increase?: number;
   };
-  clicks: {
+  interactions: {
     today: number;
     yesterday: number;
     weeklyAverage: number;
@@ -63,30 +65,10 @@ export interface BoostAnalytics {
     withoutBoost?: number;
     increase?: number;
   };
-  engagementRate: number;
-  conversionRate: number;
-  boostEfficiency: number;
-  additionalViews: number;
-  engagementIncrease: number;
-  rankingPosition: number;
-  viewsIncrease?: number;
-}
-
-// Add interface for AIMessage to fix type errors
-export interface AIMessage {
-  id: string;
-  content: string;
-  role: 'user' | 'assistant' | 'system';
-  timestamp: Date | string;
-  has_read?: boolean;
-}
-
-// Add AIConversation interface
-export interface AIConversation {
-  id: string;
-  messages: AIMessage[];
-  aiProfileId: string;
-  userId: string;
-  createdAt: Date | string;
-  updatedAt: Date | string;
+  rank: {
+    current: number;
+    previous: number;
+    change: number;
+  };
+  trending: boolean;
 }

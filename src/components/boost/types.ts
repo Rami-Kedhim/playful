@@ -1,5 +1,5 @@
 
-import { BoostStatus, BoostEligibility, BoostPackage } from "@/types/boost";
+import { BoostStatus, BoostEligibility, BoostPackage, HermesBoostStatus } from "@/types/boost";
 
 export interface BoostButtonProps {
   text?: string;
@@ -18,18 +18,6 @@ export interface BoostDialogContainerProps {
   buttonSize?: string;
 }
 
-export interface HermesBoostStatus {
-  position: number;
-  activeUsers: number;
-  estimatedVisibility: number;
-  lastUpdateTime: string;
-  isActive?: boolean;
-  active?: boolean;
-  boostScore?: number;
-  effectivenessScore?: number;
-  timeRemaining?: number;
-}
-
 export interface BoostDialogTabsProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
@@ -43,15 +31,14 @@ export interface BoostDialogTabsProps {
   handleCancel: () => Promise<void>;
   dailyBoostUsage: number;
   dailyBoostLimit: number;
-  hermesStatus: any;
+  hermesStatus: HermesBoostStatus;
   
-  // Add missing properties
+  // Additional properties
   formatBoostDuration?: (duration: string) => string;
   getBoostPrice?: () => number;
   handlePurchase?: () => Promise<void>;
   handleDialogClose?: () => void;
   boostAnalytics?: any;
-  hermesBoostStatus?: any;
 }
 
 export interface BoostPackagesProps {
@@ -62,12 +49,6 @@ export interface BoostPackagesProps {
   dailyUsage: number;
   dailyLimit: number;
   disabled?: boolean;
-  
-  // Add missing properties
-  selectedPackage?: string;
-  setSelectedPackage?: (packageId: string) => void;
-  onSelectPackage?: (packageId: string) => void;
-  getBoostPrice?: () => number;
 }
 
 export interface HermesBoostInfoProps {
@@ -77,26 +58,10 @@ export interface HermesBoostInfoProps {
     estimatedVisibility: number;
     lastUpdateTime: string;
   };
-  
-  // Add missing properties
-  status?: {
-    position: any;
-    activeUsers: any;
-    estimatedVisibility: any;
-    lastUpdateTime: any;
-  };
-  hermesData?: {
-    position: any;
-    activeUsers: any;
-    estimatedVisibility: any;
-    lastUpdateTime: any;
-  };
 }
 
 export interface BoostActivePackageProps {
   boostStatus: BoostStatus;
-  
-  // Add missing property
   hermesData?: {
     position: any;
     activeUsers: any;

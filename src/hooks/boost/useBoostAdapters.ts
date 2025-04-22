@@ -1,65 +1,106 @@
 
-// The error was about incorrectly passing a number to a parameter that doesn't accept numbers
+import { BoostStatus, BoostEligibility, BoostPackage } from '@/types/boost';
+import { useBoostManager } from '@/hooks/boost/useBoostManager';
 
-// For the formatDurationAdapter function, ensure it's typed correctly:
-export const adaptFormatBoostDuration = (formatFn: (duration: string) => string) => {
-  // Ensure the adapter function accepts and returns the correct types
-  return (duration: string): string => {
-    if (typeof duration !== 'string') {
-      // Convert number to string if needed (this helps with type safety)
-      const durationStr = String(duration);
-      return formatFn(durationStr);
-    }
-    return formatFn(duration);
-  };
-};
-
-// Add missing adapter functions
-export const adaptBoostStatus = (status: any): any => {
+/**
+ * Adapts boost status from useBoostManager to the BoostStatus type
+ */
+export const adaptBoostStatus = (status: any): BoostStatus => {
   return {
-    isActive: !!status?.isActive,
-    startTime: status?.startTime,
-    endTime: status?.endTime,
-    remainingTime: status?.timeRemaining || status?.remainingTime,
+    isActive: status?.isActive || false,
+    startTime: status?.startTime || '',
+    endTime: status?.endTime || '',
+    remainingTime: status?.remainingTime?.toString() || '0',
     progress: status?.progress || 0,
-    packageId: status?.packageId,
-    packageName: status?.packageName,
-    profileId: status?.profileId,
-    activeBoostId: status?.activeBoostId,
-    expiresAt: status?.expiresAt,
-    timeRemaining: status?.timeRemaining,
-    boostPackage: status?.boostPackage
+    packageId: status?.packageId || '',
+    packageName: status?.packageName || 'Standard Boost',
+    profileId: status?.profileId || '',
+    activeBoostId: status?.activeBoostId || '',
+    expiresAt: status?.expiresAt || new Date().toISOString(),
   };
 };
 
-export const adaptBoostEligibility = (eligibility: any): any => {
+/**
+ * Adapts boost eligibility from useBoostManager to the BoostEligibility type
+ */
+export const adaptBoostEligibility = (eligibility: any): BoostEligibility => {
   return {
-    isEligible: eligibility?.isEligible !== undefined ? eligibility.isEligible : eligibility?.eligible,
-    reason: eligibility?.reason,
-    reasons: eligibility?.reasons,
-    minimumProfileCompleteness: eligibility?.minimumProfileCompleteness,
-    missingFields: eligibility?.missingFields,
-    minRequiredBalance: eligibility?.minRequiredBalance
+    isEligible: eligibility?.isEligible || false,
+    reason: eligibility?.reason || 'Unknown eligibility status',
   };
 };
 
-export const adaptBoostPackages = (packages: any[]): any[] => {
-  if (!packages || !Array.isArray(packages)) return [];
+/**
+ * Adapts boost packages from useBoostManager to BoostPackage[]
+ */
+export const adaptBoostPackages = (packages: any[]): BoostPackage[] => {
   return packages.map(pkg => ({
-    id: pkg.id,
-    name: pkg.name,
-    duration: pkg.duration,
-    price_ubx: pkg.price_ubx,
+    id: pkg.id || '',
+    name: pkg.name || '',
     description: pkg.description || '',
-    features: pkg.features || []
+    duration: pkg.duration || '01:00',
+    price_ubx: pkg.price || 0,
+    boost_power: pkg.power || 1,
+    visibility_increase: pkg.visibilityIncrease || 0,
+    image_url: pkg.imageUrl,
+    is_featured: pkg.isFeatured,
+    badge_color: pkg.badgeColor,
+    icon: pkg.icon
   }));
 };
 
-export const adaptGetBoostPrice = (priceFn: any): (() => number) => {
-  return () => {
-    if (typeof priceFn === 'function') {
-      return priceFn();
-    }
-    return 0;
+/**
+ * Adapts the price getter from useBoostManager
+ */
+export const adaptGetBoostPrice = (selectedPackage: string, packages: any[]): number => {
+  const selected = packages.find(pkg => pkg.id === selectedPackage);
+  return selected?.price || 0;
+};
+
+/**
+ * Hook that provides typed boost functionality
+ */
+export const useBoostAdapters = (profileId: string) => {
+  const {
+    boostStatus: rawStatus,
+    eligibility: rawEligibility,
+    boostPackages: rawPackages,
+    loading,
+    error,
+    purchaseBoost: rawPurchase,
+    cancelBoost: rawCancel,
+    dailyBoostUsage,
+    dailyBoostLimit
+  } = useBoostManager(profileId);
+
+  // Adapt types for consumer components
+  const boostStatus = adaptBoostStatus(rawStatus);
+  const eligibility = adaptBoostEligibility(rawEligibility);
+  const boostPackages = adaptBoostPackages(rawPackages);
+
+  // Adapt functions
+  const purchaseBoost = async (pkg: BoostPackage) => {
+    // Convert BoostPackage to the format expected by raw purchaseBoost
+    const adaptedPackage = {
+      id: pkg.id,
+      name: pkg.name,
+      description: pkg.description,
+      price: pkg.price_ubx,
+      duration: pkg.duration
+    };
+    return rawPurchase(adaptedPackage);
+  };
+
+  return {
+    boostStatus,
+    eligibility,
+    boostPackages,
+    loading,
+    error,
+    purchaseBoost,
+    cancelBoost: rawCancel,
+    dailyBoostUsage,
+    dailyBoostLimit,
+    getBoostPrice: (packageId: string) => adaptGetBoostPrice(packageId, rawPackages)
   };
 };
