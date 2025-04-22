@@ -1,103 +1,64 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { ContentType, ContentUnlockOptions, VirtualContent } from '@/types/content';
 import { useAuth } from '@/hooks/auth';
-import { useUBX } from '@/hooks/useUBX';
 
-interface VirtualContent {
-  id: string;
-  title: string;
-  description?: string;
-  thumbnailUrl?: string;
-  contentUrl: string;
-  price: number;
-  creatorId: string;
-  createdAt: string;
-  contentType: string;
-  isOwned?: boolean;
-}
+export { ContentType };
 
-export const useVirtualContent = (contentId?: string) => {
-  const [content, setContent] = useState<VirtualContent | null>(null);
-  const [loading, setLoading] = useState(true);
+export const useVirtualContent = () => {
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [unlockedContent, setUnlockedContent] = useState<Record<string, boolean>>({});
+  const [isUnlocking, setIsUnlocking] = useState(false);
   const { user } = useAuth();
-  const { processTransaction } = useUBX();
   
-  useEffect(() => {
-    if (!contentId) {
-      setLoading(false);
-      return;
+  // Check if content is unlocked
+  const isContentUnlocked = (contentId: string): boolean => {
+    return unlockedContent[contentId] || false;
+  };
+  
+  // Unlock content
+  const unlockContent = async (options: ContentUnlockOptions): Promise<boolean> => {
+    if (!user) {
+      setError('You must be logged in to unlock content');
+      return false;
     }
     
-    const fetchContent = async () => {
-      try {
-        setLoading(true);
-        
-        // In a real implementation, this would fetch from Supabase or an API
-        // For now, use mock data
-        setTimeout(() => {
-          const mockContent: VirtualContent = {
-            id: contentId,
-            title: "Virtual Experience Demo",
-            description: "A sample virtual content experience",
-            thumbnailUrl: "https://placehold.co/600x400",
-            contentUrl: "https://example.com/virtual-content",
-            price: 50,
-            creatorId: "creator-123",
-            createdAt: new Date().toISOString(),
-            contentType: "virtual_experience", 
-            isOwned: Math.random() > 0.5
-          };
-          
-          setContent(mockContent);
-          setLoading(false);
-        }, 800);
-        
-      } catch (err: any) {
-        console.error("Error fetching virtual content:", err);
-        setError(err.message || "Failed to load content");
-        setLoading(false);
-      }
-    };
-    
-    fetchContent();
-  }, [contentId]);
-  
-  const purchaseContent = async (): Promise<boolean> => {
-    if (!content || !user) return false;
+    setIsUnlocking(true);
+    setError(null);
     
     try {
-      setLoading(true);
+      // Simulate API call to unlock content
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Process UBX transaction
-      const result = await processTransaction({
-        amount: content.price,
-        type: 'debit',
-        description: `Purchased virtual content: ${content.title}`
-      });
+      // For demonstration purposes
+      const success = Math.random() > 0.2; // 80% success rate
       
-      if (result) {
-        // Update local state to mark content as owned
-        setContent(prev => prev ? {...prev, isOwned: true} : null);
+      if (success) {
+        setUnlockedContent(prev => ({
+          ...prev,
+          [options.contentId]: true
+        }));
         return true;
+      } else {
+        setError('Failed to unlock content. Insufficient funds or content unavailable.');
+        return false;
       }
-      
-      return false;
-    } catch (err: any) {
-      console.error("Error purchasing content:", err);
-      setError(err.message || "Failed to purchase content");
+    } catch (err) {
+      setError('An error occurred while unlocking content');
       return false;
     } finally {
-      setLoading(false);
+      setIsUnlocking(false);
     }
   };
   
   return {
-    content,
-    loading,
+    isContentUnlocked,
+    unlockContent,
+    isUnlocking,
     error,
-    isOwned: content?.isOwned || false,
-    purchaseContent
+    loading,
+    unlockedContent
   };
 };
 

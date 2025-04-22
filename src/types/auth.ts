@@ -11,8 +11,8 @@ export interface User {
   metadata?: Record<string, any>;
   createdAt?: string;
   updatedAt?: string;
-  session?: any; // Add session property
-  password?: string; // Add password property
+  session?: any;
+  password?: string;
   username?: string;
   roles?: UserRole[];
   website?: string;
@@ -22,7 +22,7 @@ export interface User {
   user_metadata?: Record<string, any>;
   ubxBalance?: number;
   created_at?: string;
-  phone?: string; // Add phone property
+  phone?: string;
 }
 
 export interface UserProfile {
@@ -56,7 +56,7 @@ export interface AuthResult {
   error?: string;
   redirectTo?: string;
   token?: string;
-  session?: any; // Add session property
+  session?: any;
   password?: string;
 }
 
@@ -71,8 +71,7 @@ export interface AuthState {
 export type UserRole = string | { name: string; permissions?: string[] };
 
 export interface AuthUser extends User {
-  // Additional properties needed for auth
-  ubxBalance?: number; // Add UBX balance
+  ubxBalance?: number;
 }
 
 export interface AuthContextType {
@@ -82,15 +81,18 @@ export interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   initialized: boolean;
-  checkRole?: (role: string) => boolean;
+  checkRole: (role: string) => boolean;
   login: (email: string, password: string, options?: any) => Promise<AuthResult>;
   logout: () => Promise<void>;
   register: (email: string, password: string, username?: string, options?: any) => Promise<AuthResult>;
   updateUser: (data: Partial<User>) => Promise<boolean>;
+  updateUserProfile: (data: Partial<UserProfile>) => Promise<boolean>;
   loadUserProfile: () => Promise<User | null>;
   refreshProfile: () => Promise<void>;
   sendPasswordResetEmail: (email: string) => Promise<AuthResult>;
   resetPassword: (token: string, password: string) => Promise<AuthResult>;
   requestPasswordReset: (email: string) => Promise<AuthResult>;
   verifyEmail: (token: string) => Promise<AuthResult>;
+  signIn?: (email: string, password: string) => Promise<AuthResult>;
+  signOut?: () => Promise<void>;
 }

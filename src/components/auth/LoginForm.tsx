@@ -5,13 +5,22 @@ import { useState } from "react";
 
 export interface LoginFormProps {
   onSubmit: (email: string, password: string) => Promise<any>;
+  email?: string;
+  setEmail?: React.Dispatch<React.SetStateAction<string>>;
+  onForgotPassword?: () => void;
+  isLoading?: boolean;
 }
 
-const LoginForm = ({ onSubmit }: LoginFormProps) => {
-  const [email, setEmail] = useState("");
+const LoginForm = ({ onSubmit, email: externalEmail, setEmail: setExternalEmail, onForgotPassword, isLoading: externalIsLoading }: LoginFormProps) => {
+  const [internalEmail, setInternalEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Use either external or internal state for email
+  const email = externalEmail !== undefined ? externalEmail : internalEmail;
+  const setEmailValue = setExternalEmail || setInternalEmail;
+  const isLoading = externalIsLoading !== undefined ? externalIsLoading : isSubmitting;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +50,7 @@ const LoginForm = ({ onSubmit }: LoginFormProps) => {
           id="email"
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => setEmailValue(e.target.value)}
           required
           placeholder="name@example.com"
           autoComplete="email"
@@ -67,9 +76,21 @@ const LoginForm = ({ onSubmit }: LoginFormProps) => {
         <div className="text-sm text-red-500">{error}</div>
       )}
       
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? "Logging in..." : "Log in"}
-      </Button>
+      <div className="flex items-center justify-between">
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? "Logging in..." : "Log in"}
+        </Button>
+      </div>
+      
+      {onForgotPassword && (
+        <button 
+          type="button"
+          onClick={onForgotPassword}
+          className="w-full text-sm text-center text-primary hover:underline"
+        >
+          Forgot password?
+        </button>
+      )}
     </form>
   );
 };

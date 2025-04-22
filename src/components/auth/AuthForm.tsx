@@ -78,7 +78,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
             <LoginForm
               email={email}
               setEmail={setEmail}
-              onLogin={onLogin}
+              onSubmit={onLogin}
               onForgotPassword={() => setShowForgotPassword(true)}
               isLoading={isLoading}
             />
@@ -87,7 +87,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
             <RegisterForm
               email={email}
               setEmail={setEmail}
-              onRegister={onRegister}
+              onSubmit={(email, password, username) => onRegister(email, password, username, true)}
               isLoading={isLoading}
             />
           </TabsContent>

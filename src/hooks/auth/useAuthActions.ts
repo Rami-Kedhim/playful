@@ -6,32 +6,31 @@ import { useAuth } from './useAuthContext';
  * Hook to handle auth-related actions
  */
 export const useAuthActions = () => {
-  const { user, signIn, signOut, updateUserProfile } = useAuth();
+  const auth = useAuth();
 
   const login = useCallback(async (email: string, password: string) => {
-    return await signIn(email, password);
-  }, [signIn]);
+    return await auth.login(email, password);
+  }, [auth]);
 
   const logout = useCallback(async () => {
-    return await signOut();
-  }, [signOut]);
+    return await auth.logout();
+  }, [auth]);
 
   const updateProfile = useCallback(async (profileData: any) => {
-    return await updateUserProfile(profileData);
-  }, [updateUserProfile]);
+    return await auth.updateUserProfile(profileData);
+  }, [auth]);
   
-  // Mock implementation for refreshProfile
+  // Implementation for refreshProfile
   const refreshProfile = useCallback(async () => {
-    console.log("Profile refresh requested");
-    // This would be implemented to fetch latest profile data
-  }, []);
+    await auth.refreshProfile();
+  }, [auth]);
 
   return {
     login,
     logout,
     updateProfile,
     refreshProfile,
-    isAuthenticated: !!user,
-    userId: user?.id
+    isAuthenticated: !!auth.user,
+    userId: auth.user?.id
   };
 };
