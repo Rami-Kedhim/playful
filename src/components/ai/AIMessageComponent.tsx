@@ -1,78 +1,128 @@
 
 import React, { useState } from 'react';
-import { AIMessage } from '@/types/ai-profile';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
-import { unlockPaidMessage } from '@/services/ai/aiMessagesService';
-import { Coins, Lock } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
+import { Lock, Check, ImageIcon, FileText, Download } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { AIMessage } from '@/types/ai-profile';
 
 interface AIMessageComponentProps {
   message: AIMessage;
-  isLoading?: boolean;
-  onMessageUnlocked?: () => void;
+  onUnlock?: (messageId: string) => Promise<void>;
 }
 
-const AIMessageComponent: React.FC<AIMessageComponentProps> = ({ 
-  message, 
-  isLoading = false, 
-  onMessageUnlocked 
-}) => {
-  const { user } = useAuth();
-  const [unlocking, setUnlocking] = useState(false);
+const AIMessageComponent: React.FC<AIMessageComponentProps> = ({ message, onUnlock }) => {
+  const [isUnlocking, setIsUnlocking] = useState(false);
+  const { id, content, isAI, timestamp, attachments, status } = message;
   
-  // Check if message requires payment (handle undefined values safely)
-  const isLocked = message.requires_payment && message.payment_status === 'pending';
-  const isUserMessage = message.sender === 'user'; // Use sender property instead of is_ai
+  // Check if message requires payment
+  const requiresPayment = message.metadata?.requires_payment === true;
+  const paymentStatus = message.metadata?.payment_status;
   
+  // Handle unlock button click
   const handleUnlock = async () => {
-    if (!user) return;
+    if (!onUnlock) return;
     
-    setUnlocking(true);
+    setIsUnlocking(true);
     try {
-      const success = await unlockPaidMessage(user.id, message.id);
-      if (success && onMessageUnlocked) {
-        onMessageUnlocked();
-      }
+      await onUnlock(id);
+    } catch (error) {
+      console.error('Error unlocking message:', error);
     } finally {
-      setUnlocking(false);
+      setIsUnlocking(false);
     }
   };
   
-  if (isLoading) {
+  // Render attachments if they exist
+  const renderAttachments = () => {
+    if (!attachments || attachments.length === 0) return null;
+    
     return (
-      <div className={`flex max-w-[80%] ${isUserMessage ? 'ml-auto' : 'mr-auto'}`}>
-        <div className={`rounded-lg p-3 ${isUserMessage ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-          <Skeleton className="h-4 w-[250px] mb-2" />
-          <Skeleton className="h-4 w-[200px]" />
-        </div>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {attachments.map((attachment, index) => {
+          const isImage = attachment.type.startsWith('image/');
+          
+          return (
+            <div 
+              key={index} 
+              className="relative group overflow-hidden rounded-md bg-muted/30"
+              style={{ width: isImage ? '100px' : 'auto', height: isImage ? '100px' : 'auto' }}
+            >
+              {isImage ? (
+                <img 
+                  src={attachment.url} 
+                  alt={`Attachment ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="flex items-center gap-2 p-2">
+                  <FileText className="h-4 w-4" />
+                  <span className="text-xs truncate">File attachment</span>
+                </div>
+              )}
+              
+              <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                <Button size="sm" variant="ghost" className="h-8 w-8 p-0" asChild>
+                  <a href={attachment.url} download target="_blank" rel="noopener noreferrer">
+                    <Download className="h-4 w-4" />
+                  </a>
+                </Button>
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
-  }
-  
+  };
+
   return (
-    <div className={`flex max-w-[80%] ${isUserMessage ? 'ml-auto' : 'mr-auto'} mb-4`}>
-      <div className={`rounded-lg p-3 ${isUserMessage ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-        {isLocked ? (
-          <div className="flex flex-col items-center gap-2">
-            <Lock className="h-5 w-5 text-yellow-500" />
-            <p className="text-sm text-center">This premium message requires payment to view</p>
-            <p className="text-sm font-semibold flex items-center gap-1 mb-2">
-              <Coins className="h-4 w-4 text-yellow-500" />
-              {message.price || 5} Lucoins
-            </p>
-            <Button 
-              size="sm" 
-              onClick={handleUnlock} 
-              disabled={unlocking}
-              className="mt-1"
-            >
-              {unlocking ? 'Processing...' : 'Unlock Message'}
-            </Button>
-          </div>
-        ) : (
-          <p className="whitespace-pre-wrap">{message.content}</p>
-        )}
+    <div className={`flex ${isAI ? 'justify-start' : 'justify-end'} mb-4`}>
+      <div className={`max-w-[80%] ${isAI ? 'order-last ml-2' : 'order-first mr-2'}`}>
+        <Card className={`overflow-hidden border-0 ${isAI ? 'bg-muted/30' : 'bg-primary/10'}`}>
+          <CardContent className="p-3">
+            {requiresPayment && paymentStatus !== 'completed' ? (
+              <div className="flex flex-col items-center py-2">
+                <Lock className="h-5 w-5 mb-2 text-muted-foreground" />
+                <p className="text-sm text-center mb-2">
+                  This message requires payment to unlock.
+                </p>
+                <div className="flex items-center gap-1 text-amber-500 mb-2">
+                  <span className="text-sm font-medium">{message.metadata?.price || 5} UBX</span>
+                </div>
+                <Button 
+                  size="sm" 
+                  onClick={handleUnlock}
+                  disabled={isUnlocking}
+                >
+                  {isUnlocking ? 'Processing...' : 'Unlock Message'}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm whitespace-pre-wrap">{content}</p>
+                {renderAttachments()}
+              </>
+            )}
+            
+            <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+              <span>
+                {formatDistanceToNow(new Date(timestamp), { addSuffix: true })}
+              </span>
+              {status === 'delivered' && !isAI && (
+                <span className="flex items-center">
+                  <Check className="h-3 w-3 mr-1" />
+                  Delivered
+                </span>
+              )}
+              {status === 'read' && !isAI && (
+                <span className="flex items-center text-primary">
+                  <Check className="h-3 w-3 mr-1" />
+                  Read
+                </span>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

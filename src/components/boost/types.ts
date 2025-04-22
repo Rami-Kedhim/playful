@@ -50,3 +50,14 @@ export interface UseBoostManagerResult {
   fetchBoostPackages: () => Promise<BoostPackage[]>;
   adaptGetBoostPrice: (fn: (pkg: BoostPackage) => number) => (pkg: BoostPackage) => number;
 }
+
+export interface BoostActivePackageProps {
+  boostStatus: BoostStatus;
+  formatDuration?: (duration: string) => string;
+  onCancel?: () => Promise<boolean>;
+}
+
+export interface HermesBoostInfoProps {
+  hermesStatus: HermesBoostStatus;
+  isActive?: boolean;
+}

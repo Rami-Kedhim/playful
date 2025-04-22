@@ -1,206 +1,180 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { brainHub } from '@/services/neural/HermesOxumBrainHub';
-import { LivecamModel, BoostableLivecamsOptions } from '@/types/livecams';
-import { BrainHubRequest } from '@/types/brainHub';
+import { LivecamModel } from '@/types/livecam';
+import { BoostableLivecamsOptions } from '@/types/livecam';
+import { oxum } from '@/core/Oxum';
 
 export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => {
   const [livecams, setLivecams] = useState<LivecamModel[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [boostedIds, setBoostedIds] = useState<string[]>([]);
-  const [isEvaluating, setIsEvaluating] = useState(false);
-  const [boostOpportunities, setBoostOpportunities] = useState<any[]>([]);
+  const [error, setError] = useState<Error | null>(null);
+  const [hasMore, setHasMore] = useState(true);
 
-  const fetchLivecams = useCallback(async () => {
+  const fetchLivecams = useCallback(async (refresh = false) => {
+    const {
+      limit = 12,
+      offset = 0,
+      onlyLive = false,
+      categories = [],
+      region,
+      language,
+      sortBy = 'boosted'
+    } = options;
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      // Mock data generation
-      const mockLivecams = generateMockLivecams(options.limit || 10, options.onlyLive);
-      
-      // Process through Brain Hub
-      const processedLivecams = await processThroughBrainHub(mockLivecams);
-      
-      // Track which livecams are boosted
-      const boostIds = processedLivecams.filter(cam => cam.boosted).map(cam => cam.id);
-      setBoostedIds(boostIds);
-      
-      setLivecams(processedLivecams);
+      // Mock API request with a delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // Generate mock data
+      const count = limit;
+      const mockLivecams: LivecamModel[] = Array.from({ length: count }, (_, index) => {
+        const id = `livecam-${index + offset + 1}`;
+        const isLive = onlyLive ? true : Math.random() > 0.3;
+        const boosted = Math.random() > 0.7;
+        const boostScore = boosted ? Math.random() * 10 : 0;
+        const viewerCount = isLive ? Math.floor(Math.random() * 1000) : 0;
+
+        // Generate some tags
+        const categoryPool = ['Amateur', 'Professional', 'Couples', 'Solo', 'Group', 'Fetish'];
+        const selectedCategories = onlyLive && categories.length > 0 
+          ? categories
+          : Array.from({ length: Math.floor(Math.random() * 3) + 1 }, () => 
+              categoryPool[Math.floor(Math.random() * categoryPool.length)]
+            );
+
+        return {
+          id,
+          username: `user${index + offset + 1}`,
+          name: `Livecam Model ${index + offset + 1}`,
+          displayName: `Model ${index + offset + 1}`,
+          imageUrl: `https://source.unsplash.com/random/300x300?portrait&sig=${id}`,
+          thumbnailUrl: `https://source.unsplash.com/random/300x300?portrait&sig=${id}`,
+          isLive,
+          isStreaming: isLive,
+          viewerCount,
+          region: region || 'US',
+          language: language || 'en',
+          tags: selectedCategories,
+          category: selectedCategories[0] || 'Amateur',
+          rating: Math.floor(Math.random() * 5) + 1,
+          boosted,
+          boostScore,
+          isPopular: viewerCount > 500
+        };
+      });
+
+      // Sort based on sortBy parameter
+      let sortedLivecams = [...mockLivecams];
+      switch (sortBy) {
+        case 'boosted':
+          sortedLivecams = sortedLivecams.sort((a, b) => (b.boostScore || 0) - (a.boostScore || 0));
+          break;
+        case 'popular':
+          sortedLivecams = sortedLivecams.sort((a, b) => b.viewerCount - a.viewerCount);
+          break;
+        case 'new':
+          // For demo, just shuffle them
+          sortedLivecams = sortedLivecams.sort(() => Math.random() - 0.5);
+          break;
+        case 'rating':
+          sortedLivecams = sortedLivecams.sort((a, b) => b.rating - a.rating);
+          break;
+      }
+
+      // Apply Oxum's boost allocation algorithm to refine the order
+      try {
+        // This is just an example of how to use Oxum
+        // In a real application, this would use the actual boost data
+        const boostMatrix = sortedLivecams.map(livecam => [
+          livecam.boostScore || 0, 
+          livecam.viewerCount / 100, 
+          livecam.rating / 5
+        ]);
+        
+        // Only if we have livecams, call Oxum's algorithm
+        if (boostMatrix.length > 0) {
+          const boostAllocation = oxum.boostAllocationEigen(boostMatrix);
+          
+          // Apply boost allocation to sort the livecams
+          sortedLivecams = sortedLivecams.map((livecam, i) => ({
+            ...livecam,
+            boostScore: boostAllocation[i] * 10 // Scale from 0-1 to 0-10
+          })).sort((a, b) => (b.boostScore || 0) - (a.boostScore || 0));
+        }
+      } catch (oxumError) {
+        console.error("Error using Oxum boost allocation:", oxumError);
+        // Continue with the original sorting if Oxum fails
+      }
+
+      // Update state based on refresh flag
+      setLivecams(prev => refresh ? sortedLivecams : [...prev, ...sortedLivecams]);
+      setHasMore(sortedLivecams.length >= limit);
+      return sortedLivecams;
     } catch (err) {
-      console.error('Error fetching livecams:', err);
-      setError('Failed to load livecam data');
+      const caughtError = err instanceof Error ? err : new Error('Failed to fetch livecams');
+      setError(caughtError);
+      console.error('Error fetching livecams:', caughtError);
+      return [];
     } finally {
       setLoading(false);
     }
-  }, [options.limit, options.onlyLive, options.categories]);
-  
-  // Fetch data on mount
+  }, [options]);
+
+  // Load initial data
   useEffect(() => {
-    fetchLivecams();
+    fetchLivecams(true);
   }, [fetchLivecams]);
-  
-  // Helper to process livecams through Brain Hub
-  const processThroughBrainHub = async (data: LivecamModel[]): Promise<LivecamModel[]> => {
+
+  // Function to load more livecams
+  const loadMore = useCallback(async () => {
+    if (loading || !hasMore) return;
+    
+    // Calculate new offset
+    const newOffset = livecams.length;
+    
+    // Fetch more livecams with updated offset
+    await fetchLivecams(false);
+  }, [loading, hasMore, livecams.length, fetchLivecams]);
+
+  // Function to refresh the data
+  const refresh = useCallback(() => {
+    return fetchLivecams(true);
+  }, [fetchLivecams]);
+
+  // Function to boost a livecam
+  const boostLivecam = useCallback(async (livecamId: string, boostAmount: number) => {
     try {
-      const request: BrainHubRequest = {
-        type: 'livecam_boost',
-        data,
-        filters: {
-          applyBoostScores: true,
-          filterInappropriate: true
-        }
-      };
-      
-      const response = await brainHub.processRequest(request);
-      
-      return response.data || data;
-    } catch (error) {
-      console.error('Error processing livecams through Brain Hub:', error);
-      return data;
-    }
-  };
-  
-  // Helper to boost a specific livecam
-  const boostLivecam = useCallback(async (id: string): Promise<boolean> => {
-    try {
-      const livecamToBoost = livecams.find(cam => cam.id === id);
-      if (!livecamToBoost) return false;
-      
-      const request: BrainHubRequest = {
-        type: 'apply_boost',
-        data: {
-          itemId: id,
-          itemType: 'livecam',
-          currentScore: livecamToBoost.boostScore || 0
-        }
-      };
-      
-      const response = await brainHub.processRequest(request);
-      
-      if (response.success) {
-        setLivecams(prev => 
-          prev.map(cam => 
-            cam.id === id 
-              ? { ...cam, boosted: true, boostScore: response.data.newScore, boostRank: response.data.boostRank } 
-              : cam
-          )
-        );
-        setBoostedIds(prev => [...prev, id]);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Error boosting livecam:', error);
-      return false;
-    }
-  }, [livecams]);
-  
-  // Helper to cancel a boost for a livecam
-  const cancelBoost = useCallback(async (id: string): Promise<boolean> => {
-    try {
-      const request: BrainHubRequest = {
-        type: 'cancel_boost',
-        data: {
-          itemId: id,
-          itemType: 'livecam'
-        }
-      };
-      
-      const response = await brainHub.processRequest(request);
-      
-      if (response.success) {
-        setLivecams(prev => 
-          prev.map(cam => 
-            cam.id === id 
-              ? { ...cam, boosted: false, boostScore: undefined, boostRank: undefined } 
-              : cam
-          )
-        );
-        setBoostedIds(prev => prev.filter(itemId => itemId !== id));
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Error canceling boost:', error);
+      // In a real application, this would call an API to boost the livecam
+      // For now, we'll just update the local state
+      setLivecams(prev => 
+        prev.map(livecam => 
+          livecam.id === livecamId 
+            ? { 
+                ...livecam, 
+                boosted: true, 
+                boostScore: (livecam.boostScore || 0) + boostAmount 
+              } 
+            : livecam
+        )
+      );
+      return true;
+    } catch (err) {
+      console.error('Error boosting livecam:', err);
       return false;
     }
   }, []);
-
-  // Check if a livecam is boosted
-  const isBoosted = useCallback((id: string) => {
-    return boostedIds.includes(id);
-  }, [boostedIds]);
-  
-  // Updated evaluate boost opportunities function without undefined variables
-  const evaluateBoostOpportunities = useCallback(async () => {
-    if (!brainHub) return;
-
-    try {
-      setIsEvaluating(true);
-      
-      // Create a request for the brain hub with minimal required data
-      const response = brainHub.processRequest({
-        type: 'evaluate_boost_opportunities',
-        data: {
-          userProfile: {}, // Pass empty object instead of undefined variable
-          recentViews: [], // Pass empty array instead of undefined variable
-          availableCredits: 0 // Pass default value instead of userData?.lucoins
-        }
-      });
-      
-      if (response.success && response.data) {
-        setBoostOpportunities(response.data.opportunities || []);
-      }
-    } catch (err) {
-      console.error("Failed to evaluate boost opportunities:", err);
-    } finally {
-      setIsEvaluating(false);
-    }
-  }, [brainHub]);
-  
-  // Helper function to generate mock data
-  const generateMockLivecams = (limit: number, onlyLive = false): LivecamModel[] => {
-    const models: LivecamModel[] = [];
-    
-    for (let i = 0; i < limit; i++) {
-      const isLive = onlyLive ? true : Math.random() > 0.3;
-      
-      models.push({
-        id: `livecam-${i}`,
-        name: `Model ${i}`,
-        username: `model${i}`,
-        displayName: `Model ${i}`,
-        isLive,
-        viewerCount: isLive ? Math.floor(Math.random() * 5000) : 0,
-        thumbnailUrl: `https://picsum.photos/seed/livecam${i}/300/200`,
-        imageUrl: `https://picsum.photos/seed/livecam${i}/300/200`,
-        profileUrl: `/livecams/model-${i}`,
-        tags: ['interactive', 'hd', Math.random() > 0.5 ? 'featured' : 'new'],
-        boosted: Math.random() > 0.8,
-        boostScore: Math.random() > 0.7 ? Math.floor(Math.random() * 100) : undefined
-      });
-    }
-    
-    return models;
-  };
 
   return {
     livecams,
     loading,
     error,
-    refreshLivecams: fetchLivecams,
-    boostLivecam,
-    filters: options,
-    hasMore: false,
-    totalCount: livecams.length,
-    loadMore: () => {}, // No-op function for pagination
-    updateFilters: () => {}, // No-op function for filters
-    cancelBoost,
-    isBoosted,
-    boostedIds,
-    evaluateBoostOpportunities
+    hasMore,
+    loadMore,
+    refresh,
+    boostLivecam
   };
 };
 

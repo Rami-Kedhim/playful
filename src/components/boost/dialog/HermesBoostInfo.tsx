@@ -1,46 +1,65 @@
 
 import React from 'react';
-import { Progress } from '@/components/ui/progress';
 import { Card, CardContent } from '@/components/ui/card';
-import { Info } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Zap, Users, TrendingUp } from 'lucide-react';
+import { HermesBoostStatus } from '@/types/boost';
 import { HermesBoostInfoProps } from '../types';
 
-const HermesBoostInfo: React.FC<HermesBoostInfoProps> = ({ hermesStatus }) => {
-  const formatDate = (date: string) => {
-    try {
-      return new Date(date).toLocaleTimeString();
-    } catch (e) {
-      return 'Unknown';
-    }
-  };
-
+const HermesBoostInfo = ({ hermesStatus, isActive = false }: HermesBoostInfoProps) => {
+  if (!hermesStatus) return null;
+  
+  const { position, activeUsers, estimatedVisibility, boostScore = 0, effectivenessScore = 0 } = hermesStatus;
+  
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Current Position</div>
-            <div className="text-2xl font-bold">{hermesStatus.position}</div>
-            <div className="text-xs text-muted-foreground mt-1">Out of {hermesStatus.activeUsers} active users</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Visibility</div>
-            <div className="text-2xl font-bold">{hermesStatus.estimatedVisibility}%</div>
-            <Progress
-              value={hermesStatus.estimatedVisibility}
-              className="h-2 mt-2"
-            />
-          </CardContent>
-        </Card>
-      </div>
+    <Card className="bg-muted/30 border-none mt-4">
+      <CardContent className="pt-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-medium flex items-center">
+            <Zap className="h-4 w-4 mr-1 text-amber-500" />
+            Hermes Boost Analytics
+          </h3>
+          <span className={`text-xs px-2 py-0.5 rounded-full ${isActive ? 'bg-green-500/20 text-green-500' : 'bg-gray-500/20 text-gray-400'}`}>
+            {isActive ? 'Active' : 'Inactive'}
+          </span>
+        </div>
 
-      <div className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
-        <Info className="h-3 w-3" /> Last updated: {formatDate(hermesStatus.lastUpdateTime)}
-      </div>
-    </div>
+        <div className="space-y-3 text-sm">
+          <div>
+            <div className="flex justify-between mb-1">
+              <span className="text-muted-foreground flex items-center">
+                <TrendingUp className="h-3 w-3 mr-1" />
+                Visibility Score
+              </span>
+              <span className="font-medium">{estimatedVisibility}%</span>
+            </div>
+            <Progress value={estimatedVisibility} className="h-1" />
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground flex items-center">
+              <Users className="h-3 w-3 mr-1" />
+              Current Position
+            </span>
+            <span className="font-medium">{position} of {activeUsers}</span>
+          </div>
+
+          {boostScore > 0 && (
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Boost Power</span>
+              <span className="font-medium">{boostScore.toFixed(1)}</span>
+            </div>
+          )}
+
+          {effectivenessScore > 0 && (
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Effectiveness</span>
+              <span className="font-medium">{effectivenessScore.toFixed(1)}</span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

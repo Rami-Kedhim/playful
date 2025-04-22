@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
+import HomePage from './pages/Home';
 import ProfilePage from './pages/Profile';
 import WalletPage from './pages/Wallet';
 import SearchPage from './pages/Search';
@@ -21,6 +22,8 @@ const StubPage = ({ title }: { title: string }) => (
 );
 
 // Create stub components for missing pages
+const MetaversePage = () => <StubPage title="Metaverse" />;
+const CompanionPage = () => <StubPage title="AI Companion" />;
 const SettingsPage = () => <StubPage title="Settings" />;
 const NotFoundPage = () => <StubPage title="Not Found" />;
 const AboutPage = () => <StubPage title="About" />;
@@ -40,6 +43,18 @@ const EscortPage = () => <StubPage title="Escort" />;
 const EscortProfilePage = () => <StubPage title="Escort Profile" />;
 const CreatorPage = () => <StubPage title="Creator" />;
 const CreatorProfilePage = () => <StubPage title="Creator Profile" />;
+const PersonaListingPage = () => <StubPage title="UberPersonas" />;
+const PersonaDetailPage = () => <StubPage title="UberPersona Detail" />;
+const EthicsPage = () => <StubPage title="Ethics & Safety" />;
+const FeedbackPage = () => <StubPage title="Feedback" />;
+const ReportPage = () => <StubPage title="Report Abuse" />;
+const CreatorsGuidePage = () => <StubPage title="Creators Guide" />;
+const VerificationPage = () => <StubPage title="Verification" />;
+const BoostGuidePage = () => <StubPage title="Boost Guide" />;
+const WalletGuidePage = () => <StubPage title="Wallet Guide" />;
+const CompliancePage = () => <StubPage title="Legal Compliance" />;
+const CopyrightPage = () => <StubPage title="Copyright" />;
+const CookiesPage = () => <StubPage title="Cookie Policy" />;
 
 const Routes = () => {
   return (
@@ -71,6 +86,23 @@ const Routes = () => {
       <Route path="/ai-models" element={<AIModelPage />} />
       <Route path="/ai-model/:id" element={<AIModelDetail />} />
       <Route path="/pulse-boost" element={<PulseBoostPage />} />
+      <Route path="/metaverse" element={<MetaversePage />} />
+      <Route path="/companion" element={<CompanionPage />} />
+      <Route path="/personas" element={<PersonaListingPage />} />
+      <Route path="/persona/:id" element={<PersonaDetailPage />} />
+      
+      {/* Footer links from home page */}
+      <Route path="/ethics" element={<EthicsPage />} />
+      <Route path="/feedback" element={<FeedbackPage />} />
+      <Route path="/report" element={<ReportPage />} />
+      <Route path="/creators-guide" element={<CreatorsGuidePage />} />
+      <Route path="/verification" element={<VerificationPage />} />
+      <Route path="/boost-guide" element={<BoostGuidePage />} />
+      <Route path="/wallet-guide" element={<WalletGuidePage />} />
+      <Route path="/legal/compliance" element={<CompliancePage />} />
+      <Route path="/legal/copyright" element={<CopyrightPage />} />
+      <Route path="/legal/cookies" element={<CookiesPage />} />
+      
       <Route path="*" element={<NotFoundPage />} />
     </RouterRoutes>
   );

@@ -72,6 +72,16 @@ export enum ProcessingStatus {
   CANCELLED = 'cancelled'
 }
 
+// Enhanced ProcessingStatus type with additional properties
+export interface ProcessingStatusData {
+  status: ProcessingStatus;
+  message?: string;
+  completedCount: number;
+  totalCount: number;
+  progress?: number;
+  lastUpdated?: Date;
+}
+
 // Add AIMessage interface for AI message components
 export interface AIMessage {
   id: string;
@@ -84,5 +94,23 @@ export interface AIMessage {
     url: string;
   }[];
   status?: 'sent' | 'delivered' | 'read' | 'failed';
+  metadata?: Record<string, any>;
+  
+  // Additional properties needed for AI chat functionality
+  role?: 'user' | 'assistant' | 'system';
+  has_read?: boolean;
+  requires_payment?: boolean;
+  payment_status?: string;
+  price?: number;
+}
+
+// Add AIConversation interface for chat system
+export interface AIConversation {
+  id: string;
+  profileId: string;
+  userId: string;
+  messages: AIMessage[];
+  createdAt: string;
+  updatedAt: string;
   metadata?: Record<string, any>;
 }

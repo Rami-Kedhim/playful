@@ -1,221 +1,160 @@
 
-import { useState, useEffect } from 'react';
-import { UserEconomy, PulseBoost, EnhancedBoostStatus } from '@/types/pulse-boost';
-import { toast } from '@/hooks/use-toast';
-import { PULSE_BOOSTS } from '@/constants/pulseBoostConfig';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { useBoostManager } from '@/hooks/boost';
-import {
-  applyPulseBoost,
-  autoApplyPulseBoosts,
-  cleanExpiredPulseBoosts,
-  hasAnyActiveBoost,
-  getActiveBoostDetails,
-  calculatePulseBoostPower
-} from '@/services/pulseBoostService';
+import { useState, useEffect, useCallback } from 'react';
+import { BoostStatus, BoostPackage } from '@/types/boost';
+import { useBoostManager } from '@/hooks/boost/useBoostManager';
 
-export interface UsePulseBoostReturn {
-  userEconomy: UserEconomy | null;
-  isLoading: boolean;
-  error: string | null;
-  purchaseBoost: (boostId: string) => Promise<boolean>;
-  cancelBoost: (boostId: string) => Promise<boolean>;
-  refreshBoosts: () => void;
-  hasActiveBoost: boolean;
-  activeBoosts: ReturnType<typeof getActiveBoostDetails>;
-  boostPower: number;
-  enhancedBoostStatus: EnhancedBoostStatus;
-  pulseBoostPackages: PulseBoost[];
+interface PulseBoostProps {
+  profileId?: string;
+  userId?: string;
 }
 
-// Combines both boost systems to provide unified functionality
-export const usePulseBoost = (profileId?: string): UsePulseBoostReturn => {
-  const { user, profile } = useAuth();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [userEconomy, setUserEconomy] = useState<UserEconomy | null>(null);
+interface EnhancedBoostStatus extends BoostStatus {
+  // Make sure the startTime and endTime are Date objects
+  startTime: string;
+  endTime: string;
+  remainingTime: string;
+}
+
+export const usePulseBoost = ({ profileId, userId }: PulseBoostProps) => {
+  const [pulseLevel, setPulseLevel] = useState(0);
+  const [enhancedStatus, setEnhancedStatus] = useState<EnhancedBoostStatus | null>(null);
+  const [isActive, setIsActive] = useState(false);
   
-  // Get the legacy boost system
-  const { 
+  const {
     boostStatus,
     boostPackages,
-    purchaseBoost: purchaseLegacyBoost,
-    cancelBoost: cancelLegacyBoost
-  } = useBoostManager(profileId || user?.id);
-  
-  // Initialize user economy data
-  useEffect(() => {
-    if (!user?.id) return;
-    
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        // In a real implementation, you would fetch this data from an API
-        // For now, we'll create mock data based on the user profile
-        
-        const mockUserEconomy: UserEconomy = {
-          userId: user.id,
-          ubxBalance: profile?.ubx_balance || 0,
-          subscriptionLevel: ((profile as any)?.subscription_tier || 'free') as any,
-          subscriptionExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-          activeBoosts: []
-        };
-        
-        setUserEconomy(mockUserEconomy);
-        
-        // Auto apply boosts based on subscription
-        setTimeout(() => {
-          setUserEconomy(prev => {
-            if (!prev) return prev;
-            return autoApplyPulseBoosts(prev);
-          });
-        }, 500);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load user economy data');
-        toast({
-          title: "Error",
-          description: "Failed to load boost data",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchData();
-    
-    // Set up an interval to clean expired boosts
-    const interval = setInterval(() => {
-      setUserEconomy(prev => {
-        if (!prev) return prev;
-        return cleanExpiredPulseBoosts(prev);
-      });
-    }, 60000); // Check every minute
-    
-    return () => clearInterval(interval);
-  }, [user?.id, profile?.ubx_balance]);
-  
-  // Purchase a boost
-  const purchaseBoost = async (boostId: string): Promise<boolean> => {
-    if (!userEconomy) {
-      toast({
-        title: "Error",
-        description: "User data not loaded",
-        variant: "destructive",
-      });
-      return false;
-    }
-    
-    const boost = PULSE_BOOSTS.find(b => b.id === boostId);
-    if (!boost) {
-      toast({
-        title: "Error",
-        description: "Boost package not found",
-        variant: "destructive",
-      });
-      return false;
-    }
-    
-    setIsLoading(true);
-    
-    try {
-      const result = applyPulseBoost(userEconomy, boost);
-      
-      if (result instanceof Error) {
-        toast({
-          title: "Error",
-          description: result.message,
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      setUserEconomy(result);
-      
-      toast({
-        title: "Boost Activated",
-        description: `${boost.name} has been applied to your profile!`,
-      });
-      
-      return true;
-    } catch (err: any) {
-      setError(err.message || 'Failed to purchase boost');
-      toast({
-        title: "Error",
-        description: "Failed to activate boost",
-        variant: "destructive",
-      });
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  // Cancel a specific boost
-  const cancelBoost = async (boostId: string): Promise<boolean> => {
-    if (!userEconomy) return false;
-    
-    setIsLoading(true);
-    
-    try {
-      const updatedUserEconomy = {
-        ...userEconomy,
-        activeBoosts: userEconomy.activeBoosts.filter(boost => boost.boostId !== boostId)
-      };
-      
-      setUserEconomy(updatedUserEconomy);
-      
-      toast({
-        title: "Boost Cancelled",
-        description: "The boost has been cancelled",
-      });
-      
-      return true;
-    } catch (err: any) {
-      setError(err.message || 'Failed to cancel boost');
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  // Refresh boosts manually
-  const refreshBoosts = () => {
-    if (!userEconomy) return;
-    
-    setUserEconomy(prev => {
-      if (!prev) return prev;
-      return cleanExpiredPulseBoosts(prev);
-    });
-  };
-  
-  // Calculate derived values
-  const hasActiveBoost = userEconomy ? hasAnyActiveBoost(userEconomy) : false;
-  const activeBoosts = userEconomy ? getActiveBoostDetails(userEconomy) : [];
-  const boostPower = userEconomy ? calculatePulseBoostPower(userEconomy) : 0;
-  
-  // Combine the legacy boost status with Pulse boost info
-  const enhancedBoostStatus: EnhancedBoostStatus = {
-    ...(boostStatus || { isActive: false }),
-    pulseData: hasActiveBoost ? {
-      visibility: activeBoosts[0]?.boostDetails?.visibility || 'unknown',
-      pulseLevel: boostPower,
-      boostType: activeBoosts[0]?.boostDetails?.name || 'Unknown Boost'
-    } : undefined,
-    progress: 75 // Default progress value
-  };
-  
-  return {
-    userEconomy,
-    isLoading,
+    loading,
     error,
     purchaseBoost,
-    cancelBoost,
-    refreshBoosts,
-    hasActiveBoost,
-    activeBoosts,
-    boostPower,
-    enhancedBoostStatus,
-    pulseBoostPackages: PULSE_BOOSTS
+    cancelBoost
+  } = useBoostManager(profileId || userId || '');
+  
+  // Function to calculate pulse data based on boost status
+  const calculatePulseData = useCallback(() => {
+    if (!boostStatus?.isActive) {
+      return {
+        visibility: 'low',
+        pulseLevel: 0,
+        boostType: 'none'
+      };
+    }
+    
+    // Determine the current boost package
+    const currentPackage = boostPackages.find(pkg => pkg.id === boostStatus.packageId);
+    
+    // Calculate pulse level based on boost power or default to medium
+    const boostPower = currentPackage?.boost_power || 5;
+    let pulseLevel = 0;
+    let visibility = 'low';
+    let boostType = currentPackage?.name || 'standard';
+    
+    if (boostPower >= 8) {
+      pulseLevel = 3;
+      visibility = 'high';
+    } else if (boostPower >= 5) {
+      pulseLevel = 2;
+      visibility = 'medium';
+    } else if (boostPower > 0) {
+      pulseLevel = 1;
+      visibility = 'low';
+    }
+    
+    return {
+      visibility,
+      pulseLevel,
+      boostType
+    };
+  }, [boostStatus, boostPackages]);
+  
+  // Calculate progress percentage
+  const calculateProgress = useCallback(() => {
+    if (!boostStatus?.isActive) return 0;
+    
+    const now = new Date().getTime();
+    const start = new Date(boostStatus.startTime).getTime();
+    const end = new Date(boostStatus.endTime).getTime();
+    
+    if (now >= end) return 100;
+    if (now <= start) return 0;
+    
+    const elapsed = now - start;
+    const total = end - start;
+    const progress = (elapsed / total) * 100;
+    
+    return Math.max(0, Math.min(100, progress));
+  }, [boostStatus]);
+  
+  // Update the enhanced boost status
+  const updateEnhancedStatus = useCallback(() => {
+    if (!boostStatus) {
+      setEnhancedStatus(null);
+      setIsActive(false);
+      setPulseLevel(0);
+      return;
+    }
+    
+    const pulseData = calculatePulseData();
+    const progress = calculateProgress();
+    
+    setPulseLevel(pulseData.pulseLevel);
+    setIsActive(boostStatus.isActive);
+    
+    if (boostStatus.isActive) {
+      setEnhancedStatus({
+        ...boostStatus,
+        pulseData,
+        progress
+      });
+    } else {
+      setEnhancedStatus(null);
+    }
+  }, [boostStatus, calculatePulseData, calculateProgress]);
+  
+  // Apply a pulse boost
+  const applyPulseBoost = async (boostPackage: BoostPackage) => {
+    try {
+      const result = await purchaseBoost(boostPackage);
+      if (result) {
+        updateEnhancedStatus();
+      }
+      return result;
+    } catch (err) {
+      console.error('Error applying pulse boost:', err);
+      return false;
+    }
+  };
+  
+  // Cancel an active pulse boost
+  const cancelPulseBoost = async () => {
+    try {
+      const result = await cancelBoost();
+      if (result) {
+        setIsActive(false);
+        setPulseLevel(0);
+        setEnhancedStatus(null);
+      }
+      return result;
+    } catch (err) {
+      console.error('Error cancelling pulse boost:', err);
+      return false;
+    }
+  };
+  
+  // Update on any changes
+  useEffect(() => {
+    updateEnhancedStatus();
+  }, [updateEnhancedStatus]);
+  
+  return {
+    pulseLevel,
+    isActive,
+    enhancedStatus,
+    loading,
+    error,
+    boostPackages,
+    applyPulseBoost,
+    cancelPulseBoost
   };
 };
+
+export default usePulseBoost;

@@ -1,158 +1,113 @@
-import { useCallback } from 'react';
-import { toast } from '@/components/ui/use-toast';
-import { useBoostAnalytics } from './useBoostAnalytics';
-import { AnalyticsData } from './useBoostAnalytics';
-import { boostService } from '@/services/boostService';
 
-export const useBoostOperations = (
-  profileId?: string,
-  boostStatus?: any,
-  setBoostStatus?: any,
-  setIsLoading?: any,
-  setError?: any,
-  setDailyBoostUsage?: any
-) => {
-  const { fetchAnalytics } = useBoostAnalytics(profileId);
+import { useCallback, useState } from 'react';
+import { BoostAnalytics } from '@/types/boost';
 
-  // Check for active boost
-  const checkActiveBoost = useCallback(async () => {
-    if (!profileId) return null;
+interface AnalyticsData {
+  impressions: {
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+  };
+  interactions: {
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+  };
+  rankingPosition: number;
+  viewsIncrease: number;
+}
+
+export const useBoostOperations = (profileId: string) => {
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<AnalyticsData>({
+    impressions: {
+      withBoost: 0,
+      withoutBoost: 0,
+      increase: 0
+    },
+    interactions: {
+      withBoost: 0,
+      withoutBoost: 0,
+      increase: 0
+    },
+    rankingPosition: 0,
+    viewsIncrease: 0
+  });
+
+  const fetchAnalytics = useCallback(async (): Promise<BoostAnalytics> => {
+    setLoading(true);
     
     try {
-      const activeBoost = await boostService.fetchActiveBoost(profileId);
+      // Simulate analytics data fetch
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      if (setBoostStatus && activeBoost) {
-        setBoostStatus(activeBoost);
-      }
+      const analyticsData: BoostAnalytics = {
+        impressions: {
+          today: 432,
+          yesterday: 287,
+          weeklyAverage: 310,
+          withBoost: 432,
+          withoutBoost: 210,
+          increase: 105
+        },
+        interactions: {
+          today: 87,
+          yesterday: 63,
+          weeklyAverage: 70,
+          withBoost: 87,
+          withoutBoost: 42,
+          increase: 107
+        },
+        rank: {
+          current: 13,
+          previous: 47,
+          change: 34
+        },
+        trending: true,
+        additionalViews: 222,
+        engagementIncrease: 0.23,
+        rankingPosition: 13,
+        viewsIncrease: 105,
+        engagementRate: 0.2,
+        clicks: {
+          today: 45,
+          yesterday: 28,
+          weeklyAverage: 30,
+          withBoost: 45,
+          withoutBoost: 22,
+          increase: 105
+        }
+      };
       
-      return activeBoost;
+      setData({
+        impressions: {
+          withBoost: analyticsData.impressions.withBoost,
+          withoutBoost: analyticsData.impressions.withoutBoost || 0,
+          increase: analyticsData.impressions.increase || 0
+        },
+        interactions: {
+          withBoost: analyticsData.interactions.withBoost,
+          withoutBoost: analyticsData.interactions.withoutBoost || 0,
+          increase: analyticsData.interactions.increase || 0
+        },
+        rankingPosition: analyticsData.rankingPosition,
+        viewsIncrease: analyticsData.viewsIncrease || 0
+      });
+      
+      return analyticsData;
     } catch (error) {
-      console.error("Error checking active boost:", error);
-      return null;
-    }
-  }, [profileId, setBoostStatus]);
-
-  // Purchase a boost
-  const purchaseBoost = useCallback(async (boostPackage: any) => {
-    if (!profileId) {
-      toast({
-        title: "Error",
-        description: "Profile ID is required",
-        variant: "destructive"
-      });
-      return false;
-    }
-
-    if (setIsLoading) setIsLoading(true);
-    
-    try {
-      const result = await boostService.purchaseBoost(profileId, boostPackage.id);
-      
-      if (!result.success) {
-        toast({
-          title: "Error",
-          description: result.message || "Failed to purchase boost",
-          variant: "destructive"
-        });
-        return false;
-      }
-      
-      if (setDailyBoostUsage) {
-        setDailyBoostUsage((prev: number) => prev + 1);
-      }
-      
-      // Fetch updated boost status
-      const updatedBoost = await checkActiveBoost();
-      
-      toast({
-        title: "Success",
-        description: "Boost purchased successfully!",
-      });
-      
-      return true;
-    } catch (error: any) {
-      console.error("Error purchasing boost:", error);
-      toast({
-        title: "Error",
-        description: error.message || "An error occurred",
-        variant: "destructive"
-      });
-      
-      if (setError) setError(error.message || "Failed to purchase boost");
-      return false;
+      console.error('Error fetching boost analytics:', error);
+      throw error;
     } finally {
-      if (setIsLoading) setIsLoading(false);
+      setLoading(false);
     }
-  }, [profileId, setIsLoading, setError, setDailyBoostUsage, checkActiveBoost]);
-
-  // Cancel a boost
-  const cancelBoost = useCallback(async () => {
-    if (!profileId || !boostStatus?.isActive) {
-      toast({
-        title: "Error",
-        description: "No active boost to cancel",
-        variant: "destructive"
-      });
-      return false;
-    }
-
-    if (setIsLoading) setIsLoading(true);
-    
-    try {
-      const result = await boostService.cancelBoost(profileId);
-      
-      if (!result.success) {
-        toast({
-          title: "Error",
-          description: result.message || "Failed to cancel boost",
-          variant: "destructive"
-        });
-        return false;
-      }
-      
-      if (setBoostStatus) {
-        setBoostStatus({ isActive: false });
-      }
-      
-      toast({
-        title: "Success",
-        description: "Boost cancelled successfully",
-      });
-      
-      return true;
-    } catch (error: any) {
-      console.error("Error cancelling boost:", error);
-      toast({
-        title: "Error",
-        description: error.message || "An error occurred",
-        variant: "destructive"
-      });
-      
-      if (setError) setError(error.message || "Failed to cancel boost");
-      return false;
-    } finally {
-      if (setIsLoading) setIsLoading(false);
-    }
-  }, [profileId, boostStatus, setIsLoading, setError, setBoostStatus]);
-
-  // Fetch boost analytics
-  const fetchBoostAnalytics = useCallback(async (): Promise<AnalyticsData | null> => {
-    try {
-      if (!profileId || !boostStatus?.isActive) {
-        return null;
-      }
-      
-      return await fetchAnalytics();
-    } catch (error) {
-      console.error("Error fetching boost analytics:", error);
-      return null;
-    }
-  }, [profileId, boostStatus, fetchAnalytics]);
+  }, [profileId]);
 
   return {
-    checkActiveBoost,
-    purchaseBoost,
-    cancelBoost,
-    fetchAnalytics: fetchBoostAnalytics
+    data,
+    loading,
+    fetchAnalytics
   };
 };
+
+export default useBoostOperations;

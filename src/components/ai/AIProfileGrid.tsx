@@ -1,131 +1,158 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AIProfile } from '@/types/ai-profile';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { getAIProfiles } from '@/services/ai/aiProfilesService';
-import { MessageSquare, Image } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { AIProfile } from '@/types/ai-profile';
+import AIProfileCard from './AIProfileCard';
+import { Grid, List, Search } from 'lucide-react';
 
-const AIProfileGrid = () => {
-  const [profiles, setProfiles] = useState<AIProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    const loadProfiles = async () => {
-      setLoading(true);
-      try {
-        const fetchedProfiles = await getAIProfiles();
-        setProfiles(fetchedProfiles);
-      } catch (error) {
-        console.error("Error loading AI profiles:", error);
-        toast({
-          title: "Failed to load AI profiles",
-          description: "There was an error loading the AI profiles. Please try again later.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadProfiles();
-  }, []);
-  
-  const handleChatClick = (profileId: string) => {
-    navigate(`/ai-chat/${profileId}`);
-  };
-  
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="overflow-hidden">
-            <Skeleton className="w-full h-48" />
-            <CardHeader>
-              <Skeleton className="h-6 w-3/4 mb-2" />
-              <Skeleton className="h-4 w-1/2" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-20 w-full" />
-            </CardContent>
-            <CardFooter>
-              <Skeleton className="h-10 w-full" />
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-  
-  if (profiles.length === 0 && !loading) {
-    return (
-      <div className="text-center py-12">
-        <h3 className="text-lg font-medium">No AI profiles available</h3>
-        <p className="text-muted-foreground mt-2">Check back later for new AI companions.</p>
-      </div>
-    );
-  }
-  
+interface AIProfileGridProps {
+  profiles: AIProfile[];
+  onProfileAction?: (profile: AIProfile) => void;
+  actionLabel?: string;
+  showFilters?: boolean;
+  loading?: boolean;
+  emptyStateMessage?: string;
+}
+
+const AIProfileGrid: React.FC<AIProfileGridProps> = ({
+  profiles,
+  onProfileAction,
+  actionLabel = 'Chat Now',
+  showFilters = true,
+  loading = false,
+  emptyStateMessage = 'No AI profiles found'
+}) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedType, setSelectedType] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Filter profiles based on search query and selected type
+  const filteredProfiles = profiles.filter(profile => {
+    const matchesSearch = 
+      !searchQuery || 
+      profile.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      profile.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      profile.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+    const matchesType = 
+      selectedType === 'all' || 
+      (profile.type?.toLowerCase() === selectedType.toLowerCase());
+      
+    return matchesSearch && matchesType;
+  });
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {profiles.map((profile) => (
-        <Card key={profile.id} className="overflow-hidden flex flex-col">
-          <div className="relative h-48 overflow-hidden">
-            <img 
-              src={profile.avatar_url} 
-              alt={profile.name}
-              className="w-full h-full object-cover transition-transform hover:scale-105"
+    <div className="space-y-6">
+      {showFilters && (
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search AI profiles..."
+              className="pl-9"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-semibold">{profile.name}</h3>
-                <p className="text-sm text-muted-foreground">{profile.age} • {profile.location}</p>
-              </div>
-              {profile.personality && (
-                <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
-                  {profile.personality.type}
-                </span>
+          
+          <div className="flex gap-2">
+            <Select value={selectedType} onValueChange={setSelectedType}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="companion">Companions</SelectItem>
+                <SelectItem value="assistant">Assistants</SelectItem>
+                <SelectItem value="roleplay">Roleplay</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <div className="flex border rounded-md">
+              <Button
+                variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                size="icon"
+                onClick={() => setViewMode('grid')}
+                className="rounded-r-none"
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                size="icon"
+                onClick={() => setViewMode('list')}
+                className="rounded-l-none"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="animate-pulse bg-muted/40 rounded-lg h-80"></div>
+          ))}
+        </div>
+      ) : filteredProfiles.length > 0 ? (
+        <div className={`
+          ${viewMode === 'grid' 
+            ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6' 
+            : 'flex flex-col gap-4'}
+        `}>
+          {filteredProfiles.map(profile => (
+            <div key={profile.id}>
+              {viewMode === 'grid' ? (
+                <AIProfileCard
+                  profile={profile}
+                  onAction={onProfileAction}
+                  actionLabel={actionLabel}
+                />
+              ) : (
+                <div className="flex gap-4 p-4 bg-muted/20 rounded-lg">
+                  <div className="flex-shrink-0 w-24">
+                    <img
+                      src={profile.thumbnailUrl || profile.imageUrl}
+                      alt={profile.name}
+                      className="w-full aspect-square object-cover rounded-md"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="flex-1 flex flex-col">
+                    <h3 className="font-semibold">{profile.displayName || profile.name}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                      {profile.description}
+                    </p>
+                    <div className="mt-auto pt-2">
+                      <Button 
+                        size="sm" 
+                        onClick={() => onProfileAction && onProfileAction(profile)}
+                        variant="secondary"
+                      >
+                        {actionLabel}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
-          </CardHeader>
-          <CardContent className="flex-grow">
-            <p className="text-sm line-clamp-3">{profile.bio}</p>
-            
-            <div className="mt-4">
-              <div className="flex flex-wrap gap-2">
-                {profile.interests?.slice(0, 3).map((interest, i) => (
-                  <span key={i} className="bg-muted text-xs px-2 py-1 rounded-full">
-                    {interest}
-                  </span>
-                ))}
-                {profile.interests && profile.interests.length > 3 && (
-                  <span className="text-xs text-muted-foreground">+{profile.interests.length - 3} more</span>
-                )}
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex gap-2">
-            <Button 
-              className="flex-1 gap-2"
-              onClick={() => handleChatClick(profile.id)}
-            >
-              <MessageSquare size={16} /> Chat
-            </Button>
-            <Button 
-              variant="outline" 
-              className="flex gap-2"
-            >
-              <Image size={16} /> Images
-            </Button>
-          </CardFooter>
-        </Card>
-      ))}
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">{emptyStateMessage}</p>
+        </div>
+      )}
     </div>
   );
 };

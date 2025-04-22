@@ -1,34 +1,41 @@
 
-export interface Livecam {
-  id: string;
-  name?: string;
-  thumbnailUrl: string;
-  isLive: boolean;
-  viewerCount: number;
-  tags?: string[];
-  price?: number;
-  rating?: number;
-  username?: string;
-  profileImageUrl?: string;
-  age?: number;
-  location?: string;
-  description?: string;
-  languages?: string[];
-  categories?: string[];
-  lastActive?: string;
-  nextScheduled?: string;
-}
-
-// Adding interfaces to make LivecamCard work correctly
 export interface LivecamModel {
   id: string;
+  name: string;
+  username: string;
   displayName: string;
-  username?: string;
-  imageUrl?: string;
+  imageUrl: string;
   thumbnailUrl: string;
+  previewVideoUrl?: string;
   isLive: boolean;
-  viewerCount?: number;
+  isStreaming: boolean;
+  viewerCount: number;
   country?: string;
-  language?: string;
+  region: string;
+  language: string;
+  tags: string[];
+  category: string;
   categories?: string[];
+  rating: number;
+  age?: number;
+  description?: string;
+  streamUrl?: string;
+  profileUrl?: string;
+  boosted?: boolean;
+  boostScore?: number;
+  isPopular?: boolean;
+}
+
+export interface Livecam extends LivecamModel {
+  // Any additional properties specific to Livecam but not in LivecamModel
+}
+
+export interface BoostableLivecamsOptions {
+  limit?: number;
+  offset?: number;
+  onlyLive?: boolean;
+  categories?: string[];
+  region?: string;
+  language?: string;
+  sortBy?: 'boosted' | 'popular' | 'new' | 'rating';
 }

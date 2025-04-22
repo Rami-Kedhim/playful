@@ -1,104 +1,103 @@
 
 import React from 'react';
-import { AIProfile } from '@/types/ai-profile';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Heart, Info } from 'lucide-react';
-
-interface AIProfileTypeIndicatorProps {
-  type: string;
-  showLabel: boolean;
-}
-
-// Create stub component for AIProfileTypeIndicator
-const AIProfileTypeIndicator: React.FC<AIProfileTypeIndicatorProps> = ({ type, showLabel }) => {
-  return (
-    <Badge variant="outline" className="bg-primary/10 text-primary">
-      {type}
-    </Badge>
-  );
-};
-
-// Create stub component for AIEmotionStatus
-const AIEmotionStatus: React.FC<{ status?: string }> = ({ status }) => {
-  return <span>{status}</span>;
-};
+import { AIProfile } from '@/types/ai-profile';
 
 interface AIProfileCardProps {
   profile: AIProfile;
-  onChatClick?: () => void;
+  onAction?: (profile: AIProfile) => void;
+  actionLabel?: string;
+  showBadges?: boolean;
 }
 
-const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) => {
-  // Determine if profile is premium
-  const isPremium = (profile.lucoin_chat_price || 0) > 10 || profile.boost_status?.is_boosted;
+const AIProfileCard: React.FC<AIProfileCardProps> = ({
+  profile,
+  onAction,
+  actionLabel = 'Chat Now',
+  showBadges = true
+}) => {
+  const {
+    id,
+    name,
+    displayName,
+    imageUrl,
+    thumbnailUrl,
+    description,
+    type,
+    tags = []
+  } = profile;
+
+  // Display profile type with proper formatting
+  const profileType = type || 'companion';
+  const formattedType = profileType.charAt(0).toUpperCase() + profileType.slice(1);
+
+  // Handle action button click
+  const handleAction = () => {
+    if (onAction) {
+      onAction(profile);
+    }
+  };
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-md flex flex-col">
+    <Card className="overflow-hidden h-full hover:shadow-md transition-all border border-white/5">
       <div className="relative">
-        <img 
-          src={profile.avatar_url || profile.avatarUrl}
-          alt={profile.name} 
-          className="w-full h-[220px] object-cover object-center"
-        />
-        
-        <div className="absolute top-2 right-2 flex gap-1">
-          <Badge className="bg-primary text-primary-foreground">
-            {profile.age}
-          </Badge>
-          <AIProfileTypeIndicator 
-            type={isPremium ? 'premium' : 'ai'} 
-            showLabel={false} 
+        <Link to={`/ai-profile/${id}`}>
+          <img
+            src={thumbnailUrl || imageUrl}
+            alt={name || displayName}
+            className="w-full aspect-[4/5] object-cover"
+            loading="lazy"
           />
-        </div>
+        </Link>
         
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
-          <div className="flex items-center gap-2">
-            <h3 className="text-xl font-semibold">{profile.name}</h3>
-            {profile.personality && (
-              <Badge className="capitalize">
-                {profile.personality.type || ''}
+        {showBadges && (
+          <div className="absolute top-2 right-2">
+            <Badge variant="default" className="bg-primary/80 backdrop-blur-sm">
+              {formattedType}
+            </Badge>
+          </div>
+        )}
+      </div>
+      
+      <CardContent className="p-4">
+        <Link to={`/ai-profile/${id}`} className="hover:text-primary transition-colors">
+          <h3 className="font-semibold text-lg mb-1">{displayName || name}</h3>
+        </Link>
+        
+        {description && (
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+            {description}
+          </p>
+        )}
+        
+        {tags && tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-4">
+            {tags.slice(0, 3).map((tag) => (
+              <Badge key={tag} variant="outline" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+            {tags.length > 3 && (
+              <Badge variant="outline" className="text-xs">
+                +{tags.length - 3}
               </Badge>
             )}
           </div>
-          <p className="text-sm opacity-90">{profile.location}</p>
-        </div>
-      </div>
-      
-      <CardContent className="p-4 flex-1">
-        <p className="text-sm text-muted-foreground line-clamp-3">
-          {profile.bio || "No bio available"}
-        </p>
+        )}
         
-        <div className="flex flex-wrap gap-1 mt-3">
-          {profile.interests?.slice(0, 3).map((interest, i) => (
-            <Badge key={i} variant="secondary" className="text-xs capitalize">
-              {interest}
-            </Badge>
-          ))}
-          {profile.interests && profile.interests.length > 3 && (
-            <Badge variant="outline" className="text-xs">
-              +{profile.interests.length - 3} more
-            </Badge>
-          )}
-        </div>
+        {onAction && (
+          <Button 
+            onClick={handleAction} 
+            className="w-full"
+            variant="default"
+          >
+            {actionLabel}
+          </Button>
+        )}
       </CardContent>
-      
-      <CardFooter className="p-4 pt-0 gap-2">
-        <Button 
-          className="flex-1" 
-          variant="default"
-          onClick={onChatClick}
-        >
-          <MessageSquare className="w-4 h-4 mr-2" />
-          Chat ({profile.lucoin_chat_price || 5} LC)
-        </Button>
-        
-        <Button variant="outline" className="px-4">
-          <Heart className="w-4 h-4" />
-        </Button>
-      </CardFooter>
     </Card>
   );
 };

@@ -1,223 +1,134 @@
-import { useState, useEffect, useCallback } from "react";
-import { LivecamModel } from "@/types/livecams";
-import { useToast } from "@/components/ui/use-toast";
-import livecamBoost from "@/services/visibility/LivecamBoostAdapter";
 
-const fetchLivecamDetails = async (username: string): Promise<LivecamModel | null> => {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  return {
-    id: `livecam-${username}`,
-    name: username.charAt(0).toUpperCase() + username.slice(1),
-    username,
-    displayName: username.charAt(0).toUpperCase() + username.slice(1),
-    imageUrl: `https://picsum.photos/seed/${username}/800/450`,
-    thumbnailUrl: `https://picsum.photos/seed/${username}/200/200`,
-    isLive: Math.random() > 0.3,
-    viewerCount: Math.floor(Math.random() * 1000),
-    country: ['US', 'CA', 'UK', 'FR', 'DE'][Math.floor(Math.random() * 5)],
-    categories: ['chat', 'dance', 'games', 'music'].slice(0, Math.floor(Math.random() * 3) + 1),
-    age: 20 + Math.floor(Math.random() * 15),
-    language: ['English', 'Spanish', 'French', 'German'][Math.floor(Math.random() * 4)],
-    description: "Welcome to my stream! I love interacting with my viewers.",
-    streamUrl: "https://example.com/stream"
-  };
-};
+import { useState, useEffect, useCallback } from 'react';
+import { LivecamModel } from '@/types/livecam';
+import { oxum } from '@/core/Oxum';
 
-const mapToLivecam = (data: any): any => {
-  return {
-    id: data.id,
-    username: data.username,
-    name: data.name,
-    imageUrl: data.imageUrl || data.thumbnailUrl,
-    thumbnailUrl: data.thumbnailUrl || data.imageUrl,
-    isLive: data.isStreaming || false,
-    isStreaming: data.isStreaming || false,
-    viewerCount: data.viewerCount || 0,
-    region: data.region || 'Unknown',
-    language: data.language || 'English',
-    tags: data.tags || [],
-    category: data.category || '',
-    rating: data.rating || 0
-  };
-};
-
-export const useLivecamDetail = (livecamId: string | undefined) => {
-  const { toast } = useToast();
+export const useLivecamDetail = (livecamId: string) => {
   const [livecam, setLivecam] = useState<LivecamModel | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isBoosted, setIsBoosted] = useState(false);
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [boostStatus, setBoostStatus] = useState<{timeRemaining?: number, intensity?: number} | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isChatActive, setIsChatActive] = useState(false);
-  const [recentTips, setRecentTips] = useState<{username: string, amount: number}[]>([]);
+  const [error, setError] = useState<Error | null>(null);
+  const [relatedLivecams, setRelatedLivecams] = useState<LivecamModel[]>([]);
 
-  useEffect(() => {
-    const loadLivecamData = async () => {
-      if (!livecamId) return;
+  const fetchLivecamDetail = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Mock API request with a delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // Generate mock data for the livecam
+      const mockLivecam: LivecamModel = {
+        id: livecamId,
+        username: `user_${livecamId}`,
+        name: `Livecam Model ${livecamId}`,
+        displayName: `Model ${livecamId}`,
+        imageUrl: `https://source.unsplash.com/random/600x900?portrait&sig=${livecamId}`,
+        thumbnailUrl: `https://source.unsplash.com/random/300x450?portrait&sig=${livecamId}`,
+        isLive: Math.random() > 0.3,
+        isStreaming: Math.random() > 0.3,
+        viewerCount: Math.floor(Math.random() * 1000),
+        country: 'United States',
+        region: 'US',
+        language: 'English',
+        tags: ['Amateur', 'Couples', 'Fetish'],
+        category: 'Amateur',
+        categories: ['Amateur', 'Couples'],
+        rating: Math.floor(Math.random() * 5) + 1,
+        age: Math.floor(Math.random() * 10) + 20,
+        description: 'This is a sample livecam model description that would typically contain information about the model, their interests, and what viewers can expect during their streams.',
+        streamUrl: 'https://example.com/stream',
+        previewVideoUrl: 'https://example.com/preview.mp4'
+      };
+
+      setLivecam(mockLivecam);
       
-      setLoading(true);
-      try {
-        const livecamData = await fetchLivecamDetails(livecamId);
-        setLivecam(mapToLivecam(livecamData));
-        
-        if (livecamData) {
-          const status = livecamBoost.checkBoostStatus(livecamData.id);
-          setIsBoosted(status.isBoosted);
-          if (status.isBoosted) {
-            setBoostStatus({
-              timeRemaining: status.timeRemaining,
-              intensity: status.intensity
-            });
-          }
-          
-          const mockFollowedStreams = localStorage.getItem('followedStreams');
-          const followedStreams = mockFollowedStreams ? JSON.parse(mockFollowedStreams) : [];
-          setIsFollowing(followedStreams.includes(livecamData.id));
-        }
-      } catch (error) {
-        console.error("Error loading livecam details:", error);
-        setError("Failed to load livecam details");
-        toast({
-          title: "Error",
-          description: "Failed to load livecam details",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadLivecamData();
-  }, [livecamId, toast]);
+      // Also fetch related livecams while we're at it
+      fetchRelatedLivecams(mockLivecam);
+      
+      return mockLivecam;
+    } catch (err) {
+      const caughtError = err instanceof Error ? err : new Error('Failed to fetch livecam detail');
+      setError(caughtError);
+      console.error('Error fetching livecam detail:', caughtError);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [livecamId]);
 
-  useEffect(() => {
-    if (!livecam || !livecam.isLive) return;
-    
-    const interval = setInterval(() => {
-      setLivecam(prev => {
-        if (!prev) return prev;
-        
-        const fluctuation = Math.floor(Math.random() * 10) - 5;
-        const newCount = Math.max(0, (prev.viewerCount || 0) + fluctuation);
+  const fetchRelatedLivecams = useCallback(async (currentLivecam: LivecamModel) => {
+    try {
+      // Mock API request with a delay
+      await new Promise(resolve => setTimeout(resolve, 600));
+
+      // Generate mock data for related livecams
+      const mockRelated: LivecamModel[] = Array.from({ length: 4 }, (_, index) => {
+        const id = `related-${index}`;
+        const isLive = Math.random() > 0.3;
         
         return {
-          ...prev,
-          viewerCount: newCount
+          id,
+          username: `user${index}`,
+          name: `Related Model ${index}`,
+          displayName: `Related ${index}`,
+          imageUrl: `https://source.unsplash.com/random/300x300?portrait&sig=${id}`,
+          thumbnailUrl: `https://source.unsplash.com/random/300x300?portrait&sig=${id}`,
+          isLive,
+          isStreaming: isLive,
+          viewerCount: isLive ? Math.floor(Math.random() * 500) : 0,
+          region: currentLivecam.region,
+          language: currentLivecam.language,
+          tags: [...currentLivecam.tags].sort(() => Math.random() - 0.5).slice(0, 2),
+          category: currentLivecam.category,
+          rating: Math.floor(Math.random() * 5) + 1
         };
       });
-    }, 5000);
-    
-    return () => clearInterval(interval);
-  }, [livecam]);
 
-  const handleToggleFollow = useCallback(() => {
-    if (!livecam) return;
-    
-    const mockFollowedStreams = localStorage.getItem('followedStreams');
-    const followedStreams = mockFollowedStreams ? JSON.parse(mockFollowedStreams) : [];
-    
-    if (isFollowing) {
-      const updatedStreams = followedStreams.filter((id: string) => id !== livecam.id);
-      localStorage.setItem('followedStreams', JSON.stringify(updatedStreams));
-      setIsFollowing(false);
-      toast({
-        title: "Unfollowed",
-        description: `You are no longer following ${livecam.displayName}`,
-      });
-    } else {
-      followedStreams.push(livecam.id);
-      localStorage.setItem('followedStreams', JSON.stringify(followedStreams));
-      setIsFollowing(true);
-      toast({
-        title: "Following",
-        description: `You are now following ${livecam.displayName}`,
-      });
-    }
-  }, [livecam, isFollowing, toast]);
+      // Apply Oxum's boost allocation to order the related livecams
+      try {
+        const boostMatrix = mockRelated.map(livecam => [
+          Math.random() * 5,  // Random boost score 
+          livecam.viewerCount / 100, 
+          livecam.rating / 5
+        ]);
+        
+        const boostAllocation = oxum.boostAllocationEigen(boostMatrix);
+        
+        // Apply boost allocation to sort the related livecams
+        const sortedRelated = mockRelated
+          .map((livecam, i) => ({
+            ...livecam,
+            boostScore: boostAllocation[i] * 10 // Scale from 0-1 to 0-10
+          }))
+          .sort((a, b) => (b.boostScore || 0) - (a.boostScore || 0));
 
-  const handleBoost = useCallback(() => {
-    if (!livecam) return;
-    
-    const boostableLivecam = {
-      id: livecam.id,
-      username: livecam.username,
-      name: livecam.displayName,
-      imageUrl: livecam.imageUrl,
-      thumbnailUrl: livecam.thumbnailUrl || livecam.imageUrl,
-      isStreaming: livecam.isLive,
-      viewerCount: livecam.viewerCount || 0,
-      region: livecam.country || 'unknown',
-      language: livecam.language || 'en',
-      tags: livecam.categories || [],
-      category: livecam.categories?.[0] || 'general',
-      rating: 5
-    };
-    
-    livecamBoost.boostLivecam(boostableLivecam);
-    
-    setIsBoosted(true);
-    setBoostStatus({
-      timeRemaining: 24,
-      intensity: 30
-    });
-    
-    toast({
-      title: "Boost Applied",
-      description: `${livecam.displayName} has been boosted!`,
-    });
-  }, [livecam, toast]);
-
-  const handleCancelBoost = useCallback(() => {
-    if (!livecam) return;
-    
-    livecamBoost.removeLivecamBoost(livecam.id);
-    
-    setIsBoosted(false);
-    setBoostStatus(null);
-    
-    toast({
-      title: "Boost Cancelled",
-      description: "The boost has been cancelled",
-    });
-  }, [livecam, toast]);
-
-  const handleTipSent = useCallback((username: string, amount: number) => {
-    setRecentTips(prev => [...prev, { username, amount }].slice(-5));
-    
-    if (username !== "You") {
-      toast({
-        title: "New Tip!",
-        description: `${username} tipped ${livecam?.displayName || 'the streamer'} $${amount}`,
-      });
-    }
-  }, [livecam, toast]);
-
-  const handleStartChat = useCallback(() => {
-    setIsChatActive(true);
-    
-    if (window.innerWidth < 768) {
-      const chatElement = document.getElementById('livecam-chat');
-      if (chatElement) {
-        chatElement.scrollIntoView({ behavior: 'smooth' });
+        setRelatedLivecams(sortedRelated);
+      } catch (error) {
+        console.error("Error applying boost allocation:", error);
+        // Fall back to unsorted related livecams
+        setRelatedLivecams(mockRelated);
       }
+    } catch (err) {
+      console.error('Error fetching related livecams:', err);
+      setRelatedLivecams([]);
     }
   }, []);
+
+  // Load data on mount and when livecamId changes
+  useEffect(() => {
+    if (livecamId) {
+      fetchLivecamDetail();
+    }
+  }, [livecamId, fetchLivecamDetail]);
 
   return {
     livecam,
     loading,
     error,
-    isBoosted,
-    isFollowing,
-    boostStatus,
-    isChatActive,
-    recentTips,
-    handleBoost,
-    handleCancelBoost,
-    handleTipSent,
-    handleStartChat,
-    handleToggleFollow
+    relatedLivecams,
+    refresh: fetchLivecamDetail
   };
 };
+
+export default useLivecamDetail;
