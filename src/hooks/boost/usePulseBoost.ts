@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useBoost } from '@/hooks/boost/useBoost';
 import { BoostPackage } from '@/types/boost';
 import { ActiveBoost, EnhancedBoostStatus } from '@/types/pulse-boost';
+import { supabase } from '@/integrations/supabase/client';
 
 export const usePulseBoost = (profileId?: string) => {
   const { boostStatus, packages, boostProfile, cancelBoost } = useBoost();
@@ -19,6 +20,35 @@ export const usePulseBoost = (profileId?: string) => {
 
   const pulseBoostPackages: BoostPackage[] = packages || [];
 
+  // Fetch active pulse boosts from database
+  const fetchActivePulseBoosts = async (userId: string): Promise<ActiveBoost[]> => {
+    const { data, error } = await supabase
+      .from('pulse_boosts_active')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .order('started_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching active pulse boosts:', error);
+      return [];
+    }
+
+    if (!data) {
+      return [];
+    }
+
+    return data.map((item) => ({
+      boostId: item.boost_id,
+      startedAt: new Date(item.started_at),
+      expiresAt: item.expires_at ? new Date(item.expires_at) : undefined,
+      userId: item.user_id,
+      visibility: item.visibility_increase ? `${item.visibility_increase}% increased visibility` : undefined,
+      timeRemaining: '', // Could be computed if needed
+      boostDetails: pulseBoostPackages.find((pkg) => pkg.id === item.boost_id),
+    }));
+  };
+
   useEffect(() => {
     const loadBoostData = async () => {
       setIsLoading(true);
@@ -31,11 +61,36 @@ export const usePulseBoost = (profileId?: string) => {
 
         setUserEconomy(mockUserEconomy);
 
-        if (boostStatus?.isActive && boostStatus.packageId) {
+        if (profileId) {
+          const activeBoostsData = await fetchActivePulseBoosts(profileId);
+          setActiveBoosts(activeBoostsData);
+
+          if (activeBoostsData.length > 0) {
+            const firstBoost = activeBoostsData[0];
+            const boostPackage = firstBoost.boostDetails;
+
+            const enhancedStatus: EnhancedBoostStatus = {
+              isActive: true,
+              startTime: firstBoost.startedAt,
+              endTime: firstBoost.expiresAt,
+              expiresAt: firstBoost.expiresAt || new Date(),
+              pulseData: {
+                boostType: boostPackage?.name || '',
+                visibility: boostPackage?.visibility || 'homepage',
+                coverage: boostPackage?.visibility_increase || 50,
+              },
+              remainingTime: firstBoost.timeRemaining || '',
+              boostPackage
+            };
+
+            setEnhancedBoostStatus(enhancedStatus);
+          } else {
+            setEnhancedBoostStatus({ isActive: false });
+          }
+        } else if (boostStatus?.isActive && boostStatus.packageId) {
           const boostPackage = packages.find(pkg => pkg.id === boostStatus.packageId);
 
           if (boostPackage) {
-            // Convert startTime and endTime to Date if they are strings
             const startTimeDate = boostStatus.startTime instanceof Date
               ? boostStatus.startTime
               : (boostStatus.startTime ? new Date(boostStatus.startTime) : new Date());
@@ -86,7 +141,6 @@ export const usePulseBoost = (profileId?: string) => {
 
   const purchaseBoost = async (pkg: BoostPackage): Promise<boolean> => {
     if (!profileId) return false;
-
     try {
       const result = await boostProfile(profileId, pkg.id);
       return !!result;
@@ -121,3 +175,4 @@ export const usePulseBoost = (profileId?: string) => {
 };
 
 export default usePulseBoost;
+

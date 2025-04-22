@@ -3826,6 +3826,39 @@ export type Database = {
           },
         ]
       }
+      pulse_boosts_active: {
+        Row: {
+          boost_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          started_at: string
+          updated_at: string
+          user_id: string
+          visibility_increase: number | null
+        }
+        Insert: {
+          boost_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          started_at?: string
+          updated_at?: string
+          user_id: string
+          visibility_increase?: number | null
+        }
+        Update: {
+          boost_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          started_at?: string
+          updated_at?: string
+          user_id?: string
+          visibility_increase?: number | null
+        }
+        Relationships: []
+      }
       regional_settings: {
         Row: {
           compliance_rules: Json | null
