@@ -29,8 +29,8 @@ const LivecamSidebar: React.FC<LivecamSidebarProps> = ({
       <LivecamStats model={model} />
       
       <LivecamBoostPanel
-        model={model}
-        isBoosted={isBoosted}
+        livecamId={model.id}
+        isCurrentlyBoosted={isBoosted}
         boostStatus={boostStatus}
         onBoost={onBoost}
         onCancelBoost={onCancelBoost}

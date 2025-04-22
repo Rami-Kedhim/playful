@@ -7,21 +7,18 @@ import { Zap } from "lucide-react";
 import { useBoostContext } from "@/contexts/BoostContext";
 import { formatDistance } from "date-fns";
 import BoostDialogTabs from "./dialog/BoostDialogTabs";
-import { HermesBoostStatus } from "@/types/boost";
-
-interface BoostDialogContainerProps {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  onSuccess?: () => void;
-  profileId: string;
-}
+import { HermesBoostStatus, BoostDialogContainerProps } from "./types";
 
 const BoostDialogContainer = ({
   open,
   setOpen,
   onSuccess,
-  profileId
+  profileId,
+  buttonText = "Boost Profile",
+  buttonVariant = "outline",
+  buttonSize = "sm"
 }: BoostDialogContainerProps) => {
+  const [dialogOpen, setDialogOpen] = useState(open || false);
   const [activeTab, setActiveTab] = useState("packages");
   const [hermesBoostStatus, setHermesBoostStatus] = useState<HermesBoostStatus | undefined>(undefined);
   
@@ -33,6 +30,21 @@ const BoostDialogContainer = ({
     purchaseBoost,
     cancelBoost,
   } = useBoostContext();
+
+  // Handle external open state if provided
+  useEffect(() => {
+    if (open !== undefined) {
+      setDialogOpen(open);
+    }
+  }, [open]);
+
+  // Handle close event both internally and externally
+  const handleOpenChange = (newOpen: boolean) => {
+    setDialogOpen(newOpen);
+    if (setOpen) {
+      setOpen(newOpen);
+    }
+  };
   
   // Mock boost packages for demo purposes
   const boostPackages = [
@@ -71,16 +83,19 @@ const BoostDialogContainer = ({
   };
   
   useEffect(() => {
-    if (open) {
+    if (dialogOpen) {
       // Mock fetching Hermes boost status
       setHermesBoostStatus({
         position: 3,
         activeUsers: 125,
         estimatedVisibility: 65,
-        lastUpdateTime: new Date().toISOString()
+        lastUpdateTime: new Date().toISOString(),
+        timeRemaining: 16 * 60 + 32, // 16h 32m in minutes
+        boostScore: 85,
+        effectivenessScore: 75
       });
     }
-  }, [open]);
+  }, [dialogOpen]);
   
   // Format boost duration for display
   const formatBoostDuration = (duration: string): string => {
@@ -123,11 +138,11 @@ const BoostDialogContainer = ({
   
   // Handle closing dialog
   const handleDialogClose = () => {
-    setOpen(false);
+    handleOpenChange(false);
   };
   
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center">
@@ -139,17 +154,16 @@ const BoostDialogContainer = ({
         <BoostDialogTabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          isLoading={isLoading}
           boostStatus={boostStatus}
           eligibility={eligibility}
           hermesBoostStatus={hermesBoostStatus}
           boostPackages={boostPackages}
           selectedPackage={selectedPackage}
-          onSelectPackage={setSelectedPackage}
+          setSelectedPackage={setSelectedPackage}
           formatBoostDuration={formatBoostDuration}
           getBoostPrice={getBoostPrice}
-          onPurchase={handlePurchase}
-          onCancel={handleCancel}
+          handlePurchase={handlePurchase}
+          handleCancel={handleCancel}
           handleDialogClose={handleDialogClose}
           dailyBoostUsage={dailyBoostUsage}
           dailyBoostLimit={dailyBoostLimit}

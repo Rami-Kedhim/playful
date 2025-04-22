@@ -8,13 +8,20 @@ import { useToast } from '@/components/ui/use-toast';
 import { Rocket, TrendingUp, Star, Clock } from 'lucide-react';
 import UBXPriceDisplay from '@/components/oxum/UBXPriceDisplay';
 import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
+import { LivecamModel } from '@/types/livecams';
 
 // This is a simplified version for demonstration purposes
 interface LivecamBoostPanelProps {
-  livecamId: string;
+  livecamId?: string;
   isCurrentlyBoosted?: boolean;
   boostRank?: number;
   viewerIncreasePercent?: number;
+  onBoost?: () => void;
+  onCancelBoost?: () => void;
+  // New props
+  model?: LivecamModel;
+  isBoosted?: boolean;
+  boostStatus?: { timeRemaining?: number; intensity?: number; } | null;
 }
 
 const LivecamBoostPanel: React.FC<LivecamBoostPanelProps> = ({
@@ -22,32 +29,45 @@ const LivecamBoostPanel: React.FC<LivecamBoostPanelProps> = ({
   isCurrentlyBoosted = false,
   boostRank = 0,
   viewerIncreasePercent = 0,
+  onBoost,
+  onCancelBoost,
+  // Handle new props with defaults
+  model,
+  isBoosted = false,
+  boostStatus = null,
 }) => {
+  // Use either isCurrentlyBoosted or isBoosted, preferring isCurrentlyBoosted if specified
+  const isBoostedStatus = isCurrentlyBoosted !== undefined ? isCurrentlyBoosted : isBoosted;
+  
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   const handleBoost = async () => {
-    setLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Boost activated!",
-        description: "Your livecam is now boosted for 24 hours.",
-      });
-    } catch (error) {
-      toast({
-        title: "Boost failed",
-        description: "There was an error boosting your livecam.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+    if (!onBoost) {
+      setLoading(true);
+      try {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        toast({
+          title: "Boost activated!",
+          description: "Your livecam is now boosted for 24 hours.",
+        });
+      } catch (error) {
+        toast({
+          title: "Boost failed",
+          description: "There was an error boosting your livecam.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      onBoost();
     }
   };
 
-  if (isCurrentlyBoosted) {
+  if (isBoostedStatus) {
     return (
       <Card>
         <CardHeader className="pb-3">

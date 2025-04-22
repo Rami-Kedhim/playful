@@ -29,10 +29,10 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   
   // Use the boost manager hook
   const {
-    boostStatus,
+    boostStatus: managerBoostStatus,
     eligibility,
-    purchaseBoost: purchaseBoostOriginal,
-    cancelBoost,
+    purchaseBoost: purchaseLegacyBoost,
+    cancelBoost: cancelLegacyBoost,
     loading,
     error,
     getBoostAnalytics,
@@ -50,7 +50,7 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
     
     fetchData();
-  }, [boostStatus.isActive, getBoostAnalytics]);
+  }, [managerBoostStatus.isActive, getBoostAnalytics]);
   
   // Function to fetch analytics on demand
   const fetchAnalytics = async () => {
@@ -66,10 +66,23 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
   
-  // Create a safe boostStatus object with progress 
-  const safeBoostStatus: BoostStatus = {
-    ...boostStatus,
-    progress: boostStatus.progress ?? 0
+  // Create a BoostStatus that adheres to the interface
+  const boostStatus: BoostStatus = {
+    isActive: managerBoostStatus.isActive,
+    progress: managerBoostStatus.progress,
+    startTime: managerBoostStatus.startTime ? 
+      (typeof managerBoostStatus.startTime === 'string' ? 
+        managerBoostStatus.startTime : 
+        managerBoostStatus.startTime.toISOString()) : 
+      undefined,
+    endTime: managerBoostStatus.endTime ? 
+      (typeof managerBoostStatus.endTime === 'string' ? 
+        managerBoostStatus.endTime : 
+        managerBoostStatus.endTime.toISOString()) : 
+      undefined,
+    timeRemaining: managerBoostStatus.timeRemaining,
+    packageId: managerBoostStatus.packageId,
+    packageName: managerBoostStatus.packageName,
   };
   
   // Adapt purchaseBoost to accept packageId string
@@ -79,20 +92,22 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       id: packageId,
       name: "Standard Boost",
       duration: "24:00:00",
-      price_ubx: 50
+      price_ubx: 15, // Ensure price is included
+      description: "Standard boost package",
+      features: []
     };
     
-    return await purchaseBoostOriginal(mockPackage);
+    return await purchaseLegacyBoost(mockPackage);
   };
   
   const value: BoostContextType = {
-    boostStatus: safeBoostStatus,
+    boostStatus,
     isLoading: loading,
     error,
     dailyBoostUsage,
     dailyBoostLimit,
     purchaseBoost,
-    cancelBoost,
+    cancelBoost: cancelLegacyBoost,
     boostAnalytics: analyticsData,
     fetchAnalytics
   };

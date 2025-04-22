@@ -40,6 +40,7 @@ export interface HermesBoostStatus {
   active?: boolean;
   boostScore?: number;
   effectivenessScore?: number;
+  timeRemaining?: number;
 }
 
 // Adding BoostAnalytics interface to fix errors in BoostAnalyticsCard

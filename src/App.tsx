@@ -1,3 +1,4 @@
+
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -9,7 +10,7 @@ import HomePage from "./pages/HomePage";
 import Wallet from "./pages/Wallet";
 import UpdatedWallet from "./pages/UpdatedWallet";
 import PulseBoost from "./pages/PulseBoost";
-import LivecamPage from "./pages/LivecamPage";
+import LiveCamPage from "./pages/LiveCamPage"; // Fixed casing
 
 const createStubContextFile = () => {
   const StubProvider = ({ children }: { children: React.ReactNode }) => <>{children}</>;

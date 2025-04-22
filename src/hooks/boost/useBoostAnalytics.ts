@@ -1,8 +1,9 @@
 
-/**
- * AnalyticsData interface for boost-related analytics
- */
+import { useState } from 'react';
+
+// Define the correct AnalyticsData interface
 export interface AnalyticsData {
+  // Standard metrics
   impressions: {
     today: number;
     yesterday: number;
@@ -22,81 +23,61 @@ export interface AnalyticsData {
   engagementRate: number;
   conversionRate: number;
   boostEfficiency: number;
+  
+  // Additional fields
   additionalViews: number;
   engagementIncrease: number;
   rankingPosition: number;
 }
 
-/**
- * Interface representing detailed click analytics
- */
-export interface ClickAnalytics {
-  today: number;
-  yesterday: number;
-  weeklyAverage: number;
-  withBoost: number;
-  withoutBoost?: number;
-  increase?: number;
-}
-
-/**
- * BoostAnalytics interface for more detailed boost analysis
- */
-export interface BoostAnalytics {
-  impressions: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
+export const useBoostAnalytics = (profileId?: string) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const fetchAnalytics = async (): Promise<AnalyticsData | null> => {
+    setLoading(true);
+    try {
+      // In a real app this would call to an API
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Mock analytics data
+      const data: AnalyticsData = {
+        impressions: {
+          today: 250,
+          yesterday: 190,
+          weeklyAverage: 175,
+          withBoost: 250,
+          withoutBoost: 120,
+          increase: 108
+        },
+        clicks: {
+          today: 45,
+          yesterday: 32,
+          weeklyAverage: 28,
+          withBoost: 45,
+          withoutBoost: 22,
+          increase: 105
+        },
+        engagementRate: 18,
+        conversionRate: 4.2,
+        boostEfficiency: 85,
+        additionalViews: 130,
+        engagementIncrease: 65,
+        rankingPosition: 3
+      };
+      
+      setLoading(false);
+      return data;
+    } catch (error) {
+      setError("Failed to load analytics data");
+      setLoading(false);
+      return null;
+    }
   };
-  clicks: ClickAnalytics;
-  engagementRate: number;
-  conversionRate: number;
-  boostEfficiency: number;
-  additionalViews: number;
-  engagementIncrease: number;
-  rankingPosition: number;
-}
-
-/**
- * Custom hook for accessing boost analytics
- */
-export const useBoostAnalytics = (profileId: string) => {
-  /**
-   * Get analytics data for a profile
-   */
-  const getAnalyticsData = async (): Promise<AnalyticsData> => {
-    // This would fetch from an API in a real application
-    // Mock data for now
-    return {
-      impressions: {
-        today: 234,
-        yesterday: 180,
-        weeklyAverage: 200,
-        withBoost: 280,
-        withoutBoost: 120,
-        increase: 133
-      },
-      clicks: {
-        today: 45,
-        yesterday: 30,
-        weeklyAverage: 35,
-        withBoost: 50,
-        withoutBoost: 25,
-        increase: 100
-      },
-      engagementRate: 19.2,
-      conversionRate: 5.3,
-      boostEfficiency: 78,
-      additionalViews: 120,
-      engagementIncrease: 25,
-      rankingPosition: 3
-    };
-  };
-
+  
   return {
-    getAnalyticsData
+    fetchAnalytics,
+    loading,
+    error
   };
 };

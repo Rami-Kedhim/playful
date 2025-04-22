@@ -1,35 +1,57 @@
 
-import { Sparkles } from "lucide-react";
+import React from 'react';
+import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
+import { TrendingUp, Users, BarChart } from 'lucide-react';
+import { HermesBoostInfoProps } from '../types';
 
-interface HermesBoostInfoProps {
-  hermesData?: {
-    position: number;
-    activeUsers: number;
-    estimatedVisibility: number;
-    lastUpdateTime: string;
-  };
-}
-
-const HermesBoostInfo = ({ hermesData }: HermesBoostInfoProps) => {
-  if (!hermesData) return null;
+const HermesBoostInfo: React.FC<HermesBoostInfoProps> = ({ 
+  hermesStatus, 
+  status,
+  hermesData 
+}) => {
+  // Use whichever prop is provided
+  const data = hermesData || hermesStatus || status;
+  
+  if (!data) {
+    return null;
+  }
+  
+  const lastUpdateTime = new Date(data.lastUpdateTime);
+  const formattedUpdateTime = lastUpdateTime.toLocaleTimeString([], { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
   
   return (
-    <div className="rounded-md border p-3 bg-secondary/10">
-      <h4 className="text-sm font-medium flex items-center mb-2">
-        <Sparkles className="h-4 w-4 mr-2 text-amber-500" />
-        Current Boost Metrics
-      </h4>
-      
-      <div className="text-xs text-muted-foreground space-y-1">
-        <p>• Profiles boosting right now: <span className="text-foreground">{hermesData.activeUsers}</span></p>
-        <p>• Average visibility increase: <span className="text-foreground">{hermesData.estimatedVisibility}%</span></p>
-        <p>• Best ranking achieved: <span className="text-foreground">#{hermesData.position}</span></p>
-      </div>
-      
-      <p className="text-xs mt-2 italic text-muted-foreground">
-        Last updated: {new Date(hermesData.lastUpdateTime).toLocaleTimeString()}
-      </p>
-    </div>
+    <Card>
+      <CardContent className="p-4">
+        <CardTitle className="text-sm font-medium flex items-center mb-2">
+          <BarChart className="h-4 w-4 mr-2" />
+          Hermes-Oxum System Status
+        </CardTitle>
+        <CardDescription>
+          Live boost performance metrics updated at {formattedUpdateTime}
+        </CardDescription>
+        
+        <div className="grid grid-cols-3 gap-3 mt-4">
+          <div className="flex flex-col items-center p-2 bg-muted rounded">
+            <Users className="h-4 w-4 mb-1 text-muted-foreground" />
+            <span className="text-sm font-medium">{data.activeUsers}</span>
+            <span className="text-xs text-muted-foreground">Active Users</span>
+          </div>
+          <div className="flex flex-col items-center p-2 bg-muted rounded">
+            <TrendingUp className="h-4 w-4 mb-1 text-muted-foreground" />
+            <span className="text-sm font-medium">#{data.position}</span>
+            <span className="text-xs text-muted-foreground">Current Rank</span>
+          </div>
+          <div className="flex flex-col items-center p-2 bg-muted rounded">
+            <BarChart className="h-4 w-4 mb-1 text-muted-foreground" />
+            <span className="text-sm font-medium">{data.estimatedVisibility}%</span>
+            <span className="text-xs text-muted-foreground">Visibility</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

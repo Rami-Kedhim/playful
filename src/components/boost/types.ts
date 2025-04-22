@@ -23,6 +23,7 @@ export interface BoostEligibility {
   eligible: boolean;
   isEligible?: boolean; // For compatibility with both naming conventions
   reasons?: string[];
+  reason?: string; // Add this field
   minimumProfileCompleteness?: number;
   missingFields?: string[];
   minRequiredBalance?: number;
@@ -49,6 +50,9 @@ export interface HermesBoostStatus {
   lastUpdateTime: string;
   isActive?: boolean; // For compatibility
   active?: boolean; // For compatibility
+  timeRemaining?: number;
+  boostScore?: number;
+  effectivenessScore?: number;
 }
 
 export interface HermesBoostInfoProps {
@@ -82,4 +86,49 @@ export interface AnalyticsData {
     withBoost: number;
     improvement: number;
   };
+}
+
+// Add missing types for BoostDialogTabsProps
+export interface BoostDialogTabsProps {
+  activeTab: string;
+  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+  boostStatus: any;
+  eligibility: any;
+  hermesBoostStatus?: HermesBoostStatus;
+  boostPackages: any[];
+  selectedPackage: string | null;
+  setSelectedPackage: (packageId: string) => void;
+  formatBoostDuration: (duration: string) => string;
+  getBoostPrice: () => number;
+  handlePurchase: () => Promise<void>;
+  handleCancel: () => Promise<void>;
+  handleDialogClose: () => void;
+  boostAnalytics?: any;
+  dailyBoostUsage: number;
+  dailyBoostLimit: number;
+  loading: boolean;
+}
+
+// Add LivecamBoostPanelProps
+export interface LivecamBoostPanelProps {
+  livecamId?: string;
+  model?: any;
+  isCurrentlyBoosted?: boolean;
+  isBoosted?: boolean;
+  boostRank?: number;
+  viewerIncreasePercent?: number;
+  boostStatus?: any;
+  onBoost?: () => void;
+  onCancelBoost?: () => void;
+}
+
+// Add BoostDialogContainerProps
+export interface BoostDialogContainerProps {
+  open?: boolean;
+  setOpen?: (open: boolean) => void;
+  onSuccess?: () => void;
+  profileId: string;
+  buttonText?: string;
+  buttonVariant?: string;
+  buttonSize?: string;
 }

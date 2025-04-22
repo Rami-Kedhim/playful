@@ -9,26 +9,7 @@ import BoostEligibilityCheck from './BoostEligibilityCheck';
 import BoostPackages from './BoostPackages';
 import BoostActivePackage from './BoostActivePackage';
 import HermesBoostInfo from './HermesBoostInfo';
-
-interface BoostDialogTabsProps {
-  activeTab: string;
-  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
-  boostStatus: BoostStatus;
-  eligibility: BoostEligibility;
-  hermesBoostStatus?: HermesBoostStatus;
-  boostPackages: any[];
-  selectedPackage: string | null;
-  setSelectedPackage: (packageId: string) => void;
-  formatBoostDuration: (duration: string) => string;
-  getBoostPrice: () => number;
-  handlePurchase: () => Promise<void>;
-  handleCancel: () => Promise<void>;
-  handleDialogClose: () => void;
-  boostAnalytics?: any;
-  dailyBoostUsage: number;
-  dailyBoostLimit: number;
-  loading: boolean;
-}
+import { BoostDialogTabsProps } from '../types';
 
 const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   activeTab,
@@ -132,7 +113,7 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
       <TabsContent value="packages" className="mt-6">
         <BoostPackages
           packages={boostPackages}
-          selectedPackage={selectedPackage}
+          selectedPackage={selectedPackage || ''}
           onSelectPackage={setSelectedPackage}
           formatDuration={formatBoostDuration}
           getBoostPrice={getBoostPrice}

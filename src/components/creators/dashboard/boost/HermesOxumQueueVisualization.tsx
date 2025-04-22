@@ -13,7 +13,6 @@ import {
   Cell
 } from "recharts";
 import { useHermesOxumBoost } from "@/hooks/boost/useHermesOxumBoost";
-import hermesOxumEngine from "@/services/boost/HermesOxumEngine";
 import { Zap, TrendingUp, Users } from "lucide-react";
 
 interface HermesOxumQueueVisualizationProps {
@@ -27,7 +26,7 @@ const HermesOxumQueueVisualization: React.FC<HermesOxumQueueVisualizationProps> 
   
   // Generate mock queue data
   useEffect(() => {
-    if (hermesBoostStatus?.isActive) {
+    if (hermesBoostStatus?.isActive || hermesBoostStatus?.active) {
       // Create queue visualization with realistic data
       const position = hermesBoostStatus.position || 1;
       const totalProfiles = Math.max(10, position + Math.floor(Math.random() * 5));
@@ -38,7 +37,9 @@ const HermesOxumQueueVisualization: React.FC<HermesOxumQueueVisualizationProps> 
         
         // Generate more realistic score values
         const baseScore = Math.floor(Math.random() * 40) + 40;
-        const score = isCurrentProfile ? hermesBoostStatus.boostScore : baseScore;
+        const score = isCurrentProfile ? 
+          (hermesBoostStatus.boostScore || baseScore) : 
+          baseScore;
         
         mockData.push({
           position: i,
@@ -53,10 +54,15 @@ const HermesOxumQueueVisualization: React.FC<HermesOxumQueueVisualizationProps> 
   }, [hermesBoostStatus]);
 
   // Don't render if boost is not active
-  if (!hermesBoostStatus?.isActive) {
+  if (!(hermesBoostStatus?.isActive || hermesBoostStatus?.active)) {
     return null;
   }
 
+  // Set a default timeRemaining if not present in the data
+  const timeRemainingMinutes = hermesBoostStatus.timeRemaining || 990; // 16h 30m default
+  const timeRemainingHours = Math.floor(timeRemainingMinutes / 60);
+  const timeRemainingMins = timeRemainingMinutes % 60;
+  
   return (
     <Card>
       <CardHeader>
@@ -70,8 +76,8 @@ const HermesOxumQueueVisualization: React.FC<HermesOxumQueueVisualizationProps> 
               Current position: {hermesBoostStatus.position} in queue
             </CardDescription>
           </div>
-          <Badge variant={hermesBoostStatus.effectivenessScore > 70 ? "default" : "secondary"}>
-            {hermesBoostStatus.effectivenessScore}% Effectiveness
+          <Badge variant={(hermesBoostStatus.effectivenessScore || 0) > 70 ? "default" : "secondary"}>
+            {hermesBoostStatus.effectivenessScore || 75}% Effectiveness
           </Badge>
         </div>
       </CardHeader>
@@ -81,7 +87,7 @@ const HermesOxumQueueVisualization: React.FC<HermesOxumQueueVisualizationProps> 
           <div className="flex items-center space-x-2 text-sm">
             <Zap className="h-4 w-4 text-yellow-500" />
             <span className="text-muted-foreground">
-              Your profile ranks #{hermesBoostStatus.position} with a boost score of {Math.round(hermesBoostStatus.boostScore)}
+              Your profile ranks #{hermesBoostStatus.position} with a boost score of {Math.round(hermesBoostStatus.boostScore || 85)}
             </span>
           </div>
           
@@ -127,7 +133,7 @@ const HermesOxumQueueVisualization: React.FC<HermesOxumQueueVisualizationProps> 
             <div className="flex flex-col items-center p-2 rounded-md bg-secondary/20">
               <span className="text-xs text-muted-foreground">Time Left</span>
               <span className="text-xl font-semibold">
-                {Math.floor(hermesBoostStatus.timeRemaining / 60)}h {hermesBoostStatus.timeRemaining % 60}m
+                {timeRemainingHours}h {timeRemainingMins}m
               </span>
             </div>
             <div className="flex flex-col items-center p-2 rounded-md bg-secondary/20">

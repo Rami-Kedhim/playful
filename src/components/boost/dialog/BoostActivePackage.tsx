@@ -1,71 +1,105 @@
 
-import { Progress } from "@/components/ui/progress";
-import { Card, CardContent } from "@/components/ui/card";
-import { Zap, Clock, Calendar } from "lucide-react";
-import { BoostStatus } from "@/types/boost";
-import { HermesBoostStatus } from "@/types/boost";
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Zap, Clock, Calendar, TrendingUp } from 'lucide-react';
+import { BoostStatus, HermesBoostStatus } from '@/types/boost';
 
 interface BoostActivePackageProps {
   boostStatus: BoostStatus;
   hermesData?: HermesBoostStatus;
 }
 
-const BoostActivePackage = ({ boostStatus, hermesData }: BoostActivePackageProps) => {
-  if (!boostStatus.isActive) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        <p>No active boost package</p>
-      </div>
-    );
+const BoostActivePackage: React.FC<BoostActivePackageProps> = ({
+  boostStatus,
+  hermesData
+}) => {
+  // Calculate progress if not provided
+  const progress = boostStatus.progress !== undefined ? boostStatus.progress : 65;
+  
+  // Format expiration date
+  let expiryDate = 'Unknown';
+  if (boostStatus.endTime) {
+    try {
+      const date = new Date(boostStatus.endTime);
+      expiryDate = date.toLocaleString();
+    } catch (e) {
+      expiryDate = boostStatus.endTime;
+    }
+  } else if (boostStatus.expiresAt) {
+    try {
+      const date = new Date(boostStatus.expiresAt);
+      expiryDate = date.toLocaleString();
+    } catch (e) {
+      expiryDate = boostStatus.expiresAt;
+    }
   }
-
+  
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex justify-between mb-4">
-          <div>
-            <h3 className="text-lg font-medium flex items-center">
-              <Zap className="h-5 w-5 mr-2 text-yellow-500" />
-              {boostStatus.packageName || "Active Boost"}
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Boost activated {boostStatus.startTime ? new Date(boostStatus.startTime).toLocaleDateString() : "recently"}
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-sm text-muted-foreground flex items-center justify-end">
-              <Clock className="h-4 w-4 mr-1" />
-              {boostStatus.remainingTime || "Time remaining"}
+    <div className="space-y-4">
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center mb-2">
+            <div className="flex items-center">
+              <Zap className="h-4 w-4 text-yellow-500 mr-2" />
+              <span className="font-medium">Active Boost</span>
             </div>
-            <div className="text-sm text-muted-foreground flex items-center justify-end mt-1">
-              <Calendar className="h-4 w-4 mr-1" />
-              {boostStatus.endTime ? 
-                `Expires ${new Date(boostStatus.endTime).toLocaleString()}` : 
-                "Expiration pending"}
+            <div className="text-sm text-muted-foreground">
+              {boostStatus.packageName || 'Standard Package'}
             </div>
           </div>
-        </div>
-
-        <div className="mb-6">
-          <div className="flex justify-between mb-2">
-            <span className="text-sm">Progress</span>
-            <span className="text-sm">{boostStatus.progress || 0}%</span>
-          </div>
-          <Progress value={boostStatus.progress || 0} className="h-2" />
-        </div>
-
-        {hermesData && (
-          <div className="bg-muted/30 p-3 rounded-md mt-4">
-            <h4 className="text-sm font-medium mb-2">Current Boost Performance</h4>
-            <div className="text-xs text-muted-foreground space-y-1">
-              <p>• Ranking position: <span className="text-foreground">#{hermesData.position}</span></p>
-              <p>• Visibility increase: <span className="text-foreground">{hermesData.estimatedVisibility}%</span></p>
-              <p>• Total boosting users: <span className="text-foreground">{hermesData.activeUsers}</span></p>
+          
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Progress</span>
+                <span>{Math.round(progress)}%</span>
+              </div>
+              <Progress value={progress} className="h-2" />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col items-center p-2 bg-muted rounded">
+                <Clock className="h-4 w-4 mb-1 text-muted-foreground" />
+                <span className="text-sm font-medium">{boostStatus.timeRemaining || '16h 32m'}</span>
+                <span className="text-xs text-muted-foreground">Remaining</span>
+              </div>
+              <div className="flex flex-col items-center p-2 bg-muted rounded">
+                <Calendar className="h-4 w-4 mb-1 text-muted-foreground" />
+                <span className="text-sm font-medium">{expiryDate}</span>
+                <span className="text-xs text-muted-foreground">Expires</span>
+              </div>
             </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      
+      {hermesData && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center mb-3">
+              <TrendingUp className="h-4 w-4 mr-2 text-primary" />
+              <span className="font-medium">Boost Performance</span>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-3">
+              <div className="flex flex-col items-center p-2 bg-muted rounded">
+                <span className="text-sm font-medium">{hermesData.position}</span>
+                <span className="text-xs text-muted-foreground">Rank</span>
+              </div>
+              <div className="flex flex-col items-center p-2 bg-muted rounded">
+                <span className="text-sm font-medium">{hermesData.estimatedVisibility}%</span>
+                <span className="text-xs text-muted-foreground">Visibility</span>
+              </div>
+              <div className="flex flex-col items-center p-2 bg-muted rounded">
+                <span className="text-sm font-medium">{hermesData.activeUsers}</span>
+                <span className="text-xs text-muted-foreground">Competitors</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
 

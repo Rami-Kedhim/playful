@@ -61,6 +61,12 @@ const BoostManagerContainer = ({
   const eligibility = adaptBoostEligibility(managerEligibility);
   const boostPackages = adaptBoostPackages(managerBoostPackages);
   
+  // Make sure eligibility has the 'eligible' property for backward compatibility
+  const adaptedEligibility = {
+    eligible: eligibility.isEligible !== undefined ? eligibility.isEligible : false,
+    reason: eligibility.reason
+  };
+  
   // Use the updated adapter function
   const formatBoostDurationAdapter = adaptFormatBoostDuration(formatBoostDuration);
   const getBoostPrice = adaptGetBoostPrice(managerGetBoostPrice);
@@ -155,7 +161,7 @@ const BoostManagerContainer = ({
     <div className="space-y-6">
       <BoostStatus
         boostStatus={boostStatus}
-        eligibility={eligibility}
+        eligibility={adaptedEligibility}
         profileCompleteness={profileCompleteness}
         rating={rating}
         country={country}
