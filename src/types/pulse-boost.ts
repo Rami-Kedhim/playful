@@ -40,6 +40,7 @@ export interface PulseBoost {
   duration?: string;
   price?: number;
   price_ubx?: number;
+  visibility_increase?: number;  // <-- Added this property for visibility increase percentage
 }
 
 export interface ActiveBoost {
@@ -79,3 +80,4 @@ export interface EnhancedBoostStatus {
     coverage?: number;
   };
 }
+
