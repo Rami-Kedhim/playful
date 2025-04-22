@@ -3,31 +3,27 @@ import { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { BoostPackage } from '@/types/boost';
 import { useUBX } from '@/hooks/useUBX';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth/useAuthContext';
 import { validateGlobalPrice, GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 
 export const useBoostPurchase = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // Get UBX utilities from our hook
+
   const {
     processTransaction,
     isProcessing: ubxLoading,
     ...ubxData
   } = useUBX();
-  
-  // Get the user's profile from the Auth context to access their balance
+
   const { profile } = useAuth();
-  // Access the UBX balance from the profile, with fallback
   const userBalance = profile?.ubx_balance ?? 0;
-  
+
   const purchaseBoost = async (boostPackage: BoostPackage): Promise<boolean> => {
     try {
       setLoading(true);
       setError(null);
-      
-      // Validate price against Oxum global price rule
+
       try {
         validateGlobalPrice(boostPackage.price_ubx || 0);
       } catch (validationError: any) {
@@ -38,8 +34,7 @@ export const useBoostPurchase = () => {
         });
         return false;
       }
-      
-      // Check if user has enough UBX
+
       if (userBalance < GLOBAL_UBX_RATE) {
         toast({
           title: "Insufficient funds",
@@ -48,37 +43,33 @@ export const useBoostPurchase = () => {
         });
         return false;
       }
-      
-      // Simulate API call delay
+
       await new Promise(resolve => setTimeout(resolve, 1200));
-      
-      // Use the processTransaction method to deduct UBX
+
       const success = await processTransaction({
-        amount: -GLOBAL_UBX_RATE, // Negative amount for spending
-        transactionType: "boost_purchase", // Use the correct property name
-        description: `Purchased ${boostPackage.name} boost`
-      });
-      
-      if (!success) {
-        throw new Error("Failed to process transaction");
-      }
-      
+        amount: -GLOBAL_UBX_RATE,
+        transaction_type: "boost_purchase", // use transaction_type as per UBXTransaction type
+        description: `Purchased ${boostPackage.name} boost`,
+      } as any);
+
+      if (!success) throw new Error("Failed to process transaction");
+
       toast({
         title: "Boost purchased",
         description: `Successfully purchased ${boostPackage.name} for ${GLOBAL_UBX_RATE} UBX`
       });
-      
+
       return true;
     } catch (err) {
       console.error("Error purchasing boost:", err);
       setError("Failed to process boost purchase");
-      
+
       toast({
         title: "Purchase failed",
         description: "There was an error processing your boost purchase",
         variant: "destructive"
       });
-      
+
       return false;
     } finally {
       setLoading(false);

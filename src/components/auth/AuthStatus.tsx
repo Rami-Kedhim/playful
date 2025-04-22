@@ -2,7 +2,7 @@
 import React from 'react';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, LogIn, User, UserCheck } from 'lucide-react';
+import { Loader2, LogIn, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -12,9 +12,6 @@ interface AuthStatusProps {
   className?: string;
 }
 
-/**
- * Component to display authentication status and quick login/profile links
- */
 const AuthStatus: React.FC<AuthStatusProps> = ({
   showAvatar = true,
   showUsername = true,
@@ -42,21 +39,24 @@ const AuthStatus: React.FC<AuthStatusProps> = ({
     );
   }
 
+  const profileImage = user?.profileImageUrl || user?.avatarUrl || '';
+  const username = user?.username || 'U';
+
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       {showAvatar && (
         <Avatar className="h-7 w-7">
-          <AvatarImage src={user?.profileImageUrl || ''} alt={user?.username || ''} />
+          <AvatarImage src={profileImage} alt={username} />
           <AvatarFallback>
-            {user?.username?.substring(0, 2).toUpperCase() || 'U'}
+            {username.substring(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       )}
-      
+
       {showUsername && (
         <div className="flex items-center gap-1">
           <UserCheck className="h-3 w-3 text-green-500" />
-          <span className="text-sm font-medium">{user?.username}</span>
+          <span className="text-sm font-medium">{username}</span>
         </div>
       )}
     </div>

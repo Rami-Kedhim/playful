@@ -5,12 +5,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { usePulseBoost } from "@/hooks/boost/usePulseBoost";
-import { pulseBoosts } from "@/constants/pulseBoostConfig"; // Updated import
-import { AlertCircle, ChevronRight, Clock, Zap } from "lucide-react";
+import { pulseBoosts } from "@/constants/pulseBoostConfig";
+import { AlertCircle, Clock, Zap } from "lucide-react";
 import PulseBoostCard from "./PulseBoostCard";
 import { formatDistanceToNow } from "date-fns";
 import UBXWallet from "../wallet/UBXWallet";
-import { PulseBoost, BoostPackage } from "@/types/boost";
+import { BoostPackage, PulseBoost } from "@/types/boost";
 
 interface PulseBoostManagerProps {
   profileId?: string;
@@ -28,18 +28,19 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
     pulseBoostPackages
   } = usePulseBoost(profileId);
 
+  // Fix typing by adding required 'features' property to map
   const convertedBoosts: PulseBoost[] = pulseBoostPackages.map(boost => ({
     id: boost.id,
     name: boost.name,
-    description: boost.description,
-    durationMinutes: 24 * 60, // Default to 24 hours (24 * 60 minutes)
-    visibility: boost.id === 'basic' ? 'homepage' : 
-               boost.id === 'premium' ? 'search' : 'global',
+    description: boost.description || '',
+    durationMinutes: 24 * 60, // Default 24 hours in minutes
+    visibility: boost.id === 'basic' ? 'homepage' : (boost.id === 'premium' ? 'search' : 'global'),
     costUBX: boost.price_ubx || boost.price,
-    badgeColor: boost.color,
+    badgeColor: boost.color || '#3b82f6',
     color: boost.color || '#3b82f6',
     duration: boost.duration,
-    price: boost.price
+    price: boost.price,
+    features: boost.features || [] // Required property
   }));
 
   if (isLoading) {
@@ -161,14 +162,15 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
                 const pulseBoost: PulseBoost = {
                   id: activeBoost.boostId,
                   name: activeBoost.boostDetails?.name || 'Unknown Boost',
-                  durationMinutes: 24 * 60, // Default to 24 hours
+                  durationMinutes: 24 * 60, // Default 24 hours
                   visibility: 'homepage',
                   costUBX: activeBoost.boostDetails?.price || 0,
-                  description: activeBoost.boostDetails?.description,
+                  description: activeBoost.boostDetails?.description || '',
                   badgeColor: activeBoost.boostDetails?.color,
                   color: activeBoost.boostDetails?.color || '#3b82f6',
                   duration: activeBoost.boostDetails?.duration || '24:00:00',
-                  price: activeBoost.boostDetails?.price || 0
+                  price: activeBoost.boostDetails?.price || 0,
+                  features: activeBoost.boostDetails?.features || []
                 };
                 
                 return (

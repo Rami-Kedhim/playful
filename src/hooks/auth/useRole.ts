@@ -1,72 +1,51 @@
 
 import { useMemo } from 'react';
 import { useAuth } from './useAuthContext';
-import type { UserRole } from '@/types/auth';
 
-interface UseRoleReturn {
-  hasRole: (role: string) => boolean;
-  hasAllRoles: (roles: string[]) => boolean;
-  hasAnyRole: (roles: string[]) => boolean;
-  isAdmin: boolean;
-  isModerator: boolean;
-  isUser: boolean;
-  isCreator: boolean;
-  isEscort: boolean;
-  roles: string[];
-  canAccessAdminFeatures: boolean; // Added missing property
-}
-
-export const useRole = (): UseRoleReturn => {
+export const useRole = () => {
   const { user, checkRole } = useAuth();
-  
-  // Extract roles array from user
+
   const roles = useMemo(() => {
     if (!user) return [];
-    
     if (user.roles && Array.isArray(user.roles)) {
       return user.roles.map(role => typeof role === 'string' ? role : role.name);
     }
-    
-    return user.role ? [user.role] : [];
+    if (user.role) return [user.role];
+    return [];
   }, [user]);
-  
-  // Check if user has a specific role
+
   const hasRole = (role: string): boolean => {
     if (!user) return false;
     return checkRole(role);
   };
-  
-  // Check if user has admin role (shorthand)
-  const isAdmin = useMemo(() => {
-    return hasRole('admin');
-  }, [user, checkRole]);
-  
-  // Check if user has all of the specified roles
+
+  const isAdmin = useMemo(() => hasRole('admin'), [user, checkRole]);
+  const isModerator = hasRole('moderator');
+  const isUser = hasRole('user');
+  const isCreator = hasRole('creator');
+  const isEscort = hasRole('escort');
+
   const hasAllRoles = (rolesToCheck: string[]): boolean => {
     if (!user || rolesToCheck.length === 0) return false;
     return rolesToCheck.every(role => hasRole(role));
   };
-  
-  // Check if user has any of the specified roles
+
   const hasAnyRole = (rolesToCheck: string[]): boolean => {
     if (!user || rolesToCheck.length === 0) return false;
     return rolesToCheck.some(role => hasRole(role));
   };
-  
-  // Check if user can access admin features - admin or moderator
-  const canAccessAdminFeatures = useMemo(() => {
-    return hasRole('admin') || hasRole('moderator');
-  }, [hasRole]);
-  
+
+  const canAccessAdminFeatures = user ? (hasRole('admin') || hasRole('moderator')) : false;
+
   return {
     hasRole,
     hasAllRoles,
     hasAnyRole,
     isAdmin,
-    isModerator: hasRole('moderator'),
-    isUser: hasRole('user'),
-    isCreator: hasRole('creator'),
-    isEscort: hasRole('escort'),
+    isModerator,
+    isUser,
+    isCreator,
+    isEscort,
     roles,
     canAccessAdminFeatures
   };

@@ -1,34 +1,15 @@
-
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Session, User } from '@supabase/supabase-js';
-import { AuthContextType, AuthResult, UserProfile } from '@/types/auth';
-
-export interface AuthContextProps {
-  user: User | null;
-  profile: UserProfile | null;
-  session: Session | null;
-  loading: boolean;
-  error: string | null;
-  signIn: (credentials: { email: string; password: string }) => Promise<void>;
-  signUp: (credentials: { email: string; password: string; username?: string; full_name?: string }) => Promise<void>;
-  signOut: () => Promise<void>;
-  sendPasswordResetEmail: (email: string) => Promise<void>;
-  confirmPasswordReset: (token: string, newPassword: string) => Promise<void>;
-  updateProfile: (data: Partial<UserProfile>) => Promise<void>;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  checkRole: (role: string) => boolean;
-  login: (email: string, password: string) => Promise<AuthResult>;
-  logout: () => Promise<void>;
-  register: (email: string, password: string, username?: string) => Promise<AuthResult>;
-  updateUserProfile: (data: Partial<UserProfile>) => Promise<boolean>;
-  refreshProfile: () => Promise<void>;
-}
+import { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import { AuthContextProps, AuthResult, User, UserProfile } from '@/types/auth';
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -41,12 +22,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
-        setUser(session?.user ?? null);
+        setUser(session?.user ? mapSupabaseUserToUser(session.user) : null);
         setIsAuthenticated(!!session?.user);
-        
-        // Fetch profile data when session changes
         if (session?.user) {
-          fetchProfile(session.user.id);
+          setTimeout(() => {
+            fetchProfile(session.user.id);
+          }, 0);
         } else {
           setProfile(null);
         }
@@ -56,18 +37,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      setUser(session?.user ? mapSupabaseUserToUser(session.user) : null);
       setIsAuthenticated(!!session?.user);
-      
+
       if (session?.user) {
         fetchProfile(session.user.id);
       }
-      
+
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Helper to map SupabaseUser to our User type
+  const mapSupabaseUserToUser = (supabaseUser: SupabaseUser): User => {
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email ?? '',
+      username: supabaseUser.user_metadata?.username,
+      name: supabaseUser.user_metadata?.full_name || supabaseUser.name,
+      role: supabaseUser.user_metadata?.role,
+      isVerified: supabaseUser.user_metadata?.isVerified,
+      profileImageUrl: supabaseUser.user_metadata?.profileImageUrl ?? supabaseUser.user_metadata?.avatar_url,
+      avatarUrl: supabaseUser.user_metadata?.avatarUrl,
+      phone: supabaseUser.phone,
+      website: supabaseUser.user_metadata?.website,
+      user_metadata: supabaseUser.user_metadata || {},
+      roles: supabaseUser.user_metadata?.roles || [],
+      ubxBalance: supabaseUser.user_metadata?.ubxBalance,
+      bio: supabaseUser.user_metadata?.bio,
+      createdAt: supabaseUser.created_at
+    };
+  };
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -92,7 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setError(null);
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      
+
       if (error) {
         setError(error.message);
         throw error;
@@ -106,17 +108,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async ({ email, password, username, full_name }: { email: string; password: string; username?: string; full_name?: string }) => {
     try {
       setError(null);
-      const { error } = await supabase.auth.signUp({ 
-        email, 
+      const { error } = await supabase.auth.signUp({
+        email,
         password,
         options: {
           data: {
             username,
-            full_name
-          }
-        }
+            full_name,
+          },
+        },
       });
-      
+
       if (error) {
         setError(error.message);
         throw error;
@@ -136,7 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw error;
     }
   };
-  
+
   const sendPasswordResetEmail = async (email: string) => {
     try {
       setError(null);
@@ -150,48 +152,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw error;
     }
   };
-  
+
   const confirmPasswordReset = async (token: string, newPassword: string) => {
     try {
       setError(null);
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
-      
+
       if (error) {
         setError(error.message);
         throw error;
       }
-    } catch (error: any) {
-      setError(error.message);
-      throw error;
-    }
-  };
-  
-  const updateProfile = async (data: Partial<UserProfile>) => {
-    if (!user) return;
-    
-    try {
-      setError(null);
-      const { error } = await supabase
-        .from('profiles')
-        .update(data)
-        .eq('id', user.id);
-        
-      if (error) {
-        setError(error.message);
-        throw error;
-      }
-      
-      // Update local profile state
-      setProfile(prev => prev ? { ...prev, ...data } : null);
     } catch (error: any) {
       setError(error.message);
       throw error;
     }
   };
 
-  // Alias methods for compatibility with different component usages
+  const updateProfile = async (data: Partial<UserProfile>) => {
+    if (!user) return false;
+
+    try {
+      setError(null);
+      const { error } = await supabase
+        .from('profiles')
+        .update(data)
+        .eq('id', user.id);
+
+      if (error) {
+        setError(error.message);
+        throw error;
+      }
+
+      // Update local profile state
+      setProfile(prev => prev ? { ...prev, ...data } : null);
+      return true;
+    } catch (error: any) {
+      setError(error.message);
+      return false;
+    }
+  };
+
+  /**
+   * Alias methods for compatibility with different component usages
+   */
   const login = async (email: string, password: string): Promise<AuthResult> => {
     try {
       await signIn({ email, password });
@@ -213,12 +218,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateUserProfile = async (data: Partial<UserProfile>): Promise<boolean> => {
-    try {
-      await updateProfile(data);
-      return true;
-    } catch (error) {
-      return false;
-    }
+    return await updateProfile(data);
   };
 
   const refreshProfile = async (): Promise<void> => {
@@ -230,7 +230,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Role checking function
   const checkRole = (role: string): boolean => {
     if (!profile) return false;
-    
+
     const roles = profile.roles || [];
     return roles.some(r => {
       if (typeof r === 'string') return r === role;
@@ -238,7 +238,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const value = {
+  const value: AuthContextProps = {
     user,
     profile,
     session,
@@ -257,7 +257,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     confirmPasswordReset,
     updateProfile,
     updateUserProfile,
-    refreshProfile
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
