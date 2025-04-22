@@ -1,85 +1,93 @@
 
-import { BoostPackage } from '@/types/boost';
+import { BoostPackage, PulseBoost } from '@/types/boost';
 
+// Define the base boost packages
 export const PULSE_BOOSTS: BoostPackage[] = [
   {
     id: 'basic',
     name: 'Standard Boost',
-    description: 'Increase your visibility in search results',
+    description: 'Increase your visibility in homepage results',
     price: 50,
-    duration: '24 hours',
+    price_ubx: 50,
+    duration: '24:00:00',
     features: [
-      'Top of search results',
-      'Featured in discover section',
-      'Standard visibility boost'
+      'Homepage visibility boost',
+      '24 hours duration',
+      'Basic analytics'
     ],
     boostLevel: 1,
-    color: '#3b82f6'
+    color: '#3b82f6', // blue
+    visibility_increase: 25,
+    boost_power: 1
   },
   {
     id: 'premium',
     name: 'Premium Boost',
-    description: 'Get maximum exposure across the platform',
-    price: 150,
-    duration: '24 hours',
+    description: 'Enhanced visibility in search results and homepage',
+    price: 100,
+    price_ubx: 100,
+    duration: '48:00:00',
     features: [
-      'Top placement in all listings',
-      'Featured on homepage',
-      'Premium visibility badge',
-      '3x visibility compared to Standard'
+      'Homepage & search results visibility',
+      '48 hours duration',
+      'Enhanced analytics'
     ],
     boostLevel: 3,
-    color: '#8b5cf6'
+    color: '#8b5cf6', // purple
+    visibility_increase: 50,
+    boost_power: 2,
+    is_featured: true
   },
   {
     id: 'ultra',
     name: 'Ultra Boost',
-    description: 'Dominate the platform with maximum visibility',
-    price: 300,
-    duration: '24 hours',
+    description: 'Maximum visibility across all platform areas',
+    price: 200,
+    price_ubx: 200,
+    duration: '72:00:00',
     features: [
-      'Highest priority placement',
-      'Featured banner promotion',
-      'Special highlight effects',
-      '5x visibility compared to Standard',
-      'Enhanced matching algorithm'
+      'Global visibility boost',
+      '72 hours duration',
+      'Premium analytics',
+      'Featured badge'
     ],
     boostLevel: 5,
-    color: '#ec4899'
+    color: '#ec4899', // pink
+    visibility_increase: 80,
+    boost_power: 3
   }
 ];
 
-export const GLOBAL_UBX_RATE = 100;
-
-/**
- * Formats a duration in minutes to a human-readable string
- */
-export const formatPulseBoostDuration = (durationMinutes: number): string => {
-  if (durationMinutes < 60) {
-    return `${durationMinutes} minutes`;
-  } else if (durationMinutes < 1440) {
-    const hours = durationMinutes / 60;
-    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
-  } else {
-    const days = Math.floor(durationMinutes / 1440);
-    const hours = Math.floor((durationMinutes % 1440) / 60);
-    if (hours === 0) {
-      return `${days} ${days === 1 ? 'day' : 'days'}`;
-    }
-    return `${days} ${days === 1 ? 'day' : 'days'}, ${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+// Function to convert minutes to a human-readable format
+export function formatPulseBoostDuration(minutes: number): string {
+  if (minutes < 60) {
+    return `${minutes}m`;
   }
-};
-
-/**
- * Convert a duration string like "24 hours" to minutes
- */
-export const convertDurationToMinutes = (duration: string): number => {
-  if (duration.includes('minutes') || duration.includes('minute')) {
-    return parseInt(duration);
-  } else if (duration.includes('hours') || duration.includes('hour')) {
-    return parseInt(duration) * 60;
-  } else if (duration.includes('days') || duration.includes('day')) {
-    return parseInt(duration) * 24 * 60;
+  
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  
+  if (hours < 24) {
+    return remainingMinutes > 0 
+      ? `${hours}h ${remainingMinutes}m` 
+      : `${hours}h`;
   }
-  return 0;
-};
+  
+  const days = Math.floor(hours / 24);
+  const remainingHours = hours % 24;
+  
+  if (remainingHours > 0 || remainingMinutes > 0) {
+    return `${days}d ${remainingHours}h`;
+  }
+  
+  return `${days}d`;
+}
+
+// Function to convert duration string like "24:00:00" to minutes
+export function convertDurationToMinutes(durationStr: string): number {
+  const [hours, minutes, seconds] = durationStr.split(':').map(Number);
+  return hours * 60 + minutes + (seconds / 60);
+}
+
+// Global UBX rate for boosts
+export const GLOBAL_UBX_RATE = 15;

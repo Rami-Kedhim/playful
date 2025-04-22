@@ -12,19 +12,21 @@ export interface BoostPackage {
   color?: string;
   price_ubx?: number;
   is_featured?: boolean;
+  boost_power?: number;
+  visibility_increase?: number;
 }
 
 export interface BoostStatus {
   isActive: boolean;
   timeRemaining?: string;
-  expiresAt?: Date;
+  expiresAt?: Date | string;
   level?: number;
   purchasedAt?: Date;
   progress?: number;
   remainingTime?: string;
   packageName?: string;
   startTime?: string;
-  endTime?: string;
+  endTime?: string | Date;
   boostPackage?: BoostPackage;
 }
 
@@ -71,6 +73,11 @@ export interface HermesBoostStatus {
   activeUsers: number;
   estimatedVisibility: number;
   lastUpdateTime: string;
+  boostScore?: number;
+  effectivenessScore?: number;
+  timeRemaining?: number;
+  isActive?: boolean;
+  active?: boolean;
 }
 
 export interface BoostActivePackageProps {
@@ -112,7 +119,25 @@ export interface AnalyticsData {
   additionalViews: number;
   engagementIncrease: number;
   rankingPosition: number;
+  views?: {
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+  };
+  searchRanking?: {
+    withBoost: number;
+    withoutBoost: number;
+    improvement: number;
+  };
   // Add other fields as needed
+}
+
+export interface BoostAnalytics {
+  additionalViews: number;
+  engagementIncrease: number;
+  rankingPosition: number;
+  conversionsIncrease?: number;
+  visibilityGain?: number;
 }
 
 export interface PulseBoost {
@@ -123,4 +148,25 @@ export interface PulseBoost {
   costUBX: number;
   description?: string;
   badgeColor?: string;
+  autoApplyWithPlan?: boolean;
+}
+
+export interface BoostDialogTabsProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  loading: boolean;
+  boostStatus: BoostStatus;
+  eligibility: { isEligible: boolean; reason?: string };
+  boostPackages: any[];
+  selectedPackage: string;
+  setSelectedPackage: (id: string) => void;
+  handleBoost: () => void;
+  handleCancel: () => Promise<boolean>;
+  dailyBoostUsage: number;
+  dailyBoostLimit: number;
+  hermesStatus: HermesBoostStatus;
+  formatBoostDuration?: (duration: string) => string;
+  getBoostPrice?: () => number;
+  handleDialogClose: () => void;
+  onBoostSuccess?: () => void;
 }

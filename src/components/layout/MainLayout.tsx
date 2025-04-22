@@ -1,40 +1,47 @@
 
-import React, { ReactNode } from 'react';
-import Navbar from '../navigation/Navbar';
-import Footer from '../navigation/Footer';
+import React from "react";
+import Navbar from "../navigation/Navbar";
+import Footer from "../navigation/Footer";
 
-interface MainLayoutProps {
-  children: ReactNode;
+export interface MainLayoutProps {
+  children: React.ReactNode;
   showHeader?: boolean;
-  showFooter?: boolean;
   containerClass?: string;
-  title?: string; // Added title prop
+  hideNavbar?: boolean;
+  hideFooter?: boolean;
+  title?: string;
+  description?: string;
 }
 
-const MainLayout = ({ 
-  children, 
-  showHeader = true, 
-  showFooter = true,
-  containerClass,
-  title
-}: MainLayoutProps) => {
+const MainLayout: React.FC<MainLayoutProps> = ({
+  children,
+  showHeader = true,
+  containerClass = "container mx-auto px-4 py-8",
+  hideNavbar = false,
+  hideFooter = false,
+  title,
+  description
+}) => {
   return (
     <div className="min-h-screen flex flex-col">
-      {showHeader && <Navbar />}
+      {!hideNavbar && <Navbar />}
       
-      <main className={`flex-grow ${containerClass || ''}`}>
-        {/* Add title rendering if provided */}
-        {title && (
-          <div className="bg-muted py-4">
-            <div className="container mx-auto px-4">
-              <h1 className="text-2xl font-bold">{title}</h1>
-            </div>
+      {showHeader && title && (
+        <div className="bg-muted/50 py-8">
+          <div className="container mx-auto px-4">
+            <h1 className="text-3xl font-bold">{title}</h1>
+            {description && <p className="text-muted-foreground mt-2">{description}</p>}
           </div>
-        )}
-        {children}
-      </main>
+        </div>
+      )}
       
-      {showFooter && <Footer />}
+      <main className="flex-grow">
+        <div className={containerClass}>
+          {children}
+        </div>
+      </main>
+
+      {!hideFooter && <Footer />}
     </div>
   );
 };

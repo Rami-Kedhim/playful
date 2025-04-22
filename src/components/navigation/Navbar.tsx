@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/auth/useAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,16 +47,16 @@ const Navbar = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="p-0">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.avatarUrl} alt={user.username || 'User'} />
+                    <AvatarImage src={user.avatarUrl || user.avatar_url} alt={user.username || user.name || 'User'} />
                     <AvatarFallback>
-                      {(user.username || user.email || 'U').charAt(0).toUpperCase()}
+                      {((user.username || user.name || user.email || 'U') as string).charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>
-                  {user.username || user.email}
+                  {user.username || user.name || user.email}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>

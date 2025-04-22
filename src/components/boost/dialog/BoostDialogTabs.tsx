@@ -6,27 +6,8 @@ import { Loader2 } from "lucide-react";
 import BoostPackages from "../BoostPackages";
 import BoostEligibilityCheck from "./BoostEligibilityCheck";
 import BoostActivePackage from "../BoostActivePackage";
-import HermesBoostInfo from '../HermesBoostInfo';
-import { BoostStatus, HermesBoostStatus } from '@/types/boost';
-
-export interface BoostDialogTabsProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  loading: boolean;
-  boostStatus: BoostStatus;
-  eligibility: { isEligible: boolean; reason?: string };
-  boostPackages: any[];
-  selectedPackage: string;
-  setSelectedPackage: (id: string) => void;
-  handleBoost: () => void;
-  handleCancel: () => Promise<boolean>;
-  dailyBoostUsage: number;
-  dailyBoostLimit: number;
-  hermesStatus: HermesBoostStatus;
-  formatBoostDuration?: (duration: string) => string;
-  getBoostPrice?: () => number;
-  handleDialogClose: () => void;
-}
+import HermesBoostInfo from './HermesBoostInfo';
+import { BoostStatus, HermesBoostStatus, BoostDialogTabsProps } from '@/types/boost';
 
 const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   activeTab,
@@ -42,6 +23,7 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   dailyBoostUsage,
   dailyBoostLimit,
   hermesStatus,
+  onBoostSuccess,
   formatBoostDuration = (duration) => {
     const [hours] = duration.split(':').map(Number);
     return hours >= 24 ? `${Math.floor(hours / 24)} days` : `${hours} hours`;
@@ -70,7 +52,6 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
             <div className="space-y-6">
               <BoostActivePackage 
                 boostStatus={boostStatus}
-                hermesData={hermesStatus}
               />
               
               <div className="flex justify-end mt-4">

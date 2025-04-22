@@ -1,50 +1,39 @@
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { formatPulseBoostDuration } from "@/constants/pulseBoostConfig";
-import { PulseBoost } from "@/types/boost";
-import { Clock, Star, TrendingUp, Zap } from "lucide-react";
-import { useState } from "react";
+import { useState } from 'react';
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Clock, Zap, ChevronRight } from "lucide-react";
+import { formatPulseBoostDuration } from '@/constants/pulseBoostConfig';
+import { PulseBoost } from '@/types/boost';
 
 interface PulseBoostCardProps {
   boost: PulseBoost;
-  isActive?: boolean;
+  isActive: boolean;
   timeRemaining?: string;
-  onActivate?: (boostId: string) => Promise<boolean>;
-  onCancel?: (boostId: string) => Promise<boolean>;
-  userBalance?: number;
-  disabled?: boolean;
+  onActivate: (boostId: string) => Promise<boolean>;
+  onCancel: (boostId: string) => Promise<boolean>;
+  userBalance: number;
 }
 
-const PulseBoostCard = ({
+const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
   boost,
-  isActive = false,
+  isActive,
   timeRemaining,
   onActivate,
   onCancel,
-  userBalance = 0,
-  disabled = false
-}: PulseBoostCardProps) => {
+  userBalance
+}) => {
   const [loading, setLoading] = useState(false);
-  const hasEnoughBalance = userBalance >= boost.costUBX;
   
-  const getVisibilityIcon = () => {
-    switch (boost.visibility) {
-      case 'homepage': 
-        return <Star className="h-4 w-4 text-yellow-500" />;
-      case 'search': 
-        return <TrendingUp className="h-4 w-4 text-blue-500" />;
-      case 'global': 
-        return <Zap className="h-4 w-4 text-purple-500" />;
-      default:
-        return <Zap className="h-4 w-4" />;
-    }
-  };
+  // Format duration to readable string
+  const formattedDuration = formatPulseBoostDuration(boost.durationMinutes);
+  
+  // Check if user can afford this boost
+  const canAfford = userBalance >= boost.costUBX;
   
   const handleActivate = async () => {
-    if (disabled || !onActivate || loading) return;
+    if (loading) return;
     
     setLoading(true);
     try {
@@ -55,7 +44,7 @@ const PulseBoostCard = ({
   };
   
   const handleCancel = async () => {
-    if (disabled || !onCancel || loading) return;
+    if (loading) return;
     
     setLoading(true);
     try {
@@ -65,64 +54,69 @@ const PulseBoostCard = ({
     }
   };
   
+  // Card background style based on boost type or if active
+  const cardStyle = isActive
+    ? { borderColor: boost.badgeColor || '#3b82f6', backgroundColor: (boost.badgeColor || '#3b82f6') + '10' }
+    : {};
+  
   return (
-    <Card className={`${isActive ? 'border-primary' : ''} transition-all hover:shadow-md`}>
-      <CardHeader className="pb-2">
+    <Card className="overflow-hidden" style={cardStyle}>
+      <CardContent className="p-5 space-y-4">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-lg flex items-center">
-            {getVisibilityIcon()}
-            <span className="ml-2">{boost.name}</span>
-          </CardTitle>
-          <Badge 
-            variant={isActive ? "default" : "outline"}
-            style={{ backgroundColor: isActive ? boost.badgeColor : undefined }}
-          >
-            {isActive ? 'Active' : formatPulseBoostDuration(boost.durationMinutes)}
+          <h3 className="font-medium text-lg">{boost.name}</h3>
+          <Badge style={{ backgroundColor: boost.badgeColor || '#3b82f6' }}>
+            {isActive ? 'Active' : `${boost.costUBX} UBX`}
           </Badge>
         </div>
-        <CardDescription>
-          {boost.description}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {isActive && timeRemaining ? (
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-sm">
-              <span className="flex items-center">
-                <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                Time remaining
-              </span>
-              <span className="font-medium">{timeRemaining}</span>
-            </div>
-            <Progress value={75} className="h-1" />
+        
+        <p className="text-sm text-muted-foreground">
+          {boost.description || `Increases profile visibility across ${boost.visibility}`}
+        </p>
+        
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-background/50 p-3 rounded-md flex flex-col items-center">
+            <Clock className="h-4 w-4 mb-1 text-muted-foreground" />
+            <span className="text-sm font-semibold">{formattedDuration}</span>
+            <span className="text-xs text-muted-foreground">Duration</span>
           </div>
-        ) : (
-          <div className="flex justify-between items-center">
-            <span className="text-lg font-bold">{boost.costUBX} UBX</span>
-            <span className="text-sm text-muted-foreground">
-              Visibility: {boost.visibility.replace('_', ' ')}
-            </span>
+          <div className="bg-background/50 p-3 rounded-md flex flex-col items-center">
+            <Zap className="h-4 w-4 mb-1 text-muted-foreground" />
+            <span className="text-sm font-semibold">{boost.visibility}</span>
+            <span className="text-xs text-muted-foreground">Visibility</span>
+          </div>
+        </div>
+        
+        {isActive && (
+          <div className="mt-2 bg-background/80 p-2 rounded-md text-center">
+            <span className="text-sm font-medium">{timeRemaining || formattedDuration} remaining</span>
           </div>
         )}
       </CardContent>
-      <CardFooter>
+      
+      <CardFooter className="px-5 pb-5 pt-0">
         {isActive ? (
           <Button 
             variant="outline" 
-            className="w-full" 
-            onClick={handleCancel}
-            disabled={disabled || loading || !onCancel}
+            onClick={handleCancel} 
+            disabled={loading}
+            className="w-full"
           >
-            {loading ? "Processing..." : "Cancel Boost"}
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Cancel Boost
           </Button>
         ) : (
           <Button 
-            className="w-full" 
-            onClick={handleActivate}
-            disabled={disabled || loading || !hasEnoughBalance || !onActivate}
-            variant={hasEnoughBalance ? "default" : "outline"}
+            onClick={handleActivate} 
+            disabled={loading || !canAfford}
+            className="w-full"
+            variant={canAfford ? "default" : "outline"}
           >
-            {loading ? "Processing..." : hasEnoughBalance ? "Activate Boost" : "Insufficient Balance"}
+            {loading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <ChevronRight className="h-4 w-4 ml-2" />
+            )}
+            {canAfford ? 'Activate' : 'Not Enough UBX'}
           </Button>
         )}
       </CardFooter>

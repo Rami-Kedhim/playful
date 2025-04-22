@@ -1,82 +1,113 @@
 
 import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { useBoostPackages } from "@/hooks/boost/useBoostPackages";
-import BoostDialogTabs from "./BoostDialogTabs";
-import { Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useBoostDialog } from '@/hooks/boost/useBoostDialog';
+import BoostDialogTabs from './dialog/BoostDialogTabs';
+import { BoostProfileDialogProps } from '@/types/boost';
+import { Loader2 } from 'lucide-react';
 
-export interface BoostProfileDialogProps {
-  profileId?: string;
-  onSuccess?: () => void;
-  onClose?: () => void;
-  open: boolean;
-  setOpen: (open: boolean) => void;
-}
-
-const BoostProfileDialog = ({ 
-  profileId,
+const BoostProfileDialog: React.FC<BoostProfileDialogProps> = ({ 
+  profileId = '',
   onSuccess,
-  onClose,
-  open, 
-  setOpen 
-}: BoostProfileDialogProps) => {
+  open,
+  setOpen
+}) => {
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
-  const { boostStatus } = useBoostPackages(profileId);
-
-  const handleSuccess = () => {
-    toast({
-      title: "Boost applied successfully!",
-      description: "Your profile visibility has been increased.",
-    });
+  
+  const {
+    activeTab,
+    setActiveTab,
+    selectedPackage,
+    setSelectedPackage,
+    boostStatus,
+    eligibility,
+    boostPackages,
+    dailyBoostUsage,
+    dailyBoostLimit,
+    hermesStatus,
+    handleBoost: handleBoostAction,
+    cancelBoost,
+    formatBoostDuration,
+    getBoostPrice,
+    loading: hookLoading,
+    error
+  } = useBoostDialog(profileId);
+  
+  // Handle boost purchase
+  const handleBoost = async () => {
+    setLoading(true);
+    const success = await handleBoostAction();
+    setLoading(false);
     
-    if (onSuccess) onSuccess();
-    handleClose();
+    if (success) {
+      if (onSuccess) {
+        onSuccess();
+      }
+      setOpen(false);
+    }
+  };
+  
+  // Handle cancel
+  const handleCancel = async () => {
+    setLoading(true);
+    const success = await cancelBoost();
+    setLoading(false);
+    
+    if (success && onSuccess) {
+      onSuccess();
+    }
+    
+    return success;
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    if (onClose) onClose();
-  };
-
+  // Loading state
+  if (hookLoading) {
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <div className="min-h-[300px] flex flex-col items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin mb-4" />
+            <p className="text-muted-foreground">Loading boost data...</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Boost Your Profile</DialogTitle>
+          <DialogTitle>
+            {boostStatus?.isActive ? 'Active Boost' : 'Boost Your Profile'}
+          </DialogTitle>
           <DialogDescription>
-            Increase your profile's visibility and get more attention using Pulse Boost.
+            {boostStatus?.isActive
+              ? 'Manage your active boost and check analytics'
+              : 'Increase visibility and get more views with profile boosting'
+            }
           </DialogDescription>
         </DialogHeader>
-
-        <div className="relative">
-          <BoostDialogTabs onBoostSuccess={handleSuccess} profileId={profileId} />
-          
-          {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-md">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          )}
-        </div>
-
-        <DialogFooter>
-          <Button 
-            variant="outline" 
-            onClick={handleClose}
-            disabled={loading}
-          >
-            Close
-          </Button>
-        </DialogFooter>
+        
+        <BoostDialogTabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          loading={loading}
+          boostStatus={boostStatus}
+          eligibility={eligibility}
+          boostPackages={boostPackages}
+          selectedPackage={selectedPackage}
+          setSelectedPackage={setSelectedPackage}
+          handleBoost={handleBoost}
+          handleCancel={handleCancel}
+          dailyBoostUsage={dailyBoostUsage}
+          dailyBoostLimit={dailyBoostLimit}
+          hermesStatus={hermesStatus}
+          formatBoostDuration={formatBoostDuration}
+          getBoostPrice={getBoostPrice}
+          handleDialogClose={() => setOpen(false)}
+          onBoostSuccess={onSuccess}
+        />
       </DialogContent>
     </Dialog>
   );

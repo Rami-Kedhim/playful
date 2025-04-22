@@ -1,59 +1,58 @@
 
-import { useBoostContext } from "@/contexts/BoostContext";
-import { useAuth } from "@/hooks/auth/useAuth";
-import BoostButtonBase from "./BoostButtonBase";
-import BoostButtonTooltip from "./BoostButtonTooltip";
-import BoostProfileDialog from "@/components/profile/settings/BoostProfileDialog";
-import { useBoostDialog } from "@/components/boost/button/useBoostDialog";
-import { useState } from "react";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Zap } from 'lucide-react';
+import BoostProfileDialog from '../BoostProfileDialog';
+import { useBoost } from '@/contexts/BoostContext';
 
 interface BoostIconButtonProps {
-  onSuccess?: () => void;
-  tooltipPlacement?: "top" | "right" | "bottom" | "left";
+  profileId?: string;
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  size?: "default" | "sm" | "lg" | "icon";
+  className?: string;
 }
 
-const BoostIconButton = ({
-  onSuccess,
-  tooltipPlacement = "top"
-}: BoostIconButtonProps) => {
-  const { isAuthenticated } = useAuth();
-  const { boostStatus, isLoading } = useBoostContext();
-  const [showDialog, setShowDialog] = useState(false);
+const BoostIconButton: React.FC<BoostIconButtonProps> = ({
+  profileId,
+  variant = "outline",
+  size = "icon",
+  className = ""
+}) => {
+  const [open, setOpen] = useState(false);
+  const { isActive } = useBoost();
   
-  const {
-    handleOpenDialog,
-    handleCloseDialog,
-    handleSuccess,
-    toggleDialog
-  } = useBoostDialog(onSuccess);
+  const handleClick = () => {
+    setOpen(true);
+  };
   
-  if (!isAuthenticated) {
-    return null;
-  }
+  const handleSuccess = () => {
+    // Refresh boost status or perform other actions
+  };
+  
+  const handleClose = () => {
+    setOpen(false);
+  };
   
   return (
     <>
-      <BoostButtonTooltip 
-        boostStatus={boostStatus}
-        placement={tooltipPlacement}
+      <Button 
+        onClick={handleClick} 
+        variant={variant} 
+        size={size} 
+        className={`${className} ${isActive ? 'text-yellow-500 border-yellow-500 hover:bg-yellow-500/10' : ''}`}
       >
-        <BoostButtonBase
-          isActive={boostStatus.isActive}
-          isLoading={isLoading}
-          variant="outline"
-          size="icon"
-          className="h-8 w-8"
-          onClick={handleOpenDialog}
-          showText={false}
+        <Zap 
+          className={`h-4 w-4 ${isActive ? 'fill-yellow-500' : ''}`} 
         />
-      </BoostButtonTooltip>
+        <span className="sr-only">Boost Profile</span>
+      </Button>
       
-      {showDialog && (
-        <BoostProfileDialog 
+      {open && (
+        <BoostProfileDialog
+          profileId={profileId}
           onSuccess={handleSuccess}
-          onClose={handleCloseDialog}
-          open={showDialog}
-          setOpen={toggleDialog}
+          open={open}
+          setOpen={setOpen}
         />
       )}
     </>
