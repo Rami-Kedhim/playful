@@ -1,5 +1,5 @@
 
-// Fixed typing and ensured all number fields are properly typed
+// Fixed typing and ensured all number fields are properly parsed and typed
 
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
@@ -56,7 +56,8 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     if (fn) {
       return fn(pkg);
     }
-    return pkg.price || 0;
+    // price guaranteed to be number here or fallback 0
+    return parseNumberValue(pkg.price, 0);
   };
 
   const convertToUBX = (value: number): number => {
@@ -74,41 +75,43 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     // Parse duration string into numbers safely
     const durationStr = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
     const parts = durationStr.split(':');
-    // Never allow undefined elements; default to '0'
     const hoursStr = parts[0] || '0';
     const minutesStr = parts[1] || '0';
     const secondsStr = parts[2] || '0';
 
-    // Convert parts to numbers
-    const hoursNum = Number(hoursStr);
-    const minutesNum = Number(minutesStr);
-    const secondsNum = Number(secondsStr);
+    const hours = parseNumberValue(hoursStr, 0);
+    const minutes = parseNumberValue(minutesStr, 0);
+    const seconds = parseNumberValue(secondsStr, 0);
 
-    // Parse safely to numbers using parseNumberValue helper
-    const hours = parseNumberValue(hoursNum, 0);
-    const minutes = parseNumberValue(minutesNum, 0);
-    const seconds = parseNumberValue(secondsNum, 0);
-
-    // Use numbers, not strings, here
     const durationMinutes: number = (hours * 60) + minutes + (seconds / 60);
 
     const boostPowerRaw = (pkg as any).boost_power ?? (pkg as any).boostPower;
     const visibilityIncreaseRaw = (pkg as any).visibility_increase ?? (pkg as any).visibilityIncrease;
 
-    // Ensure boostPower and visibilityIncrease are numbers (fix string-to-number issue)
     const boostPowerNum: number = parseNumberValue(boostPowerRaw, 50);
-
-    let visibilityIncreaseNum: number = 50;
-    if (typeof visibilityIncreaseRaw === 'string') {
-      const parsedVis = Number(visibilityIncreaseRaw);
-      visibilityIncreaseNum = isNaN(parsedVis) ? 50 : parsedVis;
-    } else if (typeof visibilityIncreaseRaw === 'number') {
-      visibilityIncreaseNum = visibilityIncreaseRaw;
-    }
+    const visibilityIncreaseNum: number = parseNumberValue(visibilityIncreaseRaw, 50);
 
     let visibility: PulseBoost['visibility'] = 'homepage';
     if (boostPowerNum >= 200) visibility = 'global';
     else if (boostPowerNum >= 100) visibility = 'search';
+
+    // Price default fallback
+    let priceNum: number = 0;
+    if (typeof pkg.price === 'number') priceNum = pkg.price;
+    else if (typeof pkg.price === 'string') {
+      const parsedPrice = Number(pkg.price);
+      priceNum = isNaN(parsedPrice) ? 0 : parsedPrice;
+    }
+
+    // costUBX fallback to converted price
+    let costUBXNum: number = 0;
+    if (typeof (pkg as any).price_ubx === 'number') costUBXNum = (pkg as any).price_ubx;
+    else if (typeof (pkg as any).price_ubx === 'string') {
+      const parsedUBX = Number((pkg as any).price_ubx);
+      costUBXNum = isNaN(parsedUBX) ? Math.round(convertToUBX(priceNum)) : parsedUBX;
+    } else {
+      costUBXNum = Math.round(convertToUBX(priceNum));
+    }
 
     return {
       id: pkg.id,
@@ -116,15 +119,12 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       description: pkg.description || `${pkg.name} visibility boost for your profile`,
       duration: durationStr,
       durationMinutes: durationMinutes,
-      price: typeof pkg.price === 'number' ? pkg.price : 0,
-      costUBX: typeof (pkg as any).price_ubx === 'number'
-        ? (pkg as any).price_ubx
-        : Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),
+      price: priceNum,
+      costUBX: costUBXNum,
       visibility,
       color: getColorForBoostPower(boostPowerNum),
       badgeColor: getColorForBoostPower(boostPowerNum),
       features: pkg.features || [],
-      // make sure types are number for visibility_increase
       visibility_increase: visibilityIncreaseNum
     };
   };
