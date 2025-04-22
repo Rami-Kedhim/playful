@@ -8,18 +8,17 @@ export const getPulsePackages = async (): Promise<BoostPackage[]> => {
   // For now, we'll return our constant data
   return new Promise((resolve) => {
     setTimeout(() => {
-      // Cast PulseBoost[] to BoostPackage[] by converting 'durationMinutes' and 'costUBX' to string price and duration respectively
-      // We create new objects to satisfy BoostPackage shape
-      const adaptedPackages: BoostPackage[] = PULSE_BOOSTS.map((pb: PulseBoost) => ({
+      // Cast PulseBoost[] to BoostPackage[] by properly converting properties
+      const adaptedPackages: BoostPackage[] = PULSE_BOOSTS.map((pb) => ({
         id: pb.id,
         name: pb.name,
         description: pb.description || '',
-        duration: String(pb.duration) ?? '00:00:00',  // duration must be string in BoostPackage
+        duration: typeof pb.duration === 'number' ? `${pb.duration}:00:00` : pb.duration || '00:00:00',
         price_ubx: pb.costUBX,
         price: pb.price || 0,
         features: pb.features || [],
-        boost_power: 0,  // no info
-        visibility_increase: 0  // no info
+        boost_power: 0,  // no info provided in PulseBoost
+        visibility_increase: 0  // no info provided in PulseBoost
       }));
       resolve(adaptedPackages);
     }, 500);
