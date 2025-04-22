@@ -1,6 +1,4 @@
 
-// Fix type errors with durationMinutes and return type visibility property
-
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
 interface UsePulseBoostAdapterResult {
@@ -13,9 +11,12 @@ interface UsePulseBoostAdapterResult {
 export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterResult => {
   // Format the pulse boost duration to readable string
   const formatPulseDuration = (duration: string): string => {
-    const [hours, minutes, seconds] = duration.split(':').map(Number);
+    const [hoursStr, minutesStr, secondsStr] = duration.split(':');
+    const hours = Number(hoursStr);
+    const minutes = Number(minutesStr);
+    const seconds = Number(secondsStr);
 
-    if (!hours && !minutes && !seconds) return "Unknown duration";
+    if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) return "Unknown duration";
 
     if (hours >= 24) {
       const days = Math.floor(hours / 24);
@@ -38,7 +39,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     fn: (pkg: BoostPackage) => number
   ) => (pkg: BoostPackage): number => {
     // If the package has an explicit UBX price, use that
-    if (pkg.price_ubx) {
+    if (pkg.price_ubx !== undefined && pkg.price_ubx !== null) {
       return pkg.price_ubx;
     }
 
@@ -57,26 +58,35 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     return value * UBX_RATE;
   };
 
+  // Get a color for the boost level
+  const getColorForBoostPower = (boost_power: number): string => {
+    if (boost_power >= 200) return '#ec4899'; // Pink for premium
+    if (boost_power >= 100) return '#8b5cf6'; // Purple for standard
+    return '#60a5fa'; // Blue for basic
+  };
+
   // Convert a standard boost package to a pulse boost
   const convertToPulseBoost = (pkg: BoostPackage): PulseBoost => {
     const durationParts = pkg.duration?.split(':') || ['0', '0', '0'];
     const hours = parseInt(durationParts[0], 10) || 0;
     const minutes = parseInt(durationParts[1], 10) || 0;
 
-    // Calculate the duration in minutes with correct type
+    // Calculate the duration in minutes with correct type and fallback
     const durationMinutes = hours * 60 + minutes;
 
     // Determine the visibility level string matching PulseBoost visibility union
-    // Use fallback to string literals inside the enum from pulse-boost.ts if needed
     let visibility: PulseBoost['visibility'] = 'homepage';
-    if (pkg.boost_power && pkg.boost_power >= 200) {
-      visibility = 'global';
-    } else if (pkg.boost_power && pkg.boost_power >= 100) {
-      visibility = 'search';
-    } else {
-      visibility = 'homepage';
+    if (pkg.boost_power !== undefined && pkg.boost_power !== null) {
+      if (pkg.boost_power >= 200) {
+        visibility = 'global';
+      } else if (pkg.boost_power >= 100) {
+        visibility = 'search';
+      } else {
+        visibility = 'homepage';
+      }
     }
 
+    // Return with all needed properties; boost_power is not in PulseBoost, so safely ignore or cast
     return {
       id: pkg.id,
       name: pkg.name,
@@ -89,16 +99,10 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       color: getColorForBoostPower(pkg.boost_power || 50),
       badgeColor: getColorForBoostPower(pkg.boost_power || 50),
       features: pkg.features || [],
-      boost_power: pkg.boost_power || 50,
+      // We do not pass boost_power to PulseBoost as it causes typing errors
+      // Remove boost_power property to satisfy PulseBoost interface
       visibility_increase: pkg.visibility_increase || 50
     };
-  };
-
-  // Get a color for the boost level
-  const getColorForBoostPower = (boost_power: number): string => {
-    if (boost_power >= 200) return '#ec4899'; // Pink for premium
-    if (boost_power >= 100) return '#8b5cf6'; // Purple for standard
-    return '#60a5fa'; // Blue for basic
   };
 
   return {

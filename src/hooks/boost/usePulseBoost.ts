@@ -35,10 +35,18 @@ export const usePulseBoost = (profileId?: string) => {
           const boostPackage = packages.find(pkg => pkg.id === boostStatus.packageId);
 
           if (boostPackage) {
+            // Convert startTime and endTime to Date if they are strings
+            const startTimeDate = boostStatus.startTime instanceof Date
+              ? boostStatus.startTime
+              : (boostStatus.startTime ? new Date(boostStatus.startTime) : new Date());
+            const endTimeDate = boostStatus.endTime instanceof Date
+              ? boostStatus.endTime
+              : (boostStatus.endTime ? new Date(boostStatus.endTime) : undefined);
+
             const mockActiveBoost: ActiveBoost = {
               boostId: boostStatus.packageId,
-              startedAt: boostStatus.startTime ? new Date(boostStatus.startTime) : new Date(),
-              expiresAt: boostStatus.endTime ? new Date(boostStatus.endTime) : undefined,
+              startedAt: startTimeDate,
+              expiresAt: endTimeDate,
               timeRemaining: boostStatus.remainingTime || '00:00:00',
               boostDetails: boostPackage,
             };
@@ -47,6 +55,8 @@ export const usePulseBoost = (profileId?: string) => {
 
             const enhancedStatus: EnhancedBoostStatus = {
               ...boostStatus,
+              startTime: startTimeDate,
+              endTime: endTimeDate,
               pulseData: {
                 boostType: boostPackage.name,
                 visibility: boostPackage.id === 'basic' ? 'homepage' :
