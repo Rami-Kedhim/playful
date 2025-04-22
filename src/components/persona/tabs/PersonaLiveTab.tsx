@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersona } from '@/types/uberPersona';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -94,3 +94,4 @@ const PersonaLiveTab: React.FC<PersonaLiveTabProps> = ({ persona }) => {
 };
 
 export default PersonaLiveTab;
+
