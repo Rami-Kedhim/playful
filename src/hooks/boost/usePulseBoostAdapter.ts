@@ -72,17 +72,17 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const durationStr = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
     const parts = durationStr.split(':');
 
-    // Cast parts explicitly as string to satisfy TypeScript
-    const hoursStr: string = parts[0] || '0';
-    const minutesStr: string = parts[1] || '0';
-    const secondsStr: string = parts[2] || '0';
+    // Parse parts with Number to ensure numbers, fallback 0
+    const hours: number = parts[0] ? Number(parts[0]) : 0;
+    const minutes: number = parts[1] ? Number(parts[1]) : 0;
+    const seconds: number = parts[2] ? Number(parts[2]) : 0;
 
-    // Use parseNumberValue to parse them to numbers
-    const hours: number = parseNumberValue(hoursStr, 0);
-    const minutes: number = parseNumberValue(minutesStr, 0);
-    const seconds: number = parseNumberValue(secondsStr, 0);
+    // Validate parsing and fallback if NaN
+    const validHours = isNaN(hours) ? 0 : hours;
+    const validMinutes = isNaN(minutes) ? 0 : minutes;
+    const validSeconds = isNaN(seconds) ? 0 : seconds;
 
-    const durationMinutes: number = (hours * 60) + minutes + (seconds / 60);
+    const durationMinutes: number = (validHours * 60) + validMinutes + (validSeconds / 60);
 
     // Parse boost power as number safely
     const boostPowerRaw = (pkg as any).boost_power ?? (pkg as any).boostPower;
