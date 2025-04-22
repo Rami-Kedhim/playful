@@ -1,7 +1,3 @@
-// Fix import casing and convert all Escort imports to exact casing from '@/types/Escort'
-// Fix height type to string, ensure conversion is applied always.
-// Fix typings on mapEscortsToUberPersonas to accept correct Escort type and compatible.
-
 import React, {
   createContext,
   useContext,
@@ -12,7 +8,7 @@ import React, {
 import { Escort } from '@/types/Escort';
 import { UberPersona } from '@/types/UberPersona';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
-import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
+import { mapEscortToUberPersona } from '@/utils/profileMapping'; // fixed import here
 import { uberCoreInstance } from '@/services/neural/UberCore';
 
 export interface HilbertSpace {
@@ -113,7 +109,7 @@ const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) =>
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [initialized, setInitialized] = useState<boolean>(false);
-  const [hilbertSpace, setHilbertSpace] = useState<HilbertSpace>(defaultHilbertSpace);
+  const [hilbertSpace, setHilbertSpace] = useState(defaultHilbertSpace);
 
   useEffect(() => {
     async function init() {
@@ -121,12 +117,8 @@ const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) =>
         setLoading(true);
         await uberCoreInstance.initialize();
         if (escorts && escorts.length > 0) {
-          const sanitizedEscorts: CompatibleEscort[] = escorts.map(e => ({
-            ...e,
-            height: e.height !== undefined && e.height !== null ? e.height.toString() : ''
-          })) as CompatibleEscort[];
-
-          const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts as Escort[]);
+          // Map each escort individually
+          const mappedPersonas = escorts.map(e => mapEscortToUberPersona(e));
           setAllPersonas(mappedPersonas);
         }
         setHilbertSpace({
@@ -169,7 +161,7 @@ const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) =>
           ...e,
           height: e.height !== undefined && e.height !== null ? e.height.toString() : '',
         })) as CompatibleEscort[];
-        const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts as Escort[]);
+        const mappedPersonas = sanitizedEscorts.map(e => mapEscortToUberPersona(e));
         setAllPersonas(mappedPersonas);
       }
 

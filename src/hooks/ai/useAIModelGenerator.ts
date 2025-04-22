@@ -1,10 +1,11 @@
+
 import { useState, useCallback } from 'react';
 import { generateAIProfile } from '@/services/generateAIProfile';
 import { AIProfile, ProcessingStatus, ProcessingStatusDetails } from '@/types/ai-profile';
 
 interface GenerateModelOptions {
   name: string;
-  personality: string;
+  personality: { type: string; traits?: string[] }; // personality should be object type
   appearance?: string;
   voice?: string;
 }
@@ -36,7 +37,7 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
     setProcessingStatus({
       status: ProcessingStatus.PENDING,
       progress: 0,
-      message: { type: "status", traits: [] },
+      message: { type: options.personality.type, traits: options.personality.traits || [] }, // fix type to object
       completedCount: 0,
       totalCount: 5
     });
@@ -67,7 +68,8 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
       const enhancedProfile: AIProfile = {
         ...aiProfile,
         displayName: options.name,
-        description: aiProfile.description || `AI companion with ${options.personality} personality.`,
+        description: aiProfile.description || `AI companion with ${options.personality.type} personality.`,
+        personality: options.personality, // make sure personality is object not string
       };
 
       setGeneratedModel(enhancedProfile);
@@ -148,3 +150,4 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
 };
 
 export default useAIModelGenerator;
+
