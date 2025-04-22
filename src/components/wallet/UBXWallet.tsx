@@ -1,14 +1,10 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Coins, ChevronRight, RefreshCw, History } from "lucide-react";
+import { useAuth } from "@/hooks/auth";
 import { useUBX } from "@/hooks/useUBX";
-import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { Link } from "react-router-dom";
+import { RefreshCw } from "lucide-react";
 
 interface UBXWalletProps {
   compact?: boolean;
@@ -16,54 +12,34 @@ interface UBXWalletProps {
   showHistory?: boolean;
 }
 
-export const UBXWallet: React.FC<UBXWalletProps> = ({
-  compact = false,
-  showRefresh = true,
-  showHistory = true
-}) => {
-  const { toast } = useToast();
+const UBXWallet = ({ 
+  compact = true,
+  showRefresh = false,
+  showHistory = false 
+}: UBXWalletProps) => {
   const { user } = useAuth();
-  const { balance, isProcessing, refreshBalance } = useUBX();
-  const [loading, setLoading] = useState(true);
+  const { balance, refreshBalance, isProcessing } = useUBX();
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
-  useEffect(() => {
-    if (user?.id) {
-      loadUBXData();
-    }
-  }, [user?.id]);
-  
-  const loadUBXData = async () => {
-    setLoading(true);
-    try {
-      await refreshBalance();
-    } catch (error) {
-      console.error("Error loading UBX data:", error);
-      toast({
-        title: "Failed to load UBX data",
-        description: "Could not retrieve your current UBX balance",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refreshBalance();
+    setIsRefreshing(false);
   };
   
   if (compact) {
     return (
-      <div className="flex items-center gap-2">
-        <Badge variant="outline" className="px-2 py-1 bg-primary/10">
-          <Coins className="h-3 w-3 mr-1 text-primary" />
-          <span>{loading ? "..." : balance} UBX</span>
-        </Badge>
+      <div className="flex items-center space-x-2">
+        <div className="font-medium">{balance} UBX</div>
         {showRefresh && (
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-6 w-6"
-            onClick={loadUBXData}
-            disabled={loading || isProcessing}
+            className="h-6 w-6" 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
           >
-            <RefreshCw className={`h-3 w-3 ${loading || isProcessing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
         )}
       </div>
@@ -72,47 +48,27 @@ export const UBXWallet: React.FC<UBXWalletProps> = ({
   
   return (
     <Card>
-      <CardHeader className="pb-2 flex flex-row items-center justify-between">
-        <CardTitle className="text-lg flex items-center">
-          <Coins className="h-5 w-5 text-primary mr-2" />
-          UBX Balance
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex justify-between items-center">
+          <div>UBX Balance</div>
+          {showRefresh && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefresh}
+              disabled={isRefreshing || isProcessing}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          )}
         </CardTitle>
-        {showRefresh && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={loadUBXData}
-            disabled={loading || isProcessing}
-          >
-            <RefreshCw className={`mr-2 h-4 w-4 ${loading || isProcessing ? 'animate-spin' : ''}`} />
-          </Button>
-        )}
       </CardHeader>
       <CardContent>
-        {loading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-24" />
-          </div>
-        ) : (
-          <>
-            <div className="text-3xl font-bold">{balance} UBX</div>
-            
-            {showHistory && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full mt-4"
-                asChild
-              >
-                <Link to="/wallet">
-                  <History className="h-4 w-4 mr-2" />
-                  Transaction History
-                  <ChevronRight className="h-4 w-4 ml-auto" />
-                </Link>
-              </Button>
-            )}
-          </>
-        )}
+        <div className="text-2xl font-bold mb-2">{balance} UBX</div>
+        <p className="text-sm text-muted-foreground">
+          Available for boosts, tips, and content purchases
+        </p>
       </CardContent>
     </Card>
   );

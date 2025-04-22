@@ -1,34 +1,21 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { 
+  BoostStatus, 
+  BoostEligibility, 
+  BoostPackage, 
+  HermesStatus, 
+  BoostDialogTabsProps as TabProps 
+} from '@/types/boost';
 import BoostPackages from "../BoostPackages";
 import BoostEligibilityCheck from "./BoostEligibilityCheck";
 import BoostActivePackage from "../BoostActivePackage";
 import HermesBoostInfo from './HermesBoostInfo';
-import { BoostStatus, HermesBoostStatus, BoostDialogTabsProps } from '@/types/boost';
 
-export interface BoostDialogTabsProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  loading: boolean;
-  boostStatus: BoostStatus;
-  eligibility: BoostEligibility;
-  boostPackages: BoostPackage[];
-  selectedPackage: string | null;
-  setSelectedPackage: (id: string) => void;
-  handleBoost: () => Promise<boolean>;
-  handleCancel: () => Promise<boolean>;
-  dailyBoostUsage: number;
-  dailyBoostLimit: number;
-  hermesStatus: HermesStatus;
-  formatBoostDuration?: (duration: string) => string;
-  getBoostPrice?: () => number;
-  handleDialogClose: () => void;
-  onBoostSuccess?: () => void;
-}
-
-const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
+const BoostDialogTabs: React.FC<TabProps> = ({
   activeTab,
   setActiveTab,
   loading,

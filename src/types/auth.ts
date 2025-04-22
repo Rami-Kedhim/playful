@@ -25,6 +25,31 @@ export interface User {
   phone?: string; // Add phone property
 }
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  username?: string;
+  name?: string;
+  avatar_url?: string;
+  bio?: string;
+  website?: string;
+  role?: string;
+  roles?: UserRole[];
+  gender?: DatabaseGender;
+  ubx_balance?: number;
+  is_verified?: boolean;
+  is_escort?: boolean;
+  subscription_tier?: string;
+}
+
+export enum DatabaseGender {
+  Male = 'male',
+  Female = 'female',
+  Other = 'other',
+  Trans = 'trans',
+  NonBinary = 'non-binary'
+}
+
 export interface AuthResult {
   success: boolean;
   user?: User;
@@ -43,7 +68,7 @@ export interface AuthState {
   initialized: boolean;
 }
 
-export type UserRole = string;
+export type UserRole = string | { name: string; permissions?: string[] };
 
 export interface AuthUser extends User {
   // Additional properties needed for auth
@@ -52,10 +77,12 @@ export interface AuthUser extends User {
 
 export interface AuthContextType {
   user: User | null;
+  profile?: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
   initialized: boolean;
+  checkRole?: (role: string) => boolean;
   login: (email: string, password: string, options?: any) => Promise<AuthResult>;
   logout: () => Promise<void>;
   register: (email: string, password: string, username?: string, options?: any) => Promise<AuthResult>;

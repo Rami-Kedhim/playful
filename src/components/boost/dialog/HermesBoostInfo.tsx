@@ -1,55 +1,54 @@
 
-import React from 'react';
-import { Card } from "@/components/ui/card";
+import { HermesStatus } from "@/types/boost";
+import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { HermesBoostStatus } from '@/types/boost';
-import { formatDistanceToNow } from 'date-fns';
+import { Clock, Users, TrendingUp } from "lucide-react";
 
 interface HermesBoostInfoProps {
-  hermesStatus: HermesBoostStatus;
+  hermesStatus: HermesStatus;
 }
 
-const HermesBoostInfo: React.FC<HermesBoostInfoProps> = ({ hermesStatus }) => {
-  const visibilityPercent = hermesStatus.estimatedVisibility || 0;
-  const lastUpdateTime = hermesStatus.lastUpdateTime ? 
-    formatDistanceToNow(new Date(hermesStatus.lastUpdateTime), { addSuffix: true }) :
-    'unknown';
-    
+const HermesBoostInfo = ({ hermesStatus }: HermesBoostInfoProps) => {
   return (
-    <div className="space-y-4">
-      <Card className="p-4 space-y-3">
-        <h3 className="font-medium">Estimated Visibility</h3>
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Current visibility</span>
-            <span className="font-medium">{visibilityPercent}%</span>
-          </div>
-          <Progress value={visibilityPercent} className="h-2" />
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Based on current traffic and active users
-        </p>
-      </Card>
-      
-      <Card className="p-4">
-        <div className="space-y-3">
-          <h3 className="font-medium">Position Analytics</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <div className="text-sm text-muted-foreground">Position</div>
-              <div className="font-medium">#{hermesStatus.position || 'N/A'}</div>
+    <Card>
+      <CardContent className="p-6">
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Global Position</span>
+              <span className="font-medium">#{hermesStatus.position || 'N/A'}</span>
             </div>
-            <div>
-              <div className="text-sm text-muted-foreground">Active Users</div>
-              <div className="font-medium">{hermesStatus.activeUsers || 0}</div>
-            </div>
+            <Progress value={100 - (hermesStatus.position || 0)} />
           </div>
-          <div className="text-xs text-muted-foreground mt-2">
-            Last updated: {lastUpdateTime}
+          
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Active Users</span>
+            </div>
+            <span className="font-medium">{hermesStatus.activeUsers || 0}</span>
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <TrendingUp className="h-4 w-4 mr-2 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Estimated Visibility</span>
+            </div>
+            <span className="font-medium">{hermesStatus.estimatedVisibility || 0}%</span>
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Last Updated</span>
+            </div>
+            <span className="text-sm">
+              {new Date(hermesStatus.lastUpdateTime || Date.now()).toLocaleTimeString()}
+            </span>
           </div>
         </div>
-      </Card>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

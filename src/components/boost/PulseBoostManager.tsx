@@ -9,7 +9,7 @@ import { AlertCircle, ChevronRight, Clock, Zap } from "lucide-react";
 import PulseBoostCard from "./PulseBoostCard";
 import { formatDistanceToNow } from "date-fns";
 import UBXWallet from "../wallet/UBXWallet";
-import { PulseBoost } from "@/types/boost";
+import { PulseBoost, BoostPackage } from "@/types/boost";
 
 interface PulseBoostManagerProps {
   profileId?: string;
@@ -35,7 +35,10 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
     visibility: boost.id === 'basic' ? 'homepage' : 
                boost.id === 'premium' ? 'search' : 'global',
     costUBX: boost.price_ubx || boost.price,
-    badgeColor: boost.color
+    badgeColor: boost.color,
+    color: boost.color || '#3b82f6',
+    duration: boost.duration,
+    price: boost.price
   }));
 
   if (isLoading) {
@@ -65,7 +68,6 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Current boost status */}
       {enhancedBoostStatus.isActive && (
         <Card className="bg-primary/5 border-primary/30">
           <CardHeader>
@@ -91,7 +93,7 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
                   <div className="text-sm text-muted-foreground">Time Remaining</div>
                   <div className="font-medium flex items-center">
                     <Clock className="h-4 w-4 mr-1 text-amber-500" />
-                    {enhancedBoostStatus.remainingTime || formatDistanceToNow(enhancedBoostStatus.endTime || new Date())}
+                    {enhancedBoostStatus.remainingTime || formatDistanceToNow(enhancedBoostStatus.endTime ? new Date(enhancedBoostStatus.endTime) : new Date())}
                   </div>
                 </div>
                 <div>
@@ -106,7 +108,6 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
         </Card>
       )}
       
-      {/* Wallet balance */}
       <UBXWallet compact={false} showRefresh={true} showHistory={false} />
       
       <Tabs defaultValue="available">
@@ -163,7 +164,10 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
                   visibility: 'homepage',
                   costUBX: activeBoost.boostDetails?.price || 0,
                   description: activeBoost.boostDetails?.description,
-                  badgeColor: activeBoost.boostDetails?.color
+                  badgeColor: activeBoost.boostDetails?.color,
+                  color: activeBoost.boostDetails?.color || '#3b82f6',
+                  duration: activeBoost.boostDetails?.duration || '24:00:00',
+                  price: activeBoost.boostDetails?.price || 0
                 };
                 
                 return (

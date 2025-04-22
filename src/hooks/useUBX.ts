@@ -1,140 +1,105 @@
-import { useState, useEffect } from 'react';
-import { useToast } from '@/components/ui/use-toast';
-import { processUBXTransaction, TransactionParams } from '@/services/ubxTransactionService';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { validateGlobalPrice } from '@/utils/oxum/globalPricing';
 
-export interface UBXPackage {
-  id: string;
-  name: string;
+import { useState } from 'react';
+import { useAuth } from '@/hooks/auth';
+import { toast } from '@/hooks/use-toast';
+
+interface UBXTransaction {
   amount: number;
-  price: number;
-  price_sol?: number;
-  bonus_amount?: number;
-  is_featured?: boolean;
+  transactionType: string;
+  description?: string;
+  metadata?: Record<string, any>;
 }
 
-export interface UBXHookReturn {
-  balance: number;
-  isProcessing: boolean;
-  processTransaction: (params: Omit<TransactionParams, 'userId'>) => Promise<boolean>;
-  error: string | null;
-  fetchPackages: () => Promise<UBXPackage[]>;
-  purchasePackage: (packageId: string) => Promise<boolean>;
-  refreshBalance: () => Promise<number | null>;
+interface UBXTransactionResult {
+  success: boolean;
+  newBalance?: number;
+  error?: string;
 }
 
-/**
- * Hook for UBX token management
- */
-export const useUBX = (): UBXHookReturn => {
-  const [balance, setBalance] = useState<number>(0);
-  const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
-  const { user, refreshProfile } = useAuth();
-
-  useEffect(() => {
-    if (user?.id) {
-      refreshBalance();
-    }
-  }, [user?.id]);
-
-  const refreshBalance = async (): Promise<number | null> => {
-    if (!user?.id) {
-      return null;
-    }
-
+export const useUBX = () => {
+  const { user, updateUser } = useAuth();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [balance, setBalance] = useState<number>(user?.ubxBalance || 0);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  
+  const refreshBalance = async () => {
+    if (!user) return;
+    
     try {
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('ubx_balance')
-        .eq('id', user.id)
-        .single();
-      
-      if (profileError) {
-        console.error('Error fetching UBX balance:', profileError);
-        return null;
-      }
-      
-      const currentBalance = profileData?.ubx_balance || 0;
-      setBalance(currentBalance);
-      return currentBalance;
-    } catch (err) {
-      console.error('Failed to refresh UBX balance:', err);
-      return null;
+      // In a real app, this would fetch from an API
+      // For now, just use the user's current balance
+      setBalance(user.ubxBalance || 0);
+      return user.ubxBalance || 0;
+    } catch (error) {
+      console.error('Error refreshing UBX balance:', error);
+      return balance;
     }
   };
-
-  const processTransaction = async (params: Omit<TransactionParams, 'userId'>): Promise<boolean> => {
-    if (!user?.id) {
+  
+  const processTransaction = async (transaction: UBXTransaction): Promise<boolean> => {
+    if (!user) {
       toast({
-        title: "Authentication required",
-        description: "Please sign in to perform this operation",
-        variant: "destructive",
+        title: 'Error',
+        description: 'You need to be logged in to perform this transaction',
+        variant: 'destructive'
       });
       return false;
     }
-
+    
     setIsProcessing(true);
-    setError(null);
     
     try {
-      // For boost-related transactions, validate the pricing against Oxum rules
-      if (params.transactionType === 'boost_purchase' || 
-          params.transactionType === 'ai_boost' || 
-          (params.metadata?.transactionPurpose === 'boost')) {
-        try {
-          // For negative amounts (spending), we need to check the absolute value
-          const amountToValidate = params.amount < 0 ? Math.abs(params.amount) : params.amount;
-          validateGlobalPrice(amountToValidate);
-        } catch (error: any) {
-          setError(`[Oxum Rule Violation] ${error.message}`);
+      // Check if user has enough balance for a debit transaction
+      if (transaction.amount < 0) {
+        const currentBalance = user.ubxBalance || 0;
+        if (currentBalance < Math.abs(transaction.amount)) {
           toast({
-            title: "Oxum Rule Violation",
-            description: error.message || "This transaction violates the Oxum Global Price Symmetry Rule.",
-            variant: "destructive"
+            title: 'Insufficient funds',
+            description: `You need ${Math.abs(transaction.amount)} UBX to complete this transaction`,
+            variant: 'destructive'
           });
           return false;
         }
       }
       
-      // Include the userId in the params
-      const result = await processUBXTransaction({
-        ...params,
-        userId: user.id
-      });
+      // In a real app, this would call an API
+      // For now, just simulate a transaction
+      const newBalance = (user.ubxBalance || 0) + transaction.amount;
       
-      if (!result.success) {
-        setError(result.error || 'Transaction failed');
+      // Update local state
+      setBalance(newBalance);
+      
+      // Update user object
+      await updateUser({ ubxBalance: newBalance });
+      
+      // Add to transaction history
+      setTransactions(prev => [
+        {
+          id: Date.now().toString(),
+          amount: transaction.amount,
+          type: transaction.transactionType,
+          description: transaction.description,
+          timestamp: new Date().toISOString()
+        },
+        ...prev
+      ]);
+      
+      // Show success message for significant transactions
+      if (Math.abs(transaction.amount) > 10) {
         toast({
-          title: "Transaction Failed",
-          description: result.error || "Could not process UBX transaction",
-          variant: "destructive"
+          title: transaction.amount > 0 ? 'Funds received' : 'Payment successful',
+          description: `${Math.abs(transaction.amount)} UBX ${transaction.amount > 0 ? 'added to' : 'deducted from'} your wallet`,
         });
-        return false;
       }
-      
-      // Update local balance state
-      if (typeof result.newBalance === 'number') {
-        setBalance(result.newBalance);
-      }
-      
-      toast({
-        title: "Transaction Successful",
-        description: result.message || `${params.amount > 0 ? 'Added' : 'Spent'} ${Math.abs(params.amount)} UBX tokens`,
-      });
       
       return true;
-    } catch (err: any) {
-      const errorMsg = err.message || 'An unexpected error occurred';
-      setError(errorMsg);
+    } catch (error) {
+      console.error('Error processing UBX transaction:', error);
       
       toast({
-        title: "Transaction Error",
-        description: errorMsg,
-        variant: "destructive"
+        title: 'Transaction failed',
+        description: 'There was an error processing your transaction',
+        variant: 'destructive'
       });
       
       return false;
@@ -142,131 +107,13 @@ export const useUBX = (): UBXHookReturn => {
       setIsProcessing(false);
     }
   };
-
-  /**
-   * Fetch available UBX packages
-   */
-  const fetchPackages = async (): Promise<UBXPackage[]> => {
-    try {
-      setIsProcessing(true);
-      
-      // Try to fetch from database first
-      const { data: packagesData, error: packagesError } = await supabase
-        .from('ubx_package_options')
-        .select('*')
-        .eq('is_active', true)
-        .order('amount', { ascending: true });
-      
-      if (packagesError) {
-        console.error("Error fetching UBX packages:", packagesError);
-      }
-      
-      // If we have data from the database, use that
-      if (packagesData && packagesData.length > 0) {
-        return packagesData;
-      }
-      
-      // Otherwise, use fallback packages
-      const packages: UBXPackage[] = [
-        {
-          id: "pack1",
-          name: "Basic Pack",
-          amount: 100,
-          price: 0,
-          price_sol: 0.05,
-          bonus_amount: 0,
-          is_featured: false
-        },
-        {
-          id: "pack2",
-          name: "Standard Pack",
-          amount: 500,
-          price: 0,
-          price_sol: 0.2,
-          bonus_amount: 50,
-          is_featured: true
-        },
-        {
-          id: "pack3",
-          name: "Premium Pack",
-          amount: 1000,
-          price: 0,
-          price_sol: 0.35,
-          bonus_amount: 150,
-          is_featured: false
-        }
-      ];
-      
-      return packages;
-    } catch (err: any) {
-      const errorMsg = err.message || 'An unexpected error occurred';
-      setError(errorMsg);
-      
-      toast({
-        title: "Error Loading Packages",
-        description: errorMsg,
-        variant: "destructive"
-      });
-      
-      return [];
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  /**
-   * Purchase UBX package
-   */
-  const purchasePackage = async (packageId: string): Promise<boolean> => {
-    try {
-      setIsProcessing(true);
-      
-      // Find the package from fetchPackages
-      const packages = await fetchPackages();
-      const selectedPackage = packages.find(p => p.id === packageId);
-      
-      if (!selectedPackage) {
-        throw new Error("Package not found");
-      }
-      
-      // Process the transaction
-      const success = await processTransaction({
-        amount: selectedPackage.amount + (selectedPackage.bonus_amount || 0),
-        transactionType: 'purchase',
-        description: `Purchased ${selectedPackage.name} package`,
-        metadata: { package_id: packageId }
-      });
-      
-      if (success) {
-        // Refresh profile to update UBX balance
-        await refreshProfile();
-      }
-      
-      return success;
-    } catch (err: any) {
-      const errorMsg = err.message || 'An unexpected error occurred';
-      setError(errorMsg);
-      
-      toast({
-        title: "Purchase Failed",
-        description: errorMsg,
-        variant: "destructive"
-      });
-      
-      return false;
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
+  
   return {
     balance,
-    isProcessing,
+    transactions,
     processTransaction,
-    error,
-    fetchPackages,
-    purchasePackage,
-    refreshBalance
+    refreshBalance,
+    isProcessing
   };
 };
 

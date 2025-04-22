@@ -1,31 +1,41 @@
 
-import React from 'react';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { BoostEligibility } from "@/types/boost";
 
 interface BoostEligibilityCheckProps {
-  eligibility: {
-    isEligible: boolean;
-    reason?: string;
-  };
+  eligibility: BoostEligibility;
 }
 
-const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({ eligibility }) => {
+const BoostEligibilityCheck = ({ eligibility }: BoostEligibilityCheckProps) => {
+  if (!eligibility) return null;
+  
   if (eligibility.isEligible) {
     return (
-      <Alert className="bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-900 dark:text-green-400 mb-4">
-        <CheckCircle className="h-4 w-4" />
-        <AlertTitle>Eligible for Boost</AlertTitle>
-        <AlertDescription>Your profile can be boosted.</AlertDescription>
+      <Alert variant="default" className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900/50">
+        <CheckCircle2 className="h-4 w-4 text-green-500" />
+        <AlertTitle>Eligible for boost</AlertTitle>
+        <AlertDescription>
+          Your profile meets all requirements for boosting
+        </AlertDescription>
       </Alert>
     );
   }
-
+  
   return (
-    <Alert variant="destructive" className="mb-4">
+    <Alert variant="destructive">
       <AlertCircle className="h-4 w-4" />
-      <AlertTitle>Not Eligible</AlertTitle>
-      <AlertDescription>{eligibility.reason || "You're not eligible to boost at this time."}</AlertDescription>
+      <AlertTitle>Not eligible for boost</AlertTitle>
+      <AlertDescription>
+        {eligibility.reason || "Your profile does not meet the requirements for boosting"}
+        {eligibility.reasons && eligibility.reasons.length > 0 && (
+          <ul className="list-disc pl-5 mt-2 space-y-1">
+            {eligibility.reasons.map((reason, index) => (
+              <li key={index} className="text-sm">{reason}</li>
+            ))}
+          </ul>
+        )}
+      </AlertDescription>
     </Alert>
   );
 };

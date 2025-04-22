@@ -12,6 +12,7 @@ export interface BoostStatus {
   boostPackage?: BoostPackage;
   profileId?: string;
   boost_level?: number;
+  activeBoostId?: string;
 }
 
 export interface BoostEligibility {
@@ -77,6 +78,46 @@ export interface PulseBoost extends BoostPackage {
   badgeColor?: string;
 }
 
+export interface HermesData {
+  position?: number;
+  visibilityScore?: number;
+  activeUsers?: number;
+  estimatedVisibility?: number;
+}
+
+// Additional interfaces needed based on errors
+export interface ActiveBoost {
+  boostId: string;
+  startedAt: Date;
+  expiresAt: Date;
+  timeRemaining: string;
+  boostDetails?: BoostPackage;
+}
+
+export interface EnhancedBoostStatus extends BoostStatus {
+  pulseData?: {
+    boostType: string;
+    visibility: string;
+    coverage: number;
+  };
+}
+
+export interface UserEconomy {
+  ubxBalance: number;
+  walletAddress?: string;
+}
+
+export interface UsePulseBoostReturn {
+  isLoading: boolean;
+  error: string | null;
+  userEconomy: UserEconomy | null;
+  purchaseBoost: (pkg: BoostPackage) => Promise<boolean>;
+  cancelBoost: (boostId?: string) => Promise<boolean>;
+  activeBoosts: ActiveBoost[];
+  enhancedBoostStatus: EnhancedBoostStatus;
+  pulseBoostPackages: BoostPackage[];
+}
+
 export interface BoostDialogTabsProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
@@ -95,11 +136,4 @@ export interface BoostDialogTabsProps {
   hermesStatus: HermesStatus;
   formatBoostDuration: (duration: string) => string;
   onBoostSuccess?: () => void;
-}
-
-export interface HermesData {
-  // Add required properties
-  position?: number;
-  visibilityScore?: number;
-  activeUsers?: number;
 }

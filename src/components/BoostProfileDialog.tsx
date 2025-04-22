@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useBoost } from '@/contexts/BoostContext';
+import { useBoost } from '@/hooks/useBoost';
 import { BoostPackage } from '@/types/boost';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -79,9 +79,9 @@ const BoostProfileDialog: React.FC<BoostProfileDialogProps> = ({
                   </div>
                   <div className="text-right">
                     <div className="font-bold">${pkg.price}</div>
-                    {pkg.price_lucoin && (
+                    {pkg.price_ubx && (
                       <div className="text-xs text-muted-foreground">
-                        or {pkg.price_lucoin} LUC
+                        or {pkg.price_ubx} UBX
                       </div>
                     )}
                   </div>

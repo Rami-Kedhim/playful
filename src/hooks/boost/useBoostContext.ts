@@ -1,6 +1,9 @@
 
 import { useContext } from 'react';
-import { BoostContext, BoostContextType } from '@/contexts/BoostContext';
+import { 
+  BoostContext, 
+  BoostContextType 
+} from '@/contexts/BoostContext';
 
 /**
  * Hook to access the boost context
