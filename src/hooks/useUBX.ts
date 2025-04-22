@@ -37,14 +37,14 @@ export const useUBX = (): UseUBXReturn => {
     setLoading(true);
     setError(null);
     try {
-      // Simulate API call for UBX balance
       await new Promise((resolve) => setTimeout(resolve, 800));
-      const simulatedBalance = 500; // Simulated UBX balance
+      const simulatedBalance = 500; // Simulated balance
       setBalance(simulatedBalance);
     } catch (err: any) {
       setError("Failed to fetch UBX balance.");
       console.error("getBalance error:", err);
       toast({
+        title: "Error",
         description: "Failed to fetch UBX balance.",
         variant: "destructive",
       });
@@ -56,11 +56,10 @@ export const useUBX = (): UseUBXReturn => {
   const fetchPackages = useCallback(async (): Promise<any[]> => {
     setLoading(true);
     try {
-      // Simulate fetching UBX packages
       await new Promise((resolve) => setTimeout(resolve, 800));
       const packages = [
         {
-          id: 'pkg_1',
+          id: 'pkg_local_1',
           name: 'Basic UBX Package',
           amount: 100,
           bonus_amount: 10,
@@ -68,7 +67,7 @@ export const useUBX = (): UseUBXReturn => {
           is_featured: true
         },
         {
-          id: 'pkg_2',
+          id: 'pkg_local_2',
           name: 'Premium UBX Package',
           amount: 500,
           bonus_amount: 75,
@@ -79,6 +78,7 @@ export const useUBX = (): UseUBXReturn => {
       return packages;
     } catch (error) {
       toast({
+        title: "Error",
         description: "Failed to load UBX packages.",
         variant: "destructive",
       });
@@ -91,7 +91,6 @@ export const useUBX = (): UseUBXReturn => {
   const purchasePackage = useCallback(async (packageId: string): Promise<boolean> => {
     setIsProcessing(true);
     try {
-      // Simulate purchasing package
       await new Promise((resolve) => setTimeout(resolve, 1000));
       toast({
         description: "UBX package purchased successfully.",
@@ -100,6 +99,7 @@ export const useUBX = (): UseUBXReturn => {
       return true;
     } catch (error) {
       toast({
+        title: "Error",
         description: "Failed to purchase UBX package.",
         variant: "destructive",
       });
@@ -112,7 +112,6 @@ export const useUBX = (): UseUBXReturn => {
   const getTransactionHistory = useCallback(async (): Promise<TransactionHistory[]> => {
     setLoading(true);
     try {
-      // Simulate fetching transaction history
       await new Promise((resolve) => setTimeout(resolve, 1000));
       const mockTransactionHistory: TransactionHistory[] = [
         {
@@ -135,6 +134,7 @@ export const useUBX = (): UseUBXReturn => {
     } catch (error: any) {
       console.error("Error fetching UBX transaction history:", error);
       toast({
+        title: "Error",
         description: "Failed to load UBX transaction history.",
         variant: "destructive",
       });
@@ -152,7 +152,6 @@ export const useUBX = (): UseUBXReturn => {
     async (params: { amount: number; type: string; description?: string }) => {
       setIsProcessing(true);
       try {
-        // Simulate processing transaction
         await new Promise((resolve) => setTimeout(resolve, 1000));
         setBalance((prev) => prev + params.amount);
         toast({
@@ -162,6 +161,7 @@ export const useUBX = (): UseUBXReturn => {
       } catch (error) {
         console.error("Error processing UBX transaction:", error);
         toast({
+          title: "Error",
           description: "Failed to process UBX transaction.",
           variant: "destructive",
         });
@@ -190,7 +190,7 @@ export const useUBX = (): UseUBXReturn => {
     refreshHistory,
     processTransaction,
     addFunds: async (amount: number) => {
-      // Optional stub for compatibility if needed
+      // Stub for compatibility if needed
       return true;
     },
     refreshBalance: async () => {
@@ -200,4 +200,3 @@ export const useUBX = (): UseUBXReturn => {
 };
 
 export default useUBX;
-
