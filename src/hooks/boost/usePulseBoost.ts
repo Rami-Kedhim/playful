@@ -44,7 +44,7 @@ export const usePulseBoost = (profileId?: string) => {
       expiresAt: item.expires_at ? new Date(item.expires_at) : undefined,
       userId: item.user_id,
       visibility: item.visibility_increase ? `${item.visibility_increase}% increased visibility` : undefined,
-      timeRemaining: '', // Could be computed if needed
+      timeRemaining: '', // Placeholder, ideally calculate based on expiresAt
       boostDetails: pulseBoostPackages.find((pkg) => pkg.id === item.boost_id),
     }));
   };
