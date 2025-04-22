@@ -1,103 +1,69 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AIProfile } from '@/types/ai-profile';
+import { Badge } from '@/components/ui/badge';
+import { MessageSquare, Heart, Info } from 'lucide-react';
+import { AIProfile } from '@/types/ai';
 
-interface AIProfileCardProps {
+export interface AIProfileCardProps {
   profile: AIProfile;
-  onAction?: (profile: AIProfile) => void;
-  actionLabel?: string;
-  showBadges?: boolean;
+  onChatClick?: () => void; // Added this prop
 }
 
-const AIProfileCard: React.FC<AIProfileCardProps> = ({
-  profile,
-  onAction,
-  actionLabel = 'Chat Now',
-  showBadges = true
-}) => {
-  const {
-    id,
-    name,
-    displayName,
-    imageUrl,
-    thumbnailUrl,
-    description,
-    type,
-    tags = []
-  } = profile;
-
-  // Display profile type with proper formatting
-  const profileType = type || 'companion';
-  const formattedType = profileType.charAt(0).toUpperCase() + profileType.slice(1);
-
-  // Handle action button click
-  const handleAction = () => {
-    if (onAction) {
-      onAction(profile);
-    }
-  };
-
+const AIProfileCard = ({ profile, onChatClick }: AIProfileCardProps) => {
   return (
-    <Card className="overflow-hidden h-full hover:shadow-md transition-all border border-white/5">
-      <div className="relative">
-        <Link to={`/ai-profile/${id}`}>
-          <img
-            src={thumbnailUrl || imageUrl}
-            alt={name || displayName}
-            className="w-full aspect-[4/5] object-cover"
-            loading="lazy"
-          />
-        </Link>
+    <Card className="overflow-hidden transition-all hover:shadow-md">
+      <div className="aspect-[3/4] relative bg-muted">
+        <img 
+          src={profile.avatarUrl || '/placeholder-avatar.jpg'} 
+          alt={profile.name}
+          className="object-cover w-full h-full"
+        />
         
-        {showBadges && (
-          <div className="absolute top-2 right-2">
-            <Badge variant="default" className="bg-primary/80 backdrop-blur-sm">
-              {formattedType}
-            </Badge>
-          </div>
+        {profile.isVerified && (
+          <Badge className="absolute top-2 right-2 bg-primary">Verified</Badge>
         )}
+        
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+          <h3 className="text-white font-medium">{profile.name}</h3>
+          <p className="text-white/80 text-xs">{profile.age} • {profile.gender}</p>
+        </div>
       </div>
       
       <CardContent className="p-4">
-        <Link to={`/ai-profile/${id}`} className="hover:text-primary transition-colors">
-          <h3 className="font-semibold text-lg mb-1">{displayName || name}</h3>
-        </Link>
+        <p className="text-sm line-clamp-2">{profile.bio}</p>
         
-        {description && (
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-            {description}
-          </p>
-        )}
-        
-        {tags && tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-4">
-            {tags.slice(0, 3).map((tag) => (
-              <Badge key={tag} variant="outline" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-            {tags.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{tags.length - 3}
-              </Badge>
-            )}
-          </div>
-        )}
-        
-        {onAction && (
-          <Button 
-            onClick={handleAction} 
-            className="w-full"
-            variant="default"
-          >
-            {actionLabel}
-          </Button>
-        )}
+        <div className="flex flex-wrap gap-1 mt-2">
+          {profile.tags?.slice(0, 3).map((tag, i) => (
+            <Badge key={i} variant="secondary" className="text-xs">
+              {tag}
+            </Badge>
+          ))}
+          {profile.tags && profile.tags.length > 3 && (
+            <Badge variant="outline" className="text-xs">
+              +{profile.tags.length - 3}
+            </Badge>
+          )}
+        </div>
       </CardContent>
+      
+      <CardFooter className="flex justify-between p-4 pt-0">
+        <Button variant="ghost" size="sm">
+          <Heart className="h-4 w-4 mr-1" />
+          <span className="sr-only">Like</span>
+        </Button>
+        
+        <Button 
+          variant="default" 
+          size="sm" 
+          className="ml-auto"
+          onClick={onChatClick}
+        >
+          <MessageSquare className="h-4 w-4 mr-1" />
+          Chat
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

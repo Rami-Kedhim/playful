@@ -1,39 +1,84 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Zap } from 'lucide-react';
-import BoostDialogContainer from "./BoostDialogContainer";
-import { BoostDialogContainerProps } from './types';
+import React, { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { useBoostPackages } from "@/hooks/boost/useBoostPackages";
+import BoostDialogTabs from "./BoostDialogTabs";
+import { Loader2 } from "lucide-react";
 
-interface BoostProfileDialogProps {
-  profileId: string;
+export interface BoostProfileDialogProps {
+  profileId?: string;
   onSuccess?: () => void;
-  buttonText?: string;
-  buttonVariant?: string; 
-  buttonSize?: string;
+  onClose?: () => void;
+  open: boolean;
+  setOpen: (open: boolean) => void;
 }
 
 const BoostProfileDialog = ({ 
-  profileId, 
-  onSuccess = () => {},
-  buttonText = "Boost Profile",
-  buttonVariant = "outline",
-  buttonSize = "sm"
+  profileId,
+  onSuccess,
+  onClose,
+  open, 
+  setOpen 
 }: BoostProfileDialogProps) => {
-  // Create a wrapper function that accepts the boolean result and calls onSuccess
-  const handleSuccess = async () => {
-    onSuccess();
-    return true; // Return true to satisfy the Promise<boolean> requirement
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+  const { boostStatus } = useBoostPackages(profileId);
+
+  const handleSuccess = () => {
+    toast({
+      title: "Boost applied successfully!",
+      description: "Your profile visibility has been increased.",
+    });
+    
+    if (onSuccess) onSuccess();
+    handleClose();
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    if (onClose) onClose();
   };
 
   return (
-    <BoostDialogContainer
-      profileId={profileId}
-      onSuccess={handleSuccess}
-      buttonText={buttonText}
-      buttonVariant={buttonVariant}
-      buttonSize={buttonSize}
-    />
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Boost Your Profile</DialogTitle>
+          <DialogDescription>
+            Increase your profile's visibility and get more attention using Pulse Boost.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="relative">
+          <BoostDialogTabs onBoostSuccess={handleSuccess} profileId={profileId} />
+          
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-md">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button 
+            variant="outline" 
+            onClick={handleClose}
+            disabled={loading}
+          >
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -1,93 +1,88 @@
 
-import { BoostPackage as BoostManagerPackage } from '@/hooks/boost/useBoostManager';
+// Defining types for boost-related components
 
-// Enhanced BoostStatus type with all required fields
-export interface BoostStatus {
-  isActive: boolean;
-  startTime: string;
-  endTime: string;
-  remainingTime: string;
-  progress?: number;
-  packageId?: string;
-  packageName?: string;
-  profileId?: string;
-  timeRemaining?: string;
-  activeBoostId?: string;
-  expiresAt?: string;
-  boostPackage?: BoostPackage;
-  pulseData?: {
-    type?: string;
-    intensity?: number;
-  };
-}
-
-export interface BoostEligibility {
-  isEligible: boolean;
-  reason: string;
-}
-
-export interface BoostPackage extends BoostManagerPackage {
+export interface BoostPackage {
   id: string;
   name: string;
   description: string;
-  duration: string;
   price: number;
-  price_ubx: number;
-  boost_power: number;
-  visibility_increase: number;
-  image_url?: string;
-  is_featured?: boolean;
-  badge_color?: string;
-  icon?: string;
-  features?: string[];
+  duration: string;
+  features: string[];
+  boostLevel: number;
+  color?: string;
 }
 
-export interface HermesBoostStatus {
+export interface BoostStatus {
+  isActive: boolean;
+  timeRemaining?: string;
+  expiresAt?: Date;
+  level?: number;
+  purchasedAt?: Date;
+}
+
+export interface EnhancedBoostStatus extends BoostStatus {
+  pulseData?: {
+    boostType: string;
+    visibility: string;
+    coverage: number;
+    trend?: number;
+  };
+  endTime?: Date;
+  remainingTime?: string;
+}
+
+export interface ActiveBoost {
+  boostId: string;
+  startedAt: Date;
+  expiresAt: Date;
+  timeRemaining: string;
+  boostDetails?: BoostPackage;
+}
+
+export interface UserBoostState {
+  activeBoosts: ActiveBoost[];
+  boostHistory: any[];
+  enhancedBoostStatus: EnhancedBoostStatus;
+}
+
+export interface UserEconomy {
+  ubxBalance: number;
+  walletAddress?: string;
+  transactions?: any[];
+}
+
+export interface HermesData {
   position: number;
   activeUsers: number;
   estimatedVisibility: number;
   lastUpdateTime: string;
-  isActive?: boolean;
-  active?: boolean;
-  boostScore?: number;
-  effectivenessScore?: number;
-  timeRemaining?: number;
 }
 
-export interface BoostAnalytics {
-  impressions: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-  interactions: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-  rank: {
-    current: number;
-    previous: number;
-    change: number;
-  };
-  trending: boolean;
-  additionalViews: number;
-  engagementIncrease: number;
-  rankingPosition: number;
-  viewsIncrease?: number;
-  engagementRate?: number;
-  clicks?: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost: number;
-    increase: number;
-  };
+export interface BoostActivePackageProps {
+  boostStatus: BoostStatus;
+  hermesData?: HermesData;
+}
+
+export interface BoostProfileDialogProps {
+  onSuccess: () => void;
+  onClose?: () => void;
+  open: boolean;
+  setOpen: () => void;
+}
+
+// Define the PulseBoostProps interface
+export interface PulseBoostProps {
+  profileId?: string;
+}
+
+// Define the return type for usePulseBoost
+export interface UsePulseBoostReturn {
+  isLoading: boolean;
+  error: string | null;
+  userEconomy: UserEconomy | null;
+  purchaseBoost: (boostPackage: BoostPackage) => Promise<boolean>;
+  cancelBoost: (boostId?: string) => Promise<boolean>;
+  activeBoosts: ActiveBoost[];
+  enhancedBoostStatus: EnhancedBoostStatus;
+  pulseBoostPackages: BoostPackage[];
 }

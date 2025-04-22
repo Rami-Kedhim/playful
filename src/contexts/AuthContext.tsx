@@ -11,6 +11,14 @@ interface User {
     avatar_url?: string;
     [key: string]: any;
   };
+  // Added properties that components are trying to access
+  username?: string;
+  name?: string;
+  profileImageUrl?: string;
+  avatarUrl?: string;
+  avatar_url?: string;
+  roles?: string[];
+  role?: string;
 }
 
 interface AuthContextType {
@@ -20,6 +28,11 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
+  // Added missing properties
+  isAuthenticated: boolean;
+  logout: () => Promise<void>;
+  checkRole: (role: string) => boolean;
+  updateUserProfile: (data: any) => Promise<boolean>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -42,7 +55,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         console.error('Error getting session:', error.message);
       }
       
-      setUser(session?.user || null);
+      if (session?.user) {
+        // Enhance user with additional properties
+        const enhancedUser = {
+          ...session.user,
+          username: session.user.user_metadata?.username || session.user.email?.split('@')[0],
+          name: session.user.user_metadata?.name || session.user.user_metadata?.username,
+          avatarUrl: session.user.user_metadata?.avatar_url,
+          profileImageUrl: session.user.user_metadata?.avatar_url,
+          roles: session.user.user_metadata?.roles || [],
+          role: session.user.user_metadata?.role || 'user',
+        };
+        setUser(enhancedUser);
+      } else {
+        setUser(null);
+      }
+      
       setIsLoading(false);
     };
 
@@ -51,7 +79,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        setUser(session?.user || null);
+        if (session?.user) {
+          // Enhance user with additional properties
+          const enhancedUser = {
+            ...session.user,
+            username: session.user.user_metadata?.username || session.user.email?.split('@')[0],
+            name: session.user.user_metadata?.name || session.user.user_metadata?.username,
+            avatarUrl: session.user.user_metadata?.avatar_url,
+            profileImageUrl: session.user.user_metadata?.avatar_url,
+            roles: session.user.user_metadata?.roles || [],
+            role: session.user.user_metadata?.role || 'user',
+          };
+          setUser(enhancedUser);
+        } else {
+          setUser(null);
+        }
         setIsLoading(false);
       }
     );
@@ -71,7 +113,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return { success: false, error: error.message };
       }
 
-      setUser(data.user);
+      // Enhance user with additional properties
+      const enhancedUser = {
+        ...data.user,
+        username: data.user?.user_metadata?.username || data.user?.email?.split('@')[0],
+        name: data.user?.user_metadata?.name || data.user?.user_metadata?.username,
+        avatarUrl: data.user?.user_metadata?.avatar_url,
+        profileImageUrl: data.user?.user_metadata?.avatar_url,
+        roles: data.user?.user_metadata?.roles || [],
+        role: data.user?.user_metadata?.role || 'user',
+      };
+      
+      setUser(enhancedUser);
       return { success: true };
     } catch (err: any) {
       setError(err.message);
@@ -105,9 +158,81 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  // Added function to match the required interface
+  const logout = async () => {
+    return signOut();
+  };
+
+  // Add checkRole function
+  const checkRole = (requiredRole: string) => {
+    if (!user) return false;
+    
+    const userRoles = user.roles || [user.role || 'user'];
+    return userRoles.includes(requiredRole);
+  };
+
+  // Add updateUserProfile function
+  const updateUserProfile = async (data: any): Promise<boolean> => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          ...user?.user_metadata,
+          ...data
+        }
+      });
+
+      if (error) {
+        console.error('Error updating user profile:', error.message);
+        return false;
+      }
+
+      // Update the local user state with the new data
+      if (user) {
+        const updatedUser = {
+          ...user,
+          user_metadata: {
+            ...user.user_metadata,
+            ...data
+          },
+          username: data.username || user.username,
+          name: data.name || user.name,
+          avatarUrl: data.avatarUrl || user.avatarUrl,
+          profileImageUrl: data.avatarUrl || user.profileImageUrl,
+        };
+        setUser(updatedUser);
+      }
+
+      return true;
+    } catch (err: any) {
+      console.error('Error updating user profile:', err.message);
+      return false;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, error, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      isLoading, 
+      error, 
+      signIn, 
+      signUp, 
+      signOut,
+      // Added properties
+      isAuthenticated: !!user,
+      logout,
+      checkRole,
+      updateUserProfile
+    }}>
       {children}
     </AuthContext.Provider>
   );
+};
+
+// Export a hook for easier use of the auth context
+export const useAuth = () => {
+  const context = React.useContext(AuthContext);
+  if (context === null) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
