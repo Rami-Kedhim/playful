@@ -1,3 +1,4 @@
+
 import { BoostPackage } from '@/types/boost';
 import { PulseBoost } from '@/types/pulse-boost';
 
@@ -130,3 +131,4 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 };
 
 export default usePulseBoostAdapter;
+
