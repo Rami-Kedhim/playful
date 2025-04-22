@@ -1,4 +1,3 @@
-
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
 interface UsePulseBoostAdapterResult {
@@ -95,7 +94,13 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 
     // Ensure boostPower and visibilityIncrease are numbers (fix string-to-number issue)
     const boostPowerNum = parseNumberValue(boostPowerRaw, 50);
-    const visibilityIncreaseNum = parseNumberValue(visibilityIncreaseRaw, 50);
+    let visibilityIncreaseNum = 50;
+    if (typeof visibilityIncreaseRaw === 'string') {
+      const parsedVis = Number(visibilityIncreaseRaw);
+      visibilityIncreaseNum = isNaN(parsedVis) ? 50 : parsedVis;
+    } else if (typeof visibilityIncreaseRaw === 'number') {
+      visibilityIncreaseNum = visibilityIncreaseRaw;
+    }
 
     let visibility: PulseBoost['visibility'] = 'homepage';
     if (boostPowerNum >= 200) visibility = 'global';
