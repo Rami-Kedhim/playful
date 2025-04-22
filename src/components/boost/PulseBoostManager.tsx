@@ -9,6 +9,15 @@ interface PulseBoostManagerProps {
   profileId?: string;
 }
 
+// Helper to map numeric visibility_increase to allowed string literals
+const mapVisibility = (visibilityIncrease?: number): "homepage" | "search" | "smart_match" | "global" => {
+  if (visibilityIncrease === undefined) return 'homepage';
+  if (visibilityIncrease >= 150) return 'global';
+  if (visibilityIncrease >= 100) return 'search';
+  if (visibilityIncrease >= 50) return 'smart_match';
+  return 'homepage';
+};
+
 const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
   const {
     isLoading,
@@ -34,18 +43,36 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
     return <div className="text-red-600">Error loading Pulse Boosts: {error}</div>;
   }
 
+  // Wrap handlers to match expected signatures passing boostId param
+  const handleActivate = async (boostId: string): Promise<boolean> => {
+    const pkg = pulseBoostPackages.find(p => p.id === boostId);
+    if (!pkg) {
+      console.error('PulseBoostManager: Boost package not found for id', boostId);
+      return false;
+    }
+    const success = await purchaseBoost(pkg);
+    if (!success) {
+      console.error('Failed to activate boost:', pkg.name);
+    }
+    return success;
+  };
+
+  const handleCancel = async (boostId: string): Promise<boolean> => {
+    const success = await cancelBoost();
+    if (!success) {
+      console.error('Failed to cancel boost');
+    }
+    return success;
+  };
+
   return (
     <div className="space-y-4">
       {pulseBoostPackages.length === 0 && (
         <div className="text-center text-muted-foreground">No pulse boosts available.</div>
       )}
       {pulseBoostPackages.map((pkg) => {
-        // Safely access visibility with fallback
-        const visibility = pkg?.visibility_increase !== undefined
-          ? `${pkg.visibility_increase}% increased visibility`
-          : 'Standard visibility';
+        const visibilityKey = mapVisibility(pkg.visibility_increase);
 
-        // Ensure costUBX fallback to 0 safely
         const costUBX = pkg.price_ubx ?? 0;
 
         const timeRemaining = activeBoosts.find(b => b.boostId === pkg.id)?.timeRemaining;
@@ -58,7 +85,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
               name: pkg.name,
               description: pkg.description,
               durationMinutes: 0, // Could parse duration if needed
-              visibility: visibility,
+              visibility: visibilityKey,
               costUBX: costUBX,
               color: pkg.color || '#3b82f6',
               badgeColor: pkg.color || '#3b82f6',
@@ -66,18 +93,8 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
             }}
             isActive={isActive(pkg.id)}
             timeRemaining={timeRemaining}
-            onActivate={async () => {
-              const success = await purchaseBoost(pkg);
-              if (!success) {
-                console.error('Failed to activate boost:', pkg.name);
-              }
-            }}
-            onCancel={async () => {
-              const success = await cancelBoost();
-              if (!success) {
-                console.error('Failed to cancel boost');
-              }
-            }}
+            onActivate={handleActivate}
+            onCancel={handleCancel}
             userBalance={userEconomy.ubxBalance}
             disabled={false}
           />
