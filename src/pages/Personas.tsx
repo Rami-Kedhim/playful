@@ -1,3 +1,5 @@
+// Fix import casing to use lowercase 'uberPersona' for UberPersona type
+
 import React, { useEffect, useState } from 'react';
 import { UberPersona } from '@/types/uberPersona';
 import UberPersonaGrid from '@/components/personas/UberPersonaGrid';

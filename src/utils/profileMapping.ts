@@ -1,12 +1,8 @@
-
-// Fixed import path for Creator to use correct casing and existence
-// Also fixed minor property fixes in mappings (no changes to logic)
-
 import { LivecamModel } from '@/types/livecams';
 import { UberPersona } from '@/types/uberPersona';
 import { AIProfile } from '@/types/ai-profile';
 import { Escort } from '@/types/Escort';
-import { Creator } from '@/types/creator';  // fixed import path casing to 'creator'
+import { Creator } from '@/types/creator';
 
 export function mapLivecamToUberPersona(livecam: LivecamModel): UberPersona {
   return {
@@ -143,9 +139,8 @@ export function mapCreatorToUberPersona(creator: Creator): UberPersona {
 }
 
 export function mapGenericToUberPersona(data: any): UberPersona {
-  // Determine the type based on available properties
   let type = 'unknown';
-  
+
   if (data.isAI || data.personality) {
     type = 'ai';
   } else if (data.isEscort || data.rates) {
@@ -155,7 +150,7 @@ export function mapGenericToUberPersona(data: any): UberPersona {
   } else if (data.isLive || data.viewerCount) {
     type = 'livecam';
   }
-  
+
   return {
     id: data.id || `generic-${Date.now()}`,
     name: data.name || data.displayName || 'Unknown',

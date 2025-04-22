@@ -1,5 +1,5 @@
 
-// Fix type errors casting strings to numbers properly in parsing duration and boostPower, visibilityIncrease
+// Fix incorrect string assignments to number type in convertToPulseBoost
 
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
@@ -100,7 +100,9 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       duration: durationStr,
       durationMinutes,
       price: typeof pkg.price === 'number' ? pkg.price : 0,
-      costUBX: typeof (pkg as any).price_ubx === 'number' ? (pkg as any).price_ubx : Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),
+      costUBX: typeof (pkg as any).price_ubx === 'number'
+        ? (pkg as any).price_ubx
+        : Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),
       visibility,
       color: getColorForBoostPower(boostPowerNum),
       badgeColor: getColorForBoostPower(boostPowerNum),
