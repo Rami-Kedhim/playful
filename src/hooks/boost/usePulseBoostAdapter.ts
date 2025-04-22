@@ -64,20 +64,21 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 
   // Convert a standard boost package to a pulse boost
   const convertToPulseBoost = (pkg: BoostPackage): PulseBoost => {
-    const durationParts = pkg.duration?.split(':') || ['0', '0', '0'];
-    // Ensure parsing to number to prevent TS errors
+    const durationParts = (pkg.duration && typeof pkg.duration === 'string') ? pkg.duration.split(':') : ['0', '0', '0'];
     const hours = Number(durationParts[0]) || 0;
     const minutes = Number(durationParts[1]) || 0;
     const seconds = Number(durationParts[2]) || 0;
 
-    // Calculate durationMinutes as number
-    const durationMinutes = (hours * 60) + minutes + (Math.floor(seconds / 60));
+    // Calculate duration in minutes, ensure number type
+    const durationMinutes = (hours * 60) + minutes + Math.floor(seconds / 60);
 
     let visibility: PulseBoost['visibility'] = 'homepage';
+    const boostPowerNum = Number(pkg.boost_power) || 50;
+
     if (pkg.boost_power !== undefined && pkg.boost_power !== null) {
-      if (pkg.boost_power >= 200) {
+      if (boostPowerNum >= 200) {
         visibility = 'global';
-      } else if (pkg.boost_power >= 100) {
+      } else if (boostPowerNum >= 100) {
         visibility = 'search';
       } else {
         visibility = 'homepage';
@@ -90,13 +91,13 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       id: pkg.id,
       name: pkg.name,
       description: pkg.description || `${pkg.name} visibility boost for your profile`,
-      duration: pkg.duration,
+      duration: typeof pkg.duration === 'string' ? pkg.duration : '00:00:00',
       durationMinutes: durationMinutes,
       price: typeof pkg.price === 'number' ? pkg.price : 0,
-      costUBX: pkg.price_ubx || Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),
+      costUBX: typeof pkg.price_ubx === 'number' ? pkg.price_ubx : Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),
       visibility,
-      color: getColorForBoostPower(pkg.boost_power || 50),
-      badgeColor: getColorForBoostPower(pkg.boost_power || 50),
+      color: getColorForBoostPower(boostPowerNum),
+      badgeColor: getColorForBoostPower(boostPowerNum),
       features: pkg.features || [],
       visibility_increase: visibilityIncreaseNum
     };
