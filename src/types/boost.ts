@@ -13,6 +13,7 @@ export interface BoostPackage {
   boostLevel?: number;
   boost_power?: number;
   visibility_increase?: number;
+  color?: string; // Add missing color property
 }
 
 // Additional interfaces used in our components
@@ -73,6 +74,7 @@ export interface BoostStatus {
   packageName?: string;
   boostPackage?: BoostPackage;
   timeRemaining?: string;
+  progress?: number; // Add missing progress property
 }
 
 export interface BoostEligibility {
@@ -93,3 +95,42 @@ export interface HermesStatus {
 
 // Re-export HermesBoostStatus as an alias to HermesStatus for backward compatibility
 export type HermesBoostStatus = HermesStatus;
+
+// Add PulseBoost type definition that was missing
+export interface PulseBoost {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  duration: string;
+  features: string[];
+  boost?: number;
+  visibility?: number;
+  maxRank?: number;
+  color: string;
+  durationMinutes?: number;
+  costUBX?: number;
+  visibility_increase?: number;
+  price_ubx?: number;
+  badgeColor?: string;
+}
+
+// Add BoostDialogTabsProps type
+export interface BoostDialogTabsProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  loading: boolean;
+  boostStatus: BoostStatus;
+  eligibility: BoostEligibility;
+  boostPackages: BoostPackage[];
+  selectedPackage: string;
+  setSelectedPackage: (id: string) => void;
+  handleBoost: () => void;
+  handleCancel: () => Promise<boolean>;
+  dailyBoostUsage: number;
+  dailyBoostLimit: number;
+  hermesStatus: HermesStatus;
+  formatBoostDuration?: (duration: string) => string;
+  getBoostPrice?: () => number;
+  handleDialogClose: () => void;
+}

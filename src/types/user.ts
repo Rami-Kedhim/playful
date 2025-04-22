@@ -1,11 +1,12 @@
 export interface User {
   id: string;
-  username: string;
+  username?: string;
   email: string;
-  role: 'user' | 'admin' | 'moderator' | 'escort' | 'creator';
-  name: string;
-  isVerified: boolean;
-  createdAt: string;
+  role?: 'user' | 'admin' | 'moderator' | 'escort' | 'creator';
+  name?: string;
+  isVerified?: boolean;
+  createdAt?: string;
+  created_at?: string;
   phone?: string;
   website?: string;
   profileImageUrl?: string;
@@ -16,25 +17,31 @@ export interface User {
   roles?: UserRole[];
   ubxBalance?: number;
   bio?: string;
-  created_at?: string;
 }
 
 export interface UserProfile {
   id: string;
-  userId: string;
-  username: string;
-  email: string;
-  displayName: string;
-  location: string;
-  bio: string;
-  isVerified: boolean;
+  userId?: string;
+  username?: string;
+  email?: string;
+  displayName?: string;
+  location?: string;
+  bio?: string;
+  isVerified?: boolean;
   website?: string; 
-  avatarUrl: string;
-  joinedDate: Date;
-  avatar_url: string;
+  avatarUrl?: string;
+  joinedDate?: Date;
+  avatar_url?: string;
   phone?: string;
   profileImageUrl?: string;
   sexual_orientation?: string;
+  roles?: UserRole[];
+  is_escort?: boolean;
+  subscription_tier?: string;
+  full_name?: string;
+  verification_status?: string;
+  is_boosted?: boolean;
+  isBoosted?: boolean;
 }
 
 export interface AuthResult {

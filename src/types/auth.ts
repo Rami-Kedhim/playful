@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email: string;
@@ -90,6 +89,8 @@ export interface AuthContextType {
   checkRole: (role: string) => boolean;
   login: (email: string, password: string, options?: any) => Promise<AuthResult>;
   logout: () => Promise<void>;
+  signIn: (email: string, password: string, options?: any) => Promise<AuthResult>;
+  signOut: () => Promise<void>;
   register: (email: string, password: string, username?: string, options?: any) => Promise<AuthResult>;
   updateUser: (data: Partial<User>) => Promise<boolean>;
   updateUserProfile: (data: Partial<UserProfile>) => Promise<boolean>;
@@ -99,6 +100,5 @@ export interface AuthContextType {
   resetPassword: (token: string, password: string) => Promise<AuthResult>;
   requestPasswordReset: (email: string) => Promise<AuthResult>;
   verifyEmail: (token: string) => Promise<AuthResult>;
-  signIn?: (email: string, password: string) => Promise<AuthResult>;
-  signOut?: () => Promise<void>;
+  session?: any;
 }

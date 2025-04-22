@@ -1,6 +1,7 @@
 
-// This file is just re-exporting the useAuth hook from the context
-import { useAuth } from '@/contexts/AuthContext';
+// This file is kept for backward compatibility
+// It re-exports components from the auth folder
+import { useAuth } from './useAuthContext';
 
-export default useAuth;
 export { useAuth };
+export default useAuth;

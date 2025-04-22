@@ -35,7 +35,7 @@ export interface PulseBoost {
   autoApplyWithPlan?: SubscriptionLevel[];
   description?: string;
   badgeColor?: string;
-  features?: string[]; // Added this field
+  features?: string[]; // Add the features field
   color?: string;
   duration?: string;
   price?: number;
