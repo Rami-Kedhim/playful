@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import { BoostPackage } from '@/types/boost';
 import { useUBX } from '@/hooks/useUBX';
 import { useAuth } from '@/hooks/auth/useAuth';
@@ -29,7 +29,7 @@ export const useBoostPurchase = () => {
       
       // Validate price against Oxum global price rule
       try {
-        validateGlobalPrice(boostPackage.price_ubx);
+        validateGlobalPrice(boostPackage.price_ubx || 0);
       } catch (validationError: any) {
         toast({
           title: "Oxum Rule Violation",
@@ -55,7 +55,7 @@ export const useBoostPurchase = () => {
       // Use the processTransaction method to deduct UBX
       const success = await processTransaction({
         amount: -GLOBAL_UBX_RATE, // Negative amount for spending
-        transactionType: "boost_purchase",
+        transaction_type: "boost_purchase", // Use the correct property name
         description: `Purchased ${boostPackage.name} boost`
       });
       

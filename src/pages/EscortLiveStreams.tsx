@@ -21,13 +21,17 @@ const EscortLiveStreams = () => {
     imageUrl: escort.imageUrl,
     thumbnailUrl: escort.imageUrl,
     isLive: Math.random() > 0.7, // Simulating some online, some offline
+    isStreaming: Math.random() > 0.7,
     viewerCount: Math.floor(Math.random() * 200) + 10,
     country: escort.location,
     categories: escort.tags,
     age: escort.age,
     description: escort.description || `Join ${escort.name}'s live stream for an intimate experience`,
     streamUrl: `/escort/${escort.id}/live`,
-  }));
+    rating: Math.random() * 2 + 3,
+    price: Math.floor(Math.random() * 50) + 20,
+    language: "English"
+  } as LivecamModel));
   
   const liveEscorts = escortsWithLiveStreams.filter(e => e.isLive);
   const offlineEscorts = escortsWithLiveStreams.filter(e => !e.isLive);
@@ -79,7 +83,7 @@ const EscortLiveStreams = () => {
 
 const StreamCard = ({ stream }: { stream: LivecamModel }) => {
   return (
-    <Link to={stream.streamUrl}>
+    <Link to={stream.streamUrl || "#"}>
       <Card className="overflow-hidden hover:shadow-md transition-all duration-300">
         <div className="relative aspect-video">
           <img 
@@ -118,7 +122,7 @@ const StreamCard = ({ stream }: { stream: LivecamModel }) => {
             
             <div className="ml-auto flex items-center">
               <Star className="h-3 w-3 text-yellow-500 mr-1" fill="currentColor" />
-              <span>{(Math.random() * 2 + 3).toFixed(1)}</span>
+              <span>{stream.rating ? stream.rating.toFixed(1) : "4.5"}</span>
             </div>
           </div>
           

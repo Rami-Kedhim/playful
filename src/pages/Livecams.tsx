@@ -1,154 +1,283 @@
-
-import React, { useState } from 'react';
-import { useLivecamContext } from '@/modules/livecams/providers/LivecamProvider';
+import React, { useState, useEffect } from 'react';
+import MainLayout from '@/components/layout/MainLayout';
+import { LivecamModel } from '@/types/livecams';
 import LivecamCard from '@/components/livecams/LivecamCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, SlidersHorizontal } from 'lucide-react';
-import MainLayout from '@/components/layout/MainLayout';
-import { Livecam, LivecamModel } from '@/types/livecams';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Slider } from '@/components/ui/slider';
+import { Search, Filter, SlidersHorizontal } from 'lucide-react';
+import { useBoostDialog } from '@/hooks/boost/useBoostDialog';
 
-const Livecams = () => {
-  const { livecams, loading, error } = useLivecamContext();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterCategory, setFilterCategory] = useState('all');
-  const [sortBy, setSortBy] = useState('relevance');
-  const [showFilters, setShowFilters] = useState(false);
+interface FilterState {
+  search: string;
+  category: string;
+  ageRange: [number, number];
+  sortBy: string;
+}
 
-  // Filter livecams based on search and category
-  const filteredLivecams = livecams
-    ? livecams.filter(livecam =>
-        livecam.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        (filterCategory === 'all' || livecam.category === filterCategory)
-      )
-    : [];
-
-  // Sort livecams based on selected criteria
-  const sortedLivecams = [...filteredLivecams].sort((a, b) => {
-    if (sortBy === 'relevance') {
-      return 0;
-    } else if (sortBy === 'rating') {
-      return (b.rating || 0) - (a.rating || 0);
-    } else if (sortBy === 'price') {
-      return (a.price || 0) - (b.price || 0);
-    } else {
-      return 0;
+const Livecams: React.FC = () => {
+  const [models, setModels] = useState<LivecamModel[]>([
+    {
+      id: "1",
+      displayName: "Alice",
+      thumbnailUrl: "https://images.pexels.com/photos/1576917/pexels-photo-1576917.jpeg?auto=compress&cs=tinysrgb&w=600",
+      isLive: true,
+      viewerCount: 123,
+      age: 22,
+      country: "USA",
+      categories: ["tattoo", "brunette"],
+      rating: 4.5,
+      price: 2.99,
+      language: "English",
+      streamUrl: "/livecam/1"
+    },
+    {
+      id: "2",
+      displayName: "Bob",
+      thumbnailUrl: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=600",
+      isLive: false,
+      viewerCount: 0,
+      age: 28,
+      country: "Canada",
+      categories: ["piercing", "blonde"],
+      rating: 4.2,
+      price: 3.49,
+      language: "French",
+      streamUrl: "/livecam/2"
+    },
+    {
+      id: "3",
+      displayName: "Charlie",
+      thumbnailUrl: "https://images.pexels.com/photos/775358/pexels-photo-775358.jpeg?auto=compress&cs=tinysrgb&w=600",
+      isLive: true,
+      viewerCount: 456,
+      age: 32,
+      country: "UK",
+      categories: ["redhead", "glasses"],
+      rating: 4.8,
+      price: 3.99,
+      language: "English",
+      streamUrl: "/livecam/3"
+    },
+    {
+      id: "4",
+      displayName: "David",
+      thumbnailUrl: "https://images.pexels.com/photos/1066886/pexels-photo-1066886.jpeg?auto=compress&cs=tinysrgb&w=600",
+      isLive: false,
+      viewerCount: 0,
+      age: 24,
+      country: "Australia",
+      categories: ["tattoo", "brunette"],
+      rating: 4.0,
+      price: 2.49,
+      language: "English",
+      streamUrl: "/livecam/4"
+    },
+    {
+      id: "5",
+      displayName: "Eve",
+      thumbnailUrl: "https://images.pexels.com/photos/1856664/pexels-photo-1856664.jpeg?auto=compress&cs=tinysrgb&w=600",
+      isLive: true,
+      viewerCount: 789,
+      age: 30,
+      country: "Germany",
+      categories: ["piercing", "blonde"],
+      rating: 4.6,
+      price: 4.49,
+      language: "German",
+      streamUrl: "/livecam/5"
+    },
+    {
+      id: "6",
+      displayName: "Frank",
+      thumbnailUrl: "https://images.pexels.com/photos/1080721/pexels-photo-1080721.jpeg?auto=compress&cs=tinysrgb&w=600",
+      isLive: false,
+      viewerCount: 0,
+      age: 26,
+      country: "France",
+      categories: ["redhead", "glasses"],
+      rating: 4.3,
+      price: 3.49,
+      language: "French",
+      streamUrl: "/livecam/6"
+    },
+    {
+      id: "7",
+      displayName: "Grace",
+      thumbnailUrl: "https://images.pexels.com/photos/1856670/pexels-photo-1856670.jpeg?auto=compress&cs=tinysrgb&w=600",
+      isLive: true,
+      viewerCount: 1011,
+      age: 29,
+      country: "Spain",
+      categories: ["tattoo", "brunette"],
+      rating: 4.7,
+      price: 4.99,
+      language: "Spanish",
+      streamUrl: "/livecam/7"
+    },
+    {
+      id: "8",
+      displayName: "Henry",
+      thumbnailUrl: "https://images.pexels.com/photos/1065084/pexels-photo-1065084.jpeg?auto=compress&cs=tinysrgb&w=600",
+      isLive: false,
+      viewerCount: 0,
+      age: 31,
+      country: "Italy",
+      categories: ["piercing", "blonde"],
+      rating: 4.1,
+      price: 2.99,
+      language: "Italian",
+      streamUrl: "/livecam/8"
     }
+  ]);
+  const [filter, setFilter] = useState<FilterState>({
+    search: "",
+    category: "All",
+    ageRange: [18, 40],
+    sortBy: "Rating"
+  });
+  const [showFilters, setShowFilters] = useState(false);
+  const [boostedModelIds, setBoostedModelIds] = useState<string[]>([]);
+  const { openBoostDialog } = useBoostDialog();
+
+  useEffect(() => {
+    // Simulate fetching boosted models from an API
+    const boosted = ["1", "3", "5"];
+    setBoostedModelIds(boosted);
+  }, []);
+
+  const handleBoostModel = (modelId: string) => {
+    openBoostDialog({
+      modelId,
+      onSuccess: () => {
+        setBoostedModelIds([...boostedModelIds, modelId]);
+      }
+    });
+  };
+
+  const handleCancelBoost = (modelId: string) => {
+    setBoostedModelIds(boostedModelIds.filter((id) => id !== modelId));
+  };
+
+  const filteredModels = models.filter((model) => {
+    const searchRegex = new RegExp(filter.search, "i");
+    const categoryMatch = filter.category === "All" || model.categories?.includes(filter.category);
+    const ageMatch = model.age && model.age >= filter.ageRange[0] && model.age <= filter.ageRange[1];
+
+    return searchRegex.test(model.displayName) && categoryMatch && ageMatch;
+  }).sort((a, b) => {
+    if (filter.sortBy === "Rating") {
+      return (b.rating || 0) - (a.rating || 0);
+    }
+    return 0;
   });
 
   return (
     <MainLayout>
-      <div className="container mx-auto py-10">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-semibold">Livecams Directory</h1>
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Search livecams..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pr-10"
-              />
-              <Search className="absolute top-2.5 right-3 h-5 w-5 text-gray-500" />
-            </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row items-center justify-between mb-6">
+          <div className="mb-4 md:mb-0">
+            <h1 className="text-3xl font-bold">Livecam Models</h1>
+            <p className="text-muted-foreground">
+              Explore our diverse collection of livecam models.
+            </p>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Input
+              type="search"
+              placeholder="Search models..."
+              className="md:w-64"
+              value={filter.search}
+              onChange={(e) => setFilter({ ...filter, search: e.target.value })}
+            />
             <Button variant="outline" onClick={() => setShowFilters(!showFilters)}>
-              <SlidersHorizontal className="mr-2 h-4 w-4" />
+              <SlidersHorizontal className="w-4 h-4 mr-2" />
               Filters
             </Button>
           </div>
         </div>
 
         {showFilters && (
-          <div className="mb-6 p-4 border rounded-md">
-            <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-              <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter by category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="Casual">Casual</SelectItem>
-                  <SelectItem value="Music">Music</SelectItem>
-                  <SelectItem value="Art">Art</SelectItem>
-                </SelectContent>
-              </Select>
+          <Card className="mb-6">
+            <CardContent className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <h3 className="text-sm font-medium mb-2">Category</h3>
+                <Select
+                  value={filter.category}
+                  onValueChange={(value) => setFilter({ ...filter, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="All" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">All</SelectItem>
+                    <SelectItem value="tattoo">Tattoo</SelectItem>
+                    <SelectItem value="piercing">Piercing</SelectItem>
+                    <SelectItem value="brunette">Brunette</SelectItem>
+                    <SelectItem value="blonde">Blonde</SelectItem>
+                    <SelectItem value="redhead">Redhead</SelectItem>
+                    <SelectItem value="glasses">Glasses</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="relevance">Relevance</SelectItem>
-                  <SelectItem value="rating">Rating</SelectItem>
-                  <SelectItem value="price">Price</SelectItem>
-                </SelectContent>
-              </Select>
+              <div>
+                <h3 className="text-sm font-medium mb-2">Age Range</h3>
+                <div className="flex items-center space-x-2">
+                  <p className="text-sm">{filter.ageRange[0]}</p>
+                  <Slider
+                    defaultValue={filter.ageRange}
+                    max={40}
+                    min={18}
+                    step={1}
+                    onValueChange={(value) => setFilter({ ...filter, ageRange: [value[0], value[1]] as [number, number] })}
+                  />
+                  <p className="text-sm">{filter.ageRange[1]}</p>
+                </div>
+              </div>
 
-              <Button variant="ghost" onClick={() => {
-                setSearchQuery('');
-                setFilterCategory('all');
-                setSortBy('relevance');
-              }}>
-                Clear Filters
-              </Button>
-            </div>
-          </div>
+              <div>
+                <h3 className="text-sm font-medium mb-2">Sort By</h3>
+                <Select
+                  value={filter.sortBy}
+                  onValueChange={(value) => setFilter({ ...filter, sortBy: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Rating" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Rating">Rating</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
-        <Tabs defaultValue="all" className="mb-4">
-          <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="featured">Featured</TabsTrigger>
-            <TabsTrigger value="live">Live</TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {loading ? (
-            <p>Loading livecams...</p>
-          ) : error ? (
-            <p>Error: {error}</p>
-          ) : sortedLivecams.length > 0 ? (
-            sortedLivecams.map(livecam => {
-              // Convert Livecam to LivecamModel with all required properties
-              const livecamModel: LivecamModel = {
-                id: livecam.id,
-                name: livecam.name || '',
-                displayName: livecam.displayName || livecam.name || 'Unnamed',
-                username: livecam.username || '',
-                description: livecam.description || '',
-                imageUrl: livecam.imageUrl || livecam.profileImage || '',
-                thumbnailUrl: livecam.thumbnailUrl || livecam.previewImage || livecam.imageUrl || '',
-                isLive: livecam.isLive,
-                isStreaming: livecam.isStreaming,
-                viewerCount: livecam.viewerCount,
-                country: livecam.region || '',
-                categories: livecam.tags || [],
-                rating: livecam.rating || 0,
-                price: livecam.price || 0,
-                language: livecam.language || 'English',
-                region: livecam.region || '',
-                tags: livecam.tags || []
-              };
-              
-              return (
-                <LivecamCard 
-                  key={livecam.id} 
-                  model={livecamModel}
-                  showBoostControls={false}
-                  isBoosted={false}
-                  onBoost={() => false}
-                  onCancelBoost={() => false}
-                />
-              );
-            })
-          ) : (
-            <p>No livecams found.</p>
-          )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-8">
+          {filteredModels.map((model) => (
+            <LivecamCard 
+              key={model.id}
+              model={model}
+              isBoosted={boostedModelIds.includes(model.id)}
+              onBoost={() => handleBoostModel(model.id)}
+              onCancelBoost={() => handleCancelBoost(model.id)}
+              showBoostControls={true}
+            />
+          ))}
         </div>
+
+        {filteredModels.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-lg text-muted-foreground">
+              No models found matching your criteria.
+            </p>
+          </div>
+        )}
       </div>
     </MainLayout>
   );

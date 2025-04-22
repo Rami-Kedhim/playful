@@ -1,37 +1,24 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import {
-  Slider
-} from "@/components/ui/slider";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from "@/components/ui/tabs";
-import {
-  Loader2,
-  RefreshCw,
-  Coins
-} from "lucide-react";
-import UBXCostPreviewModal from './UBXCostPreviewModal';
-import UBXRechargeModal from './UBXRechargeModal';
-import useUBX from '@/hooks/useUBX';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Card, CardContent } from "@/components/ui/card";
+import { Loader2, RefreshCw } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useUBX } from '@/hooks/useUBX';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface AIAvatarSettings {
-  gender: 'female' | 'male' | 'non-binary';
-  style: 'realistic' | 'anime' | 'artistic';
-  ageRange: number;
+  gender: string;
+  style: string;
+  ageRange: string;
   age: number;
   ethnicity: string;
   hairColor: string;
@@ -42,31 +29,11 @@ export interface AIAvatarSettings {
 }
 
 interface AIAvatarGeneratorProps {
-  onGenerate: (settings: AIAvatarSettings) => Promise<void>;
-  onComplete: (avatarUrl: string) => Promise<void>;
+  onGenerate: (settings: AIAvatarSettings) => void;
+  onComplete: (selectedAvatar: string) => void;
   isGenerating: boolean;
-  generatedAvatars: string[];
+  generatedAvatars?: string[];
 }
-
-const defaultSettings: AIAvatarSettings = {
-  gender: 'female',
-  style: 'realistic',
-  age: 30,
-  ageRange: 30,
-  ethnicity: 'mixed',
-  hairColor: 'brown',
-  hairStyle: 'medium',
-  bodyType: 'average',
-  skinTone: 'medium',
-  background: 'neutral'
-};
-
-// Define generation costs based on style
-const GENERATION_COSTS = {
-  realistic: 50,
-  anime: 30,
-  artistic: 40
-};
 
 export const AIAvatarGenerator: React.FC<AIAvatarGeneratorProps> = ({
   onGenerate,
@@ -74,353 +41,242 @@ export const AIAvatarGenerator: React.FC<AIAvatarGeneratorProps> = ({
   isGenerating,
   generatedAvatars = []
 }) => {
-  const [settings, setSettings] = useState<AIAvatarSettings>(defaultSettings);
-  const [activeTab, setActiveTab] = useState('appearance');
-  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
-  
-  // UBX payment state
-  const [showCostModal, setShowCostModal] = useState(false);
-  const [showRechargeModal, setShowRechargeModal] = useState(false);
-  const { processTransaction, isProcessing } = useUBX();
-  
-  // Mock UBX balance for demo purposes (in a real app, get from useUBX())
-  const [ubxBalance, setUbxBalance] = useState(100);
+  const [gender, setGender] = useState<string>('female');
+  const [style, setStyle] = useState<string>('realistic');
+  const [ageRange, setAgeRange] = useState<string>('20-30');
+  const [age, setAge] = useState<number>(25);
+  const [ethnicity, setEthnicity] = useState<string>('caucasian');
+  const [hairColor, setHairColor] = useState<string>('blonde');
+  const [hairStyle, setHairStyle] = useState<string>('long');
+  const [bodyType, setBodyType] = useState<string>('slim');
+  const [skinTone, setSkinTone] = useState<string>('fair');
+  const [background, setBackground] = useState<string>('studio');
+  const [selectedAvatar, setSelectedAvatar] = useState<string>('');
 
-  const updateSetting = (key: keyof AIAvatarSettings, value: string | number) => {
-    setSettings(prev => {
-      if (key === 'age') {
-        // Ensure the value is a number
-        const numericValue = typeof value === 'string' ? parseInt(value, 10) : value;
-        return { ...prev, [key]: numericValue, ageRange: numericValue };
-      }
-      if (key === 'ageRange') {
-        // Ensure the value is a number
-        const numericValue = typeof value === 'string' ? parseInt(value, 10) : value;
-        return { ...prev, [key]: numericValue, age: numericValue };
-      }
-      return { ...prev, [key]: value };
-    });
+  const handleGenerate = () => {
+    const settings: AIAvatarSettings = {
+      gender,
+      style,
+      ageRange,
+      age,
+      ethnicity,
+      hairColor,
+      hairStyle,
+      bodyType,
+      skinTone,
+      background
+    };
+    onGenerate(settings);
   };
 
-  // Get the cost based on selected style
-  const getGenerationCost = () => {
-    return GENERATION_COSTS[settings.style] || 30;
-  };
-
-  const handleGenerateClick = () => {
-    setShowCostModal(true);
-  };
-
-  const handleConfirmGeneration = async () => {
-    setShowCostModal(false);
+  // Sample function for handling premium avatar generation that costs UBX
+  const handlePremiumGeneration = async () => {
+    const { processTransaction } = useUBX();
+    const { user } = useAuth();
     
-    // Process the UBX transaction
-    const success = await processTransaction({
-      amount: getGenerationCost(),
-      transactionType: 'ai_avatar',
-      description: `AI avatar generation (${settings.style} style)`
-    });
-    
-    if (success) {
-      // Deduct the UBX cost (in a real app this would be handled by processTransaction)
-      setUbxBalance(prev => prev - getGenerationCost());
-      
-      // Generate the avatar
-      onGenerate(settings);
+    if (!user) {
+      // Handle unauthenticated user
+      return;
     }
-  };
-
-  const handleRechargeRequest = () => {
-    setShowCostModal(false);
-    setShowRechargeModal(true);
-  };
-
-  const handleRechargeComplete = () => {
-    // Simulate adding UBX to balance (in a real app this would be handled by the recharge process)
-    setUbxBalance(prev => prev + 100);
-    setShowRechargeModal(false);
-    // Show the cost modal again now that the user has sufficient balance
-    setShowCostModal(true);
-  };
-
-  const handleComplete = () => {
-    if (selectedAvatar) {
-      onComplete(selectedAvatar);
-    } else if (generatedAvatars.length > 0) {
-      onComplete(generatedAvatars[0]);
+    
+    try {
+      // Process UBX transaction for premium avatar generation
+      const success = await processTransaction({
+        amount: -10, // Cost in UBX tokens
+        transaction_type: "avatar_generation", // Using the correct property name
+        description: "Premium AI avatar generation"
+      });
+      
+      if (success) {
+        // Proceed with premium generation
+        handleGenerate();
+      }
+    } catch (error) {
+      console.error("Failed to process transaction for premium avatar:", error);
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Create Your AI Avatar</h2>
-        <p className="text-muted-foreground">
-          Customize how you want your AI-generated avatar to look
-        </p>
-        <div className="flex items-center gap-2 text-sm text-primary">
-          <Coins className="h-4 w-4" />
-          <span>Your UBX Balance: {ubxBalance}</span>
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="gender">Gender</Label>
+          <Select value={gender} onValueChange={setGender}>
+            <SelectTrigger id="gender">
+              <SelectValue placeholder="Select gender" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="female">Female</SelectItem>
+              <SelectItem value="male">Male</SelectItem>
+              <SelectItem value="non-binary">Non-Binary</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="style">Style</Label>
+          <Select value={style} onValueChange={setStyle}>
+            <SelectTrigger id="style">
+              <SelectValue placeholder="Select style" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="realistic">Realistic</SelectItem>
+              <SelectItem value="artistic">Artistic</SelectItem>
+              <SelectItem value="anime">Anime</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-2">
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
-          <TabsTrigger value="style">Style & Background</TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="ageRange">Age Range</Label>
+          <Select value={ageRange} onValueChange={setAgeRange}>
+            <SelectTrigger id="ageRange">
+              <SelectValue placeholder="Select age range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="18-25">18-25</SelectItem>
+              <SelectItem value="20-30">20-30</SelectItem>
+              <SelectItem value="30-40">30-40</SelectItem>
+              <SelectItem value="40+">40+</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-        <TabsContent value="appearance" className="space-y-4 mt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Gender</Label>
-              <Select 
-                value={settings.gender} 
-                onValueChange={(value: 'female' | 'male' | 'non-binary') => updateSetting('gender', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="non-binary">Non-binary</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Age: {settings.age}</Label>
-              <Slider 
-                value={[settings.age]} 
-                min={18} 
-                max={60} 
-                step={1} 
-                onValueChange={(value) => updateSetting('age', value[0])}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Ethnicity</Label>
-              <Select 
-                value={settings.ethnicity} 
-                onValueChange={(value) => updateSetting('ethnicity', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select ethnicity" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="caucasian">Caucasian</SelectItem>
-                  <SelectItem value="black">Black</SelectItem>
-                  <SelectItem value="asian">Asian</SelectItem>
-                  <SelectItem value="hispanic">Hispanic</SelectItem>
-                  <SelectItem value="middle-eastern">Middle Eastern</SelectItem>
-                  <SelectItem value="mixed">Mixed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Skin Tone</Label>
-              <Select 
-                value={settings.skinTone} 
-                onValueChange={(value) => updateSetting('skinTone', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select skin tone" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="very-light">Very Light</SelectItem>
-                  <SelectItem value="light">Light</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="tan">Tan</SelectItem>
-                  <SelectItem value="deep">Deep</SelectItem>
-                  <SelectItem value="dark">Dark</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Hair Color</Label>
-              <Select 
-                value={settings.hairColor} 
-                onValueChange={(value) => updateSetting('hairColor', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select hair color" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="black">Black</SelectItem>
-                  <SelectItem value="brown">Brown</SelectItem>
-                  <SelectItem value="blonde">Blonde</SelectItem>
-                  <SelectItem value="red">Red</SelectItem>
-                  <SelectItem value="gray">Gray</SelectItem>
-                  <SelectItem value="colorful">Colorful</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Hair Style</Label>
-              <Select 
-                value={settings.hairStyle} 
-                onValueChange={(value) => updateSetting('hairStyle', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select hair style" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="short">Short</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="long">Long</SelectItem>
-                  <SelectItem value="curly">Curly</SelectItem>
-                  <SelectItem value="wavy">Wavy</SelectItem>
-                  <SelectItem value="straight">Straight</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Body Type</Label>
-            <Select 
-              value={settings.bodyType} 
-              onValueChange={(value) => updateSetting('bodyType', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select body type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="slender">Slender</SelectItem>
-                <SelectItem value="athletic">Athletic</SelectItem>
-                <SelectItem value="average">Average</SelectItem>
-                <SelectItem value="curvy">Curvy</SelectItem>
-                <SelectItem value="muscular">Muscular</SelectItem>
-                <SelectItem value="plus-size">Plus Size</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="style" className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <Label>Style</Label>
-            <Select 
-              value={settings.style} 
-              onValueChange={(value: 'realistic' | 'anime' | 'artistic') => updateSetting('style', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select style" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="realistic">
-                  Realistic ({GENERATION_COSTS.realistic} UBX)
-                </SelectItem>
-                <SelectItem value="anime">
-                  Anime ({GENERATION_COSTS.anime} UBX)
-                </SelectItem>
-                <SelectItem value="artistic">
-                  Artistic ({GENERATION_COSTS.artistic} UBX)
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground mt-1">
-              Different styles have different UBX costs. Realistic images cost more to generate.
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Background</Label>
-            <Select 
-              value={settings.background} 
-              onValueChange={(value) => updateSetting('background', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select background" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="neutral">Neutral</SelectItem>
-                <SelectItem value="urban">Urban</SelectItem>
-                <SelectItem value="nature">Nature</SelectItem>
-                <SelectItem value="studio">Studio</SelectItem>
-                <SelectItem value="luxury">Luxury</SelectItem>
-                <SelectItem value="minimal">Minimal</SelectItem>
-                <SelectItem value="gradient">Gradient</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      <div className="space-y-4">
-        <Button
-          onClick={handleGenerateClick}
-          className="w-full"
-          disabled={isGenerating}
-          variant="secondary"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Generate Avatar ({getGenerationCost()} UBX)
-            </>
-          )}
-        </Button>
-
-        {generatedAvatars.length > 0 && (
-          <>
-            <div className="grid grid-cols-2 gap-4">
-              {generatedAvatars.map((avatar, index) => (
-                <Card 
-                  key={index} 
-                  className={`cursor-pointer overflow-hidden ${selectedAvatar === avatar ? 'ring-2 ring-primary' : ''}`}
-                  onClick={() => setSelectedAvatar(avatar)}
-                >
-                  <CardContent className="p-0">
-                    <img 
-                      src={avatar} 
-                      alt={`Generated avatar ${index + 1}`} 
-                      className="w-full h-auto object-cover aspect-square"
-                    />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            <Button 
-              onClick={handleComplete}
-              className="w-full"
-              disabled={!selectedAvatar && generatedAvatars.length <= 0}
-            >
-              Continue
-            </Button>
-          </>
-        )}
+        <div>
+          <Label htmlFor="ethnicity">Ethnicity</Label>
+          <Select value={ethnicity} onValueChange={setEthnicity}>
+            <SelectTrigger id="ethnicity">
+              <SelectValue placeholder="Select ethnicity" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="caucasian">Caucasian</SelectItem>
+              <SelectItem value="african">African</SelectItem>
+              <SelectItem value="asian">Asian</SelectItem>
+              <SelectItem value="hispanic">Hispanic</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      {/* UBX Payment Modals */}
-      <UBXCostPreviewModal
-        isOpen={showCostModal}
-        onClose={() => setShowCostModal(false)}
-        onConfirm={handleConfirmGeneration}
-        onRecharge={handleRechargeRequest}
-        cost={getGenerationCost()}
-        currentBalance={ubxBalance}
-      />
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="hairColor">Hair Color</Label>
+          <Select value={hairColor} onValueChange={setHairColor}>
+            <SelectTrigger id="hairColor">
+              <SelectValue placeholder="Select hair color" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="blonde">Blonde</SelectItem>
+              <SelectItem value="brown">Brown</SelectItem>
+              <SelectItem value="black">Black</SelectItem>
+              <SelectItem value="red">Red</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-      <UBXRechargeModal
-        isOpen={showRechargeModal}
-        onClose={() => setShowRechargeModal(false)}
-        onRechargeComplete={handleRechargeComplete}
-      />
+        <div>
+          <Label htmlFor="hairStyle">Hair Style</Label>
+          <Select value={hairStyle} onValueChange={setHairStyle}>
+            <SelectTrigger id="hairStyle">
+              <SelectValue placeholder="Select hair style" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="long">Long</SelectItem>
+              <SelectItem value="short">Short</SelectItem>
+              <SelectItem value="curly">Curly</SelectItem>
+              <SelectItem value="straight">Straight</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="bodyType">Body Type</Label>
+          <Select value={bodyType} onValueChange={setBodyType}>
+            <SelectTrigger id="bodyType">
+              <SelectValue placeholder="Select body type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="slim">Slim</SelectItem>
+              <SelectItem value="athletic">Athletic</SelectItem>
+              <SelectItem value="average">Average</SelectItem>
+              <SelectItem value="curvy">Curvy</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="skinTone">Skin Tone</Label>
+          <Select value={skinTone} onValueChange={setSkinTone}>
+            <SelectTrigger id="skinTone">
+              <SelectValue placeholder="Select skin tone" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="fair">Fair</SelectItem>
+              <SelectItem value="light">Light</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="dark">Dark</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="background">Background</Label>
+        <Select value={background} onValueChange={setBackground}>
+          <SelectTrigger id="background">
+            <SelectValue placeholder="Select background" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="studio">Studio</SelectItem>
+            <SelectItem value="outdoor">Outdoor</SelectItem>
+            <SelectItem value="abstract">Abstract</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Button onClick={handleGenerate} disabled={isGenerating}>
+        {isGenerating ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Generating...
+          </>
+        ) : (
+          <>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Generate Avatars
+          </>
+        )}
+      </Button>
+
+      {generatedAvatars.length > 0 && (
+        <div className="grid grid-cols-3 gap-4">
+          {generatedAvatars.map((avatar, index) => (
+            <Card
+              key={index}
+              className={`cursor-pointer ${selectedAvatar === avatar ? 'border-2 border-primary' : ''}`}
+              onClick={() => setSelectedAvatar(avatar)}
+            >
+              <CardContent className="p-2">
+                <img
+                  src={avatar}
+                  alt={`Generated Avatar ${index + 1}`}
+                  className="w-full h-32 object-cover rounded-md"
+                />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {selectedAvatar && (
+        <Button onClick={() => onComplete(selectedAvatar)}>
+          Complete
+        </Button>
+      )}
     </div>
   );
 };

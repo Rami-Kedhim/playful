@@ -1,155 +1,121 @@
-import { useState, useEffect, useCallback } from "react";
-import { ContentType } from "./useVirtualContent";
-import { logContentAction, logContentError } from "@/utils/debugUtils";
 
-interface VirtualContentItem {
+import { useState } from 'react';
+import { ContentType } from '@/types/content';
+
+interface VirtualCreatorContent {
   id: string;
-  creatorId: string;
-  type: ContentType;
-  price: number;
-  thumbnailUrl?: string;
-  title?: string;
+  title: string;
   description?: string;
+  thumbnailUrl: string;
+  contentType: ContentType;
+  creatorId: string;
+  price: number;
+  likes: number;
+  views: number;
 }
 
-interface ContentResponse {
-  loading: boolean;
-  error: string | null;
-  content: VirtualContentItem[];
-  hasMore: boolean;
-  loadMore: () => void;
-  refreshContent: () => void;
-}
-
-export const useVirtualCreatorContent = (creatorId: string, initialLimit = 6): ContentResponse => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [content, setContent] = useState<VirtualContentItem[]>([]);
-  const [hasMore, setHasMore] = useState(false);
-  const [limit, setLimit] = useState(initialLimit);
-
-  const fetchVirtualContent = useCallback(async (creatorId: string, limit: number) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      logContentAction('Fetching virtual content', { creatorId, limit });
-      // In a real implementation, this would be a fetch call to your API
-      // For now, we'll mock data based on the creatorId
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
-      
-      // Mock data
-      const mockContent: VirtualContentItem[] = [
-        {
-          id: `${creatorId}-photo-1`,
-          creatorId,
-          type: "photo",
-          price: 5,
-          thumbnailUrl: "https://picsum.photos/seed/photo1/400/400",
-          title: "Exclusive Photo 1",
-          description: "Special content just for you"
-        },
-        {
-          id: `${creatorId}-photo-2`,
-          creatorId,
-          type: "photo",
-          price: 8,
-          thumbnailUrl: "https://picsum.photos/seed/photo2/400/400",
-          title: "Exclusive Photo 2",
-          description: "Premium content"
-        },
-        {
-          id: `${creatorId}-video-1`,
-          creatorId,
-          type: "video",
-          price: 15,
-          thumbnailUrl: "https://picsum.photos/seed/video1/400/400",
-          title: "Private Video",
-          description: "Exclusive video content"
-        },
-        {
-          id: `${creatorId}-message-1`,
-          creatorId,
-          type: "message",
-          price: 10,
-          title: "Personal Message",
-          description: "Unlock this special message from me"
-        },
-        {
-          id: `${creatorId}-photo-3`,
-          creatorId,
-          type: "photo",
-          price: 7,
-          thumbnailUrl: "https://picsum.photos/seed/photo3/400/400",
-          title: "Exclusive Photo 3",
-          description: "More premium content"
-        },
-        {
-          id: `${creatorId}-video-2`,
-          creatorId,
-          type: "video",
-          price: 20,
-          thumbnailUrl: "https://picsum.photos/seed/video2/400/400",
-          title: "Behind the Scenes",
-          description: "See how the magic happens"
-        },
-        {
-          id: `${creatorId}-message-2`,
-          creatorId,
-          type: "message",
-          price: 12,
-          title: "Secret Message",
-          description: "For your eyes only"
-        },
-        {
-          id: `${creatorId}-photo-4`,
-          creatorId,
-          type: "photo",
-          price: 9,
-          thumbnailUrl: "https://picsum.photos/seed/photo4/400/400",
-          title: "Exclusive Photo 4",
-          description: "Limited edition content"
-        }
-      ];
-      
-      // Return only the number of items requested
-      const limitedContent = mockContent.slice(0, limit);
-      setHasMore(limitedContent.length < mockContent.length);
-      setContent(limitedContent);
-      logContentAction('Fetched virtual content', { count: limitedContent.length, hasMore: limitedContent.length < mockContent.length });
-    } catch (err: any) {
-      console.error("Error fetching virtual content:", err);
-      logContentError('Fetching virtual content', err);
-      setError(err.message || "Failed to load content");
-    } finally {
-      setLoading(false);
+export function useVirtualCreatorContent(creatorId?: string) {
+  const [content, setContent] = useState<VirtualCreatorContent[]>([
+    // Mock content data
+    {
+      id: "content-1",
+      title: "Exclusive Photoshoot",
+      description: "Behind the scenes of my latest photoshoot",
+      thumbnailUrl: "https://via.placeholder.com/300x200",
+      contentType: ContentType.PHOTO,
+      creatorId: "creator-1",
+      price: 5,
+      likes: 120,
+      views: 450
+    },
+    {
+      id: "content-2",
+      title: "Beach Day Vibes",
+      description: "Fun day at the beach",
+      thumbnailUrl: "https://via.placeholder.com/300x200",
+      contentType: ContentType.PHOTO,
+      creatorId: "creator-1",
+      price: 3,
+      likes: 89,
+      views: 320
+    },
+    {
+      id: "content-3",
+      title: "Workout Routine Video",
+      description: "My daily workout routine",
+      thumbnailUrl: "https://via.placeholder.com/300x200",
+      contentType: ContentType.VIDEO,
+      creatorId: "creator-1",
+      price: 10,
+      likes: 210,
+      views: 780
+    },
+    {
+      id: "content-4",
+      title: "Exclusive Message",
+      description: "Personal message just for you",
+      thumbnailUrl: "https://via.placeholder.com/300x200",
+      contentType: ContentType.MESSAGE,
+      creatorId: "creator-1",
+      price: 2,
+      likes: 67,
+      views: 150
+    },
+    {
+      id: "content-5",
+      title: "Evening Photoshoot",
+      description: "Sunset vibes",
+      thumbnailUrl: "https://via.placeholder.com/300x200",
+      contentType: ContentType.PHOTO,
+      creatorId: "creator-2",
+      price: 7,
+      likes: 145,
+      views: 520
+    },
+    {
+      id: "content-6",
+      title: "Travel Vlog",
+      description: "My trip to Paris",
+      thumbnailUrl: "https://via.placeholder.com/300x200",
+      contentType: ContentType.VIDEO,
+      creatorId: "creator-2",
+      price: 12,
+      likes: 230,
+      views: 890
+    },
+    {
+      id: "content-7",
+      title: "Secret Message",
+      description: "Special content just for subscribers",
+      thumbnailUrl: "https://via.placeholder.com/300x200",
+      contentType: ContentType.MESSAGE,
+      creatorId: "creator-2",
+      price: 5,
+      likes: 82,
+      views: 180
+    },
+    {
+      id: "content-8",
+      title: "Night Out Photos",
+      description: "Photos from last weekend",
+      thumbnailUrl: "https://via.placeholder.com/300x200",
+      contentType: ContentType.PHOTO,
+      creatorId: "creator-2",
+      price: 4,
+      likes: 95,
+      views: 340
     }
-  }, []);
-  
-  useEffect(() => {
-    if (creatorId) {
-      fetchVirtualContent(creatorId, limit);
-    }
-  }, [creatorId, limit, fetchVirtualContent]);
+  ]);
 
-  const loadMore = useCallback(() => {
-    logContentAction('Loading more content', { currentLimit: limit, newLimit: limit + initialLimit });
-    setLimit(prevLimit => prevLimit + initialLimit);
-  }, [limit, initialLimit]);
+  // Filter content by creator ID if provided
+  const filteredContent = creatorId 
+    ? content.filter(item => item.creatorId === creatorId)
+    : content;
 
-  const refreshContent = useCallback(() => {
-    logContentAction('Refreshing content', { creatorId, limit });
-    fetchVirtualContent(creatorId, limit);
-  }, [creatorId, limit, fetchVirtualContent]);
-  
   return {
-    loading,
-    error,
-    content,
-    hasMore,
-    loadMore,
-    refreshContent
+    content: filteredContent,
+    totalItems: filteredContent.length,
+    totalViews: filteredContent.reduce((sum, item) => sum + item.views, 0),
+    totalLikes: filteredContent.reduce((sum, item) => sum + item.likes, 0)
   };
-};
-
-export default useVirtualCreatorContent;
+}

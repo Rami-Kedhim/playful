@@ -40,6 +40,12 @@ export interface UserProfile {
   is_verified?: boolean;
   is_escort?: boolean;
   subscription_tier?: string;
+  full_name?: string;
+  location?: string;
+  sexual_orientation?: string;
+  verification_status?: string;
+  is_boosted?: boolean;
+  isBoosted?: boolean;
 }
 
 export enum DatabaseGender {

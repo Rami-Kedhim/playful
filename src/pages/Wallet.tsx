@@ -1,25 +1,14 @@
-
-import { useEffect, useState } from "react";
+import { useState } from 'react';
+import MainLayout from '@/components/layout/MainLayout';
 import { useAuth } from "@/contexts/AuthContext";
-import AppLayout from "@/components/layout/AppLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Coins, History, Gift, Zap, Shield, ExternalLink } from "lucide-react";
-import UBXBalance from "@/components/profile/settings/UBXBalance";
-import UBXTransactionHistory from "@/components/profile/settings/UBXTransactionHistory";
-import UBXPackageDialog from "@/components/profile/settings/UBXPackageDialog";
-import UBXRechargeDialog from "@/components/profile/settings/UBXRechargeDialog";
-import WalletConnect from "@/components/solana/WalletConnect";
-import SolanaWalletPanel from "@/components/wallet/SolanaWalletPanel";
-import { Button } from "@/components/ui/button";
-import { blockchainService, NETWORK_CONFIG } from "@/services/blockchainService";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Wallet = () => {
   const { user, profile } = useAuth();
   const [rechargeDialogOpen, setRechargeDialogOpen] = useState(false);
   
   return (
-    <AppLayout>
+    <MainLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
@@ -144,7 +133,7 @@ const Wallet = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </AppLayout>
+    </MainLayout>
   );
 };
 

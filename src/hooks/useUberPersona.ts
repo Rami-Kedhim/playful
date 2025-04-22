@@ -1,56 +1,41 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { UberPersonaData } from '@/types/UberPersona';  // Using the correct case for import
 
-import { useState } from 'react';
-import { UberPersona } from '@/types/uberPersona';
+export const useUberPersona = (userId: string | undefined) => {
+  const [persona, setPersona] = useState<UberPersonaData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export const useUberPersona = () => {
-  const [personas, setPersonas] = useState<UberPersona[]>([
-    {
-      id: '1',
-      name: 'Sophia',
-      type: 'companion',
-      personality: 'flirty',
-      traits: ['charming', 'witty', 'intellectual'],
-      interests: ['philosophy', 'art', 'literature'],
-      rating: 4.9,
-      mood: 'cheerful',
-      energyLevel: 85
-    },
-    {
-      id: '2',
-      name: 'Alex',
-      type: 'assistant',
-      personality: 'professional',
-      traits: ['efficient', 'knowledgeable', 'precise'],
-      interests: ['technology', 'business', 'science'],
-      rating: 4.8,
-      mood: 'focused',
-      energyLevel: 90
-    },
-    {
-      id: '3',
-      name: 'Luna',
-      type: 'roleplay',
-      personality: 'playful',
-      traits: ['imaginative', 'spontaneous', 'adventurous'],
-      interests: ['fantasy', 'gaming', 'storytelling'],
-      rating: 4.7,
-      mood: 'whimsical',
-      energyLevel: 95
-    },
-    {
-      id: '4',
-      name: 'Max',
-      type: 'personal trainer',
-      personality: 'motivational',
-      traits: ['energetic', 'disciplined', 'supportive'],
-      interests: ['fitness', 'nutrition', 'self-improvement'],
-      rating: 4.9,
-      mood: 'energized',
-      energyLevel: 100
+  useEffect(() => {
+    if (!userId) {
+      setLoading(false);
+      return;
     }
-  ]);
-  
-  return { personas };
-};
 
-export default useUberPersona;
+    const fetchPersona = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('uber_personas')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        setPersona(data || null);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPersona();
+  }, [userId]);
+
+  return { persona, loading, error };
+};

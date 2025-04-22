@@ -1,91 +1,51 @@
-
-import React, { useEffect, useRef } from 'react';
-import { Message } from '@/types/messaging';
-import { formatDistanceToNow } from 'date-fns';
-import { useAuth } from '@/contexts/AuthContext';
-import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import React from "react";
+import { formatDistanceToNow } from "date-fns";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ChatMessage } from "@/types/chat";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface MessageListProps {
-  messages: Message[];
-  loading: boolean;
+  messages: ChatMessage[];
 }
 
-const MessageList: React.FC<MessageListProps> = ({ messages, loading }) => {
+const MessageList: React.FC<MessageListProps> = ({ messages }) => {
   const { user } = useAuth();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-40">
-        <div className="animate-pulse flex space-x-2">
-          <div className="rounded-full bg-muted h-2 w-2"></div>
-          <div className="rounded-full bg-muted h-2 w-2"></div>
-          <div className="rounded-full bg-muted h-2 w-2"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (messages.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-40">
-        <p className="text-muted-foreground">No messages yet</p>
-        <p className="text-sm text-muted-foreground">Start the conversation by sending a message</p>
-      </div>
-    );
-  }
 
   return (
-    <div className="space-y-4 py-4 px-1">
-      {messages.map((message) => {
-        const isCurrentUser = message.sender_id === user?.id;
-        
-        return (
-          <div 
-            key={message.id} 
-            className={cn(
-              "flex items-start gap-2",
-              isCurrentUser ? "flex-row-reverse" : "flex-row"
-            )}
+    <div className="space-y-4">
+      {messages.map((message) => (
+        <div
+          key={message.id}
+          className={`flex items-start ${
+            message.senderId === user?.id ? "justify-end" : "justify-start"
+          }`}
+        >
+          {message.senderId !== user?.id && (
+            <Avatar className="w-8 h-8 mr-3">
+              <AvatarImage src={message.senderAvatar} alt={message.senderName} />
+              <AvatarFallback>{message.senderName.substring(0, 2)}</AvatarFallback>
+            </Avatar>
+          )}
+          <div
+            className={`rounded-lg p-3 text-sm w-fit max-w-[70%] ${
+              message.senderId === user?.id
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-secondary-foreground"
+            }`}
           >
-            {!isCurrentUser && (
-              <Avatar className="h-8 w-8 mt-0.5">
-                <AvatarImage src={message.sender?.avatar_url || ''} alt={message.sender?.username || 'User'} />
-                <AvatarFallback>
-                  {message.sender?.username?.[0]?.toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
-            )}
-            
-            <div 
-              className={cn(
-                "rounded-lg px-3 py-2 max-w-[80%]",
-                isCurrentUser 
-                  ? "bg-primary text-primary-foreground" 
-                  : "bg-muted"
-              )}
+            <div className="font-medium">{message.senderName}</div>
+            <p className="text-sm">{message.content}</p>
+            <time
+              dateTime={message.timestamp}
+              className="text-xs text-muted-foreground block mt-1"
             >
-              <div className="break-words">
-                {message.content}
-              </div>
-              <div 
-                className={cn(
-                  "text-xs mt-1",
-                  isCurrentUser ? "text-primary-foreground/70" : "text-muted-foreground"
-                )}
-              >
-                {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
-              </div>
-            </div>
+              {formatDistanceToNow(new Date(message.timestamp), {
+                addSuffix: true,
+              })}
+            </time>
           </div>
-        );
-      })}
-      <div ref={messagesEndRef} />
+        </div>
+      ))}
     </div>
   );
 };

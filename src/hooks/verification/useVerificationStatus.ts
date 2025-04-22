@@ -1,71 +1,87 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/auth/useAuthContext';
 
-interface VerificationHookResult {
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/components/ui/use-toast';
+
+export interface VerificationStatus {
   status: string;
-  isVerifying: boolean;
-  error: string | null;
-  submitVerification: (level?: string) => Promise<void>;
-  refreshStatus: () => Promise<void>;
+  canSubmit: boolean;
+  lastSubmitted?: Date | null;
+  reason?: string;
+  isVerified: boolean;
 }
 
-/**
- * useVerificationStatus Hook
- *
- * This hook provides the verification status of the current user and a function to submit
- * a verification request. It fetches the verification status from the user's profile and
- * allows the user to submit a verification request.
- */
-export const useVerificationStatus = (): VerificationHookResult => {
+export const useVerificationStatus = () => {
   const { user, profile, updateUserProfile } = useAuth();
-  const [status, setStatus] = useState<string>('NONE');
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [status, setStatus] = useState<VerificationStatus>({
+    status: 'not_started',
+    canSubmit: true,
+    isVerified: false
+  });
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch initial verification status from the user profile
-    if (profile?.verification_status) {
-      setStatus(profile.verification_status);
+    if (profile) {
+      // Use is_verified which exists in the profile type
+      const isVerified = !!profile.is_verified;
+      
+      setStatus({
+        status: isVerified ? 'verified' : 'not_started',
+        canSubmit: !isVerified,
+        isVerified
+      });
+      
+      setLoading(false);
     }
-  }, [profile?.verification_status]);
+  }, [profile]);
 
-  const refreshStatus = async () => {
-    // Refresh verification status from the user profile
-    if (profile?.verification_status) {
-      setStatus(profile.verification_status);
-    }
-  };
-
-  const submitVerification = async (level: string = 'BASIC') => {
-    setIsVerifying(true);
+  const submitVerification = async (documentUrl: string, selfieUrl: string) => {
+    if (!user) return false;
+    
+    setLoading(true);
     setError(null);
-
+    
     try {
-      // Simulate submitting a verification request
-      // In a real application, you would send a request to your backend
-      console.log(`Submitting verification request for level: ${level}`);
-
-      // Simulate a successful verification
-      const newStatus = 'PENDING';
-      setStatus(newStatus);
-
-      // Update the user profile with the new verification status
-      if (user && updateUserProfile) {
-        await updateUserProfile({ verification_status: newStatus });
-      }
-    } catch (err: any) {
-      console.error("Failed to submit verification request:", err);
-      setError("Failed to submit verification request. Please try again.");
+      // Update the user profile with verification data
+      const success = await updateUserProfile({
+        is_verified: false // Set to false initially until verification is approved
+      });
+      
+      if (!success) throw new Error("Failed to submit verification");
+      
+      setStatus({
+        ...status,
+        status: 'pending',
+        canSubmit: false,
+        lastSubmitted: new Date()
+      });
+      
+      toast({
+        title: "Verification submitted",
+        description: "Your verification has been submitted and is pending review.",
+      });
+      
+      return true;
+    } catch (error: any) {
+      setError(error.message || "Failed to submit verification");
+      
+      toast({
+        title: "Verification failed",
+        description: "There was an error submitting your verification.",
+        variant: "destructive"
+      });
+      
+      return false;
     } finally {
-      setIsVerifying(false);
+      setLoading(false);
     }
   };
 
   return {
     status,
-    isVerifying,
+    loading,
     error,
-    submitVerification,
-    refreshStatus
+    submitVerification
   };
 };

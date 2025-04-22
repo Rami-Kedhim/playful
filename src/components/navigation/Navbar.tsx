@@ -1,96 +1,84 @@
-
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, Settings, User } from "lucide-react";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { Menu } from "lucide-react";
+import NavItems from "./NavItems";
+import ProfileDropdown from "./ProfileDropdown";
 
 const Navbar = () => {
-  const { user, signOut } = useAuth();
-  
-  const handleLogout = async () => {
-    await signOut();
-  };
+  const { isAuthenticated, user } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="border-b bg-background">
-      <div className="container mx-auto px-4 flex items-center justify-between h-16">
-        <div className="flex items-center">
-          <Link to="/" className="text-xl font-semibold">
-            PulseBoost
-          </Link>
-          
-          <div className="ml-10 hidden md:flex items-center space-x-4">
-            <Link to="/" className="text-foreground/70 hover:text-foreground">
-              Home
-            </Link>
-            <Link to="/boost" className="text-foreground/70 hover:text-foreground">
-              Boost
-            </Link>
-            <Link to="/about" className="text-foreground/70 hover:text-foreground">
-              About
-            </Link>
-          </div>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="p-0">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.avatarUrl || user.avatar_url} alt={user.username || user.name || 'User'} />
-                    <AvatarFallback>
-                      {((user.username || user.name || user.email || 'U') as string).charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>
-                  {user.username || user.name || user.email}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/profile" className="flex w-full cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
-                    Profile
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/settings" className="flex w-full cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+    <div className="bg-background border-b sticky top-0 z-50">
+      <div className="container h-16 flex items-center justify-between py-4">
+        <Link to="/" className="font-bold text-xl">
+          UberEscorts
+        </Link>
+
+        <div className="hidden md:flex items-center space-x-4">
+          <NavItems />
+          {isAuthenticated ? (
+            <ProfileDropdown />
           ) : (
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" asChild>
-                <Link to="/login">Login</Link>
-              </Button>
-              <Button asChild>
-                <Link to="/register">Register</Link>
-              </Button>
-            </div>
+            <>
+              <Link to="/auth?tab=login">
+                <Button variant="outline" size="sm">
+                  Log In
+                </Button>
+              </Link>
+              <Link to="/auth?tab=register">
+                <Button size="sm">Sign Up</Button>
+              </Link>
+            </>
           )}
         </div>
+
+        <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+          <SheetTrigger asChild className="md:hidden">
+            <Button variant="ghost" size="sm">
+              <Menu className="h-4 w-4" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="sm:max-w-sm">
+            <SheetHeader>
+              <SheetTitle>Menu</SheetTitle>
+              <SheetDescription>
+                Explore the platform
+              </SheetDescription>
+            </SheetHeader>
+            <div className="py-4">
+              <NavItems />
+              <div className="mt-4">
+                {isAuthenticated ? (
+                  <ProfileDropdown />
+                ) : (
+                  <div className="flex flex-col space-y-2">
+                    <Link to="/auth?tab=login">
+                      <Button variant="outline" size="sm">
+                        Log In
+                      </Button>
+                    </Link>
+                    <Link to="/auth?tab=register">
+                      <Button size="sm">Sign Up</Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
-    </nav>
+    </div>
   );
 };
 
