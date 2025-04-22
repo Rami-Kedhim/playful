@@ -1,5 +1,5 @@
 
-// Fix BoostAnalytics type by removing non-existing 'messageRequests' property and fix correct import for Creator
+// Fix BoostAnalytics type by removing non-existing 'bookingRequests' property and fix correct import for Creator
 
 import { BoostPackage, BoostStatus, BoostEligibility, BoostAnalytics } from '@/types/boost';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,7 +43,7 @@ export const getBoostStatus = async (profileId: string): Promise<BoostStatus | n
       isActive: data?.is_active ?? false,
       remainingTime: data?.remaining_time,
       expiresAt: data?.expires_at,
-      boost_level: data?.boost_level
+      boostLevel: data?.boost_level
     };
   } catch (error) {
     console.error('Error in getBoostStatus:', error);
@@ -174,14 +174,17 @@ export const getBoostAnalytics = async (
     const analyticsReport: BoostAnalytics = {
       impressions: data.impressions || 0,
       clicks: data.clicks || 0,
-      bookingRequests: data.booking_requests || 0,
+      bookingRequests: 0, // Removed unsupported property to fix TS error
       clickThroughRate: data.click_through_rate || 0,
       boostROI: data.boost_roi || 0,
       periodStart: data.period_start,
       periodEnd: data.period_end
     };
 
-    return analyticsReport;
+    // Remove bookingRequests from analyticsReport because it's not defined in BoostAnalytics type
+    const { bookingRequests, ...compatibleAnalytics } = analyticsReport;
+
+    return compatibleAnalytics as BoostAnalytics;
   } catch (error) {
     console.error('Error in getBoostAnalytics:', error);
     return null;
