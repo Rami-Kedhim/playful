@@ -1,33 +1,59 @@
 
-import React from "react";
-import { BoostEligibility } from "@/types/boost";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import React from 'react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, Check, Info } from 'lucide-react';
+import { BoostEligibility } from '@/types/boost';
 
 interface BoostEligibilityCheckProps {
   eligibility: BoostEligibility;
-  children: React.ReactNode;
+  onResolve?: () => void;
+  showSuccessAlert?: boolean;
 }
 
-const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({
+export const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({
   eligibility,
-  children,
+  onResolve,
+  showSuccessAlert = false
 }) => {
+  if (!eligibility) {
+    return null;
+  }
+
   if (eligibility.isEligible) {
-    return <>{children}</>;
+    // Only show success message if explicitly requested
+    if (!showSuccessAlert) {
+      return null;
+    }
+
+    return (
+      <Alert className="mb-6 border-green-200 bg-green-50 text-green-800">
+        <Check className="h-5 w-5 text-green-600" />
+        <AlertTitle>Ready to Boost</AlertTitle>
+        <AlertDescription>
+          Your profile is eligible for boosting. Choose a package to get started!
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Not Eligible for Boosting</AlertTitle>
-        <AlertDescription>
-          {eligibility.reason || "Your profile doesn't meet the requirements for boosting."}
-        </AlertDescription>
-      </Alert>
-      {children}
-    </div>
+    <Alert className="mb-6" variant="destructive">
+      <AlertCircle className="h-5 w-5" />
+      <AlertTitle>Profile Not Eligible</AlertTitle>
+      <AlertDescription>
+        <div className="space-y-2">
+          <p>{eligibility.reason}</p>
+          {onResolve && (
+            <button
+              className="text-sm font-medium underline hover:no-underline"
+              onClick={onResolve}
+            >
+              Resolve Issue
+            </button>
+          )}
+        </div>
+      </AlertDescription>
+    </Alert>
   );
 };
 

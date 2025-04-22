@@ -1,157 +1,134 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { BoostStatus, BoostEligibility, BoostPackage } from '@/types/boost';
-import { useBoostManager } from './useBoostManager';
+import { useBoostManager, BoostPackage as BoostManagerPackage } from './useBoostManager';
 
-// Add adapter functions
-export const adaptBoostStatus = (status: any): BoostStatus => {
-  if (!status) return {
-    isActive: false,
-    startTime: new Date().toISOString(),
-    endTime: new Date().toISOString(),
-    remainingTime: '00:00:00',
-    progress: 0,
-    packageId: '',
-    packageName: '',
-    profileId: '',
-    timeRemaining: '00:00:00'
-  };
-
-  return {
-    isActive: status?.isActive || false,
-    startTime: status?.startTime || new Date().toISOString(),
-    endTime: status?.endTime || new Date().toISOString(),
-    remainingTime: status?.remainingTime || '00:00:00',
-    progress: status?.progress || 0,
-    packageId: status?.packageId || '',
-    packageName: status?.packageName || '',
-    profileId: status?.profileId || '',
-    timeRemaining: status?.timeRemaining || '00:00:00',
-    // Add other properties as needed
-  };
-};
-
-export const adaptBoostEligibility = (eligibility: any): BoostEligibility => {
-  if (!eligibility) return {
-    isEligible: false,
-    reason: 'Eligibility status unknown',
-  };
-
-  return {
-    isEligible: eligibility?.isEligible || false,
-    reason: eligibility?.reason || 'Eligibility status unknown',
-  };
-};
-
-export const adaptBoostPackages = (packages: any[]): BoostPackage[] => {
-  if (!packages || !Array.isArray(packages) || packages.length === 0) {
-    return [];
-  }
-
-  return packages.map(pkg => ({
-    id: pkg.id || '',
-    name: pkg.name || '',
-    description: pkg.description || '',
-    duration: pkg.duration || '00:00:00',
-    price: pkg.price || 0,
-    price_ubx: pkg.price_ubx || pkg.price || 0,
-    boost_power: pkg.boost_power || 1,
-    visibility_increase: pkg.visibility_increase || 0,
-    features: pkg.features || [],
-    image_url: pkg.image_url || '',
-    is_featured: pkg.is_featured || false,
-    badge_color: pkg.badge_color || '',
-    icon: pkg.icon || '',
-  }));
-};
-
-export const adaptGetBoostPrice = (getPrice: any) => {
-  return () => {
-    if (typeof getPrice === 'function') {
-      return getPrice();
-    }
-    return 15; // Default price
-  };
-};
-
-export const adaptFormatBoostDuration = (formatter: (duration: string) => string) => {
-  return (duration: string): string => {
-    return formatter(duration);
-  };
-};
-
-export const useBoostAdapters = (userId: string) => {
-  const { 
-    boostStatus: rawBoostStatus, 
-    eligibility: rawEligibility, 
-    boostPackages: rawPackages,
+export const useBoostAdapters = (profileId: string) => {
+  const {
     loading,
     error,
-    purchaseBoost: rawPurchaseBoost,
-    cancelBoost,
-    dailyBoostUsage,
-    dailyBoostLimit,
-    selectedPackage,
-    setSelectedPackage,
-    fetchBoostPackages,
-    getBoostAnalytics,
-  } = useBoostManager(userId);
-
-  // Get boost price for the selected package
-  const getBoostPrice = useCallback((): number => {
-    const selectedPackage = rawPackages && rawPackages.length > 0 ? rawPackages[0] : null;
-    return selectedPackage ? (selectedPackage.price_ubx || selectedPackage.price || 0) : 0;
-  }, [rawPackages]);
-
-  // Purchase boost with additional validation
-  const purchaseBoost = useCallback(async (boostPackage: BoostPackage): Promise<boolean> => {
-    try {
-      // Adapt the boost package to the format expected by rawPurchaseBoost
-      const adaptedPackage = {
-        id: boostPackage.id,
-        name: boostPackage.name,
-        price: boostPackage.price,
-        price_ubx: boostPackage.price_ubx,
-        // Add other properties needed by rawPurchaseBoost
-      };
-      return await rawPurchaseBoost(adaptedPackage);
-    } catch (err) {
-      console.error("Error in purchaseBoost adapter:", err);
-      return false;
-    }
-  }, [rawPurchaseBoost]);
-
-  // Format boost duration for display
-  const formatBoostDuration = (duration: string): string => {
-    const [hours, minutes] = duration.split(':').map(Number);
-    if (hours >= 24) {
-      const days = Math.floor(hours / 24);
-      return `${days} ${days === 1 ? 'day' : 'days'}`;
-    }
-    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
-  };
-
-  return {
     boostStatus: rawBoostStatus,
     eligibility: rawEligibility,
     boostPackages: rawPackages,
     dailyBoostUsage,
     dailyBoostLimit,
+    purchaseBoost: rawPurchaseBoost,
+    cancelBoost: rawCancelBoost
+  } = useBoostManager(profileId);
+
+  // Adapter for boost status
+  const adaptBoostStatus = useCallback((status: any): BoostStatus => {
+    if (!status) {
+      return {
+        isActive: false,
+        startTime: '',
+        endTime: '',
+        remainingTime: ''
+      };
+    }
+
+    return {
+      isActive: status.isActive || false,
+      startTime: status.startTime || '',
+      endTime: status.endTime || '',
+      remainingTime: status.remainingTime || '',
+      progress: status.progress,
+      packageId: status.packageId,
+      packageName: status.packageName,
+      profileId: status.profileId,
+      timeRemaining: status.timeRemaining,
+      activeBoostId: status.activeBoostId,
+      expiresAt: status.expiresAt,
+      boostPackage: status.boostPackage ? adaptBoostPackage(status.boostPackage) : undefined,
+      pulseData: status.pulseData
+    };
+  }, []);
+
+  // Adapter for boost eligibility
+  const adaptBoostEligibility = useCallback((eligibility: any): BoostEligibility => {
+    return {
+      isEligible: eligibility.isEligible || false,
+      reason: eligibility.reason || 'Unknown'
+    };
+  }, []);
+
+  // Adapter for a single boost package
+  const adaptBoostPackage = useCallback((pkg: any): BoostPackage => {
+    return {
+      id: pkg.id || '',
+      name: pkg.name || '',
+      description: pkg.description || '',
+      duration: pkg.duration || '',
+      price: pkg.price || 0,
+      price_ubx: pkg.price_ubx || 0,
+      boost_power: pkg.boost_power || 0,
+      visibility_increase: pkg.visibility_increase || 0,
+      features: pkg.features || [],
+      image_url: pkg.image_url,
+      is_featured: pkg.is_featured,
+      badge_color: pkg.badge_color,
+      icon: pkg.icon
+    };
+  }, []);
+
+  // Adapter for boost packages
+  const adaptBoostPackages = useCallback((packages: any[]): BoostPackage[] => {
+    if (!packages || !Array.isArray(packages)) {
+      return [];
+    }
+    
+    return packages.map(pkg => adaptBoostPackage(pkg));
+  }, [adaptBoostPackage]);
+
+  // Function to adapt formatBoostDuration
+  const adaptFormatBoostDuration = useCallback((formatter: (duration: string) => string) => {
+    return (duration: string) => {
+      return formatter(duration);
+    };
+  }, []);
+
+  // Adapter for purchase boost function
+  const purchaseBoost = useCallback(async (pkg: BoostPackage): Promise<boolean> => {
+    try {
+      // Create a package object compatible with the raw useBoostManager
+      const managerPackage: BoostManagerPackage = {
+        id: pkg.id,
+        name: pkg.name,
+        price: pkg.price || 0,
+        description: pkg.description || '',
+        duration: pkg.duration || '',
+        features: pkg.features || []
+      };
+      
+      return await rawPurchaseBoost(managerPackage);
+    } catch (error) {
+      console.error('Error purchasing boost:', error);
+      return false;
+    }
+  }, [rawPurchaseBoost]);
+
+  // Format duration (common util)
+  const formatBoostDuration = useCallback((duration: string): string => {
+    const [hours, minutes] = duration.split(':').map(Number);
+    return hours >= 24 ? 
+      `${Math.floor(hours / 24)} days` : 
+      `${hours} hours`;
+  }, []);
+
+  return {
     loading,
     error,
+    boostStatus: rawBoostStatus,
+    eligibility: rawEligibility,
+    boostPackages: rawPackages,
+    dailyBoostUsage,
+    dailyBoostLimit,
     purchaseBoost,
-    cancelBoost,
-    getBoostPrice,
-    adaptFormatBoostDuration,
-    formatBoostDuration,
-    selectedPackage,
-    setSelectedPackage,
-    fetchBoostPackages,
-    getBoostAnalytics,
-    // Export the adapter functions
+    cancelBoost: rawCancelBoost,
     adaptBoostStatus,
     adaptBoostEligibility,
     adaptBoostPackages,
-    adaptGetBoostPrice
+    adaptFormatBoostDuration,
+    formatBoostDuration
   };
 };

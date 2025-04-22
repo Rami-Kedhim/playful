@@ -1,11 +1,21 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Zap, Check } from 'lucide-react';
-import { BoostPackagesProps } from '../types';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Check, Zap } from "lucide-react";
 import { BoostPackage } from '@/types/boost';
+
+export interface BoostPackagesProps {
+  packages: BoostPackage[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+  formatDuration: (duration: string) => string;
+  dailyUsage: number;
+  dailyLimit: number;
+  disabled?: boolean;
+  getBoostPrice?: () => number;
+}
 
 const BoostPackages: React.FC<BoostPackagesProps> = ({
   packages,
@@ -14,63 +24,91 @@ const BoostPackages: React.FC<BoostPackagesProps> = ({
   formatDuration,
   dailyUsage,
   dailyLimit,
-  disabled = false
+  disabled = false,
+  getBoostPrice
 }) => {
+  if (packages.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">No packages available right now.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-muted-foreground">Select Boost Package</h3>
-        <div className="text-xs text-muted-foreground">
-          Daily usage: <span className="font-medium">{dailyUsage}/{dailyLimit}</span>
-        </div>
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">Select a Package</h3>
+        <Badge variant="outline">
+          {dailyUsage} / {dailyLimit} today
+        </Badge>
       </div>
-
-      <RadioGroup value={selectedId} onValueChange={onSelect} className="space-y-2">
-        {packages.map((pkg: BoostPackage) => (
-          <Card 
-            key={pkg.id} 
-            className={`border ${selectedId === pkg.id ? 'border-primary' : 'border-border'} cursor-pointer transition-all`}
+      
+      <RadioGroup value={selectedId} onValueChange={onSelect}>
+        {packages.map((pkg) => (
+          <div
+            key={pkg.id}
+            className="mb-3"
           >
-            <CardContent className="p-3 flex gap-2">
-              <RadioGroupItem value={pkg.id} id={pkg.id} disabled={disabled} className="mt-1" />
-              <div className="flex-1">
-                <Label 
-                  htmlFor={pkg.id} 
-                  className={`flex items-start justify-between cursor-pointer ${disabled ? 'opacity-60' : ''}`}
-                >
-                  <div>
-                    <div className="font-medium flex items-center">
-                      {pkg.name}
-                      {pkg.id === selectedId && (
-                        <Check className="h-4 w-4 ml-1 text-primary" />
-                      )}
+            <label
+              htmlFor={`pkg-${pkg.id}`}
+              className="cursor-pointer"
+            >
+              <Card
+                className={`transition-all ${
+                  selectedId === pkg.id
+                    ? "border-primary ring-1 ring-primary"
+                    : ""
+                } ${disabled ? "opacity-70" : "hover:border-primary/50"}`}
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="flex items-center">
+                        <Zap className="mr-1 h-4 w-4 text-primary" />
+                        {pkg.name}
+                      </CardTitle>
+                      <CardDescription>{pkg.description}</CardDescription>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      Duration: {formatDuration(pkg.duration)}
+                    <RadioGroupItem
+                      value={pkg.id}
+                      id={`pkg-${pkg.id}`}
+                      className="mt-1"
+                      disabled={disabled}
+                    />
+                  </div>
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xl font-semibold">
+                        {pkg.price_ubx} UBX
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        (≈ ${pkg.price})
+                      </span>
                     </div>
-                    {pkg.description && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {pkg.description}
-                      </div>
-                    )}
-                    {pkg.features && pkg.features.length > 0 && (
-                      <ul className="text-xs text-muted-foreground mt-1 space-y-0.5">
-                        {pkg.features.map((feature, i) => (
-                          <li key={i} className="flex items-center">
-                            <Zap className="h-3 w-3 mr-1 text-primary" />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                    
+                    <span className="text-sm text-muted-foreground">
+                      {formatDuration(pkg.duration)}
+                    </span>
                   </div>
-                  <div className="font-bold text-right">
-                    {pkg.price_ubx} UBX
+                  
+                  <div className="mt-3 border-t pt-3">
+                    <ul className="text-sm space-y-1">
+                      {pkg.features?.map((feature, i) => (
+                        <li key={i} className="flex items-center gap-2">
+                          <Check className="h-3 w-3 text-primary flex-shrink-0" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                </Label>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </label>
+          </div>
         ))}
       </RadioGroup>
     </div>

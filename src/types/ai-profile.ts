@@ -1,86 +1,49 @@
 
-// Enhanced AIProfile interface
 export interface AIProfile {
   id: string;
   name: string;
+  displayName: string;
+  imageUrl: string;
+  thumbnailUrl: string;
   description?: string;
-  imageUrl?: string;
-  age?: number;
-  country?: string;
-  language?: string;
-  personality?: {
-    type?: string;
-    [key: string]: any;
-  };
-  interests?: string[];
-  tags?: string[];
-  category?: string;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-  
-  // Additional properties needed by components
-  avatar_url?: string;
-  avatarUrl?: string;
-  location?: string;
   bio?: string;
+  personality?: string;
   type?: string;
-  lucoin_chat_price?: number;
-  lucoin_image_price?: number;
-  boost_status?: any;
-  subscription_price?: number;
+  tags?: string[];
+  createdAt: string;
+  updatedAt?: string;
+  created_at?: string;
+  availability_status?: string;
+  systemMetadata?: {
+    version?: string;
+    lastSynced?: Date;
+    personalityIndex?: number;
+    statusFlags?: {
+      needsModeration?: boolean;
+      hasPendingUpdates?: boolean;
+    }
+  };
+  stats?: {
+    followerCount?: number;
+    messageCount?: number;
+    responseRate?: number;
+    averageResponseTime?: number;
+  };
+  features?: string[];
+  settings?: {
+    voiceEnabled?: boolean;
+    imageGenerationEnabled?: boolean;
+    personalityLevel?: number;
+  };
+  subscription?: {
+    price?: number;
+    currency?: string;
+    interval?: string;
+  };
   premium_content_count?: {
     photos?: number;
     videos?: number;
     messages?: number;
     [key: string]: number | undefined;
   };
-  gallery_images?: string[];
-  livecam_enabled?: boolean;
-  profileStats?: {
-    photos: number;
-    videos: number;
-    messages: number;
-  };
-}
-
-// AI Message interface
-export interface AIMessage {
-  id: string;
-  content: string;
-  role: 'user' | 'assistant' | 'system';
-  timestamp: Date | string;
-  has_read?: boolean;
-  requires_payment?: boolean;
-  payment_status?: string;
-  sender?: string;
-  price?: number;
-}
-
-// AI Conversation interface
-export interface AIConversation {
-  id: string;
-  messages: AIMessage[];
-  aiProfileId: string;
-  userId: string;
-  createdAt: Date | string;
-  updatedAt: Date | string;
-}
-
-// AI Generation Options
-export interface AIGenerationOptions {
-  count?: number;
-  personalityTypes?: string[];
-  ageRange?: {
-    min: number;
-    max: number;
-  };
-  regions?: string[];
-}
-
-// Processing Status
-export interface ProcessingStatus {
-  completedCount: number;
-  totalCount: number;
-  status: 'idle' | 'processing' | 'completed' | 'error';
-  message?: string;
 }

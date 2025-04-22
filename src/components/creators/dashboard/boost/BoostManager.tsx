@@ -1,8 +1,19 @@
 
-import { BoostManagerContainerProps } from "./types";
-import BoostManagerContainer from "./BoostManagerContainer";
+import { BoostManagerContainer } from "./BoostManagerContainer";
 
-const BoostManager = (props: BoostManagerContainerProps) => {
+export interface BoostManagerProps {
+  profileId?: string;
+  creatorId?: string;
+  profileCompleteness?: number;
+  isVerified?: boolean;
+  rating?: number;
+  profileCreatedDate?: Date;
+  country?: string;
+  role?: "verified" | "regular" | "AI";
+  ubxBalance?: number;
+}
+
+const BoostManager = (props: BoostManagerProps) => {
   // Extract the profileId from the props
   const { profileId, creatorId } = props;
   

@@ -1,59 +1,57 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { BoostPackage } from '@/types/boost';
 
-export const useBoostPackages = () => {
+export const useBoostPackages = (): BoostPackage[] => {
   const [packages, setPackages] = useState<BoostPackage[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchPackages = useCallback(async () => {
-    try {
-      setLoading(true);
-      
-      // In a real app, this would be an API call
-      // For demo, we'll use mock data
+  
+  useEffect(() => {
+    // Simulated API fetch of boost packages
+    const fetchPackages = async () => {
+      // Mock data
       const mockPackages: BoostPackage[] = [
         {
-          id: "boost-1",
-          name: "1-Hour Boost",
-          duration: "01:00:00",
-          price_ubx: 5,
-          description: "Quick visibility boost",
-          features: ["Top search position", "Featured badge"]
+          id: 'basic',
+          name: 'Basic Boost',
+          price: 15,
+          price_ubx: 150,
+          description: '6-hour visibility boost',
+          duration: '06:00:00',
+          boost_power: 20,
+          visibility_increase: 25,
+          features: ['Featured in search results', 'Higher ranking'],
         },
         {
-          id: "boost-3",
-          name: "3-Hour Boost",
-          duration: "03:00:00",
-          price_ubx: 15,
-          description: "Standard visibility boost",
-          features: ["Top search position", "Featured badge", "Profile highlighting"]
+          id: 'standard',
+          name: 'Standard Boost',
+          price: 30,
+          price_ubx: 300,
+          description: '24-hour visibility boost',
+          duration: '24:00:00',
+          boost_power: 50,
+          visibility_increase: 75,
+          features: ['Featured in search results', 'Higher ranking', 'Featured on homepage'],
         },
         {
-          id: "boost-24",
-          name: "24-Hour Boost",
-          duration: "24:00:00",
-          price_ubx: 50,
-          description: "Full day visibility boost",
-          features: ["Top search position", "Featured badge", "Profile highlighting", "Priority in all listings"]
+          id: 'premium',
+          name: 'Premium Boost',
+          price: 50,
+          price_ubx: 500,
+          description: '3-day visibility boost',
+          duration: '72:00:00',
+          boost_power: 100,
+          visibility_increase: 150,
+          features: ['Featured in search results', 'Higher ranking', 'Featured on homepage', 'Premium badge'],
         }
       ];
       
       setPackages(mockPackages);
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching boost packages:", err);
-      setError("Failed to fetch boost packages");
-    } finally {
-      setLoading(false);
-    }
+    };
+    
+    fetchPackages();
   }, []);
-
-  return {
-    packages,
-    loading,
-    error,
-    fetchPackages
-  };
+  
+  return packages;
 };
+
+export default useBoostPackages;

@@ -1,16 +1,12 @@
 
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Clock, Award, Activity, Info } from 'lucide-react';
-import BoostPackages from '../BoostPackages';
-import HermesBoostInfo from './HermesBoostInfo';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import BoostPackages from './BoostPackages';
+import BoostEligibilityCheck from './BoostEligibilityCheck';
 import BoostActivePackage from './BoostActivePackage';
-import { cx } from 'class-variance-authority';
-
-// Import the types from the types file
+import HermesBoostInfo from '../HermesBoostInfo';
 import { BoostDialogTabsProps } from '../types';
 
 const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
@@ -27,195 +23,116 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   dailyBoostUsage,
   dailyBoostLimit,
   hermesStatus,
-  formatBoostDuration,
-  getBoostPrice,
-  handlePurchase,
-  handleDialogClose,
-  boostAnalytics
+  formatBoostDuration = (duration) => {
+    const [hours] = duration.split(':').map(Number);
+    return hours >= 24 ? `${Math.floor(hours / 24)} days` : `${hours} hours`;
+  },
+  getBoostPrice = () => 0,
+  handleDialogClose
 }) => {
-  // Format duration using the prop or fallback to internal function
-  const formatDuration = formatBoostDuration || ((duration: string): string => {
-    const [hours, minutes] = duration.split(':').map(Number);
-    if (hours >= 24) {
-      const days = Math.floor(hours / 24);
-      return `${days} ${days === 1 ? 'day' : 'days'}`;
-    }
-    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
-  });
-
   return (
-    <Tabs
-      defaultValue="boost"
-      value={activeTab}
-      onValueChange={setActiveTab}
-      className="w-full space-y-5"
-    >
-      <TabsList className="grid grid-cols-3">
-        <TabsTrigger value="boost" disabled={loading}>
-          Boost Now
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <TabsList className="grid w-full grid-cols-3">
+        <TabsTrigger value="active">
+          {boostStatus?.isActive ? "Active Boost" : "Status"}
         </TabsTrigger>
-        <TabsTrigger value="analytics" disabled={loading || !boostStatus?.isActive}>
+        <TabsTrigger value="packages" disabled={loading}>
+          Packages
+        </TabsTrigger>
+        <TabsTrigger value="analytics" disabled={loading}>
           Analytics
         </TabsTrigger>
-        <TabsTrigger value="settings" disabled={loading}>
-          Settings
-        </TabsTrigger>
       </TabsList>
-
-      <TabsContent value="boost">
-        {!eligibility.isEligible && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Not Eligible</AlertTitle>
-            <AlertDescription>
-              {eligibility.reason || 'You are not eligible for boosting at this time.'}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {boostStatus?.isActive ? (
+      
+      <div className="mt-4">
+        {/* Active Boost Tab */}
+        <TabsContent value="active">
+          {boostStatus?.isActive ? (
+            <div className="space-y-6">
+              <BoostActivePackage 
+                boostStatus={boostStatus} 
+                hermesData={hermesStatus}
+              />
+              
+              <div className="flex justify-end mt-4">
+                <Button 
+                  variant="destructive"
+                  onClick={handleCancel}
+                  disabled={loading}
+                  className="w-full"
+                >
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Cancel Boost
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <BoostEligibilityCheck eligibility={eligibility} />
+              
+              <p className="text-sm text-muted-foreground">
+                No active boost. Select a boost package to increase your profile visibility.
+              </p>
+              
+              <Button 
+                onClick={() => setActiveTab('packages')} 
+                disabled={!eligibility?.isEligible || loading}
+                className="w-full"
+              >
+                View Packages
+              </Button>
+            </div>
+          )}
+        </TabsContent>
+        
+        {/* Packages Tab */}
+        <TabsContent value="packages">
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold flex items-center">
-                  <Activity className="mr-2 h-5 w-5 text-green-500" />
-                  Active Boost
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <BoostActivePackage
-                  boostStatus={boostStatus}
-                  hermesData={{
-                    position: hermesStatus.position,
-                    activeUsers: hermesStatus.activeUsers,
-                    estimatedVisibility: hermesStatus.estimatedVisibility,
-                    lastUpdateTime: hermesStatus.lastUpdateTime
-                  }}
-                />
-
-                <div className="mt-6">
-                  <Button
-                    onClick={handleCancel}
-                    variant="destructive"
-                    disabled={loading}
-                    className="w-full"
-                  >
-                    {loading ? "Cancelling..." : "Cancel Boost"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold">
-                  Boost Metrics
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <HermesBoostInfo 
-                  hermesStatus={hermesStatus}
-                />
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold flex items-center">
-                  <Clock className="mr-2 h-5 w-5" />
-                  Boost Packages
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            <BoostEligibilityCheck eligibility={eligibility} />
+            
+            {eligibility?.isEligible && (
+              <>
                 <BoostPackages
                   packages={boostPackages}
                   selectedId={selectedPackage}
                   onSelect={setSelectedPackage}
-                  formatDuration={formatDuration}
-                  getBoostPrice={getBoostPrice}
+                  formatDuration={formatBoostDuration}
                   dailyUsage={dailyBoostUsage}
                   dailyLimit={dailyBoostLimit}
-                  disabled={!eligibility.isEligible || loading}
+                  disabled={loading}
+                  getBoostPrice={getBoostPrice}
                 />
-
-                <div className="mt-6">
-                  <Button
-                    onClick={handlePurchase || handleBoost}
-                    variant="default"
-                    disabled={!eligibility.isEligible || loading || !selectedPackage}
-                    className="w-full"
+                
+                <div className="flex justify-end gap-2 mt-4">
+                  <Button variant="outline" onClick={handleDialogClose}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleBoost}
+                    disabled={!selectedPackage || loading}
                   >
-                    {loading ? "Processing..." : "Activate Boost"}
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Apply Boost
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold flex items-center">
-                  <Award className="mr-2 h-5 w-5" />
-                  Visibility Analysis
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <HermesBoostInfo 
-                  hermesStatus={hermesStatus}
-                />
-              </CardContent>
-            </Card>
+              </>
+            )}
           </div>
-        )}
-      </TabsContent>
-
-      <TabsContent value="analytics">
-        <Card>
-          <CardHeader>
-            <CardTitle>Boost Performance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center p-6">
-              <p className="text-muted-foreground">
-                Analytics data is being processed. Check back soon.
-              </p>
+        </TabsContent>
+        
+        {/* Analytics Tab */}
+        <TabsContent value="analytics">
+          <div className="space-y-6">
+            <HermesBoostInfo hermesStatus={hermesStatus} />
+            
+            <div className="flex justify-end mt-4">
+              <Button variant="outline" onClick={handleDialogClose}>
+                Close
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-      </TabsContent>
-
-      <TabsContent value="settings">
-        <Card>
-          <CardHeader>
-            <CardTitle>Boost Settings</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span>Auto-renew boost</span>
-                <div className="flex h-6 w-11 rounded-full bg-gray-200 p-1 transition-all dark:bg-gray-700">
-                  <div className="h-4 w-4 rounded-full bg-white transition-all"></div>
-                </div>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span>Receive boost notifications</span>
-                <div className="flex h-6 w-11 rounded-full bg-primary p-1 transition-all">
-                  <div className="h-4 w-4 translate-x-5 rounded-full bg-white transition-all"></div>
-                </div>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span>Show boost badge on profile</span>
-                <div className="flex h-6 w-11 rounded-full bg-primary p-1 transition-all">
-                  <div className="h-4 w-4 translate-x-5 rounded-full bg-white transition-all"></div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </TabsContent>
+          </div>
+        </TabsContent>
+      </div>
     </Tabs>
   );
 };

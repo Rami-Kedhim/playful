@@ -1,3 +1,4 @@
+
 export interface LivecamModel {
   id: string;
   username: string;
@@ -21,6 +22,10 @@ export interface LivecamModel {
   profileUrl?: string;
   age?: number;
   description?: string;
+  streamUrl?: string;
+  boosted?: boolean;
+  boostScore?: number;
+  featured?: boolean;
 }
 
 export interface Livecam {
@@ -38,6 +43,7 @@ export interface Livecam {
   category: string;
   rating: number;
   price?: number;
+  profileImageUrl?: string;
 }
 
 export interface LivecamCategory {
@@ -54,4 +60,11 @@ export interface LivecamFilter {
   language?: string;
   isLive?: boolean;
   sort?: 'popular' | 'newest' | 'rating';
+}
+
+export interface BoostableLivecamsOptions {
+  limit?: number;
+  filter?: LivecamFilter;
+  includeOffline?: boolean;
+  boostOnly?: boolean;
 }

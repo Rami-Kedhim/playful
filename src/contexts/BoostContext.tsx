@@ -2,12 +2,12 @@
 import React, { createContext, useContext, useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { useBoostAdapters } from '@/hooks/boost/useBoostAdapters';
-import { BoostStatus, BoostEligibility, BoostPackage } from '@/types/boost';
+import { BoostStatus, BoostEligibility, BoostPackage, BoostAnalytics } from '@/types/boost';
 import { useAuth } from '@/hooks/auth/useAuth';
 
 interface BoostContextType {
   isActive: boolean;
-  isLoading: boolean; // Added isLoading property
+  isLoading: boolean;
   boostStatus: BoostStatus | null;
   eligibility: BoostEligibility;
   boostPackages: BoostPackage[];
@@ -15,6 +15,7 @@ interface BoostContextType {
   dailyBoostLimit: number;
   loading: boolean;
   error: string | null;
+  boostAnalytics: BoostAnalytics | null;
   purchaseBoost: (pkg: BoostPackage) => Promise<boolean>;
   cancelBoost: () => Promise<boolean>;
 }
@@ -35,6 +36,7 @@ export const useBoostContext = useBoost;
 export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [boostAnalytics, setBoostAnalytics] = useState<BoostAnalytics | null>(null);
   
   const {
     boostStatus: rawBoostStatus,
@@ -60,7 +62,7 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <BoostContext.Provider value={{
       isActive,
-      isLoading: loading || boostLoading, // Expose isLoading property
+      isLoading: loading || boostLoading,
       boostStatus,
       eligibility,
       boostPackages,
@@ -68,6 +70,7 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       dailyBoostLimit,
       loading: loading || boostLoading,
       error,
+      boostAnalytics,
       purchaseBoost: async (pkg: BoostPackage) => {
         try {
           loading && setLoading(true);

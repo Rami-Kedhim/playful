@@ -1,352 +1,264 @@
 
-import { useState, useCallback, useEffect } from "react";
-import { toast } from "@/hooks/use-toast";
-import { AnalyticsData } from "./useBoostAnalytics";
-import { GLOBAL_UBX_RATE, validateGlobalPrice } from "@/utils/oxum/globalPricing";
-
-// Define service stub if not available
-const boostService = {
-  fetchBoostPackages: async () => [
-    {
-      id: "boost-1",
-      name: "24-Hour Boost",
-      description: "Standard boost for 24 hours",
-      duration: "24:00:00",
-      price_ubx: GLOBAL_UBX_RATE,
-      features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking"]
-    },
-    {
-      id: "boost-2",
-      name: "Weekend Boost",
-      description: "3-day visibility boost",
-      duration: "72:00:00",
-      price_ubx: GLOBAL_UBX_RATE * 2.5,
-      features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking", "Extended duration"]
-    }
-  ],
-  fetchActiveBoost: async (profileId: string) => ({
-    isActive: Math.random() > 0.7, // 30% chance of having active boost
-    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-    remainingTime: "18 hours remaining"
-  }),
-  checkBoostEligibility: async (profileId: string) => ({
-    isEligible: true,
-    reason: ""
-  }),
-  purchaseBoost: async (profileId: string, boostPackageId: string) => ({
-    success: true,
-    message: "Boost purchased successfully"
-  }),
-  cancelBoost: async (profileId: string) => ({
-    success: true,
-    message: "Boost cancelled successfully"
-  }),
-  fetchBoostAnalytics: async (profileId: string) => ({
-    impressions: {
-      today: 234,
-      yesterday: 180,
-      weeklyAverage: 200,
-      withBoost: 280,
-      withoutBoost: 120,
-      increase: 133
-    },
-    clicks: {
-      today: 45,
-      yesterday: 30,
-      weeklyAverage: 35,
-      withBoost: 50,
-      withoutBoost: 25,
-      increase: 100
-    },
-    engagementRate: 19.2,
-    conversionRate: 5.3,
-    boostEfficiency: 78,
-    additionalViews: 120,
-    engagementIncrease: 25,
-    rankingPosition: 3
-  })
-};
-
-// Define and export types
-export interface BoostStatus {
-  isActive: boolean;
-  activeBoostId?: string;
-  startTime?: Date;
-  endTime?: Date;
-  timeRemaining?: string;
-}
-
-export interface BoostEligibility {
-  isEligible: boolean;
-  reasons?: string[];
-  reason?: string;
-}
+import { useState, useEffect, useCallback } from 'react';
+import { BoostStatus, BoostEligibility, BoostAnalytics } from '@/types/boost';
 
 export interface BoostPackage {
   id: string;
   name: string;
+  price: number;
   description: string;
   duration: string;
-  price: number;
   features: string[];
+  boost_power?: number;
+  visibility_increase?: number;
+  price_ubx?: number;
 }
 
-// Format boost duration in hours to user-friendly string
-export const formatBoostDuration = (duration: string | number): string => {
-  if (typeof duration === 'string') {
-    if (duration.includes(':')) {
-      const [hours] = duration.split(':').map(Number);
-      if (hours < 1) {
-        return `${Math.round(hours * 60)} minutes`;
-      } else if (hours === 1) {
-        return "1 hour";
-      } else {
-        return `${hours} hours`;
-      }
-    }
-    return duration;
-  }
-  
-  const hours = duration;
-  if (hours < 1) {
-    return `${Math.round(hours * 60)} minutes`;
-  } else if (hours === 1) {
-    return "1 hour";
-  } else if (Number.isInteger(hours)) {
-    return `${hours} hours`;
-  } else {
-    const h = Math.floor(hours);
-    const m = Math.round((hours - h) * 60);
-    return `${h} hour${h !== 1 ? 's' : ''} ${m} min`;
-  }
-};
+interface UseBoostManagerResult {
+  loading: boolean;
+  error: string | null;
+  boostStatus: any;
+  eligibility: any;
+  boostPackages: BoostPackage[];
+  dailyBoostUsage: number;
+  dailyBoostLimit: number;
+  purchaseBoost: (pkg: BoostPackage) => Promise<boolean>;
+  cancelBoost: () => Promise<boolean>;
+  hermesBoostData: any;
+}
 
-export const useBoostManager = (profileId?: string) => {
+export const useBoostManager = (profileId: string): UseBoostManagerResult => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [boostStatus, setBoostStatus] = useState<BoostStatus>({ isActive: false });
-  const [eligibility, setEligibility] = useState<BoostEligibility>({ isEligible: false });
+  const [boostStatus, setBoostStatus] = useState<any>(null);
+  const [eligibility, setEligibility] = useState<any>({ isEligible: true });
   const [boostPackages, setBoostPackages] = useState<BoostPackage[]>([]);
-  const [selectedPackage, setSelectedPackage] = useState<BoostPackage | null>(null);
-  const [dailyBoostUsage, setDailyBoostUsage] = useState(0);
-  const DAILY_BOOST_LIMIT = 4;
-  
-  // Fetch available boost packages
-  const fetchBoostPackages = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Fetch boost packages from the service
-      const packages = await boostService.fetchBoostPackages();
-      
-      // Convert the API response to our internal format
-      const formattedPackages: BoostPackage[] = packages.map(pkg => ({
-        id: pkg.id,
-        name: pkg.name,
-        description: pkg.description || '',
-        duration: pkg.duration,
-        price: pkg.price_ubx,
-        features: pkg.features || []
-      }));
-      
-      setBoostPackages(formattedPackages);
-      
-      // Check active boost status
-      if (profileId) {
-        const activeBoostStatus = await boostService.fetchActiveBoost(profileId);
-        
-        if (activeBoostStatus?.isActive) {
-          setBoostStatus({
-            isActive: true,
-            activeBoostId: "active-boost-1",
-            startTime: activeBoostStatus.expiresAt 
-              ? new Date(activeBoostStatus.expiresAt.getTime() - 2 * 60 * 60 * 1000)  // Approximate
-              : new Date(),
-            endTime: activeBoostStatus.expiresAt,
-            timeRemaining: activeBoostStatus.remainingTime
-          });
-        }
-        
-        // Check eligibility
-        const eligibilityResult = await boostService.checkBoostEligibility(profileId);
-        setEligibility(eligibilityResult);
-        
-        // Get daily usage (this is a placeholder - real implementation would track this)
-        const dailyBoostsUsed = Math.min(
-          Math.floor(Math.random() * DAILY_BOOST_LIMIT), 
-          DAILY_BOOST_LIMIT - (eligibilityResult.isEligible ? 1 : 0)
-        );
-        setDailyBoostUsage(dailyBoostsUsed);
-      }
-    } catch (err: any) {
-      console.error("Error fetching boost packages:", err);
-      setError("Failed to load boost packages. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
-  }, [profileId]);
-  
-  // Calculate boost price - enforce global pricing
-  const getBoostPrice = useCallback(() => {
-    // Always return GLOBAL_UBX_RATE to match expected function signature
-    return GLOBAL_UBX_RATE;
-  }, []);
-  
-  // Purchase boost
-  const purchaseBoost = useCallback(async (boostPackage: BoostPackage): Promise<boolean> => {
-    if (!profileId) {
-      toast({
-        title: "Error",
-        description: "Profile ID is required to purchase a boost",
-        variant: "destructive"
-      });
-      return false;
-    }
+  const [dailyBoostUsage] = useState(0);
+  const [dailyBoostLimit] = useState(3);
+  const [hermesBoostData, setHermesBoostData] = useState<any>(null);
+
+  // Mock data for demonstration
+  useEffect(() => {
+    if (!profileId) return;
+
+    setLoading(true);
     
-    try {
-      setLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      // Mock boost status
+      const isActive = Math.random() > 0.7;
       
-      // Enforce Oxum Rule #001: Validate global price symmetry
-      try {
-        validateGlobalPrice(boostPackage.price);
-      } catch (error: any) {
-        console.error("Oxum Rule Violation:", error);
-        toast({
-          title: "Oxum Rule Violation",
-          description: "Price inconsistency detected. Transaction halted.",
-          variant: "destructive"
-        });
-        return false;
-      }
-      
-      // Call the service to purchase the boost
-      const result = await boostService.purchaseBoost(profileId, boostPackage.id);
-      
-      if (!result.success) {
-        toast({
-          title: "Error",
-          description: result.message || "Failed to purchase boost",
-          variant: "destructive"
-        });
-        return false;
-      }
-      
-      // Refresh the boost status
-      const updatedBoost = await boostService.fetchActiveBoost(profileId);
-      
-      if (updatedBoost?.isActive) {
+      if (isActive) {
+        const endTime = new Date();
+        endTime.setHours(endTime.getHours() + 24);
+        
         setBoostStatus({
           isActive: true,
-          activeBoostId: boostPackage.id,
-          startTime: new Date(),
-          endTime: updatedBoost.expiresAt,
-          timeRemaining: updatedBoost.remainingTime
+          startTime: new Date().toISOString(),
+          endTime: endTime.toISOString(),
+          remainingTime: '23:45:00',
+          packageId: 'standard',
+          packageName: 'Standard Boost',
+          timeRemaining: '23h 45m',
+          progress: 15
+        });
+      } else {
+        setBoostStatus({
+          isActive: false
         });
       }
       
-      setDailyBoostUsage(prev => Math.min(DAILY_BOOST_LIMIT, prev + 1));
+      // Mock packages
+      setBoostPackages([
+        {
+          id: 'basic',
+          name: 'Basic Boost',
+          price: 15,
+          price_ubx: 150,
+          description: '6-hour visibility boost',
+          duration: '06:00:00',
+          features: ['Featured in search results', 'Higher ranking'],
+          boost_power: 20,
+          visibility_increase: 25
+        },
+        {
+          id: 'standard',
+          name: 'Standard Boost',
+          price: 30,
+          price_ubx: 300,
+          description: '24-hour visibility boost',
+          duration: '24:00:00',
+          features: ['Featured in search results', 'Higher ranking', 'Featured on homepage'],
+          boost_power: 50,
+          visibility_increase: 75
+        },
+        {
+          id: 'premium',
+          name: 'Premium Boost',
+          price: 50,
+          price_ubx: 500,
+          description: '3-day visibility boost',
+          duration: '72:00:00',
+          features: ['Featured in search results', 'Higher ranking', 'Featured on homepage', 'Premium badge'],
+          boost_power: 100,
+          visibility_increase: 150
+        }
+      ]);
       
-      toast({
-        title: "Boost Purchased",
-        description: `Your ${boostPackage.name} has been activated successfully!`
+      // Mock HERMES data
+      setHermesBoostData({
+        position: Math.floor(Math.random() * 100) + 1,
+        activeUsers: 1253,
+        estimatedVisibility: Math.floor(Math.random() * 50) + 50, // 50-100%
+        lastUpdateTime: new Date().toISOString()
       });
       
-      return true;
-    } catch (err: any) {
-      console.error("Error purchasing boost:", err);
-      
-      toast({
-        title: "Error",
-        description: err.message || "Failed to purchase boost. Please try again.",
-        variant: "destructive"
-      });
-      
-      return false;
-    } finally {
       setLoading(false);
+    }, 800);
+  }, [profileId]);
+
+  // Check eligibility when profile ID changes
+  useEffect(() => {
+    if (profileId) {
+      checkEligibility();
     }
   }, [profileId]);
-  
-  // Cancel boost
-  const cancelBoost = useCallback(async (): Promise<boolean> => {
-    if (!profileId || !boostStatus.isActive) {
-      return false;
-    }
+
+  // Check if profile is eligible for boosting
+  const checkEligibility = useCallback(async () => {
+    if (!profileId) return;
     
     try {
-      setLoading(true);
+      // Simulate API call
+      const result = {
+        isEligible: true,
+        reason: ''
+      };
       
-      // Call the service to cancel the boost
-      const result = await boostService.cancelBoost(profileId);
+      setEligibility(result);
+      return result;
+    } catch (err) {
+      console.error('Error checking eligibility:', err);
+      setError('Failed to check eligibility');
       
-      if (!result.success) {
-        toast({
-          title: "Error",
-          description: result.message || "Failed to cancel boost",
-          variant: "destructive"
-        });
-        return false;
-      }
+      const result = {
+        isEligible: false,
+        reason: 'Error checking eligibility'
+      };
+      
+      setEligibility(result);
+      return result;
+    }
+  }, [profileId]);
+
+  // Purchase a boost package
+  const purchaseBoost = useCallback(async (pkg: BoostPackage): Promise<boolean> => {
+    if (!profileId) return false;
+    
+    setLoading(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const endTime = new Date();
+      const [hours] = pkg.duration.split(':').map(Number);
+      endTime.setHours(endTime.getHours() + hours);
+      
+      setBoostStatus({
+        isActive: true,
+        startTime: new Date().toISOString(),
+        endTime: endTime.toISOString(),
+        remainingTime: pkg.duration,
+        packageId: pkg.id,
+        packageName: pkg.name,
+        timeRemaining: `${hours}h 0m`,
+        progress: 0
+      });
+      
+      setLoading(false);
+      return true;
+    } catch (err) {
+      console.error('Error purchasing boost:', err);
+      setError('Failed to purchase boost');
+      setLoading(false);
+      return false;
+    }
+  }, [profileId]);
+
+  // Cancel an active boost
+  const cancelBoost = useCallback(async (): Promise<boolean> => {
+    if (!profileId || !boostStatus?.isActive) return false;
+    
+    setLoading(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 600));
       
       setBoostStatus({
         isActive: false
       });
       
-      toast({
-        title: "Boost Cancelled",
-        description: "Your profile boost has been cancelled successfully"
-      });
-      
-      return true;
-    } catch (err: any) {
-      console.error("Error cancelling boost:", err);
-      
-      toast({
-        title: "Error",
-        description: err.message || "Failed to cancel boost. Please try again.",
-        variant: "destructive"
-      });
-      
-      return false;
-    } finally {
       setLoading(false);
-    }
-  }, [profileId, boostStatus.isActive]);
-  
-  // Get boost analytics
-  const getBoostAnalytics = async (): Promise<AnalyticsData | null> => {
-    if (!profileId) return null;
-    
-    try {
-      return await boostService.fetchBoostAnalytics(profileId);
+      return true;
     } catch (err) {
-      console.error('Error fetching boost analytics:', err);
-      return null;
+      console.error('Error cancelling boost:', err);
+      setError('Failed to cancel boost');
+      setLoading(false);
+      return false;
     }
-  };
+  }, [profileId, boostStatus]);
 
-  // Automatically refresh boost status on mount
-  useEffect(() => {
-    if (profileId) {
-      fetchBoostPackages();
-    }
-  }, [profileId, fetchBoostPackages]);
-  
+  // For demonstrating analytics access
+  const getBoostAnalytics = useCallback(async (): Promise<BoostAnalytics> => {
+    return {
+      impressions: {
+        today: 324,
+        yesterday: 217,
+        weeklyAverage: 245,
+        withBoost: 324,
+        withoutBoost: 120,
+        increase: 170
+      },
+      interactions: {
+        today: 87,
+        yesterday: 42,
+        weeklyAverage: 53,
+        withBoost: 87,
+        withoutBoost: 29,
+        increase: 200
+      },
+      rank: {
+        current: 14,
+        previous: 73,
+        change: 59
+      },
+      trending: true,
+      additionalViews: 204,
+      engagementIncrease: 107,
+      rankingPosition: 14,
+      clicks: {
+        today: 42,
+        yesterday: 21,
+        weeklyAverage: 25,
+        withBoost: 42,
+        withoutBoost: 15,
+        increase: 180
+      }
+    };
+  }, []);
+
   return {
+    loading,
+    error,
     boostStatus,
     eligibility,
     boostPackages,
-    selectedPackage,
-    setSelectedPackage,
-    fetchBoostPackages,
-    getBoostPrice,
+    dailyBoostUsage,
+    dailyBoostLimit,
     purchaseBoost,
     cancelBoost,
-    loading,
-    error,
-    getBoostAnalytics,
-    dailyBoostUsage,
-    dailyBoostLimit: DAILY_BOOST_LIMIT
+    hermesBoostData
   };
 };

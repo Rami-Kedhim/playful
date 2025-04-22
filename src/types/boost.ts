@@ -15,12 +15,15 @@ export interface BoostStatus {
   activeBoostId?: string;
   expiresAt?: string;
   boostPackage?: BoostPackage;
+  pulseData?: {
+    type?: string;
+    intensity?: number;
+  };
 }
 
 export interface BoostEligibility {
   isEligible: boolean;
   reason: string;
-  // No reasons property - using reason instead
 }
 
 export interface BoostPackage extends BoostManagerPackage {
@@ -28,6 +31,7 @@ export interface BoostPackage extends BoostManagerPackage {
   name: string;
   description: string;
   duration: string;
+  price: number;
   price_ubx: number;
   boost_power: number;
   visibility_increase: number;
@@ -35,6 +39,7 @@ export interface BoostPackage extends BoostManagerPackage {
   is_featured?: boolean;
   badge_color?: string;
   icon?: string;
+  features?: string[];
 }
 
 export interface HermesBoostStatus {
@@ -75,4 +80,14 @@ export interface BoostAnalytics {
   additionalViews: number;
   engagementIncrease: number;
   rankingPosition: number;
+  viewsIncrease?: number;
+  engagementRate?: number;
+  clicks?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+  };
 }

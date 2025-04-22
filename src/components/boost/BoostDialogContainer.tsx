@@ -1,165 +1,135 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import BoostDialogTabs from "./dialog/BoostDialogTabs";
-import { useBoostAdapters, adaptBoostStatus, adaptBoostEligibility, adaptBoostPackages } from "@/hooks/boost/useBoostAdapters";
-import { useAuth } from "@/hooks/auth/useAuth";
-import { BoostStatus, BoostEligibility, BoostPackage } from "@/types/boost";
+import BoostDialogTabs from './dialog/BoostDialogTabs';
+import { useBoostContext } from '@/contexts/BoostContext';
 
 export interface BoostDialogContainerProps {
   profileId: string;
   onSuccess?: () => Promise<boolean>;
-  buttonProps?: { text?: string; variant?: string; size?: string };
-  open?: boolean;
-  setOpen?: (open: boolean) => void;
   buttonText?: string;
   buttonVariant?: string;
   buttonSize?: string;
+  open?: boolean;
+  setOpen?: (open: boolean) => void;
 }
 
 const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
   profileId,
   onSuccess,
-  buttonProps,
-  open: propOpen,
-  setOpen: propSetOpen,
   buttonText = "Boost Profile",
   buttonVariant = "default",
-  buttonSize = "default"
+  buttonSize = "default",
+  open: externalOpen,
+  setOpen: setExternalOpen,
 }) => {
-  const [open, setOpen] = useState(propOpen || false);
-  const [activeTab, setActiveTab] = useState("boost");
-  const { user } = useAuth();
-  
-  // Use controlled or uncontrolled open state based on props
-  const dialogOpen = propOpen !== undefined ? propOpen : open;
-  const setDialogOpen = propSetOpen || setOpen;
-
+  const [internalOpen, setInternalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("packages");
   const {
-    boostStatus: rawBoostStatus,
-    eligibility: rawEligibility,
-    boostPackages: rawPackages,
+    boostStatus,
+    eligibility,
+    boostPackages,
+    loading,
     dailyBoostUsage,
     dailyBoostLimit,
-    loading: boostLoading,
     purchaseBoost,
-    cancelBoost,
-    getBoostPrice
-  } = useBoostAdapters(profileId || user?.id || '');
+    cancelBoost
+  } = useBoostContext();
 
-  // Convert types to ensure compatibility
-  const boostStatus: BoostStatus = adaptBoostStatus(rawBoostStatus);
-  const eligibility: BoostEligibility = adaptBoostEligibility(rawEligibility);
-  const boostPackages: BoostPackage[] = adaptBoostPackages(rawPackages);
+  const [selectedPackage, setSelectedPackage] = useState<string>("");
 
-  // Mock Hermes boost status for now
-  const hermesStatus = {
-    position: 5,
-    activeUsers: 120,
-    estimatedVisibility: 85,
-    lastUpdateTime: new Date().toISOString()
-  };
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = setExternalOpen || setInternalOpen;
 
-  const [selectedPackage, setSelectedPackage] = useState("");
+  const handleDialogClose = useCallback(() => {
+    setOpen(false);
+    setActiveTab("packages");
+  }, [setOpen]);
 
-  useEffect(() => {
-    // Set default selected package if packages exist and none is selected
-    if (boostPackages.length > 0 && !selectedPackage) {
-      setSelectedPackage(boostPackages[0].id);
+  const handleCancelBoost = useCallback(async () => {
+    try {
+      const result = await cancelBoost();
+      if (result) {
+        if (onSuccess) {
+          await onSuccess();
+        }
+        handleDialogClose();
+      }
+      return result;
+    } catch (error) {
+      console.error('Error cancelling boost:', error);
+      return false;
     }
-  }, [boostPackages, selectedPackage]);
+  }, [cancelBoost, onSuccess, handleDialogClose]);
 
-  // Format duration string helper function
-  const formatBoostDuration = (duration: string): string => {
-    const [hours, minutes] = duration.split(':').map(Number);
-    if (hours >= 24) {
-      const days = Math.floor(hours / 24);
-      return `${days} ${days === 1 ? 'day' : 'days'}`;
-    }
-    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
-  };
-
-  // Handle boost purchase
-  const handlePurchase = async (): Promise<void> => {
-    const selectedPkg = boostPackages.find(pkg => pkg.id === selectedPackage);
-    if (!selectedPkg) return;
-
-    const result = await purchaseBoost(selectedPkg);
+  const handleBoost = useCallback(async () => {
+    if (!selectedPackage) return;
     
-    if (result && onSuccess) {
-      await onSuccess();
+    const pkg = boostPackages.find(p => p.id === selectedPackage);
+    if (!pkg) return;
+
+    try {
+      const result = await purchaseBoost(pkg);
+      if (result && onSuccess) {
+        await onSuccess();
+        handleDialogClose();
+      }
+    } catch (error) {
+      console.error("Error purchasing boost:", error);
     }
+  }, [selectedPackage, boostPackages, purchaseBoost, onSuccess, handleDialogClose]);
 
-    if (result) {
-      setDialogOpen(false);
-    }
-  };
-
-  // Handle boost cancellation
-  const handleBoost = async (): Promise<void> => {
-    if (boostStatus?.isActive) {
-      await cancelBoost();
-    } else {
-      await handlePurchase();
-    }
-  };
-
-  // Handle boost cancel
-  const handleCancel = async (): Promise<void> => {
-    const result = await cancelBoost();
-    if (result && onSuccess) {
-      await onSuccess();
-    }
-  };
-
-  // Dialog close handler
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-  };
-
-  const getBoostPriceWrapper = () => {
-    return getBoostPrice();
-  };
+  // Function to get price for selected boost package
+  const getBoostPrice = useCallback(() => {
+    if (!selectedPackage) return 0;
+    
+    const pkg = boostPackages.find(p => p.id === selectedPackage);
+    return pkg?.price || 0;
+  }, [selectedPackage, boostPackages]);
 
   return (
-    <>
-      <Button
-        onClick={() => setDialogOpen(true)}
-        variant={buttonProps?.variant || buttonVariant as any}
-        size={buttonProps?.size || buttonSize as any}
-      >
-        {buttonProps?.text || buttonText}
-      </Button>
-
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">PULSE Boost System</DialogTitle>
-          </DialogHeader>
-          
-          <BoostDialogTabs
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            boostStatus={boostStatus}
-            eligibility={eligibility}
-            boostPackages={boostPackages}
-            selectedPackage={selectedPackage}
-            setSelectedPackage={setSelectedPackage}
-            handleBoost={handleBoost}
-            handleCancel={handleCancel}
-            dailyBoostUsage={dailyBoostUsage}
-            dailyBoostLimit={dailyBoostLimit}
-            hermesStatus={hermesStatus}
-            loading={boostLoading}
-            formatBoostDuration={formatBoostDuration}
-            getBoostPrice={getBoostPriceWrapper}
-            handlePurchase={handlePurchase}
-            handleDialogClose={handleDialogClose}
-          />
-        </DialogContent>
-      </Dialog>
-    </>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant={buttonVariant as any} size={buttonSize as any}>
+          {buttonText}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Profile Boost</DialogTitle>
+        </DialogHeader>
+        
+        <BoostDialogTabs 
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          loading={loading}
+          boostStatus={boostStatus || { isActive: false, startTime: '', endTime: '', remainingTime: '' }}
+          eligibility={eligibility || { isEligible: false, reason: 'Unknown' }}
+          boostPackages={boostPackages}
+          selectedPackage={selectedPackage}
+          setSelectedPackage={setSelectedPackage}
+          handleBoost={handleBoost}
+          handleCancel={handleCancelBoost}
+          dailyBoostUsage={dailyBoostUsage}
+          dailyBoostLimit={dailyBoostLimit}
+          handleDialogClose={handleDialogClose}
+          getBoostPrice={getBoostPrice}
+          hermesStatus={{
+            position: 0,
+            activeUsers: 0,
+            estimatedVisibility: 0,
+            lastUpdateTime: ''
+          }}
+        />
+      </DialogContent>
+    </Dialog>
   );
 };
 

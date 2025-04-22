@@ -70,4 +70,6 @@ export interface UberPersona {
   verificationLevel?: string;
   onlinePercentage?: number;
   streamQuality?: string;
+  isActive?: boolean;
+  capabilities?: string[];
 }
