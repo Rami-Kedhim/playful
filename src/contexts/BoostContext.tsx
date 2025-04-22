@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/auth/useAuth';
 
 interface BoostContextType {
   isActive: boolean;
+  isLoading: boolean; // Added isLoading property
   boostStatus: BoostStatus | null;
   eligibility: BoostEligibility;
   boostPackages: BoostPackage[];
@@ -52,6 +53,7 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <BoostContext.Provider value={{
       isActive,
+      isLoading: loading || boostLoading, // Expose isLoading property
       boostStatus,
       eligibility,
       boostPackages,

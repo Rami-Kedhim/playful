@@ -2,43 +2,46 @@
 export interface UberPersona {
   id: string;
   displayName: string;
+  name?: string;
+  username?: string;
   avatarUrl?: string;
-  type?: string;
-  isOnline?: boolean;
-  isLocked?: boolean;
-  isPremium?: boolean;
-  rating?: number;
-  followerCount?: number;
-  verificationLevel?: number;
-  onlinePercentage?: number;
+  imageUrl?: string;
+  bio?: string;
+  description?: string;
   location?: string;
   country?: string;
-  tags?: string[];
+  type?: string;
   availability?: {
-    isAvailable: boolean;
     nextAvailable?: string;
-    schedule?: Record<string, any>;
+    schedule?: Record<string, string[]>;
   };
-  systemMetadata?: {
-    version?: string;
-    lastSynced?: Date;
-    personalityIndex?: number;
-    statusFlags?: Record<string, boolean>;
+  stats?: {
+    rating?: number;
+    reviewCount?: number;
+    responseTime?: number;
+    bookingCount?: number;
   };
-  boost?: number;
-  streamQuality?: {
-    quality: number;
-    stability: number;
-    prediction: string;
+  roleFlags?: {
+    isAI?: boolean;
+    isVerified?: boolean;
+    isCreator?: boolean;
   };
-  aiAttributes?: {
-    lastProcessed: string;
-    enhancementScore: number;
-    [key: string]: any;
+  monetization?: {
+    subscriptionPrice?: number;
+    meetingPrice?: number;
+    acceptsLucoin?: boolean;
   };
-  boost_status?: {
-    isActive: boolean;
-    boostPower?: number;
-    [key: string]: any;
+  premium_content_count?: {
+    photos?: number;
+    videos?: number;
+    messages?: number;
+    [key: string]: number | undefined;
   };
+  languages?: string[];
+  services?: string[];
+  traits?: string[];
+  tags?: string[];
+  gallery_images?: string[];
+  livecam_enabled?: boolean;
+  boost_status?: any;
 }

@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useBoostContext } from "@/contexts/BoostContext";
 import BoostDialogHeader from "@/components/boost/dialog/BoostDialogHeader";
@@ -7,13 +6,7 @@ import BoostInfoTooltip from "@/components/boost/dialog/BoostInfoTooltip";
 import { useBoostManager, formatBoostDuration } from "@/hooks/boost";
 import { useEffect, useState } from "react";
 import { toast } from "@/hooks/use-toast";
-import { 
-  adaptBoostStatus, 
-  adaptBoostEligibility,
-  adaptBoostPackages,
-  adaptFormatBoostDuration,
-  adaptGetBoostPrice
-} from "@/hooks/boost/useBoostAdapters";
+import { useBoostAdapters } from "@/hooks/boost/useBoostAdapters";
 import { useHermesOxumBoost } from "@/hooks/boost/useHermesOxumBoost";
 
 interface BoostProfileDialogProps {
@@ -32,7 +25,7 @@ const BoostProfileDialog = ({
   const { boostStatus: contextBoostStatus } = useBoostContext();
   const [activeTab, setActiveTab] = useState<string>("packages");
   const [boostAnalytics, setBoostAnalytics] = useState<any>(null);
-  const profileId = contextBoostStatus.profileId || '';
+  const profileId = contextBoostStatus?.profileId || '';
 
   const { 
     boostStatus: managerBoostStatus, 
@@ -47,8 +40,13 @@ const BoostProfileDialog = ({
     loading,
     getBoostAnalytics,
     dailyBoostUsage,
-    dailyBoostLimit
-  } = useBoostManager(profileId);
+    dailyBoostLimit,
+    adaptBoostStatus,
+    adaptBoostEligibility,
+    adaptBoostPackages,
+    adaptFormatBoostDuration,
+    adaptGetBoostPrice
+  } = useBoostAdapters(profileId);
 
   const { hermesStatus: hermesBoostStatus } = useHermesOxumBoost(profileId);
 
@@ -94,7 +92,6 @@ const BoostProfileDialog = ({
     return analytics;
   };
 
-  // Update this function to return void as expected in the props
   const handlePurchase = async (): Promise<void> => {
     if (!selectedPackage) {
       toast({
@@ -124,7 +121,6 @@ const BoostProfileDialog = ({
     }
   };
 
-  // Update this function to return void as expected in the props
   const handleCancel = async (): Promise<void> => {
     const success = await cancelBoost();
     if (success) {

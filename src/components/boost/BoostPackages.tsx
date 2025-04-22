@@ -13,6 +13,7 @@ export interface BoostPackagesProps {
   dailyUsage: number;
   dailyLimit: number;
   disabled?: boolean;
+  getBoostPrice?: () => number; // Add this to fix TypeScript error
 }
 
 const BoostPackages: React.FC<BoostPackagesProps> = ({

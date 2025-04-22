@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import BoostDialogTabs from "./dialog/BoostDialogTabs";
-import { useBoostAdapters } from "@/hooks/boost/useBoostAdapters";
+import { useBoostAdapters, adaptBoostStatus, adaptBoostEligibility, adaptBoostPackages } from "@/hooks/boost/useBoostAdapters";
 import { useAuth } from "@/hooks/auth/useAuth";
+import { BoostStatus, BoostEligibility, BoostPackage } from "@/types/boost";
 
 export interface BoostDialogContainerProps {
   profileId: string;
@@ -36,9 +37,9 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
   const setDialogOpen = propSetOpen || setOpen;
 
   const {
-    boostStatus,
-    eligibility,
-    boostPackages,
+    boostStatus: rawBoostStatus,
+    eligibility: rawEligibility,
+    boostPackages: rawPackages,
     dailyBoostUsage,
     dailyBoostLimit,
     loading: boostLoading,
@@ -46,6 +47,11 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
     cancelBoost,
     getBoostPrice
   } = useBoostAdapters(profileId || user?.id || '');
+
+  // Convert types to ensure compatibility
+  const boostStatus: BoostStatus = adaptBoostStatus(rawBoostStatus);
+  const eligibility: BoostEligibility = adaptBoostEligibility(rawEligibility);
+  const boostPackages: BoostPackage[] = adaptBoostPackages(rawPackages);
 
   // Mock Hermes boost status for now
   const hermesStatus = {
@@ -112,6 +118,10 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
     setDialogOpen(false);
   };
 
+  const getBoostPriceWrapper = () => {
+    return getBoostPrice();
+  };
+
   return (
     <>
       <Button
@@ -143,7 +153,7 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
             hermesStatus={hermesStatus}
             loading={boostLoading}
             formatBoostDuration={formatBoostDuration}
-            getBoostPrice={getBoostPrice}
+            getBoostPrice={getBoostPriceWrapper}
             handlePurchase={handlePurchase}
             handleDialogClose={handleDialogClose}
           />

@@ -1,9 +1,8 @@
-
 export interface LivecamModel {
   id: string;
   username: string;
-  name: string; // Add name property
-  displayName?: string; // Add displayName as optional property for backward compatibility
+  name: string; 
+  displayName?: string;
   thumbnailUrl: string;
   imageUrl: string;
   previewVideoUrl?: string;
@@ -11,16 +10,17 @@ export interface LivecamModel {
   isStreaming: boolean;
   viewerCount: number;
   region: string;
-  country?: string; // Add country property
+  country?: string;
   language: string;
   tags: string[];
   category: string;
-  categories?: string[]; // Add categories as optional
+  categories?: string[];
   rating: number;
   price: number;
   isPopular?: boolean;
   profileUrl?: string;
   age?: number;
+  description?: string;
 }
 
 export interface Livecam {

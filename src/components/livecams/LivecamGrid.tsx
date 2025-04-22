@@ -1,105 +1,81 @@
-
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { LivecamModel } from '@/types/livecams';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Eye, MapPin } from 'lucide-react';
+import React from "react";
+import { LivecamModel } from "@/types/livecams";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Eye, MapPin, Flag, Tag } from "lucide-react";
+import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 interface LivecamGridProps {
-  livecams: LivecamModel[];
-  hasMore: boolean;
-  onLoadMore: () => Promise<void>;
+  models: LivecamModel[];
+  className?: string;
 }
 
-const LivecamGrid: React.FC<LivecamGridProps> = ({ livecams, hasMore, onLoadMore }) => {
+const LivecamGridCard = ({ model }: { model: LivecamModel }) => {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {livecams.map((livecam) => (
-          <LivecamCard key={livecam.id} livecam={livecam} />
-        ))}
-      </div>
-      
-      {hasMore && (
-        <div className="flex justify-center mt-6">
-          <Button onClick={onLoadMore} variant="outline">
-            Load More
-          </Button>
+    <Card className="overflow-hidden group">
+      <div className="aspect-video relative">
+        <img
+          src={model.thumbnailUrl}
+          alt={model.displayName || model.name}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+        {model.isLive && (
+          <Badge className="absolute top-2 left-2 bg-red-500 border-none">
+            Live
+          </Badge>
+        )}
+        <div className="absolute top-2 right-2 flex flex-col gap-1">
+          <Badge variant="outline" className="bg-black/60 backdrop-blur-sm">
+            <Eye className="mr-1 h-3 w-3" />
+            {model.viewerCount}
+          </Badge>
         </div>
-      )}
-    </div>
+      </div>
+
+      <CardContent className="p-3">
+        <Link to={`/livecams/${model.id}`}>
+          <h3 className="font-medium hover:text-primary transition-colors truncate">
+            {model.displayName || model.name}
+          </h3>
+        </Link>
+        <div className="mt-2 flex flex-wrap gap-1 text-xs">
+          {model.country && (
+            <div className="flex items-center text-muted-foreground mr-2">
+              <MapPin className="mr-1 h-3 w-3" />
+              <span>{model.country}</span>
+            </div>
+          )}
+
+          {model.category && (
+            <div className="flex items-center text-muted-foreground">
+              <Tag className="mr-1 h-3 w-3" />
+              <span>{model.category}</span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+
+      <CardFooter className="p-3 pt-0 flex justify-between">
+        <Button asChild size="sm" variant="ghost" className="text-xs">
+          <Link to={`/livecams/${model.id}`}>View Profile</Link>
+        </Button>
+        <Button size="icon" variant="outline" className="h-8 w-8">
+          <Heart className="h-4 w-4" />
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 
-const LivecamCard: React.FC<{ livecam: LivecamModel }> = ({ livecam }) => {
+const LivecamGrid: React.FC<LivecamGridProps> = ({ models, className }) => {
   return (
-    <Link to={`/livecams/${livecam.id}`}>
-      <Card className="overflow-hidden h-full transition-all duration-200 hover:shadow-md hover:-translate-y-1">
-        <div className="relative aspect-video overflow-hidden">
-          <img 
-            src={livecam.thumbnailUrl || livecam.imageUrl} 
-            alt={livecam.displayName || livecam.username}
-            className="object-cover w-full h-full"
-          />
-          
-          {livecam.isLive && (
-            <div className="absolute top-2 left-2">
-              <Badge className="bg-red-500 hover:bg-red-600 flex items-center gap-1">
-                <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                LIVE
-              </Badge>
-            </div>
-          )}
-          
-          {!livecam.isLive && (
-            <div className="absolute top-2 left-2">
-              <Badge variant="outline" className="bg-black/50 border-white/20">
-                OFFLINE
-              </Badge>
-            </div>
-          )}
-          
-          {livecam.viewerCount > 0 && (
-            <div className="absolute bottom-2 right-2">
-              <Badge variant="outline" className="bg-black/70 text-white border-none flex items-center gap-1">
-                <Eye className="h-3 w-3" />
-                {livecam.viewerCount.toLocaleString()}
-              </Badge>
-            </div>
-          )}
-        </div>
-        
-        <CardContent className="p-3">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6">
-              <AvatarImage src={livecam.imageUrl} alt={livecam.displayName || livecam.username} />
-              <AvatarFallback>{(livecam.displayName || livecam.username || '?').charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <h3 className="font-medium text-sm leading-none">{livecam.displayName || livecam.username}</h3>
-              
-              <div className="flex items-center text-xs text-muted-foreground mt-1">
-                {livecam.country && (
-                  <div className="flex items-center mr-2">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    {livecam.country}
-                  </div>
-                )}
-                
-                {livecam.categories && livecam.categories.length > 0 && (
-                  <div className="text-xs">
-                    {livecam.categories[0]}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+    <div className={cn("grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4", className)}>
+      {models.map((model) => (
+        <LivecamGridCard key={model.id} model={model} />
+      ))}
+    </div>
   );
 };
 
