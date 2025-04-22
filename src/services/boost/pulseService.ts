@@ -14,7 +14,7 @@ export const getPulsePackages = async (): Promise<BoostPackage[]> => {
         name: pb.name,
         description: pb.description || '',
         duration: typeof pb.duration === 'number' ? `${pb.duration}:00:00` : pb.duration || '00:00:00',
-        price_ubx: pb.costUBX,
+        price_ubx: pb.costUBX ?? 0,
         price: pb.price || 0,
         features: pb.features || [],
         boost_power: 0,  // no info provided in PulseBoost

@@ -1,9 +1,10 @@
+
 import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 import { BoostStatus, BoostEligibility, BoostPackage } from '@/types/boost';
 import { AnalyticsData } from '@/hooks/boost/useBoostAnalytics';
 
 // Mock data
-const mockBoostPackages = [
+const mockBoostPackages: BoostPackage[] = [
   {
     id: "boost-1",
     name: "24-Hour Boost",
@@ -11,7 +12,9 @@ const mockBoostPackages = [
     duration: "24:00:00",
     price_ubx: GLOBAL_UBX_RATE,
     price: GLOBAL_UBX_RATE,
-    features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking"]
+    features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking"],
+    boost_power: 0,
+    visibility_increase: 0,
   },
   {
     id: "boost-2",
@@ -20,7 +23,9 @@ const mockBoostPackages = [
     duration: "72:00:00",
     price_ubx: GLOBAL_UBX_RATE * 2.5,
     price: GLOBAL_UBX_RATE * 2.5,
-    features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking", "Extended duration"]
+    features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking", "Extended duration"],
+    boost_power: 0,
+    visibility_increase: 0,
   },
   {
     id: "boost-3",
@@ -29,7 +34,9 @@ const mockBoostPackages = [
     duration: "168:00:00",
     price_ubx: GLOBAL_UBX_RATE * 5,
     price: GLOBAL_UBX_RATE * 5,
-    features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking", "Extended duration", "Premium placement"]
+    features: ["Higher ranking in search", "Featured in boosted section", "Analytics tracking", "Extended duration", "Premium placement"],
+    boost_power: 0,
+    visibility_increase: 0,
   }
 ];
 
@@ -74,7 +81,6 @@ export const boostService = {
         timeRemaining: `${hoursRemaining} hours remaining`,
         progress: Math.round((24 - hoursRemaining) / 24 * 100),
         boostPackage: boostPackage,
-        profileId
       };
       
       activeBoosts[profileId] = activeBoost;
@@ -147,7 +153,6 @@ export const boostService = {
       timeRemaining: `${hours} hours remaining`,
       progress: 0,
       boostPackage: selectedPackage,
-      profileId
     };
     
     activeBoosts[profileId] = activeBoost;

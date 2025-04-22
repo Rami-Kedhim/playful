@@ -72,10 +72,14 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const seconds = Number(durationParts[2]) || 0;
 
     // Calculate durationMinutes as number
-    const durationMinutes = (hours * 60) + minutes + Math.floor(seconds / 60);
+    const durationMinutes: number = (hours * 60) + minutes + Math.floor(seconds / 60);
 
     let visibility: PulseBoost['visibility'] = 'homepage';
-    const boostPowerNum: number = Number(pkg.boost_power) || 50;
+
+    // Ensure boost_power is number
+    const boostPowerNum: number = typeof pkg.boost_power === 'number'
+      ? pkg.boost_power
+      : (pkg.boost_power ? Number(pkg.boost_power) : 50);
 
     if (pkg.boost_power !== undefined && pkg.boost_power !== null) {
       if (boostPowerNum >= 200) {
@@ -87,7 +91,10 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       }
     }
 
-    const visibilityIncreaseNum: number = Number(pkg.visibility_increase) || 50;
+    // Ensure visibility_increase is number
+    const visibilityIncreaseNum: number = typeof pkg.visibility_increase === 'number'
+      ? pkg.visibility_increase
+      : (pkg.visibility_increase ? Number(pkg.visibility_increase) : 50);
 
     return {
       id: pkg.id,
