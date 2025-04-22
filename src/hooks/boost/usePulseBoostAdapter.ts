@@ -1,4 +1,3 @@
-
 import { BoostPackage } from '@/types/boost';
 import { PulseBoost } from '@/types/pulse-boost';
 
@@ -70,33 +69,22 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
   };
 
   const convertToPulseBoost = (pkg: BoostPackage): PulseBoost => {
-    // Parse duration string safely
     const durationStr = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
     const parts = durationStr.split(':');
 
-    // Parse parts with Number to ensure numbers, fallback 0
     const hours: number = parts[0] ? Number(parts[0]) : 0;
     const minutes: number = parts[1] ? Number(parts[1]) : 0;
     const seconds: number = parts[2] ? Number(parts[2]) : 0;
 
-    // Validate parsing and fallback if NaN
     const validHours = isNaN(hours) ? 0 : hours;
     const validMinutes = isNaN(minutes) ? 0 : minutes;
     const validSeconds = isNaN(seconds) ? 0 : seconds;
 
     const durationMinutes: number = (validHours * 60) + validMinutes + (validSeconds / 60);
 
-    // Parse boost power as number safely
     const boostPowerRaw: unknown = (pkg as any).boost_power ?? (pkg as any).boostPower;
     const boostPowerNum: number = parseNumberValue(boostPowerRaw, 50);
 
-    // Parse visibility increase as number safely
-    const visibilityIncreaseRaw: unknown = (pkg as any).visibility_increase ?? (pkg as any).visibilityIncrease;
-    const visibilityIncreaseNum: number = parseNumberValue(visibilityIncreaseRaw, 50);
-
-    // Determine visibility string according to pulse-boost.ts definition
-    // visibility field type is 'homepage' | 'search' | 'smart_match' | 'global'
-    // Map boostPowerNum thresholds to visibility strings
     let visibility: PulseBoost['visibility'] = 'homepage';
     if (boostPowerNum >= 200) visibility = 'global';
     else if (boostPowerNum >= 100) visibility = 'search';
@@ -105,12 +93,10 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     let priceNum: number = 0;
     if (typeof pkg.price === 'number') priceNum = pkg.price;
     else if (typeof pkg.price === 'string') {
-      // Parse string price to number safely
       const parsedPrice = Number(pkg.price);
       priceNum = isNaN(parsedPrice) ? 0 : parsedPrice;
     }
 
-    // Ensure costUBX is number and parsed safely, fallback to convertToUBX(priceNum)
     let costUBXNum: number = 0;
     if (typeof (pkg as any).price_ubx === 'number') costUBXNum = (pkg as any).price_ubx;
     else if (typeof (pkg as any).price_ubx === 'string') {
@@ -131,8 +117,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       visibility,
       color: getColorForBoostPower(boostPowerNum),
       badgeColor: getColorForBoostPower(boostPowerNum),
-      features: pkg.features || [],
-      visibility_increase: visibilityIncreaseNum
+      features: pkg.features || []
     };
   };
 
@@ -145,4 +130,3 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 };
 
 export default usePulseBoostAdapter;
-
