@@ -1,302 +1,172 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/auth/useAuthContext';
+import { PULSE_BOOSTS } from '@/constants/pulseBoostConfig';
 import { 
   BoostPackage, 
-  EnhancedBoostStatus, 
+  UsePulseBoostReturn, 
+  UserEconomy, 
   ActiveBoost,
-  UserEconomy,
-  UsePulseBoostReturn
+  EnhancedBoostStatus,
+  PulseBoost
 } from '@/types/boost';
-import { PULSE_BOOSTS } from '@/constants/pulseBoostConfig';
-import { getPulsePackages } from '@/services/boost/pulseService';
+import { formatPulseBoostDuration, convertDurationToMinutes } from '@/constants/pulseBoostConfig';
 
-// Default configuration
-const DEFAULT_ENHANCED_STATUS: EnhancedBoostStatus = {
-  isActive: false,
-  pulseData: {
-    boostType: 'none',
-    visibility: 'standard',
-    coverage: 0
-  }
+// Convert our standard BoostPackage to PulseBoost
+const convertToPulseBoost = (boostPackage: BoostPackage): PulseBoost => {
+  return {
+    id: boostPackage.id,
+    name: boostPackage.name,
+    durationMinutes: convertDurationToMinutes(boostPackage.duration),
+    description: boostPackage.description,
+    visibility: boostPackage.id === 'basic' ? 'homepage' : 
+               boostPackage.id === 'premium' ? 'search' : 'global',
+    costUBX: boostPackage.price_ubx || boostPackage.price,
+    badgeColor: boostPackage.color
+  };
 };
 
-export const usePulseBoost = (profileId?: string): UsePulseBoostReturn => {
-  const { user } = useAuth();
-  const userId = profileId || user?.id;
-  
-  const [loading, setLoading] = useState(true);
+export function usePulseBoost(profileId?: string): UsePulseBoostReturn {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [pulseLevel, setPulseLevel] = useState(0);
-  const [isActive, setIsActive] = useState(false);
-  const [enhancedStatus, setEnhancedStatus] = useState<EnhancedBoostStatus>(DEFAULT_ENHANCED_STATUS);
   const [userEconomy, setUserEconomy] = useState<UserEconomy | null>(null);
   const [activeBoosts, setActiveBoosts] = useState<ActiveBoost[]>([]);
-  const [boostPackages, setBoostPackages] = useState<BoostPackage[]>([]);
-  
+  const [enhancedBoostStatus, setEnhancedBoostStatus] = useState<EnhancedBoostStatus>({
+    isActive: false,
+  });
+  const [pulseBoostPackages, setPulseBoostPackages] = useState<BoostPackage[]>([]);
+
   useEffect(() => {
     const fetchData = async () => {
-      if (!userId) {
-        setLoading(false);
-        return;
-      }
-      
       try {
-        // Load boost packages
-        const packages = await getPulsePackages();
-        setBoostPackages(packages);
+        // Simulate API call to get boost packages
+        const packages = PULSE_BOOSTS;
         
-        // Fetch user's active boosts
-        const { data: boostsData, error: boostsError } = await supabase
-          .from('active_boosts')
-          .select('*')
-          .eq('user_id', userId);
-          
-        if (boostsError) throw new Error(boostsError.message);
+        // Enhance the packages with price_ubx field for compatibility
+        const enhancedPackages = packages.map(pkg => ({
+          ...pkg,
+          price_ubx: pkg.price
+        }));
         
-        // Process active boosts
-        if (boostsData && boostsData.length > 0) {
-          const activeUserBoosts = boostsData.map(boost => {
-            const boostPackage = packages.find(p => p.id === boost.package_id);
-            const expiresAt = new Date(boost.end_time);
-            const now = new Date();
-            
-            // Calculate remaining time
-            const remainingMs = expiresAt.getTime() - now.getTime();
-            const remainingHours = Math.max(0, Math.floor(remainingMs / (1000 * 60 * 60)));
-            const remainingMinutes = Math.max(0, Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60)));
-            
-            return {
-              boostId: boost.package_id,
-              startedAt: new Date(boost.created_at),
-              expiresAt,
-              timeRemaining: `${remainingHours}h ${remainingMinutes}m`,
-              boostDetails: boostPackage
-            };
-          });
-          
-          setActiveBoosts(activeUserBoosts);
-          
-          if (activeUserBoosts.length > 0) {
-            setIsActive(true);
-            setPulseLevel(Math.max(...activeUserBoosts.map(b => b.boostDetails?.boostLevel || 0)));
-            
-            // Enhanced status with the highest level boost
-            const topBoost = activeUserBoosts.reduce((prev, current) => {
-              return (prev.boostDetails?.boostLevel || 0) > (current.boostDetails?.boostLevel || 0) ? prev : current;
-            });
-            
-            setEnhancedStatus({
-              isActive: true,
-              timeRemaining: topBoost.timeRemaining,
-              expiresAt: topBoost.expiresAt,
-              endTime: topBoost.expiresAt,
-              level: topBoost.boostDetails?.boostLevel,
-              pulseData: {
-                boostType: topBoost.boostDetails?.name || 'standard',
-                visibility: `${Math.round((topBoost.boostDetails?.boostLevel || 1) * 50)}% increased`,
-                coverage: (topBoost.boostDetails?.boostLevel || 1) * 25
-              }
-            });
+        setPulseBoostPackages(enhancedPackages);
+        
+        // Simulate API call to get user economy data
+        setUserEconomy({
+          ubxBalance: 500, // Mock balance
+          walletAddress: '0x123...abc'
+        });
+        
+        // Check if there's an active boost
+        const mockActiveBoost = {
+          isActive: false,
+          pulseData: {
+            boostType: 'Standard Boost',
+            visibility: 'Homepage',
+            coverage: 75,
           }
-        }
+        };
         
-        // Fetch user economy data
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('ubx_balance')
-          .eq('id', userId)
-          .single();
-          
-        if (profileError && profileError.code !== 'PGRST116') {
-          throw new Error(profileError.message);
-        }
+        setEnhancedBoostStatus(mockActiveBoost);
         
-        if (profileData) {
-          setUserEconomy({
-            ubxBalance: profileData.ubx_balance || 0
-          });
-        }
-        
+        setIsLoading(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
-        console.error('Error in usePulseBoost:', err);
-      } finally {
-        setLoading(false);
+        setError('Failed to fetch boost data');
+        setIsLoading(false);
       }
     };
     
     fetchData();
-  }, [userId]);
-  
-  // Apply a new pulse boost
+  }, [profileId]);
+
   const purchaseBoost = async (boostPackage: BoostPackage): Promise<boolean> => {
-    if (!userId) return false;
+    setIsLoading(true);
     
     try {
-      setError(null);
+      // Simulating API call
+      console.log(`Purchasing boost: ${boostPackage.id} for profile: ${profileId}`);
       
-      // Check if user has enough UBX balance
-      if (!userEconomy || userEconomy.ubxBalance < boostPackage.price) {
-        setError('Insufficient UBX balance');
-        return false;
-      }
+      // Create new active boost
+      const now = new Date();
+      const expirationTime = new Date(now.getTime() + convertDurationToMinutes(boostPackage.duration) * 60 * 1000);
       
-      // Calculate end time based on duration
-      const durationHours = parseInt(boostPackage.duration.split(' ')[0], 10);
-      const endTime = new Date();
-      endTime.setHours(endTime.getHours() + durationHours);
-      
-      // Begin transaction
-      const { data: boostData, error: boostError } = await supabase
-        .from('active_boosts')
-        .insert({
-          user_id: userId,
-          package_id: boostPackage.id,
-          end_time: endTime.toISOString(),
-          status: 'active',
-          boost_data: {
-            level: boostPackage.boostLevel,
-            name: boostPackage.name
-          }
-        })
-        .select();
-      
-      if (boostError) throw new Error(boostError.message);
-      
-      // Deduct UBX from user balance
-      const { error: balanceError } = await supabase
-        .from('profiles')
-        .update({ 
-          ubx_balance: (userEconomy.ubxBalance - boostPackage.price),
-          last_boost: new Date().toISOString()
-        })
-        .eq('id', userId);
-        
-      if (balanceError) throw new Error(balanceError.message);
-      
-      // Record transaction
-      const { error: txError } = await supabase
-        .from('ubx_transactions')
-        .insert({
-          user_id: userId,
-          amount: -boostPackage.price,
-          transaction_type: 'boost_purchase',
-          description: `Purchased ${boostPackage.name} boost`,
-          metadata: { boost_id: boostPackage.id }
-        });
-        
-      if (txError) throw new Error(txError.message);
-      
-      // Update local state
-      setUserEconomy({
-        ...userEconomy,
-        ubxBalance: userEconomy.ubxBalance - boostPackage.price
-      });
-      
-      const newActiveBoost: ActiveBoost = {
+      const newBoost: ActiveBoost = {
         boostId: boostPackage.id,
-        startedAt: new Date(),
-        expiresAt: endTime,
-        timeRemaining: `${durationHours}h 0m`,
+        startedAt: now,
+        expiresAt: expirationTime,
+        timeRemaining: formatPulseBoostDuration(convertDurationToMinutes(boostPackage.duration)),
         boostDetails: boostPackage
       };
       
-      setActiveBoosts([...activeBoosts, newActiveBoost]);
-      setIsActive(true);
-      setPulseLevel(Math.max(pulseLevel, boostPackage.boostLevel));
+      // Update state
+      setActiveBoosts(prev => [...prev, newBoost]);
       
-      setEnhancedStatus({
+      // Update enhanced status
+      setEnhancedBoostStatus({
         isActive: true,
-        timeRemaining: `${durationHours}h 0m`,
-        expiresAt: endTime,
-        endTime: endTime,
-        level: boostPackage.boostLevel,
+        endTime: expirationTime,
+        remainingTime: formatPulseBoostDuration(convertDurationToMinutes(boostPackage.duration)),
         pulseData: {
           boostType: boostPackage.name,
-          visibility: `${Math.round(boostPackage.boostLevel * 50)}% increased`,
-          coverage: boostPackage.boostLevel * 25
+          visibility: boostPackage.id === 'basic' ? 'Homepage' : 
+                     boostPackage.id === 'premium' ? 'Search Results' : 'Global',
+          coverage: boostPackage.boostLevel * 20
         }
       });
       
-      return true;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to purchase boost');
-      console.error('Error purchasing boost:', err);
-      return false;
-    }
-  };
-  
-  // Cancel an active boost
-  const cancelBoost = async (boostId?: string): Promise<boolean> => {
-    if (!userId) return false;
-    
-    try {
-      setError(null);
-      
-      const targetBoostId = boostId || (activeBoosts.length > 0 ? activeBoosts[0].boostId : null);
-      
-      if (!targetBoostId) {
-        setError('No active boost to cancel');
-        return false;
-      }
-      
-      // Update status in database
-      const { error: cancelError } = await supabase
-        .from('active_boosts')
-        .update({ status: 'cancelled' })
-        .eq('user_id', userId)
-        .eq('package_id', targetBoostId);
-        
-      if (cancelError) throw new Error(cancelError.message);
-      
-      // Update local state
-      const updatedBoosts = activeBoosts.filter(boost => boost.boostId !== targetBoostId);
-      setActiveBoosts(updatedBoosts);
-      
-      if (updatedBoosts.length === 0) {
-        setIsActive(false);
-        setPulseLevel(0);
-        setEnhancedStatus(DEFAULT_ENHANCED_STATUS);
-      } else {
-        // Recalculate highest remaining boost
-        const highestRemaining = updatedBoosts.reduce((prev, current) => {
-          return (prev.boostDetails?.boostLevel || 0) > (current.boostDetails?.boostLevel || 0) ? prev : current;
-        });
-        
-        setPulseLevel(highestRemaining.boostDetails?.boostLevel || 0);
-        setEnhancedStatus({
-          isActive: true,
-          timeRemaining: highestRemaining.timeRemaining,
-          expiresAt: highestRemaining.expiresAt,
-          endTime: highestRemaining.expiresAt,
-          level: highestRemaining.boostDetails?.boostLevel,
-          pulseData: {
-            boostType: highestRemaining.boostDetails?.name || 'standard',
-            visibility: `${Math.round((highestRemaining.boostDetails?.boostLevel || 1) * 50)}% increased`,
-            coverage: (highestRemaining.boostDetails?.boostLevel || 1) * 25
-          }
+      // Update user economy (deduct balance)
+      if (userEconomy) {
+        const newBalance = userEconomy.ubxBalance - (boostPackage.price_ubx || boostPackage.price);
+        setUserEconomy({
+          ...userEconomy,
+          ubxBalance: newBalance > 0 ? newBalance : 0
         });
       }
       
+      setIsLoading(false);
       return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to cancel boost');
-      console.error('Error cancelling boost:', err);
+      setError('Failed to purchase boost');
+      setIsLoading(false);
       return false;
     }
   };
 
-  // Return the values matching the expected interface
+  const cancelBoost = async (boostId?: string): Promise<boolean> => {
+    setIsLoading(true);
+    
+    try {
+      // Simulating API call
+      console.log(`Cancelling boost for profile: ${profileId}`);
+      
+      // If boostId is provided, only cancel that specific boost
+      if (boostId) {
+        setActiveBoosts(prev => prev.filter(boost => boost.boostId !== boostId));
+      } else {
+        // Cancel all active boosts
+        setActiveBoosts([]);
+      }
+      
+      // Reset enhanced status
+      setEnhancedBoostStatus({
+        isActive: false
+      });
+      
+      setIsLoading(false);
+      return true;
+    } catch (err) {
+      setError('Failed to cancel boost');
+      setIsLoading(false);
+      return false;
+    }
+  };
+
   return {
-    isLoading: loading,
+    isLoading,
     error,
     userEconomy,
     purchaseBoost,
     cancelBoost,
     activeBoosts,
-    enhancedBoostStatus: enhancedStatus,
-    pulseBoostPackages: boostPackages
+    enhancedBoostStatus,
+    pulseBoostPackages
   };
-};
+}

@@ -1,92 +1,85 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="border-t bg-background">
-      <div className="container py-8 px-4 md:px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+    <footer className="bg-background border-t">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4">UberEscorts</h3>
+            <h3 className="text-lg font-semibold mb-4">PulseBoost</h3>
             <p className="text-sm text-muted-foreground">
-              Real • Virtual • Intelligent — Explore the UberPersona Multiverse
+              Precision Upgrade Layer for Scalable Exposure - 
+              Advanced boost system for maximizing your profile visibility.
             </p>
           </div>
           
           <div>
-            <h4 className="text-sm font-semibold mb-4">Resources</h4>
-            <ul className="space-y-2">
+            <h4 className="font-medium mb-4">Features</h4>
+            <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/about" className="text-sm text-muted-foreground hover:text-foreground transition">
+                <Link to="/boost" className="text-muted-foreground hover:text-foreground">
+                  Profile Boosting
+                </Link>
+              </li>
+              <li>
+                <Link to="/analytics" className="text-muted-foreground hover:text-foreground">
+                  Analytics
+                </Link>
+              </li>
+              <li>
+                <Link to="/wallet" className="text-muted-foreground hover:text-foreground">
+                  UBX Wallet
+                </Link>
+              </li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 className="font-medium mb-4">Company</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/about" className="text-muted-foreground hover:text-foreground">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link to="/faq" className="text-sm text-muted-foreground hover:text-foreground transition">
-                  FAQ
+                <Link to="/contact" className="text-muted-foreground hover:text-foreground">
+                  Contact
                 </Link>
               </li>
               <li>
-                <Link to="/support" className="text-sm text-muted-foreground hover:text-foreground transition">
-                  Support
-                </Link>
-              </li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="text-sm font-semibold mb-4">For Creators</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/creator-signup" className="text-sm text-muted-foreground hover:text-foreground transition">
-                  Become a Creator
-                </Link>
-              </li>
-              <li>
-                <Link to="/creator-login" className="text-sm text-muted-foreground hover:text-foreground transition">
-                  Creator Login
-                </Link>
-              </li>
-              <li>
-                <Link to="/creator-resources" className="text-sm text-muted-foreground hover:text-foreground transition">
-                  Resources
+                <Link to="/careers" className="text-muted-foreground hover:text-foreground">
+                  Careers
                 </Link>
               </li>
             </ul>
           </div>
           
           <div>
-            <h4 className="text-sm font-semibold mb-4">Legal</h4>
-            <ul className="space-y-2">
+            <h4 className="font-medium mb-4">Legal</h4>
+            <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground transition">
+                <Link to="/terms" className="text-muted-foreground hover:text-foreground">
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition">
+                <Link to="/privacy" className="text-muted-foreground hover:text-foreground">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/compliance" className="text-sm text-muted-foreground hover:text-foreground transition">
-                  Compliance
+                <Link to="/cookies" className="text-muted-foreground hover:text-foreground">
+                  Cookie Policy
                 </Link>
               </li>
             </ul>
           </div>
         </div>
         
-        <div className="flex flex-col md:flex-row justify-between items-center mt-8 pt-8 border-t">
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} UberEscorts. All rights reserved.
-          </p>
-          <div className="flex items-center gap-4 mt-4 md:mt-0">
-            <Link to="/terms" className="text-xs text-muted-foreground hover:text-foreground transition">Terms</Link>
-            <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition">Privacy</Link>
-            <Link to="/cookies" className="text-xs text-muted-foreground hover:text-foreground transition">Cookies</Link>
-          </div>
+        <div className="mt-8 pt-4 border-t text-center text-sm text-muted-foreground">
+          <p>© {new Date().getFullYear()} PulseBoost. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -1,137 +1,89 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { AlignLeft, ArrowUpCircle, Info, BarChart3 } from 'lucide-react';
 import { HermesBoostStatus } from '@/types/boost';
-import { Zap, Users, TrendingUp, Clock } from 'lucide-react';
 
-interface HermesBoostInfoProps {
+export interface HermesBoostInfoProps {
   hermesStatus: HermesBoostStatus;
+  isActive?: boolean;
 }
 
-const HermesBoostInfo: React.FC<HermesBoostInfoProps> = ({ hermesStatus }) => {
-  const getVisibilityColor = (visibility: number): string => {
-    if (visibility >= 80) return "text-green-500";
-    if (visibility >= 50) return "text-amber-500";
-    return "text-gray-500";
-  };
-
-  const formatLastUpdate = (lastUpdateTime: string): string => {
-    if (!lastUpdateTime) return "Not available";
-    
-    try {
-      const updateDate = new Date(lastUpdateTime);
-      return updateDate.toLocaleTimeString();
-    } catch (e) {
-      return "Invalid time";
-    }
-  };
-
+const HermesBoostInfo: React.FC<HermesBoostInfoProps> = ({ 
+  hermesStatus,
+  isActive = false
+}) => {
   return (
     <div className="space-y-4">
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-medium">Boost Analytics</CardTitle>
-            <Badge variant="outline" className="ml-2">
-              HERMES + OXUM
-            </Badge>
-          </div>
-          <CardDescription>
-            Real-time boost visibility analytics
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex flex-col space-y-1">
-              <span className="text-sm text-muted-foreground">Position</span>
-              <div className="flex items-center">
-                <TrendingUp className="h-4 w-4 mr-2 text-primary" />
-                <span className="text-xl font-semibold">
-                  {hermesStatus.position || "N/A"}
-                </span>
-              </div>
-            </div>
-            
-            <div className="flex flex-col space-y-1">
-              <span className="text-sm text-muted-foreground">Active Users</span>
-              <div className="flex items-center">
-                <Users className="h-4 w-4 mr-2 text-primary" />
-                <span className="text-xl font-semibold">
-                  {hermesStatus.activeUsers || 0}
-                </span>
-              </div>
-            </div>
-            
-            <div className="flex flex-col space-y-1">
-              <span className="text-sm text-muted-foreground">Visibility Score</span>
-              <div className="flex items-center">
-                <Zap className="h-4 w-4 mr-2 text-primary" />
-                <span className={`text-xl font-semibold ${getVisibilityColor(hermesStatus.estimatedVisibility)}`}>
-                  {hermesStatus.estimatedVisibility || 0}%
-                </span>
-              </div>
-            </div>
-            
-            <div className="flex flex-col space-y-1">
-              <span className="text-sm text-muted-foreground">Last Update</span>
-              <div className="flex items-center">
-                <Clock className="h-4 w-4 mr-2 text-primary" />
-                <span className="text-sm">
-                  {formatLastUpdate(hermesStatus.lastUpdateTime)}
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          {hermesStatus.isActive || hermesStatus.active ? (
-            <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded">
-              <p className="text-sm text-green-600 dark:text-green-400">
-                Your boost is currently active and working at optimal efficiency.
+      <div className="flex items-center justify-between">
+        <h3 className="font-medium flex items-center">
+          <BarChart3 className="h-4 w-4 mr-2 text-blue-500" /> 
+          Boost Performance Metrics
+        </h3>
+        
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <button className="inline-flex items-center text-muted-foreground hover:text-foreground text-sm">
+              <Info className="h-3.5 w-3.5 mr-1" /> 
+              What is this?
+            </button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-80">
+            <div className="space-y-2">
+              <h4 className="font-medium text-sm">Hermes Boost System</h4>
+              <p className="text-xs text-muted-foreground">
+                The Hermes algorithm optimizes how your profile visibility is distributed across the platform,
+                balancing fair exposure with maximum impact.
               </p>
             </div>
-          ) : (
-            <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded">
-              <p className="text-sm text-amber-600 dark:text-amber-400">
-                No active boost detected. Apply a boost to increase visibility.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </HoverCardContent>
+        </HoverCard>
+      </div>
       
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-medium">Boost Effectiveness</CardTitle>
-          <CardDescription>
-            How well your boost is performing
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Card>
+          <CardContent className="p-4 space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-sm">Boost Score:</span>
-              <span className="font-semibold">{hermesStatus.boostScore || 0}</span>
+              <span className="text-sm text-muted-foreground">Position</span>
+              <span className="font-medium">#{hermesStatus?.position || 'N/A'}</span>
             </div>
-            
             <div className="flex justify-between items-center">
-              <span className="text-sm">Effectiveness:</span>
-              <span className="font-semibold">{hermesStatus.effectivenessScore || 0}%</span>
+              <span className="text-sm text-muted-foreground">Active Users</span>
+              <span className="font-medium">{hermesStatus?.activeUsers || 0}</span>
             </div>
-            
-            {hermesStatus.timeRemaining !== undefined && (
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Time Remaining:</span>
-                <span className="font-semibold">
-                  {typeof hermesStatus.timeRemaining === 'number' 
-                    ? `${Math.floor(hermesStatus.timeRemaining / 60)}h ${hermesStatus.timeRemaining % 60}m`
-                    : 'N/A'}
-                </span>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Visibility</span>
+              <span className="font-medium">{hermesStatus?.estimatedVisibility || 0}%</span>
+            </div>
+            <Progress value={hermesStatus?.estimatedVisibility || 0} className="h-2" />
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="text-sm text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <AlignLeft className="h-3.5 w-3.5" />
+          <span>
+            Last updated: {hermesStatus?.lastUpdateTime ? new Date(hermesStatus.lastUpdateTime).toLocaleTimeString() : 'N/A'}
+          </span>
+        </div>
+      </div>
+      
+      {!isActive && (
+        <div className="bg-muted p-4 rounded-md text-sm text-center">
+          <ArrowUpCircle className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+          <p className="text-muted-foreground">
+            Activate a boost to see real-time analytics here
+          </p>
+        </div>
+      )}
     </div>
   );
 };

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { formatPulseBoostDuration } from "@/constants/pulseBoostConfig";
-import { PulseBoost } from "@/types/pulse-boost";
+import { PulseBoost } from "@/types/boost";
 import { Clock, Star, TrendingUp, Zap } from "lucide-react";
 import { useState } from "react";
 

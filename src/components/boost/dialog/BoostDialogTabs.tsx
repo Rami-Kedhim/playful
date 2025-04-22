@@ -3,11 +3,30 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import BoostPackages from './BoostPackages';
-import BoostEligibilityCheck from './BoostEligibilityCheck';
-import BoostActivePackage from './BoostActivePackage';
+import BoostPackages from "../BoostPackages";
+import BoostEligibilityCheck from "./BoostEligibilityCheck";
+import BoostActivePackage from "../BoostActivePackage";
 import HermesBoostInfo from '../HermesBoostInfo';
-import { BoostDialogTabsProps } from '../types';
+import { BoostStatus, HermesBoostStatus } from '@/types/boost';
+
+export interface BoostDialogTabsProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  loading: boolean;
+  boostStatus: BoostStatus;
+  eligibility: { isEligible: boolean; reason?: string };
+  boostPackages: any[];
+  selectedPackage: string;
+  setSelectedPackage: (id: string) => void;
+  handleBoost: () => void;
+  handleCancel: () => Promise<boolean>;
+  dailyBoostUsage: number;
+  dailyBoostLimit: number;
+  hermesStatus: HermesBoostStatus;
+  formatBoostDuration?: (duration: string) => string;
+  getBoostPrice?: () => number;
+  handleDialogClose: () => void;
+}
 
 const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   activeTab,
@@ -50,7 +69,7 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
           {boostStatus?.isActive ? (
             <div className="space-y-6">
               <BoostActivePackage 
-                boostStatus={boostStatus} 
+                boostStatus={boostStatus}
                 hermesData={hermesStatus}
               />
               

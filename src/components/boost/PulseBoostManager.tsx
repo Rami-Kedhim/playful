@@ -10,6 +10,7 @@ import { AlertCircle, ChevronRight, Clock, Zap } from "lucide-react";
 import PulseBoostCard from "./PulseBoostCard";
 import { formatDistanceToNow } from "date-fns";
 import UBXWallet from "../wallet/UBXWallet";
+import { PulseBoost } from "@/types/boost";
 
 interface PulseBoostManagerProps {
   profileId?: string;
@@ -26,6 +27,18 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
     enhancedBoostStatus,
     pulseBoostPackages
   } = usePulseBoost(profileId);
+
+  // Convert BoostPackage[] to PulseBoost[]
+  const convertedBoosts: PulseBoost[] = pulseBoostPackages.map(boost => ({
+    id: boost.id,
+    name: boost.name,
+    description: boost.description,
+    durationMinutes: 24 * 60, // Default to 24 hours (24 * 60 minutes)
+    visibility: boost.id === 'basic' ? 'homepage' : 
+               boost.id === 'premium' ? 'search' : 'global',
+    costUBX: boost.price_ubx || boost.price,
+    badgeColor: boost.color
+  }));
 
   if (isLoading) {
     return (
@@ -64,7 +77,7 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
                 Active Boost
               </CardTitle>
               {enhancedBoostStatus.pulseData && (
-                <Badge style={{ backgroundColor: PULSE_BOOSTS.find(b => b.name === enhancedBoostStatus.pulseData?.boostType)?.badgeColor }}>
+                <Badge style={{ backgroundColor: PULSE_BOOSTS.find(b => b.name === enhancedBoostStatus.pulseData?.boostType)?.color }}>
                   {enhancedBoostStatus.pulseData.boostType}
                 </Badge>
               )}
@@ -116,13 +129,16 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
           ) : null}
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {pulseBoostPackages.map((boost) => (
+            {convertedBoosts.map((boost) => (
               <PulseBoostCard
                 key={boost.id}
                 boost={boost}
                 isActive={activeBoostIds.includes(boost.id)}
                 timeRemaining={activeBoosts.find(ab => ab.boostId === boost.id)?.timeRemaining}
-                onActivate={purchaseBoost}
+                onActivate={(boostId) => {
+                  const boostPackage = pulseBoostPackages.find(b => b.id === boostId);
+                  return boostPackage ? purchaseBoost(boostPackage) : Promise.resolve(false);
+                }}
                 onCancel={cancelBoost}
                 userBalance={userEconomy?.ubxBalance || 0}
               />
@@ -141,22 +157,29 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {activeBoosts.map((activeBoost) => (
-                <PulseBoostCard
-                  key={`${activeBoost.boostId}-${activeBoost.startedAt.toISOString()}`}
-                  boost={activeBoost.boostDetails || {
-                    id: activeBoost.boostId,
-                    name: 'Unknown Boost',
-                    durationMinutes: 0,
-                    visibility: 'homepage',
-                    costUBX: 0
-                  }}
-                  isActive={true}
-                  timeRemaining={activeBoost.timeRemaining}
-                  onCancel={cancelBoost}
-                  disabled={false}
-                />
-              ))}
+              {activeBoosts.map((activeBoost) => {
+                // Convert ActiveBoost to PulseBoost
+                const pulseBoost: PulseBoost = {
+                  id: activeBoost.boostId,
+                  name: activeBoost.boostDetails?.name || 'Unknown Boost',
+                  durationMinutes: 24 * 60, // Default to 24 hours
+                  visibility: 'homepage',
+                  costUBX: activeBoost.boostDetails?.price || 0,
+                  description: activeBoost.boostDetails?.description,
+                  badgeColor: activeBoost.boostDetails?.color
+                };
+                
+                return (
+                  <PulseBoostCard
+                    key={`${activeBoost.boostId}-${activeBoost.startedAt.toISOString()}`}
+                    boost={pulseBoost}
+                    isActive={true}
+                    timeRemaining={activeBoost.timeRemaining}
+                    onCancel={cancelBoost}
+                    disabled={false}
+                  />
+                );
+              })}
             </div>
           )}
         </TabsContent>

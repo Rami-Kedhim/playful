@@ -10,6 +10,8 @@ export interface BoostPackage {
   features: string[];
   boostLevel: number;
   color?: string;
+  price_ubx?: number;
+  is_featured?: boolean;
 }
 
 export interface BoostStatus {
@@ -18,6 +20,12 @@ export interface BoostStatus {
   expiresAt?: Date;
   level?: number;
   purchasedAt?: Date;
+  progress?: number;
+  remainingTime?: string;
+  packageName?: string;
+  startTime?: string;
+  endTime?: string;
+  boostPackage?: BoostPackage;
 }
 
 export interface EnhancedBoostStatus extends BoostStatus {
@@ -58,6 +66,13 @@ export interface HermesData {
   lastUpdateTime: string;
 }
 
+export interface HermesBoostStatus {
+  position: number;
+  activeUsers: number;
+  estimatedVisibility: number;
+  lastUpdateTime: string;
+}
+
 export interface BoostActivePackageProps {
   boostStatus: BoostStatus;
   hermesData?: HermesData;
@@ -67,7 +82,8 @@ export interface BoostProfileDialogProps {
   onSuccess: () => void;
   onClose?: () => void;
   open: boolean;
-  setOpen: () => void;
+  setOpen: (open: boolean) => void;
+  profileId?: string;
 }
 
 // Define the PulseBoostProps interface
@@ -85,4 +101,26 @@ export interface UsePulseBoostReturn {
   activeBoosts: ActiveBoost[];
   enhancedBoostStatus: EnhancedBoostStatus;
   pulseBoostPackages: BoostPackage[];
+}
+
+export interface BoostEligibility {
+  isEligible: boolean;
+  reason?: string;
+}
+
+export interface AnalyticsData {
+  additionalViews: number;
+  engagementIncrease: number;
+  rankingPosition: number;
+  // Add other fields as needed
+}
+
+export interface PulseBoost {
+  id: string;
+  name: string;
+  durationMinutes: number;
+  visibility: string;
+  costUBX: number;
+  description?: string;
+  badgeColor?: string;
 }

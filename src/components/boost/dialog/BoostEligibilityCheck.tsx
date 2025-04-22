@@ -1,57 +1,32 @@
 
 import React from 'react';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Check, Info } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Ban, CheckCircle } from "lucide-react";
 import { BoostEligibility } from '@/types/boost';
 
 interface BoostEligibilityCheckProps {
   eligibility: BoostEligibility;
-  onResolve?: () => void;
-  showSuccessAlert?: boolean;
 }
 
-export const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({
-  eligibility,
-  onResolve,
-  showSuccessAlert = false
-}) => {
-  if (!eligibility) {
-    return null;
-  }
-
+const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({ eligibility }) => {
   if (eligibility.isEligible) {
-    // Only show success message if explicitly requested
-    if (!showSuccessAlert) {
-      return null;
-    }
-
     return (
-      <Alert className="mb-6 border-green-200 bg-green-50 text-green-800">
-        <Check className="h-5 w-5 text-green-600" />
-        <AlertTitle>Ready to Boost</AlertTitle>
-        <AlertDescription>
-          Your profile is eligible for boosting. Choose a package to get started!
+      <Alert variant="default" className="bg-green-500/10 text-green-500 border-green-500/50">
+        <CheckCircle className="h-4 w-4" />
+        <AlertTitle>Eligible for boost</AlertTitle>
+        <AlertDescription className="text-green-500/90">
+          Your profile meets all requirements to be boosted
         </AlertDescription>
       </Alert>
     );
   }
-
+  
   return (
-    <Alert className="mb-6" variant="destructive">
-      <AlertCircle className="h-5 w-5" />
-      <AlertTitle>Profile Not Eligible</AlertTitle>
-      <AlertDescription>
-        <div className="space-y-2">
-          <p>{eligibility.reason}</p>
-          {onResolve && (
-            <button
-              className="text-sm font-medium underline hover:no-underline"
-              onClick={onResolve}
-            >
-              Resolve Issue
-            </button>
-          )}
-        </div>
+    <Alert variant="destructive" className="bg-destructive/10 text-destructive">
+      <Ban className="h-4 w-4" />
+      <AlertTitle>Not eligible for boost</AlertTitle>
+      <AlertDescription className="text-destructive/90">
+        {eligibility.reason || "Your profile does not meet the requirements for boosting"}
       </AlertDescription>
     </Alert>
   );
