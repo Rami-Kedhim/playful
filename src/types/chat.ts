@@ -10,6 +10,9 @@ export interface Message {
   isDeleted?: boolean;
 }
 
+// Add ChatMessage as an alias for Message for backward compatibility
+export type ChatMessage = Message;
+
 export interface Attachment {
   id: string;
   url: string;

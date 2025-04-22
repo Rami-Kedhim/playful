@@ -10,6 +10,7 @@ interface AuthContextProps {
   login: (email: string, password: string) => Promise<AuthResult>;
   register: (credentials: RegisterCredentials) => Promise<AuthResult>;
   logout: () => Promise<void>;
+  signOut: () => Promise<void>; // Alias for logout for backward compatibility
   isAuthenticated: boolean;
   isLoading: boolean;
   checkRole: (role: string) => boolean;
@@ -18,6 +19,7 @@ interface AuthContextProps {
   refreshProfile: () => Promise<void>;
   error: string | null;
   profile: any;
+  sendPasswordResetEmail: (email: string) => Promise<AuthResult>;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -55,6 +57,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSession(null);
     setProfile(null);
   };
+
+  // Alias for logout for backward compatibility
+  const signOut = logout;
 
   // Check if user has a specific role
   const checkRole = (roleName: string): boolean => {
@@ -148,6 +153,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Send password reset email
+  const sendPasswordResetEmail = async (email: string): Promise<AuthResult> => {
+    try {
+      setError(null);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
+      });
+      
+      if (error) {
+        setError(error.message);
+        return { success: false, error: error.message };
+      }
+      
+      return {
+        success: true,
+      };
+    } catch (error: any) {
+      const errorMsg = error.message || 'Failed to send password reset email';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
+    }
+  };
+
   // Update user profile
   const updateUserProfile = async (userData: Partial<User>): Promise<boolean> => {
     try {
@@ -207,6 +235,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     login,
     register,
     logout,
+    signOut, // Add signOut alias
     isAuthenticated: !!user,
     isLoading: loading,
     checkRole,
@@ -215,6 +244,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateUserProfile,
     refreshProfile,
     profile,
+    sendPasswordResetEmail,
   };
   
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -228,5 +258,4 @@ export const useAuth = () => {
   return context;
 };
 
-// Export only once
 export { AuthContext };

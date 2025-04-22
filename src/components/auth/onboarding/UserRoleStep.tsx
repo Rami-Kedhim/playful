@@ -66,7 +66,7 @@ export const UserRoleStep: React.FC<UserRoleStepProps> = ({ onNext }) => {
     try {
       const avatarGender = settings.gender;
       const avatarSettings: AIAvatarSettings = {
-        gender: avatarGender as "male" | "female" | "non-binary",
+        gender: avatarGender,
         style: settings.style,
         ageRange: settings.ageRange,
         age: settings.age,

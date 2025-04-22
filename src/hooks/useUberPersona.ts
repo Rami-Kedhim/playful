@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { UberPersonaData } from '@/types/UberPersona';  // Using the correct case for import
+import { UberPersona } from '@/types/uberPersona';  // Using the correct case for import
 
 export const useUberPersona = (userId: string | undefined) => {
-  const [persona, setPersona] = useState<UberPersonaData | null>(null);
+  const [persona, setPersona] = useState<UberPersona | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
