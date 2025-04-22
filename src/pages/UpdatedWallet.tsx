@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { Button } from '@/components/ui/button';
@@ -55,70 +56,14 @@ const UpdatedWallet = () => {
 
               <div className="space-y-1">
                 <h3 className="text-xl font-semibold">
-                  LuCoins Balance: {profile?.lucoin_balance || profile?.lucoinsBalance || 0} LC
+                  UBX Balance: {profile?.ubx_balance || profile?.ubxBalance || 0} UBX
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Use LuCoins to boost your profile, send messages, and more.
-                </p>
-                <Button>
-                  Add LuCoins
-                </Button>
-              </div>
-
-              <div className="space-y-1">
-                <h3 className="text-xl font-semibold">
-                  UBX Balance: {profile?.ubx_balance || 0} UBX
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Use UBX to purchase exclusive content and services.
+                  Use UBX to boost your profile, send messages, and more.
                 </p>
                 <Button>
                   Add UBX
                 </Button>
-              </div>
-
-              <div className="space-y-2">
-                <h4 className="text-lg font-semibold">Profile Boost</h4>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    {profile?.is_boosted || profile?.isBoosted ? (
-                      <>
-                        <ShieldCheck className="h-5 w-5 text-green-500" />
-                        <p className="text-sm">Your profile is currently boosted!</p>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-5 w-5 text-yellow-500" />
-                        <p className="text-sm">Boost your profile to get more visibility.</p>
-                      </>
-                    )}
-                  </div>
-                  <Button variant="secondary" size="sm">
-                    {profile?.is_boosted || profile?.isBoosted ? "Manage Boost" : "Boost Profile"}
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h4 className="text-lg font-semibold">Subscription</h4>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    {profile?.is_boosted || profile?.isBoosted ? (
-                      <>
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                        <p className="text-sm">You are currently subscribed!</p>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-5 w-5 text-yellow-500" />
-                        <p className="text-sm">Subscribe to unlock exclusive features.</p>
-                      </>
-                    )}
-                  </div>
-                  <Button variant="secondary" size="sm">
-                    {profile?.is_boosted || profile?.isBoosted ? "Manage Subscription" : "Subscribe"}
-                  </Button>
-                </div>
               </div>
             </div>
           </CardContent>

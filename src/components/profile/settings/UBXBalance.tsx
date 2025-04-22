@@ -14,11 +14,11 @@ const UBXBalance: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   // Mock UBX balance - in a real app would come from user profile
-  const [balance, setBalance] = useState(user?.lucoinsBalance || 0);
+  const [balance, setBalance] = useState(user?.ubxBalance || 0);
   
   useEffect(() => {
     // Update balance when user changes
-    setBalance(user?.lucoinsBalance || 0);
+    setBalance(user?.ubxBalance || 0);
   }, [user]);
   
   const handleAddFunds = async () => {

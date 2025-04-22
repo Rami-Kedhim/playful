@@ -13,6 +13,15 @@ export interface User {
   updatedAt?: string;
   session?: any; // Add session property
   password?: string; // Add password property
+  username?: string;
+  roles?: UserRole[];
+  website?: string;
+  bio?: string;
+  profileImageUrl?: string;
+  avatar_url?: string;
+  user_metadata?: Record<string, any>;
+  ubxBalance?: number;
+  created_at?: string;
 }
 
 export interface AuthResult {
@@ -22,6 +31,7 @@ export interface AuthResult {
   redirectTo?: string;
   token?: string;
   session?: any; // Add session property
+  password?: string;
 }
 
 export interface AuthState {
@@ -30,4 +40,10 @@ export interface AuthState {
   isLoading: boolean;
   error: string | null;
   initialized: boolean;
+}
+
+export type UserRole = string | { name: string };
+
+export interface AuthUser extends User {
+  // Additional properties needed for auth
 }

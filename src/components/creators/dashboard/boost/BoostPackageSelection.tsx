@@ -46,7 +46,7 @@ const BoostPackageSelection = ({
           <div>Account Type: {role}</div>
         </div>
         <div className="mt-2 font-medium">
-          Your base boost price: {getBoostPrice()} LC
+          Your base boost price: {getBoostPrice()} UBX
         </div>
       </div>
       

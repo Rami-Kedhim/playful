@@ -6,7 +6,7 @@ import { toast } from '@/hooks/use-toast';
 export interface MonetizationSettings {
   subscriptionPrice: number;
   unlockingPrice: number;
-  acceptsLucoin: boolean;
+  acceptsUbx: boolean;
   acceptsTips: boolean;
   boostingActive: boolean;
   meetingPrice: number;
@@ -16,7 +16,7 @@ export function useMonetizationSystem(personaId: string) {
   const [settings, setSettings] = useState<MonetizationSettings>({
     subscriptionPrice: 0,
     unlockingPrice: 0,
-    acceptsLucoin: false,
+    acceptsUbx: false,
     acceptsTips: false,
     boostingActive: false,
     meetingPrice: 0
@@ -32,7 +32,7 @@ export function useMonetizationSystem(personaId: string) {
       const fetchedSettings: MonetizationSettings = {
         subscriptionPrice: 10,
         unlockingPrice: 5,
-        acceptsLucoin: true,
+        acceptsUbx: true,
         acceptsTips: true,
         boostingActive: false,
         meetingPrice: 20
@@ -80,4 +80,3 @@ export function useMonetizationSystem(personaId: string) {
 }
 
 export default useMonetizationSystem;
-

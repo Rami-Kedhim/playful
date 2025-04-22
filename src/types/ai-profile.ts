@@ -9,14 +9,15 @@ export interface AIProfile {
     traits?: string[];
   };
   location?: string;
-  lucoin_chat_price?: number;
-  lucoin_image_price?: number;
+  ubx_chat_price?: number;
+  ubx_image_price?: number;
   interests?: string[];
   availability_status?: string;
   boost_status?: {
     isActive: boolean;
     expiresAt?: string;
     boost_level?: number;
+    is_boosted?: boolean;
   };
   isVerified?: boolean;
   
@@ -74,7 +75,8 @@ export enum ProcessingStatus {
   PENDING = 'pending',
   PROCESSING = 'processing',
   COMPLETED = 'completed',
-  FAILED = 'failed'
+  FAILED = 'failed',
+  IDLE = 'idle'
 }
 
 export interface ProcessingStatusDetails {
@@ -82,4 +84,6 @@ export interface ProcessingStatusDetails {
   progress: number;
   message: string;
   error?: string;
+  completedCount?: number;
+  totalCount?: number;
 }

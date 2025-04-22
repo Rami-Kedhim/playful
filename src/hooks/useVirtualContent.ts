@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useLucoins } from "@/hooks/useLucoins";
+import { useUbx } from "@/hooks/useUbx";
 import { logContentAction, logContentError, logContentFlow } from "@/utils/debugUtils";
 
 export type ContentType = "photo" | "video" | "message";
@@ -17,7 +18,7 @@ export const useVirtualContent = () => {
   const [unlockedContent, setUnlockedContent] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { processLucoinTransaction } = useLucoins();
+  const { processUbxTransaction } = useUbx();
   
   useEffect(() => {
     setError(null);
@@ -70,7 +71,7 @@ export const useVirtualContent = () => {
     
     try {
       logContentFlow('Processing payment', contentId, { price });
-      const transactionResult = await processLucoinTransaction({
+      const transactionResult = await processUbxTransaction({
         amount: price,
         transactionType: 'purchase',
         description: `Unlock ${contentType} content`,

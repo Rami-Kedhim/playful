@@ -45,12 +45,12 @@ export const useAIModelMonetization = () => {
   
   // Additional methods needed by components
   const sendAIGift = (profileId: string, giftType: string, price: number) => {
-    console.log(`Sending ${giftType} gift to profile ${profileId} for ${price} LC`);
+    console.log(`Sending ${giftType} gift to profile ${profileId} for ${price} UBX`);
     return true;
   };
   
   const purchaseAIContent = (profileId: string, contentId: string, price: number) => {
-    console.log(`Purchasing content ${contentId} from profile ${profileId} for ${price} LC`);
+    console.log(`Purchasing content ${contentId} from profile ${profileId} for ${price} UBX`);
     return true;
   };
   

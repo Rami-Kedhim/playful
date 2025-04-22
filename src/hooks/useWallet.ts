@@ -34,7 +34,7 @@ interface WalletContextValue {
 const mockWallet: Wallet = {
   id: "wallet-123",
   balance: 500,
-  currency: "LC",
+  currency: "UBX",
   lastUpdated: new Date(),
   status: "active",
   transactions: [
@@ -132,7 +132,7 @@ export const useWallet = (): WalletContextValue => {
       const actionType = amount > 0 ? "deposit" : "purchase";
       toast({
         title: `${actionType.charAt(0).toUpperCase() + actionType.slice(1)} Successful`,
-        description: `Your wallet has been ${amount > 0 ? "credited with" : "debited"} ${Math.abs(amount)} LC`,
+        description: `Your wallet has been ${amount > 0 ? "credited with" : "debited"} ${Math.abs(amount)} UBX`,
       });
       
       return true;

@@ -27,11 +27,12 @@ export interface BoostPackage {
   duration: string;
   price: number;
   price_ubx?: number;
-  price_lucoin?: number;
   features?: string[];
   boost_power?: number;
   visibility_increase?: number;
   boostLevel?: number;
+  color?: string;
+  is_featured?: boolean;
 }
 
 export interface BoostProfileDialogProps {
@@ -48,4 +49,45 @@ export interface HermesStatus {
   lastUpdateTime: string;
   boostScore?: number;
   effectivenessScore?: number;
+}
+
+export interface HermesBoostStatus extends HermesStatus {
+  // Additional properties for HermesBoostStatus
+}
+
+export interface BoostAnalytics {
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  time_period: string;
+}
+
+export interface PulseBoost extends BoostPackage {
+  color: string;
+  is_featured?: boolean;
+}
+
+export interface BoostDialogTabsProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  loading: boolean;
+  boostStatus: BoostStatus;
+  eligibility: BoostEligibility;
+  boostPackages: BoostPackage[];
+  selectedPackage: string | null;
+  setSelectedPackage: (packageId: string) => void;
+  handleBoost: () => Promise<boolean>;
+  handleCancel: () => Promise<boolean>;
+  dailyBoostUsage: number;
+  dailyBoostLimit: number;
+  handleDialogClose: () => void;
+  getBoostPrice: () => number;
+  hermesStatus: HermesStatus;
+  formatBoostDuration: (duration: string) => string;
+}
+
+export interface HermesData {
+  // Add required properties
+  position?: number;
+  visibilityScore?: number;
 }

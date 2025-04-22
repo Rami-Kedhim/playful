@@ -7,7 +7,7 @@ interface LucoinBalanceProps {
   balance: number;
 }
 
-const LucoinBalance = ({ balance }: LucoinBalanceProps) => {
+const UBXBalance = ({ balance }: LucoinBalanceProps) => {
   return (
     <Card>
       <CardHeader>
@@ -49,4 +49,4 @@ const LucoinBalance = ({ balance }: LucoinBalanceProps) => {
   );
 };
 
-export default LucoinBalance;
+export default UBXBalance;
