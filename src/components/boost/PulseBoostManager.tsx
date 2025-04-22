@@ -57,7 +57,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
     return success;
   };
 
-  const handleCancel = async (boostId: string): Promise<boolean> => {
+  const handleCancel = async (_boostId: string): Promise<boolean> => {
     const success = await cancelBoost();
     if (!success) {
       console.error('Failed to cancel boost');
