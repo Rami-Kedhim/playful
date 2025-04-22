@@ -2,7 +2,7 @@
 import React from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CircleAlert, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
-import { BoostEligibility } from '../types';
+import { BoostEligibility } from '@/types/boost';
 
 interface BoostEligibilityCheckProps {
   eligibility: BoostEligibility;
@@ -10,9 +10,6 @@ interface BoostEligibilityCheckProps {
 }
 
 const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({ eligibility, loading }) => {
-  // Use isEligible for the check, but fall back to eligible for compatibility
-  const isEligible = eligibility.isEligible !== undefined ? eligibility.isEligible : eligibility.eligible;
-  
   if (loading) {
     return (
       <Alert variant="default" className="bg-muted">
@@ -23,7 +20,7 @@ const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({ eligibili
     );
   }
   
-  if (isEligible) {
+  if (eligibility.isEligible) {
     return (
       <Alert variant="default" className="bg-green-500/10 border-green-500/20">
         <CheckCircle2 className="h-4 w-4 text-green-500 mr-2" />

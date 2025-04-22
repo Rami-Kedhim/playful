@@ -84,7 +84,7 @@ function App() {
                                         <Route path="/ai-chat" element={<AIChat />} />
                                         <Route path="/creator-dashboard" element={<CreatorDashboard />} />
                                         <Route path="/escort/:id" element={<EscortProfile />} />
-                                        <Route path="/livecams" element={<LivecamPage />} />
+                                        <Route path="/livecams" element={<LiveCamPage />} />
                                         <Route path="/livecam/:id" element={<LivecamDetail />} />
                                         <Route path="/ai-models" element={<AIModelPage />} />
                                         <Route path="/ai-model/:id" element={<AIModelDetail />} />

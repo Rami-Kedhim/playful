@@ -1,34 +1,9 @@
 
 import { useState } from 'react';
+import { BoostAnalytics } from '@/types/boost';
 
-// Define the correct AnalyticsData interface
-export interface AnalyticsData {
-  // Standard metrics
-  impressions: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-  clicks: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-  engagementRate: number;
-  conversionRate: number;
-  boostEfficiency: number;
-  
-  // Additional fields
-  additionalViews: number;
-  engagementIncrease: number;
-  rankingPosition: number;
-}
+// Define the AnalyticsData interface to match BoostAnalytics
+export type AnalyticsData = BoostAnalytics;
 
 export const useBoostAnalytics = (profileId?: string) => {
   const [loading, setLoading] = useState(false);
@@ -63,7 +38,8 @@ export const useBoostAnalytics = (profileId?: string) => {
         boostEfficiency: 85,
         additionalViews: 130,
         engagementIncrease: 65,
-        rankingPosition: 3
+        rankingPosition: 3,
+        viewsIncrease: 108 // Added to match usage in code
       };
       
       setLoading(false);

@@ -15,18 +15,26 @@ interface BoostProfileDialogProps {
 
 const BoostProfileDialog = ({ 
   profileId, 
-  onSuccess,
+  onSuccess = () => {},
   buttonText = "Boost Profile",
   buttonVariant = "outline",
   buttonSize = "sm"
 }: BoostProfileDialogProps) => {
+  // Create a wrapper function that accepts the boolean result and calls onSuccess
+  const handleSuccess = async () => {
+    await onSuccess();
+    return true; // Return true to satisfy the Promise<boolean> requirement
+  };
+
   return (
     <BoostDialogContainer
       profileId={profileId}
-      onSuccess={onSuccess}
-      buttonText={buttonText}
-      buttonVariant={buttonVariant}
-      buttonSize={buttonSize}
+      onSuccess={handleSuccess}
+      buttonProps={{
+        text: buttonText,
+        variant: buttonVariant,
+        size: buttonSize
+      }}
     />
   );
 };

@@ -46,6 +46,8 @@ const LivecamSidebar: React.FC<LivecamSidebarProps> = ({
                   {category}
                 </Badge>
               ))
+            ) : model.category ? (
+              <Badge variant="outline">{model.category}</Badge>
             ) : (
               <p className="text-gray-500">No tags available</p>
             )}

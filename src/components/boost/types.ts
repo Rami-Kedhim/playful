@@ -1,134 +1,53 @@
 
-// Types for boost components
+import { BoostStatus, BoostEligibility, BoostPackage } from "@/types/boost";
 
-export interface BoostPackage {
-  id: string;
-  name: string;
-  duration: string;
-  price_ubx: number;
-  description: string;
-  features: string[];
+export interface BoostButtonProps {
+  text?: string;
+  variant?: string;
+  size?: string;
 }
 
-export interface BoostStatus {
-  isActive: boolean;
-  progress?: number;
-  expiresAt?: string;
-  startedAt?: string;
-  packageId?: string;
-  pulseData?: any; // For Pulse Boost integration
+export interface BoostDialogContainerProps {
+  profileId: string;
+  onSuccess?: () => Promise<boolean>;
+  buttonProps?: BoostButtonProps;
 }
 
-export interface BoostEligibility {
-  eligible: boolean;
-  isEligible?: boolean; // For compatibility with both naming conventions
-  reasons?: string[];
-  reason?: string; // Add this field
-  minimumProfileCompleteness?: number;
-  missingFields?: string[];
-  minRequiredBalance?: number;
+export interface BoostDialogTabsProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  loading: boolean;
+  boostStatus: BoostStatus;
+  eligibility: BoostEligibility;
+  boostPackages: BoostPackage[];
+  selectedPackage: string;
+  setSelectedPackage: (packageId: string) => void;
+  handleBoost: () => Promise<void>;
+  handleCancel: () => Promise<void>;
+  dailyBoostUsage: number;
+  dailyBoostLimit: number;
+  hermesStatus: any;
 }
 
 export interface BoostPackagesProps {
-  boostPackages?: BoostPackage[];
-  packages?: BoostPackage[];
-  selectedPackage?: string;
-  onSelectPackage?: (packageId: string) => void;
-  setSelectedPackage?: (packageId: string) => void;
-  formatBoostDuration?: (duration: string) => string;
-  formatDuration?: (duration: string) => string;
-  getBoostPrice?: () => number;
-  dailyBoostUsage?: number;
-  dailyBoostLimit?: number;
+  packages: BoostPackage[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+  formatDuration: (duration: string) => string;
+  dailyUsage: number;
+  dailyLimit: number;
   disabled?: boolean;
 }
 
-export interface HermesBoostStatus {
-  position: number;
-  activeUsers: number;
-  estimatedVisibility: number;
-  lastUpdateTime: string;
-  isActive?: boolean; // For compatibility
-  active?: boolean; // For compatibility
-  timeRemaining?: number;
-  boostScore?: number;
-  effectivenessScore?: number;
-}
-
 export interface HermesBoostInfoProps {
-  hermesStatus?: HermesBoostStatus;
-  status?: HermesBoostStatus;
-  hermesData?: HermesBoostStatus;
-}
-
-export interface AnalyticsData {
-  impressions: number;
-  clicks: number;
-  engagementRate: number;
-  conversionRate: number;
-  boostEfficiency: number;
-  
-  // Make all optional to resolve conflicts
-  additionalViews?: number;
-  engagementIncrease?: number;
-  rankingPosition?: number;
-  views?: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-  // Removed duplicate clicks property
-  searchRanking?: {
-    withoutBoost: number;
-    withBoost: number;
-    improvement: number;
+  hermesStatus: {
+    position: number;
+    activeUsers: number;
+    estimatedVisibility: number;
+    lastUpdateTime: string;
   };
 }
 
-// Add missing types for BoostDialogTabsProps
-export interface BoostDialogTabsProps {
-  activeTab: string;
-  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
-  boostStatus: any;
-  eligibility: any;
-  hermesBoostStatus?: HermesBoostStatus;
-  boostPackages: any[];
-  selectedPackage: string | null;
-  setSelectedPackage: (packageId: string) => void;
-  formatBoostDuration: (duration: string) => string;
-  getBoostPrice: () => number;
-  handlePurchase: () => Promise<void>;
-  handleCancel: () => Promise<void>;
-  handleDialogClose: () => void;
-  boostAnalytics?: any;
-  dailyBoostUsage: number;
-  dailyBoostLimit: number;
-  loading: boolean;
-}
-
-// Add LivecamBoostPanelProps
-export interface LivecamBoostPanelProps {
-  livecamId?: string;
-  model?: any;
-  isCurrentlyBoosted?: boolean;
-  isBoosted?: boolean;
-  boostRank?: number;
-  viewerIncreasePercent?: number;
-  boostStatus?: any;
-  onBoost?: () => void;
-  onCancelBoost?: () => void;
-}
-
-// Add BoostDialogContainerProps
-export interface BoostDialogContainerProps {
-  open?: boolean;
-  setOpen?: (open: boolean) => void;
-  onSuccess?: () => void;
-  profileId: string;
-  buttonText?: string;
-  buttonVariant?: string;
-  buttonSize?: string;
+export interface BoostActivePackageProps {
+  boostStatus: BoostStatus;
 }

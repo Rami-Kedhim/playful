@@ -6,6 +6,7 @@ export interface BoostPackage {
   price_ubx: number;
   description?: string;
   features?: string[];
+  price?: number; // Added to ensure compatibility
 }
 
 export interface BoostStatus {
@@ -43,7 +44,6 @@ export interface HermesBoostStatus {
   timeRemaining?: number;
 }
 
-// Adding BoostAnalytics interface to fix errors in BoostAnalyticsCard
 export interface BoostAnalytics {
   impressions: {
     today: number;
@@ -67,4 +67,24 @@ export interface BoostAnalytics {
   additionalViews: number;
   engagementIncrease: number;
   rankingPosition: number;
+  viewsIncrease?: number;
+}
+
+// Add interface for AIMessage to fix type errors
+export interface AIMessage {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant' | 'system';
+  timestamp: Date | string;
+  has_read?: boolean;
+}
+
+// Add AIConversation interface
+export interface AIConversation {
+  id: string;
+  messages: AIMessage[];
+  aiProfileId: string;
+  userId: string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }

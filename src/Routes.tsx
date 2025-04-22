@@ -5,7 +5,7 @@ import HomePage from './pages/HomePage';
 import ProfilePage from './pages/Profile';
 import WalletPage from './pages/Wallet';
 import SearchPage from './pages/Search';
-import LivecamPage from './pages/LivecamPage';
+import LiveCamPage from './pages/LiveCamPage'; // Fixed casing
 import LivecamDetail from './pages/LivecamDetail';
 import AIModelPage from './pages/AIModelPage';
 import AIModelDetail from './pages/AIModelDetail';
@@ -68,7 +68,7 @@ const Routes = () => {
       <Route path="/escort/:id" element={<EscortProfilePage />} />
       <Route path="/creators" element={<CreatorPage />} />
       <Route path="/creator/:id" element={<CreatorProfilePage />} />
-      <Route path="/livecams" element={<LivecamPage />} />
+      <Route path="/livecams" element={<LiveCamPage />} />
       <Route path="/livecam/:id" element={<LivecamDetail />} />
       <Route path="/ai-models" element={<AIModelPage />} />
       <Route path="/ai-model/:id" element={<AIModelDetail />} />
