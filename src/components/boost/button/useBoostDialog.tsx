@@ -1,10 +1,12 @@
 
 import { useState } from "react";
-import { useBoostContext } from "@/contexts/BoostContext";
+import { useBoostContext } from "@/hooks/boost/useBoostContext";
 
 export const useBoostDialog = (onSuccess?: () => void) => {
   const [showDialog, setShowDialog] = useState(false);
-  const { boostStatus, isLoading } = useBoostContext();
+  const context = useBoostContext();
+  const boostStatus = context?.boostStatus;
+  const isLoading = context?.loading || false;
   
   const handleOpenDialog = () => {
     setShowDialog(true);

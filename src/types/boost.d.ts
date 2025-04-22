@@ -5,10 +5,14 @@ export interface BoostPackage {
   description?: string;
   price: number;
   price_lucoin?: number;
+  price_ubx?: number;
   duration: string;
   features?: string[];
   durationMinutes?: number;
   costUBX?: number;
+  boostLevel?: number;
+  boost_power?: number;
+  visibility_increase?: number;
 }
 
 // Additional interfaces used in our components
@@ -56,4 +60,27 @@ export interface BoostAnalytics {
     withoutBoost: number;
     increase: number;
   };
+}
+
+export interface BoostStatus {
+  isActive: boolean;
+  startTime?: string;
+  endTime?: string;
+  remainingTime?: string;
+  expiresAt?: string;
+  boost_level?: number;
+}
+
+export interface BoostEligibility {
+  isEligible: boolean;
+  reason?: string;
+}
+
+export interface HermesStatus {
+  position: number;
+  activeUsers: number;
+  estimatedVisibility: number;
+  lastUpdateTime: string;
+  boostScore?: number;
+  effectivenessScore?: number;
 }

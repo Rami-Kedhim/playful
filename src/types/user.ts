@@ -32,6 +32,7 @@ export interface UserProfile {
   avatar_url: string;
   phone?: string;
   profileImageUrl?: string;
+  sexual_orientation?: string;
 }
 
 // Add AuthResult type needed for SignInForm and SignUpForm
@@ -41,6 +42,7 @@ export interface AuthResult {
   user?: User;
   token?: string;
   error?: string;
+  session?: any; // Add session property
 }
 
 // Add these types needed for Auth components
@@ -57,10 +59,4 @@ export interface RegisterCredentials {
 }
 
 // Add UserRole enum for AuthPage
-export enum UserRole {
-  USER = 'user',
-  ADMIN = 'admin',
-  MODERATOR = 'moderator',
-  ESCORT = 'escort',
-  CREATOR = 'creator'
-}
+export type UserRole = string | { name: string };

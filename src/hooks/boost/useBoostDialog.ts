@@ -2,10 +2,13 @@
 import { useState } from 'react';
 import { useBoostManager } from './useBoostManager';
 import { BoostPackage } from '@/types/boost';
+import { useBoostContext } from './useBoostContext';
 
 export const useBoostDialog = (profileId: string) => {
   const [activeTab, setActiveTab] = useState('packages');
   const [selectedPackage, setSelectedPackage] = useState<string>('');
+  
+  const boostContext = useBoostContext();
   
   const {
     loading,
@@ -31,14 +34,14 @@ export const useBoostDialog = (profileId: string) => {
   };
 
   const getBoostPrice = (pkg: BoostPackage) => {
-    return pkg?.price_ubx || pkg?.price || 0;
+    return pkg?.price_ubx || pkg?.price_lucoin || pkg?.price || 0;
   };
 
   const handleBoost = async () => {
-    if (!selectedPackage) return;
+    if (!selectedPackage) return false;
     
     const packageToBoost = boostPackages.find(pkg => pkg.id === selectedPackage);
-    if (!packageToBoost) return;
+    if (!packageToBoost) return false;
     
     return await purchaseBoost(packageToBoost);
   };

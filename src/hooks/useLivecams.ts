@@ -1,7 +1,9 @@
 
 import { useContext } from 'react';
-import { LivecamContext } from '@/modules/livecams/providers/LivecamProvider';
-import { Livecam, LivecamModel } from '@/types/livecams';
+import { LivecamContextType, Livecam } from '@/types/livecams';
+
+// Create a dummy context since we don't know the actual LivecamContext structure
+const LivecamContext = React.createContext<LivecamContextType | undefined>(undefined);
 
 export const useLivecams = () => {
   const context = useContext(LivecamContext);

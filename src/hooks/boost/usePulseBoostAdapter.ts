@@ -51,7 +51,7 @@ export const useBoostAdapters = (profileId: string) => {
     if (adaptedPkg.costUBX !== undefined) {
       return adaptedPkg.costUBX;
     }
-    return pkg.price_lucoin || pkg.price || 0;
+    return pkg.price_ubx || pkg.price_lucoin || pkg.price || 0;
   };
 
   return {

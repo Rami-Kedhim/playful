@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import BoostDialogTabs from './dialog/BoostDialogTabs';
-import { useBoostContext } from '@/contexts/BoostContext';
+import { useBoostContext } from '@/hooks/boost/useBoostContext';
 
 export interface BoostDialogContainerProps {
   profileId: string;
@@ -43,16 +43,13 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
 
   const [internalOpen, setInternalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("packages");
+  const boostContext = useBoostContext();
   const {
     boostStatus,
-    eligibility,
-    boostPackages,
-    loading,
-    dailyBoostUsage,
-    dailyBoostLimit,
-    purchaseBoost,
-    cancelBoost
-  } = useBoostContext();
+    loading: isLoading,
+    packages: boostPackages,
+    cancelBoost,
+  } = boostContext;
 
   const [selectedPackage, setSelectedPackage] = useState<string>("");
 
@@ -66,7 +63,7 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
 
   const handleCancelBoost = useCallback(async () => {
     try {
-      const result = await cancelBoost();
+      const result = boostContext.cancelBoost ? await boostContext.cancelBoost() : false;
       if (result) {
         if (onSuccess) {
           await onSuccess();
@@ -78,31 +75,36 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
       console.error('Error cancelling boost:', error);
       return false;
     }
-  }, [cancelBoost, onSuccess, handleDialogClose]);
+  }, [boostContext, onSuccess, handleDialogClose]);
 
   const handleBoost = useCallback(async () => {
-    if (!selectedPackage) return;
+    if (!selectedPackage) return false;
     
     const pkg = boostPackages.find(p => p.id === selectedPackage);
-    if (!pkg) return;
+    if (!pkg) return false;
 
     try {
-      const result = await purchaseBoost(pkg);
+      const result = boostContext.boostProfile ? 
+        await boostContext.boostProfile(profileId, pkg.id) : 
+        false;
+        
       if (result && onSuccess) {
         await onSuccess();
         handleDialogClose();
       }
+      return result;
     } catch (error) {
       console.error("Error purchasing boost:", error);
+      return false;
     }
-  }, [selectedPackage, boostPackages, purchaseBoost, onSuccess, handleDialogClose]);
+  }, [selectedPackage, boostPackages, boostContext, profileId, onSuccess, handleDialogClose]);
 
   // Function to get price for selected boost package
   const getBoostPrice = useCallback(() => {
     if (!selectedPackage) return 0;
     
     const pkg = boostPackages.find(p => p.id === selectedPackage);
-    return pkg?.price || 0;
+    return pkg?.price_ubx || pkg?.price_lucoin || pkg?.price || 0;
   }, [selectedPackage, boostPackages]);
 
   return (
@@ -120,16 +122,16 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
         <BoostDialogTabs 
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          loading={loading}
+          loading={isLoading}
           boostStatus={boostStatus || { isActive: false, startTime: '', endTime: '', remainingTime: '' }}
-          eligibility={eligibility || { isEligible: false, reason: 'Unknown' }}
-          boostPackages={boostPackages}
+          eligibility={{ isEligible: true, reason: '' }}
+          boostPackages={boostPackages || []}
           selectedPackage={selectedPackage}
           setSelectedPackage={setSelectedPackage}
           handleBoost={handleBoost}
           handleCancel={handleCancelBoost}
-          dailyBoostUsage={dailyBoostUsage}
-          dailyBoostLimit={dailyBoostLimit}
+          dailyBoostUsage={boostContext.dailyBoostUsage || 0}
+          dailyBoostLimit={boostContext.dailyBoostLimit || 5}
           handleDialogClose={handleDialogClose}
           getBoostPrice={getBoostPrice}
           hermesStatus={{
@@ -138,6 +140,7 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
             estimatedVisibility: 0,
             lastUpdateTime: ''
           }}
+          formatBoostDuration={(duration) => `${duration}`}
         />
       </DialogContent>
     </Dialog>

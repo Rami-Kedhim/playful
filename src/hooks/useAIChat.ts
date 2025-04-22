@@ -1,136 +1,61 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from './auth/useAuthContext';
-import { AIConversation, AIMessage } from '@/types/ai-chat';
-import { AIProfile } from '@/types/ai-profile';
-import { aiMessagesService } from '@/services/ai/aiMessagesService';
+
+import { useState } from 'react';
+import { AIMessage } from '@/types/ai-chat';
 import { aiConversationsService } from '@/services/ai/aiConversationsService';
 
-interface UseAIChatProps {
-  profileId: string;
-  initialMessages?: AIMessage[];
-  onMessageSent?: (message: AIMessage) => void;
-  onMessageReceived?: (message: AIMessage) => void;
+interface UseAIChatReturn {
+  isProcessing: boolean;
+  currentPrompt: string | null;
+  sendMessage: (message: string) => Promise<void>;
+  clearChat: () => void;
 }
 
-export const useAIChat = ({
-  profileId,
-  initialMessages = [],
-  onMessageSent,
-  onMessageReceived
-}: UseAIChatProps) => {
-  const { user } = useAuth();
-  const [messages, setMessages] = useState<AIMessage[]>(initialMessages);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [conversation, setConversation] = useState<AIConversation | null>(null);
-  
-  const loadMessages = useCallback(async () => {
-    if (!profileId) return;
-    
-    setLoading(true);
-    setError(null);
+export const useAIChat = (): UseAIChatReturn => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentPrompt, setCurrentPrompt] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([]);
+
+  const sendMessage = async (message: string) => {
+    setIsProcessing(true);
+    setCurrentPrompt(message);
     
     try {
-      const result = await aiMessagesService.fetchMessages(profileId);
+      // Add user message
+      setMessages(prev => [...prev, { role: 'user', content: message }]);
       
-      if (result.messages) {
-        setMessages(result.messages);
-      }
-      
-      if (result.conversation) {
-        setConversation(result.conversation);
-      }
-    } catch (err) {
-      console.error('Error loading messages:', err);
-      setError('Failed to load messages');
-    } finally {
-      setLoading(false);
-    }
-  }, [profileId]);
-  
-  useEffect(() => {
-    loadMessages();
-  }, [loadMessages]);
-  
-  const sendUserMessage = async (content: string) => {
-    if (!profileId || !content.trim()) return null;
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const newMessage: AIMessage = {
-        id: Date.now().toString(),
+      // Send message using service
+      const aiMessage = await aiConversationsService.sendMessage({
         role: 'user',
-        content,
-        timestamp: new Date(),
-        senderId: user?.id || '',
-        receiverId: profileId,
-        isAI: false,
-        status: 'sent'
-      };
-      
-      setMessages(prev => [...prev, newMessage]);
-      if (onMessageSent) onMessageSent(newMessage);
-      
-      const response = await aiMessagesService.sendMessage({
-        content,
-        profileId
+        content: message,
+        senderId: 'user-1',
+        receiverId: 'ai-1'
       });
       
-      if (response && response.messages) {
-        setMessages(response.messages);
-        
-        const aiResponse = response.messages.find(msg => 
-          msg.isAI && !messages.some(existingMsg => existingMsg.id === msg.id)
-        );
-        
-        if (aiResponse && onMessageReceived) {
-          onMessageReceived(aiResponse);
-        }
-      }
+      // Mock AI response after a delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      return response;
-    } catch (err) {
-      console.error('Error sending message:', err);
-      setError('Failed to send message');
-      return null;
+      // Add AI response
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: `I processed your message: "${message}"`
+      }]);
+    } catch (error) {
+      console.error('Error processing AI message:', error);
     } finally {
-      setLoading(false);
+      setIsProcessing(false);
+      setCurrentPrompt(null);
     }
   };
-  
-  const markMessagesAsRead = useCallback(async () => {
-    const unreadMessages = messages.filter(msg => 
-      msg.isAI && !(msg.has_read || msg.status === 'read')
-    );
-    
-    if (unreadMessages.length === 0) return;
-    
-    try {
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.isAI && !(msg.has_read || msg.status === 'read')
-            ? { ...msg, has_read: true, status: 'read' }
-            : msg
-        )
-      );
-      
-      // TODO: Add API call to mark messages as read on server
-      // await markAsRead(unreadMessages.map(msg => msg.id));
-    } catch (err) {
-      console.error('Error marking messages as read:', err);
-    }
-  }, [messages]);
-  
+
+  const clearChat = () => {
+    setMessages([]);
+  };
+
   return {
-    messages,
-    loading,
-    error,
-    conversation,
-    sendMessage: sendUserMessage,
-    loadMessages,
-    markAsRead: markMessagesAsRead
+    isProcessing,
+    currentPrompt,
+    sendMessage,
+    clearChat
   };
 };
 

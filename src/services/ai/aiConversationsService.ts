@@ -1,72 +1,74 @@
-import { supabase } from '@/lib/supabase';
-import { AIConversation } from '@/types/ai-chat';
-import { AIProfile } from '@/types/ai-profile';
 
-export const fetchConversation = async (conversationId: string): Promise<AIConversation> => {
-  try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Mock data
-    const mockConversation: AIConversation = {
-      id: conversationId,
-      user_id: 'current-user-id',
-      ai_profile_id: 'ai-profile-id',
-      created_at: new Date(Date.now() - 24 * 3600000).toISOString(),
-      updated_at: new Date(Date.now() - 1 * 3600000).toISOString(),
-      messages: [
-        {
-          id: 'msg1',
-          senderId: 'current-user-id',
-          receiverId: 'ai-profile-id',
-          content: 'Hello there!',
-          timestamp: new Date(Date.now() - 2 * 3600000).toISOString(),
-          isAI: false
-        },
-        {
-          id: 'msg2',
-          senderId: 'ai-profile-id',
-          receiverId: 'current-user-id',
-          content: 'Hi! How can I help you today?',
-          timestamp: new Date(Date.now() - 1.9 * 3600000).toISOString(),
-          isAI: true
-        }
-      ]
-    };
-    
-    return mockConversation;
-  } catch (error) {
-    console.error('Error fetching conversation:', error);
-    throw new Error('Failed to fetch conversation');
-  }
-};
+import { AIMessage, AIMessageResponse } from '@/types/ai-chat';
 
-export const getConversations = async (userId: string): Promise<AIConversation[]> => {
-  try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
+export const aiConversationsService = {
+  sendMessage: async (message: Partial<AIMessage>): Promise<AIMessage> => {
+    // Mock API call
+    await new Promise(res => setTimeout(res, 500));
     
-    // Mock data
-    const mockConversations: AIConversation[] = [
+    // Return a mock response
+    return {
+      id: `msg-${Date.now()}`,
+      role: message.role || 'user',
+      content: message.content || '',
+      timestamp: new Date(),
+      is_ai: message.role === 'assistant',
+      sender: message.senderId,
+      conversation_id: message.conversation_id,
+    } as AIMessage;
+  },
+  
+  getMessagesByConversationId: async (conversationId: string): Promise<AIMessage[]> => {
+    // Mock API call
+    await new Promise(res => setTimeout(res, 500));
+    
+    // Return mock messages
+    return [
       {
-        id: 'conv1',
-        user_id: userId,
-        ai_profile_id: 'ai1',
-        created_at: new Date(Date.now() - 24 * 3600000).toISOString(),
-        updated_at: new Date(Date.now() - 1 * 3600000).toISOString()
+        id: `msg-1`,
+        role: 'user',
+        content: 'Hello!',
+        timestamp: new Date(),
+        senderId: 'user-1',
+        receiverId: 'ai-1',
+        conversation_id: conversationId,
       },
       {
-        id: 'conv2',
-        user_id: userId,
-        ai_profile_id: 'ai2',
-        created_at: new Date(Date.now() - 48 * 3600000).toISOString(),
-        updated_at: new Date(Date.now() - 12 * 3600000).toISOString()
+        id: `msg-2`,
+        role: 'assistant',
+        content: 'Hi there! How can I assist you today?',
+        timestamp: new Date(),
+        senderId: 'ai-1',
+        receiverId: 'user-1',
+        conversation_id: conversationId,
       }
     ];
-    
-    return mockConversations;
-  } catch (error) {
-    console.error('Error fetching conversations:', error);
-    throw new Error('Failed to fetch conversations');
+  },
+  
+  markMessagesAsRead: async (conversationId: string): Promise<boolean> => {
+    // Mock API call
+    await new Promise(res => setTimeout(res, 500));
+    return true;
+  },
+  
+  mapDatabaseMessageToAIMessage: (data: AIMessageResponse): AIMessage => {
+    return {
+      id: data.id,
+      role: data.is_ai ? 'assistant' : 'user',
+      content: data.content,
+      timestamp: new Date(data.created_at),
+      is_ai: data.is_ai,
+      has_read: data.has_read,
+      requires_payment: data.requires_payment,
+      price: data.price,
+      payment_status: data.payment_status,
+      conversation_id: data.conversation_id,
+      senderId: data.sender_id
+    };
+  },
+  
+  // Add fetchMessages for compatibility
+  fetchMessages: async (conversationId: string): Promise<AIMessage[]> => {
+    return aiConversationsService.getMessagesByConversationId(conversationId);
   }
 };

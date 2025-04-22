@@ -17,6 +17,9 @@ export interface AIMessage {
   isAI?: boolean;
   sender?: string; // Backward compatibility
   conversation_id?: string; // Backward compatibility
+  status?: string;
+  profileId?: string;
+  messages?: AIMessage[];
 }
 
 export interface AIConversation {
@@ -34,6 +37,7 @@ export interface AIMessageRequest {
   senderId: string;
   receiverId: string;
   conversation_id?: string;
+  profileId?: string;
 }
 
 export interface AIMessageResponse {
