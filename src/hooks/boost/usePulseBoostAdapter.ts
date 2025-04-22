@@ -1,5 +1,6 @@
 
-import { BoostPackage, PulseBoost } from '@/types/boost';
+import { BoostPackage } from '@/types/boost';
+import { PulseBoost } from '@/types/pulse-boost';
 
 interface UsePulseBoostAdapterResult {
   formatPulseDuration: (duration: string) => string;
@@ -69,6 +70,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
   };
 
   const convertToPulseBoost = (pkg: BoostPackage): PulseBoost => {
+    // Parse duration string safely
     const durationStr = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
     const parts = durationStr.split(':');
 
@@ -92,9 +94,13 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const visibilityIncreaseRaw: unknown = (pkg as any).visibility_increase ?? (pkg as any).visibilityIncrease;
     const visibilityIncreaseNum: number = parseNumberValue(visibilityIncreaseRaw, 50);
 
+    // Determine visibility string according to pulse-boost.ts definition
+    // visibility field type is 'homepage' | 'search' | 'smart_match' | 'global'
+    // Map boostPowerNum thresholds to visibility strings
     let visibility: PulseBoost['visibility'] = 'homepage';
     if (boostPowerNum >= 200) visibility = 'global';
     else if (boostPowerNum >= 100) visibility = 'search';
+    else if (boostPowerNum >= 75) visibility = 'smart_match';
 
     let priceNum: number = 0;
     if (typeof pkg.price === 'number') priceNum = pkg.price;
