@@ -77,10 +77,15 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const minutesStr = parts[1] || '0';
     const secondsStr = parts[2] || '0';
 
+    // Convert parts to numbers
+    const hoursNum = Number(hoursStr);
+    const minutesNum = Number(minutesStr);
+    const secondsNum = Number(secondsStr);
+
     // Parse safely to numbers using parseNumberValue helper
-    const hours = parseNumberValue(hoursStr, 0);
-    const minutes = parseNumberValue(minutesStr, 0);
-    const seconds = parseNumberValue(secondsStr, 0);
+    const hours = parseNumberValue(hoursNum, 0);
+    const minutes = parseNumberValue(minutesNum, 0);
+    const seconds = parseNumberValue(secondsNum, 0);
 
     // Use numbers, not strings, here
     const durationMinutes = (hours * 60) + minutes + (seconds / 60);
