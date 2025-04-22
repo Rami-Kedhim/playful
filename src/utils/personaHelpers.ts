@@ -1,4 +1,8 @@
-import { UberPersona } from '@/types/UberPersona'; // fixed import casing
+
+// Adjusted import casing to '@/types/UberPersona'
+import { UberPersona } from '@/types/UberPersona';
+
+// Added checks for the newly ensured properties in UberPersona
 
 function getPersonaType(persona: UberPersona): string {
   return persona?.type ?? '';
@@ -21,7 +25,7 @@ function getPersonaTags(persona: UberPersona): string[] {
 }
 
 function isPersonaVerified(persona: UberPersona): boolean {
-  return persona?.roleFlags?.isVerified ?? false;
+  return persona?.isVerified ?? false;
 }
 
 function isPersonaOnline(persona: UberPersona): boolean {

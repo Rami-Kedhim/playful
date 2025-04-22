@@ -1,4 +1,7 @@
-import type { UberPersona } from '@/types/uberPersona';
+
+// Fixed import casing issue and removed duplicated UberPersona type imports
+
+import { UberPersona } from '@/types/UberPersona';
 
 import { UberCoreSettings } from '@/services/neural/types/UberCoreService';
 import neuralServiceRegistry from './registry/NeuralServiceRegistry';
@@ -141,3 +144,4 @@ export class UberCore {
 }
 
 export const uberCoreInstance = new UberCore();
+

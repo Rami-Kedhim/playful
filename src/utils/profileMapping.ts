@@ -1,7 +1,8 @@
-import { UberPersona } from '@/types/UberPersona'; // fixed import casing
+
+import { UberPersona } from '@/types/UberPersona';
 import { LivecamModel } from '@/types/livecams';
 import { AIProfile } from '@/types/ai-profile';
-import { Escort } from '@/types/Escort'; // Added missing import
+import { Escort } from '@/types/Escort';
 
 export function mapLivecamToUberPersona(livecam: LivecamModel): UberPersona {
   return {
@@ -16,11 +17,24 @@ export function mapLivecamToUberPersona(livecam: LivecamModel): UberPersona {
     tags: livecam.tags || [],
     isActive: true,
     roleFlags: {
-      isLivecam: true
+      isEscort: false,
+      isCreator: false,
+      isLivecam: true,
+      isAI: false,
+      isVerified: false,
+      isFeatured: false,
     },
     capabilities: {
+      hasPhotos: false,
+      hasVideos: false,
+      hasStories: false,
+      hasChat: true,
+      hasBooking: false,
       hasLiveStream: true,
-      hasChat: true
+      hasExclusiveContent: false,
+      hasContent: false,
+      hasRealMeets: false,
+      hasVirtualMeets: false,
     },
     systemMetadata: {
       source: 'scraped',
@@ -47,12 +61,24 @@ export function mapAIProfileToUberPersona(aiProfile: AIProfile): UberPersona {
     isAI: true,
     tags: aiProfile.interests || [],
     roleFlags: {
+      isEscort: false,
+      isCreator: false,
+      isLivecam: false,
       isAI: true,
-      isVerified: aiProfile.isVerified
+      isVerified: aiProfile.isVerified ?? false,
+      isFeatured: false,
     },
     capabilities: {
+      hasPhotos: true,
+      hasVideos: false,
+      hasStories: false,
       hasChat: true,
-      hasPhotos: true
+      hasBooking: false,
+      hasLiveStream: false,
+      hasExclusiveContent: false,
+      hasContent: false,
+      hasRealMeets: false,
+      hasVirtualMeets: false,
     },
     systemMetadata: {
       source: 'ai_generated',
@@ -78,17 +104,34 @@ export function mapEscortToUberPersona(escort: Escort): UberPersona {
     isPremium: escort.isPremium || false,
     isActive: true,
     tags: escort.tags || [],
+    services: escort.services || [],
     roleFlags: {
       isEscort: true,
-      isVerified: escort.isVerified
+      isCreator: false,
+      isLivecam: false,
+      isAI: false,
+      isVerified: escort.isVerified,
+      isFeatured: false,
     },
     capabilities: {
       hasPhotos: true,
+      hasVideos: false,
+      hasStories: false,
+      hasChat: false,
       hasBooking: true,
-      hasRealMeets: true
+      hasLiveStream: false,
+      hasExclusiveContent: false,
+      hasContent: true,
+      hasRealMeets: true,
+      hasVirtualMeets: false,
     },
     monetization: {
-      meetingPrice: escort.rates?.hourly
+      acceptsLucoin: false,
+      acceptsTips: false,
+      subscriptionPrice: 0,
+      unlockingPrice: 0,
+      boostingActive: false,
+      meetingPrice: escort.rates?.hourly || 0,
     },
     systemMetadata: {
       source: 'manual',
@@ -99,10 +142,8 @@ export function mapEscortToUberPersona(escort: Escort): UberPersona {
   };
 }
 
-// Note: Removed mapCreatorToUberPersona because import error existed and not used currently
-
 export function mapGenericToUberPersona(data: any): UberPersona {
-  let type = 'unknown';
+  let type = 'escort';
 
   if (data.isAI || data.personality) {
     type = 'ai';
@@ -118,7 +159,7 @@ export function mapGenericToUberPersona(data: any): UberPersona {
     id: data.id || `generic-${Date.now()}`,
     name: data.name || data.displayName || 'Unknown',
     displayName: data.displayName || data.name || 'Unknown',
-    type,
+    type: type as 'escort' | 'creator' | 'livecam' | 'ai', // adjust to literal union
     avatarUrl: data.avatarUrl || data.profileImage || data.imageUrl,
     imageUrl: data.imageUrl || data.profileImage || data.avatarUrl,
     bio: data.bio || data.description,
@@ -128,16 +169,26 @@ export function mapGenericToUberPersona(data: any): UberPersona {
     isPremium: !!data.isPremium,
     isActive: data.isActive !== false,
     tags: data.tags || data.interests || [],
+    services: data.services || data.services || [],
     roleFlags: {
-      isAI: type === 'ai',
       isEscort: type === 'escort',
       isCreator: type === 'creator',
       isLivecam: type === 'livecam',
-      isVerified: !!data.isVerified
+      isAI: type === 'ai',
+      isVerified: !!data.isVerified,
+      isFeatured: false,
     },
     capabilities: {
       hasPhotos: true,
-      hasChat: type === 'ai' || type === 'livecam'
+      hasVideos: false,
+      hasStories: false,
+      hasChat: type === 'ai' || type === 'livecam',
+      hasBooking: false,
+      hasLiveStream: false,
+      hasExclusiveContent: false,
+      hasContent: false,
+      hasRealMeets: false,
+      hasVirtualMeets: false,
     },
     systemMetadata: {
       source: 'manual',

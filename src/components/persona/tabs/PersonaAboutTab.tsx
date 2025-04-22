@@ -1,5 +1,5 @@
 
-import { UberPersona } from '@/types/UberPersona'; // Fixed casing here
+import { UberPersona } from '@/types/UberPersona';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,11 +10,11 @@ interface PersonaAboutTabProps {
 }
 
 const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
-  const hasDescription = !!persona.description || !!persona.bio;
+  const hasDescription = !!(persona.description || persona.bio);
   const hasLanguages = Array.isArray(persona.languages) && persona.languages.length > 0;
   const hasServices = Array.isArray(persona.services) && persona.services.length > 0;
   const hasTraits = Array.isArray(persona.traits) && persona.traits.length > 0;
-  
+
   const responseTime = persona.stats?.responseTime;
   const responseTimeDisplay = responseTime
     ? responseTime < 60
@@ -39,7 +39,7 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
           </CardContent>
         </Card>
       )}
-      
+
       {hasLanguages && (
         <Card>
           <CardContent className="p-4">
@@ -75,7 +75,7 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
           </CardContent>
         </Card>
       )}
-      
+
       {hasTraits && (
         <Card>
           <CardContent className="p-4">
@@ -120,7 +120,7 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
           </div>
         </CardContent>
       </Card>
-      
+
       {persona.location && (
         <Card>
           <CardContent className="p-4">
@@ -129,14 +129,14 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
               Location
             </h3>
             <p className="text-muted-foreground">{persona.location}</p>
-            
+
             <Button variant="outline" className="mt-4 w-full">
               View on Map
             </Button>
           </CardContent>
         </Card>
       )}
-      
+
       <Card>
         <CardContent className="p-4">
           <h3 className="text-lg font-medium mb-2 flex items-center">
@@ -146,7 +146,7 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
           <p className="text-muted-foreground">
             {persona.availability?.nextAvailable || 'Available now'}
           </p>
-          
+
           <Button className="mt-4 w-full">
             Check Schedule
           </Button>

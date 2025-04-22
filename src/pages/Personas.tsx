@@ -1,7 +1,5 @@
-
-// Fix import casing to lowercase and fix type union expectation on UberPersona.type by casting mapped persons’ type property
 import React, { useEffect, useState } from 'react';
-import { UberPersona } from '@/types/uberPersona'; // fixed import casing
+import { UberPersona } from '@/types/UberPersona';
 import UberPersonaGrid from '@/components/personas/UberPersonaGrid';
 import { mapEscortToUberPersona } from '@/utils/profileMapping';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
@@ -30,10 +28,9 @@ const PersonasPage: React.FC = () => {
 
         const mappedPersonas = state.escorts.map(escort => {
           const mapped = mapEscortToUberPersona(escort);
-          // Cast type string to literal union for compatibility with UberPersona.type
           return {
             ...mapped,
-            type: mapped.type as 'livecam' | 'ai' | 'escort' | 'creator'
+            type: mapped.type as 'escort' | 'creator' | 'livecam' | 'ai'
           };
         });
         setAllPersonas(mappedPersonas);
