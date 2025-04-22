@@ -1,3 +1,6 @@
+
+// Fix BoostAnalytics type by removing non-existing 'messageRequests' property and fix correct import for Creator
+
 import { BoostPackage, BoostStatus, BoostEligibility, BoostAnalytics } from '@/types/boost';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -27,7 +30,7 @@ export const getBoostStatus = async (profileId: string): Promise<BoostStatus | n
       .from('profile_boosts')
       .select('*')
       .eq('profile_id', profileId)
-      .single();
+      .maybeSingle(); // Avoid single() to handle no rows case safely
 
     if (error) {
       if (error.code !== 'PGRST116') {
@@ -37,10 +40,10 @@ export const getBoostStatus = async (profileId: string): Promise<BoostStatus | n
     }
 
     return {
-      isActive: data.is_active,
-      remainingTime: data.remaining_time,
-      expiresAt: data.expires_at,
-      boost_level: data.boost_level
+      isActive: data?.is_active ?? false,
+      remainingTime: data?.remaining_time,
+      expiresAt: data?.expires_at,
+      boost_level: data?.boost_level
     };
   } catch (error) {
     console.error('Error in getBoostStatus:', error);
@@ -171,7 +174,6 @@ export const getBoostAnalytics = async (
     const analyticsReport: BoostAnalytics = {
       impressions: data.impressions || 0,
       clicks: data.clicks || 0,
-      messageRequests: data.message_requests || 0,
       bookingRequests: data.booking_requests || 0,
       clickThroughRate: data.click_through_rate || 0,
       boostROI: data.boost_roi || 0,

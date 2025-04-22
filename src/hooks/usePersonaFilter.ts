@@ -1,5 +1,7 @@
+
 import { useState, useEffect } from 'react';
-import { UberPersona } from '@/types/UberPersona';
+// Fix import casing for UberPersona type to be all lowercase matching file system sensitive paths
+import { UberPersona } from '@/types/uberPersona';
 
 export interface FilterOptions {
   searchTerm: string;

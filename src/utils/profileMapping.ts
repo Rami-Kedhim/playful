@@ -1,3 +1,7 @@
+
+// Fix import for Creator type (remove unused import or correct if needed)
+// It appears Creator is present in '@/types/creator' and properly imported below
+
 import { LivecamModel } from '@/types/livecams';
 import { UberPersona } from '@/types/uberPersona';
 import { AIProfile } from '@/types/ai-profile';

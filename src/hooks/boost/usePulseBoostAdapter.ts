@@ -1,5 +1,5 @@
 
-// Fix incorrect string assignments to number type in convertToPulseBoost
+// Fix parsing to ensure all duration components are number type to fix TS string-to-number assignment errors
 
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
@@ -73,7 +73,11 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
   const convertToPulseBoost = (pkg: BoostPackage): PulseBoost => {
     // Parse duration string into numbers safely
     const durationStr = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
-    const [hoursStr, minutesStr, secondsStr] = durationStr.split(':');
+    const parts = durationStr.split(':');
+    // Never allow undefined elements; default to '0'
+    const hoursStr = parts[0] || '0';
+    const minutesStr = parts[1] || '0';
+    const secondsStr = parts[2] || '0';
 
     // Parse safely to numbers using parseNumberValue helper
     const hours = parseNumberValue(hoursStr, 0);
@@ -120,4 +124,3 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 };
 
 export default usePulseBoostAdapter;
-
