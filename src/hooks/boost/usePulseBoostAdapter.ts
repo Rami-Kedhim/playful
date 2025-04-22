@@ -74,7 +74,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const durationStr = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
     const parts = durationStr.split(':');
 
-    // Explicitly cast to number for hours, minutes, seconds for duration calculation
+    // Explicitly cast to number for hours, minutes, seconds for duration calculation using parseNumberValue
     const hours = parseNumberValue(parts[0] || '0', 0);
     const minutes = parseNumberValue(parts[1] || '0', 0);
     const seconds = parseNumberValue(parts[2] || '0', 0);
@@ -136,3 +136,4 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 };
 
 export default usePulseBoostAdapter;
+
