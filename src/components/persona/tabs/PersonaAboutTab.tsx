@@ -1,5 +1,5 @@
 
-import { UberPersona } from '@/types/uberPersona'; // fixed casing from UberPersona to uberPersona
+import { UberPersona } from '@/types/UberPersona'; // Fixed casing here
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

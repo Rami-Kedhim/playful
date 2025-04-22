@@ -1,8 +1,9 @@
 
+
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { UberPersona } from '@/types/uberPersona'; // fixed import casing
+import { UberPersona } from '@/types/UberPersona'; // fixed import casing
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PlayIcon, LockIcon } from "lucide-react";

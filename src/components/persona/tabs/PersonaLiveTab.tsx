@@ -1,6 +1,7 @@
 
+
 import React from 'react';
-import { UberPersona } from '@/types/uberPersona'; // fixed import casing
+import { UberPersona } from '@/types/UberPersona'; // fixed import casing
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/UberPersona';
 
 export interface FilterOptions {
   searchTerm: string;

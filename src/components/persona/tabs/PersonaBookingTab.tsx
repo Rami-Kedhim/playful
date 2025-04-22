@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, DollarSign } from 'lucide-react';
-import { UberPersona } from '@/types/uberPersona'; // fixed import casing here too
+import { UberPersona } from '@/types/UberPersona'; // fixed import casing here too
 
 interface PersonaBookingTabProps {
   persona: UberPersona;

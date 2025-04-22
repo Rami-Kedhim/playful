@@ -1,10 +1,7 @@
-
-// Fix import for Creator type by removing unused import to avoid errors
-
+import { UberPersona } from '@/types/UberPersona'; // fixed import casing
 import { LivecamModel } from '@/types/livecams';
-import { UberPersona } from '@/types/uberPersona'; // fixed import casing
 import { AIProfile } from '@/types/ai-profile';
-import { Escort } from '@/types/Escort';
+import { Escort } from '@/types/Escort'; // Added missing import
 
 export function mapLivecamToUberPersona(livecam: LivecamModel): UberPersona {
   return {

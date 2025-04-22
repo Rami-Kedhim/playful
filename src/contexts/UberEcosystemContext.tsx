@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useState } from 'react';
-import { UberPersona } from '@/types/uberPersona';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { UberPersona } from '@/types/UberPersona';
+import { Escort } from '@/types/Escort';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { mapEscortToUberPersona } from '@/utils/profileMapping';
-import { uberCoreInstance } from '@/services/neural/UberCore';
+import { uberCoreInstance } from '@/core/UberCore';
 
 export interface HilbertSpace {
   dimension: number;

@@ -1,9 +1,8 @@
-
 // Core UberEscorts engine entrypoint connecting Hermes, Oxum, Orus AI layers
 
 // Fix import of hermes from HermesOxumNeuralHub
 import { neuralHub as hermes } from '@/services/neural/HermesOxumNeuralHub';
-import { uberCoreInstance } from '@/services/neural/UberCore';
+import { uberCoreInstance } from '@/core/UberCore'; // fixed import path to '@/core/UberCore'
 import securityEngine from '@/services/neural/BrainHubSecurityEngine';
 
 export const initializeSystem = async () => {
@@ -20,4 +19,3 @@ export const shutdownSystem = async () => {
 
   console.info('UberEscorts core engine shut down');
 };
-
