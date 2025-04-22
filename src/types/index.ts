@@ -1,5 +1,4 @@
 
-export * from './uberPersona';
-// Remove duplicated export of BoostStatus to avoid TS errors
-// export * from './boost'; // removed to prevent duplicate re-export of BoostStatus
-export type { NeuralModel } from './uberPersona';
+export * from './UberPersona';
+// Removed incorrect re-export of NeuralModel removed because 'NeuralModel' is defined in neural-system or UberPersona
+// If needed, user should import NeuralSystem types explicitly
