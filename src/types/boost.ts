@@ -25,9 +25,12 @@ export interface BoostStatus {
   progress?: number;
   remainingTime?: string;
   packageName?: string;
-  startTime?: string;
+  startTime?: string | Date;
   endTime?: string | Date;
   boostPackage?: BoostPackage;
+  packageId?: string;
+  profileId?: string;
+  activeBoostId?: string;
 }
 
 export interface EnhancedBoostStatus extends BoostStatus {
@@ -129,7 +132,6 @@ export interface AnalyticsData {
     withoutBoost: number;
     improvement: number;
   };
-  // Add other fields as needed
 }
 
 export interface BoostAnalytics {
@@ -138,6 +140,14 @@ export interface BoostAnalytics {
   rankingPosition: number;
   conversionsIncrease?: number;
   visibilityGain?: number;
+  impressions?: number; 
+  viewsIncrease?: number;
+  engagementRate?: number;
+  interactions?: {
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+  };
 }
 
 export interface PulseBoost {

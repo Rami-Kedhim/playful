@@ -7,11 +7,11 @@ export const useAuthState = () => {
   const { user } = useAuth();
 
   const isAdmin = useCallback((userObj: User | null) => {
-    return userObj?.roles?.includes('ADMIN') || false;
+    return userObj?.roles?.includes('admin') || false;
   }, []);
 
   const isCreator = useCallback((userObj: User | null) => {
-    return userObj?.roles?.includes('CREATOR') || false;
+    return userObj?.roles?.includes('creator') || false;
   }, []);
 
   return {

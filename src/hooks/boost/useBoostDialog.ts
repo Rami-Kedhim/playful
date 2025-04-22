@@ -30,9 +30,9 @@ export const useBoostDialog = (profileId: string) => {
     effectivenessScore: boostStatus?.isActive ? 7.2 : 0
   };
 
-  const getBoostPrice = adaptGetBoostPrice((pkg: BoostPackage) => {
-    return pkg.price_ubx || pkg.price || 0;
-  });
+  const getBoostPrice = (pkg: BoostPackage) => {
+    return pkg?.price_ubx || pkg?.price || 0;
+  };
 
   const handleBoost = async () => {
     if (!selectedPackage) return;

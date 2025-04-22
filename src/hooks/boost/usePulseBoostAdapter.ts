@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { usePulseBoost } from './usePulseBoost';
 import { PULSE_BOOSTS } from '@/constants/pulseBoostConfig';
+import { BoostPackage, PulseBoost } from '@/types/boost';
 import { toast } from '@/hooks/use-toast';
 
 // Default global UBX rate if not imported
@@ -49,10 +50,11 @@ export const usePulseBoostAdapter = (profileId?: string): UsePulseBoostAdapterRe
     price_ubx: pulseBoost.costUBX,
     description: pulseBoost.description || 'Boost your visibility',
     features: [
-      `Visibility: ${pulseBoost.visibility.replace('_', ' ')}`,
-      `Duration: ${formatMinutesToHumanReadable(pulseBoost.durationMinutes)}`,
-      pulseBoost.autoApplyWithPlan ? 'Auto-applies with premium subscription' : 'Manual activation'
-    ]
+      `Visibility: ${(pulseBoost as any).visibility?.replace('_', ' ') || 'Standard'}`,
+      `Duration: ${formatMinutesToHumanReadable((pulseBoost as any).durationMinutes || 60)}`,
+      (pulseBoost as any).autoApplyWithPlan ? 'Auto-applies with premium subscription' : 'Manual activation'
+    ],
+    boostLevel: 1 // Default boost level
   }));
   
   // Convert minutes to HH:MM:SS format
@@ -121,7 +123,17 @@ export const usePulseBoostAdapter = (profileId?: string): UsePulseBoostAdapterRe
         return false;
       }
       
-      return await purchasePulseBoost(pulseBoost.id);
+      const boostPackage: BoostPackage = {
+        id: pkg.id,
+        name: pkg.name,
+        description: pkg.description,
+        price: pkg.price || pkg.price_ubx || 0,
+        duration: pkg.duration || "24:00:00",
+        boostLevel: pkg.boostLevel || 1,
+        features: pkg.features || []
+      };
+      
+      return await purchasePulseBoost(boostPackage);
     } catch (err) {
       console.error("Error in purchaseBoost adapter:", err);
       return false;
@@ -164,7 +176,10 @@ export const usePulseBoostAdapter = (profileId?: string): UsePulseBoostAdapterRe
       viewsIncrease: Math.floor(Math.random() * 50) + 20,
       engagementRate: (Math.random() * 0.3 + 0.1).toFixed(2),
       impressions: Math.floor(Math.random() * 200) + 100,
-      rankingImprovement: Math.floor(Math.random() * 8) + 3
+      rankingImprovement: Math.floor(Math.random() * 8) + 3,
+      additionalViews: Math.floor(Math.random() * 100) + 50,
+      engagementIncrease: Math.floor(Math.random() * 30) + 10,
+      rankingPosition: Math.floor(Math.random() * 10) + 1
     });
   };
   

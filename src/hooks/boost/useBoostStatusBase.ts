@@ -109,7 +109,8 @@ export const useBoostStatusBase = ({
         if (!prev.endTime) return prev;
         
         try {
-          const endTime = new Date(prev.endTime);
+          const endTimeStr = typeof prev.endTime === 'string' ? prev.endTime : prev.endTime.toISOString();
+          const endTime = new Date(endTimeStr);
           const now = new Date();
           
           if (now >= endTime) {
@@ -124,11 +125,14 @@ export const useBoostStatusBase = ({
           const diff = endTime.getTime() - now.getTime(); // in milliseconds
           const seconds = Math.floor(diff / 1000);
           
+          // Get startTime as string
+          const startTimeStr = typeof prev.startTime === 'string' ? prev.startTime : prev.startTime?.toISOString() || '';
+          
           return {
             ...prev,
             remainingTime: seconds.toString(),
             timeRemaining: formatDistanceToNow(endTime, { addSuffix: false }),
-            progress: calculateProgress(prev.startTime, prev.endTime)
+            progress: startTimeStr ? calculateProgress(startTimeStr, endTimeStr) : 0
           };
         } catch (e) {
           console.error('Error updating remaining time:', e);

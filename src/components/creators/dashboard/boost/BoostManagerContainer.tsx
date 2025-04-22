@@ -51,13 +51,13 @@ const BoostManagerContainer = ({ profileId }: { profileId?: string }) => {
     return true;
   };
 
-  // Apply our own custom formatter using the adapter
-  const formatDuration = adaptFormatBoostDuration((duration: string) => {
+  // Apply our own custom formatter
+  const formatDuration = (duration: string) => {
     const [hours, minutes] = duration.split(':').map(Number);
     return hours >= 24 ? 
       `${Math.floor(hours / 24)} days` : 
       `${hours} hours`;
-  });
+  };
 
   return (
     <Card className="p-6">
