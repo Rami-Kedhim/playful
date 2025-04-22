@@ -1,145 +1,82 @@
-
 import { UberPersona } from '@/types/uberPersona';
-import { UberCoreSettings } from '@/services/neural/types/UberCoreService';
-import neuralServiceRegistry from './registry/NeuralServiceRegistry';
+import { generateRandomId } from '@/utils/generators';
 
-export class UberCore {
-  private initialized: boolean = false;
-  private settings: UberCoreSettings = {
-    boostingEnabled: true,
-    boostingAlgorithm: 'OxumAlgorithm',
-    orderByBoost: true,
-    autonomyLevel: 75,
-    resourceAllocation: 60,
-    hilbertDimension: 4,
-    aiEnhancementLevel: 3
-  };
-
-  public isAvailable(persona: UberPersona): boolean {
-    if (!persona) return false;
-
-    // Used .isActive optionally
-    return (persona.isActive ?? false) && !!persona.availability?.schedule;
-  }
-
-  public async initialize(): Promise<boolean> {
-    if (this.initialized) {
-      return true;
-    }
-
-    try {
-      await neuralServiceRegistry.initialize();
-      console.info('UberCore initialized with settings:', this.settings);
-      this.initialized = true;
-      return true;
-    } catch (error) {
-      console.error('Failed to initialize UberCore:', error);
-      return false;
-    }
-  }
-
-  public updateSettings(newSettings: Partial<UberCoreSettings>): void {
-    this.settings = {
-      ...this.settings,
-      ...newSettings
-    };
-
-    console.info('UberCore settings updated:', this.settings);
-  }
-
-  public getSettings(): UberCoreSettings {
-    return { ...this.settings };
-  }
-
-  public async shutdown(): Promise<boolean> {
-    if (!this.initialized) {
-      return true;
-    }
-
-    this.initialized = false;
-    return true;
-  }
-
-  public async processPersona(persona: UberPersona): Promise<UberPersona> {
-    if (!this.initialized) {
-      await this.initialize();
-    }
-
-    try {
-      const processedPersona: UberPersona = { ...persona };
-
-      if (!processedPersona.systemMetadata) {
-        processedPersona.systemMetadata = {
-          source: 'manual',
-          lastSynced: new Date(),
-          tagsGeneratedByAI: false,
-          hilbertSpaceVector: [],
-          personalityIndex: undefined,
-          statusFlags: undefined
-        };
-      }
-
-      switch (processedPersona.type ?? '') {
-        case 'escort':
-          break;
-        case 'creator':
-          break;
-        case 'livecam':
-          break;
-        case 'ai':
-          break;
-        default:
-          break;
-      }
-
-      return processedPersona;
-    } catch (error) {
-      console.error('Error processing persona:', error);
-      return persona;
-    }
-  }
-
-  public getPersonaStatus(persona: UberPersona): {
-    isLocked: boolean;
-    isOnline: boolean;
-    availability: string;
-  } {
+export const UberCoreService = {
+  async getPersonaById(id: string): Promise<UberPersona | null> {
+    console.log(`Fetching persona with ID: ${id}`);
     return {
-      isLocked: persona.isLocked ?? false,
-      isOnline: persona.isOnline ?? false,
-      availability: persona.availability?.nextAvailable ?? 'Unknown',
+      id: generateRandomId(),
+      name: 'Test Persona',
+      type: 'escort',
+      displayName: 'Test Persona',
+      avatarUrl: 'https://example.com/avatar.jpg',
+      location: 'Test Location',
+      isVerified: true,
+      isOnline: true,
+      tags: ['test', 'persona'],
     };
-  }
+  },
 
-  public calculateMatchScore(personaA: UberPersona, personaB: UberPersona): number {
-    let score = 0;
+  async updatePersona(persona: UberPersona): Promise<UberPersona> {
+    console.log(`Updating persona with ID: ${persona.id}`);
+    return {
+      id: generateRandomId(),
+      name: 'Updated Test Persona',
+      type: 'escort',
+      displayName: 'Updated Test Persona',
+      avatarUrl: 'https://example.com/avatar.jpg',
+      location: 'Updated Test Location',
+      isVerified: true,
+      isOnline: true,
+      tags: ['test', 'persona'],
+    };
+  },
 
-    if (personaA.type === personaB.type) score += 10;
-    if (personaA.location === personaB.location) score += 20;
+  async deletePersona(id: string): Promise<boolean> {
+    console.log(`Deleting persona with ID: ${id}`);
+    return true;
+  },
 
-    if (personaA.tags && personaB.tags) {
-      const sharedTags = personaA.tags.filter(tag => personaB.tags?.includes(tag));
-      score += sharedTags.length * 5;
-    }
+  async createPersona(persona: UberPersona): Promise<UberPersona> {
+    console.log(`Creating persona with name: ${persona.name}`);
+    return {
+      id: generateRandomId(),
+      name: 'New Test Persona',
+      type: 'escort',
+      displayName: 'New Test Persona',
+      avatarUrl: 'https://example.com/avatar.jpg',
+      location: 'New Test Location',
+      isVerified: true,
+      isOnline: true,
+      tags: ['test', 'persona'],
+    };
+  },
 
-    return Math.min(100, score);
-  }
-
-  public isPremiumPersona(persona: UberPersona): boolean {
-    return persona.isPremium === true;
-  }
-
-  public requiresNeuralBoost(persona: UberPersona): boolean {
-    if (!this.settings.boostingEnabled) return false;
-
-    const isPremium = persona.isPremium === true;
-
-    const useNeural = persona.systemMetadata?.statusFlags?.needsModeration === true ||
-                      persona.systemMetadata?.personalityIndex !== undefined;
-
-    return isPremium || useNeural;
-  }
-}
-
-export const uberCoreInstance = new UberCore();
-
+  async listPersonas(): Promise<UberPersona[]> {
+    console.log('Listing all personas');
+    return [
+      {
+        id: generateRandomId(),
+        name: 'Test Persona 1',
+        type: 'escort',
+        displayName: 'Test Persona 1',
+        avatarUrl: 'https://example.com/avatar.jpg',
+        location: 'Test Location 1',
+        isVerified: true,
+        isOnline: true,
+        tags: ['test', 'persona'],
+      },
+      {
+        id: generateRandomId(),
+        name: 'Test Persona 2',
+        type: 'escort',
+        displayName: 'Test Persona 2',
+        avatarUrl: 'https://example.com/avatar.jpg',
+        location: 'Test Location 2',
+        isVerified: true,
+        isOnline: true,
+        tags: ['test', 'persona'],
+      },
+    ];
+  },
+};

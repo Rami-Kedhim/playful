@@ -1,6 +1,4 @@
-
 import { useState, useEffect } from 'react';
-// Fix import casing for UberPersona type to be all lowercase matching file system sensitive paths
 import { UberPersona } from '@/types/uberPersona';
 
 export interface FilterOptions {
@@ -14,7 +12,6 @@ const filterByTypeFlag = (personas: UberPersona[], typeFlag: string) => {
   if (!personas) return [];
   
   return personas.filter(persona => {
-    // Check if roleFlags exists and has the specified property
     if (persona.roleFlags && persona.roleFlags[typeFlag as keyof typeof persona.roleFlags]) {
       return true;
     }
@@ -26,7 +23,6 @@ const filterByCapabilityFlag = (personas: UberPersona[], capabilityFlag: string)
   if (!personas) return [];
   
   return personas.filter(persona => {
-    // Check if capabilities exists and has the specified property
     if (persona.capabilities && persona.capabilities[capabilityFlag as keyof typeof persona.capabilities]) {
       return true;
     }

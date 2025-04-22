@@ -1,5 +1,4 @@
-
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/uberPersona'; // fixed import casing
 
 function getPersonaType(persona: UberPersona): string {
   return persona?.type ?? '';

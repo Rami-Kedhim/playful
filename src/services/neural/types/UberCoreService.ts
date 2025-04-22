@@ -1,7 +1,4 @@
-
-// Fix import path casing to lowercase to avoid duplicates
-
-import { UberPersona } from '@/types/uberPersona';
+import type { UberPersona } from '@/types/uberPersona';
 
 export interface UberCoreSettings {
   boostingEnabled: boolean;
@@ -35,4 +32,3 @@ export interface UberCoreService {
   findNearestNeighbors(personaId: string, count: number): UberPersona[];
   convertToUberPersona(entity: any): UberPersona;
 }
-

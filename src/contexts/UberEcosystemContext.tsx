@@ -1,14 +1,4 @@
-
-// Fix CompatibleEscort type properties to match Escort and proper use of boostStatus property and optional chains
-
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from 'react';
-import { Escort } from '@/types/Escort';
+import React, { createContext, useContext, useState } from 'react';
 import { UberPersona } from '@/types/uberPersona';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { mapEscortToUberPersona } from '@/utils/profileMapping';

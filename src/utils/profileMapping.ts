@@ -2,7 +2,7 @@
 // Fix import for Creator type by removing unused import to avoid errors
 
 import { LivecamModel } from '@/types/livecams';
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/uberPersona'; // fixed import casing
 import { AIProfile } from '@/types/ai-profile';
 import { Escort } from '@/types/Escort';
 

@@ -1,6 +1,4 @@
 
-// Fixed typing and ensured all number fields are properly parsed and typed
-
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
 interface UsePulseBoostAdapterResult {
@@ -56,7 +54,6 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     if (fn) {
       return fn(pkg);
     }
-    // price guaranteed to be number here or fallback 0
     return parseNumberValue(pkg.price, 0);
   };
 
@@ -72,16 +69,12 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
   };
 
   const convertToPulseBoost = (pkg: BoostPackage): PulseBoost => {
-    // Parse duration string into numbers safely
     const durationStr = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
     const parts = durationStr.split(':');
-    const hoursStr = parts[0] || '0';
-    const minutesStr = parts[1] || '0';
-    const secondsStr = parts[2] || '0';
 
-    const hours = parseNumberValue(hoursStr, 0);
-    const minutes = parseNumberValue(minutesStr, 0);
-    const seconds = parseNumberValue(secondsStr, 0);
+    const hours = parseNumberValue(parts[0] || '0', 0);
+    const minutes = parseNumberValue(parts[1] || '0', 0);
+    const seconds = parseNumberValue(parts[2] || '0', 0);
 
     const durationMinutes: number = (hours * 60) + minutes + (seconds / 60);
 
@@ -95,7 +88,6 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     if (boostPowerNum >= 200) visibility = 'global';
     else if (boostPowerNum >= 100) visibility = 'search';
 
-    // Price default fallback
     let priceNum: number = 0;
     if (typeof pkg.price === 'number') priceNum = pkg.price;
     else if (typeof pkg.price === 'string') {
@@ -103,7 +95,6 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       priceNum = isNaN(parsedPrice) ? 0 : parsedPrice;
     }
 
-    // costUBX fallback to converted price
     let costUBXNum: number = 0;
     if (typeof (pkg as any).price_ubx === 'number') costUBXNum = (pkg as any).price_ubx;
     else if (typeof (pkg as any).price_ubx === 'string') {
@@ -138,4 +129,3 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 };
 
 export default usePulseBoostAdapter;
-

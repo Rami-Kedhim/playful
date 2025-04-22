@@ -1,7 +1,5 @@
+import type { UberPersona } from '@/types/uberPersona';
 
-// Use optional chaining and update types to include missing properties safely
-
-import { UberPersona } from '@/types/uberPersona';
 import { UberCoreSettings } from '@/services/neural/types/UberCoreService';
 import neuralServiceRegistry from './registry/NeuralServiceRegistry';
 

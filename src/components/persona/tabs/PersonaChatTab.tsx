@@ -1,4 +1,3 @@
-
 // Fix import casing to match filename (uberPersona.ts)
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Info } from 'lucide-react';
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/uberPersona'; // fixed casing
 
 interface PersonaChatTabProps {
   persona: UberPersona;

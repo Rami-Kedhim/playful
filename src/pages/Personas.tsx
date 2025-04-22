@@ -1,7 +1,7 @@
 
 // Fix import casing to lowercase and fix type union expectation on UberPersona.type by casting mapped persons’ type property
 import React, { useEffect, useState } from 'react';
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/uberPersona'; // fixed import casing
 import UberPersonaGrid from '@/components/personas/UberPersonaGrid';
 import { mapEscortToUberPersona } from '@/utils/profileMapping';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';

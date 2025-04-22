@@ -1,7 +1,5 @@
-
-// Fix import casing to use lowercase 'uberPersona' to avoid duplicate type issues
 import React from 'react';
-import { UberPersona } from '@/types/uberPersona';  // changed from "@/types/UberPersona"
+import { UberPersona } from '@/types/uberPersona';
 import UberPersonaCard from './UberPersonaCard';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -18,7 +16,6 @@ const UberPersonaGrid: React.FC<UberPersonaGridProps> = ({
   emptyMessage = "No profiles found",
   className,
 }) => {
-  // Create skeleton array for loading state
   const loadingSkeletons = Array(12).fill(null);
 
   if (loading) {
