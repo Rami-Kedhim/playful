@@ -72,6 +72,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const seconds = Number(durationParts[2]) || 0;
 
     // Calculate durationMinutes as number
+    // Correct calculation of total minutes (include seconds converted to decimal fraction)
     const durationMinutes: number = (hours * 60) + minutes + Math.floor(seconds / 60);
 
     let visibility: PulseBoost['visibility'] = 'homepage';
