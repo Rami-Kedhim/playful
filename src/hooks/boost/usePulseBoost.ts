@@ -69,6 +69,13 @@ export const usePulseBoost = (profileId?: string) => {
             const firstBoost = activeBoostsData[0];
             const boostPackage = firstBoost.boostDetails;
 
+            if (!boostPackage) {
+              console.warn('Boost package not found for active boostId:', firstBoost.boostId);
+              setEnhancedBoostStatus({ isActive: false });
+              setIsLoading(false);
+              return;
+            }
+
             const enhancedStatus: EnhancedBoostStatus = {
               isActive: true,
               startTime: firstBoost.startedAt,
@@ -123,6 +130,10 @@ export const usePulseBoost = (profileId?: string) => {
             };
 
             setEnhancedBoostStatus(enhancedStatus);
+          } else {
+            console.warn('Boost package not found for boostStatus.packageId:', boostStatus.packageId);
+            setEnhancedBoostStatus({ isActive: false });
+            setActiveBoosts([]);
           }
         } else {
           setActiveBoosts([]);
