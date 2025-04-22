@@ -110,16 +110,16 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       name: pkg.name,
       description: pkg.description || `${pkg.name} visibility boost for your profile`,
       duration: durationStr,
-      durationMinutes: durationMinutes,
+      durationMinutes: durationMinutes, // number type here
       price: typeof pkg.price === 'number' ? pkg.price : 0,
       costUBX: typeof pkg.price_ubx === 'number'
         ? pkg.price_ubx
-        : Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),
+        : Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)), // number type here
       visibility,
       color: getColorForBoostPower(boostPowerNum),
       badgeColor: getColorForBoostPower(boostPowerNum),
       features: pkg.features || [],
-      visibility_increase: visibilityIncreaseNum
+      visibility_increase: visibilityIncreaseNum // number type here
     };
   };
 

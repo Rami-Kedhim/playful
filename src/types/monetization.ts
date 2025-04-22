@@ -1,5 +1,4 @@
-
-import { AIProfile, AIGift, AIBoost } from "@/types/ai-profile";
+import { AIProfile } from "@/types/ai-profile";
 
 // Core interfaces for monetization
 export interface ContentPurchase {

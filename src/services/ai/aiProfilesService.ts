@@ -11,12 +11,12 @@ export const getAIProfiles = async (): Promise<AIProfile[]> => {
     const { data, error } = await supabase
       .from('ai_profiles' as any)
       .select('*') as any;
-    
+
     if (error) {
       console.error("Error fetching AI profiles:", error);
       return mockAIProfiles;
     }
-    
+
     return data as AIProfile[];
   } catch (error) {
     console.error("Error in getAIProfiles:", error);
@@ -35,12 +35,12 @@ export const getAIProfileById = async (profileId: string): Promise<AIProfile | n
       .select('*')
       .eq('id', profileId)
       .single() as any;
-    
+
     if (error) {
       console.error("Error fetching AI profile by ID:", error);
       return mockAIProfiles.find(p => p.id === profileId) || null;
     }
-    
+
     return data as AIProfile;
   } catch (error) {
     console.error("Error in getAIProfileById:", error);
@@ -71,9 +71,14 @@ export const mockAIProfiles: AIProfile[] = [
     interests: ["travel", "fine dining", "art", "philosophy"],
     ubx_chat_price: 5,
     ubx_image_price: 10,
-    delayed_response_min: 2000,
-    delayed_response_max: 5000,
-    created_at: "2023-01-01T00:00:00.000Z"
+    created_at: "2023-01-01T00:00:00.000Z",
+    is_verified: true,
+    category: "AI Companion",
+    rating: 4.5,
+    review_count: 100,
+    price: 0,
+    is_premium: false,
+    availability_status: "available",
   },
   {
     id: "ai-profile-2",
@@ -94,9 +99,14 @@ export const mockAIProfiles: AIProfile[] = [
     interests: ["books", "coffee shops", "indie music", "photography"],
     ubx_chat_price: 5,
     ubx_image_price: 10,
-    delayed_response_min: 3000,
-    delayed_response_max: 8000,
-    created_at: "2023-02-01T00:00:00.000Z"
+    created_at: "2023-02-01T00:00:00.000Z",
+    is_verified: false,
+    category: "AI Companion",
+    rating: 4,
+    review_count: 50,
+    price: 0,
+    is_premium: false,
+    availability_status: "available",
   },
   {
     id: "ai-profile-3",
@@ -117,9 +127,13 @@ export const mockAIProfiles: AIProfile[] = [
     interests: ["power dynamics", "psychology", "leather crafting", "gothic art"],
     ubx_chat_price: 10,
     ubx_image_price: 20,
-    delayed_response_min: 1500,
-    delayed_response_max: 4000,
-    created_at: "2023-03-01T00:00:00.000Z"
+    created_at: "2023-03-01T00:00:00.000Z",
+    is_verified: true,
+    category: "AI Companion",
+    rating: 5,
+    review_count: 75,
+    price: 0,
+    is_premium: false,
+    availability_status: "available",
   }
 ];
-

@@ -1,4 +1,3 @@
-
 import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 import { BoostStatus, BoostEligibility, BoostPackage } from '@/types/boost';
 import { AnalyticsData } from '@/hooks/boost/useBoostAnalytics';
@@ -190,7 +189,7 @@ export const boostService = {
     await new Promise(resolve => setTimeout(resolve, 400));
     
     // Generate realistic mock data
-    return {
+    const data: any = {
       impressions: {
         today: Math.floor(Math.random() * 200) + 100,
         yesterday: Math.floor(Math.random() * 200) + 80,
@@ -207,12 +206,22 @@ export const boostService = {
         withoutBoost: Math.floor(Math.random() * 30) + 10,
         increase: Math.floor(Math.random() * 150) + 50
       },
-      engagementRate: Math.random() * 20 + 5,
       conversionRate: Math.random() * 10 + 1,
       boostEfficiency: Math.random() * 30 + 60,
       additionalViews: Math.floor(Math.random() * 150) + 50,
       engagementIncrease: Math.floor(Math.random() * 40) + 10,
       rankingPosition: Math.floor(Math.random() * 10) + 1
     };
+
+    const boostAnalytics: AnalyticsData = {
+      impressions: data.impressions,
+      clicks: data.clicks,
+      conversionRate: data.conversionRate,
+      boostEfficiency: data.boostEfficiency,
+      additionalViews: data.additionalViews,
+      engagementIncrease: data.engagementIncrease,
+      rankingPosition: data.rankingPosition
+    };
+    return boostAnalytics;
   }
 };

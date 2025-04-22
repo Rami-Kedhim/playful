@@ -1,97 +1,30 @@
+import { GLOBAL_UBX_RATE } from "./globalPricing";
 
-import { validateGlobalPrice, GLOBAL_UBX_RATE, PRICE_TOLERANCE } from './globalPricing';
-import { OxumPriceAnalytics } from '@/services/analytics/oxumPriceAnalytics';
+// Define a tolerance for price comparisons
+const PRICE_TOLERANCE = 0.001;
 
-export interface TestResult {
-  success: boolean;
-  message: string;
-  details?: any;
-  timestamp?: Date;
-}
+// Function to check if a price is within the acceptable tolerance
+export const isPriceWithinTolerance = (price1: number, price2: number): boolean => {
+  return Math.abs(price1 - price2) <= PRICE_TOLERANCE;
+};
 
-/**
- * Runs a comprehensive self-test on the Oxum pricing system
- */
-export function runPricingSystemSelfTest(): {
-  success: boolean;
-  results: TestResult[];
-  testsPassed?: number;
-  failedTests?: number;
-} {
-  const results: TestResult[] = [];
-  
-  // Test 1: Exact match should pass
+// Function to run a single test and return the result
+export const runTest = (testName: string, testFunction: () => boolean | void): { success: boolean; message: string } => {
   try {
-    const exactMatchResult = validateGlobalPrice(GLOBAL_UBX_RATE);
-    results.push({
-      success: exactMatchResult === true,
-      message: 'Exact match validation passed',
-      details: { price: GLOBAL_UBX_RATE },
-      timestamp: new Date()
-    });
+    const result = testFunction();
+    const success = result === undefined ? true : result;
+
+    if (success) {
+      return { success: true, message: `${testName} passed` };
+    } else {
+      return { success: false, message: `${testName} failed` };
+    }
   } catch (error: any) {
-    results.push({
-      success: false,
-      message: 'Exact match validation failed unexpectedly',
-      details: { error: error.message },
-      timestamp: new Date()
-    });
+    return { success: false, message: `${testName} threw an error: ${error.message}` };
   }
-  
-  // Clear previous analytics events for a clean slate
-  OxumPriceAnalytics.clearEvents();
-  
-  // Test 2: Price within tolerance should pass
-  const toleranceAmount = GLOBAL_UBX_RATE * (1 + (PRICE_TOLERANCE / 2));
-  try {
-    const toleranceResult = validateGlobalPrice(toleranceAmount);
-    results.push({
-      success: toleranceResult === true,
-      message: 'Tolerance validation passed',
-      details: { price: toleranceAmount },
-      timestamp: new Date()
-    });
-  } catch (error: any) {
-    results.push({
-      success: false,
-      message: 'Tolerance validation failed unexpectedly',
-      details: { 
-        error: error.message,
-        tolerance: PRICE_TOLERANCE,
-        testPrice: toleranceAmount
-      },
-      timestamp: new Date()
-    });
-  }
-  
-  // Test 3: Price outside tolerance should fail
-  const outsideToleranceAmount = GLOBAL_UBX_RATE * (1 + (PRICE_TOLERANCE * 2));
-  try {
-    validateGlobalPrice(outsideToleranceAmount);
-    results.push({
-      success: false,
-      message: 'Out of tolerance validation incorrectly passed',
-      details: { price: outsideToleranceAmount },
-      timestamp: new Date()
-    });
-  } catch (error: any) {
-    results.push({
-      success: true,
-      message: 'Out of tolerance validation correctly failed',
-      details: { error: error.message },
-      timestamp: new Date()
-    });
-  }
-  
-  // Determine if all tests passed
-  const allTestsPassed = results.every(result => result.success);
-  const testsPassed = results.filter(result => result.success).length;
-  const failedTests = results.filter(result => !result.success).length;
-  
-  return {
-    success: allTestsPassed,
-    results: results,
-    testsPassed,
-    failedTests
-  };
-}
+};
+
+// Function to compare two prices and return a boolean indicating if they are equal within a tolerance
+export const comparePrices = (price1: number, price2: number): boolean => {
+  return Math.abs(price1 - price2) < PRICE_TOLERANCE;
+};

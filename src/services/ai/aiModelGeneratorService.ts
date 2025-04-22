@@ -1,8 +1,9 @@
+
 import { AIProfile, ProcessingStatus } from '@/types/ai-profile';
 
 export interface AIModelGeneratorOptions {
   name: string;
-  personality: string;
+  personality: { type: string; traits?: string[] };
   appearance: string;
   voice: string;
 }
@@ -22,7 +23,15 @@ export interface AIModelGeneratorState {
 }
 
 export const aiModelGeneratorService = {
-  async generateModel(options: AIModelGeneratorOptions, onProgress: (progress: number, stage: string, completed: number, total: number) => void): Promise<AIProfile> {
+  async generateModel(
+    options: AIModelGeneratorOptions,
+    onProgress: (
+      progress: number,
+      stage: string,
+      completed: number,
+      total: number
+    ) => void
+  ): Promise<AIProfile> {
     return new Promise((resolve, reject) => {
       const totalSteps = 100;
       let completedSteps = 0;
@@ -52,21 +61,17 @@ export const aiModelGeneratorService = {
                     age: 25,
                     bio: 'A friendly AI companion',
                     personality: options.personality,
-                    avatarUrl: '/images/ai-avatar.png',
+                    avatar_url: '/images/ai-avatar.png',
                     location: 'Virtual',
                     interests: ['chatting', 'learning', 'fun'],
-                    isVerified: true,
-                    createdAt: new Date().toISOString(),
+                    is_verified: true,
+                    created_at: new Date().toISOString(),
                     category: 'AI Companion',
                     rating: 4.5,
-                    reviewCount: 100,
+                    review_count: 100,
                     price: 0,
-                    isPremium: false,
-                    boost_status: {
-                      isActive: false,
-                      expiresAt: undefined
-                    },
-                    availability_status: 'available'
+                    is_premium: false,
+                    availability_status: 'available',
                   };
                   updateProgress('Model Ready', 0);
                   resolve(generatedModel);
@@ -82,3 +87,5 @@ export const aiModelGeneratorService = {
     });
   }
 };
+
+

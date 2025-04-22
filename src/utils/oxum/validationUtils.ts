@@ -1,9 +1,7 @@
-
 import { GLOBAL_UBX_RATE } from './constants';
 import { validateGlobalPrice } from './globalPricing';
 import { OxumPriceAnalytics } from '@/services/analytics/oxumPriceAnalytics';
 import { OxumNotificationService } from '@/services/notifications/oxumNotificationService';
-import { recordSuccessfulValidation, recordValidationFailure } from './healthMonitor';
 
 /**
  * Resilient Price Comparison with tolerance

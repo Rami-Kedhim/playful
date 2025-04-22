@@ -1,4 +1,3 @@
-
 /**
  * Adapter to integrate livecam boosts with the visibility system
  */
@@ -59,7 +58,9 @@ export class LivecamBoostAdapter {
         username: 'unknown',
         imageUrl: '',
         tags: [],
-        category: ''
+        category: '',
+        displayName: '',
+        thumbnailUrl: ''
       } as Livecam;
       
       // Recalculate base score without boost
@@ -130,7 +131,9 @@ export class LivecamBoostAdapter {
         username: 'unknown',
         imageUrl: '',
         tags: [],
-        category: ''
+        category: '',
+        displayName: '',
+        thumbnailUrl: ''
       } as Livecam;
       
       // Calculate base score without boost

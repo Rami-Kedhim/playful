@@ -1,10 +1,5 @@
-
-// Fix duplicated export and remove broken paths for verification as requested
-
-// Removed exports causing errors
-// export * from './verification/statusCheck';
-// export * from './verification/requestSubmission';
-// export * from './verification/documentUpload';
+// Fix double export of NeuralModel from UberPersona by removing duplicate exports
+// Or explicitly re-export only once
 
 export * from './UberPersona';
 export * from './neural/NeuralSystemMetrics';

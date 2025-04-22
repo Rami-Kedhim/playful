@@ -1,4 +1,3 @@
-
 import { validateGlobalPrice, GLOBAL_UBX_RATE, runPricingSystemSelfTest } from './globalPricing';
 import { OxumPriceAnalytics } from '@/services/analytics/oxumPriceAnalytics';
 
@@ -87,7 +86,7 @@ export class OxumPricingSystemTest {
       }
       
       // Test 6: Run the self-test function
-      const selfTestResults = runPricingSystemSelfTest();
+      const selfTestResults = await runPricingSystemSelfTest();
       if (selfTestResults.success) {
         results.push({ name: "System self-test", passed: true });
       } else {

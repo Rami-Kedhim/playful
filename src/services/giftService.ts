@@ -1,40 +1,144 @@
+// Import appropriate types instead of AIGift
+import { Gift, GiftType } from '@/types/gift';
+import { supabase } from '@/integrations/supabase/client';
 
-import { AIAnalyticsService } from "./analyticsService";
-import { GiftParams } from "@/types/monetization";
-import { AIGift } from "@/types/ai-profile";
+// Mock gift data for development
+const mockGifts: Gift[] = [
+  {
+    id: 'gift-1',
+    name: 'Rose',
+    description: 'A beautiful red rose',
+    price: 5,
+    image_url: '/images/gifts/rose.png',
+    type: GiftType.FLOWER,
+    animation_url: '/animations/rose.json',
+  },
+  {
+    id: 'gift-2',
+    name: 'Champagne',
+    description: 'Bottle of premium champagne',
+    price: 20,
+    image_url: '/images/gifts/champagne.png',
+    type: GiftType.DRINK,
+    animation_url: '/animations/champagne.json',
+  },
+  {
+    id: 'gift-3',
+    name: 'Diamond',
+    description: 'Sparkling diamond gift',
+    price: 50,
+    image_url: '/images/gifts/diamond.png',
+    type: GiftType.JEWELRY,
+    animation_url: '/animations/diamond.json',
+  }
+];
 
-export class GiftService {
-  static async sendGift({ profileId, giftType, amount }: GiftParams): Promise<boolean> {
-    try {
-      console.log(`[Gift] Sending gift: ${giftType} to profile: ${profileId}`);
-      
-      // In a real app, this would call a Supabase function to handle the transaction
-      // For this demo, we'll simulate a successful gift
-      
-      const mockGift: AIGift = {
-        id: Math.random().toString(36).substring(2, 15),
-        gift_type: giftType,
-        name: giftType,
-        description: `A ${giftType} gift`,
-        price: amount,
-        user_id: 'current-user',
-        profile_id: profileId,
-        created_at: new Date().toISOString()
-      };
-      
-      // Track gift analytics
-      await AIAnalyticsService.trackEvent(
-        profileId,
-        'gift',
-        { giftType, amount }
-      );
-      
-      // Here we would store the gift in the database
-      
-      return true;
-    } catch (error: any) {
-      console.error('[Gift] Gift failed:', error);
+/**
+ * Get all available gifts
+ */
+export const getAvailableGifts = async (): Promise<Gift[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('gifts')
+      .select('*');
+    
+    if (error) {
+      console.error('Error fetching gifts:', error);
+      return mockGifts;
+    }
+    
+    return data as Gift[];
+  } catch (error) {
+    console.error('Error in getAvailableGifts:', error);
+    return mockGifts;
+  }
+};
+
+/**
+ * Send a gift to a profile
+ */
+export const sendGift = async (
+  senderId: string,
+  receiverId: string,
+  giftId: string,
+  message?: string
+): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from('sent_gifts')
+      .insert({
+        sender_id: senderId,
+        receiver_id: receiverId,
+        gift_id: giftId,
+        message: message || '',
+        sent_at: new Date().toISOString()
+      });
+    
+    if (error) {
+      console.error('Error sending gift:', error);
       return false;
     }
+    
+    return true;
+  } catch (error) {
+    console.error('Error in sendGift:', error);
+    return false;
   }
-}
+};
+
+/**
+ * Get gifts received by a profile
+ */
+export const getReceivedGifts = async (profileId: string): Promise<any[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('sent_gifts')
+      .select(`
+        *,
+        gifts:gift_id (*)
+      `)
+      .eq('receiver_id', profileId);
+    
+    if (error) {
+      console.error('Error fetching received gifts:', error);
+      return [];
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in getReceivedGifts:', error);
+    return [];
+  }
+};
+
+/**
+ * Get gifts sent by a profile
+ */
+export const getSentGifts = async (profileId: string): Promise<any[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('sent_gifts')
+      .select(`
+        *,
+        gifts:gift_id (*)
+      `)
+      .eq('sender_id', profileId);
+    
+    if (error) {
+      console.error('Error fetching sent gifts:', error);
+      return [];
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in getSentGifts:', error);
+    return [];
+  }
+};
+
+export default {
+  getAvailableGifts,
+  sendGift,
+  getReceivedGifts,
+  getSentGifts
+};
