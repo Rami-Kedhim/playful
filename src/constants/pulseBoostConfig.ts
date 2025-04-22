@@ -50,3 +50,36 @@ export const PULSE_BOOSTS: BoostPackage[] = [
 ];
 
 export const GLOBAL_UBX_RATE = 100;
+
+/**
+ * Formats a duration in minutes to a human-readable string
+ */
+export const formatPulseBoostDuration = (durationMinutes: number): string => {
+  if (durationMinutes < 60) {
+    return `${durationMinutes} minutes`;
+  } else if (durationMinutes < 1440) {
+    const hours = durationMinutes / 60;
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+  } else {
+    const days = Math.floor(durationMinutes / 1440);
+    const hours = Math.floor((durationMinutes % 1440) / 60);
+    if (hours === 0) {
+      return `${days} ${days === 1 ? 'day' : 'days'}`;
+    }
+    return `${days} ${days === 1 ? 'day' : 'days'}, ${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+  }
+};
+
+/**
+ * Convert a duration string like "24 hours" to minutes
+ */
+export const convertDurationToMinutes = (duration: string): number => {
+  if (duration.includes('minutes') || duration.includes('minute')) {
+    return parseInt(duration);
+  } else if (duration.includes('hours') || duration.includes('hour')) {
+    return parseInt(duration) * 60;
+  } else if (duration.includes('days') || duration.includes('day')) {
+    return parseInt(duration) * 24 * 60;
+  }
+  return 0;
+};
