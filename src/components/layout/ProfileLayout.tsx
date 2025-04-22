@@ -31,37 +31,39 @@ const ProfileLayout = ({
   };
 
   return (
-    <MainLayout showHeader={false} containerClass="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={handleBack} 
-              className="rounded-full"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              {title && (
-                <h1 className="text-3xl font-bold">{title}</h1>
-              )}
-              {subtitle && (
-                <p className="text-gray-400">{subtitle}</p>
-              )}
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleBack} 
+                className="rounded-full"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div>
+                {title && (
+                  <h1 className="text-3xl font-bold">{title}</h1>
+                )}
+                {subtitle && (
+                  <p className="text-muted-foreground">{subtitle}</p>
+                )}
+              </div>
             </div>
+            
+            {actions && (
+              <div className="flex items-center gap-2">
+                {actions}
+              </div>
+            )}
           </div>
-          
-          {actions && (
-            <div className="flex items-center gap-2">
-              {actions}
-            </div>
-          )}
         </div>
+        
+        {children}
       </div>
-      
-      {children}
     </MainLayout>
   );
 };

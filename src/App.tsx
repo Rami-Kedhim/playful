@@ -10,6 +10,7 @@ import Wallet from "./pages/Wallet";
 import UpdatedWallet from "./pages/UpdatedWallet";
 import PulseBoost from "./pages/PulseBoost";
 import Livecam from "./pages/Livecam";
+import Profile from "./pages/Profile";
 
 const createStubContextFile = () => {
   const StubProvider = ({ children }: { children: React.ReactNode }) => <>{children}</>;
@@ -31,7 +32,6 @@ const { StubProvider: HermesProvider } = createStubContextFile();
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Profile = lazy(() => import('./pages/Profile'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Messages = lazy(() => import('./pages/Messages'));
 const Notifications = lazy(() => import('./pages/Notifications'));

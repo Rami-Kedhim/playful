@@ -1,53 +1,31 @@
 
-import { ReactNode } from "react";
-import AppLayout from "./AppLayout";
-import Breadcrumbs from "../navigation/Breadcrumbs";
+import React, { ReactNode } from 'react';
+import Navbar from '../navigation/Navbar';
+import Footer from '../navigation/Footer';
 
 interface MainLayoutProps {
   children: ReactNode;
-  title?: string;
-  description?: string;
   showHeader?: boolean;
+  showFooter?: boolean;
   containerClass?: string;
-  hideNavbar?: boolean;
-  hideFooter?: boolean;
-  showBreadcrumbs?: boolean;
 }
 
-/**
- * MainLayout provides a consistent layout structure for pages
- * by adding standard container and spacing within AppLayout
- */
 const MainLayout = ({ 
   children, 
-  title, 
-  description,
   showHeader = true, 
-  containerClass = "container mx-auto px-4 py-8",
-  hideNavbar = false,
-  hideFooter = false,
-  showBreadcrumbs = true
+  showFooter = true,
+  containerClass
 }: MainLayoutProps) => {
   return (
-    <AppLayout hideNavbar={hideNavbar} hideFooter={hideFooter}>
-      <div className={containerClass}>
-        {showBreadcrumbs && (
-          <div className="mb-4">
-            <Breadcrumbs />
-          </div>
-        )}
-        
-        {showHeader && title && (
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold">{title}</h1>
-            {description && (
-              <p className="text-muted-foreground mt-2">{description}</p>
-            )}
-          </div>
-        )}
+    <div className="min-h-screen flex flex-col">
+      {showHeader && <Navbar />}
+      
+      <main className={`flex-grow ${containerClass || ''}`}>
         {children}
-      </div>
-    </AppLayout>
+      </main>
+      
+      {showFooter && <Footer />}
+    </div>
   );
 };
 
