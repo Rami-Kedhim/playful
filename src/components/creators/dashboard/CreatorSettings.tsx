@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,14 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/auth";
+import { useAuthActions } from "@/hooks/auth/useAuthActions";
 
 interface ProfileProps {
   profile: any;
 }
 
 const CreatorSettings = ({ profile }: ProfileProps) => {
-  const { refreshProfile } = useAuth();
+  const { user } = useAuth();
+  const { refreshProfile } = useAuthActions();
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState({
     displayName: profile?.full_name || "",

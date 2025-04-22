@@ -104,7 +104,7 @@ const BoostProfileDialog: React.FC<BoostProfileDialogProps> = ({
           dailyBoostLimit={dailyBoostLimit}
           hermesStatus={hermesStatus}
           formatBoostDuration={formatBoostDuration}
-          getBoostPrice={getBoostPrice}
+          getBoostPrice={() => getBoostPrice(selectedPackage)}
           handleDialogClose={() => setOpen(false)}
           onBoostSuccess={onSuccess}
         />

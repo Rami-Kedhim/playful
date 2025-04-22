@@ -1,9 +1,13 @@
 
 import { BoostButton as RefactoredBoostButton } from './button';
-import { BoostButtonProps } from './button/types';
+import type { BoostButtonProps } from './button/types';
 
-const BoostButton = (props: BoostButtonProps) => {
-  return <RefactoredBoostButton {...props} />;
+const BoostButton = (props: Omit<BoostButtonProps, 'variant'> & { variant?: string }) => {
+  // Filter out any variant that is not in the allowed variants for BoostButtonProps
+  const { variant, ...restProps } = props;
+  const safeProps = restProps as BoostButtonProps;
+  
+  return <RefactoredBoostButton {...safeProps} />;
 };
 
 export default BoostButton;

@@ -1,17 +1,17 @@
 
 import { useCallback } from 'react';
 import { useAuth } from './useAuthContext';
-import { AuthUser, UserRole } from '@/types/auth';
+import { User } from '@/types/auth';
 
 export const useAuthState = () => {
   const { user } = useAuth();
 
-  const isAdmin = useCallback((user: AuthUser | null) => {
-    return user?.roles?.includes(UserRole.ADMIN) || false;
+  const isAdmin = useCallback((userObj: User | null) => {
+    return userObj?.roles?.includes('ADMIN') || false;
   }, []);
 
-  const isCreator = useCallback((user: AuthUser | null) => {
-    return user?.roles?.includes(UserRole.CREATOR) || false;
+  const isCreator = useCallback((userObj: User | null) => {
+    return userObj?.roles?.includes('CREATOR') || false;
   }, []);
 
   return {

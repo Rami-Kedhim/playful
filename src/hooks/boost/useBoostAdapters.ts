@@ -1,271 +1,291 @@
 
-import { useState, useCallback } from 'react';
-import { BoostPackage, BoostStatus, BoostEligibility, BoostAnalytics } from '@/types/boost';
+import { useState, useEffect } from 'react';
+import { BoostStatus, BoostEligibility, BoostPackage, HermesBoostStatus } from '@/types/boost';
+
+interface RawBoostData {
+  isActive?: boolean;
+  packageId?: string;
+  packageName?: string;
+  expiresAt?: string;
+  startTime?: string;
+  endTime?: string;
+  progress?: number;
+}
 
 export const useBoostAdapters = (profileId: string) => {
-  // Mock data and states
-  const [boostStatus, setBoostStatus] = useState<any>({
-    isActive: false,
-    startTime: '',
-    endTime: '',
-    remainingTime: '',
-  });
-  
-  const [eligibility, setEligibility] = useState<any>({
-    isEligible: true,
-    reason: ''
-  });
-  
-  const [boostPackages, setBoostPackages] = useState<any[]>([
-    {
-      id: 'basic',
-      name: 'Basic Boost',
-      price: 15,
-      price_ubx: 150,
-      description: '6-hour visibility boost',
-      duration: '06:00:00',
-      boost_power: 20,
-      visibility_increase: 25,
-      features: ['Featured in search results', 'Higher ranking'],
-    },
-    {
-      id: 'standard',
-      name: 'Standard Boost',
-      price: 30,
-      price_ubx: 300,
-      description: '24-hour visibility boost',
-      duration: '24:00:00',
-      boost_power: 50,
-      visibility_increase: 75,
-      features: ['Featured in search results', 'Higher ranking', 'Featured on homepage'],
-    },
-    {
-      id: 'premium',
-      name: 'Premium Boost',
-      price: 50,
-      price_ubx: 500,
-      description: '3-day visibility boost',
-      duration: '72:00:00',
-      boost_power: 100,
-      visibility_increase: 150,
-      features: ['Featured in search results', 'Higher ranking', 'Featured on homepage', 'Premium badge'],
-    }
-  ]);
-
-  const [loading, setLoading] = useState(false);
+  const [boostStatus, setBoostStatus] = useState<RawBoostData | null>(null);
+  const [eligibility, setEligibility] = useState<BoostEligibility | null>(null);
+  const [boostPackages, setBoostPackages] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [dailyBoostUsage] = useState(0);
-  const [dailyBoostLimit] = useState(3);
-  
-  // Adapter functions to convert from raw data to the expected types
-  const adaptBoostStatus = useCallback((raw: any): BoostStatus => {
-    if (!raw) return {
-      isActive: false,
-      startTime: '',
-      endTime: '',
-      remainingTime: '',
+  const [dailyBoostUsage, setDailyBoostUsage] = useState<number>(0);
+  const [dailyBoostLimit, setDailyBoostLimit] = useState<number>(5);
+
+  useEffect(() => {
+    if (!profileId) return;
+
+    const fetchBoostData = async () => {
+      try {
+        setLoading(true);
+        
+        // Mock data for testing
+        const mockStatus = {
+          isActive: Math.random() > 0.7,
+          packageName: 'Premium Boost',
+          expiresAt: new Date(Date.now() + 3600000 * 24).toISOString(),
+          startTime: new Date(Date.now() - 3600000).toISOString(),
+          endTime: new Date(Date.now() + 3600000 * 24).toISOString(),
+          progress: 22,
+        };
+        
+        const mockEligibility = {
+          isEligible: true,
+          reason: undefined
+        };
+        
+        const mockPackages = [
+          {
+            id: 'basic',
+            name: 'Basic Boost',
+            description: '24 hour visibility boost',
+            duration: '24:00:00',
+            price: 10,
+            price_ubx: 100,
+            boost_power: 1,
+            visibility_increase: 25,
+            image_url: '',
+            is_featured: false,
+            badge_color: 'blue',
+            icon: 'zap',
+            features: ['24-hour duration', 'Basic visibility increase']
+          },
+          {
+            id: 'premium',
+            name: 'Premium Boost',
+            description: '3 day visibility boost with priority placement',
+            duration: '72:00:00',
+            price: 25,
+            price_ubx: 250,
+            boost_power: 2,
+            visibility_increase: 50,
+            image_url: '',
+            is_featured: true,
+            badge_color: 'purple',
+            icon: 'star',
+            features: ['3-day duration', 'Homepage feature', '50% visibility increase']
+          },
+          {
+            id: 'ultimate',
+            name: 'Ultimate Boost',
+            description: '7 day max visibility with spotlight feature',
+            duration: '168:00:00',
+            price: 50,
+            price_ubx: 500,
+            boost_power: 3,
+            visibility_increase: 100,
+            image_url: '',
+            is_featured: true,
+            badge_color: 'gold',
+            icon: 'crown',
+            features: ['7-day duration', 'Featured section placement', 'Top search results']
+          }
+        ];
+        
+        setBoostStatus(mockStatus);
+        setEligibility(mockEligibility);
+        setBoostPackages(mockPackages);
+        setDailyBoostUsage(Math.floor(Math.random() * 3));
+        setDailyBoostLimit(5);
+        
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching boost data:", err);
+        setError("Failed to load boost data");
+        setLoading(false);
+      }
     };
-
-    return {
-      isActive: raw.isActive || false,
-      startTime: raw.startTime || '',
-      endTime: raw.endTime || '',
-      remainingTime: raw.remainingTime || '',
-      progress: raw.progress,
-      packageId: raw.packageId,
-      packageName: raw.packageName,
-      profileId: raw.profileId,
-      timeRemaining: raw.timeRemaining,
-      activeBoostId: raw.activeBoostId,
-      expiresAt: raw.expiresAt,
-      boostPackage: raw.boostPackage,
-      pulseData: raw.pulseData,
-    };
-  }, []);
-
-  const adaptBoostEligibility = useCallback((raw: any): BoostEligibility => {
-    if (!raw) return {
-      isEligible: false,
-      reason: 'Unknown',
-    };
-
-    return {
-      isEligible: raw.isEligible || false,
-      reason: raw.reason || '',
-    };
-  }, []);
-
-  const adaptBoostPackages = useCallback((raw: any[]): BoostPackage[] => {
-    if (!raw || !Array.isArray(raw)) return [];
-
-    return raw.map(pkg => ({
-      id: pkg.id || '',
-      name: pkg.name || '',
-      description: pkg.description || '',
-      duration: pkg.duration || '',
-      price: pkg.price || 0,
-      price_ubx: pkg.price_ubx || 0,
-      boost_power: pkg.boost_power || 0,
-      visibility_increase: pkg.visibility_increase || 0,
-      image_url: pkg.image_url,
-      is_featured: pkg.is_featured,
-      badge_color: pkg.badge_color,
-      icon: pkg.icon,
-      features: pkg.features || [],
-    }));
-  }, []);
-
-  // Function to format boost duration based on the given duration string
-  const formatBoostDuration = useCallback((duration: string): string => {
-    const [hours, minutes] = duration.split(':').map(Number);
-    if (isNaN(hours) || isNaN(minutes)) return 'Invalid duration';
     
-    return hours >= 24 ? 
-      `${Math.floor(hours / 24)} days` : 
-      `${hours} hours`;
-  }, []);
-
-  // Function to adapt a formatter function for boost durations
-  const adaptFormatBoostDuration = useCallback((formatter: (duration: string) => string) => {
-    return (duration: string): string => {
-      try {
-        return formatter(duration);
-      } catch (error) {
-        console.error('Error formatting boost duration:', error);
-        return 'Unknown duration';
-      }
+    fetchBoostData();
+  }, [profileId]);
+  
+  // Adapter functions to convert data formats
+  const adaptBoostStatus = (rawStatus: RawBoostData | null): BoostStatus => {
+    if (!rawStatus) return { isActive: false };
+    
+    return {
+      isActive: rawStatus.isActive || false,
+      timeRemaining: rawStatus.expiresAt ? getTimeRemaining(new Date(rawStatus.expiresAt)) : undefined,
+      expiresAt: rawStatus.expiresAt,
+      packageName: rawStatus.packageName,
+      startTime: rawStatus.startTime,
+      endTime: rawStatus.endTime,
+      progress: rawStatus.progress
     };
-  }, []);
-
-  // Function to adapt a price getter function
-  const adaptGetBoostPrice = useCallback((fn: (pkg: BoostPackage) => number) => {
-    return (pkg: BoostPackage): number => {
-      try {
-        return fn(pkg);
-      } catch (error) {
-        console.error('Error getting boost price:', error);
-        return 0;
-      }
+  };
+  
+  const adaptBoostEligibility = (rawEligibility: BoostEligibility | null): BoostEligibility => {
+    if (!rawEligibility) return { isEligible: false, reason: "Unknown eligibility status" };
+    
+    return {
+      isEligible: rawEligibility.isEligible,
+      reason: rawEligibility.reason
     };
-  }, []);
-
-  // Function to purchase a boost package
-  const purchaseBoost = useCallback(async (pkg: BoostPackage): Promise<boolean> => {
-    setLoading(true);
+  };
+  
+  const adaptBoostPackages = (rawPackages: any[] | null): BoostPackage[] => {
+    if (!rawPackages || rawPackages.length === 0) return [];
+    
+    return rawPackages.map(pkg => ({
+      id: pkg.id,
+      name: pkg.name,
+      description: pkg.description,
+      price: pkg.price,
+      duration: pkg.duration,
+      features: pkg.features,
+      boostLevel: pkg.boost_power || 1,
+      color: pkg.badge_color,
+      price_ubx: pkg.price_ubx,
+      is_featured: pkg.is_featured,
+      boost_power: pkg.boost_power,
+      visibility_increase: pkg.visibility_increase
+    }));
+  };
+  
+  const getTimeRemaining = (expiryDate: Date): string => {
+    const diffMs = expiryDate.getTime() - Date.now();
+    if (diffMs <= 0) return "Expired";
+    
+    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${diffHrs}h ${diffMins}m`;
+  };
+  
+  // Purchase boost function
+  const purchaseBoost = async (pkg: BoostPackage): Promise<boolean> => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
+      setLoading(true);
+      
+      // Mock purchase logic
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
       // Update boost status
       setBoostStatus({
         isActive: true,
-        startTime: new Date().toISOString(),
-        endTime: new Date(Date.now() + (parseInt(pkg.duration.split(':')[0]) * 60 * 60 * 1000)).toISOString(),
-        remainingTime: pkg.duration,
-        packageId: pkg.id,
         packageName: pkg.name,
-        profileId: profileId,
+        expiresAt: calculateExpiryDate(pkg.duration),
+        startTime: new Date().toISOString(),
+        endTime: calculateExpiryDate(pkg.duration),
+        progress: 0
       });
-
-      return true;
-    } catch (err: any) {
-      setError(err.message || 'Failed to purchase boost');
-      return false;
-    } finally {
+      
+      // Update daily usage
+      setDailyBoostUsage(prev => prev + 1);
+      
       setLoading(false);
+      return true;
+    } catch (err) {
+      console.error("Error purchasing boost:", err);
+      setError("Failed to purchase boost");
+      setLoading(false);
+      return false;
     }
-  }, [profileId]);
-
-  // Function to cancel an active boost
-  const cancelBoost = useCallback(async (): Promise<boolean> => {
-    setLoading(true);
+  };
+  
+  // Cancel boost function
+  const cancelBoost = async (): Promise<boolean> => {
     try {
-      // Simulate API call
+      setLoading(true);
+      
+      // Mock cancel logic
       await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Reset boost status
+      
+      // Update boost status
       setBoostStatus({
-        isActive: false,
-        startTime: '',
-        endTime: '',
-        remainingTime: '',
-        packageId: '',
-        packageName: '',
-        profileId: profileId,
+        isActive: false
       });
-
-      return true;
-    } catch (err: any) {
-      setError(err.message || 'Failed to cancel boost');
-      return false;
-    } finally {
+      
       setLoading(false);
+      return true;
+    } catch (err) {
+      console.error("Error cancelling boost:", err);
+      setError("Failed to cancel boost");
+      setLoading(false);
+      return false;
     }
-  }, [profileId]);
-
-  // Function to get boost analytics
-  const getBoostAnalytics = useCallback(async (): Promise<BoostAnalytics | null> => {
+  };
+  
+  // Format boost duration
+  const formatBoostDuration = (duration: string): string => {
+    const [hours, minutes] = duration.split(':').map(Number);
+    
+    if (hours >= 24) {
+      const days = Math.floor(hours / 24);
+      return `${days} ${days === 1 ? 'day' : 'days'}`;
+    }
+    
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+  };
+  
+  // Calculate expiry date from duration
+  const calculateExpiryDate = (duration: string): string => {
+    const [hours, minutes, seconds] = duration.split(':').map(Number);
+    const expiryDate = new Date();
+    expiryDate.setHours(expiryDate.getHours() + hours);
+    expiryDate.setMinutes(expiryDate.getMinutes() + minutes);
+    expiryDate.setSeconds(expiryDate.getSeconds() + seconds);
+    
+    return expiryDate.toISOString();
+  };
+  
+  // Get boost analytics
+  const getBoostAnalytics = async (): Promise<any> => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-
+      // Mock analytics data
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
       return {
-        impressions: {
-          today: 120,
-          yesterday: 98,
-          weeklyAverage: 105,
-          withBoost: 150,
-          withoutBoost: 80,
-          increase: 87.5,
-        },
-        interactions: {
-          today: 42,
-          yesterday: 35,
-          weeklyAverage: 38,
-          withBoost: 55,
-          withoutBoost: 30,
-          increase: 83.3,
-        },
-        rank: {
-          current: 12,
-          previous: 24,
-          change: 12,
-        },
-        trending: true,
-        additionalViews: 70,
-        engagementIncrease: 25,
-        rankingPosition: 12,
-        viewsIncrease: 87.5,
-        engagementRate: 0.35,
-        clicks: {
-          today: 15,
-          yesterday: 12,
-          weeklyAverage: 13,
-          withBoost: 20,
-          withoutBoost: 10,
-          increase: 100,
-        },
+        viewsIncrease: Math.floor(Math.random() * 40) + 10,
+        engagementRate: (Math.random() * 0.2 + 0.1).toFixed(2),
+        rankingPosition: Math.floor(Math.random() * 10) + 1,
+        conversionIncrease: (Math.random() * 30 + 5).toFixed(1)
       };
     } catch (err) {
-      console.error('Error getting boost analytics:', err);
+      console.error("Error getting analytics:", err);
       return null;
     }
-  }, []);
+  };
 
-  // Function to fetch boost packages
-  const fetchBoostPackages = useCallback(async (): Promise<BoostPackage[]> => {
-    setLoading(true);
+  // Function to get a realistic price for a boost package
+  const adaptGetBoostPrice = (selectedPackageId?: string): number => {
+    if (!selectedPackageId) return 0;
+    
+    const selectedPackage = boostPackages.find(pkg => pkg.id === selectedPackageId);
+    if (!selectedPackage) return 0;
+    
+    return selectedPackage.price_ubx || 100;
+  };
+  
+  // Fetch boost packages
+  const fetchBoostPackages = async (): Promise<void> => {
     try {
-      // Simulate API call
+      setLoading(true);
+      
+      // Mock fetch logic - already handled in useEffect
       await new Promise(resolve => setTimeout(resolve, 800));
-      return boostPackages;
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch boost packages');
-      return [];
-    } finally {
+      
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching packages:", err);
+      setError("Failed to load packages");
       setLoading(false);
     }
-  }, [boostPackages]);
+  };
+
+  // Function to produce format boost duration for display
+  const adaptFormatBoostDuration = (duration: string): string => {
+    return formatBoostDuration(duration);
+  };
 
   return {
     boostStatus,

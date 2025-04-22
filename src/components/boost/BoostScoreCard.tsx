@@ -3,7 +3,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Loader2, RefreshCw, Zap } from "lucide-react";
-import { BoostProfileDialog } from "@/components/boost";
+import { Dialog } from "@/components/ui/dialog";
+import { useState } from "react";
+import BoostProfileDialog from "./BoostProfileDialog";
 
 interface BoostScoreCardProps {
   profileId: string;
@@ -22,6 +24,8 @@ const BoostScoreCard = ({
   error,
   onRefresh
 }: BoostScoreCardProps) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  
   const getScoreColor = (score: number | null) => {
     if (score === null) return 'bg-gray-500';
     if (score >= 90) return 'bg-emerald-500';
@@ -40,52 +44,73 @@ const BoostScoreCard = ({
     return 'Poor';
   };
 
+  const handleBoostSuccess = () => {
+    onRefresh();
+  };
+
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg flex items-center justify-between">
-          <span>Profile Boost Score</span>
-          {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-        </CardTitle>
-        <CardDescription>
-          How visible your profile is in search results
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {error ? (
-          <div className="text-sm text-red-500 mb-2">{error}</div>
-        ) : (
-          <>
-            <div className="flex justify-between items-center mb-1">
-              <div className="text-sm font-medium">{getScoreLabel(boostScore)}</div>
-              <div className="text-2xl font-bold">{boostScore !== null ? boostScore : '-'}</div>
-            </div>
-            <Progress
-              value={boostScore || 0}
-              className={`h-2 ${getScoreColor(boostScore)}`}
-            />
-            <p className="text-xs text-muted-foreground mt-2">
-              A higher score means more visibility in search results and browsing.
-            </p>
-          </>
-        )}
-      </CardContent>
-      <CardFooter className="flex justify-between pt-0">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onRefresh}
-          disabled={loading}
-        >
-          <RefreshCw className="h-3 w-3 mr-2" />
-          Refresh
-        </Button>
-        
-        {isOwnProfile && (
-          <BoostProfileDialog profileId={profileId} />
-        )}
-      </CardFooter>
-    </Card>
+    <>
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex items-center justify-between">
+            <span>Profile Boost Score</span>
+            {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+          </CardTitle>
+          <CardDescription>
+            How visible your profile is in search results
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {error ? (
+            <div className="text-sm text-red-500 mb-2">{error}</div>
+          ) : (
+            <>
+              <div className="flex justify-between items-center mb-1">
+                <div className="text-sm font-medium">{getScoreLabel(boostScore)}</div>
+                <div className="text-2xl font-bold">{boostScore !== null ? boostScore : '-'}</div>
+              </div>
+              <Progress
+                value={boostScore || 0}
+                className={`h-2 ${getScoreColor(boostScore)}`}
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                A higher score means more visibility in search results and browsing.
+              </p>
+            </>
+          )}
+        </CardContent>
+        <CardFooter className="flex justify-between pt-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRefresh}
+            disabled={loading}
+          >
+            <RefreshCw className="h-3 w-3 mr-2" />
+            Refresh
+          </Button>
+          
+          {isOwnProfile && (
+            <Button 
+              size="sm" 
+              onClick={() => setDialogOpen(true)}
+            >
+              <Zap className="h-3 w-3 mr-2" />
+              Boost
+            </Button>
+          )}
+        </CardFooter>
+      </Card>
+      
+      {isOwnProfile && (
+        <BoostProfileDialog 
+          profileId={profileId} 
+          onSuccess={handleBoostSuccess}
+          open={dialogOpen}
+          setOpen={setDialogOpen}
+        />
+      )}
+    </>
   );
 };
 

@@ -1,25 +1,7 @@
 
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-
-interface User {
-  id: string;
-  email: string;
-  created_at: string;
-  user_metadata?: {
-    username?: string;
-    avatar_url?: string;
-    [key: string]: any;
-  };
-  // Added properties that components are trying to access
-  username?: string;
-  name?: string;
-  profileImageUrl?: string;
-  avatarUrl?: string;
-  avatar_url?: string;
-  roles?: string[];
-  role?: string;
-}
+import { User } from '@/types/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -33,6 +15,10 @@ interface AuthContextType {
   logout: () => Promise<void>;
   checkRole: (role: string) => boolean;
   updateUserProfile: (data: any) => Promise<boolean>;
+  refreshProfile: () => Promise<void>;
+  profile: any; // Mock profile data
+  updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
+  userRoles: string[];
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -45,6 +31,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [profile, setProfile] = useState(null);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
 
   useEffect(() => {
     // Check active sessions and sets the user
@@ -65,8 +53,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           profileImageUrl: session.user.user_metadata?.avatar_url,
           roles: session.user.user_metadata?.roles || [],
           role: session.user.user_metadata?.role || 'user',
-        };
+          email: session.user.email || '',
+        } as User;
+        
         setUser(enhancedUser);
+        setUserRoles(enhancedUser.roles || [enhancedUser.role || 'user']);
       } else {
         setUser(null);
       }
@@ -89,8 +80,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             profileImageUrl: session.user.user_metadata?.avatar_url,
             roles: session.user.user_metadata?.roles || [],
             role: session.user.user_metadata?.role || 'user',
-          };
+            email: session.user.email || '',
+          } as User;
+          
           setUser(enhancedUser);
+          setUserRoles(enhancedUser.roles || [enhancedUser.role || 'user']);
         } else {
           setUser(null);
         }
@@ -122,9 +116,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         profileImageUrl: data.user?.user_metadata?.avatar_url,
         roles: data.user?.user_metadata?.roles || [],
         role: data.user?.user_metadata?.role || 'user',
-      };
+        email: data.user?.email || '',
+      } as User;
       
       setUser(enhancedUser);
+      setUserRoles(enhancedUser.roles || [enhancedUser.role || 'user']);
       return { success: true };
     } catch (err: any) {
       setError(err.message);
@@ -198,13 +194,38 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           name: data.name || user.name,
           avatarUrl: data.avatarUrl || user.avatarUrl,
           profileImageUrl: data.avatarUrl || user.profileImageUrl,
-        };
+          email: user.email || '',
+        } as User;
+        
         setUser(updatedUser);
       }
 
       return true;
     } catch (err: any) {
       console.error('Error updating user profile:', err.message);
+      return false;
+    }
+  };
+  
+  // Add refreshProfile function
+  const refreshProfile = async (): Promise<void> => {
+    try {
+      // This would normally fetch user profile from the database
+      console.log("Refreshing user profile");
+      // For now, do nothing
+    } catch (err) {
+      console.error("Error refreshing profile:", err);
+    }
+  };
+  
+  // Add updatePassword function
+  const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
+    try {
+      // This would be implemented with Supabase
+      console.log("Updating password");
+      return true;
+    } catch (err) {
+      console.error("Error updating password:", err);
       return false;
     }
   };
@@ -221,7 +242,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       isAuthenticated: !!user,
       logout,
       checkRole,
-      updateUserProfile
+      updateUserProfile,
+      profile,
+      refreshProfile,
+      updatePassword,
+      userRoles
     }}>
       {children}
     </AuthContext.Provider>

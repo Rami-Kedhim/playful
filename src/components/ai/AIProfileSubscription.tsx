@@ -1,81 +1,98 @@
 
-import { AIProfile } from "@/types/ai-profile";
-import { Card, CardContent } from "@/components/ui/card";
+import React from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { StarIcon } from "lucide-react";
+import { Check, Crown, Star, Image as ImageIcon, VideoIcon, MessageCircle } from "lucide-react";
+import { AIProfile } from '@/types/ai-profile';
 
 interface AIProfileSubscriptionProps {
-  profile: AIProfile;
-  onSubscribe: () => void;
+  aiProfile: AIProfile;
+  onSubscribe?: () => void;
 }
 
-const AIProfileSubscription: React.FC<AIProfileSubscriptionProps> = ({ 
-  profile, 
-  onSubscribe 
-}) => {
-  const subscriptionPrice = profile.subscription_price || 29;
+const AIProfileSubscription: React.FC<AIProfileSubscriptionProps> = ({ aiProfile, onSubscribe }) => {
+  const isSubscribed = false; // This would come from a subscription check
   
-  // Handle potential undefined or non-object premium_content_count
-  const premiumContent = profile.premium_content_count || {};
-  const photosCount = typeof premiumContent === 'object' ? (premiumContent.photos || 0) : 0;
-  const videosCount = typeof premiumContent === 'object' ? (premiumContent.videos || 0) : 0;
-  const messagesCount = typeof premiumContent === 'object' ? (premiumContent.messages || 0) : 0;
-
+  const premiumContent = {
+    photos: aiProfile.gallery_images?.length || 0,
+    videos: aiProfile.premium_content_count || 0,
+    messages: "Unlimited"
+  };
+  
+  const price = aiProfile.subscription_price || 9.99;
+  
+  const features = [
+    "Full chat access",
+    "Exclusive photos and videos",
+    "Priority responses",
+    "Custom AI personality adaptation",
+    "Advanced conversation memory"
+  ];
+  
   return (
-    <Card className="overflow-hidden border-gradient-to-r from-purple-500 to-pink-500">
-      <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2">
-        <div className="flex justify-between items-center">
-          <h3 className="font-bold text-white text-lg">Premium Subscription</h3>
-          <Badge variant="secondary" className="bg-white text-purple-600 border-0">
-            <StarIcon className="h-3 w-3 mr-1 fill-amber-500 stroke-amber-600" />
-            VIP
-          </Badge>
-        </div>
-      </div>
-      
-      <CardContent className="p-6">
-        <div className="flex items-baseline mb-4">
-          <span className="text-3xl font-bold">{subscriptionPrice}</span>
-          <span className="text-muted-foreground ml-1">LC / month</span>
-        </div>
-        
-        <ul className="space-y-2 mb-6">
-          <li className="flex items-start">
-            <div className="h-5 w-5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs mr-2 flex-shrink-0 mt-0.5">✓</div>
-            <span>Unlimited messaging with {profile.name}</span>
-          </li>
-          <li className="flex items-start">
-            <div className="h-5 w-5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs mr-2 flex-shrink-0 mt-0.5">✓</div>
-            <span>Access to {photosCount} exclusive photos</span>
-          </li>
-          <li className="flex items-start">
-            <div className="h-5 w-5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs mr-2 flex-shrink-0 mt-0.5">✓</div>
-            <span>Access to {videosCount} premium videos</span>
-          </li>
-          <li className="flex items-start">
-            <div className="h-5 w-5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs mr-2 flex-shrink-0 mt-0.5">✓</div>
-            <span>{messagesCount} personalized voice messages</span>
-          </li>
-          {profile.livecam_enabled && (
-            <li className="flex items-start">
-              <div className="h-5 w-5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs mr-2 flex-shrink-0 mt-0.5">✓</div>
-              <span>Priority access to livecam events</span>
-            </li>
+    <Card className="w-full">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Premium Subscription</CardTitle>
+          {isSubscribed && (
+            <Badge variant="outline" className="bg-primary/10 text-primary border-primary">
+              <Crown className="h-3 w-3 mr-1 fill-primary" />
+              Subscribed
+            </Badge>
           )}
-        </ul>
+        </div>
+        <CardDescription>
+          Access exclusive content with {aiProfile.name}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="flex flex-col items-center justify-center p-3 bg-muted/50 rounded-lg">
+            <ImageIcon className="h-5 w-5 mb-1 text-muted-foreground" />
+            <span className="text-lg font-bold">{premiumContent.photos}</span>
+            <span className="text-xs text-muted-foreground">Photos</span>
+          </div>
+          <div className="flex flex-col items-center justify-center p-3 bg-muted/50 rounded-lg">
+            <VideoIcon className="h-5 w-5 mb-1 text-muted-foreground" />
+            <span className="text-lg font-bold">{premiumContent.videos}</span>
+            <span className="text-xs text-muted-foreground">Videos</span>
+          </div>
+          <div className="flex flex-col items-center justify-center p-3 bg-muted/50 rounded-lg">
+            <MessageCircle className="h-5 w-5 mb-1 text-muted-foreground" />
+            <span className="text-lg font-bold">{premiumContent.messages}</span>
+            <span className="text-xs text-muted-foreground">Messages</span>
+          </div>
+        </div>
         
-        <Button 
-          className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-          onClick={onSubscribe}
-        >
-          Subscribe Now
-        </Button>
-        
-        <p className="text-xs text-muted-foreground text-center mt-4">
-          Cancel anytime. No hidden fees.
-        </p>
+        <div className="space-y-2">
+          {features.map((feature, index) => (
+            <div key={index} className="flex items-center">
+              <Check className="h-4 w-4 mr-2 text-green-500" />
+              <span className="text-sm">{feature}</span>
+            </div>
+          ))}
+        </div>
       </CardContent>
+      <CardFooter className="flex flex-col">
+        <div className="w-full flex items-center justify-between mb-3">
+          <div className="flex items-center">
+            <Star className="h-4 w-4 text-amber-500 mr-1" />
+            <span className="text-sm font-medium">{aiProfile.rating || 4.8}</span>
+            <span className="text-xs text-muted-foreground ml-1">
+              ({aiProfile.reviewCount || 42} reviews)
+            </span>
+          </div>
+          <div className="text-lg font-bold">${price.toFixed(2)}<span className="text-sm text-muted-foreground">/mo</span></div>
+        </div>
+        <Button 
+          onClick={onSubscribe} 
+          className="w-full" 
+          disabled={isSubscribed}
+        >
+          {isSubscribed ? 'Already Subscribed' : 'Subscribe Now'}
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

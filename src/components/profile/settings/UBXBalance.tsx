@@ -1,92 +1,101 @@
 
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Coins, RefreshCw } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { getSolanaPrice } from '@/services/solanaService';
+import { useToast } from "@/hooks/use-toast";
+import { Plus, ArrowUpRight } from "lucide-react";
+import { useAuth } from "@/hooks/auth";
+import { useAuthActions } from "@/hooks/auth/useAuthActions";
 
-interface UBXBalanceProps {
-  onRecharge?: () => void;
-}
-
-const UBXBalance: React.FC<UBXBalanceProps> = ({ onRecharge }) => {
-  const { profile, refreshProfile } = useAuth();
-  const [price, setPrice] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
-  const balance = profile?.ubx_balance || 0;
+const UBXBalance: React.FC = () => {
+  const { user } = useAuth();
+  const { refreshProfile } = useAuthActions();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Mock UBX balance - in a real app would come from user profile
+  const [balance, setBalance] = useState(user?.lucoinsBalance || 0);
   
   useEffect(() => {
-    // Fetch the current price for UBX tokens
-    const fetchPrice = async () => {
-      try {
-        // In reality, this would fetch the UBX price or calculate it
-        // We'll use SOL price as a placeholder for now
-        const solPrice = await getSolanaPrice();
-        setPrice(solPrice / 10); // Placeholder: 1 UBX = 0.1 SOL value
-      } catch (error) {
-        console.error("Error fetching UBX price:", error);
-      }
-    };
+    // Update balance when user changes
+    setBalance(user?.lucoinsBalance || 0);
+  }, [user]);
+  
+  const handleAddFunds = async () => {
+    setIsLoading(true);
     
-    fetchPrice();
-  }, []);
-
-  const refreshBalance = async () => {
-    setLoading(true);
     try {
-      await refreshProfile();
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Update local state
+      const addedAmount = 100;
+      setBalance(prev => prev + addedAmount);
+      
+      toast({
+        title: "Funds Added",
+        description: `${addedAmount} UBX has been added to your account.`,
+      });
+    } catch (error) {
+      console.error("Error adding funds:", error);
+      toast({
+        title: "Transaction Failed",
+        description: "There was a problem adding funds to your account.",
+        variant: "destructive",
+      });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
-
+  
+  const formatBalance = (value: number) => {
+    return value.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
+  
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-lg flex items-center">
-          <Coins className="h-5 w-5 text-primary mr-2" />
-          UBX Balance
-        </CardTitle>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={refreshBalance} 
-          disabled={loading}
-        >
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-        </Button>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-lg">UBX Balance</CardTitle>
+            <CardDescription>Your available UBX funds</CardDescription>
+          </div>
+          <Button
+            variant="outline"
+            className="h-8 px-3"
+            onClick={handleAddFunds}
+            disabled={isLoading}
+          >
+            <Plus className="h-3.5 w-3.5 mr-1" />
+            Add Funds
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
-        {loading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-24" />
-            <Skeleton className="h-4 w-20" />
+        <div className="flex justify-between items-center">
+          <div>
+            <div className="text-3xl font-bold">{formatBalance(balance)}</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Available UBX
+            </div>
           </div>
-        ) : (
-          <>
-            <div className="text-3xl font-bold">{balance.toLocaleString()} UBX</div>
-            <p className="text-sm text-muted-foreground mt-1">
-              {price !== null ? (
-                <>≈ ${(balance * price).toFixed(2)} USD</>
-              ) : (
-                '—'
-              )}
-            </p>
-          </>
-        )}
-        
-        {onRecharge && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={onRecharge} 
-            className="w-full mt-4"
-          >
-            Add UBX Tokens
+          <Button variant="ghost" size="sm" className="text-xs">
+            Transaction History
+            <ArrowUpRight className="ml-1 h-3 w-3" />
           </Button>
-        )}
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4 mt-6">
+          <Button className="w-full">
+            Send UBX
+          </Button>
+          <Button variant="outline" className="w-full">
+            Withdraw UBX
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
