@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,7 +47,7 @@ const BoostStatusCard: React.FC<BoostStatusCardProps> = ({
         const expiresDate = typeof boostStatus.expiresAt === 'string' 
           ? new Date(boostStatus.expiresAt)
           : boostStatus.expiresAt;
-          
+        
         expiresAtDisplay = expiresDate.toLocaleDateString(undefined, {
           month: 'short',
           day: 'numeric',

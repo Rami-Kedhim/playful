@@ -1,120 +1,69 @@
+import { supabase } from '@/lib/supabase';
+import { AIMessage, AIMessageResponse } from '@/types/ai-chat';
 
-import { AIMessage, AIConversation } from '@/types/ai-profile';
+export const aiMessagesService = {
+  async sendMessage(message: Partial<AIMessage>): Promise<AIMessage | null> {
+    // Fix the properties to match the database schema
+    const { data, error } = await supabase
+      .from('ai_messages')
+      .insert({
+        content: message.content,
+        sender_id: message.senderId,
+        receiver_id: message.receiverId,
+        conversation_id: message.conversation_id
+      })
+      .select()
+      .single();
 
-interface MessagePayload {
-  content: string;
-  profileId: string;
-}
+    if (error) {
+      console.error('Error sending message:', error);
+      return null;
+    }
 
-interface MessageResponse {
-  success: boolean;
-  message?: string;
-  messages?: AIMessage[];
-  conversation?: AIConversation;
-}
+    return this.mapDatabaseMessageToAIMessage(data);
+  },
 
-export const sendMessage = async (payload: MessagePayload): Promise<MessageResponse> => {
-  try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Create a mock user message
-    const userMessage: AIMessage = {
-      id: `user-${Date.now()}`,
-      senderId: 'current-user-id',
-      receiverId: payload.profileId,
-      content: payload.content,
-      timestamp: new Date().toISOString(),
-      isAI: false
-    };
-    
-    // Create a mock AI response
-    const aiResponse: AIMessage = {
-      id: `ai-${Date.now()}`,
-      senderId: payload.profileId,
-      receiverId: 'current-user-id',
-      content: `This is an AI response to: "${payload.content}"`,
-      timestamp: new Date().toISOString(),
-      isAI: true
-    };
-    
-    // Return both messages
+  async getMessagesByConversationId(conversationId: string): Promise<AIMessage[]> {
+    const { data, error } = await supabase
+      .from('ai_messages')
+      .select('*')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching messages:', error);
+      return [];
+    }
+
+    return data.map(this.mapDatabaseMessageToAIMessage);
+  },
+
+  async markMessagesAsRead(conversationId: string): Promise<void> {
+    const { error } = await supabase
+      .from('ai_messages')
+      .update({ has_read: true })
+      .eq('conversation_id', conversationId)
+      .eq('has_read', false);
+
+    if (error) {
+      console.error('Error marking messages as read:', error);
+    }
+  },
+
+  mapDatabaseMessageToAIMessage(data: AIMessageResponse): AIMessage {
     return {
-      success: true,
-      messages: [userMessage, aiResponse],
-      conversation: {
-        id: 'mock-conversation-id',
-        user_id: 'current-user-id',
-        ai_profile_id: payload.profileId,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        messages: [userMessage, aiResponse]
-      }
+      id: data.id,
+      role: data.is_ai ? 'assistant' : 'user',
+      content: data.content,
+      timestamp: new Date(data.created_at),
+      senderId: data.sender_id,
+      receiverId: data.sender_id, // This might need to be updated based on schema
+      isAI: data.is_ai,
+      has_read: data.has_read,
+      requires_payment: data.requires_payment,
+      price: data.price,
+      payment_status: data.payment_status as any,
+      created_at: data.created_at
     };
-  } catch (error) {
-    console.error('Error sending message:', error);
-    return {
-      success: false,
-      message: 'Failed to send message'
-    };
-  }
-};
-
-export const fetchMessages = async (profileId: string): Promise<{
-  messages: AIMessage[];
-  conversation: AIConversation;
-}> => {
-  try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Mock data
-    const mockMessages: AIMessage[] = [
-      {
-        id: 'msg1',
-        senderId: 'current-user-id',
-        receiverId: profileId,
-        content: 'Hello there!',
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-        isAI: false
-      },
-      {
-        id: 'msg2',
-        senderId: profileId,
-        receiverId: 'current-user-id',
-        content: 'Hi! How can I help you today?',
-        timestamp: new Date(Date.now() - 3500000).toISOString(),
-        isAI: true
-      }
-    ];
-    
-    const mockConversation: AIConversation = {
-      id: 'mock-conversation-id',
-      user_id: 'current-user-id',
-      ai_profile_id: profileId,
-      created_at: new Date(Date.now() - 3600000).toISOString(),
-      updated_at: new Date(Date.now() - 3500000).toISOString(),
-      messages: mockMessages
-    };
-    
-    return {
-      messages: mockMessages,
-      conversation: mockConversation
-    };
-  } catch (error) {
-    console.error('Error fetching messages:', error);
-    throw new Error('Failed to fetch messages');
-  }
-};
-
-export const markMessagesAsRead = async (messageIds: string[]): Promise<boolean> => {
-  try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    return true;
-  } catch (error) {
-    console.error('Error marking messages as read:', error);
-    return false;
   }
 };

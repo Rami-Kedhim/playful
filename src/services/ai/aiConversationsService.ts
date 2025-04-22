@@ -1,5 +1,6 @@
-
-import { AIConversation } from '@/types/ai-profile';
+import { supabase } from '@/lib/supabase';
+import { AIConversation } from '@/types/ai-chat';
+import { AIProfile } from '@/types/ai-profile';
 
 export const fetchConversation = async (conversationId: string): Promise<AIConversation> => {
   try {

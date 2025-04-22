@@ -1,6 +1,3 @@
-
-// Updated FilterOptions to include roleFilters and capabilityFilters explicitly
-
 import { useState, useEffect } from 'react';
 import { UberPersona } from '@/types/UberPersona';
 
@@ -10,6 +7,30 @@ export interface FilterOptions {
   roleFilters: Record<string, boolean>;
   capabilityFilters: Record<string, boolean>;
 }
+
+const filterByTypeFlag = (personas: UberPersona[], typeFlag: string) => {
+  if (!personas) return [];
+  
+  return personas.filter(persona => {
+    // Check if roleFlags exists and has the specified property
+    if (persona.roleFlags && persona.roleFlags[typeFlag as keyof typeof persona.roleFlags]) {
+      return true;
+    }
+    return false;
+  });
+};
+
+const filterByCapabilityFlag = (personas: UberPersona[], capabilityFlag: string) => {
+  if (!personas) return [];
+  
+  return personas.filter(persona => {
+    // Check if capabilities exists and has the specified property
+    if (persona.capabilities && persona.capabilities[capabilityFlag as keyof typeof persona.capabilities]) {
+      return true;
+    }
+    return false;
+  });
+};
 
 export function usePersonaFilter(personas: UberPersona[]) {
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
@@ -39,9 +60,7 @@ export function usePersonaFilter(personas: UberPersona[]) {
     if (filterOptions.roleFilters) {
       Object.entries(filterOptions.roleFilters).forEach(([role, active]) => {
         if (active) {
-          results = results.filter(persona =>
-            persona.roleFlags ? persona.roleFlags[role as keyof typeof persona.roleFlags] === true : false
-          );
+          results = filterByTypeFlag(results, role);
         }
       });
     }
@@ -49,9 +68,7 @@ export function usePersonaFilter(personas: UberPersona[]) {
     if (filterOptions.capabilityFilters) {
       Object.entries(filterOptions.capabilityFilters).forEach(([capability, active]) => {
         if (active) {
-          results = results.filter(persona =>
-            persona.capabilities ? Boolean(persona.capabilities[capability as keyof typeof persona.capabilities]) : false
-          );
+          results = filterByCapabilityFlag(results, capability);
         }
       });
     }
@@ -74,4 +91,3 @@ export function usePersonaFilter(personas: UberPersona[]) {
 }
 
 export default usePersonaFilter;
-

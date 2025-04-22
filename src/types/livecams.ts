@@ -42,6 +42,7 @@ export interface LivecamModel {
   tags: string[];
   previewVideoUrl?: string;
   isPopular?: boolean;
+  category?: string; // Adding missing property
 }
 
 export interface LivecamSettings {

@@ -1,29 +1,24 @@
 
-// Fix import for LivecamContext, remove unused import
-
 import { useContext } from 'react';
-import { useParams } from 'react-router-dom';
-import { useLivecamContext } from '@/modules/livecams/providers/LivecamProvider';
-import type { Livecam } from '@/types/livecam';
+import { LivecamContext } from '@/modules/livecams/providers/LivecamProvider';
+import { Livecam, LivecamModel } from '@/types/livecams';
 
-export function useLivecamDetail() {
-  const context = useLivecamContext();
-  const { id } = useParams<{ id: string }>();
-
+export const useLivecams = () => {
+  const context = useContext(LivecamContext);
+  
   if (!context) {
-    throw new Error('useLivecamDetail must be used within a LivecamProvider');
+    throw new Error('useLivecams must be used within a LivecamProvider');
   }
-
-  const livecam = context.getLivecamById?.(id || '');
-  const { loading, error } = context;
-
-  return {
-    livecam,
-    isLoading: loading,
-    error,
-    relatedLivecams: context.livecams?.filter((c: Livecam) => c.id !== id).slice(0, 3) || []
+  
+  // Add the missing getLivecamById function
+  const getLivecamById = (id: string): Livecam | undefined => {
+    return context.livecams?.find(livecam => livecam.id === id);
   };
-}
+  
+  return {
+    ...context,
+    getLivecamById
+  };
+};
 
-export default useLivecamDetail;
-
+export default useLivecams;

@@ -9,17 +9,19 @@ export const useAuthState = () => {
   const isAdmin = useCallback((userObj: User | null) => {
     // Check if user has admin role regardless of the format
     if (!userObj || !userObj.roles) return false;
-    return userObj.roles.some(role => 
-      typeof role === 'string' ? role === 'admin' : role.name === 'admin'
-    );
+    return userObj.roles.some(role => {
+      if (typeof role === 'string') return role === 'admin';
+      return role?.name === 'admin';
+    });
   }, []);
 
   const isCreator = useCallback((userObj: User | null) => {
     // Check if user has creator role regardless of the format
     if (!userObj || !userObj.roles) return false;
-    return userObj.roles.some(role => 
-      typeof role === 'string' ? role === 'creator' : role.name === 'creator'
-    );
+    return userObj.roles.some(role => {
+      if (typeof role === 'string') return role === 'creator';
+      return role?.name === 'creator';
+    });
   }, []);
 
   return {

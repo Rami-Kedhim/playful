@@ -2,8 +2,25 @@
 import { useState, useEffect } from 'react';
 import { BoostAnalytics } from '@/types/boost';
 
+// Update the impressions type to be an object instead of a number
 export interface AnalyticsData extends Omit<BoostAnalytics, 'impressions'> {
   impressions: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+  };
+  interactions: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+  };
+  clicks: {
     today: number;
     yesterday: number;
     weeklyAverage: number;
@@ -27,7 +44,7 @@ export const useBoostAnalytics = (profileId: string) => {
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        // Mock data
+        // Mock data with proper typing
         const mockData: AnalyticsData = {
           impressions: {
             today: 324,

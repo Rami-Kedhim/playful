@@ -1,31 +1,63 @@
 
-import React from 'react';
-import { BoostButton as RefactoredBoostButton } from './button';
-import type { BoostButtonProps } from './button/types';
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Zap } from 'lucide-react';
+import BoostProfileDialog from '../BoostProfileDialog';
+import { useBoost } from '@/contexts/BoostContext';
 
-const BoostButton = (props: Omit<BoostButtonProps, 'variant'> & { variant?: string }) => {
-  // Filter out any variant that is not in the allowed variants for BoostButtonProps
-  const { variant, ...restProps } = props;
+interface BoostButtonProps {
+  profileId?: string;
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  size?: "default" | "sm" | "lg" | "icon";
+  className?: string;
+  showStatus?: boolean;
+}
+
+const BoostButton: React.FC<BoostButtonProps> = ({
+  profileId,
+  variant = "default",
+  size = "default",
+  className = "",
+  showStatus = false
+}) => {
+  const [open, setOpen] = useState(false);
+  const { isActive } = useBoost();
   
-  // Only pass variant if it's one of the allowed values
-  const allowedVariants = ['link', 'default', 'destructive', 'outline', 'secondary', 'ghost'];
+  const handleClick = () => {
+    setOpen(true);
+  };
   
-  // Convert variant to allowed type or use default
-  let safeVariant: 'link' | 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | undefined;
+  const handleSuccess = () => {
+    // Refresh boost status or perform other actions
+  };
   
-  if (variant && allowedVariants.includes(variant)) {
-    safeVariant = variant as 'link' | 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
-  } else {
-    // If variant is not allowed, default to 'default'
-    safeVariant = 'default';
-  }
+  const handleClose = () => {
+    setOpen(false);
+  };
   
-  const safeProps = {
-    ...restProps,
-    variant: safeVariant
-  } as BoostButtonProps;
-  
-  return <RefactoredBoostButton {...safeProps} />;
+  return (
+    <>
+      <Button
+        onClick={handleClick}
+        variant={variant}
+        size={size}
+        className={className}
+      >
+        <Zap className={`h-4 w-4 ${size === "default" || size === "lg" ? "mr-2" : ""}`} />
+        {(size === "default" || size === "lg") && "Boost Profile"}
+        {showStatus && isActive && (size === "default" || size === "lg") && " ✓"}
+      </Button>
+      
+      {open && (
+        <BoostProfileDialog
+          profileId={profileId}
+          onSuccess={handleSuccess}
+          open={open}
+          setOpen={setOpen}
+        />
+      )}
+    </>
+  );
 };
 
 export default BoostButton;

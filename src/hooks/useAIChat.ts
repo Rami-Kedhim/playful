@@ -1,7 +1,9 @@
-
 import { useState, useEffect, useCallback } from 'react';
-import { AIMessage, AIProfile, AIConversation } from '@/types/ai-profile';
-import { fetchMessages, sendMessage } from '@/services/ai/aiMessagesService';
+import { useAuth } from './auth/useAuthContext';
+import { AIConversation, AIMessage } from '@/types/ai-chat';
+import { AIProfile } from '@/types/ai-profile';
+import { aiMessagesService } from '@/services/ai/aiMessagesService';
+import { aiConversationsService } from '@/services/ai/aiConversationsService';
 
 interface UseAIChatProps {
   profileId: string;
@@ -16,6 +18,7 @@ export const useAIChat = ({
   onMessageSent,
   onMessageReceived
 }: UseAIChatProps) => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<AIMessage[]>(initialMessages);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +31,7 @@ export const useAIChat = ({
     setError(null);
     
     try {
-      const result = await fetchMessages(profileId);
+      const result = await aiMessagesService.fetchMessages(profileId);
       
       if (result.messages) {
         setMessages(result.messages);
@@ -56,32 +59,28 @@ export const useAIChat = ({
     setError(null);
     
     try {
-      // Create user message object
-      const userMessage: AIMessage = {
-        id: `temp-${Date.now()}`,
-        senderId: 'current-user', // This will be replaced by the actual user ID on the server
-        receiverId: profileId,
+      const newMessage: AIMessage = {
+        id: Date.now().toString(),
+        role: 'user',
         content,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date(),
+        senderId: user?.id || '',
+        receiverId: profileId,
         isAI: false,
         status: 'sent'
       };
       
-      // Optimistically update UI
-      setMessages(prev => [...prev, userMessage]);
-      if (onMessageSent) onMessageSent(userMessage);
+      setMessages(prev => [...prev, newMessage]);
+      if (onMessageSent) onMessageSent(newMessage);
       
-      // Send message to server
-      const response = await sendMessage({
+      const response = await aiMessagesService.sendMessage({
         content,
         profileId
       });
       
-      // Update messages with server response
       if (response && response.messages) {
         setMessages(response.messages);
         
-        // Find AI response if any
         const aiResponse = response.messages.find(msg => 
           msg.isAI && !messages.some(existingMsg => existingMsg.id === msg.id)
         );
@@ -102,7 +101,6 @@ export const useAIChat = ({
   };
   
   const markMessagesAsRead = useCallback(async () => {
-    // Find unread messages
     const unreadMessages = messages.filter(msg => 
       msg.isAI && !(msg.has_read || msg.status === 'read')
     );
@@ -110,7 +108,6 @@ export const useAIChat = ({
     if (unreadMessages.length === 0) return;
     
     try {
-      // Update locally first
       setMessages(prev => 
         prev.map(msg => 
           msg.isAI && !(msg.has_read || msg.status === 'read')

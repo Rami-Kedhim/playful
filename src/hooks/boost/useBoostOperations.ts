@@ -1,4 +1,3 @@
-
 import { useCallback, useState } from 'react';
 import { BoostAnalytics } from '@/types/boost';
 
@@ -31,6 +30,33 @@ interface AnalyticsData {
   };
 }
 
+interface BoostAnalyticsWithImpressions extends Omit<BoostAnalytics, 'impressions'> {
+  impressions: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+  };
+  interactions: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+  };
+  clicks: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+  };
+}
+
 export const useBoostOperations = (profileId: string) => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<AnalyticsData>({
@@ -55,68 +81,7 @@ export const useBoostOperations = (profileId: string) => {
       // Simulate analytics data fetch
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      const analyticsData: BoostAnalytics & {
-        impressions: {
-          today: number;
-          yesterday: number;
-          weeklyAverage: number;
-          withBoost: number;
-          withoutBoost: number;
-          increase: number;
-        };
-        interactions: {
-          today: number;
-          yesterday: number;
-          weeklyAverage: number;
-          withBoost: number;
-          withoutBoost: number;
-          increase: number;
-        };
-        clicks: {
-          today: number;
-          yesterday: number;
-          weeklyAverage: number;
-          withBoost: number;
-          withoutBoost: number;
-          increase: number;
-        };
-      } = {
-        impressions: {
-          today: 432,
-          yesterday: 287,
-          weeklyAverage: 310,
-          withBoost: 432,
-          withoutBoost: 210,
-          increase: 105
-        },
-        interactions: {
-          today: 87,
-          yesterday: 63,
-          weeklyAverage: 70,
-          withBoost: 87,
-          withoutBoost: 42,
-          increase: 107
-        },
-        rank: {
-          current: 13,
-          previous: 47,
-          change: 34
-        },
-        trending: true,
-        additionalViews: 222,
-        engagementIncrease: 0.23,
-        rankingPosition: 13,
-        viewsIncrease: 105,
-        engagementRate: 0.2,
-        clicks: {
-          today: 45,
-          yesterday: 28,
-          weeklyAverage: 30,
-          withBoost: 45,
-          withoutBoost: 22,
-          increase: 105
-        }
-      };
+      const analyticsData: BoostAnalyticsWithImpressions = generateMockAnalytics(profileId);
       
       setData({
         impressions: {
@@ -150,3 +115,46 @@ export const useBoostOperations = (profileId: string) => {
 };
 
 export default useBoostOperations;
+
+const generateMockAnalytics = (profileId: string): BoostAnalyticsWithImpressions => {
+  const randomRank = Math.floor(Math.random() * 100);
+  const previousRank = Math.floor(Math.random() * 100);
+  const rankChange = Math.floor(Math.random() * 50);
+  const impressionChange = Math.floor(Math.random() * 100);
+
+  return {
+    impressions: {
+      today: 324,
+      yesterday: 217,
+      weeklyAverage: 245,
+      withBoost: 324,
+      withoutBoost: 120,
+      increase: 170
+    },
+    interactions: {
+      today: 87,
+      yesterday: 42,
+      weeklyAverage: 53,
+      withBoost: 87,
+      withoutBoost: 29,
+      increase: 200
+    },
+    rank: {
+      current: randomRank,
+      previous: previousRank,
+      change: rankChange
+    },
+    trending: impressionChange > 0,
+    additionalViews: Math.floor(Math.random() * 500),
+    engagementIncrease: Math.floor(Math.random() * 200),
+    rankingPosition: randomRank,
+    clicks: {
+      today: 42,
+      yesterday: 21,
+      weeklyAverage: 25,
+      withBoost: 42,
+      withoutBoost: 15,
+      increase: 180
+    }
+  };
+};
