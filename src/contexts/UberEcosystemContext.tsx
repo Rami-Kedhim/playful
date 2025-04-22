@@ -1,6 +1,5 @@
 
-// Fix CompatibleEscort type properties to match Escort
-// Ensure id and name are on CompatibleEscort so it satisfies Escort requirements
+// Fix CompatibleEscort type properties to match Escort and proper use of boostStatus property and optional chains
 
 import React, {
   createContext,
@@ -60,7 +59,6 @@ const getBoostedPersonas = (allPersonas: UberPersona[]): UberPersona[] =>
   allPersonas.filter(p => p.monetization?.boostingActive || p.roleFlags?.isFeatured);
 
 const getBoostStatus = (persona: UberPersona) => {
-  // Use optional chaining for all potential undefined properties
   if (persona?.monetization?.boostingActive && persona?.roleFlags?.isFeatured) {
     return {
       isActive: true,
@@ -68,8 +66,6 @@ const getBoostStatus = (persona: UberPersona) => {
       remainingTime: '2 days'
     };
   }
-  
-  // Use default value if boostStatus is missing
   return persona?.boostStatus || {
     isActive: false,
     tier: 'none',
@@ -229,4 +225,3 @@ export const useUberEcosystemContext = () => {
 };
 
 export default UberEcosystemContext;
-

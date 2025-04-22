@@ -1,5 +1,4 @@
 
-// Fixed import casing to match filename (uberPersona.ts)
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,26 +12,26 @@ interface PersonaBookingTabProps {
 const PersonaBookingTab: React.FC<PersonaBookingTabProps> = ({ persona }) => {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
-  
+
   const getMeetingPrice = () => {
     if (persona.monetization && typeof persona.monetization === 'object') {
       return persona.monetization.meetingPrice ?? 0;
     }
     return 0;
   };
-  
+
   const meetingPrice = getMeetingPrice();
-  
+
   const availableDates = [
-    '2023-08-01', '2023-08-02', '2023-08-03', 
+    '2023-08-01', '2023-08-02', '2023-08-03',
     '2023-08-04', '2023-08-05', '2023-08-06'
   ];
-  
+
   const availableTimes = [
-    '10:00 AM', '11:00 AM', '1:00 PM', 
+    '10:00 AM', '11:00 AM', '1:00 PM',
     '2:00 PM', '4:00 PM', '7:00 PM'
   ];
-  
+
   return (
     <div className="space-y-6">
       <Card>
@@ -46,7 +45,7 @@ const PersonaBookingTab: React.FC<PersonaBookingTabProps> = ({ persona }) => {
               </span>
             </div>
           </div>
-          
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">
@@ -70,7 +69,7 @@ const PersonaBookingTab: React.FC<PersonaBookingTabProps> = ({ persona }) => {
                 ))}
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium mb-2">
                 <Clock className="h-4 w-4 inline mr-2" />
@@ -90,14 +89,14 @@ const PersonaBookingTab: React.FC<PersonaBookingTabProps> = ({ persona }) => {
                 ))}
               </div>
             </div>
-            
-            <Button 
-              className="w-full mt-6" 
+
+            <Button
+              className="w-full mt-6"
               disabled={!selectedDate || !selectedTime}
             >
               Book Now
             </Button>
-            
+
             <p className="text-xs text-muted-foreground text-center mt-2">
               You won't be charged until your booking is confirmed
             </p>

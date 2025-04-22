@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersona } from '@/types/uberPersona';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PlayIcon, LockIcon } from "lucide-react";
@@ -13,10 +14,8 @@ interface PersonaContentTabProps {
 export const PersonaContentTab: React.FC<PersonaContentTabProps> = ({ persona }) => {
   const [selectedTab, setSelectedTab] = useState('photos');
 
-  // Determine if persona has exclusive content by checking monetization flag
   const showExclusiveContent = persona.monetization?.subscriptionPrice !== undefined && persona.monetization?.subscriptionPrice > 0;
 
-  // Generate placeholder content based on persona type
   const generatePlaceholderContent = (type: 'photos' | 'videos') => {
     const count = type === 'photos' ? 9 : 6;
     return Array.from({ length: count }).map((_, index) => {
@@ -61,7 +60,7 @@ export const PersonaContentTab: React.FC<PersonaContentTabProps> = ({ persona })
       );
     });
   };
-  
+
   return (
     <div>
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
@@ -72,33 +71,33 @@ export const PersonaContentTab: React.FC<PersonaContentTabProps> = ({ persona })
             <TabsTrigger value="exclusive">Exclusive</TabsTrigger>
           )}
         </TabsList>
-        
+
         <TabsContent value="photos">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {generatePlaceholderContent('photos')}
           </div>
         </TabsContent>
-        
+
         <TabsContent value="videos">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {generatePlaceholderContent('videos')}
           </div>
         </TabsContent>
-        
+
         {showExclusiveContent && (
           <TabsContent value="exclusive">
             <div className="space-y-6">
               <div className="bg-muted/30 border rounded-lg p-6 mb-6">
                 <h3 className="text-lg font-medium mb-2">Premium Content</h3>
                 <p className="text-muted-foreground mb-4">
-                  Access exclusive content from {persona.displayName || (persona as any).name} with a premium subscription.
+                  Access exclusive content from {persona.displayName || persona.name} with a premium subscription.
                 </p>
                 <Button>
                   <LockIcon className="w-4 h-4 mr-2" />
                   Subscribe for Premium
                 </Button>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {Array.from({ length: 8 }).map((_, index) => (
                   <Card key={index} className="overflow-hidden relative group">

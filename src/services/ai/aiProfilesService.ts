@@ -2,12 +2,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { AIProfile } from "@/types/ai-profile";
 
-/**
- * Get all AI profiles
- */
 export const getAIProfiles = async (): Promise<AIProfile[]> => {
   try {
-    // Using any to bypass type issues
     const { data, error } = await supabase
       .from('ai_profiles' as any)
       .select('*') as any;
@@ -24,12 +20,8 @@ export const getAIProfiles = async (): Promise<AIProfile[]> => {
   }
 };
 
-/**
- * Get a specific AI profile by ID
- */
 export const getAIProfileById = async (profileId: string): Promise<AIProfile | null> => {
   try {
-    // Using any to bypass type issues
     const { data, error } = await supabase
       .from('ai_profiles' as any)
       .select('*')
@@ -41,7 +33,6 @@ export const getAIProfileById = async (profileId: string): Promise<AIProfile | n
       return mockAIProfiles.find(p => p.id === profileId) || null;
     }
 
-    // Changed `is_verified` to `isVerified`
     return {
       ...data,
       isVerified: data.is_verified,
@@ -52,9 +43,6 @@ export const getAIProfileById = async (profileId: string): Promise<AIProfile | n
   }
 };
 
-/**
- * Mock AI Profiles for development or fallback
- */
 export const mockAIProfiles: AIProfile[] = [
   {
     id: "ai-profile-1",
@@ -77,7 +65,6 @@ export const mockAIProfiles: AIProfile[] = [
     ubx_image_price: 10,
     created_at: "2023-01-01T00:00:00.000Z",
     isVerified: true,
-    category: "AI Companion",
     rating: 4.5,
     reviewCount: 100,
     price: 0,
@@ -105,7 +92,6 @@ export const mockAIProfiles: AIProfile[] = [
     ubx_image_price: 10,
     created_at: "2023-02-01T00:00:00.000Z",
     isVerified: false,
-    category: "AI Companion",
     rating: 4,
     reviewCount: 50,
     price: 0,
@@ -133,7 +119,6 @@ export const mockAIProfiles: AIProfile[] = [
     ubx_image_price: 20,
     created_at: "2023-03-01T00:00:00.000Z",
     isVerified: true,
-    category: "AI Companion",
     rating: 5,
     reviewCount: 75,
     price: 0,

@@ -1,6 +1,4 @@
 
-// Fix number/string type casting (fix type errors by rigorous parsing)
-
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
 interface UsePulseBoostAdapterResult {
@@ -36,17 +34,16 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
   };
 
   const parseNumberValue = (val: any, fallback: number): number => {
-    if (typeof val === "number") return val;
-    if (typeof val === "string") {
+    if(typeof val === 'number') return val;
+    if(typeof val === 'string') {
       const parsed = Number(val);
-      return isNaN(parsed) ? fallback : parsed;
+      if(isNaN(parsed)) return fallback;
+      return parsed;
     }
     return fallback;
   };
 
-  const adaptGetPulseBoostPrice = (
-    fn: (pkg: BoostPackage) => number
-  ) => (pkg: BoostPackage): number => {
+  const adaptGetPulseBoostPrice = (fn: (pkg: BoostPackage) => number) => (pkg: BoostPackage): number => {
     if (pkg.price_ubx !== undefined && pkg.price_ubx !== null) {
       if (typeof pkg.price_ubx === 'string') {
         const parsed = Number(pkg.price_ubx);
@@ -113,4 +110,3 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 };
 
 export default usePulseBoostAdapter;
-

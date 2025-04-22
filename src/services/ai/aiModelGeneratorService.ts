@@ -65,8 +65,7 @@ export const aiModelGeneratorService = {
                     created_at: new Date().toISOString(),
                     rating: 4.5,
                     reviewCount: 100,
-                    // Removed invalid 'price' property
-                    is_premium: false,
+                    isPremium: false,
                     availability_status: 'available',
                   };
                   updateProgress('Model Ready', 0);
