@@ -40,7 +40,7 @@ export const getBoostStatus = async (profileId: string): Promise<BoostStatus | n
       isActive: data.is_active,
       remainingTime: data.remaining_time,
       expiresAt: data.expires_at,
-      boostLevel: data.boost_level
+      boost_level: data.boost_level
     };
   } catch (error) {
     console.error('Error in getBoostStatus:', error);

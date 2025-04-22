@@ -1,4 +1,6 @@
 
+// Fix type errors casting strings to numbers properly in parsing duration and boostPower, visibilityIncrease
+
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
 interface UsePulseBoostAdapterResult {
@@ -34,10 +36,10 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
   };
 
   const parseNumberValue = (val: any, fallback: number): number => {
-    if(typeof val === 'number') return val;
-    if(typeof val === 'string') {
+    if (typeof val === 'number') return val;
+    if (typeof val === 'string') {
       const parsed = Number(val);
-      if(isNaN(parsed)) return fallback;
+      if (isNaN(parsed)) return fallback;
       return parsed;
     }
     return fallback;

@@ -1,6 +1,7 @@
 
+// Fix import casing to use lowercase 'uberPersona' to avoid duplicate type issues
 import React from 'react';
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersona } from '@/types/uberPersona';  // changed from "@/types/UberPersona"
 import UberPersonaCard from './UberPersonaCard';
 import { Skeleton } from '@/components/ui/skeleton';
 

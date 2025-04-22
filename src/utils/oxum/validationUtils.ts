@@ -1,11 +1,27 @@
-// Validation utilities for Oxum protocol
-import { OxumValidationError } from './errors';
-import { OxumValidationContext, ValidationResult } from './types';
 
-// Constants for validation rules
-const MAX_PRICE_DELTA = 0.15; // 15% maximum price deviation
-const MIN_TRANSACTION_VALUE = 0.01; // Minimum transaction value in UBX
-const MAX_TRANSACTION_VALUE = 100000; // Maximum transaction value in UBX
+// Create dummy modules for missing imports to fix build errors for imports of errors and types
+
+/**
+ * Validation utilities for Oxum protocol
+ */
+
+// Dummy OxumValidationError class for error throwing
+export class OxumValidationError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = 'OxumValidationError';
+  }
+}
+
+// Dummy types needed for validation context and result
+export interface OxumValidationContext {
+  marketReference?: number;
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+}
 
 /**
  * Validates a price against the Oxum global pricing rules
@@ -13,6 +29,10 @@ const MAX_TRANSACTION_VALUE = 100000; // Maximum transaction value in UBX
  * @param context Optional validation context
  * @returns True if valid, throws OxumValidationError if invalid
  */
+const MAX_PRICE_DELTA = 0.15; // 15% maximum price deviation
+const MIN_TRANSACTION_VALUE = 0.01; // Minimum transaction value in UBX
+const MAX_TRANSACTION_VALUE = 100000; // Maximum transaction value in UBX
+
 export function validateGlobalPrice(
   price: number,
   context?: OxumValidationContext
@@ -124,3 +144,4 @@ export function validateBoostPackage(boostPackage: any): boolean {
   console.log(`Validation succeeded: Boost package ${boostPackage.id} is valid`);
   return true;
 }
+

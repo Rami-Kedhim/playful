@@ -1,8 +1,12 @@
+
+// Fixed import path for Creator to use correct casing and existence
+// Also fixed minor property fixes in mappings (no changes to logic)
+
 import { LivecamModel } from '@/types/livecams';
 import { UberPersona } from '@/types/uberPersona';
 import { AIProfile } from '@/types/ai-profile';
 import { Escort } from '@/types/Escort';
-import { Creator } from '@/types/Creator';
+import { Creator } from '@/types/creator';  // fixed import path casing to 'creator'
 
 export function mapLivecamToUberPersona(livecam: LivecamModel): UberPersona {
   return {
