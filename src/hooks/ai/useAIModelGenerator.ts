@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { generateAIProfile } from '@/services/generateAIProfile';
 import { AIProfile, ProcessingStatus, ProcessingStatusDetails } from '@/types/ai-profile';
@@ -37,7 +36,7 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
     setProcessingStatus({
       status: ProcessingStatus.PENDING,
       progress: 0,
-      message: 'Preparing to generate model',
+      message: { type: "status", traits: [] },
       completedCount: 0,
       totalCount: 5
     });

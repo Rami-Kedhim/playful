@@ -1,6 +1,4 @@
-// Fix double export of NeuralModel from UberPersona by removing duplicate exports
-// Or explicitly re-export only once
-
+// Fix duplicated export of NeuralModel by re-exporting only once
 export * from './UberPersona';
 export * from './neural/NeuralSystemMetrics';
 export * from './Escort';
