@@ -1,5 +1,5 @@
 
-// Fix string-to-number conversion for duration parts & properties
+// Fix number/string consistency in parsing durations and fields, align typing
 
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
@@ -81,6 +81,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 
     const durationMinutes = (hours * 60) + minutes + (seconds / 60);
 
+    // Use parseNumberValue to handle potential string values for boostPower and visibilityIncrease
     const boostPowerNum = parseNumberValue((pkg as any).boost_power ?? (pkg as any).boostPower ?? 50, 50);
     const visibilityIncreaseNum = parseNumberValue((pkg as any).visibility_increase ?? (pkg as any).visibilityIncrease ?? 50, 50);
 
@@ -113,4 +114,3 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 };
 
 export default usePulseBoostAdapter;
-

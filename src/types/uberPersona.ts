@@ -1,10 +1,12 @@
 
+// Adjusted interface to unify property names to camelCase and fix types for UberPersona to match usage in code
+
 export interface BoostStatus {
   isActive: boolean;
   tier?: 'basic' | 'premium' | 'none';
   remainingTime?: string;
   expiresAt?: string | Date;
-  boost_level?: number;
+  boostLevel?: number; // fixed from boost_level to camelCase
 }
 
 export interface AvailabilityScheduleSlot {
@@ -120,7 +122,7 @@ export interface UberPersona {
   price?: number;
   stats?: Stats;
   neuralModel?: NeuralModel;
-  boost_status?: BoostStatus;
+  boostStatus?: BoostStatus; // fixed from boost_status to boostStatus
   createdAt?: Date | string;
   updatedAt?: Date | string;
 }
