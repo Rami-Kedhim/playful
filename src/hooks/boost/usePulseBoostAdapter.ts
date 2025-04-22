@@ -71,7 +71,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const seconds = Number(durationParts[2]) || 0;
 
     // Calculate durationMinutes as number
-    const durationMinutes = hours * 60 + minutes + Math.floor(seconds / 60);
+    const durationMinutes = (hours * 60) + minutes + (Math.floor(seconds / 60));
 
     let visibility: PulseBoost['visibility'] = 'homepage';
     if (pkg.boost_power !== undefined && pkg.boost_power !== null) {
@@ -91,7 +91,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       name: pkg.name,
       description: pkg.description || `${pkg.name} visibility boost for your profile`,
       duration: pkg.duration,
-      durationMinutes,
+      durationMinutes: durationMinutes,
       price: typeof pkg.price === 'number' ? pkg.price : 0,
       costUBX: pkg.price_ubx || Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),
       visibility,
