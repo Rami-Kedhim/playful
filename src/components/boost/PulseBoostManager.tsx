@@ -57,6 +57,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
     return success;
   };
 
+  // Accept boostId param to match signature but ignore it internally
   const handleCancel = async (_boostId: string): Promise<boolean> => {
     const success = await cancelBoost();
     if (!success) {
@@ -75,7 +76,9 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
 
         const costUBX = pkg.price_ubx ?? 0;
 
-        const timeRemaining = activeBoosts.find(b => b.boostId === pkg.id)?.timeRemaining;
+        // timeRemaining is a string or undefined, ensure it matches expected string | undefined
+        const activeBoost = activeBoosts.find(b => b.boostId === pkg.id);
+        const timeRemaining = activeBoost ? activeBoost.timeRemaining : undefined;
 
         return (
           <PulseBoostCard
