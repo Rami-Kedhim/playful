@@ -55,7 +55,7 @@ export const useBoostPurchase = () => {
       // Use the processTransaction method to deduct UBX
       const success = await processTransaction({
         amount: -GLOBAL_UBX_RATE, // Negative amount for spending
-        transaction_type: "boost_purchase", // Use the correct property name
+        transactionType: "boost_purchase", // Use the correct property name
         description: `Purchased ${boostPackage.name} boost`
       });
       

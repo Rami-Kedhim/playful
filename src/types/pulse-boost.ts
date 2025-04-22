@@ -35,14 +35,21 @@ export interface PulseBoost {
   autoApplyWithPlan?: SubscriptionLevel[];
   description?: string;
   badgeColor?: string;
+  features?: string[]; // Added this field
+  color?: string;
+  duration?: string;
+  price?: number;
+  price_ubx?: number;
 }
 
 export interface ActiveBoost {
   boostId: string;
   startedAt: Date;
-  expiresAt: Date;
+  expiresAt?: Date;
   userId?: string;
   visibility?: string;
+  timeRemaining?: string;
+  boostDetails?: any;
 }
 
 export interface UserEconomy {
@@ -60,14 +67,15 @@ export interface EnhancedBoostStatus {
   startTime?: Date;
   endTime?: Date;
   timeRemaining?: string;
-  progress: number | undefined;
+  progress?: number;
   profileId?: string;
   remainingTime?: string;
   expiresAt?: Date;
   boostPackage?: any;
   pulseData?: {
     visibility: string;
-    pulseLevel: number;
+    pulseLevel?: number;
     boostType: string;
+    coverage?: number;
   };
 }

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { AIAvatarSettings } from '@/services/ai/aiAvatarService';
+import { AIAvatarSettings as AIAvatarServiceSettings } from '@/services/ai/aiAvatarService';
 import { Loader2 } from "lucide-react";
 
 export interface AIAvatarSettings {

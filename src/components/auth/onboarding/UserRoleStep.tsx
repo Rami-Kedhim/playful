@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -12,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { AIAvatarGenerator, AIAvatarSettings } from './AIAvatarGenerator';
-import { generateAIAvatars, saveAIAvatar } from '@/services/ai/aiAvatarService';
+import { generateAIAvatars, saveAIAvatar, AIAvatarSettings as AIAvatarServiceSettings } from '@/services/ai/aiAvatarService';
 import { Loader2, Check } from "lucide-react";
 
 interface UserRoleStepProps {
@@ -64,9 +65,9 @@ export const UserRoleStep: React.FC<UserRoleStepProps> = ({ onNext }) => {
   const handleGenerateAvatars = async (settings: AIAvatarSettings) => {
     setIsGenerating(true);
     try {
-      const avatarGender = settings.gender;
-      const avatarSettings: AIAvatarSettings = {
-        gender: avatarGender,
+      // Convert component's AIAvatarSettings to service's AIAvatarServiceSettings
+      const avatarSettings: AIAvatarServiceSettings = {
+        gender: settings.gender,
         style: settings.style,
         ageRange: settings.ageRange,
         age: settings.age,

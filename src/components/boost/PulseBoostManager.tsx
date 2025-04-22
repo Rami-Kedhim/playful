@@ -1,10 +1,11 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { usePulseBoost } from "@/hooks/boost/usePulseBoost";
-import { PULSE_BOOSTS } from "@/constants/pulseBoostConfig";
+import { pulseBoosts } from "@/constants/pulseBoostConfig";
 import { AlertCircle, ChevronRight, Clock, Zap } from "lucide-react";
 import PulseBoostCard from "./PulseBoostCard";
 import { formatDistanceToNow } from "date-fns";
@@ -77,7 +78,7 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
                 Active Boost
               </CardTitle>
               {enhancedBoostStatus.pulseData && (
-                <Badge style={{ backgroundColor: PULSE_BOOSTS.find(b => b.name === enhancedBoostStatus.pulseData?.boostType)?.color }}>
+                <Badge style={{ backgroundColor: pulseBoosts.find(b => b.name === enhancedBoostStatus.pulseData?.boostType)?.color }}>
                   {enhancedBoostStatus.pulseData.boostType}
                 </Badge>
               )}

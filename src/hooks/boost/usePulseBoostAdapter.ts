@@ -66,9 +66,9 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     
     // Determine the visibility level based on boost level or other properties
     let visibility = 'standard';
-    if (pkg.boostLevel === 3 || pkg.boost_power >= 200) {
+    if (pkg.boost_power && pkg.boost_power >= 200) {
       visibility = 'global';
-    } else if (pkg.boostLevel === 2 || pkg.boost_power >= 100) {
+    } else if (pkg.boost_power && pkg.boost_power >= 100) {
       visibility = 'platform';
     } else {
       visibility = 'homepage';
@@ -81,25 +81,21 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       duration: pkg.duration,
       durationMinutes,
       price: pkg.price,
-      price_ubx: pkg.price_ubx || Math.round(convertToUBX(pkg.price)),
       costUBX: pkg.price_ubx || Math.round(convertToUBX(pkg.price)),
       visibility,
-      color: getColorForBoostLevel(pkg.boostLevel || 1),
-      badgeColor: getColorForBoostLevel(pkg.boostLevel || 1),
+      color: getColorForBoostPower(pkg.boost_power || 50),
+      badgeColor: getColorForBoostPower(pkg.boost_power || 50),
       features: pkg.features || [],
       boost_power: pkg.boost_power || 50,
-      visibility_increase: pkg.visibility_increase || 50,
-      boostLevel: pkg.boostLevel || 1
+      visibility_increase: pkg.visibility_increase || 50
     };
   };
   
   // Get a color for the boost level
-  const getColorForBoostLevel = (level: number): string => {
-    switch (level) {
-      case 3: return '#ec4899'; // Pink for premium
-      case 2: return '#8b5cf6'; // Purple for standard
-      default: return '#60a5fa'; // Blue for basic
-    }
+  const getColorForBoostPower = (boost_power: number): string => {
+    if (boost_power >= 200) return '#ec4899'; // Pink for premium
+    if (boost_power >= 100) return '#8b5cf6'; // Purple for standard
+    return '#60a5fa'; // Blue for basic
   };
   
   return {

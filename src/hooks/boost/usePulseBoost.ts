@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useBoost } from '@/hooks/boost/useBoost';
-import { PULSE_BOOSTS } from '@/constants/pulseBoostConfig';
+import { pulseBoosts } from '@/constants/pulseBoostConfig';
 import { PulseBoost, BoostPackage, ActiveBoost, EnhancedBoostStatus } from '@/types/boost';
 
 export const usePulseBoost = (profileId?: string) => {

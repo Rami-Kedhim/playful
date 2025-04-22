@@ -20,7 +20,7 @@ export const useBoostPackages = (): BoostPackage[] => {
           boost_power: 20,
           visibility_increase: 25,
           features: ['Featured in search results', 'Higher ranking'],
-          boostLevel: 1
+          color: '#3b82f6'
         },
         {
           id: 'standard',
@@ -32,7 +32,7 @@ export const useBoostPackages = (): BoostPackage[] => {
           boost_power: 50,
           visibility_increase: 75,
           features: ['Featured in search results', 'Higher ranking', 'Featured on homepage'],
-          boostLevel: 2
+          color: '#8b5cf6' 
         },
         {
           id: 'premium',
@@ -44,7 +44,7 @@ export const useBoostPackages = (): BoostPackage[] => {
           boost_power: 100,
           visibility_increase: 150,
           features: ['Featured in search results', 'Higher ranking', 'Featured on homepage', 'Premium badge'],
-          boostLevel: 3
+          color: '#ec4899'
         }
       ];
       

@@ -8,6 +8,8 @@ export interface Message {
   status: 'sent' | 'delivered' | 'read';
   attachments?: Attachment[];
   isDeleted?: boolean;
+  senderName?: string;
+  senderAvatar?: string;
 }
 
 // Add ChatMessage as an alias for Message for backward compatibility

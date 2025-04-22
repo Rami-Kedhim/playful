@@ -28,7 +28,7 @@ export const useHermesOxumBoost = (profileId?: string) => {
         
         const isProfileBoosted = Math.random() > 0.6; // 40% chance of being boosted
         
-        setHermesStatus({
+        const updatedStatus: HermesBoostStatus = {
           isActive: isProfileBoosted,
           position: Math.floor(Math.random() * 20) + 1,
           activeUsers: Math.floor(Math.random() * 500) + 100,
@@ -36,7 +36,9 @@ export const useHermesOxumBoost = (profileId?: string) => {
           lastUpdateTime: new Date().toISOString(),
           boostScore: Math.floor(Math.random() * 100),
           effectivenessScore: Math.floor(Math.random() * 100)
-        });
+        };
+        
+        setHermesStatus(updatedStatus);
       } catch (err) {
         console.error('Error fetching Hermes boost status:', err);
         setError('Failed to fetch boost status');
