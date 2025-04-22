@@ -1,3 +1,4 @@
+
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
 interface UsePulseBoostAdapterResult {
@@ -94,7 +95,8 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 
     // Ensure boostPower and visibilityIncrease are numbers (fix string-to-number issue)
     const boostPowerNum = parseNumberValue(boostPowerRaw, 50);
-    let visibilityIncreaseNum = 50;
+    
+    let visibilityIncreaseNum: number = 50;
     if (typeof visibilityIncreaseRaw === 'string') {
       const parsedVis = Number(visibilityIncreaseRaw);
       visibilityIncreaseNum = isNaN(parsedVis) ? 50 : parsedVis;
