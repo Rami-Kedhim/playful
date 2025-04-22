@@ -1,4 +1,6 @@
 
+// Fix usage of 'previewImage' property, which does not exist on type 'Livecam', remove or replace with 'imageUrl'
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Livecam, LivecamModel } from '@/types/livecams';
 
@@ -45,7 +47,7 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
           displayName: 'Sophia Live',
           imageUrl: 'https://example.com/sophia.jpg',
           thumbnailUrl: 'https://example.com/sophia-thumb.jpg',
-          previewImage: 'https://example.com/sophia-preview.jpg',
+          // Removed previewImage
           profileImage: 'https://example.com/sophia-profile.jpg',
           isLive: true,
           isStreaming: true,
@@ -66,7 +68,7 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
           displayName: 'Emma Gaming',
           imageUrl: 'https://example.com/emma.jpg',
           thumbnailUrl: 'https://example.com/emma-thumb.jpg',
-          previewImage: 'https://example.com/emma-preview.jpg',
+          // Removed previewImage
           profileImage: 'https://example.com/emma-profile.jpg',
           isLive: true,
           isStreaming: true,
@@ -87,7 +89,7 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
           displayName: 'Mia Music',
           imageUrl: 'https://example.com/mia.jpg',
           thumbnailUrl: 'https://example.com/mia-thumb.jpg',
-          previewImage: 'https://example.com/mia-preview.jpg',
+          // Removed previewImage
           profileImage: 'https://example.com/mia-profile.jpg',
           isLive: false,
           isStreaming: false,
@@ -136,3 +138,4 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
     </LivecamContext.Provider>
   );
 };
+

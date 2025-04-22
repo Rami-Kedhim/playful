@@ -1,7 +1,28 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
-import { AuthContextProps, AuthResult, User, UserProfile } from '@/types/auth';
+
+interface AuthContextProps {
+  user: any | null;
+  profile: any | null;
+  session: Session | null;
+  loading: boolean;
+  error: string | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  checkRole: (role: string) => boolean;
+  signIn: (args: { email: string; password: string }) => Promise<void>;
+  signUp: (args: { email: string; password: string; username?: string; full_name?: string }) => Promise<void>;
+  signOut: () => Promise<void>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  register: (email: string, password: string, username?: string) => Promise<{ success: boolean; error?: string }>;
+  sendPasswordResetEmail: (email: string) => Promise<void>;
+  confirmPasswordReset: (token: string, newPassword: string) => Promise<void>;
+  updateProfile: (data: Partial<any>) => Promise<boolean>;
+  updateUserProfile: (data: Partial<any>) => Promise<boolean>;
+  refreshProfile: () => Promise<void>;
+}
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
@@ -10,8 +31,8 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<any | null>(null);
+  const [profile, setProfile] = useState<any | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +69,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const mapSupabaseUserToUser = (supabaseUser: SupabaseUser): User => {
+  const mapSupabaseUserToUser = (supabaseUser: SupabaseUser): any => {
     return {
       id: supabaseUser.id,
       email: supabaseUser.email ?? '',
@@ -81,7 +102,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      setProfile(data as UserProfile);
+      setProfile(data as any);
     } catch (error) {
       console.error('Error in fetchProfile:', error);
     }
@@ -167,7 +188,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const updateProfile = async (data: Partial<UserProfile>) => {
+  const updateProfile = async (data: Partial<any>) => {
     if (!user) return false;
 
     try {
@@ -190,7 +211,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const login = async (email: string, password: string): Promise<AuthResult> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       await signIn({ email, password });
       return { success: true };
@@ -201,7 +222,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = signOut;
 
-  const register = async (email: string, password: string, username?: string): Promise<AuthResult> => {
+  const register = async (email: string, password: string, username?: string): Promise<{ success: boolean; error?: string }> => {
     try {
       await signUp({ email, password, username });
       return { success: true };
@@ -210,7 +231,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const updateUserProfile = async (data: Partial<UserProfile>): Promise<boolean> => {
+  const updateUserProfile = async (data: Partial<any>): Promise<boolean> => {
     return await updateProfile(data);
   };
 

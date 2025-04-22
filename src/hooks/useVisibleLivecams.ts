@@ -1,4 +1,6 @@
 
+// Fix usage of 'previewImage' property, which does not exist on type 'Livecam', remove or replace with 'imageUrl'
+
 import { useState, useEffect, useCallback } from 'react';
 import { Livecam } from '@/types/livecams';
 
@@ -22,7 +24,7 @@ const useVisibleLivecams = () => {
           displayName: 'Jessica Live',
           imageUrl: 'https://example.com/jessica.jpg',
           thumbnailUrl: 'https://example.com/jessica-thumb.jpg',
-          previewImage: 'https://example.com/jessica-preview.jpg',
+          // Removed previewImage - not in Livecam type
           profileImage: 'https://example.com/jessica-profile.jpg',
           isLive: true,
           isStreaming: true,
@@ -43,7 +45,7 @@ const useVisibleLivecams = () => {
           displayName: 'Michael Gaming',
           imageUrl: 'https://example.com/michael.jpg',
           thumbnailUrl: 'https://example.com/michael-thumb.jpg',
-          previewImage: 'https://example.com/michael-preview.jpg',
+          // Removed previewImage - not in Livecam type
           profileImage: 'https://example.com/michael-profile.jpg',
           isLive: false,
           isStreaming: false,
@@ -77,3 +79,4 @@ const useVisibleLivecams = () => {
 };
 
 export default useVisibleLivecams;
+

@@ -1,4 +1,3 @@
-
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
 interface UsePulseBoostAdapterResult {
@@ -86,7 +85,9 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       }
     }
 
-    // Return with all needed properties; boost_power is not in PulseBoost, so safely ignore or cast
+    // Ensure visibility_increase is a number (number expected)
+    const visibilityIncreaseNum = Number(pkg.visibility_increase) || 50;
+
     return {
       id: pkg.id,
       name: pkg.name,
@@ -99,7 +100,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       color: getColorForBoostPower(pkg.boost_power || 50),
       badgeColor: getColorForBoostPower(pkg.boost_power || 50),
       features: pkg.features || [],
-      visibility_increase: pkg.visibility_increase || 50
+      visibility_increase: visibilityIncreaseNum
     };
   };
 
