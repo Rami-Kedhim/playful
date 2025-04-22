@@ -43,9 +43,18 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Fetch analytics on load and when boost status changes
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getBoostAnalytics();
-      if (data) {
-        setAnalyticsData(data);
+      if (!managerBoostStatus.isActive) {
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        const data = await getBoostAnalytics();
+        if (data) {
+          setAnalyticsData(data);
+        }
+      } catch (err) {
+        console.error("Error fetching analytics:", err);
       }
     };
     
@@ -66,10 +75,12 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
   
-  // Create a BoostStatus that adheres to the interface
+  // Create a safe BoostStatus that doesn't access potentially undefined properties
   const boostStatus: BoostStatus = {
-    isActive: managerBoostStatus.isActive,
-    progress: managerBoostStatus.progress,
+    isActive: !!managerBoostStatus.isActive,
+    // Only add progress if it exists
+    ...(managerBoostStatus.progress !== undefined && { progress: managerBoostStatus.progress }),
+    // Handle date formatting
     startTime: managerBoostStatus.startTime ? 
       (typeof managerBoostStatus.startTime === 'string' ? 
         managerBoostStatus.startTime : 
@@ -81,8 +92,10 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         managerBoostStatus.endTime.toISOString()) : 
       undefined,
     timeRemaining: managerBoostStatus.timeRemaining,
-    packageId: managerBoostStatus.packageId,
-    packageName: managerBoostStatus.packageName,
+    // Only add these properties if they exist
+    ...(managerBoostStatus.packageId && { packageId: managerBoostStatus.packageId }),
+    ...(managerBoostStatus.packageName && { packageName: managerBoostStatus.packageName }),
+    ...(managerBoostStatus.profileId && { profileId: managerBoostStatus.profileId }),
   };
   
   // Adapt purchaseBoost to accept packageId string
@@ -92,12 +105,17 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       id: packageId,
       name: "Standard Boost",
       duration: "24:00:00",
-      price_ubx: 15, // Ensure price is included
+      price_ubx: 15,
       description: "Standard boost package",
       features: []
     };
     
-    return await purchaseLegacyBoost(mockPackage);
+    try {
+      return await purchaseLegacyBoost(mockPackage);
+    } catch (error) {
+      console.error("Failed to purchase boost:", error);
+      return false;
+    }
   };
   
   const value: BoostContextType = {

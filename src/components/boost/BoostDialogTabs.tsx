@@ -9,43 +9,30 @@ import BoostPackages from './dialog/BoostPackages';
 import HermesBoostInfo from './dialog/HermesBoostInfo';
 import BoostActivePackage from './dialog/BoostActivePackage';
 import { BoostStatus, BoostEligibility } from '@/types/boost';
+import { BoostDialogTabsProps } from './types';
 
-interface BoostDialogTabsProps {
-  isLoading: boolean;
-  boostStatus: BoostStatus;
-  eligibility: BoostEligibility;
-  hermesStatus?: any;
-  boostPackages: any[];
-  selectedPackage: string;
-  setSelectedPackage: (packageId: string) => void;
-  formatDuration: (duration: string) => string;
-  getBoostPrice: () => number;
-  onPurchase: () => Promise<boolean>;
-  onCancel: () => Promise<boolean>;
-  dailyBoostUsage: number;
-  dailyBoostLimit: number;
-  
-  // Add missing properties that are expected by the component
-  activeTab?: string;
-  setActiveTab?: (tab: string) => void;
-}
-
+// Update the component with the correct property names
 const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
-  isLoading,
+  activeTab: initialActiveTab,
+  setActiveTab: externalSetActiveTab,
+  loading: isLoading,
   boostStatus,
   eligibility,
-  hermesStatus = null,
+  hermesStatus,
   boostPackages,
   selectedPackage,
   setSelectedPackage,
-  formatDuration,
-  getBoostPrice,
-  onPurchase,
-  onCancel,
+  handleBoost: onPurchase,
+  handleCancel: onCancel,
   dailyBoostUsage,
   dailyBoostLimit,
-  activeTab: initialActiveTab,
-  setActiveTab: externalSetActiveTab
+  hermesBoostStatus,
+  formatBoostDuration,
+  getBoostPrice,
+  handlePurchase,
+  handleDialogClose,
+  handleCancel,
+  boostAnalytics
 }) => {
   const [internalActiveTab, setInternalActiveTab] = useState(boostStatus.isActive ? "active" : "packages");
   const [purchaseLoading, setPurchaseLoading] = useState(false);
@@ -55,68 +42,85 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   const activeTab = initialActiveTab || internalActiveTab;
   const setActiveTab = externalSetActiveTab || setInternalActiveTab;
   
-  // Ensure eligibility object has all needed properties
+  // Create compatible eligibility object using isEligible instead of eligible
   const compatibleEligibility: BoostEligibility = {
-    isEligible: eligibility.isEligible || eligibility.eligible || false,
-    eligible: eligibility.eligible || eligibility.isEligible || false,
-    reasons: eligibility.reasons || [],
+    isEligible: eligibility.isEligible !== undefined ? eligibility.isEligible : false,
+    reason: eligibility.reason,
+    reasons: eligibility.reasons,
     minimumProfileCompleteness: eligibility.minimumProfileCompleteness,
     missingFields: eligibility.missingFields,
     minRequiredBalance: eligibility.minRequiredBalance
   };
   
-  // Ensure BoostStatus object has proper types
+  // Ensure boostStatus has all required properties
   const compatibleStatus: BoostStatus = {
     ...boostStatus,
     progress: boostStatus.progress || 0
   };
   
-  // Ensure hermesStatus has required properties
-  const safeHermesStatus = hermesStatus ? {
-    position: hermesStatus.position || 0,
-    activeUsers: hermesStatus.activeUsers || 0,
-    estimatedVisibility: hermesStatus.estimatedVisibility || 0,
-    lastUpdateTime: hermesStatus.lastUpdateTime || new Date().toISOString(),
-  } : undefined;
+  // Use hermesBoostStatus if provided, otherwise use hermesStatus
+  const safeHermesStatus = hermesBoostStatus || hermesStatus || {
+    position: 0,
+    activeUsers: 0,
+    estimatedVisibility: 0,
+    lastUpdateTime: new Date().toISOString(),
+  };
   
-  // Handle purchase button click
-  const handlePurchase = async () => {
+  // Use the provided purchase function or create a wrapper
+  const handlePurchaseWrapper = async () => {
+    if (handlePurchase) {
+      return handlePurchase();
+    }
+    
     if (!selectedPackage) return;
     
     setPurchaseLoading(true);
     try {
-      // Convert void return to boolean for expected type
       await onPurchase();
-      return true;
+      return;
     } catch (error) {
       console.error("Purchase error:", error);
-      return false;
     } finally {
       setPurchaseLoading(false);
     }
   };
   
-  // Handle cancel button click
-  const handleCancel = async () => {
+  // Use the provided cancel function or create a wrapper
+  const handleCancelWrapper = async () => {
+    if (handleCancel) {
+      return handleCancel();
+    }
+    
     setCancelLoading(true);
     try {
-      // Convert void return to boolean for expected type
       await onCancel();
-      return true;
     } catch (error) {
       console.error("Cancel error:", error);
-      return false;
     } finally {
       setCancelLoading(false);
     }
   };
   
+  // Format duration if not provided externally
+  const formatDuration = formatBoostDuration || ((duration: string) => {
+    const [hours, minutes] = duration.split(":").map(Number);
+    if (hours >= 24) {
+      const days = Math.floor(hours / 24);
+      return `${days} day${days !== 1 ? 's' : ''}`;
+    }
+    return `${hours} hour${hours !== 1 ? 's' : ''}`;
+  });
+  
+  // Calculate boost price if not provided externally
+  const calculateBoostPrice = getBoostPrice || (() => {
+    const pkg = boostPackages.find(p => p.id === selectedPackage);
+    return pkg ? pkg.price_ubx : 0;
+  });
+  
   // Set active tab when boost status changes
   React.useEffect(() => {
     if (boostStatus.isActive) {
       setActiveTab("active");
-    } else {
-      setActiveTab("packages");
     }
   }, [boostStatus.isActive, setActiveTab]);
   
@@ -156,18 +160,18 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
       
       <TabsContent value="packages" className="mt-6">
         <BoostPackages
-          boostPackages={boostPackages}
-          selectedPackage={selectedPackage}
+          packages={boostPackages}
+          selectedId={selectedPackage}
+          onSelect={setSelectedPackage}
           formatDuration={formatDuration}
-          setSelectedPackage={setSelectedPackage}
-          dailyBoostUsage={dailyBoostUsage}
-          dailyBoostLimit={dailyBoostLimit}
+          dailyUsage={dailyBoostUsage}
+          dailyLimit={dailyBoostLimit}
           disabled={!compatibleEligibility.isEligible || isLoading}
         />
         
         <div className="flex justify-end mt-6">
           <Button
-            onClick={handlePurchase}
+            onClick={handlePurchaseWrapper}
             disabled={
               !compatibleEligibility.isEligible || 
               !selectedPackage || 
@@ -184,14 +188,14 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
             ) : (
               <>
                 <Zap className="mr-2 h-4 w-4" />
-                Apply Boost ({getBoostPrice()} UBX)
+                Apply Boost ({calculateBoostPrice()} UBX)
               </>
             )}
           </Button>
         </div>
 
         <div className="mt-8">
-          <HermesBoostInfo status={safeHermesStatus} />
+          <HermesBoostInfo hermesStatus={safeHermesStatus} />
         </div>
       </TabsContent>
       
@@ -200,13 +204,12 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
           <div className="space-y-6">
             <BoostActivePackage 
               boostStatus={compatibleStatus}
-              hermesData={safeHermesStatus}
             />
             
             <div className="flex justify-end mt-6">
               <Button 
                 variant="destructive" 
-                onClick={handleCancel}
+                onClick={handleCancelWrapper}
                 disabled={cancelLoading}
               >
                 {cancelLoading ? (

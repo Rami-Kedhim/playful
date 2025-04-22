@@ -6,12 +6,31 @@ import { BarChart, LineChart, TrendingUp, Users, Zap } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { BoostAnalytics } from "@/types/boost";
 
-interface AnalyticsData extends Partial<BoostAnalytics> {
-  impressions?: number;
-  clicks?: number;
+// Define our own AnalyticsData interface instead of extending BoostAnalytics
+interface AnalyticsData {
+  impressions?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  clicks?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
   engagementRate?: number;
   conversionRate?: number;
   boostEfficiency?: number;
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  viewsIncrease?: number;
 }
 
 interface BoostAnalyticsCardProps {

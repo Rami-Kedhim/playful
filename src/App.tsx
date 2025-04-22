@@ -1,4 +1,3 @@
-
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -10,7 +9,7 @@ import HomePage from "./pages/HomePage";
 import Wallet from "./pages/Wallet";
 import UpdatedWallet from "./pages/UpdatedWallet";
 import PulseBoost from "./pages/PulseBoost";
-import LiveCamPage from "./pages/LiveCamPage"; // Fixed casing
+import Livecam from "./pages/Livecam";
 
 const createStubContextFile = () => {
   const StubProvider = ({ children }: { children: React.ReactNode }) => <>{children}</>;
@@ -84,7 +83,7 @@ function App() {
                                         <Route path="/ai-chat" element={<AIChat />} />
                                         <Route path="/creator-dashboard" element={<CreatorDashboard />} />
                                         <Route path="/escort/:id" element={<EscortProfile />} />
-                                        <Route path="/livecams" element={<LiveCamPage />} />
+                                        <Route path="/livecams" element={<Livecam />} />
                                         <Route path="/livecam/:id" element={<LivecamDetail />} />
                                         <Route path="/ai-models" element={<AIModelPage />} />
                                         <Route path="/ai-model/:id" element={<AIModelDetail />} />

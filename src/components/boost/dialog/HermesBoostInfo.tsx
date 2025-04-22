@@ -1,76 +1,63 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { InfoCircle, TrendingUp, Users, Zap } from 'lucide-react';
-import { format } from 'date-fns';
+import { Info } from 'lucide-react'; // Change InfoCircle to Info
 import { HermesBoostInfoProps } from '../types';
 
-const HermesBoostInfo: React.FC<HermesBoostInfoProps> = ({ hermesStatus }) => {
-  if (!hermesStatus) return null;
-
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), 'MMM d, h:mm a');
-    } catch (e) {
-      return dateString;
-    }
-  };
+const HermesBoostInfo: React.FC<HermesBoostInfoProps> = ({ 
+  hermesStatus,
+  status,
+  hermesData
+}) => {
+  // Use any provided data source, starting with hermesStatus
+  const data = hermesStatus || status || hermesData;
+  
+  if (!data) {
+    return (
+      <Card className="border-dashed">
+        <CardContent className="p-4 space-y-2">
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-16 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card>
-      <CardContent className="p-4 space-y-4">
+    <Card className="border-dashed">
+      <CardContent className="p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium">Hermes Boost Status</h3>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <InfoCircle className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="text-xs max-w-[200px]">
-                  These metrics show how your profile is performing in the Hermes system.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <Info className="h-4 w-4" />
+            <span>Hermes® Boost Info</span>
+          </div>
+          <div className="text-sm">
+            Last updated: <span className="font-medium">just now</span>
+          </div>
         </div>
-
-        <div className="space-y-3">
-          <div>
-            <div className="flex items-center justify-between text-sm mb-1">
-              <span className="text-muted-foreground flex items-center">
-                <TrendingUp className="h-3.5 w-3.5 mr-1.5" />
-                Visibility Score
-              </span>
-              <span className="font-medium">{hermesStatus.estimatedVisibility}%</span>
-            </div>
-            <Progress value={hermesStatus.estimatedVisibility || 0} className="h-1.5" />
+        
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <div className="text-sm text-muted-foreground">Position</div>
+            <div className="text-xl font-semibold">#{data.position}</div>
+            <Progress value={30} className="h-1" />
           </div>
-
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground flex items-center">
-              <Users className="h-3.5 w-3.5 mr-1.5" />
-              Active Profiles
-            </span>
-            <span>{hermesStatus.activeUsers}</span>
+          
+          <div className="space-y-1">
+            <div className="text-sm text-muted-foreground">Active Users</div>
+            <div className="text-xl font-semibold">{data.activeUsers}</div>
+            <Progress value={65} className="h-1" />
           </div>
-
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground flex items-center">
-              <Zap className="h-3.5 w-3.5 mr-1.5" />
-              Queue Position
-            </span>
-            <span>{hermesStatus.position}</span>
+        </div>
+        
+        <div className="space-y-1">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Est. Visibility</span>
+            <span>{data.estimatedVisibility}%</span>
           </div>
-
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground flex items-center">
-              Last Updated
-            </span>
-            <span>{formatDate(hermesStatus.lastUpdateTime)}</span>
-          </div>
+          <Progress value={data.estimatedVisibility} className="h-2" />
         </div>
       </CardContent>
     </Card>

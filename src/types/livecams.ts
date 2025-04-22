@@ -1,8 +1,7 @@
-
 export interface LivecamModel {
   id: string;
   displayName?: string;
-  name: string; // Adding this to ensure it's always available
+  name: string; // Required property
   imageUrl?: string;
   thumbnailUrl: string;
   category?: string;
@@ -11,7 +10,7 @@ export interface LivecamModel {
   streamUrl?: string;
   price?: number;
   
-  // Adding all required properties
+  // Adding properties that were missing based on error messages
   username?: string;
   previewVideoUrl?: string;
   isPopular?: boolean;
@@ -27,10 +26,9 @@ export interface LivecamModel {
   language?: string;
 }
 
-// Add missing export to fix import issues
 export interface Livecam {
   id: string;
-  name: string;
+  name: string; // Required property
   username?: string;
   thumbnailUrl: string;
   isLive: boolean;

@@ -6,7 +6,7 @@ export interface BoostPackage {
   price_ubx: number;
   description?: string;
   features?: string[];
-  price?: number; // Added to ensure compatibility
+  price?: number;
 }
 
 export interface BoostStatus {
@@ -21,10 +21,12 @@ export interface BoostStatus {
   boostPackage?: BoostPackage;
   profileId?: string;
   timeRemaining?: string;
+  activeBoostId?: string; // Add for cancelBoost
 }
 
 export interface BoostEligibility {
   isEligible: boolean;
+  eligible?: boolean; // For backward compatibility
   reason?: string;
   reasons?: string[];
   minimumProfileCompleteness?: number;

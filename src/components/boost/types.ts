@@ -11,6 +11,23 @@ export interface BoostDialogContainerProps {
   profileId: string;
   onSuccess?: () => Promise<boolean>;
   buttonProps?: BoostButtonProps;
+  open?: boolean;
+  setOpen?: (open: boolean) => void;
+  buttonText?: string;
+  buttonVariant?: string;
+  buttonSize?: string;
+}
+
+export interface HermesBoostStatus {
+  position: number;
+  activeUsers: number;
+  estimatedVisibility: number;
+  lastUpdateTime: string;
+  isActive?: boolean;
+  active?: boolean;
+  boostScore?: number;
+  effectivenessScore?: number;
+  timeRemaining?: number;
 }
 
 export interface BoostDialogTabsProps {
@@ -27,6 +44,14 @@ export interface BoostDialogTabsProps {
   dailyBoostUsage: number;
   dailyBoostLimit: number;
   hermesStatus: any;
+  
+  // Add missing properties
+  hermesBoostStatus?: HermesBoostStatus;
+  formatBoostDuration?: (duration: string) => string;
+  getBoostPrice?: () => number;
+  handlePurchase?: () => Promise<void>;
+  handleDialogClose?: () => void;
+  boostAnalytics?: any;
 }
 
 export interface BoostPackagesProps {
@@ -37,6 +62,9 @@ export interface BoostPackagesProps {
   dailyUsage: number;
   dailyLimit: number;
   disabled?: boolean;
+  boostPackages?: BoostPackage[];
+  selectedPackage?: string;
+  setSelectedPackage?: (packageId: string) => void;
 }
 
 export interface HermesBoostInfoProps {
@@ -46,8 +74,26 @@ export interface HermesBoostInfoProps {
     estimatedVisibility: number;
     lastUpdateTime: string;
   };
+  status?: {
+    position: any;
+    activeUsers: any;
+    estimatedVisibility: any;
+    lastUpdateTime: any;
+  };
+  hermesData?: {
+    position: any;
+    activeUsers: any;
+    estimatedVisibility: any;
+    lastUpdateTime: any;
+  };
 }
 
 export interface BoostActivePackageProps {
   boostStatus: BoostStatus;
+  hermesData?: {
+    position: any;
+    activeUsers: any;
+    estimatedVisibility: any;
+    lastUpdateTime: any;
+  };
 }

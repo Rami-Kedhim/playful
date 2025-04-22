@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { useBoostAnalytics } from './useBoostAnalytics';
@@ -100,7 +99,7 @@ export const useBoostOperations = (
     if (setIsLoading) setIsLoading(true);
     
     try {
-      const result = await boostService.cancelBoost(profileId, boostStatus.activeBoostId);
+      const result = await boostService.cancelBoost(profileId);
       
       if (!result.success) {
         toast({

@@ -94,7 +94,8 @@ const BoostProfileDialog = ({
     return analytics;
   };
 
-  const handlePurchase = async () => {
+  // Update this function to return void as expected in the props
+  const handlePurchase = async (): Promise<void> => {
     if (!selectedPackage) {
       toast({
         title: "No package selected",
@@ -123,12 +124,12 @@ const BoostProfileDialog = ({
     }
   };
 
-  const handleCancel = async () => {
+  // Update this function to return void as expected in the props
+  const handleCancel = async (): Promise<void> => {
     const success = await cancelBoost();
     if (success) {
       if (onSuccess) onSuccess();
     }
-    return success;
   };
 
   const handleCloseDialog = () => {
@@ -147,17 +148,18 @@ const BoostProfileDialog = ({
           boostStatus={boostStatus}
           eligibility={eligibility}
           boostPackages={boostPackages}
-          selectedPackage={selectedPackage}
+          selectedPackage={selectedPackage || ""}
           setSelectedPackage={handlePackageSelect}
-          handlePurchase={handlePurchase}
+          handleBoost={handlePurchase}
           handleCancel={handleCancel}
           handleDialogClose={handleCloseDialog}
-          boostAnalytics={boostAnalytics}
-          formatBoostDuration={formatBoostDurationAdapter}
-          getBoostPrice={getBoostPrice}
+          hermesStatus={hermesBoostStatus}
           loading={loading}
           dailyBoostUsage={dailyBoostUsage}
           dailyBoostLimit={dailyBoostLimit}
+          formatBoostDuration={formatBoostDurationAdapter}
+          getBoostPrice={getBoostPrice}
+          boostAnalytics={boostAnalytics}
           hermesBoostStatus={hermesBoostStatus}
         />
         

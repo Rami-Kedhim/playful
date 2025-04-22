@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -5,7 +6,7 @@ import { Link } from "react-router-dom";
 import { Users, Globe } from "lucide-react";
 import LivecamBoostControls from './LivecamBoostControls';
 import LivecamBoostBadge from './LivecamBoostBadge';
-import { LivecamModel, Livecam } from '@/types/livecam';
+import { LivecamModel } from '@/types/livecams';
 
 interface LivecamCardProps {
   model: LivecamModel;
@@ -22,24 +23,24 @@ const LivecamCard = ({
   onBoost = () => false,
   onCancelBoost = () => false
 }: LivecamCardProps) => {
-  // Convert to boost interface format for the boost controls
-  const livecam: Livecam = {
+  // Convert to compatible format for LivecamBoostControls
+  const livecamData = {
     id: model.id,
-    name: model.displayName,
+    name: model.name || model.displayName || "",
     thumbnailUrl: model.thumbnailUrl,
-    isLive: model.isLive,
+    isLive: model.isLive || false,
     viewerCount: model.viewerCount || 0,
     username: model.username,
-    tags: model.categories
+    tags: model.tags || model.categories
   };
 
   return (
     <Card className="overflow-hidden group">
-      <Link to={`/livecams/${model.username}`} className="relative block">
+      <Link to={`/livecams/${model.username || model.id}`} className="relative block">
         <div className="relative aspect-video overflow-hidden bg-muted">
           <img 
             src={model.thumbnailUrl || model.imageUrl} 
-            alt={model.displayName} 
+            alt={model.name || model.displayName} 
             className="object-cover w-full h-full transition-transform group-hover:scale-105"
           />
           
@@ -66,13 +67,13 @@ const LivecamCard = ({
       <CardContent className="p-4">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="font-medium truncate">{model.displayName}</h3>
+            <h3 className="font-medium truncate">{model.name || model.displayName}</h3>
             <p className="text-sm text-muted-foreground truncate">{model.username}</p>
           </div>
           
           {showBoostControls && (
             <LivecamBoostControls 
-              livecam={livecam}
+              livecam={livecamData}
               isBoosted={isBoosted}
               onBoost={onBoost}
               onCancel={onCancelBoost}
@@ -88,16 +89,16 @@ const LivecamCard = ({
             </div>
           )}
           
-          {model.categories && model.categories.length > 0 && (
+          {(model.categories?.length > 0 || model.tags?.length > 0) && (
             <div className="flex flex-wrap gap-1 mt-2">
-              {model.categories.slice(0, 2).map(category => (
+              {(model.categories || model.tags || []).slice(0, 2).map(category => (
                 <Badge key={category} variant="outline" className="text-xs">
                   {category}
                 </Badge>
               ))}
-              {model.categories.length > 2 && (
+              {(model.categories?.length || model.tags?.length || 0) > 2 && (
                 <Badge variant="outline" className="text-xs">
-                  +{model.categories.length - 2}
+                  +{(model.categories?.length || model.tags?.length || 0) - 2}
                 </Badge>
               )}
             </div>
