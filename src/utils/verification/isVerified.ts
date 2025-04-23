@@ -41,10 +41,7 @@ export const hasSubmittedVerification = (user: User | null): boolean => {
 export const getUserVerificationLevel = (user: User | null): string => {
   if (!user) return 'none';
   
-  // Check if they have verification_level in their profile
-  if (user.verification_level) return user.verification_level;
-  
-  // Check user_metadata for verification level
+  // Check if they have verification_level in their user_metadata
   if (user.user_metadata?.verification_level) return user.user_metadata.verification_level;
   
   // If verified but no specific level, assume basic

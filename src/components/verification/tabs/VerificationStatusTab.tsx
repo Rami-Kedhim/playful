@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Clock, AlertTriangle, ShieldCheck } from 'lucide-react';
-import { VerificationBadge } from '@/components/verification/VerificationBadge';
+import VerificationBadge from '@/components/verification/VerificationBadge';
 
 interface VerificationStatusTabProps {
   userId: string;

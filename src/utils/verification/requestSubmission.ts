@@ -61,15 +61,18 @@ export const submitVerificationRequest = async (
     if (backImage) formData.append('backImage', backImage);
     formData.append('selfieImage', selfieImage);
     
-    // Get current domain for edge function URL
-    const supabaseUrl = supabase.supabaseUrl;
+    // Access the Supabase URL through environment variables instead
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    
+    // Get token from local storage or current session
+    const accessToken = localStorage.getItem('supabase.auth.token') || '';
     
     // Call the process-verification edge function
     const response = await fetch(`${supabaseUrl}/functions/v1/process-verification`, {
       method: 'POST',
       body: formData,
       headers: {
-        'Authorization': `Bearer ${supabase.auth.session()?.access_token || localStorage.getItem('supabase.auth.token') || ''}`
+        'Authorization': `Bearer ${accessToken}`
       }
     });
     
