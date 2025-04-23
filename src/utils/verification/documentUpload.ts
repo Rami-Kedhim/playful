@@ -1,30 +1,44 @@
 
+import { supabase } from '@/integrations/supabase/client';
+
 /**
- * Upload a verification document to storage
- * @param file The file to upload
- * @param documentType The type of document 
- * @param userId The user ID
- * @returns The URL of the uploaded file or null if upload failed
+ * Upload a document to Supabase storage
+ * @param file File to upload
+ * @param filePrefix Prefix for the file name
+ * @param userId User ID
+ * @returns URL to the uploaded file
  */
 export const uploadVerificationDocument = async (
   file: File,
-  documentType: string,
+  filePrefix: string,
   userId: string
-): Promise<string | null> => {
-  // In a real app, this would upload the file to storage
-  console.log(`Uploading ${documentType} document for user ${userId}`);
-  
+): Promise<string> => {
   try {
-    // Simulate file upload
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${filePrefix}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+    const filePath = `${userId}/${fileName}`;
     
-    // Return mock URL
-    return `https://example.com/verification/${userId}/${documentType}-${Date.now()}.jpg`;
+    const { data, error } = await supabase.storage
+      .from('verification-documents')
+      .upload(filePath, file);
+    
+    if (error) throw error;
+    
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('verification-documents')
+      .getPublicUrl(filePath);
+    
+    return urlData.publicUrl;
   } catch (error) {
-    console.error('Error uploading document:', error);
-    return null;
+    console.error('Error uploading verification document:', error);
+    throw new Error('Failed to upload document');
   }
 };
 
-// Export additional functions
-export { uploadVerificationDocuments, getDocumentUploadStatus } from './uploadVerificationDocuments';
+export const getFileTypeFromMimeType = (mimeType: string): string => {
+  if (mimeType.startsWith('image/')) return 'image';
+  if (mimeType.startsWith('application/pdf')) return 'pdf';
+  if (mimeType.startsWith('application/msword') || mimeType.includes('officedocument.wordprocessingml')) return 'doc';
+  return 'other';
+};

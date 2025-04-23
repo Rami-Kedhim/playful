@@ -74,7 +74,7 @@ serve(async (req) => {
     const token = authHeader.replace('Bearer ', '');
     
     // Create Supabase admin client for storage operations
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://haffqtqpbnaviefewfmn.supabase.co';
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     
@@ -94,8 +94,11 @@ serve(async (req) => {
     }
     
     // Parse request body
-    const requestData = await req.json();
-    const { documentType, frontImage, backImage, selfieImage } = requestData;
+    const formData = await req.formData();
+    const documentType = formData.get('documentType');
+    const frontImage = formData.get('frontImage');
+    const backImage = formData.get('backImage');
+    const selfieImage = formData.get('selfieImage');
     
     if (!documentType || !frontImage || !selfieImage) {
       return new Response(
@@ -112,7 +115,7 @@ serve(async (req) => {
       supabaseAdmin, 
       user.id, 
       documentType, 
-      frontImage, 
+      await frontImage.arrayBuffer(), 
       'front'
     );
     if (frontDocument) documents.push(frontDocument);
@@ -123,7 +126,7 @@ serve(async (req) => {
         supabaseAdmin, 
         user.id, 
         documentType, 
-        backImage, 
+        await backImage.arrayBuffer(), 
         'back'
       );
       if (backDocument) documents.push(backDocument);
@@ -134,7 +137,7 @@ serve(async (req) => {
       supabaseAdmin, 
       user.id, 
       'selfie', 
-      selfieImage, 
+      await selfieImage.arrayBuffer(), 
       'selfie'
     );
     if (selfieDocument) documents.push(selfieDocument);
@@ -156,13 +159,18 @@ serve(async (req) => {
     }
     
     // Update user profile to indicate verification was submitted
-    await supabaseAdmin
-      .from('profiles')
-      .update({ 
-        verification_submitted: true,
-        last_verification_request: new Date().toISOString()
-      })
-      .eq('id', user.id);
+    await supabaseAdmin.auth.admin.updateUserById(
+      user.id,
+      {
+        user_metadata: { 
+          verification_submitted: true,
+          verification_documents: {
+            submittedAt: new Date().toISOString(),
+            documentUrls: documents.map(doc => doc.fileUrl)
+          }
+        }
+      }
+    );
     
     return new Response(
       JSON.stringify({ 

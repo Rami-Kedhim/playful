@@ -36,15 +36,31 @@ export const submitVerificationRequest = async (
   selfieImage: File
 ): Promise<{ success: boolean; message: string; requestId?: string }> => {
   try {
-    const [frontUrl, backUrl, selfieUrl] = await Promise.all([
-      uploadVerificationDocument(frontImage, `${documentType}_front`, userId),
-      backImage ? uploadVerificationDocument(backImage, `${documentType}_back`, userId) : Promise.resolve(null),
-      uploadVerificationDocument(selfieImage, 'selfie', userId),
-    ]);
+    const formData = new FormData();
+    formData.append('documentType', documentType);
+    formData.append('frontImage', frontImage);
+    if (backImage) formData.append('backImage', backImage);
+    formData.append('selfieImage', selfieImage);
+    
+    // Call the process-verification edge function
+    const response = await fetch(`https://haffqtqpbnaviefewfmn.supabase.co/functions/v1/process-verification`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+      }
+    });
+    
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to submit verification request');
+    }
+    
     return {
       success: true,
-      message: 'Verification request submitted successfully',
-      requestId: `vr-${Date.now()}`
+      message: 'Verification submitted successfully',
+      requestId: result.verificationId
     };
   } catch (error) {
     console.error('Error submitting verification request:', error);
@@ -74,4 +90,3 @@ export const submitVerificationForm = async (
     return { success: false, message: 'Failed to submit verification request' };
   }
 };
-

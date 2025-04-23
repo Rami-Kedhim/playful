@@ -1,69 +1,86 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Shield, ShieldCheck, ShieldOff } from 'lucide-react';
-
-type VerificationLevel = 'none' | 'basic' | 'verified' | 'premium';
+import { Shield, ShieldCheck, ShieldAlert } from 'lucide-react';
 
 interface VerificationBadgeProps {
-  level: VerificationLevel;
+  level: 'none' | 'basic' | 'enhanced' | 'premium' | string;
   size?: 'sm' | 'md' | 'lg';
-  showIcon?: boolean;
   showLabel?: boolean;
-  className?: string;
 }
 
-export const VerificationBadge: React.FC<VerificationBadgeProps> = ({
-  level,
-  size = 'md',
-  showIcon = true,
-  showLabel = true,
-  className = '',
+export const VerificationBadge: React.FC<VerificationBadgeProps> = ({ 
+  level, 
+  size = 'sm',
+  showLabel = true
 }) => {
-  if (level === 'none') return null;
-
-  let icon = null;
-  let label = '';
-  let variant: 'default' | 'secondary' | 'outline' | 'destructive' = 'default';
-  let color = '';
-
-  switch (level) {
-    case 'basic':
-      icon = <Shield className="h-3.5 w-3.5 mr-1" />;
-      label = 'Basic';
-      variant = 'secondary';
-      break;
-    case 'verified':
-      icon = <ShieldCheck className="h-3.5 w-3.5 mr-1" />;
-      label = 'Verified';
-      variant = 'default';
-      color = 'bg-green-600 hover:bg-green-700';
-      break;
-    case 'premium':
-      icon = <ShieldCheck className="h-3.5 w-3.5 mr-1" />;
-      label = 'Premium';
-      variant = 'default';
-      color = 'bg-purple-600 hover:bg-purple-700';
-      break;
-    default:
-      icon = <ShieldOff className="h-3.5 w-3.5 mr-1" />;
-      label = 'Unverified';
-      variant = 'outline';
-  }
-
-  const sizeClasses = size === 'sm' 
-    ? 'text-xs px-1.5 py-0' 
-    : size === 'lg' 
-      ? 'text-base px-3 py-1' 
-      : '';
-
+  // Map string levels to our standard levels
+  let standardLevel = level;
+  if (level === 'verified') standardLevel = 'basic';
+  if (!level || level === 'unverified') standardLevel = 'none';
+  
+  // Determine icon and text based on level
+  const getIcon = () => {
+    switch (standardLevel) {
+      case 'none':
+        return <ShieldAlert className={iconSizes[size]} />;
+      case 'basic':
+        return <Shield className={iconSizes[size]} />;
+      case 'enhanced':
+      case 'premium':
+        return <ShieldCheck className={iconSizes[size]} />;
+      default:
+        return <Shield className={iconSizes[size]} />;
+    }
+  };
+  
+  const getText = () => {
+    switch (standardLevel) {
+      case 'none':
+        return 'Not Verified';
+      case 'basic':
+        return 'Verified';
+      case 'enhanced':
+        return 'Enhanced';
+      case 'premium':
+        return 'Premium';
+      default:
+        return 'Unverified';
+    }
+  };
+  
+  const getVariant = () => {
+    switch (standardLevel) {
+      case 'none':
+        return 'outline';
+      case 'basic':
+        return 'success';
+      case 'enhanced':
+        return 'success';
+      case 'premium':
+        return 'success';
+      default:
+        return 'outline';
+    }
+  };
+  
+  // Size maps
+  const iconSizes: Record<string, string> = {
+    'sm': 'h-3 w-3',
+    'md': 'h-4 w-4',
+    'lg': 'h-5 w-5'
+  };
+  
+  const containerSizes: Record<string, string> = {
+    'sm': 'text-xs',
+    'md': 'text-sm',
+    'lg': 'text-base'
+  };
+  
   return (
-    <Badge
-      variant={variant}
-      className={`flex items-center ${sizeClasses} ${color} ${className}`}
-    >
-      {showIcon && icon}
-      {showLabel && <span>{label}</span>}
+    <Badge variant={getVariant()} className={`gap-1 font-normal ${containerSizes[size]}`}>
+      {getIcon()}
+      {showLabel && <span>{getText()}</span>}
     </Badge>
   );
 };

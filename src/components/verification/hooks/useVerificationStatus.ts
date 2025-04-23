@@ -40,7 +40,10 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
     setError(null);
     
     try {
-      // Use eq on both legacy and current user id fields
+      // Check user metadata for verification status
+      const hasSubmittedVerification = user.user_metadata?.verification_submitted === true;
+      
+      // Now also check the verification_requests table
       const { data, error } = await supabase
         .from('verification_requests')
         .select('*')
@@ -49,11 +52,24 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
         .limit(1)
         .single();
       
-      if (error) {
+      if (error && error.code !== 'PGRST116') { // Not found is acceptable
         throw new Error(error.message);
       }
       
-      setVerification(data);
+      // If we have data from the table, use that; otherwise use the metadata
+      if (data) {
+        setVerification(data);
+      } else if (hasSubmittedVerification) {
+        // Create a synthetic verification request from metadata
+        setVerification({
+          id: 'metadata-' + Math.random().toString(36).substring(2, 9),
+          profile_id: user.id,
+          status: 'pending',
+          requested_level: 'basic',
+          documents: user.user_metadata?.verification_documents || [],
+          created_at: user.user_metadata?.verification_documents?.submittedAt || new Date().toISOString()
+        });
+      }
     } catch (err: any) {
       setError(err.message);
       console.error("Error fetching verification status:", err);
