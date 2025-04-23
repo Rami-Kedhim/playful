@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth';
 import { canSubmitVerification, submitVerificationRequest } from '@/utils/verification';
 import { DocumentType } from '@/types/verification';
 import DocumentTypeSelect from './form/DocumentTypeSelect';

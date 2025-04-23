@@ -9,7 +9,7 @@ import {
   VerificationDocument,
   DocumentType
 } from '@/types/verification';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth';
 import { useToast } from '@/components/ui/use-toast';
 
 interface UseVerificationStatusResult {
