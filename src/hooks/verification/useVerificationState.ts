@@ -29,7 +29,7 @@ export const useVerificationState = (): VerificationStateResult => {
 
       try {
         const result = await checkVerificationStatus(user.id);
-        // Cast result.status to VerificationStatus
+        // Cast result.status to VerificationStatus since it comes from an API
         setStatus(result.status as VerificationStatus);
       } catch (err: any) {
         setError(err.message);
