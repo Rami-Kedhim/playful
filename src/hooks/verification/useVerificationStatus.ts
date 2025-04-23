@@ -43,9 +43,10 @@ export const useVerificationStatus = () => {
     setError(null);
     
     try {
-      // Update the user profile with verification data
+      // Update the user profile with verification data - using correct property names
       const success = await updateUserProfile({
-        verificationDocuments: {
+        verification_submitted: true,
+        verification_documents: {
           documentUrl,
           selfieUrl,
           submittedAt: new Date().toISOString()
