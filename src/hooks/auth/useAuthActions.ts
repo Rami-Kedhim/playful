@@ -1,36 +1,42 @@
 
-import { useCallback } from 'react';
-import { useAuth } from './useAuthContext';
+import { useAuth } from './useAuth.tsx';
 
 /**
- * Hook to handle auth-related actions
+ * A hook that provides authentication-related actions
  */
 export const useAuthActions = () => {
   const auth = useAuth();
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = async (email: string, password: string) => {
     return await auth.login(email, password);
-  }, [auth]);
+  };
 
-  const logout = useCallback(async () => {
+  const logout = async () => {
     return await auth.logout();
-  }, [auth]);
+  };
 
-  const updateProfile = useCallback(async (profileData: any) => {
-    return await auth.updateUserProfile(profileData);
-  }, [auth]);
+  const updateProfile = async (userData: any) => {
+    return await auth.updateUserProfile(userData);
+  };
   
-  // Implementation for refreshProfile
-  const refreshProfile = useCallback(async () => {
+  const refreshProfile = async () => {
     await auth.refreshProfile();
-  }, [auth]);
+  };
+  
+  const sendPasswordResetEmail = async (email: string) => {
+    if (auth.sendPasswordResetEmail) {
+      return await auth.sendPasswordResetEmail(email);
+    }
+    return { success: false, error: 'Function not implemented' };
+  };
 
   return {
     login,
     logout,
     updateProfile,
     refreshProfile,
-    isAuthenticated: !!auth.user,
-    userId: auth.user?.id
+    sendPasswordResetEmail
   };
 };
+
+export default useAuthActions;

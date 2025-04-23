@@ -1,3 +1,4 @@
+
 import React, { createContext, ReactNode, useEffect, useState } from 'react';
 import { BoostPackage, BoostStatus, BoostEligibility } from '@/types/boost';
 import { useAuth } from '@/hooks/auth/useAuth.tsx';

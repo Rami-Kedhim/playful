@@ -1,6 +1,6 @@
 
 import { useMemo } from 'react';
-import { useAuth } from './useAuthContext';
+import { useAuth } from './useAuth.tsx';
 
 export const useRole = () => {
   const { user, checkRole } = useAuth();
