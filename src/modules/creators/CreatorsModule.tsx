@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { CreatorsNeuralService } from '@/services/neural/modules/CreatorsNeuralService';
 import { CreatorProvider } from './providers/CreatorProvider';
 
@@ -46,4 +46,3 @@ const CreatorsModule: React.FC = () => {
 };
 
 export default CreatorsModule;
-
