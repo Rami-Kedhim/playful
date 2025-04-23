@@ -42,6 +42,7 @@ const Auth = () => {
 
   const handleRegister = async (email: string, password: string, username: string) => {
     try {
+      // Using register function which should now be properly defined
       const result = await register(email, password, username);
       
       if (result.success) {

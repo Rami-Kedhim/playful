@@ -25,7 +25,7 @@ export const useAuthState = () => {
   }, []);
 
   return {
-    isAdmin: isAdmin(user),
-    isCreator: isCreator(user),
+    isAdmin: user ? isAdmin(user as User) : false,
+    isCreator: user ? isCreator(user as User) : false,
   };
 }

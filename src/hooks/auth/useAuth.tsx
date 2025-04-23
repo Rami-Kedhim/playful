@@ -24,6 +24,8 @@ interface Profile {
   is_verified?: boolean;
   username?: string;
   is_boosted?: boolean;
+  ubx_balance?: number;
+  ubxBalance?: number;
 }
 
 export interface AuthContextType {
@@ -31,13 +33,15 @@ export interface AuthContextType {
   profile: Profile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{success: boolean, error?: string}>;
   logout: () => Promise<void>;
   signOut: () => Promise<void>;
   checkRole: (role: string) => boolean;
   updateUserProfile: (userData: Partial<User>) => Promise<boolean>;
   refreshProfile: () => Promise<void>;
   sendPasswordResetEmail?: (email: string) => Promise<{ success: boolean; error?: string }>;
+  register: (email: string, password: string, username?: string) => Promise<{success: boolean, error?: string}>;
+  error?: string | null;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -46,6 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Simulate loading auth state
@@ -78,6 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setProfile(null);
       } catch (error) {
         console.error("Auth loading error:", error);
+        setError("Failed to load authentication state");
       } finally {
         setIsLoading(false);
       }
@@ -88,6 +94,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
+    setError(null);
     try {
       // Mock login for development
       const mockUser = {
@@ -109,9 +116,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       setUser(mockUser);
       setProfile(mockProfile);
-    } catch (error) {
+      return { success: true };
+    } catch (error: any) {
       console.error("Login error:", error);
-      throw error;
+      setError(error.message || "Failed to login");
+      return { success: false, error: error.message || "Failed to login" };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const register = async (email: string, password: string, username?: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Mock registration
+      const mockUser = {
+        id: 'user-new',
+        email,
+        name: username || email.split('@')[0],
+        username: username || email.split('@')[0],
+        avatarUrl: 'https://i.pravatar.cc/150?u=new',
+        profileImageUrl: 'https://i.pravatar.cc/150?u=new',
+        roles: ['user'],
+        ubxBalance: 500
+      };
+      
+      const mockProfile = {
+        subscription_tier: 'free',
+        userId: 'user-new',
+        is_verified: false
+      };
+      
+      setUser(mockUser);
+      setProfile(mockProfile);
+      return { success: true };
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      setError(error.message || "Failed to register");
+      return { success: false, error: error.message || "Failed to register" };
     } finally {
       setIsLoading(false);
     }
@@ -123,8 +166,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Mock logout
       setUser(null);
       setProfile(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Logout error:", error);
+      setError(error.message || "Failed to logout");
       throw error;
     } finally {
       setIsLoading(false);
@@ -176,6 +220,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // In a real app, you would fetch the updated profile from the server
     } catch (error) {
       console.error("Error refreshing profile:", error);
+      setError("Failed to refresh profile");
     } finally {
       setIsLoading(false);
     }
@@ -196,10 +241,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       login,
       logout,
       signOut,
+      register,
       checkRole,
       updateUserProfile,
       refreshProfile,
-      sendPasswordResetEmail
+      sendPasswordResetEmail,
+      error
     }}>
       {children}
     </AuthContext.Provider>
