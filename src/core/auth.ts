@@ -1,9 +1,9 @@
 
 // Authentication and user utilities
 
-import { useAuth } from '@/hooks/auth/useAuthContext';
+import { useAuth } from '@/hooks/auth';
 
-// Placeholder for shared auth utilities if needed
+// Re-export auth utilities
 export {
   useAuth
 };

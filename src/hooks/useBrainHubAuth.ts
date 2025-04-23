@@ -1,6 +1,5 @@
-
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/auth/useAuthContext';
+import { useAuth } from '@/hooks/auth';
 
 interface BrainHubAccess {
   hasAccess: boolean;

@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth';
 import {
   DropdownMenu,
   DropdownMenuContent,

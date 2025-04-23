@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/auth";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
