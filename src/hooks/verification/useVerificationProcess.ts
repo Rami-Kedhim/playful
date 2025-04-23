@@ -28,6 +28,14 @@ export const useVerificationProcess = () => {
       );
       
       if (result.success) {
+        // Update local user metadata to reflect verification submission
+        if (user.user_metadata) {
+          user.user_metadata.verification_submitted = true;
+          user.user_metadata.verification_documents = {
+            submittedAt: new Date().toISOString()
+          };
+        }
+        
         toast({
           title: "Verification Submitted",
           description: "Your verification request has been submitted successfully."
@@ -53,4 +61,3 @@ export const useVerificationProcess = () => {
     loading
   };
 };
-

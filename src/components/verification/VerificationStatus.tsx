@@ -10,6 +10,10 @@ export const VerificationStatus = () => {
   const { status, isVerified } = useVerificationStatus();
 
   if (!user) return null;
+  
+  // Check if user has submitted verification in user_metadata
+  const hasSubmittedVerification = user.user_metadata && 
+    user.user_metadata.verification_submitted === true;
 
   return (
     <Card>
@@ -19,8 +23,8 @@ export const VerificationStatus = () => {
       <CardContent>
         <div className="flex items-center justify-between">
           <span>Status:</span>
-          <Badge variant={isVerified ? "success" : "warning"}>
-            {isVerified ? "Verified" : "Pending"}
+          <Badge variant={isVerified ? "success" : hasSubmittedVerification ? "warning" : "default"}>
+            {isVerified ? "Verified" : hasSubmittedVerification ? "Pending" : "Not Started"}
           </Badge>
         </div>
       </CardContent>

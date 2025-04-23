@@ -43,13 +43,17 @@ export const useVerificationStatus = () => {
     setError(null);
     
     try {
-      // Update the user profile with verification data - using correct property names
+      // Update the user profile with verification data using properties that exist in the User type
       const success = await updateUserProfile({
-        verification_submitted: true,
-        verification_documents: {
-          documentUrl,
-          selfieUrl,
-          submittedAt: new Date().toISOString()
+        // Instead of using verification_submitted which doesn't exist in the User type
+        // We'll store the verification info in user_metadata which is allowed
+        user_metadata: {
+          verification_submitted: true,
+          verification_documents: {
+            documentUrl,
+            selfieUrl,
+            submittedAt: new Date().toISOString()
+          }
         }
       });
       
