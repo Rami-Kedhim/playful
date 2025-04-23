@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import usePulseBoost from '@/hooks/boost/usePulseBoost';
 import PulseBoostCard from '@/components/boost/PulseBoostCard';
@@ -7,6 +8,7 @@ import LoadingOverlay from '@/components/common/LoadingOverlay';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { BoostPackage } from '@/types/boost';
+import { PulseBoost } from '@/types/pulse-boost';
 import { toast } from '@/hooks/use-toast';
 
 interface PulseBoostManagerProps {
@@ -61,15 +63,30 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
     );
   }
 
-  const handlePurchaseBoost = async (pkg: BoostPackage) => {
+  // Modified to accept PulseBoost and map it to the BoostPackage that purchaseBoost expects
+  const handlePurchaseBoost = async (boost: PulseBoost): Promise<boolean> => {
     if (!purchaseBoost || processingId) return false;
-    setProcessingId(pkg.id);
+    setProcessingId(boost.id);
+    
     try {
-      const result = await purchaseBoost(pkg);
+      // Find the corresponding package from pulseBoostPackages
+      const packageToUse = pulseBoostPackages.find(pkg => pkg.id === boost.id);
+      
+      if (!packageToUse) {
+        console.error('Could not find corresponding boost package for ID:', boost.id);
+        toast({
+          title: "Activation Failed",
+          description: "Could not find the selected boost package. Please try again.",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      const result = await purchaseBoost(packageToUse);
       if (result) {
         toast({
           title: "Boost Activated",
-          description: `Your ${pkg.name} boost has been successfully activated.`,
+          description: `Your ${boost.name} boost has been successfully activated.`,
         });
       }
       return result;
@@ -86,7 +103,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
     }
   };
 
-  const handleCancelBoost = async (boostId: string) => {
+  const handleCancelBoost = async (boostId: string): Promise<boolean> => {
     if (processingId) return false;
     setProcessingId(boostId);
     try {
@@ -127,7 +144,8 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
             color: pkg.color || '#3b82f6',
             badgeColor: pkg.color || '#3b82f6',
             features: Array.isArray(pkg.features) ? pkg.features : [],
-            visibility_increase: pkg.visibility_increase
+            visibility_increase: pkg.visibility_increase,
+            price: pkg.price
           }}
           isActive={currentStatus?.isActive && (currentStatus?.activeBoostId === pkg.id || currentStatus?.packageId === pkg.id)}
           timeRemaining={currentStatus?.remainingTime}

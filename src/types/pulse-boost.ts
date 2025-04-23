@@ -35,12 +35,12 @@ export interface PulseBoost {
   autoApplyWithPlan?: SubscriptionLevel[];
   description?: string;
   badgeColor?: string;
-  features?: string[]; // Add the features field
+  features?: string[]; 
   color?: string;
   duration?: string;
-  price?: number;
+  price: number; // Changed from optional to required to match BoostPackage
   price_ubx?: number;
-  visibility_increase?: number;  // <-- Added this property for visibility increase percentage
+  visibility_increase?: number;
 }
 
 export interface ActiveBoost {
@@ -73,7 +73,7 @@ export interface EnhancedBoostStatus {
   remainingTime?: string;
   expiresAt?: Date;
   boostPackage?: any;
-  packageId?: string; // Added packageId property
+  packageId?: string;
   pulseData?: {
     visibility: string;
     pulseLevel?: number;
