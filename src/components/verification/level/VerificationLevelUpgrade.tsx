@@ -1,6 +1,4 @@
 
-// Fix usage of verificationRequest properties to replace deprecated .level with .verificationLevel or .requested_level
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
@@ -15,15 +13,14 @@ import { VerificationLevel } from '@/types/verification';
 type UpgradeStep = 'select' | 'requirements' | 'payment' | 'processing';
 
 const VerificationLevelUpgrade = () => {
-  const { verificationRequest } = useVerificationStatus();
+  const { status, loading, verificationRequest } = useVerificationStatus();
   const [currentStep, setCurrentStep] = useState<UpgradeStep>('select');
   const [targetLevel, setTargetLevel] = useState<VerificationLevel | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingState, setLoadingState] = useState(false);
   
-  const currentLevel = 
-    (verificationRequest?.verificationLevel || 
-     verificationRequest?.requested_level ||
-     VerificationLevel.NONE) as VerificationLevel;
+  const currentLevel = verificationRequest?.verificationLevel || 
+                      verificationRequest?.requested_level ||
+                      VerificationLevel.NONE;
   
   const handleSelectLevel = (level: VerificationLevel) => {
     setTargetLevel(level);
@@ -44,7 +41,7 @@ const VerificationLevelUpgrade = () => {
   };
   
   const handleCompletePurchase = async () => {
-    setLoading(true);
+    setLoadingState(true);
     
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -63,7 +60,7 @@ const VerificationLevelUpgrade = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setLoadingState(false);
     }
   };
   
@@ -87,7 +84,7 @@ const VerificationLevelUpgrade = () => {
         return (
           <VerificationPaymentStep
             targetLevel={targetLevel}
-            loading={loading}
+            loading={loadingState}
             onBack={handleBack}
             onComplete={handleCompletePurchase}
           />

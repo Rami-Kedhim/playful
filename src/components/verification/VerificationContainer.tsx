@@ -10,7 +10,7 @@ import VerificationLevelType from './level/VerificationLevelType';
 import { VerificationLevel } from '@/types/verification';
 
 const VerificationContainer = () => {
-  const { verification, loading, error } = useVerificationStatus();
+  const { status, loading, error, verificationRequest } = useVerificationStatus();
   const [activeTab, setActiveTab] = useState('status');
   const [selectedType, setSelectedType] = useState<string | null>(null);
 

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { toast } from '@/components/ui/use-toast';
-import { VerificationLevel, VerificationStatus } from '@/types/verification';
+import { VerificationLevel, VerificationStatus, VerificationRequest } from '@/types/verification';
 
 export interface VerificationStatusState {
   status: VerificationStatus;
@@ -21,6 +21,7 @@ export const useVerificationStatus = () => {
   });
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [verificationRequest, setVerificationRequest] = useState<VerificationRequest | null>(null);
 
   useEffect(() => {
     if (profile) {
@@ -28,6 +29,22 @@ export const useVerificationStatus = () => {
       const isVerified = !!profile.is_verified;
       
       const hasSubmittedVerification = user?.user_metadata?.verification_submitted === true;
+      
+      // Create a verification request object from user metadata if available
+      let request: VerificationRequest | null = null;
+      if (hasSubmittedVerification && user?.user_metadata?.verification_documents) {
+        request = {
+          id: user.id,
+          userId: user.id,
+          status: hasSubmittedVerification ? VerificationStatus.PENDING : VerificationStatus.NONE,
+          verificationLevel: VerificationLevel.BASIC,
+          documents: [],
+          submittedAt: user.user_metadata.verification_documents.submittedAt,
+          updatedAt: user.user_metadata.verification_documents.submittedAt,
+        };
+      }
+      
+      setVerificationRequest(request);
       
       setStatus({
         status: hasSubmittedVerification ? VerificationStatus.PENDING : VerificationStatus.NONE,
@@ -62,6 +79,19 @@ export const useVerificationStatus = () => {
       
       if (!success) throw new Error("Failed to submit verification");
       
+      // Update local state
+      const newRequest: VerificationRequest = {
+        id: user.id,
+        userId: user.id,
+        status: VerificationStatus.PENDING,
+        verificationLevel: VerificationLevel.BASIC,
+        documents: [],
+        submittedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      setVerificationRequest(newRequest);
+      
       setStatus(prev => ({
         ...prev,
         status: VerificationStatus.PENDING,
@@ -95,6 +125,7 @@ export const useVerificationStatus = () => {
     loading,
     error,
     submitVerification,
-    isVerified: status.isVerified
+    isVerified: status.isVerified,
+    verificationRequest
   };
 };
