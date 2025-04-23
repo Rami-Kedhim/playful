@@ -22,31 +22,36 @@ export const usePulseBoost = (profileId?: string) => {
 
   // Fetch active pulse boosts from database
   const fetchActivePulseBoosts = async (userId: string): Promise<ActiveBoost[]> => {
-    const { data, error } = await supabase
-      .from('pulse_boosts_active')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('status', 'active')
-      .order('started_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('pulse_boosts_active')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .order('started_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching active pulse boosts:', error);
+      if (error) {
+        console.error('Error fetching active pulse boosts:', error);
+        return [];
+      }
+
+      if (!data) {
+        return [];
+      }
+
+      return data.map((item) => ({
+        boostId: item.boost_id,
+        startedAt: new Date(item.started_at),
+        expiresAt: item.expires_at ? new Date(item.expires_at) : undefined,
+        userId: item.user_id,
+        visibility: item.visibility_increase ? `${item.visibility_increase}% increased visibility` : undefined,
+        timeRemaining: '', // Placeholder, will be calculated below
+        boostDetails: pulseBoostPackages.find((pkg) => pkg.id === item.boost_id),
+      }));
+    } catch (err) {
+      console.error('Exception in fetchActivePulseBoosts:', err);
       return [];
     }
-
-    if (!data) {
-      return [];
-    }
-
-    return data.map((item) => ({
-      boostId: item.boost_id,
-      startedAt: new Date(item.started_at),
-      expiresAt: item.expires_at ? new Date(item.expires_at) : undefined,
-      userId: item.user_id,
-      visibility: item.visibility_increase ? `${item.visibility_increase}% increased visibility` : undefined,
-      timeRemaining: '', // Placeholder, ideally calculate based on expiresAt
-      boostDetails: pulseBoostPackages.find((pkg) => pkg.id === item.boost_id),
-    }));
   };
 
   useEffect(() => {
@@ -64,10 +69,28 @@ export const usePulseBoost = (profileId?: string) => {
 
         if (profileId) {
           const activeBoostsData = await fetchActivePulseBoosts(profileId);
-          setActiveBoosts(activeBoostsData);
+          
+          // Calculate time remaining for each active boost
+          const boostsWithTimeRemaining = activeBoostsData.map(boost => {
+            let timeRemaining = '';
+            if (boost.expiresAt) {
+              const now = new Date();
+              const diff = boost.expiresAt.getTime() - now.getTime();
+              if (diff > 0) {
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                timeRemaining = `${hours}h ${minutes}m`;
+              } else {
+                timeRemaining = 'Expired';
+              }
+            }
+            return { ...boost, timeRemaining };
+          });
+          
+          setActiveBoosts(boostsWithTimeRemaining);
 
-          if (activeBoostsData.length > 0) {
-            const firstBoost = activeBoostsData[0];
+          if (boostsWithTimeRemaining.length > 0) {
+            const firstBoost = boostsWithTimeRemaining[0];
             const boostPackage = firstBoost.boostDetails;
 
             if (!boostPackage) {
@@ -191,4 +214,3 @@ export const usePulseBoost = (profileId?: string) => {
 };
 
 export default usePulseBoost;
-

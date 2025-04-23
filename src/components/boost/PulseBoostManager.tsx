@@ -47,13 +47,26 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
   // Debug log for packages
   // console.debug("PulseBoostManager packages:", pulseBoostPackages);
 
+  // Handle loading state first
+  if (isLoading) {
+    return <div className="text-center py-4">Loading Pulse Boosts...</div>;
+  }
+
+  // Handle error state next
+  if (error) {
+    return <div className="text-center py-4 text-red-500">Error: {error}</div>;
+  }
+
   // Defensive: If pulseBoostPackages is empty or undefined, render message
   if (!pulseBoostPackages || pulseBoostPackages.length === 0) {
     return <div className="text-center text-muted-foreground">No pulse boosts available.</div>;
   }
 
   // Helper to check active boost for a package
-  const isActive = (boostId: string) => activeBoosts.some((boost) => boost.boostId === boostId);
+  const isActive = (boostId: string) => {
+    if (!activeBoosts || activeBoosts.length === 0) return false;
+    return activeBoosts.some((boost) => boost.boostId === boostId);
+  };
 
   // Wrap handlers to match expected signatures passing boostId param
   const handleActivate = async (boostId: string): Promise<boolean> => {
@@ -62,38 +75,50 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
       console.error('PulseBoostManager: Boost package not found for id', boostId);
       return false;
     }
-    const success = await purchaseBoost(pkg);
-    if (!success) {
-      console.error('Failed to activate boost:', pkg.name);
+    
+    try {
+      const success = await purchaseBoost(pkg);
+      if (!success) {
+        console.error('Failed to activate boost:', pkg.name);
+      }
+      return success;
+    } catch (err) {
+      console.error('Error activating boost:', err);
+      return false;
     }
-    return success;
   };
 
   // Accept boostId param to match signature but ignore it internally
   const handleCancel = async (_boostId: string): Promise<boolean> => {
-    const success = await cancelBoost();
-    if (!success) {
-      console.error('Failed to cancel boost');
+    try {
+      const success = await cancelBoost();
+      if (!success) {
+        console.error('Failed to cancel boost');
+      }
+      return success;
+    } catch (err) {
+      console.error('Error cancelling boost:', err);
+      return false;
     }
-    return success;
   };
 
   return (
     <div className="space-y-4">
-      {pulseBoostPackages.map((pkg) => {
-        if (!pkg) {
-          console.error('PulseBoostManager: Encountered undefined package in pulseBoostPackages');
+      {Array.isArray(pulseBoostPackages) && pulseBoostPackages.map((pkg) => {
+        if (!pkg || typeof pkg !== 'object') {
+          console.error('PulseBoostManager: Encountered invalid package in pulseBoostPackages');
           return null;
         }
 
         const visibilityKey = mapVisibility(pkg.visibility_increase);
-
-        const costUBX = pkg.price_ubx ?? 0;
-
-        // timeRemaining is a string or undefined, ensure it matches expected string | undefined
-        const activeBoost = activeBoosts.find(b => b.boostId === pkg.id);
+        const costUBX = typeof pkg.price_ubx === 'number' ? pkg.price_ubx : 0;
+        
+        // Find active boost for this package
+        const activeBoost = Array.isArray(activeBoosts) ? 
+          activeBoosts.find(b => b.boostId === pkg.id) : 
+          undefined;
+          
         const timeRemaining = activeBoost ? activeBoost.timeRemaining : undefined;
-
         const durationMinutes = parseDurationToMinutes(pkg.duration);
 
         return (
@@ -101,15 +126,15 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
             key={pkg.id}
             boost={{
               id: pkg.id,
-              name: pkg.name,
-              description: pkg.description,
+              name: pkg.name || 'Unnamed Boost',
+              description: pkg.description || '',
               durationMinutes: durationMinutes,
               duration: pkg.duration,
               visibility: visibilityKey,
               costUBX: costUBX,
               color: pkg.color || '#3b82f6',
               badgeColor: pkg.color || '#3b82f6',
-              features: pkg.features || []
+              features: Array.isArray(pkg.features) ? pkg.features : []
             }}
             isActive={isActive(pkg.id)}
             timeRemaining={timeRemaining}
@@ -125,4 +150,3 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
 };
 
 export default PulseBoostManager;
-

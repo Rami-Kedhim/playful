@@ -27,13 +27,22 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   
-  // Format duration to readable string
-  const formattedDuration = boost.durationMinutes 
-    ? formatDuration(boost.durationMinutes) 
-    : boost.duration || "Unknown";
+  // Format duration to readable string safely
+  const formatDuration = (minutes?: number): string => {
+    if (!minutes && minutes !== 0) return "Unknown";
+    if (minutes < 60) return `${minutes} minutes`;
+    if (minutes < 1440) return `${Math.floor(minutes / 60)} hours`;
+    return `${Math.floor(minutes / 1440)} days`;
+  };
+
+  // Safely get formatted duration string
+  const formattedDuration = boost.durationMinutes !== undefined ? 
+    formatDuration(boost.durationMinutes) : 
+    (boost.duration || "Unknown");
   
-  // Check if user can afford this boost
-  const canAfford = userBalance >= (boost.costUBX || boost.price_ubx || boost.price || 0);
+  // Check if user can afford this boost safely
+  const boostCost = boost.costUBX ?? boost.price_ubx ?? boost.price ?? 0;
+  const canAfford = userBalance >= boostCost;
   
   const handleActivate = async () => {
     if (loading || !onActivate) return;
@@ -41,6 +50,8 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
     setLoading(true);
     try {
       await onActivate(boost.id);
+    } catch (error) {
+      console.error("Error activating boost:", error);
     } finally {
       setLoading(false);
     }
@@ -52,6 +63,8 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
     setLoading(true);
     try {
       await onCancel(boost.id);
+    } catch (error) {
+      console.error("Error cancelling boost:", error);
     } finally {
       setLoading(false);
     }
@@ -61,22 +74,14 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
   const cardStyle = isActive
     ? { borderColor: boost.badgeColor || boost.color || '#3b82f6', backgroundColor: (boost.badgeColor || boost.color || '#3b82f6') + '10' }
     : {};
-
-  // Format duration helper
-  function formatDuration(minutes?: number): string {
-    if (!minutes) return "Unknown";
-    if (minutes < 60) return `${minutes} minutes`;
-    if (minutes < 1440) return `${Math.floor(minutes / 60)} hours`;
-    return `${Math.floor(minutes / 1440)} days`;
-  }
   
   return (
     <Card className="overflow-hidden" style={cardStyle}>
       <CardContent className="p-5 space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="font-medium text-lg">{boost.name}</h3>
+          <h3 className="font-medium text-lg">{boost.name || 'Unnamed Boost'}</h3>
           <Badge style={{ backgroundColor: boost.badgeColor || boost.color || '#3b82f6' }}>
-            {isActive ? 'Active' : `${boost.costUBX || boost.price_ubx || boost.price} UBX`}
+            {isActive ? 'Active' : `${boostCost} UBX`}
           </Badge>
         </div>
         
@@ -138,4 +143,3 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
 };
 
 export default PulseBoostCard;
-
