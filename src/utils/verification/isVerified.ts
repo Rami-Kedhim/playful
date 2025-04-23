@@ -1,6 +1,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { User } from '@/types/user';
+import { VerificationLevel } from '@/types/verification';
 
 /**
  * Check if a user profile is verified
@@ -38,16 +39,26 @@ export const hasSubmittedVerification = (user: User | null): boolean => {
  * @param user The user object to check
  * @returns The verification level string or 'none'
  */
-export const getUserVerificationLevel = (user: User | null): string => {
-  if (!user) return 'none';
+export const getUserVerificationLevel = (user: User | null): VerificationLevel => {
+  if (!user) return VerificationLevel.NONE;
   
   // Check if they have verification_level in their user_metadata
-  if (user.user_metadata?.verification_level) return user.user_metadata.verification_level;
+  const metadataLevel = user.user_metadata?.verification_level;
+  
+  if (metadataLevel) {
+    // Map string value to enum
+    switch (metadataLevel.toLowerCase()) {
+      case 'basic': return VerificationLevel.BASIC;
+      case 'enhanced': return VerificationLevel.ENHANCED;
+      case 'premium': return VerificationLevel.PREMIUM;
+      default: return VerificationLevel.NONE;
+    }
+  }
   
   // If verified but no specific level, assume basic
-  if (isUserVerified(user)) return 'basic';
+  if (isUserVerified(user)) return VerificationLevel.BASIC;
   
-  return 'none';
+  return VerificationLevel.NONE;
 };
 
 /**
@@ -65,12 +76,31 @@ export const checkProfileVerificationStatus = async (userId: string) => {
       
     if (error) throw error;
     
+    let verificationLevel = VerificationLevel.NONE;
+    
+    // Map database string to enum value
+    if (profile?.verification_level) {
+      switch (profile.verification_level) {
+        case 'basic':
+          verificationLevel = VerificationLevel.BASIC;
+          break;
+        case 'enhanced':
+          verificationLevel = VerificationLevel.ENHANCED;
+          break;
+        case 'premium':
+          verificationLevel = VerificationLevel.PREMIUM;
+          break;
+        default:
+          verificationLevel = VerificationLevel.NONE;
+      }
+    }
+    
     return {
       isVerified: profile?.is_verified || false,
-      level: profile?.verification_level || 'none'
+      level: verificationLevel
     };
   } catch (error) {
     console.error('Error checking verification status:', error);
-    return { isVerified: false, level: 'none' };
+    return { isVerified: false, level: VerificationLevel.NONE };
   }
 };

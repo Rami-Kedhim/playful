@@ -1,54 +1,110 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/hooks/auth';
-import { useToast } from '@/components/ui/use-toast';
-import { submitVerificationForm } from '@/utils/verification';
-import type { DocumentType } from '@/types/verification';
+import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/lib/supabase';
+import { VerificationStatus } from '@/types/verification';
 
 export const useVerificationProcess = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<VerificationStatus>(VerificationStatus.NONE);
 
-  const submitVerification = async (data: {
-    documentType: DocumentType;
-    documentFile: File;
-    selfieFile?: File;
-    documentBackImage?: {file: File, preview: string} | null;
-    documentFrontImage: {file: File, preview: string};
-    selfieImage: {file: File, preview: string};
-  }) => {
-    if (!user) return false;
-    
-    setLoading(true);
-    try {
-      // We'll use the submitVerificationForm function from our utils
-      // which handles the upload and form submission
-      const result = await submitVerificationForm(
-        user.id,
-        {
-          documentType: data.documentType,
-          documentFile: data.documentFrontImage.file,
-          documentBackImage: data.documentBackImage || undefined,
-          selfieImage: data.selfieImage
-        }
-      );
-      
-      if (result.success) {
-        toast({
-          title: "Verification Submitted",
-          description: "Your verification request has been submitted successfully."
-        });
-        return true;
-      }
-      
-      throw new Error(result.message || "Failed to submit verification");
-    } catch (error: any) {
+  const submitVerification = async (formData: any) => {
+    if (!user) {
       toast({
-        title: "Submission Failed",
-        description: error.message || "Failed to submit verification request",
-        variant: "destructive"
+        title: "Authentication required",
+        description: "You must be logged in to submit verification",
+        variant: "destructive",
       });
+      return false;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Upload document files to Supabase Storage
+      const documentFile = formData.documentFile;
+      const selfieFile = formData.selfieImage?.file;
+
+      if (!documentFile || !selfieFile) {
+        throw new Error("Missing required document files");
+      }
+
+      // Get Supabase URL from environment
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      if (!supabaseUrl) {
+        throw new Error("Missing Supabase configuration");
+      }
+
+      // Get auth token from localStorage or current session
+      const authData = localStorage.getItem('sb-haffqtqpbnaviefewfmn-auth-token');
+      let accessToken = '';
+      
+      if (authData) {
+        try {
+          const parsed = JSON.parse(authData);
+          accessToken = parsed.access_token || '';
+        } catch (e) {
+          console.error("Error parsing auth token", e);
+        }
+      }
+
+      if (!accessToken) {
+        throw new Error("No authentication token found");
+      }
+
+      // Create FormData for the API request
+      const apiFormData = new FormData();
+      apiFormData.append('documentType', formData.documentType);
+      apiFormData.append('frontImage', documentFile);
+      apiFormData.append('selfieImage', selfieFile);
+
+      // Call the process-verification edge function
+      const response = await fetch(`${supabaseUrl}/functions/v1/process-verification`, {
+        method: 'POST',
+        body: apiFormData,
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to submit verification request');
+      }
+
+      const result = await response.json();
+
+      // Update user metadata to indicate verification has been submitted
+      await supabase.auth.updateUser({
+        data: { 
+          verification_submitted: true,
+          verification_documents: {
+            submittedAt: new Date().toISOString()
+          }
+        }
+      });
+
+      toast({
+        title: "Verification submitted",
+        description: "Your verification request has been submitted successfully.",
+      });
+
+      setStatus(VerificationStatus.PENDING);
+      return true;
+    } catch (error: any) {
+      console.error("Verification submission error:", error);
+      setError(error.message || "An error occurred during submission");
+      
+      toast({
+        title: "Submission failed",
+        description: error.message || "Failed to submit verification request",
+        variant: "destructive",
+      });
+      
       return false;
     } finally {
       setLoading(false);
@@ -56,8 +112,10 @@ export const useVerificationProcess = () => {
   };
 
   return {
-    submitVerification,
-    loading
+    loading,
+    error,
+    status,
+    submitVerification
   };
 };
 
