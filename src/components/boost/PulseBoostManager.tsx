@@ -130,7 +130,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
             features: Array.isArray(pkg.features) ? pkg.features : [],
             visibility_increase: pkg.visibility_increase
           }}
-          isActive={currentStatus?.isActive && currentStatus?.packageId === pkg.id}
+          isActive={currentStatus?.isActive && (currentStatus?.activeBoostId === pkg.id || currentStatus?.packageId === pkg.id)}
           timeRemaining={currentStatus?.remainingTime}
           onActivate={handlePurchaseBoost}
           onCancel={handleCancelBoost}

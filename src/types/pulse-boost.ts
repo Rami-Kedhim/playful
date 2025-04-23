@@ -73,6 +73,7 @@ export interface EnhancedBoostStatus {
   remainingTime?: string;
   expiresAt?: Date;
   boostPackage?: any;
+  packageId?: string; // Added packageId property
   pulseData?: {
     visibility: string;
     pulseLevel?: number;
@@ -80,4 +81,3 @@ export interface EnhancedBoostStatus {
     coverage?: number;
   };
 }
-

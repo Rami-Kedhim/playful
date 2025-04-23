@@ -44,7 +44,8 @@ const usePulseBoostAdapter = (profileId: string) => {
                   startTime: new Date(boostData.started_at),
                   endTime: expiresAt,
                   remainingTime,
-                  packageId: boostData.boost_id
+                  activeBoostId: boostData.boost_id,
+                  packageId: boostData.boost_id // Make sure we're using boost_id for packageId
                 });
               } else {
                 setRealtimeStatus({ isActive: false });
