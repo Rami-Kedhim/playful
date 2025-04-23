@@ -5,10 +5,11 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Clock, AlertTriangle, ShieldCheck } from 'lucide-react';
 import VerificationBadge from '@/components/verification/VerificationBadge';
+import { VerificationLevel } from '@/types/verification';
 
 interface VerificationStatusTabProps {
   userId: string;
-  currentLevel: 'basic' | 'verified' | 'premium';
+  currentLevel: VerificationLevel;
   verificationStatus: 'unverified' | 'pending' | 'verified' | 'rejected';
 }
 
@@ -18,9 +19,9 @@ const VerificationStatusTab: React.FC<VerificationStatusTabProps> = ({
 }) => {
   // Level progression mapping
   const levelMap = {
-    'basic': 1,
-    'verified': 2,
-    'premium': 3
+    [VerificationLevel.BASIC]: 1,
+    [VerificationLevel.ENHANCED]: 2,
+    [VerificationLevel.PREMIUM]: 3
   };
 
   // Status indicator
@@ -58,9 +59,9 @@ const VerificationStatusTab: React.FC<VerificationStatusTabProps> = ({
   };
 
   // Level benefits
-  const renderLevelBenefits = (level: 'basic' | 'verified' | 'premium') => {
+  const renderLevelBenefits = (level: VerificationLevel) => {
     switch (level) {
-      case 'basic':
+      case VerificationLevel.BASIC:
         return (
           <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
             <li>Basic account features</li>
@@ -68,7 +69,7 @@ const VerificationStatusTab: React.FC<VerificationStatusTabProps> = ({
             <li>Limited messaging</li>
           </ul>
         );
-      case 'verified':
+      case VerificationLevel.ENHANCED:
         return (
           <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
             <li>All basic features</li>
@@ -77,16 +78,18 @@ const VerificationStatusTab: React.FC<VerificationStatusTabProps> = ({
             <li>Unlimited messaging</li>
           </ul>
         );
-      case 'premium':
+      case VerificationLevel.PREMIUM:
         return (
           <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-            <li>All verified features</li>
+            <li>All enhanced features</li>
             <li>Premium badge on profile</li>
             <li>Featured in premium listings</li>
             <li>Priority support</li>
             <li>Enhanced analytics</li>
           </ul>
         );
+      default:
+        return null;
     }
   };
 
@@ -103,16 +106,16 @@ const VerificationStatusTab: React.FC<VerificationStatusTabProps> = ({
           <div className="flex justify-between items-center">
             <div className="space-y-1">
               <h3 className="font-medium">Current Level</h3>
-              <VerificationBadge level={currentLevel} size="md" />
+              <VerificationBadge level={currentLevel} />
             </div>
             <div>{renderStatusIndicator()}</div>
           </div>
           
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Basic</span>
-              <span>Verified</span>
-              <span>Premium</span>
+              <span>{VerificationLevel.BASIC}</span>
+              <span>{VerificationLevel.ENHANCED}</span>
+              <span>{VerificationLevel.PREMIUM}</span>
             </div>
             <Progress value={levelMap[currentLevel] * 33.33} className="h-2" />
           </div>
@@ -120,39 +123,39 @@ const VerificationStatusTab: React.FC<VerificationStatusTabProps> = ({
       </Card>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className={currentLevel === 'basic' ? 'border-primary' : ''}>
+        <Card className={currentLevel === VerificationLevel.BASIC ? 'border-primary' : ''}>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">Basic</CardTitle>
-              {currentLevel === 'basic' && <Badge variant="outline">Current</Badge>}
+              {currentLevel === VerificationLevel.BASIC && <Badge variant="outline">Current</Badge>}
             </div>
           </CardHeader>
           <CardContent>
-            {renderLevelBenefits('basic')}
+            {renderLevelBenefits(VerificationLevel.BASIC)}
           </CardContent>
         </Card>
         
-        <Card className={currentLevel === 'verified' ? 'border-primary' : ''}>
+        <Card className={currentLevel === VerificationLevel.ENHANCED ? 'border-primary' : ''}>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Verified</CardTitle>
-              {currentLevel === 'verified' && <Badge variant="outline">Current</Badge>}
+              <CardTitle className="text-base">Enhanced</CardTitle>
+              {currentLevel === VerificationLevel.ENHANCED && <Badge variant="outline">Current</Badge>}
             </div>
           </CardHeader>
           <CardContent>
-            {renderLevelBenefits('verified')}
+            {renderLevelBenefits(VerificationLevel.ENHANCED)}
           </CardContent>
         </Card>
         
-        <Card className={currentLevel === 'premium' ? 'border-primary' : ''}>
+        <Card className={currentLevel === VerificationLevel.PREMIUM ? 'border-primary' : ''}>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">Premium</CardTitle>
-              {currentLevel === 'premium' && <Badge variant="outline">Current</Badge>}
+              {currentLevel === VerificationLevel.PREMIUM && <Badge variant="outline">Current</Badge>}
             </div>
           </CardHeader>
           <CardContent>
-            {renderLevelBenefits('premium')}
+            {renderLevelBenefits(VerificationLevel.PREMIUM)}
           </CardContent>
         </Card>
       </div>
