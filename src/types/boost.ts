@@ -1,4 +1,3 @@
-
 export interface BoostPackage {
   id: string;
   name: string;
@@ -75,6 +74,7 @@ export interface BoostStatus {
   boostPackage?: BoostPackage;
   timeRemaining?: string;
   progress?: number; // Add missing progress property
+  activeBoostId?: string; // Add the activeBoostId property
 }
 
 export interface BoostEligibility {

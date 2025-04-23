@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { formatBoostDuration } from '@/utils/boostCalculator';
 import { supabase } from '@/integrations/supabase/client';

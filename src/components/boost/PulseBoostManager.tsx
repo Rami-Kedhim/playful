@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import usePulseBoost from '@/hooks/boost/usePulseBoost';
 import PulseBoostCard from '@/components/boost/PulseBoostCard';
