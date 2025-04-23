@@ -1,21 +1,18 @@
 
-import { useState } from 'react';
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Loader2, Clock, Zap, ChevronRight, CheckCircle, AlertCircle } from "lucide-react";
-import { PulseBoost } from '@/types/pulse-boost';
-import { BoostPackage } from '@/types/boost';
-import { toast } from '@/hooks/use-toast';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { PulseBoost } from "@/types/pulse-boost";
+import { Zap } from "lucide-react";
 
 interface PulseBoostCardProps {
   boost: PulseBoost;
   isActive: boolean;
   timeRemaining?: string;
-  onActivate?: (pkg: BoostPackage) => Promise<boolean>;
+  onActivate: (boost: PulseBoost) => Promise<boolean>;
   onCancel: (boostId: string) => Promise<boolean>;
-  userBalance?: number;
+  userBalance: number;
   disabled?: boolean;
 }
 
@@ -25,244 +22,81 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
   timeRemaining,
   onActivate,
   onCancel,
-  userBalance = 0,
+  userBalance,
   disabled = false
 }) => {
-  const [loading, setLoading] = useState(false);
-  const [actionSuccess, setActionSuccess] = useState<boolean | null>(null);
+  const handleActivate = () => onActivate(boost);
+  const handleCancel = () => onCancel(boost.id);
   
-  // Calculate progress value for the progress bar (0-100)
-  const calculateProgress = (): number => {
-    if (!isActive || !timeRemaining) return 0;
-    
-    // Parse time remaining format (e.g., "2h 30m") to calculate progress
-    let totalMinutes = 0;
-    let elapsedMinutes = 0;
-    
-    if (boost.durationMinutes) {
-      totalMinutes = boost.durationMinutes;
-      
-      // Parse timeRemaining format like "2h 30m"
-      const hourMatch = timeRemaining.match(/(\d+)h/);
-      const minuteMatch = timeRemaining.match(/(\d+)m/);
-      
-      const remainingHours = hourMatch ? parseInt(hourMatch[1]) : 0;
-      const remainingMinutes = minuteMatch ? parseInt(minuteMatch[1]) : 0;
-      
-      const remainingTotalMinutes = (remainingHours * 60) + remainingMinutes;
-      elapsedMinutes = totalMinutes - remainingTotalMinutes;
-    }
-    
-    return Math.min(100, Math.max(0, (elapsedMinutes / totalMinutes) * 100));
-  };
-  
-  // Format duration to readable string safely
-  const formatDuration = (minutes?: number): string => {
-    if (!minutes && minutes !== 0) return "Unknown";
-    if (minutes < 60) return `${minutes} minutes`;
-    if (minutes < 1440) return `${Math.floor(minutes / 60)} hours`;
-    return `${Math.floor(minutes / 1440)} days`;
+  const getProgress = () => {
+    if (!timeRemaining || !isActive) return 0;
+    const [hours, minutes] = timeRemaining.split('h ')[0].split(':').map(Number);
+    const totalMinutes = boost.durationMinutes;
+    const remainingMinutes = (hours * 60) + (minutes || 0);
+    return Math.max(0, Math.min(100, ((totalMinutes - remainingMinutes) / totalMinutes) * 100));
   };
 
-  // Safely get formatted duration string
-  const formattedDuration = boost.durationMinutes !== undefined ? 
-    formatDuration(boost.durationMinutes) : 
-    (boost.duration || "Unknown");
-  
-  // Check if user can afford this boost safely
-  const boostCost = boost.costUBX ?? boost.price_ubx ?? boost.price ?? 0;
-  const canAfford = userBalance >= boostCost;
-  
-  const handleActivate = async () => {
-    if (loading || !onActivate) return;
-    
-    setLoading(true);
-    setActionSuccess(null);
-    
-    try {
-      // Convert the PulseBoost to BoostPackage for the onActivate call
-      const boostPackage: BoostPackage = {
-        id: boost.id,
-        name: boost.name,
-        description: boost.description || '',
-        duration: boost.duration || '00:00:00',
-        price: boost.price || 0,
-        price_ubx: boost.price_ubx || boost.costUBX || 0,
-        features: boost.features || [],
-        visibility_increase: typeof boost.visibility_increase === 'number' ? boost.visibility_increase : 50,
-        color: boost.color
-      };
-      
-      const success = await onActivate(boostPackage);
-      setActionSuccess(success);
-      
-      if (success) {
-        toast({
-          title: "Boost Activated",
-          description: `Your ${boost.name} has been successfully activated.`,
-          variant: "default"
-        });
-      } else {
-        toast({
-          title: "Activation Failed",
-          description: "There was an issue activating your boost.",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error("Error activating boost:", error);
-      setActionSuccess(false);
-      
-      toast({
-        title: "Activation Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  const handleCancel = async () => {
-    if (loading) return;
-    
-    setLoading(true);
-    setActionSuccess(null);
-    
-    try {
-      const success = await onCancel(boost.id);
-      setActionSuccess(success);
-      
-      if (success) {
-        toast({
-          title: "Boost Cancelled",
-          description: `Your ${boost.name} has been cancelled.`,
-          variant: "default"
-        });
-      } else {
-        toast({
-          title: "Cancellation Failed",
-          description: "There was an issue cancelling your boost.",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error("Error cancelling boost:", error);
-      setActionSuccess(false);
-      
-      toast({
-        title: "Cancellation Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // Card background style based on boost type or if active
-  const cardStyle = isActive
-    ? { borderColor: boost.badgeColor || boost.color || '#3b82f6', backgroundColor: (boost.badgeColor || boost.color || '#3b82f6') + '10' }
-    : {};
-  
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-md" style={cardStyle}>
-      <CardContent className="p-5 space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="font-medium text-lg">{boost.name || 'Unnamed Boost'}</h3>
-          <Badge style={{ backgroundColor: boost.badgeColor || boost.color || '#3b82f6' }}>
-            {isActive ? 'Active' : `${boostCost} UBX`}
-          </Badge>
+    <Card className={`relative overflow-hidden border-2 ${isActive ? `border-${boost.badgeColor}` : 'border-transparent'}`}>
+      {isActive && (
+        <div className="absolute top-0 left-0 w-full px-6 pt-2">
+          <Progress value={getProgress()} className="h-1" />
         </div>
-        
-        <p className="text-sm text-muted-foreground">
-          {boost.description || `Increases profile visibility across ${boost.visibility || 'platform'}`}
-        </p>
-        
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-background/50 p-3 rounded-md flex flex-col items-center">
-            <Clock className="h-4 w-4 mb-1 text-muted-foreground" />
-            <span className="text-sm font-semibold">{formattedDuration}</span>
-            <span className="text-xs text-muted-foreground">Duration</span>
+      )}
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center text-xl">
+              {boost.name}
+              {isActive && <Zap className="ml-2 h-5 w-5 text-yellow-400 animate-pulse" />}
+            </CardTitle>
+            <CardDescription>{boost.description}</CardDescription>
           </div>
-          <div className="bg-background/50 p-3 rounded-md flex flex-col items-center">
-            <Zap className="h-4 w-4 mb-1 text-muted-foreground" />
-            <span className="text-sm font-semibold">
-              {boost.visibility_increase ? `+${boost.visibility_increase}%` : 'Standard'}
-            </span>
-            <span className="text-xs text-muted-foreground">Visibility</span>
+          <div className="text-right">
+            <p className="text-lg font-semibold">{boost.costUBX} UBX</p>
+            <p className="text-sm text-muted-foreground">
+              {boost.durationMinutes / 60} hours
+            </p>
           </div>
         </div>
-        
-        {isActive && timeRemaining && (
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">{timeRemaining} remaining</span>
-              <span className="text-xs text-muted-foreground">{calculateProgress().toFixed(0)}%</span>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <ul className="space-y-2">
+            {boost.features.map((feature, index) => (
+              <li key={index} className="flex items-center text-sm">
+                <Zap className="mr-2 h-4 w-4 text-primary" />
+                {feature}
+              </li>
+            ))}
+          </ul>
+          
+          {isActive ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span>Time Remaining:</span>
+                <span className="font-semibold">{timeRemaining}</span>
+              </div>
+              <Button 
+                variant="destructive" 
+                className="w-full" 
+                onClick={handleCancel}
+                disabled={disabled}
+              >
+                Cancel Boost
+              </Button>
             </div>
-            <Progress value={calculateProgress()} className="h-2" />
-          </div>
-        )}
-        
-        {!isActive && !canAfford && (
-          <div className="mt-2 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 p-2 rounded-md text-center">
-            <span className="text-sm font-medium flex items-center justify-center">
-              <AlertCircle className="h-4 w-4 mr-1" />
-              Insufficient balance
-            </span>
-          </div>
-        )}
-        
-        {actionSuccess === false && (
-          <div className="mt-2 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 p-2 rounded-md text-center">
-            <span className="text-sm font-medium">Action failed. Please try again.</span>
-          </div>
-        )}
+          ) : (
+            <Button 
+              className="w-full" 
+              onClick={handleActivate}
+              disabled={disabled || userBalance < boost.costUBX}
+            >
+              {userBalance < boost.costUBX ? "Insufficient UBX Balance" : "Activate Boost"}
+            </Button>
+          )}
+        </div>
       </CardContent>
-      
-      <CardFooter className="px-5 pb-5 pt-0">
-        {isActive ? (
-          <Button 
-            variant="outline" 
-            onClick={handleCancel} 
-            disabled={loading || disabled}
-            className="w-full"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Cancelling...
-              </>
-            ) : (
-              <>Cancel Boost</>
-            )}
-          </Button>
-        ) : (
-          <Button 
-            onClick={handleActivate} 
-            disabled={loading || !canAfford || disabled || !onActivate}
-            className="w-full"
-            variant={canAfford ? "default" : "outline"}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Activating...
-              </>
-            ) : actionSuccess ? (
-              <>
-                <CheckCircle className="mr-2 h-4 w-4" />
-                Activated
-              </>
-            ) : (
-              <>
-                Activate
-                <ChevronRight className="h-4 w-4 ml-2" />
-              </>
-            )}
-          </Button>
-        )}
-      </CardFooter>
     </Card>
   );
 };
