@@ -29,7 +29,7 @@ export const useVerificationState = (): VerificationStateResult => {
 
       try {
         const result = await checkVerificationStatus(user.id);
-        setStatus(result.status);
+        setStatus(result.status as VerificationStatus);
       } catch (err: any) {
         setError(err.message);
       } finally {

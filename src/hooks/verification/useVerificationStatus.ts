@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/auth';
 import { toast } from '@/components/ui/use-toast';
 
 export interface VerificationStatus {
@@ -82,6 +82,7 @@ export const useVerificationStatus = () => {
     status,
     loading,
     error,
-    submitVerification
+    submitVerification,
+    isVerified: status.isVerified // Add the isVerified property here
   };
 };
