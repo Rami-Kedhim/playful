@@ -24,7 +24,7 @@ export const useVerificationStatus = () => {
   useEffect(() => {
     if (profile) {
       // Check if profile has verification status
-      const isVerified = !!profile.is_verified || profile.verification_status === 'approved';
+      const isVerified = !!profile.is_verified;
       
       setStatus({
         status: isVerified ? 'verified' : 'not_started',
@@ -45,7 +45,6 @@ export const useVerificationStatus = () => {
     try {
       // Update the user profile with verification data
       const success = await updateUserProfile({
-        is_verified: false,
         verificationDocuments: {
           documentUrl,
           selfieUrl,
