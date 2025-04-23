@@ -1,44 +1,75 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 
 /**
- * Upload a document to Supabase storage
- * @param file File to upload
- * @param filePrefix Prefix for the file name
+ * Upload a verification document to Supabase storage
  * @param userId User ID
- * @returns URL to the uploaded file
+ * @param file Document file to upload
+ * @param documentType Type of document (id_card, passport, etc.)
+ * @param category Category of upload (front, back, selfie)
+ * @returns URL of the uploaded file
  */
 export const uploadVerificationDocument = async (
-  file: File,
-  filePrefix: string,
-  userId: string
+  userId: string, 
+  file: File, 
+  documentType: string,
+  category: string
 ): Promise<string> => {
   try {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${filePrefix}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-    const filePath = `${userId}/${fileName}`;
+    // Create a unique file name
+    const timestamp = new Date().getTime();
+    const fileExtension = file.name.split('.').pop() || 'jpg';
+    const filePath = `${userId}/${documentType}_${category}_${timestamp}.${fileExtension}`;
     
-    const { data, error } = await supabase.storage
+    // Upload to verification-documents bucket
+    const { data: uploadData, error: uploadError } = await supabase
+      .storage
       .from('verification-documents')
-      .upload(filePath, file);
-    
-    if (error) throw error;
+      .upload(filePath, file, {
+        contentType: file.type,
+        upsert: true
+      });
+      
+    if (uploadError) {
+      console.error(`Error uploading ${category} document:`, uploadError);
+      throw new Error(`Failed to upload ${category} document: ${uploadError.message}`);
+    }
     
     // Get public URL
-    const { data: urlData } = supabase.storage
+    const { data: publicUrlData } = supabase
+      .storage
       .from('verification-documents')
       .getPublicUrl(filePath);
-    
-    return urlData.publicUrl;
+      
+    return publicUrlData.publicUrl;
   } catch (error) {
-    console.error('Error uploading verification document:', error);
-    throw new Error('Failed to upload document');
+    console.error(`Error processing ${category} document:`, error);
+    throw error;
   }
 };
 
-export const getFileTypeFromMimeType = (mimeType: string): string => {
-  if (mimeType.startsWith('image/')) return 'image';
-  if (mimeType.startsWith('application/pdf')) return 'pdf';
-  if (mimeType.startsWith('application/msword') || mimeType.includes('officedocument.wordprocessingml')) return 'doc';
-  return 'other';
+/**
+ * Check if there are pending document uploads
+ * @param userId User ID
+ * @returns Boolean indicating pending uploads
+ */
+export const hasPendingUploads = async (userId: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from('verification_documents')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('status', 'pending')
+      .limit(1);
+      
+    if (error) {
+      console.error('Error checking for pending uploads:', error);
+      return false;
+    }
+    
+    return data && data.length > 0;
+  } catch (error) {
+    console.error('Error checking for pending uploads:', error);
+    return false;
+  }
 };

@@ -1,35 +1,42 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileUp, X, Image } from 'lucide-react';
+import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Upload, Image, X } from 'lucide-react';
 
 interface DocumentUploadHandlerProps {
   label: string;
   onFileSelect: (file: File) => void;
   error?: string;
-  optional?: boolean;
+  accept?: string;
+  placeholder?: string;
+  previewUrl?: string;
 }
 
 const DocumentUploadHandler: React.FC<DocumentUploadHandlerProps> = ({
   label,
   onFileSelect,
   error,
-  optional = false
+  accept = "image/*",
+  placeholder = "Select or drag an image",
+  previewUrl
 }) => {
-  const [preview, setPreview] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(previewUrl || null);
   const [isDragging, setIsDragging] = useState(false);
-  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = () => {
-      setPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    if (file) {
+      handleFile(file);
+    }
+  };
+
+  const handleFile = (file: File) => {
+    // Create preview
+    const filePreview = URL.createObjectURL(file);
+    setPreview(filePreview);
     onFileSelect(file);
   };
 
@@ -46,85 +53,75 @@ const DocumentUploadHandler: React.FC<DocumentUploadHandlerProps> = ({
     e.preventDefault();
     setIsDragging(false);
     
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = () => {
-      setPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-    onFileSelect(file);
-  };
-
-  const removeFile = () => {
-    setPreview(null);
-    if (inputRef.current) {
-      inputRef.current.value = '';
+    if (e.dataTransfer.files.length) {
+      const file = e.dataTransfer.files[0];
+      handleFile(file);
     }
   };
 
+  const clearPreview = () => {
+    setPreview(null);
+    // Reset input
+    const input = document.getElementById(`file-input-${label.replace(/\s+/g, '-')}`) as HTMLInputElement;
+    if (input) input.value = '';
+  };
+
   return (
-    <div className="space-y-2">
-      <div className="flex items-baseline justify-between">
-        <p className="text-sm font-medium">{label}</p>
-        {optional && <span className="text-xs text-muted-foreground">Optional</span>}
-      </div>
-      
-      {preview ? (
-        <Card className="overflow-hidden">
-          <div className="relative">
-            <img 
-              src={preview} 
-              alt={label} 
-              className="w-full h-auto max-h-40 object-cover" 
-            />
-            <Button 
-              type="button"
-              variant="destructive" 
-              size="icon"
-              className="absolute top-2 right-2 h-6 w-6"
-              onClick={removeFile}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </Card>
-      ) : (
-        <div
-          className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer transition-colors ${
-            isDragging ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary/50'
-          }`}
+    <FormItem>
+      <FormLabel>{label}</FormLabel>
+      <FormControl>
+        <div 
+          className={`relative ${error ? 'border-destructive' : ''}`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          onClick={() => inputRef.current?.click()}
         >
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-          {isDragging ? (
-            <Image className="h-8 w-8 text-primary mb-2" />
+          {preview ? (
+            <Card className="p-2 relative">
+              <img 
+                src={preview} 
+                alt={`Preview for ${label}`} 
+                className="w-full h-auto max-h-48 object-contain rounded-md"
+              />
+              <Button 
+                variant="ghost" 
+                size="icon"
+                type="button"
+                onClick={clearPreview}
+                className="absolute top-2 right-2 bg-background/90 rounded-full h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </Card>
           ) : (
-            <FileUp className="h-8 w-8 text-muted-foreground mb-2" />
+            <div 
+              className={`flex flex-col items-center justify-center p-6 border-2 border-dashed
+              rounded-md transition-colors h-32
+              ${isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/20'}
+              ${error ? 'border-destructive' : ''}`}
+            >
+              <div className="flex flex-col items-center gap-2 text-center">
+                {isDragging ? <Image className="h-8 w-8 text-primary" /> : <Upload className="h-8 w-8" />}
+                <div className="text-sm text-muted-foreground">
+                  <span className="font-medium text-foreground">Click to upload</span> or drag and drop
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {placeholder}
+                </p>
+              </div>
+              <Input
+                id={`file-input-${label.replace(/\s+/g, '-')}`}
+                type="file"
+                accept={accept}
+                onChange={handleFileChange}
+                className="absolute inset-0 opacity-0 cursor-pointer h-full w-full"
+              />
+            </div>
           )}
-          <p className="text-sm font-medium text-center">
-            {isDragging ? 'Drop to upload' : 'Click to upload or drag and drop'}
-          </p>
-          <p className="text-xs text-muted-foreground text-center mt-1">
-            JPG, PNG or WEBP (max. 5MB)
-          </p>
         </div>
-      )}
-      
-      {error && (
-        <p className="text-sm text-destructive">{error}</p>
-      )}
-    </div>
+      </FormControl>
+      {error && <FormMessage>{error}</FormMessage>}
+    </FormItem>
   );
 };
 

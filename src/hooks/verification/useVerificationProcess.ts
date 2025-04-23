@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { useToast } from '@/components/ui/use-toast';
-import { submitVerificationRequest } from '@/utils/verification';
+import { submitVerificationForm } from '@/utils/verification';
 import type { DocumentType } from '@/types/verification';
 
 export const useVerificationProcess = () => {
@@ -14,28 +14,27 @@ export const useVerificationProcess = () => {
     documentType: DocumentType;
     documentFile: File;
     selfieFile?: File;
+    documentBackImage?: {file: File, preview: string} | null;
+    documentFrontImage: {file: File, preview: string};
+    selfieImage: {file: File, preview: string};
   }) => {
     if (!user) return false;
     
     setLoading(true);
     try {
-      const result = await submitVerificationRequest(
+      // We'll use the submitVerificationForm function from our utils
+      // which handles the upload and form submission
+      const result = await submitVerificationForm(
         user.id,
-        data.documentType,
-        data.documentFile,
-        data.selfieFile || null,
-        data.documentFile
+        {
+          documentType: data.documentType,
+          documentFile: data.documentFrontImage.file,
+          documentBackImage: data.documentBackImage || undefined,
+          selfieImage: data.selfieImage
+        }
       );
       
       if (result.success) {
-        // Update local user metadata to reflect verification submission
-        if (user.user_metadata) {
-          user.user_metadata.verification_submitted = true;
-          user.user_metadata.verification_documents = {
-            submittedAt: new Date().toISOString()
-          };
-        }
-        
         toast({
           title: "Verification Submitted",
           description: "Your verification request has been submitted successfully."
@@ -61,3 +60,5 @@ export const useVerificationProcess = () => {
     loading
   };
 };
+
+export default useVerificationProcess;

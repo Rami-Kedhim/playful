@@ -1,87 +1,69 @@
 
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Shield, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { 
+  Shield, 
+  ShieldCheck, 
+  AlertTriangle
+} from 'lucide-react';
+import { VerificationLevel } from '@/types/verification';
 
 interface VerificationBadgeProps {
-  level: 'none' | 'basic' | 'enhanced' | 'premium' | string;
-  size?: 'sm' | 'md' | 'lg';
-  showLabel?: boolean;
+  level: VerificationLevel | 'none' | 'basic' | 'enhanced' | 'premium';
 }
 
-export const VerificationBadge: React.FC<VerificationBadgeProps> = ({ 
-  level, 
-  size = 'sm',
-  showLabel = true
-}) => {
-  // Map string levels to our standard levels
-  let standardLevel = level;
-  if (level === 'verified') standardLevel = 'basic';
-  if (!level || level === 'unverified') standardLevel = 'none';
-  
-  // Determine icon and text based on level
-  const getIcon = () => {
-    switch (standardLevel) {
-      case 'none':
-        return <ShieldAlert className={iconSizes[size]} />;
-      case 'basic':
-        return <Shield className={iconSizes[size]} />;
-      case 'enhanced':
-      case 'premium':
-        return <ShieldCheck className={iconSizes[size]} />;
-      default:
-        return <Shield className={iconSizes[size]} />;
+const VerificationBadge = ({ level }: VerificationBadgeProps) => {
+  // Normalize the level to ensure it matches our enum values
+  const normalizedLevel = level === 'none' ? VerificationLevel.NONE : 
+                          level === 'basic' ? VerificationLevel.BASIC :
+                          level === 'enhanced' ? VerificationLevel.ENHANCED :
+                          level === 'premium' ? VerificationLevel.PREMIUM : 
+                          level;
+
+  if (normalizedLevel === VerificationLevel.NONE) {
+    return (
+      <div className="flex items-start gap-3 p-4 border border-gray-700 rounded-lg">
+        <AlertTriangle className="h-5 w-5 text-gray-400 mt-0.5" />
+        <div>
+          <h3 className="font-medium text-gray-400">Not Verified</h3>
+          <p className="text-sm text-gray-500 mt-1">
+            This profile has not completed any verification steps.
+            We recommend caution when interacting.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const badges = {
+    [VerificationLevel.BASIC]: {
+      icon: <Shield className="h-5 w-5 text-amber-500 mt-0.5" />,
+      title: "Basic Verification",
+      description: "This profile has completed basic identity verification steps."
+    },
+    [VerificationLevel.ENHANCED]: {
+      icon: <ShieldCheck className="h-5 w-5 text-blue-500 mt-0.5" />,
+      title: "Enhanced Verification",
+      description: "This profile has completed enhanced verification including identity and contact verification."
+    },
+    [VerificationLevel.PREMIUM]: {
+      icon: <ShieldCheck className="h-5 w-5 text-primary mt-0.5" />,
+      title: "Premium Verification",
+      description: "This profile has completed our most comprehensive verification process, including in-person verification."
     }
   };
-  
-  const getText = () => {
-    switch (standardLevel) {
-      case 'none':
-        return 'Not Verified';
-      case 'basic':
-        return 'Verified';
-      case 'enhanced':
-        return 'Enhanced';
-      case 'premium':
-        return 'Premium';
-      default:
-        return 'Unverified';
-    }
-  };
-  
-  const getVariant = () => {
-    switch (standardLevel) {
-      case 'none':
-        return 'outline';
-      case 'basic':
-        return 'success';
-      case 'enhanced':
-        return 'success';
-      case 'premium':
-        return 'success';
-      default:
-        return 'outline';
-    }
-  };
-  
-  // Size maps
-  const iconSizes: Record<string, string> = {
-    'sm': 'h-3 w-3',
-    'md': 'h-4 w-4',
-    'lg': 'h-5 w-5'
-  };
-  
-  const containerSizes: Record<string, string> = {
-    'sm': 'text-xs',
-    'md': 'text-sm',
-    'lg': 'text-base'
-  };
-  
+
+  const badge = badges[normalizedLevel as VerificationLevel] || badges[VerificationLevel.BASIC];
+
   return (
-    <Badge variant={getVariant()} className={`gap-1 font-normal ${containerSizes[size]}`}>
-      {getIcon()}
-      {showLabel && <span>{getText()}</span>}
-    </Badge>
+    <div className="flex items-start gap-3 p-4 border border-gray-700 rounded-lg">
+      {badge.icon}
+      <div>
+        <h3 className="font-medium">{badge.title}</h3>
+        <p className="text-sm text-gray-300 mt-1">
+          {badge.description}
+        </p>
+      </div>
+    </div>
   );
 };
 

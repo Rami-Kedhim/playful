@@ -1,7 +1,7 @@
 
-// Remove imports of non-existent types and add minimal typing in function signatures
-
+import { supabase } from '@/lib/supabase';
 import { uploadVerificationDocument } from './documentUpload';
+import type { DocumentType } from '@/types/verification';
 
 /**
  * Check if a user can submit verification
@@ -9,9 +9,28 @@ import { uploadVerificationDocument } from './documentUpload';
  * @returns Eligibility response
  */
 export const canSubmitVerification = async (userId: string): Promise<{ canSubmit: boolean; reason?: string; cooldownRemaining?: number }> => {
-  // Simulate API call and allow all submissions
   try {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Check if the user already has a pending verification request
+    const { data: existingRequests, error } = await supabase
+      .from('verification_requests')
+      .select('id, status, created_at')
+      .eq('profile_id', userId)
+      .eq('status', 'pending')
+      .single();
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 is the code for "no rows returned"
+      console.error('Error checking verification eligibility:', error);
+      return { canSubmit: false, reason: 'Unable to check eligibility at this time' };
+    }
+
+    // If there's a pending request, don't allow another submission
+    if (existingRequests) {
+      return { 
+        canSubmit: false, 
+        reason: 'You already have a pending verification request.' 
+      };
+    }
+
     return { canSubmit: true };
   } catch (error) {
     console.error('Error checking verification eligibility:', error);
@@ -42,20 +61,24 @@ export const submitVerificationRequest = async (
     if (backImage) formData.append('backImage', backImage);
     formData.append('selfieImage', selfieImage);
     
+    // Get current domain for edge function URL
+    const supabaseUrl = supabase.supabaseUrl;
+    
     // Call the process-verification edge function
-    const response = await fetch(`https://haffqtqpbnaviefewfmn.supabase.co/functions/v1/process-verification`, {
+    const response = await fetch(`${supabaseUrl}/functions/v1/process-verification`, {
       method: 'POST',
       body: formData,
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+        'Authorization': `Bearer ${supabase.auth.session()?.access_token || localStorage.getItem('supabase.auth.token') || ''}`
       }
     });
     
-    const result = await response.json();
-    
     if (!response.ok) {
-      throw new Error(result.message || 'Failed to submit verification request');
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to submit verification request');
     }
+    
+    const result = await response.json();
     
     return {
       success: true,
@@ -64,7 +87,7 @@ export const submitVerificationRequest = async (
     };
   } catch (error) {
     console.error('Error submitting verification request:', error);
-    return { success: false, message: 'Failed to submit verification request' };
+    return { success: false, message: error instanceof Error ? error.message : 'Failed to submit verification request' };
   }
 };
 
@@ -74,19 +97,24 @@ export const submitVerificationRequest = async (
  */
 export const submitVerificationForm = async (
   userId: string,
-  formData: any
+  formData: {
+    documentType: DocumentType;
+    documentFile: File;
+    selfieImage: {file: File, preview: string};
+    documentBackImage?: {file: File, preview: string};
+  }
 ): Promise<{ success: boolean; message: string; requestId?: string }> => {
   console.log('Submitting verification form:', formData);
   try {
     return await submitVerificationRequest(
       userId,
       formData.documentType,
-      formData.documentFrontImage.file,
+      formData.documentFile,
       formData.documentBackImage?.file || null,
       formData.selfieImage.file
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error submitting verification form:', error);
-    return { success: false, message: 'Failed to submit verification request' };
+    return { success: false, message: error.message || 'Failed to submit verification request' };
   }
 };
