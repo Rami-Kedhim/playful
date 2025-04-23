@@ -1,31 +1,32 @@
+import { NavLink } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { Shield } from "lucide-react";
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-
-interface NavItemsProps {
-  className?: string;
-}
-
-const NavItems: React.FC<NavItemsProps> = ({ className }) => {
+const NavItems = () => {
   return (
-    <nav className={className}>
-      <ul className="flex space-x-4">
-        <li>
-          <Link to="/" className="text-foreground hover:text-primary">
-            Home
-          </Link>
-        </li>
-        <li>
-          <Link to="/explore" className="text-foreground hover:text-primary">
-            Explore
-          </Link>
-        </li>
-        <li>
-          <Link to="/livecams" className="text-foreground hover:text-primary">
-            Live
-          </Link>
-        </li>
-      </ul>
+    <nav className="flex items-center space-x-4">
+      <NavLink
+        to="/"
+        className={({ isActive }) =>
+          cn("text-sm font-medium transition-colors hover:text-primary",
+            isActive ? "text-foreground" : "text-muted-foreground"
+          )
+        }
+      >
+        Home
+      </NavLink>
+      <NavLink
+        to="/verification"
+        className={({ isActive }) =>
+          cn("text-sm font-medium transition-colors hover:text-primary flex items-center gap-1",
+            isActive ? "text-foreground" : "text-muted-foreground"
+          )
+        }
+      >
+        <Shield className="h-4 w-4" />
+        Verify Account
+      </NavLink>
+      
     </nav>
   );
 };
