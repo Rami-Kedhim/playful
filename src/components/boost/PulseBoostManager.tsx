@@ -43,6 +43,11 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
     return <div className="text-red-600">Error loading Pulse Boosts: {error}</div>;
   }
 
+  // Defensive: If pulseBoostPackages is empty or undefined, render message
+  if (!pulseBoostPackages || pulseBoostPackages.length === 0) {
+    return <div className="text-center text-muted-foreground">No pulse boosts available.</div>;
+  }
+
   // Wrap handlers to match expected signatures passing boostId param
   const handleActivate = async (boostId: string): Promise<boolean> => {
     const pkg = pulseBoostPackages.find(p => p.id === boostId);
@@ -68,10 +73,12 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
 
   return (
     <div className="space-y-4">
-      {pulseBoostPackages.length === 0 && (
-        <div className="text-center text-muted-foreground">No pulse boosts available.</div>
-      )}
       {pulseBoostPackages.map((pkg) => {
+        if (!pkg) {
+          console.error('PulseBoostManager: Encountered undefined package in pulseBoostPackages');
+          return null;
+        }
+
         const visibilityKey = mapVisibility(pkg.visibility_increase);
 
         const costUBX = pkg.price_ubx ?? 0;
