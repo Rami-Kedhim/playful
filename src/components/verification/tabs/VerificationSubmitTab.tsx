@@ -4,11 +4,12 @@ import VerificationForm from '../form/VerificationForm'
 import { useVerificationProcess } from '@/hooks/verification/useVerificationProcess'
 
 interface VerificationSubmitTabProps {
-  onSubmit: (data: any) => void
+  onSubmit?: (data: any) => void
   onComplete: () => void
 }
 
 const VerificationSubmitTab: React.FC<VerificationSubmitTabProps> = ({
+  onSubmit,
   onComplete
 }) => {
   const { submitVerification, loading } = useVerificationProcess()
@@ -17,6 +18,9 @@ const VerificationSubmitTab: React.FC<VerificationSubmitTabProps> = ({
     const success = await submitVerification(data)
     if (success) {
       onComplete()
+    }
+    if (onSubmit) {
+      onSubmit(data)
     }
   }
 
