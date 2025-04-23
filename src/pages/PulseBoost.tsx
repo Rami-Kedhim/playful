@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import PulseBoostManager from '@/components/boost/PulseBoostManager';
+import PulseBoostErrorBoundary from '@/components/boost/PulseBoostErrorBoundary';
 
 const PulseBoostPage = () => {
   const { user, profile } = useAuth();
@@ -49,7 +50,9 @@ const PulseBoostPage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <PulseBoostManager profileId={user?.id} />
+          <PulseBoostErrorBoundary>
+            <PulseBoostManager profileId={user?.id} />
+          </PulseBoostErrorBoundary>
         </CardContent>
       </Card>
     </div>

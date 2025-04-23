@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import usePulseBoost from '@/hooks/boost/usePulseBoost';
 import PulseBoostCard from '@/components/boost/PulseBoostCard';
 import usePulseBoostAdapter from '@/hooks/boost/usePulseBoostAdapter';
@@ -8,6 +8,7 @@ import LoadingOverlay from '@/components/common/LoadingOverlay';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { BoostPackage } from '@/types/boost';
+import { toast } from '@/hooks/use-toast';
 
 interface PulseBoostManagerProps {
   profileId?: string;
@@ -27,7 +28,10 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
   } = usePulseBoost(profileId || undefined);
 
   const { status: boostStatus, loading: statusLoading } = useBoostStatus(profileId);
-  const { formatPulseDuration } = usePulseBoostAdapter(profileId || '');
+  const { formatPulseDuration, realtimeStatus } = usePulseBoostAdapter(profileId || '');
+  
+  // Combine realtime status with our regular status if available
+  const currentStatus = realtimeStatus || boostStatus;
 
   // Handle loading state
   if (isLoading || statusLoading) {
@@ -63,7 +67,21 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
     setProcessingId(pkg.id);
     try {
       const result = await purchaseBoost(pkg);
+      if (result) {
+        toast({
+          title: "Boost Activated",
+          description: `Your ${pkg.name} boost has been successfully activated.`,
+        });
+      }
       return result;
+    } catch (error) {
+      console.error('Error purchasing boost:', error);
+      toast({
+        title: "Activation Failed",
+        description: "There was an error activating your boost. Please try again.",
+        variant: "destructive"
+      });
+      return false;
     } finally {
       setProcessingId(null);
     }
@@ -73,7 +91,22 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
     if (processingId) return false;
     setProcessingId(boostId);
     try {
-      return await cancelBoost();
+      const result = await cancelBoost();
+      if (result) {
+        toast({
+          title: "Boost Cancelled",
+          description: "Your boost has been successfully cancelled.",
+        });
+      }
+      return result;
+    } catch (error) {
+      console.error('Error cancelling boost:', error);
+      toast({
+        title: "Cancellation Failed",
+        description: "There was an error cancelling your boost. Please try again.",
+        variant: "destructive"
+      });
+      return false;
     } finally {
       setProcessingId(null);
     }
@@ -94,10 +127,11 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
             costUBX: pkg.price_ubx || 0,
             color: pkg.color || '#3b82f6',
             badgeColor: pkg.color || '#3b82f6',
-            features: Array.isArray(pkg.features) ? pkg.features : []
+            features: Array.isArray(pkg.features) ? pkg.features : [],
+            visibility_increase: pkg.visibility_increase
           }}
-          isActive={boostStatus?.isActive && boostStatus?.packageId === pkg.id}
-          timeRemaining={boostStatus?.remainingTime}
+          isActive={currentStatus?.isActive && currentStatus?.packageId === pkg.id}
+          timeRemaining={currentStatus?.remainingTime}
           onActivate={handlePurchaseBoost}
           onCancel={handleCancelBoost}
           userBalance={userEconomy?.ubxBalance || 0}

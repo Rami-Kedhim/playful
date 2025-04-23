@@ -1,166 +1,82 @@
 
-import { BoostPackage } from '@/types/boost';
-import { PulseBoost } from '@/types/pulse-boost';
+import { useState, useEffect } from 'react';
+import { formatBoostDuration } from '@/utils/boostCalculator';
+import { supabase } from '@/integrations/supabase/client';
+import { EnhancedBoostStatus, PulseBoost } from '@/types/pulse-boost';
 
-interface UsePulseBoostAdapterResult {
-  formatPulseDuration: (duration: string) => string;
-  adaptGetPulseBoostPrice: (fn: (pkg: BoostPackage) => number) => (pkg: BoostPackage) => number;
-  convertToUBX: (value: number) => number;
-  convertToPulseBoost: (pkg: BoostPackage) => PulseBoost;
-}
+const usePulseBoostAdapter = (profileId: string) => {
+  const [realtimeStatus, setRealtimeStatus] = useState<EnhancedBoostStatus | null>(null);
 
-export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterResult => {
+  useEffect(() => {
+    if (!profileId) return;
+
+    // Subscribe to changes in the pulse_boosts_active table
+    const channel = supabase
+      .channel('pulse-boost-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'pulse_boosts_active',
+          filter: `user_id=eq.${profileId}`
+        },
+        (payload) => {
+          console.log('Pulse boost update received:', payload);
+          
+          // Update real-time status
+          if (payload.eventType === 'DELETE') {
+            setRealtimeStatus({ isActive: false });
+          } else {
+            const boostData = payload.new;
+            if (boostData) {
+              const expiresAt = boostData.expires_at ? new Date(boostData.expires_at) : new Date();
+              const now = new Date();
+              const diff = expiresAt.getTime() - now.getTime();
+              
+              if (diff > 0) {
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const remainingTime = `${hours}h ${minutes}m`;
+
+                setRealtimeStatus({
+                  isActive: true,
+                  startTime: new Date(boostData.started_at),
+                  endTime: expiresAt,
+                  remainingTime,
+                  packageId: boostData.boost_id
+                });
+              } else {
+                setRealtimeStatus({ isActive: false });
+              }
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [profileId]);
+
+  // Format pulse duration in a user-friendly way
   const formatPulseDuration = (duration: string): string => {
-    if (!duration) return "Unknown duration";
-    
-    const parts = duration.split(':');
-    if (parts.length !== 3) return "Unknown duration";
-    
-    const hoursStr = parts[0] || '0';
-    const minutesStr = parts[1] || '0';
-    const secondsStr = parts[2] || '0';
-    
-    const hours = Number(hoursStr);
-    const minutes = Number(minutesStr);
-    const seconds = Number(secondsStr);
-
-    if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) return "Unknown duration";
-
-    if (hours >= 24) {
-      const days = Math.floor(hours / 24);
-      return `${days} ${days === 1 ? 'day' : 'days'}`;
-    }
-
-    if (hours >= 1) {
-      return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
-    }
-
-    if (minutes >= 1) {
-      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
-    }
-
-    return "Less than a minute";
+    return formatBoostDuration(duration);
   };
 
-  const parseNumberValue = (val: unknown, fallback: number): number => {
-    if (typeof val === 'number') return val;
-    if (typeof val === 'string') {
-      const parsed = Number(val);
-      if (isNaN(parsed)) return fallback;
-      return parsed;
-    }
-    return fallback;
-  };
-
-  const adaptGetPulseBoostPrice = (fn: (pkg: BoostPackage) => number) => (pkg: BoostPackage): number => {
-    if (!pkg) return 0;
-    
-    if (pkg.price_ubx !== undefined && pkg.price_ubx !== null) {
-      if (typeof pkg.price_ubx === 'string') {
-        const parsed = Number(pkg.price_ubx);
-        return isNaN(parsed) ? (fn ? fn(pkg) : 0) : parsed;
-      }
-      return pkg.price_ubx;
-    }
-    
-    if (typeof fn === 'function') {
-      try {
-        return fn(pkg);
-      } catch (error) {
-        console.error("Error in price adaptation function:", error);
-        return parseNumberValue(pkg.price, 0);
-      }
-    }
-    
-    return parseNumberValue(pkg.price, 0);
-  };
-
-  const convertToUBX = (value: number): number => {
-    const UBX_RATE = 10; // 1 USD = 10 UBX
-    return value * UBX_RATE;
-  };
-
-  const getColorForBoostPower = (boostPower: number): string => {
-    if (boostPower >= 200) return '#ec4899';
-    if (boostPower >= 100) return '#8b5cf6';
-    return '#60a5fa';
-  };
-
-  const convertToPulseBoost = (pkg: BoostPackage): PulseBoost => {
-    if (!pkg || typeof pkg !== 'object') {
-      // Provide a default PulseBoost if package is invalid
-      return {
-        id: 'default',
-        name: 'Standard Boost',
-        description: 'Default boost package',
-        duration: '24:00:00',
-        durationMinutes: 1440,
-        price: 0,
-        costUBX: 0,
-        visibility: 'homepage',
-        color: '#60a5fa',
-        badgeColor: '#60a5fa',
-        features: []
-      };
-    }
-    
-    const durationStr = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
-    const parts = durationStr.split(':');
-
-    const hours: number = parts[0] ? Number(parts[0]) : 0;
-    const minutes: number = parts[1] ? Number(parts[1]) : 0;
-    const seconds: number = parts[2] ? Number(parts[2]) : 0;
-
-    const validHours = isNaN(hours) ? 0 : hours;
-    const validMinutes = isNaN(minutes) ? 0 : minutes;
-    const validSeconds = isNaN(seconds) ? 0 : seconds;
-
-    const durationMinutes: number = (validHours * 60) + validMinutes + (validSeconds / 60);
-
-    const boostPowerRaw: unknown = (pkg as any).boost_power ?? (pkg as any).boostPower;
-    const boostPowerNum: number = parseNumberValue(boostPowerRaw, 50);
-
-    let visibility: PulseBoost['visibility'] = 'homepage';
-    if (boostPowerNum >= 200) visibility = 'global';
-    else if (boostPowerNum >= 100) visibility = 'search';
-    else if (boostPowerNum >= 75) visibility = 'smart_match';
-
-    let priceNum: number = 0;
-    if (typeof pkg.price === 'number') priceNum = pkg.price;
-    else if (typeof pkg.price === 'string') {
-      const parsedPrice = Number(pkg.price);
-      priceNum = isNaN(parsedPrice) ? 0 : parsedPrice;
-    }
-
-    let costUBXNum: number = 0;
-    if (typeof (pkg as any).price_ubx === 'number') costUBXNum = (pkg as any).price_ubx;
-    else if (typeof (pkg as any).price_ubx === 'string') {
-      const parsedUBX = Number((pkg as any).price_ubx);
-      costUBXNum = isNaN(parsedUBX) ? Math.round(convertToUBX(priceNum)) : parsedUBX;
-    } else {
-      costUBXNum = Math.round(convertToUBX(priceNum));
-    }
-
+  const adaptPulseBoost = (pulseBoost: PulseBoost) => {
+    // Transform PulseBoost to a format needed by components
     return {
-      id: pkg.id,
-      name: pkg.name,
-      description: pkg.description || `${pkg.name} visibility boost for your profile`,
-      duration: durationStr,
-      durationMinutes: durationMinutes,
-      price: priceNum,
-      costUBX: costUBXNum,
-      visibility,
-      color: getColorForBoostPower(boostPowerNum),
-      badgeColor: getColorForBoostPower(boostPowerNum),
-      features: pkg.features || []
+      ...pulseBoost,
+      formattedDuration: formatPulseDuration(pulseBoost.duration || '00:00:00')
     };
   };
 
   return {
     formatPulseDuration,
-    adaptGetPulseBoostPrice,
-    convertToUBX,
-    convertToPulseBoost
+    adaptPulseBoost,
+    realtimeStatus
   };
 };
 
