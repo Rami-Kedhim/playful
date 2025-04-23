@@ -19,6 +19,8 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  checkRole?: (role: string) => boolean;
+  signOut?: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -100,6 +102,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const checkRole = (role: string) => {
+    // Mock role check
+    return false; // For now, no roles are implemented
+  };
+
+  // Add signOut as an alias for logout for compatibility
+  const signOut = logout;
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -107,7 +117,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isAuthenticated: !!user,
       isLoading,
       login,
-      logout
+      logout,
+      checkRole,
+      signOut
     }}>
       {children}
     </AuthContext.Provider>

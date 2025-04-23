@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from "./components/ui/toaster";
-import { AuthProvider } from './hooks/auth/useAuth';
+import { AuthProvider } from './hooks/auth/useAuth.tsx'; // Import from .tsx file instead of .ts
 import { ThemeProvider } from './contexts/ThemeContext';
 import { BoostProvider } from './contexts/BoostContext';
 import HomePage from "./pages/HomePage";
