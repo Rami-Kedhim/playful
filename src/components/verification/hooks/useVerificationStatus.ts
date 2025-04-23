@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { toast } from '@/components/ui/use-toast';
+import { checkVerificationStatus } from '@/utils/verification/statusCheck';
 import { VerificationLevel, VerificationStatus, VerificationRequest } from '@/types/verification';
 
 export interface VerificationStatusState {
@@ -13,7 +14,7 @@ export interface VerificationStatusState {
 }
 
 export const useVerificationStatus = () => {
-  const { user, profile, updateUserProfile } = useAuth();
+  const { user } = useAuth();
   const [status, setStatus] = useState<VerificationStatusState>({
     status: VerificationStatus.NONE,
     canSubmit: true,
@@ -24,108 +25,57 @@ export const useVerificationStatus = () => {
   const [verificationRequest, setVerificationRequest] = useState<VerificationRequest | null>(null);
 
   useEffect(() => {
-    if (profile) {
-      // Check if profile has verification status
-      const isVerified = !!profile.is_verified;
-      
-      const hasSubmittedVerification = user?.user_metadata?.verification_submitted === true;
-      
-      // Create a verification request object from user metadata if available
-      let request: VerificationRequest | null = null;
-      if (hasSubmittedVerification && user?.user_metadata?.verification_documents) {
-        request = {
-          id: user.id,
-          userId: user.id,
-          status: hasSubmittedVerification ? VerificationStatus.PENDING : VerificationStatus.NONE,
-          verificationLevel: VerificationLevel.BASIC,
-          documents: [],
-          submittedAt: user.user_metadata.verification_documents.submittedAt,
-          updatedAt: user.user_metadata.verification_documents.submittedAt,
-        };
-      }
-      
-      setVerificationRequest(request);
-      
-      setStatus({
-        status: hasSubmittedVerification ? VerificationStatus.PENDING : VerificationStatus.NONE,
-        canSubmit: !isVerified,
-        isVerified,
-        lastSubmitted: user?.user_metadata?.verification_documents?.submittedAt ? 
-          new Date(user.user_metadata.verification_documents.submittedAt) : null
-      });
-      
-      setLoading(false);
-    }
-  }, [profile, user]);
-
-  const submitVerification = async (documentUrl: string, selfieUrl: string) => {
-    if (!user) return false;
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Update the user profile with verification data
-      const success = await updateUserProfile({
-        user_metadata: {
-          verification_submitted: true,
-          verification_documents: {
-            documentUrl,
-            selfieUrl,
-            submittedAt: new Date().toISOString()
+    if (user) {
+      const fetchVerificationStatus = async () => {
+        setLoading(true);
+        try {
+          // Check if user is verified through metadata
+          const isVerified = user.user_metadata?.verification_status === 'approved';
+          
+          // Check for verification requests
+          const result = await checkVerificationStatus(user.id);
+          
+          // Check if we have a last submitted date
+          const hasSubmitted = user.user_metadata?.verification_submitted === true;
+          const submittedAt = user.user_metadata?.verification_documents?.submittedAt;
+          
+          setStatus({
+            status: result.status,
+            canSubmit: result.status !== VerificationStatus.PENDING && 
+                       result.status !== VerificationStatus.IN_REVIEW,
+            isVerified,
+            lastSubmitted: submittedAt ? new Date(submittedAt) : null
+          });
+          
+          if (result.lastRequest) {
+            setVerificationRequest(result.lastRequest);
           }
+          
+        } catch (error: any) {
+          console.error("Error fetching verification status:", error);
+          setError(error.message || "Failed to fetch verification status");
+          
+          toast({
+            title: "Error",
+            description: "Could not retrieve verification status",
+            variant: "destructive"
+          });
+        } finally {
+          setLoading(false);
         }
-      });
-      
-      if (!success) throw new Error("Failed to submit verification");
-      
-      // Update local state
-      const newRequest: VerificationRequest = {
-        id: user.id,
-        userId: user.id,
-        status: VerificationStatus.PENDING,
-        verificationLevel: VerificationLevel.BASIC,
-        documents: [],
-        submittedAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       };
       
-      setVerificationRequest(newRequest);
-      
-      setStatus(prev => ({
-        ...prev,
-        status: VerificationStatus.PENDING,
-        canSubmit: false,
-        lastSubmitted: new Date()
-      }));
-      
-      toast({
-        title: "Verification submitted",
-        description: "Your verification has been submitted and is pending review.",
-      });
-      
-      return true;
-    } catch (error: any) {
-      setError(error.message || "Failed to submit verification");
-      
-      toast({
-        title: "Verification failed",
-        description: "There was an error submitting your verification.",
-        variant: "destructive"
-      });
-      
-      return false;
-    } finally {
-      setLoading(false);
+      fetchVerificationStatus();
     }
-  };
+  }, [user]);
 
   return {
     status,
     loading,
     error,
-    submitVerification,
     isVerified: status.isVerified,
     verificationRequest
   };
 };
+
+export default useVerificationStatus;
