@@ -18,6 +18,18 @@ const mapVisibility = (visibilityIncrease?: number): "homepage" | "search" | "sm
   return 'homepage';
 };
 
+// Helper to convert "HH:mm:ss" string duration to minutes number
+const parseDurationToMinutes = (duration?: string): number => {
+  if (!duration) return 0;
+  const parts = duration.split(':');
+  if (parts.length !== 3) return 0;
+  const [hoursStr, minutesStr, secondsStr] = parts;
+  const hours = Number(hoursStr);
+  const minutes = Number(minutesStr);
+  // return total minutes rounded
+  return Math.max(0, (hours * 60) + minutes);
+};
+
 const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
   const {
     isLoading,
@@ -32,21 +44,16 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
 
   const { formatPulseDuration } = usePulseBoostAdapter(profileId || '');
 
-  // Helper to check active boost for a package
-  const isActive = (boostId: string) => activeBoosts.some((boost) => boost.boostId === boostId);
-
-  if (isLoading) {
-    return <div>Loading Pulse Boosts...</div>;
-  }
-
-  if (error) {
-    return <div className="text-red-600">Error loading Pulse Boosts: {error}</div>;
-  }
+  // Debug log for packages
+  // console.debug("PulseBoostManager packages:", pulseBoostPackages);
 
   // Defensive: If pulseBoostPackages is empty or undefined, render message
   if (!pulseBoostPackages || pulseBoostPackages.length === 0) {
     return <div className="text-center text-muted-foreground">No pulse boosts available.</div>;
   }
+
+  // Helper to check active boost for a package
+  const isActive = (boostId: string) => activeBoosts.some((boost) => boost.boostId === boostId);
 
   // Wrap handlers to match expected signatures passing boostId param
   const handleActivate = async (boostId: string): Promise<boolean> => {
@@ -87,6 +94,8 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
         const activeBoost = activeBoosts.find(b => b.boostId === pkg.id);
         const timeRemaining = activeBoost ? activeBoost.timeRemaining : undefined;
 
+        const durationMinutes = parseDurationToMinutes(pkg.duration);
+
         return (
           <PulseBoostCard
             key={pkg.id}
@@ -94,7 +103,8 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
               id: pkg.id,
               name: pkg.name,
               description: pkg.description,
-              durationMinutes: 0, // Could parse duration if needed
+              durationMinutes: durationMinutes,
+              duration: pkg.duration,
               visibility: visibilityKey,
               costUBX: costUBX,
               color: pkg.color || '#3b82f6',
@@ -105,7 +115,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
             timeRemaining={timeRemaining}
             onActivate={handleActivate}
             onCancel={handleCancel}
-            userBalance={userEconomy.ubxBalance}
+            userBalance={userEconomy?.ubxBalance || 0}
             disabled={false}
           />
         );
@@ -115,3 +125,4 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
 };
 
 export default PulseBoostManager;
+
