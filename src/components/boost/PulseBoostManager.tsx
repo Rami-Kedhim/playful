@@ -69,6 +69,16 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
     }
   };
 
+  const handleCancelBoost = async (boostId: string) => {
+    if (processingId) return false;
+    setProcessingId(boostId);
+    try {
+      return await cancelBoost();
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {pulseBoostPackages.map((pkg) => (
@@ -89,7 +99,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
           isActive={boostStatus?.isActive && boostStatus?.packageId === pkg.id}
           timeRemaining={boostStatus?.remainingTime}
           onActivate={handlePurchaseBoost}
-          onCancel={cancelBoost}
+          onCancel={handleCancelBoost}
           userBalance={userEconomy?.ubxBalance || 0}
           disabled={Boolean(processingId)}
         />

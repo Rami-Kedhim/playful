@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Clock, Zap, ChevronRight, CheckCircle, AlertCircle } from "lucide-react";
 import { PulseBoost } from '@/types/pulse-boost';
+import { BoostPackage } from '@/types/boost';
 import { toast } from '@/hooks/use-toast';
 
 interface PulseBoostCardProps {
   boost: PulseBoost;
   isActive: boolean;
   timeRemaining?: string;
-  onActivate?: (boostId: string) => Promise<boolean>;
+  onActivate?: (pkg: BoostPackage) => Promise<boolean>; // Updated type to accept BoostPackage
   onCancel: (boostId: string) => Promise<boolean>;
   userBalance?: number;
   disabled?: boolean;
@@ -53,7 +54,20 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
     setActionSuccess(null);
     
     try {
-      const success = await onActivate(boost.id);
+      // Convert the PulseBoost to BoostPackage for the onActivate call
+      const boostPackage: BoostPackage = {
+        id: boost.id,
+        name: boost.name,
+        description: boost.description || '',
+        duration: boost.duration || '00:00:00',
+        price: boost.price || 0,
+        price_ubx: boost.price_ubx || boost.costUBX || 0,
+        features: boost.features || [],
+        visibility_increase: typeof boost.visibility_increase === 'number' ? boost.visibility_increase : 50,
+        color: boost.color
+      };
+      
+      const success = await onActivate(boostPackage);
       setActionSuccess(success);
       
       if (success) {
