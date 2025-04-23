@@ -1,5 +1,3 @@
-
-// Updated import and type usage for VerificationFormValues from local
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -15,7 +13,6 @@ import SubmissionAlert from './SubmissionAlert';
 import SuccessCard from './SuccessCard';
 import * as z from 'zod';
 
-// Define the same schema here for consistency
 const verificationFormSchema = z.object({
   documentType: z.string(),
   documentFile: z.any().refine(val => val instanceof File, { message: "Document file is required" }),
@@ -35,7 +32,6 @@ const verificationFormSchema = z.object({
   }).optional()
 });
 
-// Define type here inline to fix import issue
 export type VerificationFormValues = z.infer<typeof verificationFormSchema>;
 
 interface VerificationFormProps {

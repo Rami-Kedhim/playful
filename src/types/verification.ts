@@ -1,4 +1,3 @@
-
 export enum VerificationStatus {
   NONE = 'none',
   PENDING = 'pending',
@@ -12,7 +11,7 @@ export enum VerificationLevel {
   NONE = 'none',
   BASIC = 'basic',
   ENHANCED = 'enhanced',
-  PREMIUM = 'premium',
+  PREMIUM = 'premium'
 }
 
 export type DocumentType = 'id_card' | 'passport' | 'drivers_license' | 'selfie' | string;
