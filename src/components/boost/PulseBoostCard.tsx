@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { Loader2, Clock, Zap, ChevronRight, CheckCircle, AlertCircle } from "lucide-react";
 import { PulseBoost } from '@/types/pulse-boost';
 import { BoostPackage } from '@/types/boost';
@@ -12,7 +13,7 @@ interface PulseBoostCardProps {
   boost: PulseBoost;
   isActive: boolean;
   timeRemaining?: string;
-  onActivate?: (pkg: BoostPackage) => Promise<boolean>; // Updated type to accept BoostPackage
+  onActivate?: (pkg: BoostPackage) => Promise<boolean>;
   onCancel: (boostId: string) => Promise<boolean>;
   userBalance?: number;
   disabled?: boolean;
@@ -29,6 +30,31 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [actionSuccess, setActionSuccess] = useState<boolean | null>(null);
+  
+  // Calculate progress value for the progress bar (0-100)
+  const calculateProgress = (): number => {
+    if (!isActive || !timeRemaining) return 0;
+    
+    // Parse time remaining format (e.g., "2h 30m") to calculate progress
+    let totalMinutes = 0;
+    let elapsedMinutes = 0;
+    
+    if (boost.durationMinutes) {
+      totalMinutes = boost.durationMinutes;
+      
+      // Parse timeRemaining format like "2h 30m"
+      const hourMatch = timeRemaining.match(/(\d+)h/);
+      const minuteMatch = timeRemaining.match(/(\d+)m/);
+      
+      const remainingHours = hourMatch ? parseInt(hourMatch[1]) : 0;
+      const remainingMinutes = minuteMatch ? parseInt(minuteMatch[1]) : 0;
+      
+      const remainingTotalMinutes = (remainingHours * 60) + remainingMinutes;
+      elapsedMinutes = totalMinutes - remainingTotalMinutes;
+    }
+    
+    return Math.min(100, Math.max(0, (elapsedMinutes / totalMinutes) * 100));
+  };
   
   // Format duration to readable string safely
   const formatDuration = (minutes?: number): string => {
@@ -161,14 +187,20 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
           </div>
           <div className="bg-background/50 p-3 rounded-md flex flex-col items-center">
             <Zap className="h-4 w-4 mb-1 text-muted-foreground" />
-            <span className="text-sm font-semibold">{boost.visibility || 'Standard'}</span>
+            <span className="text-sm font-semibold">
+              {boost.visibility_increase ? `+${boost.visibility_increase}%` : 'Standard'}
+            </span>
             <span className="text-xs text-muted-foreground">Visibility</span>
           </div>
         </div>
         
         {isActive && timeRemaining && (
-          <div className="mt-2 bg-background/80 p-2 rounded-md text-center">
-            <span className="text-sm font-medium">{timeRemaining} remaining</span>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">{timeRemaining} remaining</span>
+              <span className="text-xs text-muted-foreground">{calculateProgress().toFixed(0)}%</span>
+            </div>
+            <Progress value={calculateProgress()} className="h-2" />
           </div>
         )}
         
