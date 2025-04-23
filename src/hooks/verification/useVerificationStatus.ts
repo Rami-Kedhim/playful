@@ -83,6 +83,6 @@ export const useVerificationStatus = () => {
     loading,
     error,
     submitVerification,
-    isVerified: status.isVerified // Add the isVerified property here
+    isVerified: status.isVerified
   };
 };
