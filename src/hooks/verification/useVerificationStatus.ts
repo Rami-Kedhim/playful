@@ -44,9 +44,8 @@ export const useVerificationStatus = () => {
     
     try {
       // Update the user profile with verification data
-      // Use properties that exist in the User/UserProfile type
       const success = await updateUserProfile({
-        isVerified: false, // Using isVerified which is in the User type
+        is_verified: false,
         verificationDocuments: {
           documentUrl,
           selfieUrl,
