@@ -51,7 +51,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
   }
 
   // Handle empty packages state
-  if (!pulseBoostPackages?.length) {
+  if (!pulseBoostPackages || pulseBoostPackages.length === 0) {
     return (
       <Alert className="my-4">
         <AlertCircle className="h-4 w-4" />
@@ -66,6 +66,11 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
   // Modified to accept PulseBoost and map it to the BoostPackage that purchaseBoost expects
   const handlePurchaseBoost = async (boost: PulseBoost): Promise<boolean> => {
     if (!purchaseBoost || processingId) return false;
+    if (!boost || !boost.id) {
+      console.error('Invalid boost object provided');
+      return false;
+    }
+    
     setProcessingId(boost.id);
     
     try {
@@ -105,6 +110,11 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
 
   const handleCancelBoost = async (boostId: string): Promise<boolean> => {
     if (processingId) return false;
+    if (!boostId) {
+      console.error('Invalid boost ID provided');
+      return false;
+    }
+    
     setProcessingId(boostId);
     try {
       const result = await cancelBoost();
@@ -130,31 +140,40 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
 
   return (
     <div className="space-y-6">
-      {pulseBoostPackages.map((pkg) => (
-        <PulseBoostCard
-          key={pkg.id}
-          boost={{
-            id: pkg.id,
-            name: pkg.name || 'Unnamed Boost',
-            description: pkg.description || '',
-            durationMinutes: pkg.duration ? parseInt(pkg.duration.split(':')[0]) * 60 : 0,
-            duration: pkg.duration || '00:00:00',
-            visibility: pkg.visibility_increase ? 'homepage' : 'search',
-            costUBX: pkg.price_ubx || 0,
-            color: pkg.color || '#3b82f6',
-            badgeColor: pkg.color || '#3b82f6',
-            features: Array.isArray(pkg.features) ? pkg.features : [],
-            visibility_increase: pkg.visibility_increase,
-            price: pkg.price || 0 // Ensure price is never undefined
-          }}
-          isActive={Boolean(currentStatus?.isActive && (currentStatus?.activeBoostId === pkg.id || currentStatus?.packageId === pkg.id))}
-          timeRemaining={currentStatus?.remainingTime || ''}
-          onActivate={handlePurchaseBoost}
-          onCancel={handleCancelBoost}
-          userBalance={userEconomy?.ubxBalance || 0}
-          disabled={Boolean(processingId)}
-        />
-      ))}
+      {pulseBoostPackages.map((pkg) => {
+        if (!pkg || !pkg.id) return null;
+        
+        const isActive = Boolean(
+          currentStatus?.isActive && 
+          (currentStatus?.activeBoostId === pkg.id || currentStatus?.packageId === pkg.id)
+        );
+        
+        return (
+          <PulseBoostCard
+            key={pkg.id}
+            boost={{
+              id: pkg.id,
+              name: pkg.name || 'Unnamed Boost',
+              description: pkg.description || '',
+              durationMinutes: pkg.duration ? parseInt(pkg.duration.split(':')[0]) * 60 : 0,
+              duration: pkg.duration || '00:00:00',
+              visibility: pkg.visibility_increase ? 'homepage' : 'search',
+              costUBX: pkg.price_ubx || 0,
+              color: pkg.color || '#3b82f6',
+              badgeColor: pkg.color || '#3b82f6',
+              features: Array.isArray(pkg.features) ? pkg.features : [],
+              visibility_increase: pkg.visibility_increase,
+              price: pkg.price || 0 // Ensure price is never undefined
+            }}
+            isActive={isActive}
+            timeRemaining={currentStatus?.remainingTime || ''}
+            onActivate={handlePurchaseBoost}
+            onCancel={handleCancelBoost}
+            userBalance={userEconomy?.ubxBalance || 0}
+            disabled={Boolean(processingId)}
+          />
+        );
+      })}
     </div>
   );
 };

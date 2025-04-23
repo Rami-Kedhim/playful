@@ -2,8 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { EnhancedButton } from '@/components/ui/enhanced-button';
-import { EnhancedCard, EnhancedCardHeader, EnhancedCardContent, EnhancedCardFooter } from '@/components/ui/enhanced-card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import { User, Wallet, MessageSquare, Bookmark, Search } from 'lucide-react';
 
 const HomePage = () => {
@@ -13,15 +13,15 @@ const HomePage = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-10">
         <h1 className="text-4xl font-bold mb-4">Welcome to Our Platform</h1>
-        <p className="text-xl text-gray-600 mb-6">
+        <p className="text-xl text-muted-foreground mb-6">
           Connect, discover, and experience the best services in town
         </p>
         
         {!isAuthenticated && (
           <Link to="/auth">
-            <EnhancedButton size="lg" className="font-semibold">
+            <Button size="lg" className="font-semibold">
               Sign In
-            </EnhancedButton>
+            </Button>
           </Link>
         )}
       </div>
@@ -71,26 +71,34 @@ const HomePage = () => {
   );
 };
 
-const HomeCard = ({ icon, title, description, buttonText, route }) => {
+interface HomeCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  buttonText: string;
+  route: string;
+}
+
+const HomeCard = ({ icon, title, description, buttonText, route }: HomeCardProps) => {
   return (
-    <EnhancedCard variant="hover" className="flex flex-col">
-      <EnhancedCardHeader>
+    <Card className="flex flex-col">
+      <CardHeader>
         <div className="flex items-center">
           {icon}
           <h3 className="text-lg font-semibold">{title}</h3>
         </div>
-      </EnhancedCardHeader>
-      <EnhancedCardContent className="flex-grow">
+      </CardHeader>
+      <CardContent className="flex-grow">
         <p className="text-sm text-muted-foreground">{description}</p>
-      </EnhancedCardContent>
-      <EnhancedCardFooter>
+      </CardContent>
+      <CardFooter>
         <Link to={route} className="w-full">
-          <EnhancedButton variant="outline" className="w-full">
+          <Button variant="outline" className="w-full">
             {buttonText}
-          </EnhancedButton>
+          </Button>
         </Link>
-      </EnhancedCardFooter>
-    </EnhancedCard>
+      </CardFooter>
+    </Card>
   );
 };
 
