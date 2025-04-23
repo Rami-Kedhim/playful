@@ -7,6 +7,7 @@ import { useBoostStatus } from '@/hooks/boost/useBoostStatus';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { BoostPackage } from '@/types/boost';
 
 interface PulseBoostManagerProps {
   profileId?: string;
@@ -57,6 +58,17 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
     );
   }
 
+  const handlePurchaseBoost = async (pkg: BoostPackage) => {
+    if (!purchaseBoost || processingId) return false;
+    setProcessingId(pkg.id);
+    try {
+      const result = await purchaseBoost(pkg);
+      return result;
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {pulseBoostPackages.map((pkg) => (
@@ -68,7 +80,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
             description: pkg.description || '',
             durationMinutes: pkg.duration ? parseInt(pkg.duration.split(':')[0]) * 60 : 0,
             duration: pkg.duration || '00:00:00',
-            visibility: pkg.visibility || 'homepage',
+            visibility: pkg.visibility_increase ? 'homepage' : 'search',
             costUBX: pkg.price_ubx || 0,
             color: pkg.color || '#3b82f6',
             badgeColor: pkg.color || '#3b82f6',
@@ -76,7 +88,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
           }}
           isActive={boostStatus?.isActive && boostStatus?.packageId === pkg.id}
           timeRemaining={boostStatus?.remainingTime}
-          onActivate={purchaseBoost}
+          onActivate={handlePurchaseBoost}
           onCancel={cancelBoost}
           userBalance={userEconomy?.ubxBalance || 0}
           disabled={Boolean(processingId)}

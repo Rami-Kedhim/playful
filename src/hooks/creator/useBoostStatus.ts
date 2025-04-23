@@ -1,18 +1,17 @@
 
 import { useEffect } from 'react';
-import { useBoostStatusBase, UseBoostStatusBaseResult } from '../boost/useBoostStatus';
+import { useBoostStatus } from '../boost/useBoostStatus';
 
 // Hook for creator boost status
-export const useCreatorBoostStatus = (creatorId?: string): UseBoostStatusBaseResult => {
-  const baseHook = useBoostStatusBase();
+export const useCreatorBoostStatus = (creatorId?: string) => {
+  const { status, loading, error, refetch } = useBoostStatus(creatorId);
   
   // Override the base fetchBoostStatus function for creator-specific logic
-  const fetchBoostStatus = async (): Promise<any> => {
+  const fetchBoostStatus = async () => {
     try {
       // Creator-specific implementation
-      const status = { isActive: Math.random() > 0.5 };
-      baseHook.setBoostStatus(status);
-      return status;
+      const creatorStatus = { isActive: Math.random() > 0.5 };
+      return creatorStatus;
     } catch (err) {
       console.error('Failed to fetch creator boost status', err);
       return null;
@@ -33,13 +32,15 @@ export const useCreatorBoostStatus = (creatorId?: string): UseBoostStatusBaseRes
   // Load boost status on mount
   useEffect(() => {
     if (creatorId) {
-      fetchBoostStatus();
+      refetch();
     }
-  }, [creatorId]);
+  }, [creatorId, refetch]);
   
   // Return the base hook with overrides
   return {
-    ...baseHook,
+    status,
+    loading,
+    error,
     fetchBoostStatus,
     formatDuration,
     getBoostPrice: (packageId: string) => {
