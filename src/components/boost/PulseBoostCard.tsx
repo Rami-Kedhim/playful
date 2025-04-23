@@ -3,8 +3,9 @@ import { useState } from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Clock, Zap, ChevronRight } from "lucide-react";
+import { Loader2, Clock, Zap, ChevronRight, CheckCircle, AlertCircle } from "lucide-react";
 import { PulseBoost } from '@/types/pulse-boost';
+import { toast } from '@/hooks/use-toast';
 
 interface PulseBoostCardProps {
   boost: PulseBoost;
@@ -26,6 +27,7 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
   disabled = false
 }) => {
   const [loading, setLoading] = useState(false);
+  const [actionSuccess, setActionSuccess] = useState<boolean | null>(null);
   
   // Format duration to readable string safely
   const formatDuration = (minutes?: number): string => {
@@ -48,10 +50,34 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
     if (loading || !onActivate) return;
     
     setLoading(true);
+    setActionSuccess(null);
+    
     try {
-      await onActivate(boost.id);
+      const success = await onActivate(boost.id);
+      setActionSuccess(success);
+      
+      if (success) {
+        toast({
+          title: "Boost Activated",
+          description: `Your ${boost.name} has been successfully activated.`,
+          variant: "default"
+        });
+      } else {
+        toast({
+          title: "Activation Failed",
+          description: "There was an issue activating your boost.",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       console.error("Error activating boost:", error);
+      setActionSuccess(false);
+      
+      toast({
+        title: "Activation Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -61,10 +87,34 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
     if (loading) return;
     
     setLoading(true);
+    setActionSuccess(null);
+    
     try {
-      await onCancel(boost.id);
+      const success = await onCancel(boost.id);
+      setActionSuccess(success);
+      
+      if (success) {
+        toast({
+          title: "Boost Cancelled",
+          description: `Your ${boost.name} has been cancelled.`,
+          variant: "default"
+        });
+      } else {
+        toast({
+          title: "Cancellation Failed",
+          description: "There was an issue cancelling your boost.",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       console.error("Error cancelling boost:", error);
+      setActionSuccess(false);
+      
+      toast({
+        title: "Cancellation Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -76,7 +126,7 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
     : {};
   
   return (
-    <Card className="overflow-hidden" style={cardStyle}>
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-md" style={cardStyle}>
       <CardContent className="p-5 space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="font-medium text-lg">{boost.name || 'Unnamed Boost'}</h3>
@@ -102,9 +152,24 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
           </div>
         </div>
         
-        {isActive && (
+        {isActive && timeRemaining && (
           <div className="mt-2 bg-background/80 p-2 rounded-md text-center">
-            <span className="text-sm font-medium">{timeRemaining || formattedDuration} remaining</span>
+            <span className="text-sm font-medium">{timeRemaining} remaining</span>
+          </div>
+        )}
+        
+        {!isActive && !canAfford && (
+          <div className="mt-2 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 p-2 rounded-md text-center">
+            <span className="text-sm font-medium flex items-center justify-center">
+              <AlertCircle className="h-4 w-4 mr-1" />
+              Insufficient balance
+            </span>
+          </div>
+        )}
+        
+        {actionSuccess === false && (
+          <div className="mt-2 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 p-2 rounded-md text-center">
+            <span className="text-sm font-medium">Action failed. Please try again.</span>
           </div>
         )}
       </CardContent>
@@ -117,8 +182,14 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
             disabled={loading || disabled}
             className="w-full"
           >
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Cancel Boost
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Cancelling...
+              </>
+            ) : (
+              <>Cancel Boost</>
+            )}
           </Button>
         ) : (
           <Button 
@@ -128,7 +199,15 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
             variant={canAfford ? "default" : "outline"}
           >
             {loading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Activating...
+              </>
+            ) : actionSuccess ? (
+              <>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Activated
+              </>
             ) : (
               <>
                 Activate

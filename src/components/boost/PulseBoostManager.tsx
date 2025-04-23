@@ -1,9 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import usePulseBoost from '@/hooks/boost/usePulseBoost';
 import PulseBoostCard from '@/components/boost/PulseBoostCard';
 import usePulseBoostAdapter from '@/hooks/boost/usePulseBoostAdapter';
 import { BoostPackage } from '@/types/boost';
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertCircle, Loader2 } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface PulseBoostManagerProps {
   profileId?: string;
@@ -31,6 +34,8 @@ const parseDurationToMinutes = (duration?: string): number => {
 };
 
 const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  
   const {
     isLoading,
     error,
@@ -44,35 +49,60 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
 
   const { formatPulseDuration } = usePulseBoostAdapter(profileId || '');
 
-  // Debug log for packages
-  // console.debug("PulseBoostManager packages:", pulseBoostPackages);
-
   // Handle loading state first
   if (isLoading) {
-    return <div className="text-center py-4">Loading Pulse Boosts...</div>;
+    return (
+      <div className="py-8 flex flex-col items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin mb-4" />
+        <div className="text-center">
+          <h3 className="text-lg font-medium">Loading Boost Packages</h3>
+          <p className="text-muted-foreground">Please wait while we load your boost options...</p>
+        </div>
+      </div>
+    );
   }
 
   // Handle error state next
   if (error) {
-    return <div className="text-center py-4 text-red-500">Error: {error}</div>;
+    return (
+      <Alert variant="destructive" className="my-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error Loading Boost Packages</AlertTitle>
+        <AlertDescription>
+          {error}
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   // Defensive: If pulseBoostPackages is empty or undefined, render message
-  if (!pulseBoostPackages || pulseBoostPackages.length === 0) {
-    return <div className="text-center text-muted-foreground">No pulse boosts available.</div>;
+  if (!pulseBoostPackages || !Array.isArray(pulseBoostPackages) || pulseBoostPackages.length === 0) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center">
+          <h3 className="text-lg font-medium mb-2">No Boost Packages Available</h3>
+          <p className="text-muted-foreground">
+            There are currently no boost packages available for your profile.
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   // Helper to check active boost for a package
   const isActive = (boostId: string) => {
-    if (!activeBoosts || activeBoosts.length === 0) return false;
+    if (!activeBoosts || !Array.isArray(activeBoosts) || activeBoosts.length === 0) return false;
     return activeBoosts.some((boost) => boost.boostId === boostId);
   };
 
   // Wrap handlers to match expected signatures passing boostId param
   const handleActivate = async (boostId: string): Promise<boolean> => {
+    setProcessingId(boostId);
+    
     const pkg = pulseBoostPackages.find(p => p.id === boostId);
     if (!pkg) {
       console.error('PulseBoostManager: Boost package not found for id', boostId);
+      setProcessingId(null);
       return false;
     }
     
@@ -85,11 +115,15 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
     } catch (err) {
       console.error('Error activating boost:', err);
       return false;
+    } finally {
+      setProcessingId(null);
     }
   };
 
   // Accept boostId param to match signature but ignore it internally
   const handleCancel = async (_boostId: string): Promise<boolean> => {
+    setProcessingId(_boostId);
+    
     try {
       const success = await cancelBoost();
       if (!success) {
@@ -99,14 +133,15 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
     } catch (err) {
       console.error('Error cancelling boost:', err);
       return false;
+    } finally {
+      setProcessingId(null);
     }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {Array.isArray(pulseBoostPackages) && pulseBoostPackages.map((pkg) => {
         if (!pkg || typeof pkg !== 'object') {
-          console.error('PulseBoostManager: Encountered invalid package in pulseBoostPackages');
           return null;
         }
 
@@ -120,6 +155,9 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
           
         const timeRemaining = activeBoost ? activeBoost.timeRemaining : undefined;
         const durationMinutes = parseDurationToMinutes(pkg.duration);
+        
+        const boostActive = isActive(pkg.id);
+        const isProcessing = processingId === pkg.id;
 
         return (
           <PulseBoostCard
@@ -136,12 +174,12 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
               badgeColor: pkg.color || '#3b82f6',
               features: Array.isArray(pkg.features) ? pkg.features : []
             }}
-            isActive={isActive(pkg.id)}
+            isActive={boostActive}
             timeRemaining={timeRemaining}
             onActivate={handleActivate}
             onCancel={handleCancel}
             userBalance={userEconomy?.ubxBalance || 0}
-            disabled={false}
+            disabled={isProcessing || Boolean(processingId)}
           />
         );
       })}

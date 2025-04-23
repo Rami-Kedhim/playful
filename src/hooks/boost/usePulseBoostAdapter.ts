@@ -11,7 +11,15 @@ interface UsePulseBoostAdapterResult {
 
 export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterResult => {
   const formatPulseDuration = (duration: string): string => {
-    const [hoursStr, minutesStr, secondsStr] = duration.split(':');
+    if (!duration) return "Unknown duration";
+    
+    const parts = duration.split(':');
+    if (parts.length !== 3) return "Unknown duration";
+    
+    const hoursStr = parts[0] || '0';
+    const minutesStr = parts[1] || '0';
+    const secondsStr = parts[2] || '0';
+    
     const hours = Number(hoursStr);
     const minutes = Number(minutesStr);
     const seconds = Number(secondsStr);
@@ -45,6 +53,8 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
   };
 
   const adaptGetPulseBoostPrice = (fn: (pkg: BoostPackage) => number) => (pkg: BoostPackage): number => {
+    if (!pkg) return 0;
+    
     if (pkg.price_ubx !== undefined && pkg.price_ubx !== null) {
       if (typeof pkg.price_ubx === 'string') {
         const parsed = Number(pkg.price_ubx);
@@ -52,9 +62,16 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       }
       return pkg.price_ubx;
     }
-    if (fn) {
-      return fn(pkg);
+    
+    if (typeof fn === 'function') {
+      try {
+        return fn(pkg);
+      } catch (error) {
+        console.error("Error in price adaptation function:", error);
+        return parseNumberValue(pkg.price, 0);
+      }
     }
+    
     return parseNumberValue(pkg.price, 0);
   };
 
@@ -70,6 +87,23 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
   };
 
   const convertToPulseBoost = (pkg: BoostPackage): PulseBoost => {
+    if (!pkg || typeof pkg !== 'object') {
+      // Provide a default PulseBoost if package is invalid
+      return {
+        id: 'default',
+        name: 'Standard Boost',
+        description: 'Default boost package',
+        duration: '24:00:00',
+        durationMinutes: 1440,
+        price: 0,
+        costUBX: 0,
+        visibility: 'homepage',
+        color: '#60a5fa',
+        badgeColor: '#60a5fa',
+        features: []
+      };
+    }
+    
     const durationStr = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
     const parts = durationStr.split(':');
 
@@ -131,4 +165,3 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 };
 
 export default usePulseBoostAdapter;
-
