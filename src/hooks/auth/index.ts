@@ -1,16 +1,12 @@
 
 // Import all auth hooks
-import { useAuth } from './useAuthContext';
-import { useAuthState } from './useAuthState';
-import { useAuthActions } from './useAuthActions';
-import { usePasswordManagement } from './usePasswordManagement';
-import { useProfileManagement } from './useProfileManagement';
-import { useRole } from './useRole';
-import { useAuthentication } from './useAuthentication';
+import { useAuth, AuthProvider, AuthContext } from './useAuth.tsx';
 
 // Export all authentication related hooks from a single file
 export { 
-  useAuth
+  useAuth,
+  AuthProvider,
+  AuthContext
 };
 
 // Also export useAuth as default for compatibility
