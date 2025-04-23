@@ -4,7 +4,16 @@ import { useAuth } from '@/hooks/auth';
 import { checkVerificationStatus } from '@/utils/verification/statusCheck';
 import type { VerificationStatus } from '@/types/verification';
 
-export const useVerificationState = () => {
+interface VerificationStateResult {
+  status: VerificationStatus | null;
+  loading: boolean;
+  error: string | null;
+  isVerified: boolean;
+  isPending: boolean;
+  isRejected: boolean;
+}
+
+export const useVerificationState = (): VerificationStateResult => {
   const { user } = useAuth();
   const [status, setStatus] = useState<VerificationStatus | null>(null);
   const [loading, setLoading] = useState(true);
