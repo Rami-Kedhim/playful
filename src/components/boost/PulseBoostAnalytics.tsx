@@ -1,157 +1,203 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Loader2, TrendingUp, Users, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { BarChart, LineChart, TrendingUp, Users, Zap } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PulseBoostAnalyticsProps {
   profileId?: string;
-  boostActive: boolean;
+  boostActive?: boolean;
   isLoading?: boolean;
+}
+
+interface AnalyticsData {
+  impressions: number[];
+  interactions: number[];
+  rankImprovements: number[];
+  dates: string[];
 }
 
 const PulseBoostAnalytics: React.FC<PulseBoostAnalyticsProps> = ({ 
   profileId, 
-  boostActive, 
-  isLoading = false 
+  boostActive = false,
+  isLoading = false
 }) => {
-  // Simulated data - in a real app, you'd fetch this from your backend
-  const viewsData = [
-    { name: 'Mon', withBoost: 42, withoutBoost: 18 },
-    { name: 'Tue', withBoost: 51, withoutBoost: 22 },
-    { name: 'Wed', withBoost: 68, withoutBoost: 28 },
-    { name: 'Thu', withBoost: 49, withoutBoost: 21 },
-    { name: 'Fri', withBoost: 72, withoutBoost: 30 },
-    { name: 'Sat', withBoost: 94, withoutBoost: 41 },
-    { name: 'Sun', withBoost: 86, withoutBoost: 37 },
-  ];
+  const [data, setData] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(isLoading);
   
-  const engagementData = [
-    { name: 'Mon', withBoost: 12, withoutBoost: 5 },
-    { name: 'Tue', withBoost: 19, withoutBoost: 8 },
-    { name: 'Wed', withBoost: 23, withoutBoost: 10 },
-    { name: 'Thu', withBoost: 17, withoutBoost: 7 },
-    { name: 'Fri', withBoost: 28, withoutBoost: 12 },
-    { name: 'Sat', withBoost: 32, withoutBoost: 14 },
-    { name: 'Sun', withBoost: 29, withoutBoost: 13 },
-  ];
+  useEffect(() => {
+    if (!profileId) {
+      setLoading(false);
+      return;
+    }
+    
+    const fetchAnalytics = async () => {
+      setLoading(true);
+      try {
+        // This is mock data - in a real app, you'd fetch from an API
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        const mockData: AnalyticsData = {
+          impressions: [10, 45, 60, 120, 80, 140, 180],
+          interactions: [5, 15, 20, 35, 25, 40, 55],
+          rankImprovements: [0, 5, 8, 12, 15, 20, 25],
+          dates: [
+            'Apr 17', 'Apr 18', 'Apr 19', 'Apr 20', 
+            'Apr 21', 'Apr 22', 'Apr 23'
+          ]
+        };
+        
+        setData(mockData);
+      } catch (error) {
+        console.error('Error fetching analytics data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchAnalytics();
+  }, [profileId]);
   
-  const rankData = [
-    { name: 'Mon', position: 85 },
-    { name: 'Tue', position: 68 },
-    { name: 'Wed', position: 52 },
-    { name: 'Thu', position: 43 },
-    { name: 'Fri', position: 31 },
-    { name: 'Sat', position: 24 },
-    { name: 'Sun', position: 18 },
-  ];
+  // Transform data for charts
+  const getChartData = () => {
+    if (!data) return [];
+    
+    return data.dates.map((date, index) => ({
+      name: date,
+      impressions: data.impressions[index],
+      interactions: data.interactions[index],
+      rankImprovements: data.rankImprovements[index],
+    }));
+  };
   
-  if (isLoading) {
+  if (loading) {
     return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Analytics</CardTitle>
+            <CardDescription>Loading analytics data...</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[240px] w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
+  if (!data || !boostActive) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Analytics</CardTitle>
+            <CardDescription>
+              {!boostActive 
+                ? "Analytics will be available once you have an active boost" 
+                : "No analytics data available"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex items-center justify-center p-6">
+            <div className="text-center text-muted-foreground">
+              <Zap className="h-12 w-12 mx-auto mb-4 opacity-20" />
+              <p className="font-medium">No boost data to analyze</p>
+              <p className="text-sm mt-2">
+                {!boostActive 
+                  ? "Activate a boost to see how it impacts your profile visibility" 
+                  : "Check back soon for your boost analytics"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
+  const chartData = getChartData();
+  
+  return (
+    <div className="space-y-6">
       <Card>
-        <CardContent className="p-6 flex items-center justify-center min-h-[300px]">
-          <div className="flex flex-col items-center">
-            <Loader2 className="h-8 w-8 animate-spin mb-2 text-primary" />
-            <p className="text-sm text-muted-foreground">Loading analytics...</p>
+        <CardHeader>
+          <CardTitle>Visibility Analytics</CardTitle>
+          <CardDescription>
+            Track how boosting impacts your profile's performance
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[240px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={chartData}
+                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Area 
+                  type="monotone" 
+                  dataKey="impressions" 
+                  stroke="#8884d8" 
+                  fill="hsl(224.3 76.3% 48% / 0.5)" 
+                  name="Impressions"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
-    );
-  }
-  
-  if (!profileId) {
-    return (
-      <Card>
-        <CardContent className="p-6 flex items-center justify-center min-h-[300px]">
-          <p className="text-sm text-muted-foreground">No profile selected</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>PULSE Boost Analytics</CardTitle>
-        <CardDescription>
-          {boostActive 
-            ? "Track how your active boost is improving your visibility and engagement" 
-            : "See the potential impact of boosting your profile"}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="views" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="views" className="flex items-center">
-              <Users className="mr-2 h-4 w-4" />
-              Views
-            </TabsTrigger>
-            <TabsTrigger value="engagement" className="flex items-center">
-              <TrendingUp className="mr-2 h-4 w-4" />
-              Engagement
-            </TabsTrigger>
-            <TabsTrigger value="rank" className="flex items-center">
-              <Zap className="mr-2 h-4 w-4" />
-              Rank
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="views" className="space-y-4">
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={viewsData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="withBoost" name="With Boost" fill="#3b82f6" />
-                  <Bar dataKey="withoutBoost" name="Without Boost" fill="#94a3b8" />
-                </BarChart>
-              </ResponsiveContainer>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <Users className="h-4 w-4 text-blue-500" />
+              Total Impressions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {data.impressions.reduce((sum, val) => sum + val, 0)}
             </div>
-            <p className="text-sm text-muted-foreground text-center">
-              On average, boosted profiles receive 130% more views
-            </p>
-          </TabsContent>
-          
-          <TabsContent value="engagement" className="space-y-4">
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={engagementData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="withBoost" name="With Boost" fill="#8b5cf6" />
-                  <Bar dataKey="withoutBoost" name="Without Boost" fill="#94a3b8" />
-                </BarChart>
-              </ResponsiveContainer>
+            <p className="text-xs text-muted-foreground">In the last 7 days</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-green-500" />
+              Engagement Rate
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {Math.round((data.interactions.reduce((sum, val) => sum + val, 0) / 
+                data.impressions.reduce((sum, val) => sum + val, 0)) * 100)}%
             </div>
-            <p className="text-sm text-muted-foreground text-center">
-              Boosted profiles receive 123% more interactions on average
-            </p>
-          </TabsContent>
-          
-          <TabsContent value="rank" className="space-y-4">
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={rankData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis reversed domain={[0, 100]} />
-                  <Tooltip />
-                  <Bar dataKey="position" name="Rank Position" fill="#ec4899" />
-                </BarChart>
-              </ResponsiveContainer>
+            <p className="text-xs text-muted-foreground">Profile interactions</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <LineChart className="h-4 w-4 text-purple-500" />
+              Rank Improvement
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              +{data.rankImprovements[data.rankImprovements.length - 1]}
             </div>
-            <p className="text-sm text-muted-foreground text-center">
-              Lower is better - see how your ranking improves with boosting
-            </p>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+            <p className="text-xs text-muted-foreground">Positions gained</p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 

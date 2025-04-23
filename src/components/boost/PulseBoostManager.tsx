@@ -145,10 +145,10 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
             badgeColor: pkg.color || '#3b82f6',
             features: Array.isArray(pkg.features) ? pkg.features : [],
             visibility_increase: pkg.visibility_increase,
-            price: pkg.price
+            price: pkg.price || 0 // Ensure price is never undefined
           }}
-          isActive={currentStatus?.isActive && (currentStatus?.activeBoostId === pkg.id || currentStatus?.packageId === pkg.id)}
-          timeRemaining={currentStatus?.remainingTime}
+          isActive={Boolean(currentStatus?.isActive && (currentStatus?.activeBoostId === pkg.id || currentStatus?.packageId === pkg.id))}
+          timeRemaining={currentStatus?.remainingTime || ''}
           onActivate={handlePurchaseBoost}
           onCancel={handleCancelBoost}
           userBalance={userEconomy?.ubxBalance || 0}

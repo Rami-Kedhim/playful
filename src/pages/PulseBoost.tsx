@@ -12,7 +12,7 @@ import { useBoostStatus } from '@/hooks/boost/useBoostStatus';
 const PulseBoostPage = () => {
   const { user, profile } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-  const { status: boostStatus } = useBoostStatus(user?.id);
+  const { status: boostStatus, loading } = useBoostStatus(user?.id);
 
   useEffect(() => {
     // Simulate loading state
@@ -23,7 +23,7 @@ const PulseBoostPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  if (isLoading) {
+  if (isLoading || loading) {
     return (
       <div className="container mx-auto py-10">
         <Card>
@@ -41,9 +41,9 @@ const PulseBoostPage = () => {
     );
   }
 
+  const profileId = user?.id;
   const subscriptionTier = (profile as any)?.subscription_tier || 'free';
   const isVerified = subscriptionTier !== 'free';
-  const userIsEscort = (profile as any)?.isEscort || true;
 
   return (
     <div className="container mx-auto py-10">
@@ -69,7 +69,7 @@ const PulseBoostPage = () => {
             </CardHeader>
             <CardContent>
               <PulseBoostErrorBoundary>
-                <PulseBoostManager profileId={user?.id} />
+                <PulseBoostManager profileId={profileId} />
               </PulseBoostErrorBoundary>
             </CardContent>
           </Card>
@@ -77,7 +77,7 @@ const PulseBoostPage = () => {
         
         <TabsContent value="analytics" className="space-y-6">
           <PulseBoostAnalytics 
-            profileId={user?.id} 
+            profileId={profileId} 
             boostActive={boostStatus?.isActive || false}
             isLoading={false}
           />
