@@ -17,7 +17,7 @@ import AccountSettings from "./AccountSettings";
 import NotificationSettings from "./NotificationSettings";
 import SecuritySettings from "./SecuritySettings";
 import { useAuth } from '@/hooks/auth';
-import { useAuthActions } from "@/hooks/auth/useAuthActions";
+import { useAuthActions } from "@/hooks/auth";
 import { Loader2 } from "lucide-react";
 
 interface ProfileManagerProps {

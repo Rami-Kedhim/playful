@@ -1,11 +1,10 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/auth/useAuthContext";
-import { useRole } from "@/hooks/auth/useRole";
+import { useAuth } from "@/hooks/auth";
+import { useRole } from "@/hooks/auth";
 
 const Navbar: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -61,4 +60,3 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;
-

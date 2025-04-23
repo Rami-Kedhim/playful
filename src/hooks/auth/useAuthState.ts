@@ -24,8 +24,19 @@ export const useAuthState = () => {
     });
   }, []);
 
+  const isEscort = useCallback((userObj: User | null) => {
+    // Check if user has escort role regardless of the format
+    if (!userObj || !userObj.roles) return false;
+    return userObj.roles.some(role => {
+      if (typeof role === 'string') return role === 'escort';
+      return role?.name === 'escort';
+    });
+  }, []);
+
   return {
     isAdmin: user ? isAdmin(user as User) : false,
     isCreator: user ? isCreator(user as User) : false,
+    isEscort: user ? isEscort(user as User) : false,
+    user
   };
-}
+};

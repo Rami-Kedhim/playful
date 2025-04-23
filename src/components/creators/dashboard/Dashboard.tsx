@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import { useCreatorAuth } from "@/hooks/useCreatorAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"; // Added TabsContent import
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MessageSquare, Upload, AlertCircle, ChevronRight, Zap } from "lucide-react";
 import CreatorAnalytics from "@/components/creators/dashboard/CreatorAnalytics";
@@ -12,7 +11,7 @@ import CreatorContent from "@/components/creators/dashboard/CreatorContent";
 import CreatorPayouts from "@/components/creators/dashboard/CreatorPayouts";
 import CreatorSettings from "@/components/creators/dashboard/CreatorSettings";
 import MainLayout from "@/components/layout/MainLayout";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/auth";
 
 const CreatorDashboard = () => {
   const { isCreator, creatorProfile, loading, canCreate, creatorId } = useCreatorAuth();

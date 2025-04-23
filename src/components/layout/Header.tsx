@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth';
 import { EnhancedButton } from '@/components/ui/enhanced-button';
 import { NotificationsPanel } from './NotificationsPanel';
 import MainNav from './MainNav';

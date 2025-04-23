@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useBoostManager } from '@/hooks/boost/useBoostManager';
 import { Card } from '@/components/ui/card';
 import BoostDialogContainer from '@/components/boost/BoostDialogContainer';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth';
 import { useToast } from '@/hooks/use-toast';
 import { oxum } from '@/core/Oxum';
 import { useBoostAdapters } from '@/hooks/boost/useBoostAdapters';
