@@ -1,5 +1,5 @@
 
-import { useAuth } from './useAuth';
+import { useAuth } from './useAuthContext';
 
 export const useAuthState = () => {
   const { 
@@ -16,6 +16,7 @@ export const useAuthState = () => {
     user,
     profile,
     isLoading,
+    loading,
     error,
     isAuthenticated,
     initialized

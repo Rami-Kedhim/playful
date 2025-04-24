@@ -1,5 +1,6 @@
 
-import { useAuth, AuthContext, AuthProvider } from './useAuth';
+import { useAuth } from './useAuthContext';
+import { AuthContext, AuthProvider } from './useAuth';
 import { useRole } from './useRole';
 import { useAuthState } from './useAuthState';
 import { useAuthActions } from './useAuthActions';
