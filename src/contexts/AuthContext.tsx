@@ -1,8 +1,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Session, User } from '@supabase/supabase-js';
+import { Session } from '@supabase/supabase-js';
 import { AuthContextType, AuthResult, AuthUser } from '@/types/authTypes';
+import { toast } from 'sonner';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -36,13 +37,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string): Promise<AuthResult> => {
     try {
+      setError(null);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        toast.error("Login failed", {
+          description: error.message
+        });
+        throw error;
+      }
 
+      toast.success("Login successful!");
+      
       return {
         success: true,
         user: data.user as AuthUser,
@@ -58,12 +67,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (email: string, password: string): Promise<AuthResult> => {
     try {
+      setError(null);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        toast.error("Registration failed", {
+          description: error.message
+        });
+        throw error;
+      }
+
+      toast.success("Registration successful!");
 
       return {
         success: true,
@@ -82,9 +99,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      toast.success("Logged out successfully");
       return true;
     } catch (error) {
       console.error('Error logging out:', error);
+      toast.error("Failed to log out");
       return false;
     }
   };
