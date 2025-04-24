@@ -1,7 +1,7 @@
 
 import React from 'react';
 import Navbar from '@/components/layout/Navbar';
-import { useAuth } from '@/hooks/auth/useAuthContext';
+import { useAuth } from '@/hooks/auth';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -25,11 +25,6 @@ const Layout: React.FC<LayoutProps> = ({ children, hideNavbar = false }) => {
       <main className="flex-grow">
         {children}
       </main>
-      <footer className="py-6 border-t bg-background">
-        <div className="container mx-auto px-4 text-center text-muted-foreground text-sm">
-          © {new Date().getFullYear()} UberEscorts. All rights reserved.
-        </div>
-      </footer>
     </div>
   );
 };

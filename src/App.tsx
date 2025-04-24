@@ -15,6 +15,7 @@ import Livecam from "./pages/Livecam";
 import Profile from "./pages/Profile";
 import AppLayout from "./components/layout/AppLayout";
 import AuthPage from "./pages/AuthPage";
+import Layout from './components/layout/Layout';
 
 const createStubContextFile = () => {
   const StubProvider = ({ children }: { children: React.ReactNode }) => <>{children}</>;
@@ -57,61 +58,37 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <AuthProvider>
-            <SettingsProvider>
-              <BoostProvider>
-                <UberPersonaProvider>
-                  <UberCoreProvider>
-                    <OxumProvider>
-                      <HermesProvider>
-                        <SocketProvider>
-                          <ModalProvider>
-                            <NotificationProvider>
-                              <AnalyticsProvider>
-                                <WalletProvider>
-                                  <LucieProvider>
-                                    <AppLayout>
-                                      <Suspense fallback={<div className="flex items-center justify-center h-screen">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                                      </div>}>
-                                        <Routes>
-                                          <Route path="/" element={<HomePage />} />
-                                          <Route path="/wallet" element={<Wallet />} />
-                                          <Route path="/updated-wallet" element={<UpdatedWallet />} />
-                                          <Route path="/pulse-boost" element={<PulseBoost />} />
-                                          <Route path="/login" element={<Login />} />
-                                          <Route path="/register" element={<Register />} />
-                                          <Route path="/dashboard" element={<Dashboard />} />
-                                          <Route path="/profile" element={<Profile />} />
-                                          <Route path="/settings" element={<Settings />} />
-                                          <Route path="/messages" element={<Messages />} />
-                                          <Route path="/notifications" element={<Notifications />} />
-                                          <Route path="/search" element={<Search />} />
-                                          <Route path="/explore" element={<Explore />} />
-                                          <Route path="/ai-chat" element={<AIChat />} />
-                                          <Route path="/creator-dashboard" element={<CreatorDashboard />} />
-                                          <Route path="/escort/:id" element={<EscortProfile />} />
-                                          <Route path="/livecams" element={<Livecam />} />
-                                          <Route path="/livecam/:id" element={<LivecamDetail />} />
-                                          <Route path="/ai-models" element={<AIModelPage />} />
-                                          <Route path="/ai-model/:id" element={<AIModelDetail />} />
-                                          <Route path="/auth" element={<AuthPage />} />
-                                          <Route path="*" element={<NotFound />} />
-                                        </Routes>
-                                      </Suspense>
-                                    </AppLayout>
-                                    <Toaster />
-                                  </LucieProvider>
-                                </WalletProvider>
-                              </AnalyticsProvider>
-                            </NotificationProvider>
-                          </ModalProvider>
-                        </SocketProvider>
-                      </HermesProvider>
-                    </OxumProvider>
-                  </UberCoreProvider>
-                </UberPersonaProvider>
-              </BoostProvider>
-            </SettingsProvider>
+            <Layout>
+              <Suspense fallback={<div className="flex items-center justify-center h-screen">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>}>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/wallet" element={<Wallet />} />
+                  <Route path="/updated-wallet" element={<UpdatedWallet />} />
+                  <Route path="/pulse-boost" element={<PulseBoost />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/messages" element={<Messages />} />
+                  <Route path="/notifications" element={<Notifications />} />
+                  <Route path="/search" element={<Search />} />
+                  <Route path="/explore" element={<Explore />} />
+                  <Route path="/ai-chat" element={<AIChat />} />
+                  <Route path="/creator-dashboard" element={<CreatorDashboard />} />
+                  <Route path="/escort/:id" element={<EscortProfile />} />
+                  <Route path="/livecams" element={<Livecam />} />
+                  <Route path="/livecam/:id" element={<LivecamDetail />} />
+                  <Route path="/ai-models" element={<AIModelPage />} />
+                  <Route path="/ai-model/:id" element={<AIModelDetail />} />
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </Layout>
+            <Toaster />
           </AuthProvider>
         </ThemeProvider>
       </QueryClientProvider>
