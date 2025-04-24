@@ -1,9 +1,9 @@
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { DocumentType } from '@/types/verification';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { DocumentType } from '@/types/verification';
 
 const verificationFormSchema = z.object({
   documentType: z.string(),
