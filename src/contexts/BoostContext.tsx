@@ -1,7 +1,7 @@
 
 import React, { createContext, ReactNode, useEffect, useState } from 'react';
 import { BoostPackage, BoostStatus, BoostEligibility } from '@/types/boost';
-import { useAuth } from '@/hooks/auth/useAuth.tsx';
+import { useAuth } from '@/hooks/auth';
 import useBoostPackages from '@/hooks/boost/useBoostPackages';
 
 export interface BoostContextType {

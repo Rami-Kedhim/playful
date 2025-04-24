@@ -1,16 +1,11 @@
 
-import { useRole } from './auth/useRole';
-import { AuthContextType } from '@/types/auth';
-
 // Re-export the auth context and provider
-export { AuthContext, AuthProvider, useAuth } from './auth/useAuth'; 
-
-// Re-export useRole
-export { useRole };
+export { AuthContext, AuthProvider, useAuth } from './auth/index'; 
 
 // Re-export additional hooks
+export { useRole } from './auth/useRole';
 export { useAuthState } from './auth/useAuthState';
 export { useAuthActions } from './auth/useAuthActions';
 
 // For backward compatibility with direct imports
-export * from './auth/useAuth';
+export * from './auth/useAuthContext';
