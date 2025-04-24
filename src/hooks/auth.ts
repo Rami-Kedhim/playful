@@ -1,11 +1,13 @@
 
-// Re-export the auth context and provider
-export { AuthContext, AuthProvider, useAuth } from './auth/index'; 
-
-// Re-export additional hooks
-export { useRole } from './auth/useRole';
-export { useAuthState } from './auth/useAuthState';
-export { useAuthActions } from './auth/useAuthActions';
+// Re-export all auth-related hooks and components
+export { 
+  AuthContext, 
+  AuthProvider, 
+  useAuth,
+  useRole,
+  useAuthState,
+  useAuthActions
+} from './auth/index';
 
 // For backward compatibility with direct imports
 export * from './auth/useAuthContext';
