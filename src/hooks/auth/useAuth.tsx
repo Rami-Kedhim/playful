@@ -222,6 +222,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { success: true };
   };
 
+  const updatePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
+    try {
+      // First verify the current password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email || '',
+        password: currentPassword
+      });
+      
+      if (signInError) {
+        console.error('Current password verification failed:', signInError.message);
+        return false;
+      }
+      
+      // If sign in was successful, update the password
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      
+      if (error) {
+        console.error('Error updating password:', error.message);
+        return false;
+      }
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error in updatePassword:', error.message);
+      return false;
+    }
+  };
+
   // Add checkRole function to support useRole hook
   const checkRole = (role: string): boolean => {
     if (!user) return false;
@@ -263,6 +291,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       requestPasswordReset,
       verifyEmail,
       checkRole,
+      updatePassword,
       session: user?.session || null
     }}>
       {children}
