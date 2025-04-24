@@ -16,5 +16,4 @@ export { useAuthState } from './auth/useAuthState';
 export { useAuthActions } from './auth/useAuthActions';
 
 // For backward compatibility with direct imports
-const importedModule = require('./auth/useAuth');
-export default importedModule.default;
+export * from './auth/useAuth';

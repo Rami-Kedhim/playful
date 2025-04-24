@@ -173,6 +173,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateProfile = updateUserProfile; // Alias for updateUserProfile
+
   const sendPasswordResetEmail = async (email: string): Promise<AuthResult> => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email);
@@ -209,22 +211,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const checkRole = (role: string): boolean => {
     if (!user) return false;
     
-    // Check in roles array if it exists
-    if (user.roles && Array.isArray(user.roles)) {
-      return user.roles.some(r => 
-        (typeof r === 'string' && r === role) || 
-        (typeof r === 'object' && r.name === role)
-      );
+    // Check in user_metadata.role if it exists
+    if (user.user_metadata && user.user_metadata.role) {
+      return user.user_metadata.role === role;
     }
     
     // Fall back to role property if it exists
     if (user.role) {
       return user.role === role;
-    }
-    
-    // Check in user metadata
-    if (user.user_metadata && user.user_metadata.role) {
-      return user.user_metadata.role === role;
     }
     
     return false;
@@ -234,9 +228,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     <AuthContext.Provider value={{ 
       user, 
       profile,
-      loading: isLoading, 
-      isLoading, 
-      error, 
+      loading, 
+      isLoading: loading, 
+      error: error?.message || null, 
       isAuthenticated,
       initialized,
       signIn, 
@@ -246,6 +240,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       register,
       updateUser,
       updateUserProfile,
+      updateProfile,
       loadUserProfile,
       refreshProfile,
       sendPasswordResetEmail,
@@ -253,7 +248,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       requestPasswordReset,
       verifyEmail,
       checkRole,
-      session: user?.session
+      session: user ? user.session : null
     }}>
       {children}
     </AuthContext.Provider>

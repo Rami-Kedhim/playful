@@ -46,6 +46,7 @@ export interface UserProfile {
   verification_status?: string;
   is_boosted?: boolean;
   isBoosted?: boolean;
+  ubxBalance?: number;
 }
 
 export enum DatabaseGender {
@@ -58,8 +59,8 @@ export enum DatabaseGender {
 
 export interface AuthResult {
   success: boolean;
-  user?: User;
-  error?: string;
+  user?: User | null;
+  error?: string | null;
   redirectTo?: string;
   token?: string;
   session?: any;
@@ -82,9 +83,10 @@ export interface AuthUser extends User {
 
 export interface AuthContextType {
   user: User | null;
-  profile?: UserProfile | null;
+  profile: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  loading: boolean;
   error: string | null;
   initialized: boolean;
   checkRole: (role: string) => boolean;
@@ -95,6 +97,7 @@ export interface AuthContextType {
   register: (email: string, password: string, username?: string, options?: any) => Promise<AuthResult>;
   updateUser: (data: Partial<User>) => Promise<boolean>;
   updateUserProfile: (data: Partial<UserProfile>) => Promise<boolean>;
+  updateProfile: (data: Partial<UserProfile>) => Promise<boolean>;
   loadUserProfile: () => Promise<User | null>;
   refreshProfile: () => Promise<void>;
   sendPasswordResetEmail: (email: string) => Promise<AuthResult>;

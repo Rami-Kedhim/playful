@@ -5,7 +5,8 @@ export const useAuthState = () => {
   const { 
     user, 
     profile,
-    loading: isLoading, 
+    loading, 
+    isLoading, 
     error, 
     isAuthenticated,
     initialized 
