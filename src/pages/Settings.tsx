@@ -1,18 +1,19 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const Settings = () => {
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-4">Settings</h1>
       <Card>
         <CardHeader>
-          <CardTitle>Settings</CardTitle>
+          <CardTitle>Account Settings</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center">
-            <p>Settings placeholder - not implemented yet</p>
-          </div>
+          <p className="text-muted-foreground">
+            Account settings and preferences will be added here.
+          </p>
         </CardContent>
       </Card>
     </div>

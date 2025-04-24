@@ -64,14 +64,29 @@ function App() {
               </div>}>
                 <Routes>
                   <Route path="/" element={<HomePage />} />
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route 
+                    path="/profile" 
+                    element={
+                      <Layout requireAuth>
+                        <Profile />
+                      </Layout>
+                    } 
+                  />
+                  <Route 
+                    path="/settings" 
+                    element={
+                      <Layout requireAuth>
+                        <Settings />
+                      </Layout>
+                    } 
+                  />
                   <Route path="/wallet" element={<Wallet />} />
                   <Route path="/updated-wallet" element={<UpdatedWallet />} />
                   <Route path="/pulse-boost" element={<PulseBoost />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/settings" element={<Settings />} />
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/notifications" element={<Notifications />} />
                   <Route path="/search" element={<Search />} />
@@ -83,7 +98,6 @@ function App() {
                   <Route path="/livecam/:id" element={<LivecamDetail />} />
                   <Route path="/ai-models" element={<AIModelPage />} />
                   <Route path="/ai-model/:id" element={<AIModelDetail />} />
-                  <Route path="/auth" element={<AuthPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
