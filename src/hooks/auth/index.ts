@@ -1,20 +1,16 @@
 
-// Export the auth context and provider
-import { AuthContext, AuthProvider } from '@/contexts/AuthContext';
-import { useAuthContext } from './useAuthContext';
+import { AuthContext, AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { useRole } from './useRole';
 import { useAuthState } from './useAuthState';
 import { useAuthActions } from './useAuthActions';
 
-// Export as named exports
 export {
   AuthContext,
   AuthProvider,
-  useAuthContext as useAuth,
+  useAuth,
   useRole,
   useAuthState,
   useAuthActions
 };
 
-// Export default
-export default useAuthContext;
+export default useAuth;
