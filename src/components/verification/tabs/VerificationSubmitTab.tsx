@@ -1,7 +1,7 @@
 
 import React from 'react'
-import VerificationForm from '../form/VerificationForm'
 import { useVerificationProcess } from '@/hooks/verification/useVerificationProcess'
+import VerificationForm from '../VerificationForm'
 
 interface VerificationSubmitTabProps {
   onSubmit?: (data: any) => void

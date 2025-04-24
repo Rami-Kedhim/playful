@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useVerificationStatus } from './hooks/useVerificationStatus';
-import VerificationForm from './form/VerificationForm';
+import VerificationForm from './VerificationForm';
 import VerificationStatus from './VerificationStatus';
 import VerificationLevelUpgrade from './level/VerificationLevelUpgrade';
 import VerificationLevelType from './level/VerificationLevelType';
