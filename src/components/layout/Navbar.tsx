@@ -14,6 +14,17 @@ import {
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
 
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (user?.username) {
+      return user.username.substring(0, 1).toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.substring(0, 1).toUpperCase();
+    }
+    return "U";
+  };
+
   return (
     <header className="border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -28,7 +39,7 @@ const Navbar = () => {
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user?.avatarUrl} alt={user?.username || 'User'} />
-                    <AvatarFallback>{user?.username?.[0] || 'U'}</AvatarFallback>
+                    <AvatarFallback>{getUserInitials()}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>

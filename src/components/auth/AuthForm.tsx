@@ -10,21 +10,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface AuthFormProps {
   onSuccess?: () => void;
+  initialTab?: 'login' | 'register';
 }
 
-export const AuthForm = ({ onSuccess }: AuthFormProps) => {
+export const AuthForm = ({ onSuccess, initialTab = 'login' }: AuthFormProps) => {
   const { login, register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>(initialTab);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     username: ''
   });
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
     try {
       const { email, password, username } = formData;
@@ -40,10 +43,13 @@ export const AuthForm = ({ onSuccess }: AuthFormProps) => {
         onSuccess?.();
         toast.success(activeTab === 'login' ? 'Successfully logged in!' : 'Account created successfully!');
       } else {
+        setError(result?.error || 'Authentication failed');
         toast.error(result?.error || 'Authentication failed');
       }
-    } catch (error) {
-      toast.error('An unexpected error occurred');
+    } catch (error: any) {
+      const errorMessage = error?.message || 'An unexpected error occurred';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -99,6 +105,8 @@ export const AuthForm = ({ onSuccess }: AuthFormProps) => {
                 />
               </div>
 
+              {error && <p className="text-sm text-destructive">{error}</p>}
+
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? 'Signing in...' : 'Sign In'}
               </Button>
@@ -145,6 +153,8 @@ export const AuthForm = ({ onSuccess }: AuthFormProps) => {
                   required
                 />
               </div>
+
+              {error && <p className="text-sm text-destructive">{error}</p>}
 
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? 'Creating account...' : 'Create Account'}
