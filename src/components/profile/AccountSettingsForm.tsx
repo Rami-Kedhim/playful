@@ -18,8 +18,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import PasswordDialog from './settings/PasswordDialog';
+import { useAuth } from '@/hooks/auth';
 import { AuthUser } from '@/types/auth';
 
 const accountFormSchema = z.object({
@@ -36,32 +37,40 @@ interface AccountSettingsFormProps {
 
 const AccountSettingsForm = ({ user }: AccountSettingsFormProps) => {
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { updateProfile } = useAuth();
   
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
     defaultValues: {
       email: user?.email || '',
-      notifications: true,
-      marketingEmails: false,
+      notifications: user?.preferences?.notifications ?? true,
+      marketingEmails: user?.preferences?.marketingEmails ?? false,
     },
   });
 
   const onSubmit = async (data: AccountFormValues) => {
+    setIsLoading(true);
     try {
-      // Fixed: Only pass one argument to updateEmail
-      // await updateEmail(data.email, user.id);
-      
-      toast({
-        title: 'Account updated',
-        description: 'Your account settings have been updated.',
+      // Update user profile with email and preferences
+      const success = await updateProfile({
+        email: data.email,
+        preferences: {
+          notifications: data.notifications,
+          marketingEmails: data.marketingEmails,
+        }
       });
+      
+      if (success) {
+        toast.success('Account settings updated successfully');
+      } else {
+        toast.error('Failed to update account settings');
+      }
     } catch (error) {
       console.error('Error updating account:', error);
-      toast({
-        title: 'Error updating account',
-        description: 'There was a problem updating your account settings.',
-        variant: 'destructive',
-      });
+      toast.error('There was a problem updating your account settings');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -194,7 +203,9 @@ const AccountSettingsForm = ({ user }: AccountSettingsFormProps) => {
             </CardFooter>
           </Card>
           
-          <Button type="submit">Save Changes</Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? 'Saving...' : 'Save Changes'}
+          </Button>
         </form>
       </Form>
       
