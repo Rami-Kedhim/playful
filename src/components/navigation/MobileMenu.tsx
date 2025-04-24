@@ -1,97 +1,144 @@
 
-import React from "react";
-import { useAuth } from "@/hooks/auth/useAuthContext";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
-import { User, Heart, MessageSquare } from "lucide-react";
-import { AppRoutes } from "@/utils/navigation";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/auth';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Menu, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-import MobileMenuHeader from "./mobile/MobileMenuHeader";
-import MobileMenuNavLinks from "./mobile/MobileMenuNavLinks";
-import MobileMenuServiceLinks from "./mobile/MobileMenuServiceLinks";
-import MobileMenuUserSection from "./mobile/MobileMenuUserSection";
-import MobileMenuAuthButtons from "./mobile/MobileMenuAuthButtons";
-
-interface MobileMenuProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+export interface MobileMenuProps {
+  className?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const MobileMenu: React.FC<MobileMenuProps> = ({ open, onOpenChange }) => {
-  const { isAuthenticated, logout, checkRole } = useAuth();
-  const isAdmin = checkRole('admin') || checkRole('moderator');
-
-  const handleLogout = async () => {
-    await logout();
-    onOpenChange(false);
+const MobileMenu: React.FC<MobileMenuProps> = ({ 
+  className,
+  open: controlledOpen,
+  onOpenChange
+}) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined && onOpenChange !== undefined;
+  const isOpen = isControlled ? controlledOpen : internalOpen;
+  
+  const setOpen = (value: boolean) => {
+    if (isControlled) {
+      onOpenChange?.(value);
+    } else {
+      setInternalOpen(value);
+    }
   };
 
-  const closeMenu = () => {
-    onOpenChange(false);
-  };
-
-  // Main navigation items
-  const navItems = [
-    { name: 'Home', path: AppRoutes.HOME },
-    { name: 'Escorts', path: AppRoutes.ESCORTS },
-    { name: 'Creators', path: AppRoutes.CREATORS },
-  ];
-
-  if (isAuthenticated) {
-    navItems.push({ name: 'Metaverse', path: AppRoutes.METAVERSE });
-  }
-
-  if (isAdmin) {
-    navItems.push({ name: 'Brain Hub', path: AppRoutes.BRAIN_HUB });
-    navItems.push({ name: 'SEO', path: '/seo' });
-  }
-
-  const userNavItems = [
-    { name: 'Profile', path: AppRoutes.PROFILE, icon: <User className="h-4 w-4 mr-2" /> },
-    { name: 'Favorites', path: AppRoutes.FAVORITES, icon: <Heart className="h-4 w-4 mr-2" /> },
-    { name: 'Messages', path: AppRoutes.MESSAGES, icon: <MessageSquare className="h-4 w-4 mr-2" /> },
-  ];
-
+  const { isAuthenticated, logout } = useAuth();
+  
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="left-0 right-auto h-full w-[70vw] sm:w-[350px] p-0" 
-        hideCloseButton={true}
-      >
-        <MobileMenuHeader 
-          title="Menu" 
-          onClose={closeMenu} 
-        />
-        
-        <Separator className="my-2" />
-        
-        <div className="flex-1 overflow-auto py-2 px-6">
-          <MobileMenuNavLinks 
-            items={navItems} 
-            onItemClick={closeMenu} 
-          />
-
-          <MobileMenuServiceLinks 
-            onItemClick={closeMenu} 
-            t={(key: string) => key} 
-          />
-
-          <MobileMenuUserSection 
-            isAuthenticated={isAuthenticated}
-            userNavItems={userNavItems}
-            onItemClick={closeMenu}
-            onLogout={handleLogout}
-            t={(key: string) => key}
-          />
-
-          <MobileMenuAuthButtons 
-            isAuthenticated={isAuthenticated}
-            onClose={closeMenu}
-            t={(key: string) => key}
-          />
+    <Sheet open={isOpen} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className={cn("md:hidden", className)}
+        >
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Open menu</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="right" className="w-[280px] sm:w-[350px] p-0">
+        <div className="flex justify-between items-center border-b p-4">
+          <div className="font-semibold">Menu</div>
+          <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
+            <X className="h-5 w-5" />
+            <span className="sr-only">Close menu</span>
+          </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+        
+        <div className="p-4 space-y-4">
+          <nav className="flex flex-col gap-2">
+            <Link 
+              to="/" 
+              onClick={() => setOpen(false)} 
+              className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
+            >
+              Home
+            </Link>
+            <Link 
+              to="/search" 
+              onClick={() => setOpen(false)} 
+              className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
+            >
+              Search
+            </Link>
+            <Link 
+              to="/verification" 
+              onClick={() => setOpen(false)} 
+              className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
+            >
+              Verify Account
+            </Link>
+            
+            {isAuthenticated ? (
+              <>
+                <Link 
+                  to="/profile" 
+                  onClick={() => setOpen(false)} 
+                  className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
+                >
+                  Profile
+                </Link>
+                <Link 
+                  to="/wallet" 
+                  onClick={() => setOpen(false)} 
+                  className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
+                >
+                  Wallet
+                </Link>
+                <Link 
+                  to="/messages" 
+                  onClick={() => setOpen(false)} 
+                  className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
+                >
+                  Messages
+                </Link>
+                <Link 
+                  to="/settings" 
+                  onClick={() => setOpen(false)} 
+                  className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
+                >
+                  Settings
+                </Link>
+                <button
+                  onClick={() => {
+                    logout();
+                    setOpen(false);
+                  }}
+                  className="px-2 py-1.5 text-left hover:bg-muted rounded-md text-destructive transition-colors"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link 
+                  to="/auth?mode=login" 
+                  onClick={() => setOpen(false)} 
+                  className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link 
+                  to="/auth?mode=register" 
+                  onClick={() => setOpen(false)} 
+                  className="px-2 py-1.5 hover:bg-primary/10 rounded-md font-medium text-primary transition-colors"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
+          </nav>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
 
