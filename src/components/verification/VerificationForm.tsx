@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import { useAuth } from '@/hooks/auth';
-import { useVerificationForm } from '../hooks/useVerificationForm';
+import { useVerificationForm } from './hooks/useVerificationForm';
 import DocumentTypeSelect from './form/DocumentTypeSelect';
 import DocumentUploadSection from './form/DocumentUploadSection';
 import PrivacyConsentSection from './form/PrivacyConsentSection';
