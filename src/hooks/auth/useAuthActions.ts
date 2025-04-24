@@ -1,12 +1,12 @@
 
-import { useAuth } from './useAuth';
+import { useAuth } from './useAuthContext';
 
 export const useAuthActions = () => {
   const { 
-    signIn,
-    signOut,
     login,
     logout,
+    signIn,
+    signOut,
     register,
     updateUser,
     updateUserProfile,
@@ -16,7 +16,9 @@ export const useAuthActions = () => {
     sendPasswordResetEmail,
     resetPassword,
     requestPasswordReset,
-    verifyEmail
+    verifyEmail,
+    updatePassword,
+    deleteAccount
   } = useAuth();
 
   return {
@@ -33,7 +35,9 @@ export const useAuthActions = () => {
     sendPasswordResetEmail,
     resetPassword,
     requestPasswordReset,
-    verifyEmail
+    verifyEmail,
+    updatePassword,
+    deleteAccount
   };
 };
 

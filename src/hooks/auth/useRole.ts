@@ -1,6 +1,6 @@
 
 import { useMemo } from 'react';
-import { useAuth } from './useAuth.tsx';
+import { useAuth } from './useAuthContext';
 
 export const useRole = () => {
   const { user } = useAuth();
@@ -37,7 +37,7 @@ export const useRole = () => {
     return hasRole(role);
   };
 
-  const isAdmin = useMemo(() => hasRole('admin'), [user, hasRole]);
+  const isAdmin = useMemo(() => hasRole('admin'), [user]);
   const isModerator = hasRole('moderator');
   const isUser = hasRole('user');
   const isCreator = hasRole('creator');
