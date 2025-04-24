@@ -1,27 +1,28 @@
+
 export interface User {
   id: string;
   email: string;
   name?: string;
   role?: string;
+  roles?: UserRole[];
   isVerified?: boolean;
   profileId?: string;
   avatarUrl?: string;
+  username?: string;
+  profileImageUrl?: string;
+  avatar_url?: string;
+  user_metadata?: Record<string, any>;
   preferences?: Record<string, any>;
   metadata?: Record<string, any>;
   createdAt?: string;
   updatedAt?: string;
   session?: any;
   password?: string;
-  username?: string;
-  roles?: UserRole[];
-  website?: string;
-  bio?: string;
-  profileImageUrl?: string;
-  avatar_url?: string;
-  user_metadata?: Record<string, any>;
   ubxBalance?: number;
   created_at?: string;
   phone?: string;
+  website?: string;
+  bio?: string;
 }
 
 export interface UserProfile {
