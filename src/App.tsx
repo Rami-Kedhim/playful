@@ -24,7 +24,7 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
+    <ErrorBoundary fallback={<ErrorFallback />}>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <AuthProvider>

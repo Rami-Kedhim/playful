@@ -5,13 +5,15 @@ import {
   AuthContext, 
   AuthProvider, 
   useAuth, 
+  useAuthContext,
   useAuthState,
   useAuthActions,
   useRole
-} from './auth/index';
+} from './auth';
 
 export { 
   useAuth, 
+  useAuthContext,
   AuthProvider, 
   AuthContext,
   useAuthState,

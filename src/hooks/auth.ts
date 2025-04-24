@@ -4,6 +4,7 @@ export {
   AuthContext, 
   AuthProvider, 
   useAuth,
+  useAuthContext,
   useRole,
   useAuthState,
   useAuthActions

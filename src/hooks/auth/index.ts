@@ -1,6 +1,6 @@
 
 import { AuthContext, AuthProvider } from '@/contexts/AuthContext';
-import { useAuthContext } from './useAuthContext';
+import { useAuthContext, useAuth } from './useAuthContext';
 import { useRole } from './useRole';
 import { useAuthState } from './useAuthState';
 import { useAuthActions } from './useAuthActions';
@@ -9,10 +9,10 @@ import { useAuthActions } from './useAuthActions';
 export { AuthContext, AuthProvider };
 
 // Re-export hooks with aliases
-export const useAuth = useAuthContext;
+export { useAuthContext, useAuth };
 
 // Export additional hooks
 export { useRole, useAuthState, useAuthActions };
 
 // Default export
-export default useAuthContext;
+export default useAuth;
