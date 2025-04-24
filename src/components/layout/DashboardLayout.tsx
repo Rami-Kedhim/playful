@@ -2,6 +2,7 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
+import { useRole } from '@/hooks/auth/useRole';
 import { 
   Home, 
   Calendar, 
@@ -16,7 +17,6 @@ import {
   Video,
   Camera
 } from 'lucide-react';
-import { useRole } from '@/hooks/auth/useRole';
 import { cn } from '@/lib/utils';
 
 const DashboardLayout: React.FC = () => {

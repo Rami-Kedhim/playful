@@ -1,55 +1,95 @@
 
-import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { AuthUser, AuthContextType, AuthResult } from '@/types/authTypes';
-import { getUserRoles, handleAuthError } from '@/utils/authUtils';
+import { AuthContextType, AuthUser, AuthResult } from '@/types/authTypes';
+import { toast } from 'sonner';
 
-// Create context with a default value
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Create the auth context
+export const AuthContext = createContext<AuthContextType | null>(null);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
+// Default context state
+const defaultAuthContext: AuthContextType = {
+  user: null,
+  profile: null,
+  isLoading: true,
+  loading: true,
+  error: null,
+  isAuthenticated: false,
+  initialized: false,
+  login: async () => ({ success: false }),
+  signIn: async () => ({ success: false }),
+  logout: async () => {},
+  signOut: async () => {},
+  register: async () => ({ success: false }),
+  resetPassword: async () => false,
+  sendPasswordResetEmail: async () => false,
+  requestPasswordReset: async () => false,
+  verifyEmail: async () => ({ success: false }),
+  updateUserProfile: async () => false,
+  updateUser: async () => false,
+  updateProfile: async () => false,
+  loadUserProfile: async () => null,
+  clearError: () => {},
+  refreshProfile: async () => {},
+  checkRole: () => false,
+  updatePassword: async () => false,
+  deleteAccount: async () => false,
+};
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [session, setSession] = useState<any>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [profile, setProfile] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [initialized, setInitialized] = useState<boolean>(false);
-  const [session, setSession] = useState<any | null>(null);
+  const [initialized, setInitialized] = useState(false);
 
-  // Check if user is authenticated
-  const isAuthenticated = !!user;
+  // Clear any auth errors
+  const clearError = () => setError(null);
 
-  // Initialize auth state
+  // Function to check if a user has a specific role
+  const checkRole = (role: string): boolean => {
+    if (!user) return false;
+    
+    // If user has a direct role property
+    if (user.role && user.role === role) {
+      return true;
+    }
+    
+    // If user has roles array
+    if (user.roles) {
+      // Handle either string[] or complex role objects
+      if (Array.isArray(user.roles)) {
+        // Check if roles is an array of strings
+        if (user.roles.length > 0 && typeof user.roles[0] === 'string') {
+          return (user.roles as string[]).includes(role);
+        } 
+        // Check if roles is an array of objects with name property
+        else if (user.roles.length > 0 && typeof user.roles[0] === 'object') {
+          return (user.roles as { name: string; permissions?: string[] }[])
+            .some(r => r.name === role);
+        }
+      }
+    }
+    
+    return false;
+  };
+
+  // Handle authentication state changes
   useEffect(() => {
-    // Set up the auth state listener first
+    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         setSession(newSession);
-        setUser(newSession?.user as AuthUser || null);
-        
-        // Fetch profile after auth state changes, but don't block the UI
-        if (newSession?.user?.id) {
-          setTimeout(() => {
-            loadUserProfile().catch(console.error);
-          }, 0);
-        } else {
-          setProfile(null);
-        }
+        setUser(newSession?.user || null);
+        setIsLoading(false);
       }
     );
 
     // Then check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
-      setUser(currentSession?.user as AuthUser || null);
-      
-      if (currentSession?.user?.id) {
-        loadUserProfile().catch(console.error);
-      }
-      
+      setUser(currentSession?.user || null);
       setIsLoading(false);
       setInitialized(true);
     });
@@ -59,23 +99,54 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, []);
 
-  // Login method
+  // Load user profile when user changes
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (user?.id) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+            
+          if (!error && data) {
+            setProfile(data);
+          }
+        } catch (error) {
+          console.error("Error fetching profile:", error);
+        }
+      } else {
+        setProfile(null);
+      }
+    };
+    
+    fetchProfile();
+  }, [user]);
+
+  // Login function
   const login = async (email: string, password: string): Promise<AuthResult> => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      setError(null);
-      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password
+        password,
       });
       
-      if (error) throw error;
+      if (error) {
+        setError(error.message);
+        return { success: false, error: error.message };
+      }
       
-      // Auth state listener will handle setting the user
-      return { success: true, user: data.user as AuthUser, session: data.session };
-    } catch (err) {
-      const errorMessage = handleAuthError(err);
+      return { 
+        success: true,
+        user: data.user,
+        session: data.session
+      };
+    } catch (error: any) {
+      const errorMessage = error.message || "Failed to login";
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -83,57 +154,41 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Alias for login
+  // Sign in (alias for login)
   const signIn = login;
 
-  // Logout method
-  const logout = async (): Promise<void> => {
+  // Register function
+  const register = async (email: string, password: string, username?: string): Promise<AuthResult> => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      setError(null);
-      
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) throw error;
-      
-      // Auth state listener will handle clearing the user
-    } catch (err) {
-      const errorMessage = handleAuthError(err);
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Alias for logout
-  const signOut = logout;
-
-  // Register method
-  const register = async (
-    email: string, 
-    password: string, 
-    username?: string
-  ): Promise<AuthResult> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
+          data: { 
             username: username || email.split('@')[0],
           }
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        setError(error.message);
+        return { success: false, error: error.message };
+      }
       
-      // Auth state listener will handle setting the user
-      return { success: true, user: data.user as AuthUser, session: data.session };
-    } catch (err) {
-      const errorMessage = handleAuthError(err);
+      toast.success("Registration successful", {
+        description: "You have been successfully registered"
+      });
+      
+      return { 
+        success: true,
+        user: data.user,
+        session: data.session
+      };
+    } catch (error: any) {
+      const errorMessage = error.message || "Failed to register";
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -141,46 +196,72 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Reset password method
-  const resetPassword = async (email: string): Promise<boolean> => {
+  // Logout function
+  const logout = async (): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      setError(null);
+      const { error } = await supabase.auth.signOut();
       
+      if (error) {
+        throw error;
+      }
+      
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      
+      toast.success("Logged out successfully");
+    } catch (error: any) {
+      setError(error.message || "Failed to logout");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Sign out (alias for logout)
+  const signOut = logout;
+
+  // Reset password
+  const resetPassword = async (email: string): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`
+        redirectTo: `${window.location.origin}/reset-password`,
       });
       
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
       
+      toast.success("Password reset email sent");
       return true;
-    } catch (err) {
-      const errorMessage = handleAuthError(err);
-      setError(errorMessage);
+    } catch (error: any) {
+      setError(error.message || "Failed to send reset password email");
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Alias for resetPassword
+  // Send password reset email (alias for resetPassword)
   const sendPasswordResetEmail = resetPassword;
   const requestPasswordReset = resetPassword;
 
-  // Verify email method
+  // Verify email
   const verifyEmail = async (token: string): Promise<AuthResult> => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      setError(null);
-      
-      // This is a placeholder - actual email verification is usually handled by Supabase
-      // via URL redirects. This method could be used to verify custom tokens.
-      
+      // This is a placeholder as Supabase handles email verification automatically
       return { success: true };
-    } catch (err) {
-      const errorMessage = handleAuthError(err);
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
+    } catch (error: any) {
+      setError(error.message || "Failed to verify email");
+      return { success: false, error: error.message };
     } finally {
       setIsLoading(false);
     }
@@ -188,163 +269,133 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Update user profile
   const updateUserProfile = async (userData: Partial<AuthUser>): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      setError(null);
-      
-      if (!user?.id) {
-        throw new Error('User not authenticated');
+      if (!user) {
+        throw new Error("No user is logged in");
       }
       
-      const { error } = await supabase.auth.updateUser({
-        data: userData
-      });
+      // Update Supabase auth user metadata if needed
+      if (userData.username || userData.avatarUrl || userData.name) {
+        const { error } = await supabase.auth.updateUser({
+          data: {
+            username: userData.username,
+            avatar_url: userData.avatarUrl,
+            name: userData.name,
+          }
+        });
+        
+        if (error) throw error;
+      }
       
-      if (error) throw error;
+      // Update profile in database if needed
+      if (user.id) {
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            ...userData,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', user.id);
+        
+        if (error) throw error;
+      }
       
-      // Update local user state with new data
-      setUser(prevUser => {
-        if (!prevUser) return null;
-        return {
-          ...prevUser,
-          ...userData
-        };
-      });
+      // Update local state
+      setUser(prev => prev ? { ...prev, ...userData } : null);
       
+      toast.success("Profile updated successfully");
       return true;
-    } catch (err) {
-      const errorMessage = handleAuthError(err);
-      setError(errorMessage);
+    } catch (error: any) {
+      setError(error.message || "Failed to update profile");
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Alias for updateUserProfile
+  // Aliases for updateUserProfile
   const updateUser = updateUserProfile;
+  const updateProfile = updateUserProfile;
 
-  // Update profile in the profiles table
-  const updateProfile = async (data: Partial<any>): Promise<boolean> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      if (!user?.id) {
-        throw new Error('User not authenticated');
-      }
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update(data)
-        .eq('id', user.id);
-      
-      if (error) throw error;
-      
-      // Update local profile state
-      setProfile(prevProfile => {
-        if (!prevProfile) return data;
-        return {
-          ...prevProfile,
-          ...data
-        };
-      });
-      
-      return true;
-    } catch (err) {
-      const errorMessage = handleAuthError(err);
-      setError(errorMessage);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Load user profile from profiles table
+  // Load user profile
   const loadUserProfile = async (): Promise<AuthUser | null> => {
+    if (!user?.id) return null;
+    
     try {
-      if (!user?.id) {
-        return null;
-      }
-      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
       
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 means no rows returned, which is fine for new users
-        throw error;
+      if (error) throw error;
+      
+      if (data) {
+        setProfile(data);
+        return { ...user, ...data };
       }
       
-      setProfile(data || null);
-      
       return user;
-    } catch (err) {
-      console.error('Error loading user profile:', err);
+    } catch (error: any) {
+      console.error("Error loading user profile:", error);
       return user;
     }
   };
 
-  // Refresh profile data
+  // Refresh profile
   const refreshProfile = async (): Promise<void> => {
     if (!user?.id) return;
     
     try {
-      await loadUserProfile();
-    } catch (err) {
-      console.error('Error refreshing profile:', err);
-    }
-  };
-
-  // Clear error
-  const clearError = () => setError(null);
-
-  // Check if user has a specific role
-  const checkRole = (role: string): boolean => {
-    if (!user) return false;
-    
-    if (user.role === role) return true;
-    
-    if (user.roles) {
-      if (Array.isArray(user.roles)) {
-        return user.roles.includes(role);
-      } else {
-        return user.roles.some(r => r.name === role);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) throw error;
+      
+      if (data) {
+        setProfile(data);
       }
+    } catch (error: any) {
+      console.error("Error refreshing profile:", error);
     }
-    
-    return false;
   };
 
   // Update password
   const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      setError(null);
+      // Verify old password first
+      const email = user?.email;
+      if (!email) throw new Error("User email not found");
       
-      // First verify old password by attempting to sign in
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: user?.email || '',
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
         password: oldPassword,
       });
       
       if (signInError) {
-        throw new Error('Current password is incorrect');
+        throw new Error("Current password is incorrect");
       }
       
-      // Then update the password
-      const { error } = await supabase.auth.updateUser({ 
-        password: newPassword 
+      // Update to new password
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
       });
       
       if (error) throw error;
       
+      toast.success("Password updated successfully");
       return true;
-    } catch (err) {
-      const errorMessage = handleAuthError(err);
-      setError(errorMessage);
+    } catch (error: any) {
+      setError(error.message || "Failed to update password");
       return false;
     } finally {
       setIsLoading(false);
@@ -353,24 +404,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Delete account
   const deleteAccount = async (): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      setError(null);
+      // This is a placeholder as Supabase doesn't have a direct method for users to delete their accounts
+      // You would typically implement a custom function or edge function for this
       
-      if (!user?.id) {
-        throw new Error('User not authenticated');
-      }
-      
-      // This is a placeholder - actual account deletion may require custom backend logic
-      // or Supabase admin functions, which can't be called from the client
-      
-      // For now, we'll just sign out
-      await supabase.auth.signOut();
-      
+      await logout();
       return true;
-    } catch (err) {
-      const errorMessage = handleAuthError(err);
-      setError(errorMessage);
+    } catch (error: any) {
+      setError(error.message || "Failed to delete account");
       return false;
     } finally {
       setIsLoading(false);
@@ -380,15 +424,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const authContextValue: AuthContextType = {
     user,
     profile,
+    isLoading,
+    loading: isLoading, // Alias for isLoading
+    error,
+    isAuthenticated: !!user,
+    initialized,
     login,
     signIn,
     logout,
     signOut,
-    isLoading,
-    loading: isLoading, // Alias for backward compatibility
-    error,
-    isAuthenticated,
-    initialized,
     register,
     resetPassword,
     sendPasswordResetEmail,
@@ -403,7 +447,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkRole,
     updatePassword,
     deleteAccount,
-    session
+    session,
   };
 
   return (
