@@ -81,11 +81,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  return (
-    <AuthContext.Provider value={{ user, loading, error, signIn, signOut }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  // Instead of returning JSX, return an object that the component can use
+  return { AuthContext, Provider: AuthContext.Provider, user, loading, error, signIn, signOut };
 };
 
 export const useAuth = () => {
