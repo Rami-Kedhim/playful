@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -22,6 +21,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return {
       id: supabaseUser.id,
       email: supabaseUser.email || undefined,
+      username: supabaseUser.user_metadata?.username,
+      name: supabaseUser.user_metadata?.name,
+      role: supabaseUser.user_metadata?.role,
+      avatarUrl: supabaseUser.user_metadata?.avatar_url,
       user_metadata: supabaseUser.user_metadata,
       created_at: supabaseUser.created_at,
       // Add any other properties you need
@@ -260,7 +263,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       requestPasswordReset,
       verifyEmail,
       checkRole,
-      session: user?.user_metadata?.session || null
+      session: user?.session || null
     }}>
       {children}
     </AuthContext.Provider>
