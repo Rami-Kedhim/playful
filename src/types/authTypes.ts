@@ -15,7 +15,6 @@ export interface AuthUser {
   location?: string;
   bio?: string;
   // Supabase User properties
-  app_metadata: Record<string, any>;
   user_metadata: Record<string, any>;
   aud: string;
   created_at?: string;
@@ -33,7 +32,6 @@ export interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   isAuthenticated: boolean;
-  userRoles: string[];
   register: (email: string, password: string, username?: string) => Promise<AuthResult>;
   resetPassword: (email: string) => Promise<boolean>;
   updateUserProfile: (userData: Partial<AuthUser>) => Promise<boolean>;
@@ -42,4 +40,5 @@ export interface AuthContextType {
   refreshProfile: () => Promise<void>;
   checkRole: (role: string) => boolean;
   updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
+  deleteAccount: () => Promise<boolean>;
 }
