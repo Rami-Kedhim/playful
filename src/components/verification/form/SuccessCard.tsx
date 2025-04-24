@@ -1,32 +1,18 @@
 
 import React from 'react';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
-const SuccessCard: React.FC = () => {
-  const navigate = useNavigate();
-  
+const SuccessCard = () => {
   return (
-    <Card className="text-center">
-      <CardHeader>
-        <div className="flex justify-center">
-          <CheckCircle className="h-16 w-16 text-green-500" />
-        </div>
-        <h2 className="text-2xl font-bold mt-4">Verification Submitted!</h2>
-      </CardHeader>
-      <CardContent>
+    <Card>
+      <CardContent className="pt-6 text-center space-y-4">
+        <CheckCircle className="mx-auto h-12 w-12 text-primary" />
+        <h3 className="text-lg font-semibold">Verification Submitted</h3>
         <p className="text-muted-foreground">
-          Your verification request has been successfully submitted and is now being processed.
-          You'll be notified once our team has reviewed your documents, which typically takes 24-48 hours.
+          Your verification documents have been submitted successfully. We'll review them and get back to you soon.
         </p>
       </CardContent>
-      <CardFooter className="flex justify-center">
-        <Button onClick={() => navigate('/dashboard')}>
-          Return to Dashboard
-        </Button>
-      </CardFooter>
     </Card>
   );
 };

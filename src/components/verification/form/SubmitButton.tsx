@@ -9,23 +9,17 @@ interface SubmitButtonProps {
   text: string;
 }
 
-const SubmitButton: React.FC<SubmitButtonProps> = ({ 
-  loading, 
-  disabled = false,
-  text 
-}) => {
+const SubmitButton = ({ loading, disabled, text }: SubmitButtonProps) => {
   return (
-    <Button 
-      type="submit" 
-      disabled={loading || disabled} 
-      className="w-full"
-    >
+    <Button type="submit" disabled={disabled || loading} className="w-full">
       {loading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Processing...
         </>
-      ) : text}
+      ) : (
+        text
+      )}
     </Button>
   );
 };
