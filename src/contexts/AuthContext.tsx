@@ -1,30 +1,11 @@
+
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import { AuthContextType, AuthResult } from '@/types/authTypes';
 
-interface AuthContextProps {
-  user: any | null;
-  profile: any | null;
-  session: Session | null;
-  loading: boolean;
-  error: string | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  checkRole: (role: string) => boolean;
-  signIn: (args: { email: string; password: string }) => Promise<void>;
-  signUp: (args: { email: string; password: string; username?: string; full_name?: string }) => Promise<void>;
-  signOut: () => Promise<void>;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => Promise<void>;
-  register: (email: string, password: string, username?: string) => Promise<{ success: boolean; error?: string }>;
-  sendPasswordResetEmail: (email: string) => Promise<void>;
-  confirmPasswordReset: (token: string, newPassword: string) => Promise<void>;
-  updateProfile: (data: Partial<any>) => Promise<boolean>;
-  updateUserProfile: (data: Partial<any>) => Promise<boolean>;
-  refreshProfile: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+// Export the AuthContext
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -37,6 +18,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [initialized, setInitialized] = useState<boolean>(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -64,6 +46,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       setLoading(false);
+      setInitialized(true);
     });
 
     return () => subscription.unsubscribe();
@@ -151,9 +134,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setError(null);
       await supabase.auth.signOut();
+      return true;
     } catch (error: any) {
       setError(error.message);
-      throw error;
+      return false;
     }
   };
 
@@ -163,11 +147,59 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { error } = await supabase.auth.resetPasswordForEmail(email);
       if (error) {
         setError(error.message);
-        throw error;
+        return false;
       }
+      return true;
     } catch (error: any) {
       setError(error.message);
-      throw error;
+      return false;
+    }
+  };
+
+  const resetPassword = async (email: string) => {
+    return await sendPasswordResetEmail(email);
+  };
+
+  const requestPasswordReset = async (email: string) => {
+    return await sendPasswordResetEmail(email);
+  };
+
+  const verifyEmail = async (token: string) => {
+    try {
+      // This is a placeholder since Supabase handles email verification automatically
+      return true;
+    } catch (error: any) {
+      setError(error.message);
+      return false;
+    }
+  };
+
+  const updatePassword = async (oldPassword: string, newPassword: string) => {
+    try {
+      setError(null);
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        setError(error.message);
+        return false;
+      }
+      return true;
+    } catch (error: any) {
+      setError(error.message);
+      return false;
+    }
+  };
+
+  const deleteAccount = async () => {
+    try {
+      // This would require a custom API or function
+      console.warn('Account deletion functionality needs to be implemented');
+      return false;
+    } catch (error: any) {
+      setError(error.message);
+      return false;
     }
   };
 
@@ -180,11 +212,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (error) {
         setError(error.message);
-        throw error;
+        return false;
       }
+      return true;
     } catch (error: any) {
       setError(error.message);
-      throw error;
+      return false;
     }
   };
 
@@ -200,7 +233,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (error) {
         setError(error.message);
-        throw error;
+        return false;
       }
 
       setProfile(prev => prev ? { ...prev, ...data } : null);
@@ -211,18 +244,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (email: string, password: string): Promise<AuthResult> => {
     try {
       await signIn({ email, password });
-      return { success: true };
+      return { success: true, user: user };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
   };
 
-  const logout = signOut;
+  const logout = async (): Promise<boolean> => {
+    return await signOut();
+  };
 
-  const register = async (email: string, password: string, username?: string): Promise<{ success: boolean; error?: string }> => {
+  const register = async (email: string, password: string, username?: string): Promise<AuthResult> => {
     try {
       await signUp({ email, password, username });
       return { success: true };
@@ -241,45 +276,71 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const checkRole = (role: string): boolean => {
-    if (!profile) return false;
+  const loadUserProfile = async (): Promise<any> => {
+    if (user) {
+      await fetchProfile(user.id);
+      return profile;
+    }
+    return null;
+  };
 
-    const roles = profile.roles || [];
+  const updateUser = async (userData: Partial<any>): Promise<boolean> => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: userData
+      });
+
+      if (error) {
+        setError(error.message);
+        return false;
+      }
+
+      // Update local user state
+      setUser(prev => prev ? { ...prev, ...userData } : null);
+      return true;
+    } catch (error: any) {
+      setError(error.message);
+      return false;
+    }
+  };
+
+  const checkRole = (role: string): boolean => {
+    if (!user) return false;
+
+    const roles = user.roles || [];
     return roles.some(r => {
       if (typeof r === 'string') return r === role;
       return r?.name === role;
     });
   };
 
-  const value: AuthContextProps = {
+  // Define the context value with all required properties from AuthContextType
+  const value: AuthContextType = {
     user,
     profile,
-    session,
     loading,
-    error,
     isLoading: loading,
+    error,
     isAuthenticated,
-    checkRole,
-    signIn,
-    signUp,
-    signOut,
+    initialized,
     login,
     logout,
+    signIn,
+    signOut,
     register,
-    sendPasswordResetEmail,
-    confirmPasswordReset,
-    updateProfile,
+    updateUser,
     updateUserProfile,
+    updateProfile,
+    loadUserProfile,
     refreshProfile,
+    sendPasswordResetEmail,
+    resetPassword,
+    requestPasswordReset,
+    verifyEmail,
+    updatePassword,
+    deleteAccount,
+    checkRole
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = (): AuthContextProps => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };

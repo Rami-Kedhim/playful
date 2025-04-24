@@ -1,6 +1,6 @@
 
 // Export the auth context and provider
-import { AuthContext, AuthProvider } from './useAuth.tsx';
+import { AuthContext, AuthProvider } from '@/contexts/AuthContext';
 import { useAuthContext } from './useAuthContext';
 import { useRole } from './useRole';
 import { useAuthState } from './useAuthState';
