@@ -99,12 +99,86 @@ export const useAuthActions = () => {
     }
   };
 
+  /**
+   * Update the user's password
+   */
+  const updatePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // First verify the current password by attempting to sign in
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: supabase.auth.getSession().then(({ data }) => data.session?.user.email || ''),
+        password: currentPassword,
+      });
+      
+      if (signInError) {
+        setError("Current password is incorrect");
+        return false;
+      }
+      
+      // Then update the password
+      const { error: updateError } = await supabase.auth.updateUser({ 
+        password: newPassword 
+      });
+      
+      if (updateError) throw updateError;
+      
+      toast.success("Password updated", {
+        description: "Your password has been updated successfully."
+      });
+      
+      return true;
+    } catch (error: any) {
+      const errorMessage = error.message || "Failed to update password.";
+      setError(errorMessage);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Delete a user account
+   */
+  const deleteAccount = async (): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Delete user account
+      const { error } = await supabase.auth.admin.deleteUser(
+        (await supabase.auth.getSession()).data.session?.user.id || ''
+      );
+      
+      if (error) {
+        // If admin delete fails, try to delete user's own account
+        const { error: userDeleteError } = await supabase.rpc('delete_user');
+        if (userDeleteError) throw userDeleteError;
+      }
+      
+      // Sign out the user after deletion
+      await supabase.auth.signOut();
+      
+      return true;
+    } catch (error: any) {
+      const errorMessage = error.message || "Failed to delete account.";
+      setError(errorMessage);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const clearError = () => setError(null);
   
   return {
     login,
     register,
     logout,
+    updatePassword,
+    deleteAccount,
     isLoading,
     error,
     clearError,

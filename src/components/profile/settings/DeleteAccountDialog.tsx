@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertTriangle } from "lucide-react";
-import { useAuth } from '@/hooks/auth';
+import { useAuth } from '@/hooks/auth/useAuthContext';
 import { toast } from "sonner";
 
 interface DeleteAccountDialogProps {
@@ -23,7 +23,7 @@ interface DeleteAccountDialogProps {
 const DeleteAccountDialog = ({ open, onOpenChange }: DeleteAccountDialogProps) => {
   const [confirmation, setConfirmation] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { user, deleteAccount } = useAuth();
+  const { deleteAccount } = useAuth();
 
   const handleDelete = async () => {
     if (confirmation !== 'DELETE') {
