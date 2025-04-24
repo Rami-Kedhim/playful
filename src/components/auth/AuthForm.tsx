@@ -1,100 +1,123 @@
 
-import React, { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import LoginForm from "./LoginForm";
-import RegisterForm from "./RegisterForm";
-import ForgotPasswordForm from "./ForgotPasswordForm";
+import { useState } from 'react';
+import { useAuth } from '@/hooks/auth';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface AuthFormProps {
-  onLogin: (email: string, password: string) => Promise<void>;
-  onRegister: (email: string, password: string, username: string, isAdult: boolean) => Promise<void>;
-  onForgotPassword: (email: string) => Promise<void>;
-  isLoading?: boolean;
-  error?: string | null;
+  onSuccess?: () => void;
 }
 
-const AuthForm: React.FC<AuthFormProps> = ({
-  onLogin,
-  onRegister,
-  onForgotPassword,
-  isLoading = false,
-  error = null,
-}) => {
-  const [activeTab, setActiveTab] = useState<"login" | "register">("login");
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [email, setEmail] = useState("");
+export const AuthForm = ({ onSuccess }: AuthFormProps) => {
+  const { login, register } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    username: ''
+  });
 
-  // Handle showing the forgot password form
-  if (showForgotPassword) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Reset Password</CardTitle>
-          <CardDescription>
-            Enter your email address and we'll send you a password reset link.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ForgotPasswordForm
-            email={email}
-            setEmail={setEmail}
-            onForgotPassword={onForgotPassword}
-            onBackToLogin={() => setShowForgotPassword(false)}
-            isLoading={isLoading}
-          />
-        </CardContent>
-      </Card>
-    );
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { email, password, username } = formData;
+      let result;
+
+      if (activeTab === 'login') {
+        result = await login(email, password);
+      } else {
+        result = await register(email, password, username);
+      }
+
+      if (result.success) {
+        onSuccess?.();
+      } else {
+        toast.error(result.error || 'Authentication failed');
+      }
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
 
   return (
-    <Card className="w-full">
+    <Card>
       <CardHeader>
-        <CardTitle>Welcome to UberEscorts</CardTitle>
+        <CardTitle>Welcome</CardTitle>
         <CardDescription>
-          {activeTab === "login" 
-            ? "Login to access your account and exclusive services" 
-            : "Create an account to join our elite community"}
+          {activeTab === 'login' ? 'Sign in to your account' : 'Create a new account'}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs
-          value={activeTab}
-          onValueChange={(value) => setActiveTab(value as "login" | "register")}
-          className="w-full"
-        >
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'register')}>
+          <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="login">Login</TabsTrigger>
             <TabsTrigger value="register">Register</TabsTrigger>
           </TabsList>
-          <TabsContent value="login">
-            <LoginForm
-              email={email}
-              setEmail={setEmail}
-              onSubmit={onLogin}
-              onForgotPassword={() => setShowForgotPassword(true)}
-              isLoading={isLoading}
-            />
-          </TabsContent>
-          <TabsContent value="register">
-            <RegisterForm
-              email={email}
-              setEmail={setEmail}
-              onSubmit={(email, password, username) => onRegister(email, password, username, true)}
-              isLoading={isLoading}
-            />
-          </TabsContent>
-        </Tabs>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+
+            {activeTab === 'register' && (
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  name="username"
+                  type="text"
+                  placeholder="Choose a username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Processing...' : activeTab === 'login' ? 'Sign In' : 'Create Account'}
+            </Button>
+          </form>
+        </TabsList>
       </CardContent>
     </Card>
   );
 };
-
-export default AuthForm;

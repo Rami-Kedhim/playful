@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import { Suspense } from "react";
@@ -15,6 +14,7 @@ import PulseBoost from "./pages/PulseBoost";
 import Livecam from "./pages/Livecam";
 import Profile from "./pages/Profile";
 import AppLayout from "./components/layout/AppLayout";
+import AuthPage from "./pages/AuthPage";
 
 const createStubContextFile = () => {
   const StubProvider = ({ children }: { children: React.ReactNode }) => <>{children}</>;
@@ -94,6 +94,7 @@ function App() {
                                           <Route path="/livecam/:id" element={<LivecamDetail />} />
                                           <Route path="/ai-models" element={<AIModelPage />} />
                                           <Route path="/ai-model/:id" element={<AIModelDetail />} />
+                                          <Route path="/auth" element={<AuthPage />} />
                                           <Route path="*" element={<NotFound />} />
                                         </Routes>
                                       </Suspense>

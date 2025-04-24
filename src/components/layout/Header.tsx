@@ -1,47 +1,33 @@
 
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth';
-import { EnhancedButton } from '@/components/ui/enhanced-button';
-import { NotificationsPanel } from './NotificationsPanel';
-import MainNav from './MainNav';
-import { UserNav } from './UserNav';
-import { MobileMenu } from './MobileMenu';
-
-// Import the UberEscorts Logo Component
-import Logo from './Logo';
+import { Button } from '@/components/ui/button';
 
 const Header = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
 
   return (
-    <header className="border-b bg-background sticky top-0 z-50">
-      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-        <div className="flex items-center">
-          {/* Ensure Logo component shows UberEscorts rabbit logo */}
-          <Link to="/" className="flex items-center gap-2 mr-6" aria-label="UberEscorts Home">
-            <Logo />
-          </Link>
-          <MainNav className="hidden md:flex" />
-        </div>
+    <header className="border-b">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <Link to="/" className="font-semibold text-lg">
+          Your App
+        </Link>
         
-        <div className="flex items-center gap-4">
+        <div>
           {isAuthenticated ? (
-            <>
-              <NotificationsPanel />
-              <UserNav />
-            </>
-          ) : (
-            <div className="flex items-center gap-2">
-              <EnhancedButton variant="ghost" asChild>
-                <Link to="/auth?mode=login">Sign In</Link>
-              </EnhancedButton>
-              <EnhancedButton asChild>
-                <Link to="/auth?mode=register">Sign Up</Link>
-              </EnhancedButton>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground">
+                {user?.email || user?.username}
+              </span>
+              <Button variant="outline" onClick={() => logout()}>
+                Logout
+              </Button>
             </div>
+          ) : (
+            <Button asChild>
+              <Link to="/auth">Login</Link>
+            </Button>
           )}
-          <MobileMenu className="md:hidden" />
         </div>
       </div>
     </header>
@@ -49,4 +35,3 @@ const Header = () => {
 };
 
 export default Header;
-
