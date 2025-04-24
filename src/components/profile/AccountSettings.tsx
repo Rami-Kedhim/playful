@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast"; // Updated import
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/auth";
 import { useAuthActions } from "@/hooks/auth/useAuthActions";
 
@@ -33,8 +32,7 @@ const AccountSettings = () => {
       const success = await updateProfile(formData);
       
       if (success) {
-        toast({
-          title: "Profile updated",
+        toast.success("Profile updated", {
           description: "Your profile has been successfully updated.",
         });
       } else {
@@ -42,10 +40,8 @@ const AccountSettings = () => {
       }
     } catch (error) {
       console.error("Error updating profile:", error);
-      toast({
-        title: "Update failed",
+      toast.error("Update failed", {
         description: "There was an error updating your profile.",
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
