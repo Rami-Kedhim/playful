@@ -1,15 +1,8 @@
-
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  AuthContextType, 
-  AuthResult, 
-  User, 
-  UserProfile 
-} from '@/types/auth';
-import { toast } from 'sonner';
+import { AuthContextType, User, AuthResult, UserProfile } from '@/types/auth';
+import { toast } from "sonner";
 
-// Create the authentication context
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
@@ -44,14 +37,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const [initialized, setInitialized] = useState<boolean>(false);
 
-  // Load user on mount
   useEffect(() => {
     const initializeAuth = async () => {
       try {
         setIsLoading(true);
         setError(null);
 
-        // Set up auth state change listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           async (event, session) => {
             if (session?.user) {
@@ -60,7 +51,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 email: session.user.email,
                 ...session.user,
               });
-              // Fetch user profile data
               try {
                 const { data, error: profileError } = await supabase
                   .from('profiles')
@@ -83,7 +73,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         );
 
-        // Check current session
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           setUser({
@@ -120,11 +109,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     initializeAuth();
 
     return () => {
-      // Cleanup code if needed
     };
   }, []);
 
-  // Login with email and password
   const login = async (email: string, password: string, options?: any): Promise<AuthResult> => {
     try {
       setIsLoading(true);
@@ -164,10 +151,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Alias for login for backward compatibility
   const signIn = login;
 
-  // Logout
   const logout = async (): Promise<void> => {
     try {
       setIsLoading(true);
@@ -191,10 +176,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Alias for logout for backward compatibility
   const signOut = logout;
 
-  // Register new user
   const register = async (
     email: string, 
     password: string, 
@@ -205,7 +188,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(true);
       setError(null);
 
-      // Register with Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -214,7 +196,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             username,
             ...options?.data
           },
-          // Only include emailRedirectTo if it's provided in options
           ...(options?.emailRedirectTo && { 
             emailRedirectTo: options.emailRedirectTo 
           })
@@ -250,7 +231,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Send password reset email
   const sendPasswordResetEmail = async (email: string): Promise<AuthResult> => {
     try {
       setIsLoading(true);
@@ -276,10 +256,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Alias for sendPasswordResetEmail
   const requestPasswordReset = sendPasswordResetEmail;
 
-  // Reset password with token
   const resetPassword = async (token: string, password: string): Promise<AuthResult> => {
     try {
       setIsLoading(true);
@@ -307,17 +285,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Verify email with token
   const verifyEmail = async (token: string): Promise<AuthResult> => {
     try {
       setIsLoading(true);
       setError(null);
       
-      // For email verification, we need to provide both the token and email
       const { data, error } = await supabase.auth.verifyOtp({
         token,
         type: 'email',
-        email: user?.email || '' // Need to provide email for verification
+        email: user?.email || ''
       });
       
       if (error) {
@@ -342,7 +318,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Update user data
   const updateUser = async (data: Partial<User>): Promise<boolean> => {
     try {
       setIsLoading(true);
@@ -356,7 +331,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
 
-      // Update local user state
       setUser(prevUser => prevUser ? { ...prevUser, ...data } : null);
       
       toast.success('User information updated');
@@ -371,7 +345,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Update user profile in database
   const updateUserProfile = async (data: Partial<UserProfile>): Promise<boolean> => {
     if (!user) {
       toast.error('You must be logged in to update your profile');
@@ -393,7 +366,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
 
-      // Update local profile state
       setProfile(prevProfile => prevProfile ? { ...prevProfile, ...data } : null);
       
       toast.success('Profile updated');
@@ -408,10 +380,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Alias for updateUserProfile
   const updateProfile = updateUserProfile;
 
-  // Load user profile data
   const loadUserProfile = async (): Promise<User | null> => {
     if (!user?.id) {
       return null;
@@ -449,12 +419,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Refresh the user's profile data
   const refreshProfile = async (): Promise<void> => {
     await loadUserProfile();
   };
 
-  // Update user password
   const updatePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
     try {
       setIsLoading(true);
@@ -467,7 +435,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
 
-      // First verify the current password
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: currentPassword,
@@ -479,7 +446,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
 
-      // Update to the new password
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
@@ -502,7 +468,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Delete user account
   const deleteAccount = async (): Promise<boolean> => {
     if (!user?.id) {
       toast.error('You must be logged in to delete your account');
@@ -513,7 +478,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(true);
       setError(null);
 
-      // Delete user account from Supabase
       const { error } = await supabase.auth.admin.deleteUser(user.id);
       
       if (error) {
@@ -522,10 +486,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
 
-      // Sign out after successful deletion
       await supabase.auth.signOut();
       
-      // Clear local state
       setUser(null);
       setProfile(null);
       
@@ -541,11 +503,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Check if user has a specific role
   const checkRole = (role: string): boolean => {
     if (!user) return false;
 
-    // Check if user has roles array
     if (user.roles && Array.isArray(user.roles)) {
       return user.roles.some(userRole => {
         if (typeof userRole === 'string') {
@@ -557,7 +517,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
     }
     
-    // Fallback to single role property
     return user.role === role;
   };
 
@@ -566,7 +525,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     profile,
     isAuthenticated: !!user,
     isLoading,
-    loading: isLoading, // Alias for backward compatibility
+    loading: isLoading,
     error,
     initialized,
     checkRole,

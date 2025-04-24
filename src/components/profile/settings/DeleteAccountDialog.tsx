@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   Dialog,
@@ -13,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertTriangle } from "lucide-react";
 import { useAuth } from '@/hooks/auth';
-import { toast } from 'sonner';
+import { toast } from "sonner";
 
 interface DeleteAccountDialogProps {
   open: boolean;
