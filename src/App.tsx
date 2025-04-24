@@ -1,55 +1,23 @@
 
-import React from 'react';
-import ErrorBoundary from './components/common/ErrorBoundary';
-import { Suspense } from "react";
+import React, { Suspense } from 'react';
 import { Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from "./components/ui/toaster";
-import { AuthProvider } from './hooks/auth/useAuth.tsx';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { BoostProvider } from './contexts/BoostContext';
+import ErrorBoundary from './components/common/ErrorBoundary';
+import MainLayout from './components/layout/MainLayout';
+
+// Pages
 import Home from "./pages/Home";
-import Wallet from "./pages/Wallet";
-import UpdatedWallet from "./pages/UpdatedWallet";
-import PulseBoost from "./pages/PulseBoost";
-import Livecam from "./pages/Livecam";
+import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
-import AppLayout from "./components/layout/AppLayout";
-import AuthPage from "./pages/AuthPage";
-import Layout from './components/layout/Layout';
-
-const createStubContextFile = () => {
-  const StubProvider = ({ children }: { children: React.ReactNode }) => <>{children}</>;
-  return { StubProvider };
-};
-
-const { StubProvider: ModalProvider } = createStubContextFile();
-const { StubProvider: SocketProvider } = createStubContextFile();
-const { StubProvider: UberPersonaProvider } = createStubContextFile();
-const { StubProvider: LucieProvider } = createStubContextFile();
-const { StubProvider: SettingsProvider } = createStubContextFile();
-const { StubProvider: NotificationProvider } = createStubContextFile();
-const { StubProvider: AnalyticsProvider } = createStubContextFile();
-const { StubProvider: WalletProvider } = createStubContextFile();
-const { StubProvider: UberCoreProvider } = createStubContextFile();
-const { StubProvider: OxumProvider } = createStubContextFile();
-const { StubProvider: HermesProvider } = createStubContextFile();
-
-const Login = React.lazy(() => import('./pages/Login'));
-const Register = React.lazy(() => import('./pages/Register'));
-const Dashboard = React.lazy(() => import('./pages/Dashboard'));
-const Settings = React.lazy(() => import('./pages/Settings'));
-const Messages = React.lazy(() => import('./pages/Messages'));
-const Notifications = React.lazy(() => import('./pages/Notifications'));
-const Search = React.lazy(() => import('./pages/Search'));
-const Explore = React.lazy(() => import('./pages/Explore'));
-const NotFound = React.lazy(() => import('./pages/NotFound'));
-const AIChat = React.lazy(() => import('./pages/AIChat'));
-const CreatorDashboard = React.lazy(() => import('./pages/CreatorDashboard'));
-const EscortProfile = React.lazy(() => import('./pages/EscortProfile'));
-const LivecamDetail = React.lazy(() => import('./pages/LivecamDetail'));
-const AIModelPage = React.lazy(() => import('./pages/AIModelPage'));
-const AIModelDetail = React.lazy(() => import('./pages/AIModelDetail'));
+import Settings from "./pages/Settings";
+import Messages from "./pages/Messages";
+import Search from "./pages/Search";
+import WalletPage from "./pages/WalletPage";
+import PulseBoostPage from "./pages/PulseBoostPage";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -59,51 +27,56 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <AuthProvider>
-            <Layout>
-              <Suspense fallback={<div className="flex items-center justify-center h-screen">
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-screen">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>}>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route 
-                    path="/profile" 
-                    element={
-                      <Layout requireAuth>
-                        <Profile />
-                      </Layout>
-                    } 
-                  />
-                  <Route 
-                    path="/settings" 
-                    element={
-                      <Layout requireAuth>
-                        <Settings />
-                      </Layout>
-                    } 
-                  />
-                  <Route path="/wallet" element={<Wallet />} />
-                  <Route path="/updated-wallet" element={<UpdatedWallet />} />
-                  <Route path="/pulse-boost" element={<PulseBoost />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/messages" element={<Messages />} />
-                  <Route path="/notifications" element={<Notifications />} />
-                  <Route path="/search" element={<Search />} />
-                  <Route path="/explore" element={<Explore />} />
-                  <Route path="/ai-chat" element={<AIChat />} />
-                  <Route path="/creator-dashboard" element={<CreatorDashboard />} />
-                  <Route path="/escort/:id" element={<EscortProfile />} />
-                  <Route path="/livecams" element={<Livecam />} />
-                  <Route path="/livecam/:id" element={<LivecamDetail />} />
-                  <Route path="/ai-models" element={<AIModelPage />} />
-                  <Route path="/ai-model/:id" element={<AIModelDetail />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </Layout>
-            <Toaster />
+              </div>
+            }>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/" element={
+                  <MainLayout>
+                    <Home />
+                  </MainLayout>
+                } />
+                <Route path="/profile" element={
+                  <MainLayout>
+                    <Profile />
+                  </MainLayout>
+                } />
+                <Route path="/settings" element={
+                  <MainLayout>
+                    <Settings />
+                  </MainLayout>
+                } />
+                <Route path="/messages" element={
+                  <MainLayout>
+                    <Messages />
+                  </MainLayout>
+                } />
+                <Route path="/search" element={
+                  <MainLayout>
+                    <Search />
+                  </MainLayout>
+                } />
+                <Route path="/wallet" element={
+                  <MainLayout>
+                    <WalletPage />
+                  </MainLayout>
+                } />
+                <Route path="/pulse-boost" element={
+                  <MainLayout>
+                    <PulseBoostPage />
+                  </MainLayout>
+                } />
+                <Route path="*" element={
+                  <MainLayout hideNavbar>
+                    <NotFound />
+                  </MainLayout>
+                } />
+              </Routes>
+              <Toaster />
+            </Suspense>
           </AuthProvider>
         </ThemeProvider>
       </QueryClientProvider>
