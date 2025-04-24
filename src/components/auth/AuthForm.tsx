@@ -36,10 +36,11 @@ export const AuthForm = ({ onSuccess }: AuthFormProps) => {
         result = await register(email, password, username);
       }
 
-      if (result.success) {
+      if (result?.success) {
         onSuccess?.();
+        toast.success(activeTab === 'login' ? 'Successfully logged in!' : 'Account created successfully!');
       } else {
-        toast.error(result.error || 'Authentication failed');
+        toast.error(result?.error || 'Authentication failed');
       }
     } catch (error) {
       toast.error('An unexpected error occurred');
@@ -56,7 +57,7 @@ export const AuthForm = ({ onSuccess }: AuthFormProps) => {
   };
 
   return (
-    <Card>
+    <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Welcome</CardTitle>
         <CardDescription>
@@ -73,9 +74,9 @@ export const AuthForm = ({ onSuccess }: AuthFormProps) => {
           <TabsContent value="login">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="login-email">Email</Label>
                 <Input
-                  id="email"
+                  id="login-email"
                   name="email"
                   type="email"
                   placeholder="Enter your email"
@@ -86,9 +87,9 @@ export const AuthForm = ({ onSuccess }: AuthFormProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="login-password">Password</Label>
                 <Input
-                  id="password"
+                  id="login-password"
                   name="password"
                   type="password"
                   placeholder="Enter your password"
@@ -99,7 +100,7 @@ export const AuthForm = ({ onSuccess }: AuthFormProps) => {
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Processing...' : 'Sign In'}
+                {isLoading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
           </TabsContent>
@@ -107,9 +108,9 @@ export const AuthForm = ({ onSuccess }: AuthFormProps) => {
           <TabsContent value="register">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email-register">Email</Label>
+                <Label htmlFor="register-email">Email</Label>
                 <Input
-                  id="email-register"
+                  id="register-email"
                   name="email"
                   type="email"
                   placeholder="Enter your email"
@@ -133,9 +134,9 @@ export const AuthForm = ({ onSuccess }: AuthFormProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password-register">Password</Label>
+                <Label htmlFor="register-password">Password</Label>
                 <Input
-                  id="password-register"
+                  id="register-password"
                   name="password"
                   type="password"
                   placeholder="Enter your password"
@@ -146,7 +147,7 @@ export const AuthForm = ({ onSuccess }: AuthFormProps) => {
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Processing...' : 'Create Account'}
+                {isLoading ? 'Creating account...' : 'Create Account'}
               </Button>
             </form>
           </TabsContent>
@@ -155,3 +156,5 @@ export const AuthForm = ({ onSuccess }: AuthFormProps) => {
     </Card>
   );
 };
+
+export default AuthForm;
