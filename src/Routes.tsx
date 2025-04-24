@@ -1,6 +1,11 @@
+
 import React from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import Home from './pages/Home';
+import ProfilePage from './pages/ProfilePage';
+import WalletPage from './pages/WalletPage';
+import SearchPage from './pages/SearchPage';
+import PulseBoostPage from './pages/PulseBoostPage';
 
 // Create stub components for missing pages
 const StubPage = ({ title }: { title: string }) => (
@@ -46,6 +51,10 @@ const WalletGuidePage = () => <StubPage title="Wallet Guide" />;
 const CompliancePage = () => <StubPage title="Legal Compliance" />;
 const CopyrightPage = () => <StubPage title="Copyright" />;
 const CookiesPage = () => <StubPage title="Cookie Policy" />;
+const Livecam = () => <StubPage title="Livecams" />;
+const LivecamDetail = () => <StubPage title="Livecam Detail" />;
+const AIModelPage = () => <StubPage title="AI Models" />;
+const AIModelDetail = () => <StubPage title="AI Model Detail" />;
 
 const Routes = () => {
   return (

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import HeroSection from '@/components/home/HeroSection';
@@ -7,8 +8,22 @@ import { Users, MessageSquare, Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/auth';
 import WelcomeAlert from '@/components/layout/WelcomeAlert';
 
+// Define proper type for content items
+type ContentItemType = "escort" | "creator" | "livecam";
+
+interface ContentItem {
+  id: string;
+  title: string;
+  image: string;
+  type: ContentItemType;
+  rating: number;
+  location: string;
+  username: string;
+  featured: boolean;
+}
+
 // Mock data - in a real app this would come from an API
-const mockFeaturedEscorts = [
+const mockFeaturedEscorts: ContentItem[] = [
   {
     id: '1',
     title: 'Sophie',
@@ -50,6 +65,17 @@ const mockFeaturedEscorts = [
     featured: false
   }
 ];
+
+// Create livecam and creator mock data of the correct type
+const mockFeaturedLivecams: ContentItem[] = mockFeaturedEscorts.map(item => ({
+  ...item,
+  type: 'livecam' as ContentItemType
+}));
+
+const mockFeaturedCreators: ContentItem[] = mockFeaturedEscorts.map(item => ({
+  ...item,
+  type: 'creator' as ContentItemType
+}));
 
 const Home = () => {
   const { user, isAuthenticated } = useAuth();
@@ -129,14 +155,14 @@ const Home = () => {
 
       <FeaturedContent
         title="Live Now"
-        items={mockFeaturedEscorts.slice(0, 4)} // Reusing mock data for example
+        items={mockFeaturedLivecams}
         type="livecam"
         viewAllLink="/livecams"
       />
 
       <FeaturedContent
         title="Top Creators"
-        items={mockFeaturedEscorts.slice(0, 4)} // Reusing mock data for example
+        items={mockFeaturedCreators}
         type="creator"
         viewAllLink="/creators"
       />

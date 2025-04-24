@@ -1,49 +1,24 @@
 
-import React, { useState } from 'react';
-import ProfileTabs from '@/components/profile/ProfileTabs';
-import ProfileHeader from '@/components/profile/ProfileHeader';
-import { Loader2 } from 'lucide-react';
-import { User, UserProfile } from '@/types/user';
+import React from 'react';
+import MainLayout from '@/components/layout/MainLayout';
+import { useAuth } from '@/hooks/auth';
 
-export interface ProfilePageProps {
-  user: User;
-  profile: UserProfile;
-  initialTab?: string;
-}
-
-const ProfilePage: React.FC<ProfilePageProps> = ({ user, profile, initialTab = 'about' }) => {
-  const [activeTab, setActiveTab] = useState(initialTab);
-  const [isLoading, setIsLoading] = useState(false);
+const ProfilePage = () => {
+  const { user } = useAuth();
   
-  // Handle tab change
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading profile...</p>
+  return (
+    <MainLayout title="Profile" description="Manage your profile settings">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-card rounded-lg shadow p-6">
+          <h1 className="text-2xl font-bold mb-6">Profile Page</h1>
+          {user ? (
+            <p>Welcome, {user.name || user.email || 'User'}</p>
+          ) : (
+            <p>Please log in to view your profile.</p>
+          )}
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div className="container mx-auto py-6 px-4">
-      <ProfileHeader user={user} profile={profile} />
-      
-      <div className="mt-6">
-        <ProfileTabs 
-          user={user} 
-          profile={profile} 
-          activeTab={activeTab} 
-          onTabChange={handleTabChange} 
-        />
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 

@@ -1,457 +1,351 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { AuthContextType, AuthUser, AuthResult } from '@/types/authTypes';
-import { toast } from 'sonner';
+import { AuthUser, AuthContextType } from '@/types/authTypes';
+import { mockLoginRequest, mockRegisterRequest, mockResetPasswordRequest, getUserRoles } from '@/utils/authUtils';
+import { toast } from "@/components/ui/use-toast";
 
 // Create the auth context
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-// Default context state
-const defaultAuthContext: AuthContextType = {
-  user: null,
-  profile: null,
-  isLoading: true,
-  loading: true,
-  error: null,
-  isAuthenticated: false,
-  initialized: false,
-  login: async () => ({ success: false }),
-  signIn: async () => ({ success: false }),
-  logout: async () => {},
-  signOut: async () => {},
-  register: async () => ({ success: false }),
-  resetPassword: async () => false,
-  sendPasswordResetEmail: async () => false,
-  requestPasswordReset: async () => false,
-  verifyEmail: async () => ({ success: false }),
-  updateUserProfile: async () => false,
-  updateUser: async () => false,
-  updateProfile: async () => false,
-  loadUserProfile: async () => null,
-  clearError: () => {},
-  refreshProfile: async () => {},
-  checkRole: () => false,
-  updatePassword: async () => false,
-  deleteAccount: async () => false,
-};
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<any>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [profile, setProfile] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [initialized, setInitialized] = useState(false);
+  const [initialized, setInitialized] = useState<boolean>(false);
 
-  // Clear any auth errors
-  const clearError = () => setError(null);
+  // Check if user is authenticated on component mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        // Try to get user from local storage (for demo purposes)
+        const storedUser = localStorage.getItem('auth_user');
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser) as AuthUser;
+          setUser(parsedUser);
+          
+          // Fetch the user profile (mock for now)
+          const mockProfile = {
+            id: parsedUser.id,
+            username: parsedUser.username || parsedUser.email.split('@')[0],
+            avatarUrl: parsedUser.avatarUrl || null,
+            bio: 'No bio set',
+          };
+          setProfile(mockProfile);
+        }
+      } catch (err) {
+        console.error('Error checking authentication:', err);
+        setError('Failed to authenticate');
+      } finally {
+        setIsLoading(false);
+        setInitialized(true);
+      }
+    };
 
-  // Function to check if a user has a specific role
+    checkAuth();
+  }, []);
+
+  // Mock login function for demonstration
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const authUser = await mockLoginRequest(email, password);
+      
+      // Convert User to AuthUser format
+      const convertedUser: AuthUser = {
+        id: authUser.id,
+        email: authUser.email || email, // Ensure email is always set
+        name: authUser.name,
+        role: authUser.role,
+        user_metadata: authUser.user_metadata,
+        created_at: authUser.created_at,
+      };
+
+      setUser(convertedUser);
+      
+      // Store in local storage (only for demo)
+      localStorage.setItem('auth_user', JSON.stringify(convertedUser));
+      
+      toast({
+        title: "Login successful",
+        description: `Welcome back, ${convertedUser.name || convertedUser.email.split('@')[0]}!`,
+      });
+      
+      return true;
+    } catch (err: any) {
+      setError(err.message || 'Failed to log in');
+      
+      toast({
+        title: "Login failed",
+        description: err.message || 'Invalid credentials',
+        variant: "destructive",
+      });
+      
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Alias for login for naming consistency
+  const signIn = login;
+
+  // Mock register function
+  const register = async (email: string, password: string, username?: string): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const authUser = await mockRegisterRequest(email, password, username || '');
+      
+      // Convert to AuthUser format
+      const convertedUser: AuthUser = {
+        id: authUser.id,
+        email: authUser.email || email, // Ensure email is always set
+        name: authUser.name,
+        username: username || authUser.username,
+        role: authUser.role,
+        user_metadata: authUser.user_metadata,
+        created_at: authUser.created_at,
+      };
+      
+      setUser(convertedUser);
+      
+      // Store in local storage (only for demo)
+      localStorage.setItem('auth_user', JSON.stringify(convertedUser));
+      
+      toast({
+        title: "Registration successful",
+        description: `Welcome, ${username || email.split('@')[0]}!`,
+      });
+      
+      return true;
+    } catch (err: any) {
+      setError(err.message || 'Failed to register');
+      
+      toast({
+        title: "Registration failed",
+        description: err.message || 'Registration failed',
+        variant: "destructive",
+      });
+      
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Mock logout function
+  const logout = async (): Promise<boolean> => {
+    setIsLoading(true);
+    
+    try {
+      // Clear user data
+      setUser(null);
+      setProfile(null);
+      
+      // Remove from local storage
+      localStorage.removeItem('auth_user');
+      
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+      
+      return true;
+    } catch (err) {
+      console.error('Error logging out:', err);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Alias for logout for naming consistency
+  const signOut = logout;
+
+  // Update the user
+  const updateUser = async (userData: Partial<AuthUser>): Promise<boolean> => {
+    if (!user) return false;
+    
+    try {
+      // Update the user data
+      const updatedUser = { ...user, ...userData };
+      setUser(updatedUser);
+      
+      // Update in local storage
+      localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+      
+      return true;
+    } catch (err) {
+      console.error('Error updating user:', err);
+      return false;
+    }
+  };
+
+  // Update the user profile
+  const updateProfile = async (profileData: any): Promise<boolean> => {
+    if (!profile) return false;
+    
+    try {
+      // Update the profile data
+      const updatedProfile = { ...profile, ...profileData };
+      setProfile(updatedProfile);
+      
+      return true;
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      return false;
+    }
+  };
+
+  // Load the user profile
+  const loadUserProfile = async (): Promise<any> => {
+    if (!user) return null;
+    
+    try {
+      // For demo, just return the current profile
+      return profile;
+    } catch (err) {
+      console.error('Error loading profile:', err);
+      return null;
+    }
+  };
+
+  // Refresh the profile
+  const refreshProfile = async (): Promise<void> => {
+    if (!user) return;
+    
+    try {
+      // In a real app, fetch the profile from API
+      // For demo, just use the existing profile
+      const mockProfile = {
+        id: user.id,
+        username: user.username || user.email.split('@')[0],
+        avatarUrl: user.avatarUrl || null,
+        bio: 'No bio set',
+      };
+      
+      setProfile(mockProfile);
+    } catch (err) {
+      console.error('Error refreshing profile:', err);
+    }
+  };
+
+  // Password reset request
+  const sendPasswordResetEmail = async (email: string): Promise<boolean> => {
+    try {
+      await mockResetPasswordRequest(email);
+      
+      toast({
+        title: "Password Reset Email Sent",
+        description: `If ${email} exists in our system, you will receive a password reset link shortly.`,
+      });
+      
+      return true;
+    } catch (err) {
+      console.error('Error sending password reset:', err);
+      return false;
+    }
+  };
+
+  // Alias for sendPasswordResetEmail
+  const resetPassword = sendPasswordResetEmail;
+  const requestPasswordReset = sendPasswordResetEmail;
+
+  // Update password
+  const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
+    // In a real app, this would verify the old password and update to the new one
+    // For demo purposes, just return true
+    return true;
+  };
+
+  // Verify email
+  const verifyEmail = async (token: string): Promise<boolean> => {
+    // In a real app, this would verify the email token
+    // For demo purposes, just return true
+    return true;
+  };
+
+  // Delete account
+  const deleteAccount = async (): Promise<boolean> => {
+    if (!user) return false;
+    
+    try {
+      // Clear user data
+      setUser(null);
+      setProfile(null);
+      
+      // Remove from local storage
+      localStorage.removeItem('auth_user');
+      
+      toast({
+        title: "Account Deleted",
+        description: "Your account has been successfully deleted.",
+      });
+      
+      return true;
+    } catch (err) {
+      console.error('Error deleting account:', err);
+      return false;
+    }
+  };
+
+  // Check if user has a specific role
   const checkRole = (role: string): boolean => {
     if (!user) return false;
     
-    // If user has a direct role property
-    if (user.role && user.role === role) {
+    if (user.role === role) {
       return true;
     }
     
-    // If user has roles array
-    if (user.roles) {
-      // Handle either string[] or complex role objects
-      if (Array.isArray(user.roles)) {
-        // Check if roles is an array of strings
-        if (user.roles.length > 0 && typeof user.roles[0] === 'string') {
-          return (user.roles as string[]).includes(role);
-        } 
-        // Check if roles is an array of objects with name property
-        else if (user.roles.length > 0 && typeof user.roles[0] === 'object') {
-          return (user.roles as { name: string; permissions?: string[] }[])
-            .some(r => r.name === role);
-        }
+    // Check in user_metadata.roles if it exists (could be an array)
+    if (user.user_metadata?.roles) {
+      if (Array.isArray(user.user_metadata.roles)) {
+        return user.user_metadata.roles.includes(role);
+      } else if (typeof user.user_metadata.roles === 'string') {
+        return user.user_metadata.roles === role;
       }
     }
     
     return false;
   };
 
-  // Handle authentication state changes
-  useEffect(() => {
-    // Set up auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
-        setSession(newSession);
-        setUser(newSession?.user || null);
-        setIsLoading(false);
-      }
-    );
+  // Alias for updateProfile for naming consistency
+  const updateUserProfile = updateProfile;
 
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user || null);
-      setIsLoading(false);
-      setInitialized(true);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  // Load user profile when user changes
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (user?.id) {
-        try {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-            
-          if (!error && data) {
-            setProfile(data);
-          }
-        } catch (error) {
-          console.error("Error fetching profile:", error);
-        }
-      } else {
-        setProfile(null);
-      }
-    };
-    
-    fetchProfile();
-  }, [user]);
-
-  // Login function
-  const login = async (email: string, password: string): Promise<AuthResult> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) {
-        setError(error.message);
-        return { success: false, error: error.message };
-      }
-      
-      return { 
-        success: true,
-        user: data.user,
-        session: data.session
-      };
-    } catch (error: any) {
-      const errorMessage = error.message || "Failed to login";
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Sign in (alias for login)
-  const signIn = login;
-
-  // Register function
-  const register = async (email: string, password: string, username?: string): Promise<AuthResult> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { 
-            username: username || email.split('@')[0],
-          }
-        }
-      });
-      
-      if (error) {
-        setError(error.message);
-        return { success: false, error: error.message };
-      }
-      
-      toast.success("Registration successful", {
-        description: "You have been successfully registered"
-      });
-      
-      return { 
-        success: true,
-        user: data.user,
-        session: data.session
-      };
-    } catch (error: any) {
-      const errorMessage = error.message || "Failed to register";
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Logout function
-  const logout = async (): Promise<void> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        throw error;
-      }
-      
-      setUser(null);
-      setProfile(null);
-      setSession(null);
-      
-      toast.success("Logged out successfully");
-    } catch (error: any) {
-      setError(error.message || "Failed to logout");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Sign out (alias for logout)
-  const signOut = logout;
-
-  // Reset password
-  const resetPassword = async (email: string): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast.success("Password reset email sent");
-      return true;
-    } catch (error: any) {
-      setError(error.message || "Failed to send reset password email");
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Send password reset email (alias for resetPassword)
-  const sendPasswordResetEmail = resetPassword;
-  const requestPasswordReset = resetPassword;
-
-  // Verify email
-  const verifyEmail = async (token: string): Promise<AuthResult> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // This is a placeholder as Supabase handles email verification automatically
-      return { success: true };
-    } catch (error: any) {
-      setError(error.message || "Failed to verify email");
-      return { success: false, error: error.message };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Update user profile
-  const updateUserProfile = async (userData: Partial<AuthUser>): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      if (!user) {
-        throw new Error("No user is logged in");
-      }
-      
-      // Update Supabase auth user metadata if needed
-      if (userData.username || userData.avatarUrl || userData.name) {
-        const { error } = await supabase.auth.updateUser({
-          data: {
-            username: userData.username,
-            avatar_url: userData.avatarUrl,
-            name: userData.name,
-          }
-        });
-        
-        if (error) throw error;
-      }
-      
-      // Update profile in database if needed
-      if (user.id) {
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            ...userData,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', user.id);
-        
-        if (error) throw error;
-      }
-      
-      // Update local state
-      setUser(prev => prev ? { ...prev, ...userData } : null);
-      
-      toast.success("Profile updated successfully");
-      return true;
-    } catch (error: any) {
-      setError(error.message || "Failed to update profile");
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Aliases for updateUserProfile
-  const updateUser = updateUserProfile;
-  const updateProfile = updateUserProfile;
-
-  // Load user profile
-  const loadUserProfile = async (): Promise<AuthUser | null> => {
-    if (!user?.id) return null;
-    
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      
-      if (error) throw error;
-      
-      if (data) {
-        setProfile(data);
-        return { ...user, ...data };
-      }
-      
-      return user;
-    } catch (error: any) {
-      console.error("Error loading user profile:", error);
-      return user;
-    }
-  };
-
-  // Refresh profile
-  const refreshProfile = async (): Promise<void> => {
-    if (!user?.id) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      
-      if (error) throw error;
-      
-      if (data) {
-        setProfile(data);
-      }
-    } catch (error: any) {
-      console.error("Error refreshing profile:", error);
-    }
-  };
-
-  // Update password
-  const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // Verify old password first
-      const email = user?.email;
-      if (!email) throw new Error("User email not found");
-      
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password: oldPassword,
-      });
-      
-      if (signInError) {
-        throw new Error("Current password is incorrect");
-      }
-      
-      // Update to new password
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
-      });
-      
-      if (error) throw error;
-      
-      toast.success("Password updated successfully");
-      return true;
-    } catch (error: any) {
-      setError(error.message || "Failed to update password");
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Delete account
-  const deleteAccount = async (): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // This is a placeholder as Supabase doesn't have a direct method for users to delete their accounts
-      // You would typically implement a custom function or edge function for this
-      
-      await logout();
-      return true;
-    } catch (error: any) {
-      setError(error.message || "Failed to delete account");
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const authContextValue: AuthContextType = {
+  // Create context value object
+  const contextValue: AuthContextType = {
     user,
     profile,
+    loading: isLoading,
     isLoading,
-    loading: isLoading, // Alias for isLoading
     error,
     isAuthenticated: !!user,
     initialized,
     login,
-    signIn,
     logout,
+    signIn,
     signOut,
     register,
-    resetPassword,
-    sendPasswordResetEmail,
-    requestPasswordReset,
-    verifyEmail,
-    updateUserProfile,
     updateUser,
+    updateUserProfile,
     updateProfile,
     loadUserProfile,
-    clearError,
     refreshProfile,
-    checkRole,
+    sendPasswordResetEmail,
+    resetPassword,
+    requestPasswordReset,
+    verifyEmail,
     updatePassword,
     deleteAccount,
-    session,
+    checkRole
   };
 
   return (
-    <AuthContext.Provider value={authContextValue}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

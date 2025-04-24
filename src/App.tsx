@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import { Suspense } from "react";
@@ -7,7 +8,7 @@ import { Toaster } from "./components/ui/toaster";
 import { AuthProvider } from './hooks/auth/useAuth.tsx';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { BoostProvider } from './contexts/BoostContext';
-import HomePage from "./pages/HomePage";
+import Home from "./pages/Home";
 import Wallet from "./pages/Wallet";
 import UpdatedWallet from "./pages/UpdatedWallet";
 import PulseBoost from "./pages/PulseBoost";
@@ -63,7 +64,7 @@ function App() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>}>
                 <Routes>
-                  <Route path="/" element={<HomePage />} />
+                  <Route path="/" element={<Home />} />
                   <Route path="/auth" element={<AuthPage />} />
                   <Route 
                     path="/profile" 
