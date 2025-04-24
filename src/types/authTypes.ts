@@ -6,10 +6,17 @@ export interface AuthUser {
   username?: string;
   name?: string;
   role?: string;
+  roles?: Array<string | { name: string; permissions?: string[] }>;
   aud?: string;
   user_metadata?: Record<string, any>;
   created_at: string;
   avatarUrl?: string;
+  profileImageUrl?: string;
+  avatar_url?: string;
+  website?: string;
+  bio?: string;
+  phone?: string;
+  ubxBalance?: number;
 }
 
 export interface AuthContextType {
@@ -20,11 +27,11 @@ export interface AuthContextType {
   error: string | null;
   isAuthenticated: boolean;
   initialized: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<AuthResult>;
   logout: () => Promise<boolean>;
-  signIn: (email: string, password: string) => Promise<boolean>;
+  signIn: (email: string, password: string) => Promise<AuthResult>;
   signOut: () => Promise<boolean>;
-  register: (email: string, password: string, username?: string) => Promise<boolean>;
+  register: (email: string, password: string, username?: string) => Promise<AuthResult>;
   updateUser: (userData: Partial<AuthUser>) => Promise<boolean>;
   updateUserProfile: (profileData: any) => Promise<boolean>;
   updateProfile: (profileData: any) => Promise<boolean>;
