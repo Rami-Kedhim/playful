@@ -46,6 +46,7 @@ export interface UserProfile {
   is_boosted?: boolean;
   isBoosted?: boolean;
   ubxBalance?: number;
+  preferences?: Record<string, any>;
 }
 
 export enum DatabaseGender {

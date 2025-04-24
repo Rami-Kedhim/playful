@@ -171,12 +171,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!user?.id) return false;
     
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update(data)
-        .eq('id', user.id);
-
-      if (error) throw error;
+      // Handle preferences separately if they exist
+      const { preferences, ...profileData } = data;
+      
+      // First update the profile table fields
+      if (Object.keys(profileData).length > 0) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update(profileData)
+          .eq('id', user.id);
+  
+        if (profileError) throw profileError;
+      }
+      
+      // Then update user metadata if preferences are provided
+      if (preferences) {
+        const { error: userError } = await supabase.auth.updateUser({
+          data: { preferences }
+        });
+        
+        if (userError) throw userError;
+      }
       
       await loadUserProfile(); // Refresh profile data
       toast.success('Profile updated successfully');

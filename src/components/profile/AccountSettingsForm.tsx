@@ -40,12 +40,15 @@ const AccountSettingsForm = ({ user }: AccountSettingsFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { updateProfile } = useAuth();
   
+  // Extract user preferences with defaults
+  const userPreferences = user?.user_metadata?.preferences || {};
+  
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
     defaultValues: {
       email: user?.email || '',
-      notifications: user?.preferences?.notifications ?? true,
-      marketingEmails: user?.preferences?.marketingEmails ?? false,
+      notifications: userPreferences.notifications ?? true,
+      marketingEmails: userPreferences.marketingEmails ?? false,
     },
   });
 
@@ -61,9 +64,7 @@ const AccountSettingsForm = ({ user }: AccountSettingsFormProps) => {
         }
       });
       
-      if (success) {
-        toast.success('Account settings updated successfully');
-      } else {
+      if (!success) {
         toast.error('Failed to update account settings');
       }
     } catch (error) {
