@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { AuthResult } from '@/types/auth';
 import { useAuth } from './useAuthContext';
 
@@ -58,9 +58,8 @@ export const useAuthActions = () => {
       
       if (error) throw error;
 
-      toast({
-        title: "Registration successful",
-        description: "Your account has been created successfully.",
+      toast.success("Registration successful", {
+        description: "Your account has been created successfully."
       });
       
       // Auth state listener will handle the rest
@@ -86,9 +85,8 @@ export const useAuthActions = () => {
       
       if (error) throw error;
       
-      toast({
-        title: "Logged out successfully",
-        description: "You have been logged out successfully.",
+      toast.success("Logged out successfully", {
+        description: "You have been logged out successfully."
       });
       
       return { success: true };
