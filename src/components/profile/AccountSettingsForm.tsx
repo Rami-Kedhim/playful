@@ -20,6 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import PasswordDialog from './settings/PasswordDialog';
+import DeleteAccountDialog from './settings/DeleteAccountDialog';
 import { useAuth } from '@/hooks/auth';
 import { AuthUser } from '@/types/auth';
 
@@ -37,6 +38,7 @@ interface AccountSettingsFormProps {
 
 const AccountSettingsForm = ({ user }: AccountSettingsFormProps) => {
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { updateProfile } = useAuth();
   
@@ -198,6 +200,7 @@ const AccountSettingsForm = ({ user }: AccountSettingsFormProps) => {
               <Button 
                 type="button" 
                 variant="destructive"
+                onClick={() => setIsDeleteDialogOpen(true)}
               >
                 Delete Account
               </Button>
@@ -213,6 +216,11 @@ const AccountSettingsForm = ({ user }: AccountSettingsFormProps) => {
       <PasswordDialog 
         open={isPasswordDialogOpen} 
         onOpenChange={setIsPasswordDialogOpen} 
+      />
+      
+      <DeleteAccountDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
       />
     </div>
   );

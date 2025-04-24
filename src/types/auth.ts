@@ -105,5 +105,6 @@ export interface AuthContextType {
   requestPasswordReset: (email: string) => Promise<AuthResult>;
   verifyEmail: (token: string) => Promise<AuthResult>;
   updatePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
+  deleteAccount: () => Promise<boolean>;
   session?: any;
 }
