@@ -1,29 +1,50 @@
-
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AuthUser, AuthResult, AuthContextType } from '@/types/authTypes';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import { AuthResult } from '@/types/authTypes';
 
-// Create the auth context
-export const AuthContext = createContext<AuthContextType | null>(null);
+interface AuthContextProps {
+  user: any | null;
+  profile: any | null;
+  session: Session | null;
+  loading: boolean;
+  error: string | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  checkRole: (role: string) => boolean;
+  signIn: (args: { email: string; password: string }) => Promise<void>;
+  signUp: (args: { email: string; password: string; username?: string; full_name?: string }) => Promise<void>;
+  signOut: () => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  logout: () => Promise<void>;
+  register: (email: string, password: string, username?: string) => Promise<AuthResult>;
+  sendPasswordResetEmail: (email: string) => Promise<AuthResult>;
+  confirmPasswordReset: (token: string, newPassword: string) => Promise<AuthResult>;
+  updateProfile: (data: Partial<any>) => Promise<boolean>;
+  updateUserProfile: (data: Partial<any>) => Promise<boolean>;
+  refreshProfile: () => Promise<void>;
+}
+
+export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<any | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [initialized, setInitialized] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
-    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        setSession(session);
         setUser(session?.user ? mapSupabaseUserToUser(session.user) : null);
-        
-        // If session exists, fetch profile
+        setIsAuthenticated(!!session?.user);
         if (session?.user) {
           setTimeout(() => {
             fetchProfile(session.user.id);
@@ -34,38 +55,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     );
 
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
       setUser(session?.user ? mapSupabaseUserToUser(session.user) : null);
-      
+      setIsAuthenticated(!!session?.user);
+
       if (session?.user) {
         fetchProfile(session.user.id);
       }
-      
+
       setLoading(false);
-      setInitialized(true);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const mapSupabaseUserToUser = (supabaseUser: any): AuthUser => {
+  const mapSupabaseUserToUser = (supabaseUser: SupabaseUser): any => {
     return {
       id: supabaseUser.id,
       email: supabaseUser.email ?? '',
       username: supabaseUser.user_metadata?.username,
       name: supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || '',
       role: supabaseUser.user_metadata?.role,
-      roles: supabaseUser.user_metadata?.roles || [],
-      user_metadata: supabaseUser.user_metadata || {},
-      created_at: supabaseUser.created_at,
-      avatarUrl: supabaseUser.user_metadata?.avatarUrl,
+      isVerified: supabaseUser.user_metadata?.isVerified,
       profileImageUrl: supabaseUser.user_metadata?.profileImageUrl ?? supabaseUser.user_metadata?.avatar_url,
-      avatar_url: supabaseUser.user_metadata?.avatar_url,
-      website: supabaseUser.user_metadata?.website,
-      bio: supabaseUser.user_metadata?.bio,
+      avatarUrl: supabaseUser.user_metadata?.avatarUrl,
       phone: supabaseUser.phone,
-      ubxBalance: supabaseUser.user_metadata?.ubxBalance
+      website: supabaseUser.user_metadata?.website,
+      user_metadata: supabaseUser.user_metadata || {},
+      roles: supabaseUser.user_metadata?.roles || [],
+      ubxBalance: supabaseUser.user_metadata?.ubxBalance,
+      bio: supabaseUser.user_metadata?.bio,
+      createdAt: supabaseUser.created_at
     };
   };
 
@@ -82,211 +103,186 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      setProfile(data);
+      setProfile(data as any);
     } catch (error) {
       console.error('Error in fetchProfile:', error);
     }
   };
 
-  const login = async (email: string, password: string): Promise<AuthResult> => {
+  const signIn = async ({ email, password }: { email: string; password: string }) => {
     try {
       setError(null);
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
+      if (error) {
+        setError(error.message);
+        throw error;
+      }
+    } catch (error: any) {
+      setError(error.message);
+      throw error;
+    }
+  };
+
+  const signUp = async ({ email, password, username, full_name }: { email: string; password: string; username?: string; full_name?: string }) => {
+    try {
+      setError(null);
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username,
+            full_name,
+          },
+        },
+      });
+
+      if (error) {
+        setError(error.message);
+        throw error;
+      }
+    } catch (error: any) {
+      setError(error.message);
+      throw error;
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      setError(null);
+      await supabase.auth.signOut();
+    } catch (error: any) {
+      setError(error.message);
+      throw error;
+    }
+  };
+
+  const sendPasswordResetEmail = async (email: string): Promise<AuthResult> => {
+    try {
+      setError(null);
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
       if (error) {
         setError(error.message);
         return { success: false, error: error.message };
       }
-
-      return { 
-        success: true, 
-        user: data.user ? mapSupabaseUserToUser(data.user) : null,
-        session: data.session
-      };
+      return { success: true };
     } catch (error: any) {
-      const errorMessage = error.message || 'An error occurred during login';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
+      setError(error.message);
+      return { success: false, error: error.message };
     }
   };
 
-  const register = async (email: string, password: string, username?: string): Promise<AuthResult> => {
+  const confirmPasswordReset = async (token: string, newPassword: string): Promise<AuthResult> => {
     try {
       setError(null);
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { username }
-        }
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
       });
 
       if (error) {
         setError(error.message);
         return { success: false, error: error.message };
       }
-
-      return { 
-        success: true, 
-        user: data.user ? mapSupabaseUserToUser(data.user) : null,
-        session: data.session
-      };
+      return { success: true };
     } catch (error: any) {
-      const errorMessage = error.message || 'An error occurred during registration';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
+      setError(error.message);
+      return { success: false, error: error.message };
     }
   };
 
-  const logout = async (): Promise<boolean> => {
-    try {
-      setError(null);
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        setError(error.message);
-        return false;
-      }
-      
-      return true;
-    } catch (error: any) {
-      setError(error.message || 'An error occurred during logout');
-      return false;
-    }
-  };
-
-  const updateUser = async (userData: Partial<AuthUser>): Promise<boolean> => {
-    // Implementation for updating user data
-    return false;
-  };
-
-  const updateProfile = async (profileData: any): Promise<boolean> => {
+  const updateProfile = async (data: Partial<any>) => {
     if (!user) return false;
 
     try {
       setError(null);
       const { error } = await supabase
         .from('profiles')
-        .update(profileData)
+        .update(data)
         .eq('id', user.id);
 
       if (error) {
         setError(error.message);
-        return false;
+        throw error;
       }
 
-      setProfile(prev => prev ? { ...prev, ...profileData } : null);
+      setProfile(prev => prev ? { ...prev, ...data } : null);
       return true;
     } catch (error: any) {
-      setError(error.message || 'An error occurred updating profile');
+      setError(error.message);
       return false;
     }
   };
 
-  const updateUserProfile = updateProfile;
-  
-  const loadUserProfile = async (): Promise<any> => {
-    if (!user) return null;
-    
+  const login = async (email: string, password: string): Promise<AuthResult> => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-        
-      if (error) {
-        console.error('Error loading user profile:', error);
-        return null;
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error in loadUserProfile:', error);
-      return null;
+      await signIn({ email, password });
+      return { success: true, user };
+    } catch (error: any) {
+      return { success: false, error: error.message };
     }
   };
-  
+
+  const logout = signOut;
+
+  const register = async (email: string, password: string, username?: string): Promise<AuthResult> => {
+    try {
+      await signUp({ email, password, username });
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  };
+
+  const updateUserProfile = async (data: Partial<any>): Promise<boolean> => {
+    return await updateProfile(data);
+  };
+
   const refreshProfile = async (): Promise<void> => {
     if (user) {
       await fetchProfile(user.id);
     }
   };
 
-  const sendPasswordResetEmail = async (email: string): Promise<AuthResult> => {
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
-      
-      if (error) {
-        return { success: false, error: error.message };
-      }
-      
-      return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message || 'Failed to send password reset email' };
-    }
-  };
-
-  // Placeholder implementations
-  const signIn = login;
-  const signOut = logout;
-  const resetPassword = async (email: string): Promise<AuthResult> => sendPasswordResetEmail(email);
-  const requestPasswordReset = sendPasswordResetEmail;
-  const verifyEmail = async (token: string): Promise<AuthResult> => ({ success: false, error: 'Not implemented' });
-  const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => false;
-  const deleteAccount = async (): Promise<boolean> => false;
-  
   const checkRole = (role: string): boolean => {
-    if (!user) return false;
-    
-    // Check in roles array first
-    if (user.roles && Array.isArray(user.roles)) {
-      return user.roles.some(r => {
-        if (typeof r === 'string') return r === role;
-        return r?.name === role;
-      });
-    }
-    
-    // Fall back to the role property
-    return user.role === role;
+    if (!profile) return false;
+
+    const roles = profile.roles || [];
+    return roles.some(r => {
+      if (typeof r === 'string') return r === role;
+      return r?.name === role;
+    });
   };
 
-  const contextValue: AuthContextType = {
+  const value: AuthContextProps = {
     user,
     profile,
+    session,
     loading,
-    isLoading: loading,
     error,
-    isAuthenticated: !!user,
-    initialized,
-    login,
-    logout,
+    isLoading: loading,
+    isAuthenticated,
+    checkRole,
     signIn,
+    signUp,
     signOut,
+    login,
+    logout: signOut,
     register,
-    updateUser,
-    updateUserProfile,
-    updateProfile,
-    loadUserProfile,
-    refreshProfile,
     sendPasswordResetEmail,
-    resetPassword,
-    requestPasswordReset,
-    verifyEmail,
-    updatePassword,
-    deleteAccount,
-    checkRole
+    confirmPasswordReset,
+    updateProfile,
+    updateUserProfile,
+    refreshProfile,
   };
 
-  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = (): AuthContextProps => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
-
-export default useAuth;

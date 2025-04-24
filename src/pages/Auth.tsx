@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,7 +13,6 @@ const Auth = () => {
   const { isAuthenticated, login, register } = useAuth();
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   
-  // If user is already authenticated, redirect to home
   if (isAuthenticated) {
     navigate('/');
     return null;
