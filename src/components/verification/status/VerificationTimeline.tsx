@@ -1,12 +1,6 @@
 
 import React from 'react';
-import { 
-  Clock, 
-  CheckCircle, 
-  AlertTriangle, 
-  FileCheck, 
-  ShieldCheck 
-} from 'lucide-react';
+import { Clock, CheckCircle, AlertTriangle, FileCheck } from 'lucide-react';
 import { VerificationRequest, VerificationStatus } from '@/types/verification';
 
 interface VerificationTimelineProps {
@@ -34,7 +28,7 @@ const VerificationTimeline: React.FC<VerificationTimelineProps> = ({
         description: 'Your submission is in the queue awaiting review.',
         icon: <Clock className="h-5 w-5 text-amber-500" />,
         date: '',
-        completed: [VerificationStatus.PENDING, VerificationStatus.IN_REVIEW, VerificationStatus.APPROVED, VerificationStatus.REJECTED].includes(verificationRequest.status as VerificationStatus)
+        completed: [VerificationStatus.PENDING, VerificationStatus.IN_REVIEW, VerificationStatus.APPROVED].includes(verificationRequest.status as VerificationStatus)
       },
       {
         id: 'review',
@@ -42,37 +36,29 @@ const VerificationTimeline: React.FC<VerificationTimelineProps> = ({
         description: 'Our team is currently reviewing your submission.',
         icon: <AlertTriangle className="h-5 w-5 text-amber-500" />,
         date: '',
-        completed: [VerificationStatus.IN_REVIEW, VerificationStatus.APPROVED, VerificationStatus.REJECTED].includes(verificationRequest.status as VerificationStatus)
+        completed: [VerificationStatus.IN_REVIEW, VerificationStatus.APPROVED].includes(verificationRequest.status as VerificationStatus)
       },
       {
         id: 'decision',
         title: verificationRequest.status === VerificationStatus.APPROVED ? 'Verification Approved' : 'Verification Decision',
         description: verificationRequest.status === VerificationStatus.APPROVED 
           ? 'Congratulations! Your verification has been approved.' 
-          : verificationRequest.status === VerificationStatus.REJECTED
-          ? `Verification rejected: ${verificationRequest.rejectionReason || verificationRequest.reviewer_notes || 'No reason provided.'}`
           : 'Awaiting final decision on your verification.',
-        icon: verificationRequest.status === VerificationStatus.APPROVED 
-          ? <CheckCircle className="h-5 w-5 text-green-500" />
-          : verificationRequest.status === VerificationStatus.REJECTED
-          ? <AlertTriangle className="h-5 w-5 text-red-500" />
-          : <ShieldCheck className="h-5 w-5 text-primary" />,
+        icon: <CheckCircle className="h-5 w-5 text-green-500" />,
         date: '',
-        completed: [VerificationStatus.APPROVED, VerificationStatus.REJECTED].includes(verificationRequest.status as VerificationStatus)
+        completed: verificationRequest.status === VerificationStatus.APPROVED
       }
     ];
 
     return steps;
   };
 
-  const steps = getTimelineSteps();
-
   return (
     <div className="space-y-6">
       <h3 className="text-sm font-semibold">Verification Progress</h3>
       <ol className="relative border-l border-muted">
-        {steps.map((step, index) => (
-          <li key={step.id} className={`ml-4 ${index === steps.length - 1 ? '' : 'mb-6'}`}>
+        {getTimelineSteps().map((step, index) => (
+          <li key={step.id} className={`ml-4 ${index === getTimelineSteps().length - 1 ? '' : 'mb-6'}`}>
             <div className={`absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border ${
               step.completed ? 'border-primary bg-primary' : 'border-muted bg-muted'
             }`}></div>
