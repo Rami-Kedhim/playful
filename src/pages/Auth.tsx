@@ -11,7 +11,7 @@ import { AuthResult } from '@/types/authTypes';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, login, register } = useAuth();
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   
   // If user is already authenticated, redirect to home
@@ -52,10 +52,16 @@ const Auth = () => {
               <TabsTrigger value="register">Register</TabsTrigger>
             </TabsList>
             <TabsContent value="login" className="mt-6">
-              <LoginForm onSuccess={handleLoginSuccess} />
+              <LoginForm 
+                onSubmit={login} 
+                onSuccess={handleLoginSuccess} 
+              />
             </TabsContent>
             <TabsContent value="register" className="mt-6">
-              <RegisterForm onSuccess={handleRegisterSuccess} />
+              <RegisterForm 
+                onSubmit={register}
+                onSuccess={handleRegisterSuccess} 
+              />
             </TabsContent>
           </Tabs>
         </CardContent>
