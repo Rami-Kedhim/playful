@@ -1,152 +1,102 @@
 
-import React, { useState } from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogDescription,
-  DialogFooter
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/components/ui/use-toast";
-import { useAuth } from "@/hooks/auth";
-import { useAuthActions } from "@/hooks/auth/useAuthActions";
+import { useAuth } from '@/hooks/auth';
+import { toast } from 'sonner';
 
 interface PasswordDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const PasswordDialog: React.FC<PasswordDialogProps> = ({ open, onOpenChange }) => {
+const PasswordDialog = ({ open, onOpenChange }: PasswordDialogProps) => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { updateProfile } = useAuthActions();
-  
-  const handleUpdatePassword = async (e: React.FormEvent) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { updatePassword } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation
-    if (!currentPassword) {
-      toast({
-        title: "Current password required",
-        description: "Please enter your current password",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (newPassword.length < 8) {
-      toast({
-        title: "Password too short",
-        description: "New password must be at least 8 characters",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     if (newPassword !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "New password and confirmation must match",
-        variant: "destructive",
-      });
+      toast.error('New passwords do not match');
       return;
     }
-    
-    setIsSubmitting(true);
-    
+
+    setIsLoading(true);
     try {
-      // Mock password update
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Simulate successful password update
-      const success = true;
-      
+      const success = await updatePassword(currentPassword, newPassword);
       if (success) {
-        toast({
-          title: "Password updated",
-          description: "Your password has been updated successfully",
-        });
-        
-        // Reset form and close dialog
+        toast.success('Password updated successfully');
+        onOpenChange(false);
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
-        onOpenChange(false);
-      } else {
-        toast({
-          title: "Update failed",
-          description: "There was a problem updating your password. Please try again.",
-          variant: "destructive",
-        });
       }
     } catch (error) {
-      console.error("Error updating password:", error);
-      toast({
-        title: "Update failed",
-        description: "There was a problem updating your password. Please try again.",
-        variant: "destructive",
-      });
+      toast.error('Failed to update password');
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Change Password</DialogTitle>
           <DialogDescription>
-            Enter your current password and a new password to update
+            Enter your current password and choose a new one.
           </DialogDescription>
         </DialogHeader>
-        
-        <form onSubmit={handleUpdatePassword} className="grid gap-4 py-4">
-          <div className="grid gap-2">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
             <Label htmlFor="current-password">Current Password</Label>
             <Input
               id="current-password"
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              autoComplete="current-password"
+              required
             />
           </div>
-          
-          <div className="grid gap-2">
+          <div className="space-y-2">
             <Label htmlFor="new-password">New Password</Label>
             <Input
               id="new-password"
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              autoComplete="new-password"
+              required
             />
           </div>
-          
-          <div className="grid gap-2">
+          <div className="space-y-2">
             <Label htmlFor="confirm-password">Confirm New Password</Label>
             <Input
               id="confirm-password"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              autoComplete="new-password"
+              required
             />
           </div>
-          
-          <DialogFooter className="pt-4">
-            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Updating..." : "Update Password"}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Updating...' : 'Update Password'}
             </Button>
           </DialogFooter>
         </form>
