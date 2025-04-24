@@ -1,8 +1,8 @@
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
-import { User } from '@supabase/supabase-js';
-import { AuthContextType, AuthResult, UserProfile } from '@/types/auth';
+import { User as SupabaseUser } from '@supabase/supabase-js';
+import { AuthContextType, AuthResult, UserProfile, User } from '@/types/auth';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -15,6 +15,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Computed property for isAuthenticated
   const isAuthenticated = !!user;
+
+  // Convert Supabase user to our User type
+  const convertUser = (supabaseUser: SupabaseUser | null): User | null => {
+    if (!supabaseUser) return null;
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email || undefined,
+      user_metadata: supabaseUser.user_metadata,
+      created_at: supabaseUser.created_at,
+      // Add any other properties you need
+    };
+  };
 
   useEffect(() => {
     // Check active sessions and set the user
@@ -30,7 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         if (data?.session) {
           const { data: userData } = await supabase.auth.getUser();
-          setUser(userData.user);
+          setUser(convertUser(userData.user));
           await loadUserProfile();
         }
       } catch (e: any) {
@@ -48,7 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (session?.user) {
-          setUser(session.user);
+          setUser(convertUser(session.user));
           await loadUserProfile();
         } else {
           setUser(null);
@@ -95,7 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      return { success: true, user: data?.user || null, session: data?.session };
+      return { success: true, user: convertUser(data?.user), session: data?.session };
     } catch (error: any) {
       console.error('Error signing in:', error.message);
       return { success: false, error: error.message };
@@ -132,7 +144,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       return { 
         success: true, 
-        user: data?.user || null, 
+        user: convertUser(data?.user), 
         session: data?.session 
       };
     } catch (error: any) {
@@ -248,7 +260,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       requestPasswordReset,
       verifyEmail,
       checkRole,
-      session: user ? user.session : null
+      session: user?.user_metadata?.session || null
     }}>
       {children}
     </AuthContext.Provider>
