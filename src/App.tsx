@@ -1,4 +1,3 @@
-
 import React, { Suspense } from 'react';
 import { Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -7,7 +6,7 @@ import { AuthProvider } from '@/hooks/auth';
 import { ThemeProvider } from './contexts/ThemeContext';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import ErrorFallback from './components/common/ErrorFallback';
-import MainLayout from './components/layout/MainLayout';
+import Layout from './components/layout/Layout';
 
 // Pages
 import Home from "./pages/Home";
@@ -24,7 +23,7 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <ErrorBoundary fallback={<ErrorFallback />}>
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <AuthProvider>
@@ -36,44 +35,44 @@ function App() {
               <Routes>
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/" element={
-                  <MainLayout>
+                  <Layout>
                     <Home />
-                  </MainLayout>
+                  </Layout>
                 } />
                 <Route path="/profile" element={
-                  <MainLayout>
+                  <Layout requireAuth>
                     <Profile />
-                  </MainLayout>
+                  </Layout>
                 } />
                 <Route path="/settings" element={
-                  <MainLayout>
+                  <Layout requireAuth>
                     <Settings />
-                  </MainLayout>
+                  </Layout>
                 } />
                 <Route path="/messages" element={
-                  <MainLayout>
+                  <Layout requireAuth>
                     <Messages />
-                  </MainLayout>
+                  </Layout>
                 } />
                 <Route path="/search" element={
-                  <MainLayout>
+                  <Layout>
                     <Search />
-                  </MainLayout>
+                  </Layout>
                 } />
                 <Route path="/wallet" element={
-                  <MainLayout>
+                  <Layout requireAuth>
                     <WalletPage />
-                  </MainLayout>
+                  </Layout>
                 } />
                 <Route path="/pulse-boost" element={
-                  <MainLayout>
+                  <Layout requireAuth>
                     <PulseBoostPage />
-                  </MainLayout>
+                  </Layout>
                 } />
                 <Route path="*" element={
-                  <MainLayout hideNavbar>
+                  <Layout hideNavbar>
                     <NotFound />
-                  </MainLayout>
+                  </Layout>
                 } />
               </Routes>
               <Toaster />

@@ -1,42 +1,52 @@
 
+import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/auth";
 import { Button } from "@/components/ui/button";
-import UserMenu from "@/components/layout/UserMenu";
-import { NavigationMenu } from "@/components/layout/NavigationMenu";
-import { MobileMenu } from "@/components/layout/MobileMenu";
+import NavItems from "./NavItems";
+import UserMenu from "./UserMenu";
+import MobileMenu from "./MobileMenu";
+import { cn } from "@/lib/utils";
 
-const Navbar = () => {
+interface NavbarProps {
+  className?: string;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ className }) => {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="bg-background border-b sticky top-0 z-50">
-      <div className="container h-16 flex items-center justify-between py-4">
-        <Link to="/" className="font-bold text-xl">
-          Your App
-        </Link>
+    <header className={cn("border-b sticky top-0 z-50 bg-background", className)}>
+      <div className="container mx-auto px-4">
+        <div className="h-16 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <Link to="/" className="font-semibold text-xl">
+              Your App
+            </Link>
+            <div className="hidden md:flex">
+              <NavItems />
+            </div>
+          </div>
 
-        <div className="hidden md:flex items-center space-x-4">
-          <NavigationMenu />
-          {isAuthenticated ? (
-            <UserMenu />
-          ) : (
-            <>
-              <Link to="/auth?tab=login">
-                <Button variant="outline" size="sm">
-                  Log In
-                </Button>
-              </Link>
-              <Link to="/auth?tab=register">
-                <Button size="sm">Sign Up</Button>
-              </Link>
-            </>
-          )}
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-4">
+              {!isAuthenticated && (
+                <>
+                  <Button asChild variant="ghost">
+                    <Link to="/auth?mode=login">Sign In</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link to="/auth?mode=register">Sign Up</Link>
+                  </Button>
+                </>
+              )}
+              {isAuthenticated && <UserMenu />}
+            </div>
+            <MobileMenu className="md:hidden" />
+          </div>
         </div>
-
-        <MobileMenu className="md:hidden" />
       </div>
-    </div>
+    </header>
   );
 };
 

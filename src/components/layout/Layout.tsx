@@ -1,29 +1,35 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Navbar from '@/components/layout/Navbar';
+import Navbar from '@/components/navigation/Navbar';
+import Footer from '@/components/navigation/Footer';
 import { useAuth } from '@/hooks/auth';
+import { cn } from '@/lib/utils';
 
 interface LayoutProps {
   children: React.ReactNode;
   hideNavbar?: boolean;
+  hideFooter?: boolean;
   requireAuth?: boolean;
+  className?: string;
+  containerClass?: string;
 }
 
-const Layout: React.FC<LayoutProps> = ({ 
-  children, 
+const Layout: React.FC<LayoutProps> = ({
+  children,
   hideNavbar = false,
-  requireAuth = false
+  hideFooter = false,
+  requireAuth = false,
+  className,
+  containerClass = "container mx-auto px-4 py-8"
 }) => {
   const { isLoading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    // If authentication is required and user is not authenticated,
-    // redirect to login page
+  React.useEffect(() => {
     if (requireAuth && !isLoading && !isAuthenticated) {
-      navigate('/auth', { 
+      navigate('/auth', {
         state: { from: location.pathname },
         replace: true
       });
@@ -33,23 +39,20 @@ const Layout: React.FC<LayoutProps> = ({
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  // If requireAuth is true and the user isn't authenticated yet, don't render anything
-  // The useEffect will handle the redirect
-  if (requireAuth && !isAuthenticated) {
-    return null;
-  }
-
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className={cn("min-h-screen flex flex-col bg-background", className)}>
       {!hideNavbar && <Navbar />}
       <main className="flex-grow">
-        {children}
+        <div className={containerClass}>
+          {children}
+        </div>
       </main>
+      {!hideFooter && <Footer />}
     </div>
   );
 };
