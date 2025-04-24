@@ -1,100 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+
+import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import { useAuth } from '@/hooks/auth';
-import { canSubmitVerification, submitVerificationRequest } from '@/utils/verification';
 import { DocumentType } from '@/types/verification';
+import { useVerificationForm } from '../hooks/useVerificationForm';
 import DocumentTypeSelect from './DocumentTypeSelect';
 import DocumentUploadHandler from './DocumentUploadHandler';
 import SubmitButton from './SubmitButton';
 import SubmissionAlert from './SubmissionAlert';
 import SuccessCard from './SuccessCard';
-import * as z from 'zod';
+import { submitVerificationRequest } from '@/utils/verification';
 
-const verificationFormSchema = z.object({
-  documentType: z.string(),
-  documentFile: z.any().refine(val => val instanceof File, { message: "Document file is required" }),
-  selfieFile: z.any().optional().refine(val => val === undefined || val instanceof File, { message: "Invalid selfie file" }),
-  consentChecked: z.boolean().refine(val => val === true, { message: "You must agree to the terms" }),
-  documentFrontImage: z.object({
-    file: z.any(),
-    preview: z.string()
-  }).optional(),
-  documentBackImage: z.object({
-    file: z.any(),
-    preview: z.string()
-  }).optional(),
-  selfieImage: z.object({
-    file: z.any(),
-    preview: z.string()
-  }).optional()
-});
-
-export type VerificationFormValues = z.infer<typeof verificationFormSchema>;
-
-interface VerificationFormProps {
-  onSubmit?: (data: VerificationFormValues) => void;
+export interface VerificationFormProps {
+  onSubmit?: (data: any) => void;
   loading?: boolean;
   serviceType?: string;
   onSubmissionComplete?: () => void;
 }
 
-const ID_CARD = 'id_card';
-
-const VerificationForm: React.FC<VerificationFormProps> = ({ 
-  onSubmit: externalSubmit, 
+const VerificationForm: React.FC<VerificationFormProps> = ({
+  onSubmit: externalSubmit,
   loading: externalLoading = false,
   serviceType = 'escort',
   onSubmissionComplete
 }) => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [canSubmit, setCanSubmit] = useState(true);
-  const [submitMessage, setSubmitMessage] = useState<{
-    success: boolean;
-    message: string;
-  } | null>(null);
-  const [documentType, setDocumentType] = useState<DocumentType>(ID_CARD as DocumentType);
+  const {
+    form,
+    loading,
+    setLoading,
+    submitted,
+    setSubmitted,
+    submitMessage,
+    setSubmitMessage
+  } = useVerificationForm();
 
-  const form = useForm<VerificationFormValues>({
-    resolver: zodResolver(verificationFormSchema),
-    defaultValues: {
-      documentType: ID_CARD,
-      documentFile: undefined as unknown as File,
-      selfieFile: undefined as unknown as File,
-      consentChecked: false,
-      documentFrontImage: { file: undefined as unknown as File, preview: '' },
-      documentBackImage: { file: undefined as unknown as File, preview: '' },
-      selfieImage: { file: undefined as unknown as File, preview: '' },
-    },
-  });
-
-  useEffect(() => {
-    if (user) {
-      const checkSubmitEligibility = async () => {
-        const result = await canSubmitVerification(user.id);
-        setCanSubmit(result.canSubmit);
-        
-        if (!result.canSubmit) {
-          setSubmitMessage({
-            success: false,
-            message: result.reason || "You cannot submit a verification request at this time"
-          });
-        }
-      };
-      
-      checkSubmitEligibility();
-    }
-  }, [user]);
-
-  const handleDocumentTypeChange = (type: DocumentType) => {
-    setDocumentType(type);
-  };
-
-  const onSubmit = async (data: VerificationFormValues) => {
+  const onSubmit = async (data: any) => {
     if (!user) return;
     
     setLoading(true);
@@ -105,7 +47,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
         data.documentType,
         data.documentFile,
         data.selfieFile || null,
-        data.documentFile // Use the primary document as selfie for this example
+        data.documentFile
       );
       
       setSubmitMessage({
@@ -144,15 +86,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {!canSubmit && submitMessage && (
-          <SubmissionAlert 
-            type="error" 
-            title="Cannot Submit" 
-            message={submitMessage.message} 
-          />
-        )}
-
-        {submitMessage && submitMessage.success === false && canSubmit && (
+        {submitMessage && !submitMessage.success && (
           <SubmissionAlert 
             type="error" 
             message={submitMessage.message} 
@@ -163,14 +97,13 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <DocumentTypeSelect 
               form={form}
-              onTypeChange={handleDocumentTypeChange}
+              onTypeChange={() => {}}
             />
             
             <DocumentUploadHandler
               label="Front of ID Document"
               onFileSelect={(file) => {
                 form.setValue('documentFile', file);
-                form.setValue('documentFrontImage', { file, preview: URL.createObjectURL(file) });
               }}
               error={form.formState.errors.documentFile?.message?.toString()}
             />
@@ -179,14 +112,13 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
               label="Selfie with ID"
               onFileSelect={(file) => {
                 form.setValue('selfieFile', file);
-                form.setValue('selfieImage', { file, preview: URL.createObjectURL(file) });
               }}
               error={form.formState.errors.selfieFile?.message?.toString()}
             />
 
             <SubmitButton 
               loading={loading || externalLoading} 
-              disabled={!canSubmit} 
+              disabled={false} 
               text="Submit Verification"
             />
           </form>
@@ -203,3 +135,4 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
 };
 
 export default VerificationForm;
+
