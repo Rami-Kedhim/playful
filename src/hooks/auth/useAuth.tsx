@@ -9,6 +9,7 @@ interface AuthContextType {
   error: Error | null;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  checkRole: (role: string) => boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -81,8 +82,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Add checkRole function to support useRole hook
+  const checkRole = (role: string): boolean => {
+    if (!user) return false;
+    
+    if (user.roles && Array.isArray(user.roles)) {
+      return user.roles.some(r => 
+        (typeof r === 'string' && r === role) || 
+        (typeof r === 'object' && r.name === role)
+      );
+    }
+    
+    if (user.role) {
+      return user.role === role;
+    }
+    
+    return false;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, error, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading, error, signIn, signOut, checkRole }}>
       {children}
     </AuthContext.Provider>
   );

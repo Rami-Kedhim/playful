@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { useAuth } from './useAuth.tsx';
 
 export const useRole = () => {
-  const { user, checkRole } = useAuth();
+  const { user } = useAuth();
 
   const roles = useMemo(() => {
     if (!user) return [];
@@ -16,10 +16,28 @@ export const useRole = () => {
 
   const hasRole = (role: string): boolean => {
     if (!user) return false;
-    return checkRole(role);
+    
+    // Check in roles array if it exists
+    if (user.roles && Array.isArray(user.roles)) {
+      return user.roles.some(r => 
+        (typeof r === 'string' && r === role) || 
+        (typeof r === 'object' && r.name === role)
+      );
+    }
+    
+    // Fall back to role property if it exists
+    if (user.role) {
+      return user.role === role;
+    }
+    
+    return false;
   };
 
-  const isAdmin = useMemo(() => hasRole('admin'), [user, checkRole]);
+  const checkRole = (role: string): boolean => {
+    return hasRole(role);
+  };
+
+  const isAdmin = useMemo(() => hasRole('admin'), [user, hasRole]);
   const isModerator = hasRole('moderator');
   const isUser = hasRole('user');
   const isCreator = hasRole('creator');
@@ -41,6 +59,7 @@ export const useRole = () => {
     hasRole,
     hasAllRoles,
     hasAnyRole,
+    checkRole,
     isAdmin,
     isModerator,
     isUser,
