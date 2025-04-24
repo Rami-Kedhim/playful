@@ -3,12 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AuthResult } from "@/types/authTypes";
 
 export interface RegisterFormProps {
-  onSubmit: (email: string, password: string, username: string) => Promise<any>;
+  onSubmit: (email: string, password: string, username: string) => Promise<AuthResult>;
   email?: string;
   setEmail?: React.Dispatch<React.SetStateAction<string>>;
   isLoading?: boolean;
+  onSuccess?: (result: AuthResult) => void;
 }
 
 const RegisterForm = ({ onSubmit, email: externalEmail, setEmail: setExternalEmail, isLoading: externalIsLoading }: RegisterFormProps) => {

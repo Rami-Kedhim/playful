@@ -2,13 +2,15 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { AuthResult } from "@/types/authTypes";
 
 export interface LoginFormProps {
-  onSubmit: (email: string, password: string) => Promise<any>;
+  onSubmit: (email: string, password: string) => Promise<AuthResult>;
   email?: string;
   setEmail?: React.Dispatch<React.SetStateAction<string>>;
   onForgotPassword?: () => void;
   isLoading?: boolean;
+  onSuccess?: (result: AuthResult) => void;
 }
 
 const LoginForm = ({ onSubmit, email: externalEmail, setEmail: setExternalEmail, onForgotPassword, isLoading: externalIsLoading }: LoginFormProps) => {

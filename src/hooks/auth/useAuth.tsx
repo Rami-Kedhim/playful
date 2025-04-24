@@ -1,334 +1,308 @@
+import { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { AuthContextType, AuthUser, AuthResult } from '@/types/authTypes';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AuthUser, AuthContextType } from '@/types/authTypes';
-import { mockLoginRequest, mockRegisterRequest, mockResetPasswordRequest, getUserRoles } from '@/utils/authUtils';
-import { toast } from "@/components/ui/use-toast";
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Create the auth context
-export const AuthContext = createContext<AuthContextType | null>(null);
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [session, setSession] = useState<any | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [initialized, setInitialized] = useState<boolean>(false);
 
-  // Check if user is authenticated on component mount
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // Try to get user from local storage (for demo purposes)
-        const storedUser = localStorage.getItem('auth_user');
-        if (storedUser) {
-          const parsedUser = JSON.parse(storedUser) as AuthUser;
-          setUser(parsedUser);
-          
-          // Fetch the user profile (mock for now)
-          const mockProfile = {
-            id: parsedUser.id,
-            username: parsedUser.username || parsedUser.email.split('@')[0],
-            avatarUrl: parsedUser.avatarUrl || null,
-            bio: 'No bio set',
-          };
-          setProfile(mockProfile);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ? mapSupabaseUserToUser(session.user) : null);
+        setIsAuthenticated(!!session?.user);
+        if (session?.user) {
+          setTimeout(() => {
+            fetchProfile(session.user.id);
+          }, 0);
+        } else {
+          setProfile(null);
         }
-      } catch (err) {
-        console.error('Error checking authentication:', err);
-        setError('Failed to authenticate');
-      } finally {
-        setIsLoading(false);
-        setInitialized(true);
       }
-    };
+    );
 
-    checkAuth();
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ? mapSupabaseUserToUser(session.user) : null);
+      setIsAuthenticated(!!session?.user);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      }
+      setLoading(false);
+      setInitialized(true);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  // Mock login function for demonstration
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const authUser = await mockLoginRequest(email, password);
-      
-      // Convert User to AuthUser format
-      const convertedUser: AuthUser = {
-        id: authUser.id,
-        email: authUser.email || email, // Ensure email is always set
-        name: authUser.name,
-        role: authUser.role,
-        user_metadata: authUser.user_metadata,
-        created_at: authUser.created_at,
-      };
+  const mapSupabaseUserToUser = (supabaseUser: any): AuthUser => {
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email || '',
+      username: supabaseUser.user_metadata?.username,
+      name: supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || '',
+      role: supabaseUser.user_metadata?.role,
+      isVerified: supabaseUser.user_metadata?.isVerified,
+      profileImageUrl: supabaseUser.user_metadata?.profileImageUrl ?? supabaseUser.user_metadata?.avatar_url,
+      avatarUrl: supabaseUser.user_metadata?.avatarUrl,
+      phone: supabaseUser.phone,
+      website: supabaseUser.user_metadata?.website,
+      user_metadata: supabaseUser.user_metadata || {},
+      roles: supabaseUser.user_metadata?.roles || [],
+      ubxBalance: supabaseUser.user_metadata?.ubxBalance,
+      bio: supabaseUser.user_metadata?.bio,
+      created_at: supabaseUser.created_at
+    };
+  };
 
-      setUser(convertedUser);
-      
-      // Store in local storage (only for demo)
-      localStorage.setItem('auth_user', JSON.stringify(convertedUser));
-      
-      toast({
-        title: "Login successful",
-        description: `Welcome back, ${convertedUser.name || convertedUser.email.split('@')[0]}!`,
-      });
-      
-      return true;
-    } catch (err: any) {
-      setError(err.message || 'Failed to log in');
-      
-      toast({
-        title: "Login failed",
-        description: err.message || 'Invalid credentials',
-        variant: "destructive",
-      });
-      
-      return false;
-    } finally {
-      setIsLoading(false);
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      setProfile(data);
+    } catch (error: any) {
+      console.error('Error fetching profile:', error);
     }
   };
 
-  // Alias for login for naming consistency
-  const signIn = login;
-
-  // Mock register function
-  const register = async (email: string, password: string, username?: string): Promise<boolean> => {
-    setIsLoading(true);
+  const login = async (email: string, password: string): Promise<AuthResult> => {
     setError(null);
-    
     try {
-      const authUser = await mockRegisterRequest(email, password, username || '');
-      
-      // Convert to AuthUser format
-      const convertedUser: AuthUser = {
-        id: authUser.id,
-        email: authUser.email || email, // Ensure email is always set
-        name: authUser.name,
-        username: username || authUser.username,
-        role: authUser.role,
-        user_metadata: authUser.user_metadata,
-        created_at: authUser.created_at,
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        user: data.user ? mapSupabaseUserToUser(data.user) : null,
+        session: data.session
       };
-      
-      setUser(convertedUser);
-      
-      // Store in local storage (only for demo)
-      localStorage.setItem('auth_user', JSON.stringify(convertedUser));
-      
-      toast({
-        title: "Registration successful",
-        description: `Welcome, ${username || email.split('@')[0]}!`,
-      });
-      
-      return true;
-    } catch (err: any) {
-      setError(err.message || 'Failed to register');
-      
-      toast({
-        title: "Registration failed",
-        description: err.message || 'Registration failed',
-        variant: "destructive",
-      });
-      
-      return false;
-    } finally {
-      setIsLoading(false);
+    } catch (error: any) {
+      setError(error.message);
+      return {
+        success: false,
+        error: error.message
+      };
     }
   };
 
-  // Mock logout function
   const logout = async (): Promise<boolean> => {
-    setIsLoading(true);
-    
     try {
-      // Clear user data
-      setUser(null);
-      setProfile(null);
-      
-      // Remove from local storage
-      localStorage.removeItem('auth_user');
-      
-      toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
-      });
-      
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       return true;
-    } catch (err) {
-      console.error('Error logging out:', err);
+    } catch (error: any) {
+      setError(error.message);
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  // Alias for logout for naming consistency
-  const signOut = logout;
+  const register = async (email: string, password: string, username?: string): Promise<AuthResult> => {
+    setError(null);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username: username || email.split('@')[0],
+            full_name: username
+          }
+        }
+      });
 
-  // Update the user
+      if (error) throw error;
+
+      return {
+        success: true,
+        user: data.user ? mapSupabaseUserToUser(data.user) : null,
+        session: data.session
+      };
+    } catch (error: any) {
+      setError(error.message);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  };
+
   const updateUser = async (userData: Partial<AuthUser>): Promise<boolean> => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: userData
+      });
+
+      if (error) throw error;
+      
+      // Update local state
+      if (user) {
+        setUser({ ...user, ...userData });
+      }
+      
+      return true;
+    } catch (error: any) {
+      setError(error.message);
+      return false;
+    }
+  };
+
+  const updateUserProfile = async (profileData: any): Promise<boolean> => {
     if (!user) return false;
     
     try {
-      // Update the user data
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
+      const { error } = await supabase
+        .from('profiles')
+        .update(profileData)
+        .eq('id', user.id);
+
+      if (error) throw error;
       
-      // Update in local storage
-      localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+      // Update local state
+      setProfile(prev => prev ? { ...prev, ...profileData } : null);
       
       return true;
-    } catch (err) {
-      console.error('Error updating user:', err);
+    } catch (error: any) {
+      setError(error.message);
       return false;
     }
   };
 
-  // Update the user profile
-  const updateProfile = async (profileData: any): Promise<boolean> => {
-    if (!profile) return false;
-    
-    try {
-      // Update the profile data
-      const updatedProfile = { ...profile, ...profileData };
-      setProfile(updatedProfile);
-      
-      return true;
-    } catch (err) {
-      console.error('Error updating profile:', err);
-      return false;
-    }
-  };
+  const updateProfile = updateUserProfile;
 
-  // Load the user profile
   const loadUserProfile = async (): Promise<any> => {
     if (!user) return null;
     
     try {
-      // For demo, just return the current profile
-      return profile;
-    } catch (err) {
-      console.error('Error loading profile:', err);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+      
+      setProfile(data);
+      return data;
+    } catch (error: any) {
+      setError(error.message);
       return null;
     }
   };
 
-  // Refresh the profile
   const refreshProfile = async (): Promise<void> => {
-    if (!user) return;
-    
-    try {
-      // In a real app, fetch the profile from API
-      // For demo, just use the existing profile
-      const mockProfile = {
-        id: user.id,
-        username: user.username || user.email.split('@')[0],
-        avatarUrl: user.avatarUrl || null,
-        bio: 'No bio set',
-      };
-      
-      setProfile(mockProfile);
-    } catch (err) {
-      console.error('Error refreshing profile:', err);
+    if (user) {
+      await loadUserProfile();
     }
   };
 
-  // Password reset request
   const sendPasswordResetEmail = async (email: string): Promise<boolean> => {
     try {
-      await mockResetPasswordRequest(email);
-      
-      toast({
-        title: "Password Reset Email Sent",
-        description: `If ${email} exists in our system, you will receive a password reset link shortly.`,
-      });
-      
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) throw error;
       return true;
-    } catch (err) {
-      console.error('Error sending password reset:', err);
+    } catch (error: any) {
+      setError(error.message);
       return false;
     }
   };
 
-  // Alias for sendPasswordResetEmail
   const resetPassword = sendPasswordResetEmail;
   const requestPasswordReset = sendPasswordResetEmail;
 
-  // Update password
-  const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
-    // In a real app, this would verify the old password and update to the new one
-    // For demo purposes, just return true
-    return true;
-  };
-
-  // Verify email
   const verifyEmail = async (token: string): Promise<boolean> => {
-    // In a real app, this would verify the email token
-    // For demo purposes, just return true
-    return true;
+    try {
+      // This is a placeholder as Supabase handles email verification automatically
+      return true;
+    } catch (error: any) {
+      setError(error.message);
+      return false;
+    }
   };
 
-  // Delete account
+  const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+      
+      if (error) throw error;
+      return true;
+    } catch (error: any) {
+      setError(error.message);
+      return false;
+    }
+  };
+
   const deleteAccount = async (): Promise<boolean> => {
     if (!user) return false;
     
     try {
-      // Clear user data
-      setUser(null);
-      setProfile(null);
+      // First delete profile data
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', user.id);
+        
+      if (profileError) throw profileError;
       
-      // Remove from local storage
-      localStorage.removeItem('auth_user');
+      // Then delete auth user (requires admin privileges or custom function)
+      // This is a placeholder - you'll need to implement a server function for this
       
-      toast({
-        title: "Account Deleted",
-        description: "Your account has been successfully deleted.",
-      });
-      
+      await logout();
       return true;
-    } catch (err) {
-      console.error('Error deleting account:', err);
+    } catch (error: any) {
+      setError(error.message);
       return false;
     }
   };
 
-  // Check if user has a specific role
   const checkRole = (role: string): boolean => {
     if (!user) return false;
     
-    if (user.role === role) {
-      return true;
-    }
+    // Check if user has the specified role
+    if (user.role === role) return true;
     
-    // Check in user_metadata.roles if it exists (could be an array)
-    if (user.user_metadata?.roles) {
-      if (Array.isArray(user.user_metadata.roles)) {
-        return user.user_metadata.roles.includes(role);
-      } else if (typeof user.user_metadata.roles === 'string') {
-        return user.user_metadata.roles === role;
-      }
+    // Check in roles array if it exists
+    if (user.roles) {
+      return user.roles.some(r => {
+        if (typeof r === 'string') return r === role;
+        return r?.name === role;
+      });
     }
     
     return false;
   };
 
-  // Alias for updateProfile for naming consistency
-  const updateUserProfile = updateProfile;
-
-  // Create context value object
-  const contextValue: AuthContextType = {
+  const value: AuthContextType = {
     user,
     profile,
-    loading: isLoading,
-    isLoading,
+    loading,
     error,
-    isAuthenticated: !!user,
+    isLoading: loading,
+    isAuthenticated,
     initialized,
     login,
     logout,
-    signIn,
-    signOut,
+    signIn: login,
+    signOut: logout,
     register,
     updateUser,
     updateUserProfile,
@@ -344,9 +318,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkRole
   };
 
-  return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+export default useAuth;
