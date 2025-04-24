@@ -1,6 +1,6 @@
 
-import { useAuth } from './useAuthContext';
-import { AuthContext, AuthProvider } from './useAuth';
+import { useAuthContext as useAuth } from './useAuthContext';
+import { AuthContext, AuthProvider } from './useAuth.tsx';
 import { useRole } from './useRole';
 import { useAuthState } from './useAuthState';
 import { useAuthActions } from './useAuthActions';

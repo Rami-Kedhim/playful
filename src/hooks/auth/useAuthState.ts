@@ -1,5 +1,5 @@
 
-import { useAuth } from './useAuthContext';
+import { useAuthContext as useAuth } from './useAuthContext';
 
 export const useAuthState = () => {
   const { 

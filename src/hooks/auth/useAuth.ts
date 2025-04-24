@@ -1,6 +1,7 @@
 
 // This file is kept for backward compatibility
-import { useAuth, AuthContext, AuthProvider } from './useAuth.tsx';
+import { AuthContext, AuthProvider } from './useAuth.tsx';
+import { useAuthContext } from './useAuthContext';
 
-export { useAuth, AuthContext, AuthProvider };
-export default useAuth;
+export { AuthContext, AuthProvider, useAuthContext as useAuth };
+export default useAuthContext;

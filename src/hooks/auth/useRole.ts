@@ -1,6 +1,6 @@
 
 import { useMemo } from 'react';
-import { useAuth } from './useAuthContext';
+import { useAuthContext as useAuth } from './useAuthContext';
 
 export const useRole = () => {
   const { user } = useAuth();
