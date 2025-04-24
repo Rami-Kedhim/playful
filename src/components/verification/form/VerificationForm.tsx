@@ -3,10 +3,10 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import { useAuth } from '@/hooks/auth';
-import { DocumentType } from '@/types/verification';
 import { useVerificationForm } from '../hooks/useVerificationForm';
 import DocumentTypeSelect from './DocumentTypeSelect';
-import DocumentUploadHandler from './DocumentUploadHandler';
+import DocumentUploadSection from './DocumentUploadSection';
+import PrivacyConsentSection from './PrivacyConsentSection';
 import SubmitButton from './SubmitButton';
 import SubmissionAlert from './SubmissionAlert';
 import SuccessCard from './SuccessCard';
@@ -100,21 +100,12 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
               onTypeChange={() => {}}
             />
             
-            <DocumentUploadHandler
-              label="Front of ID Document"
-              onFileSelect={(file) => {
-                form.setValue('documentFile', file);
-              }}
-              error={form.formState.errors.documentFile?.message?.toString()}
+            <DocumentUploadSection 
+              form={form}
+              documentType={form.watch('documentType')}
             />
-            
-            <DocumentUploadHandler
-              label="Selfie with ID"
-              onFileSelect={(file) => {
-                form.setValue('selfieFile', file);
-              }}
-              error={form.formState.errors.selfieFile?.message?.toString()}
-            />
+
+            <PrivacyConsentSection form={form} />
 
             <SubmitButton 
               loading={loading || externalLoading} 
@@ -135,4 +126,3 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
 };
 
 export default VerificationForm;
-
