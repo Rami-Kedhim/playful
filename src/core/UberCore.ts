@@ -1,4 +1,3 @@
-
 // UberCore - Central integration point for all core services
 // Combines: Lucie, Hermes, Oxum, Orus, UberWallet systems
 
@@ -74,7 +73,16 @@ export class UberCore {
     }
 
     try {
-      const processedPersona: UberPersona = { ...persona };
+      const processedPersona = { ...persona } as UberPersona & { 
+        boostScore?: number;
+        systemMetadata: {
+          source: 'manual' | 'ai_generated' | 'scraped';
+          lastSynced: Date;
+          tagsGeneratedByAI: boolean;
+          hilbertSpaceVector: number[];
+          flowScore?: number;
+        }
+      };
 
       if (!processedPersona.systemMetadata) {
         processedPersona.systemMetadata = {
@@ -82,17 +90,10 @@ export class UberCore {
           lastSynced: new Date(),
           tagsGeneratedByAI: false,
           hilbertSpaceVector: [],
-          // safe to add optional custom properties separately
         };
       }
 
-      // Check existence of optional nested properties using optional chaining and existence check
-      const statusFlags = processedPersona.systemMetadata.statusFlags ?? undefined;
-      const personalityIndex = processedPersona.systemMetadata.personalityIndex ?? undefined;
-
-      // Process using Oxum's boost allocation if needed
       if (this.requiresNeuralBoost(processedPersona)) {
-        // Apply Oxum boosting
         const boostMatrix = [
           [0.7, 0.3, 0.2],
           [0.3, 0.8, 0.1],
@@ -103,20 +104,20 @@ export class UberCore {
         processedPersona.boostScore = boostValues[0] * 100;
       }
 
-      // Apply Hermes flow dynamics
       const flowDynamics = hermes.resolveFlowDynamics({
         personaType: processedPersona.type,
         activityLevel: processedPersona.isOnline ? 0.8 : 0.2,
         systemLoad: 0.5
       });
       
-      processedPersona.systemMetadata.flowScore = flowDynamics.flowScore;
+      if (processedPersona.systemMetadata) {
+        processedPersona.systemMetadata.flowScore = flowDynamics.flowScore;
+      }
 
-      // Log signal transformation with Orus
       orus.logSignalTransform('persona_process', {
         personaId: processedPersona.id,
         type: processedPersona.type,
-        boostScore: processedPersona.boostScore
+        boostScore: processedPersona.boostScore || 0
       });
 
       return processedPersona;
@@ -167,26 +168,25 @@ export class UberCore {
     return isPremium || useNeural;
   }
   
-  // Load featured personas - integrates with Lucie system
   public async loadFeaturedPersonas(count: number = 6): Promise<UberPersona[]> {
     try {
-      // Simulate loading featured personas
       const personas = Array(count).fill(null).map((_, index) => ({
         id: `featured-${index}`,
         name: `Featured Persona ${index}`,
         type: index % 2 === 0 ? 'escort' : 'creator',
-        isOnline: Math.random() > 0.3,
-        isVerified: Math.random() > 0.2,
-        isPremium: Math.random() > 0.7,
+        displayName: `Featured Persona ${index}`,
+        avatarUrl: 'https://example.com/avatar.jpg',
         location: ['New York', 'Los Angeles', 'Miami', 'Las Vegas'][Math.floor(Math.random() * 4)],
+        isVerified: Math.random() > 0.2,
+        isOnline: Math.random() > 0.3,
+        isPremium: Math.random() > 0.7,
         tags: ['premium', 'featured', 'recommended'],
-        boostScore: Math.random() * 100,
         availability: {
           nextAvailable: new Date(Date.now() + Math.random() * 1000000).toISOString(),
           schedule: {}
         },
         systemMetadata: {
-          source: 'featured',
+          source: 'manual' as const,
           lastSynced: new Date(),
           tagsGeneratedByAI: false,
           hilbertSpaceVector: []
@@ -200,7 +200,6 @@ export class UberCore {
     }
   }
   
-  // System status method for dashboard HUD
   public getSystemStatus(): Record<string, any> {
     return {
       coreStatus: this.initialized ? 'online' : 'offline',

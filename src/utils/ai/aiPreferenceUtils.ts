@@ -27,5 +27,5 @@ export const processLastInteractionDate = (
     return lastInteractionValue;
   }
 
-  return new Date();
+  return null;
 };
