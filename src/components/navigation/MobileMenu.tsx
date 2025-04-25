@@ -1,141 +1,65 @@
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '@/hooks/auth';
+import React from 'react';
+import { Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/auth';
+import { Link } from 'react-router-dom';
+import NavItems from './NavItems';
 
-export interface MobileMenuProps {
+interface MobileMenuProps {
   className?: string;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
 }
 
-const MobileMenu: React.FC<MobileMenuProps> = ({ 
-  className,
-  open: controlledOpen,
-  onOpenChange
-}) => {
-  const [internalOpen, setInternalOpen] = useState(false);
-  const isControlled = controlledOpen !== undefined && onOpenChange !== undefined;
-  const isOpen = isControlled ? controlledOpen : internalOpen;
-  
-  const setOpen = (value: boolean) => {
-    if (isControlled) {
-      onOpenChange?.(value);
-    } else {
-      setInternalOpen(value);
-    }
-  };
+const MobileMenu: React.FC<MobileMenuProps> = ({ className }) => {
+  const { isAuthenticated, user, logout } = useAuth();
 
-  const { isAuthenticated, logout } = useAuth();
-  
   return (
-    <Sheet open={isOpen} onOpenChange={setOpen}>
+    <Sheet>
       <SheetTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className={cn("md:hidden", className)}
-        >
+        <Button variant="ghost" size="icon" className={className}>
           <Menu className="h-5 w-5" />
-          <span className="sr-only">Open menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-[280px] sm:w-[350px] p-0">
-        <div className="flex justify-between items-center border-b p-4">
-          <div className="font-semibold">Menu</div>
-          <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
-            <X className="h-5 w-5" />
-            <span className="sr-only">Close menu</span>
-          </Button>
-        </div>
-        
-        <div className="p-4 space-y-4">
-          <nav className="flex flex-col gap-2">
-            <Link 
-              to="/" 
-              onClick={() => setOpen(false)} 
-              className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
-            >
-              Home
-            </Link>
-            <Link 
-              to="/search" 
-              onClick={() => setOpen(false)} 
-              className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
-            >
-              Search
-            </Link>
-            <Link 
-              to="/verification" 
-              onClick={() => setOpen(false)} 
-              className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
-            >
-              Verify Account
-            </Link>
-            
+      <SheetContent side="right">
+        <div className="flex flex-col h-full">
+          <div className="py-4 border-b">
+            <h2 className="text-lg font-semibold">Menu</h2>
+          </div>
+          
+          <div className="flex flex-col space-y-4 py-4">
+            <NavItems />
+          </div>
+          
+          <div className="mt-auto py-4 border-t">
             {isAuthenticated ? (
-              <>
-                <Link 
-                  to="/profile" 
-                  onClick={() => setOpen(false)} 
-                  className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
-                >
-                  Profile
-                </Link>
-                <Link 
-                  to="/wallet" 
-                  onClick={() => setOpen(false)} 
-                  className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
-                >
-                  Wallet
-                </Link>
-                <Link 
-                  to="/messages" 
-                  onClick={() => setOpen(false)} 
-                  className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
-                >
-                  Messages
-                </Link>
-                <Link 
-                  to="/settings" 
-                  onClick={() => setOpen(false)} 
-                  className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
-                >
-                  Settings
-                </Link>
-                <button
-                  onClick={() => {
-                    logout();
-                    setOpen(false);
-                  }}
-                  className="px-2 py-1.5 text-left hover:bg-muted rounded-md text-destructive transition-colors"
-                >
-                  Sign Out
-                </button>
-              </>
+              <div className="space-y-4">
+                <div className="text-sm font-medium">
+                  {user?.email || 'Logged in user'}
+                </div>
+                <div className="space-y-2">
+                  <Button asChild variant="ghost" className="w-full justify-start">
+                    <Link to="/profile">Profile</Link>
+                  </Button>
+                  <Button asChild variant="ghost" className="w-full justify-start">
+                    <Link to="/settings">Settings</Link>
+                  </Button>
+                  <Button variant="ghost" className="w-full justify-start" onClick={() => logout()}>
+                    Logout
+                  </Button>
+                </div>
+              </div>
             ) : (
-              <>
-                <Link 
-                  to="/auth?mode=login" 
-                  onClick={() => setOpen(false)} 
-                  className="px-2 py-1.5 hover:bg-muted rounded-md transition-colors"
-                >
-                  Sign In
-                </Link>
-                <Link 
-                  to="/auth?mode=register" 
-                  onClick={() => setOpen(false)} 
-                  className="px-2 py-1.5 hover:bg-primary/10 rounded-md font-medium text-primary transition-colors"
-                >
-                  Sign Up
-                </Link>
-              </>
+              <div className="space-y-2">
+                <Button asChild variant="default" className="w-full">
+                  <Link to="/auth?mode=login">Sign In</Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full">
+                  <Link to="/auth?mode=register">Sign Up</Link>
+                </Button>
+              </div>
             )}
-          </nav>
+          </div>
         </div>
       </SheetContent>
     </Sheet>

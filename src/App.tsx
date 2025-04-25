@@ -34,11 +34,7 @@ function App() {
             }>
               <Routes>
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/" element={
-                  <Layout>
-                    <Home />
-                  </Layout>
-                } />
+                <Route path="/" element={<Home />} />
                 <Route path="/profile" element={
                   <Layout requireAuth>
                     <Profile />
@@ -54,21 +50,9 @@ function App() {
                     <Messages />
                   </Layout>
                 } />
-                <Route path="/search" element={
-                  <Layout>
-                    <Search />
-                  </Layout>
-                } />
-                <Route path="/wallet" element={
-                  <Layout requireAuth>
-                    <WalletPage />
-                  </Layout>
-                } />
-                <Route path="/pulse-boost" element={
-                  <Layout requireAuth>
-                    <PulseBoostPage />
-                  </Layout>
-                } />
+                <Route path="/search" element={<Search />} />
+                <Route path="/wallet" element={<WalletPage />} />
+                <Route path="/pulse-boost" element={<PulseBoostPage />} />
                 <Route path="*" element={
                   <Layout hideNavbar>
                     <NotFound />

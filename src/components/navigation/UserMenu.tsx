@@ -1,75 +1,77 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { LogOut, User, Settings, Bell, Wallet } from 'lucide-react';
 import { useAuth } from '@/hooks/auth';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { User, LogOut, Settings, Wallet, Zap } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const UserMenu = () => {
   const { user, logout } = useAuth();
-  
+
   const getUserInitials = () => {
-    if (user?.username) {
-      return user.username.substring(0, 2).toUpperCase();
+    if (user?.name) {
+      return user.name.substring(0, 1).toUpperCase();
     }
-    
     if (user?.email) {
-      return user.email.substring(0, 2).toUpperCase();
+      return user.email.substring(0, 1).toUpperCase();
     }
-    
-    return "U";
+    return 'U';
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="relative h-8 w-8 rounded-full focus:outline-none">
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.profileImageUrl} alt={user?.username || user?.email || "User"} />
+            <AvatarImage src={user?.avatarUrl} alt={user?.name || user?.email || 'User'} />
             <AvatarFallback>{getUserInitials()}</AvatarFallback>
           </Avatar>
-        </button>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuItem disabled className="font-medium">
-          {user?.username || user?.email || "User"}
-        </DropdownMenuItem>
+        <div className="flex items-center justify-start gap-2 p-2">
+          <div className="flex flex-col space-y-0.5">
+            <p className="text-sm font-medium">{user?.name || 'User'}</p>
+            <p className="text-xs text-muted-foreground">{user?.email}</p>
+          </div>
+        </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to="/profile" className="flex items-center">
+          <Link to="/profile" className="cursor-pointer w-full flex items-center">
             <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
+            Profile
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/wallet" className="flex items-center">
-            <Wallet className="mr-2 h-4 w-4" />
-            <span>Wallet</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/settings" className="flex items-center">
+          <Link to="/settings" className="cursor-pointer w-full flex items-center">
             <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
+            Settings
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/notifications" className="flex items-center">
-            <Bell className="mr-2 h-4 w-4" />
-            <span>Notifications</span>
+          <Link to="/wallet" className="cursor-pointer w-full flex items-center">
+            <Wallet className="mr-2 h-4 w-4" />
+            Wallet
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/pulse-boost" className="cursor-pointer w-full flex items-center">
+            <Zap className="mr-2 h-4 w-4" />
+            Pulse Boost
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => logout()} className="text-destructive cursor-pointer">
+        <DropdownMenuItem onClick={() => logout()} className="cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Sign out</span>
+          Logout
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

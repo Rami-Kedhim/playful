@@ -1,7 +1,7 @@
 
 import { ReactNode } from "react";
 import { Separator } from "@/components/ui/separator";
-import MainLayout from "@/components/layout/MainLayout";
+import Layout from "@/components/layout/Layout";
 import { cn } from "@/lib/utils";
 
 export interface LivecamDetailLayoutProps {
@@ -18,7 +18,7 @@ export interface LivecamDetailLayoutProps {
 /**
  * LivecamDetailLayout provides a specialized layout for livecam detail pages
  * with a main content area, customizable sidebar, and optional chat panel.
- * It extends the MainLayout for consistency with the rest of the application.
+ * It extends the Layout for consistency with the rest of the application.
  */
 const LivecamDetailLayout = ({ 
   sidebar, 
@@ -31,8 +31,7 @@ const LivecamDetailLayout = ({
   hideFooter = false
 }: LivecamDetailLayoutProps) => {
   return (
-    <MainLayout 
-      showHeader={false} 
+    <Layout 
       containerClass={containerClass}
       hideNavbar={hideNavbar}
       hideFooter={hideFooter}
@@ -69,7 +68,7 @@ const LivecamDetailLayout = ({
       </div>
       
       <Separator className="my-8" />
-    </MainLayout>
+    </Layout>
   );
 };
 
