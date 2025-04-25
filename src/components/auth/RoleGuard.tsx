@@ -29,7 +29,7 @@ const RoleGuard = ({
     
     const roleName = typeof roleItem === 'object' && roleItem !== null 
       ? (roleItem.name || '')
-      : String(roleItem);
+      : String(roleItem || ''); // Add null coalescing
     
     return typeof roleName === 'string' && allowedRoles.includes(roleName);
   });
