@@ -27,7 +27,8 @@ const RoleGuard = ({
   const hasRequiredRole = userRoles.some(roleItem => {
     if (!roleItem) return false;
     
-    const roleName = typeof roleItem === 'object' && roleItem !== null 
+    // Safely handle potentially null roleItem by adding a null check
+    const roleName = roleItem && typeof roleItem === 'object' && roleItem !== null 
       ? (roleItem.name || '')
       : String(roleItem || '');
     
