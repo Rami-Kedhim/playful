@@ -29,4 +29,3 @@ export const processLastInteractionDate = (
 
   return new Date();
 };
-
