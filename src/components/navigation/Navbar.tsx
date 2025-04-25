@@ -1,12 +1,12 @@
 
-import React from "react";
-import { Link } from "react-router-dom";
-import { useAuth } from "@/hooks/auth";
-import { Button } from "@/components/ui/button";
-import NavItems from "./NavItems";
-import UserMenu from "./UserMenu";
-import MobileMenu from "./MobileMenu";
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/auth';
+import { Button } from '@/components/ui/button';
+import NavItems from './NavItems';
+import UserMenu from './UserMenu';
+import MobileMenu from './MobileMenu';
+import { cn } from '@/lib/utils';
 
 interface NavbarProps {
   className?: string;

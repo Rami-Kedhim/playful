@@ -6,7 +6,6 @@ import { Toaster } from "./components/ui/toaster";
 import { AuthProvider } from '@/hooks/auth';
 import { ThemeProvider } from './contexts/ThemeContext';
 import ErrorBoundary from './components/common/ErrorBoundary';
-import ErrorFallback from './components/common/ErrorFallback';
 import Layout from './components/layout/Layout';
 
 // Pages

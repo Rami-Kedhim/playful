@@ -1,6 +1,5 @@
-
-import React from 'react';
-import MainLayout from '@/components/layout/MainLayout';
+import React, { useState } from 'react';
+import Layout from '@/components/layout/Layout';
 import HeroSection from '@/components/home/HeroSection';
 import { FeaturedContent } from '@/components/home/FeaturedContent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,22 +7,8 @@ import { Users, MessageSquare, Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/auth';
 import WelcomeAlert from '@/components/layout/WelcomeAlert';
 
-// Define proper type for content items
-type ContentItemType = "escort" | "creator" | "livecam";
-
-interface ContentItem {
-  id: string;
-  title: string;
-  image: string;
-  type: ContentItemType;
-  rating: number;
-  location: string;
-  username: string;
-  featured: boolean;
-}
-
 // Mock data - in a real app this would come from an API
-const mockFeaturedEscorts: ContentItem[] = [
+const mockFeaturedEscorts = [
   {
     id: '1',
     title: 'Sophie',
@@ -67,36 +52,33 @@ const mockFeaturedEscorts: ContentItem[] = [
 ];
 
 // Create livecam and creator mock data of the correct type
-const mockFeaturedLivecams: ContentItem[] = mockFeaturedEscorts.map(item => ({
+const mockFeaturedLivecams = mockFeaturedEscorts.map((item) => ({
   ...item,
-  type: 'livecam' as ContentItemType
+  type: 'livecam'
 }));
 
-const mockFeaturedCreators: ContentItem[] = mockFeaturedEscorts.map(item => ({
+const mockFeaturedCreators = mockFeaturedEscorts.map((item) => ({
   ...item,
-  type: 'creator' as ContentItemType
+  type: 'creator'
 }));
 
 const Home = () => {
   const { user, isAuthenticated } = useAuth();
-  const [searchLocation, setSearchLocation] = React.useState('');
+  const [searchLocation, setSearchLocation] = useState('');
 
   return (
-    <MainLayout>
-      {/* Show welcome message for logged in users */}
+    <Layout>
       {isAuthenticated && user && (
         <div className="container py-4">
           <WelcomeAlert username={user.name || user.email?.split('@')[0] || 'User'} />
         </div>
       )}
-
-      {/* Hero Section */}
+      
       <HeroSection 
         searchLocation={searchLocation}
         setSearchLocation={setSearchLocation}
       />
-
-      {/* Stats Section */}
+      
       <section className="py-12 bg-muted/50">
         <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -144,29 +126,28 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      {/* Featured Content Sections */}
+      
       <FeaturedContent
         title="Featured Escorts"
         items={mockFeaturedEscorts}
         type="escort"
         viewAllLink="/escorts"
       />
-
+      
       <FeaturedContent
         title="Live Now"
         items={mockFeaturedLivecams}
         type="livecam"
         viewAllLink="/livecams"
       />
-
+      
       <FeaturedContent
         title="Top Creators"
         items={mockFeaturedCreators}
         type="creator"
         viewAllLink="/creators"
       />
-    </MainLayout>
+    </Layout>
   );
 };
 

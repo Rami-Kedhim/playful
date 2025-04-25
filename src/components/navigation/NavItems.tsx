@@ -1,32 +1,32 @@
-import { NavLink } from "react-router-dom";
-import { cn } from "@/lib/utils";
-import { Shield } from "lucide-react";
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+
+interface NavItemProps {
+  to: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+const NavItem: React.FC<NavItemProps> = ({ to, children, className }) => (
+  <Link 
+    to={to} 
+    className={cn(
+      "px-3 py-2 text-sm font-medium transition-colors hover:text-primary", 
+      className
+    )}
+  >
+    {children}
+  </Link>
+);
 
 const NavItems = () => {
   return (
-    <nav className="flex items-center space-x-4">
-      <NavLink
-        to="/"
-        className={({ isActive }) =>
-          cn("text-sm font-medium transition-colors hover:text-primary",
-            isActive ? "text-foreground" : "text-muted-foreground"
-          )
-        }
-      >
-        Home
-      </NavLink>
-      <NavLink
-        to="/verification"
-        className={({ isActive }) =>
-          cn("text-sm font-medium transition-colors hover:text-primary flex items-center gap-1",
-            isActive ? "text-foreground" : "text-muted-foreground"
-          )
-        }
-      >
-        <Shield className="h-4 w-4" />
-        Verify Account
-      </NavLink>
-      
+    <nav className="flex items-center space-x-2">
+      <NavItem to="/">Home</NavItem>
+      <NavItem to="/search">Search</NavItem>
+      <NavItem to="/verification">Verification</NavItem>
     </nav>
   );
 };
