@@ -1,35 +1,28 @@
-import { useState, useEffect } from 'react';
+
+import { useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
+import { UseAIContextReturn } from './ai/types';
+import { useAIContextState } from './ai/useAIContextState';
+import { useAIContextOperations } from './ai/useAIContextOperations';
+import { getDefaultPreferences, processLastInteractionDate } from '@/utils/ai/aiPreferenceUtils';
 
-export interface AIPreferences {
-  anonymized: boolean;
-  personalizedResponses: boolean;
-  adaptivePersonality: boolean;
-  rememberConversations: boolean;
-  suggestContent: boolean;
-  learningEnabled: boolean;
-  voiceSettings?: {
-    voice: string;
-    speed: number;
-    pitch: number;
-  };
-}
-
-export interface AIContext {
-  preferences: AIPreferences;
-  lastInteraction: Date | null;
-  conversationCount: number;
-  favoriteTopics: string[];
-  isEnabled: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export const useUserAIContext = () => {
+export const useUserAIContext = (): UseAIContextReturn => {
   const { user } = useAuth();
-  const [aiContext, setAIContext] = useState<AIContext | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    aiContext,
+    setAIContext,
+    isLoading,
+    setIsLoading,
+    error,
+    setError
+  } = useAIContextState();
+
+  const {
+    updatePreferences,
+    trackInteraction,
+    toggleAI,
+    resetAIContext
+  } = useAIContextOperations(aiContext, setAIContext, setError, setIsLoading);
 
   useEffect(() => {
     const loadContext = async () => {
@@ -41,42 +34,16 @@ export const useUserAIContext = () => {
 
       setIsLoading(true);
       try {
-        // Check if user has app-related metadata
         const userMetadata = user.user_metadata || {};
         
-        // If user has existing AI preferences, use them
         if (userMetadata.aiPreferences) {
-          const defaultPreferences: AIPreferences = {
-            anonymized: false,
-            personalizedResponses: true,
-            adaptivePersonality: true,
-            rememberConversations: true,
-            suggestContent: true,
-            learningEnabled: true,
-          };
-
+          const defaultPreferences = getDefaultPreferences();
           const preferences = {
             ...defaultPreferences,
-            ...(userMetadata.aiPreferences as Partial<AIPreferences>)
+            ...(userMetadata.aiPreferences)
           };
 
-          // Safely handle lastAiInteraction which might be a string or boolean
-          let lastInteraction: Date | null = null;
-          
-          if (userMetadata.lastAiInteraction) {
-            // Process based on the type of lastAiInteraction
-            if (typeof userMetadata.lastAiInteraction === 'string') {
-              lastInteraction = new Date(userMetadata.lastAiInteraction);
-            } else if (typeof userMetadata.lastAiInteraction === 'boolean') {
-              // If it's a boolean and true, set to current date
-              lastInteraction = userMetadata.lastAiInteraction === true ? new Date() : null;
-            } else if (userMetadata.lastAiInteraction instanceof Date) {
-              lastInteraction = userMetadata.lastAiInteraction;
-            } else {
-              // For any other type, set to current date
-              lastInteraction = new Date();
-            }
-          }
+          const lastInteraction = processLastInteractionDate(userMetadata.lastAiInteraction);
 
           setAIContext({
             preferences,
@@ -88,16 +55,8 @@ export const useUserAIContext = () => {
             updatedAt: new Date()
           });
         } else {
-          // Create default AI context
           setAIContext({
-            preferences: {
-              anonymized: false,
-              personalizedResponses: true,
-              adaptivePersonality: true,
-              rememberConversations: true,
-              suggestContent: true,
-              learningEnabled: true,
-            },
+            preferences: getDefaultPreferences(),
             lastInteraction: null,
             conversationCount: 0,
             favoriteTopics: [],
@@ -116,117 +75,9 @@ export const useUserAIContext = () => {
     loadContext();
   }, [user]);
 
-  const updatePreferences = async (newPreferences: Partial<AIPreferences>): Promise<boolean> => {
-    if (!user || !aiContext) return false;
-    
-    try {
-      setIsLoading(true);
-      
-      // Update local state first
-      const updatedPreferences = {
-        ...aiContext.preferences,
-        ...newPreferences
-      };
-      
-      setAIContext({
-        ...aiContext,
-        preferences: updatedPreferences,
-        updatedAt: new Date()
-      });
-      
-      // In a real app, you would update this in your backend/database
-      return true;
-    } catch (err) {
-      setError('Failed to update AI preferences');
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const trackInteraction = async (topic?: string): Promise<void> => {
-    if (!user || !aiContext) return;
-    
-    try {
-      const updatedTopics = [...aiContext.favoriteTopics];
-      
-      // Add topic to favorites if provided and not already in the list
-      if (topic && !updatedTopics.includes(topic)) {
-        updatedTopics.push(topic);
-        
-        // Keep only the 10 most recent topics
-        if (updatedTopics.length > 10) {
-          updatedTopics.shift();
-        }
-      }
-      
-      setAIContext({
-        ...aiContext,
-        lastInteraction: new Date(),
-        conversationCount: aiContext.conversationCount + 1,
-        favoriteTopics: updatedTopics,
-        updatedAt: new Date()
-      });
-    } catch (err) {
-      console.error('Failed to track AI interaction:', err);
-    }
-  };
-  
-  const toggleAI = async (enabled: boolean): Promise<boolean> => {
-    if (!aiContext) return false;
-    
-    try {
-      setAIContext({
-        ...aiContext,
-        isEnabled: enabled,
-        updatedAt: new Date()
-      });
-      
-      return true;
-    } catch (err) {
-      setError('Failed to toggle AI');
-      return false;
-    }
-  };
-  
-  const resetAIContext = async (): Promise<boolean> => {
-    if (!user) return false;
-    
-    try {
-      setIsLoading(true);
-      
-      // Create fresh AI context with default settings
-      const freshContext: AIContext = {
-        preferences: {
-          anonymized: false,
-          personalizedResponses: true,
-          adaptivePersonality: true,
-          rememberConversations: true,
-          suggestContent: true,
-          learningEnabled: true,
-        },
-        lastInteraction: null,
-        conversationCount: 0,
-        favoriteTopics: [],
-        isEnabled: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      setAIContext(freshContext);
-      
-      return true;
-    } catch (err) {
-      setError('Failed to reset AI context');
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return { 
-    aiContext, 
-    isLoading, 
+  return {
+    aiContext,
+    isLoading,
     error,
     updatePreferences,
     trackInteraction,
@@ -235,4 +86,6 @@ export const useUserAIContext = () => {
   };
 };
 
+export * from './ai/types';
 export default useUserAIContext;
+
