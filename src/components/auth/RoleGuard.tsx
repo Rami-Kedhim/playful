@@ -1,3 +1,4 @@
+
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { Navigate } from 'react-router-dom';
@@ -31,6 +32,8 @@ const RoleGuard = ({
   
   // Check if the user has at least one of the allowed roles
   const hasRequiredRole = userRoles.some(role => {
+    if (role === null) return false; // Explicitly handle null role
+    
     // Handle both string roles and object roles with a name property
     const roleName = typeof role === 'object' && role !== null 
       ? (role.name || '') // Use empty string as fallback if name property is missing
