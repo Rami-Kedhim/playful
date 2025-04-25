@@ -1,4 +1,10 @@
 
+export interface AIVoiceSettings {
+  voice: string;
+  speed: number;
+  pitch: number;
+}
+
 export interface AIPreferences {
   anonymized: boolean;
   personalizedResponses: boolean;
@@ -6,7 +12,10 @@ export interface AIPreferences {
   rememberConversations: boolean;
   suggestContent: boolean;
   learningEnabled: boolean;
-  [key: string]: boolean | string | number | undefined;
+  voiceType?: string;
+  voiceSettings?: AIVoiceSettings;
+  isEnabled?: boolean;
+  [key: string]: boolean | string | number | object | undefined;
 }
 
 export interface AIContext {

@@ -1,256 +1,172 @@
 
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUserAIContext } from '@/hooks/useUserAIContext';
-import { useToast } from '@/hooks/use-toast';
 
-const AISettingsPanel: React.FC = () => {
-  const { aiContext, isLoading, updatePreferences, resetAIContext } = useUserAIContext();
-  const { toast } = useToast();
-  
-  const [voiceSpeed, setVoiceSpeed] = useState(1);
-  const [voicePitch, setVoicePitch] = useState(1);
-  
-  const handleSwitchChange = async (key: keyof typeof aiContext.preferences, value: boolean) => {
-    if (isLoading || !aiContext) return;
+const AISettingsPanel = () => {
+  const { aiContext, updatePreferences, isLoading, resetAIContext } = useUserAIContext();
+  const [voiceSettings, setVoiceSettings] = useState({
+    voice: 'default',
+    speed: 1.0,
+    pitch: 1.0
+  });
+
+  // Handle toggle changes for boolean preferences
+  const handleToggleChange = (key: string, value: boolean) => {
+    if (aiContext) {
+      updatePreferences({ [key]: value });
+    }
+  };
+
+  // Handle voice settings changes
+  const handleVoiceSettingChange = (key: string, value: any) => {
+    setVoiceSettings(prev => ({ ...prev, [key]: value }));
     
-    const success = await updatePreferences({ [key]: value });
-    
-    if (success) {
-      toast({
-        title: "Settings updated",
-        description: `AI ${key} setting has been updated.`,
-        variant: "default",
-      });
-    } else {
-      toast({
-        title: "Update failed",
-        description: "Could not update AI settings. Please try again.",
-        variant: "destructive",
+    if (aiContext && key === 'voice') {
+      updatePreferences({ voiceType: value });
+    }
+  };
+
+  // Save voice settings
+  const handleSaveVoiceSettings = () => {
+    if (aiContext) {
+      updatePreferences({ 
+        voiceSettings: {
+          voice: voiceSettings.voice,
+          speed: voiceSettings.speed, 
+          pitch: voiceSettings.pitch
+        }
       });
     }
   };
-  
-  const handleVoiceSettingChange = async () => {
-    if (isLoading || !aiContext) return;
-    
-    const success = await updatePreferences({
-      voiceSettings: {
-        voice: aiContext.preferences.voiceSettings?.voice || 'default',
-        speed: voiceSpeed,
-        pitch: voicePitch
-      }
-    });
-    
-    if (success) {
-      toast({
-        title: "Voice settings updated",
-        description: "Your AI assistant voice settings have been updated.",
-        variant: "default",
-      });
-    } else {
-      toast({
-        title: "Update failed",
-        description: "Could not update voice settings. Please try again.",
-        variant: "destructive",
-      });
+
+  // Reset all AI settings
+  const handleReset = () => {
+    if (aiContext) {
+      resetAIContext();
     }
   };
-  
-  const handleReset = async () => {
-    if (isLoading) return;
-    
-    const success = await resetAIContext();
-    
-    if (success) {
-      setVoiceSpeed(1);
-      setVoicePitch(1);
-      
-      toast({
-        title: "AI settings reset",
-        description: "All AI settings have been reset to default values.",
-        variant: "default",
-      });
-    } else {
-      toast({
-        title: "Reset failed",
-        description: "Could not reset AI settings. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-  
+
   if (!aiContext) {
     return (
-      <Card>
+      <Card className="w-full">
         <CardHeader>
-          <CardTitle>AI Assistant Settings</CardTitle>
+          <CardTitle>AI Settings</CardTitle>
+          <CardDescription>Loading settings...</CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">You need to be logged in to manage AI settings.</p>
-        </CardContent>
       </Card>
     );
   }
-  
+
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>AI Assistant Settings</CardTitle>
+        <CardTitle>AI Settings</CardTitle>
+        <CardDescription>Customize how AI interacts with you</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Privacy Settings</h3>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="anonymized">Anonymized Mode</Label>
-              <p className="text-sm text-muted-foreground">
-                Don't use your personal data to personalize responses
-              </p>
-            </div>
-            <Switch
-              id="anonymized"
-              checked={aiContext.preferences.anonymized}
-              onCheckedChange={(checked) => handleSwitchChange('anonymized', checked)}
-              disabled={isLoading}
-            />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="rememberConversations">Remember Conversations</Label>
-              <p className="text-sm text-muted-foreground">
-                Store conversation history for more contextual responses
-              </p>
-            </div>
-            <Switch
-              id="rememberConversations"
-              checked={aiContext.preferences.rememberConversations}
-              onCheckedChange={(checked) => handleSwitchChange('rememberConversations', checked)}
-              disabled={isLoading}
-            />
-          </div>
-        </div>
-        
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Personalization</h3>
           
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="personalizedResponses">Personalized Responses</Label>
-              <p className="text-sm text-muted-foreground">
-                Tailor responses based on your preferences and history
-              </p>
+              <p className="font-medium">Enable AI</p>
+              <p className="text-sm text-muted-foreground">Allow AI to provide personalized experiences</p>
             </div>
-            <Switch
-              id="personalizedResponses"
-              checked={aiContext.preferences.personalizedResponses}
-              onCheckedChange={(checked) => handleSwitchChange('personalizedResponses', checked)}
-              disabled={isLoading}
+            <Switch 
+              checked={aiContext.isEnabled} 
+              onCheckedChange={(checked) => {
+                if (aiContext) {
+                  updatePreferences({ isEnabled: checked });
+                }
+              }} 
             />
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="adaptivePersonality">Adaptive Personality</Label>
-              <p className="text-sm text-muted-foreground">
-                Adjust AI personality based on your interaction style
-              </p>
+              <p className="font-medium">Personalized Responses</p>
+              <p className="text-sm text-muted-foreground">Tailor AI responses based on your preferences</p>
             </div>
-            <Switch
-              id="adaptivePersonality"
-              checked={aiContext.preferences.adaptivePersonality}
-              onCheckedChange={(checked) => handleSwitchChange('adaptivePersonality', checked)}
-              disabled={isLoading}
+            <Switch 
+              checked={aiContext.preferences.personalizedResponses} 
+              onCheckedChange={(checked) => handleToggleChange('personalizedResponses', checked)} 
             />
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="suggestContent">Content Suggestions</Label>
-              <p className="text-sm text-muted-foreground">
-                Suggest relevant content and profiles
-              </p>
+              <p className="font-medium">Remember Conversations</p>
+              <p className="text-sm text-muted-foreground">Allow AI to reference past conversations</p>
             </div>
-            <Switch
-              id="suggestContent"
-              checked={aiContext.preferences.suggestContent}
-              onCheckedChange={(checked) => handleSwitchChange('suggestContent', checked)}
-              disabled={isLoading}
+            <Switch 
+              checked={aiContext.preferences.rememberConversations} 
+              onCheckedChange={(checked) => handleToggleChange('rememberConversations', checked)} 
             />
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Voice Settings</h3>
           
           <div className="space-y-2">
-            <Label htmlFor="voice-speed">Voice Speed</Label>
-            <Slider
-              id="voice-speed"
-              min={0.5}
-              max={2}
-              step={0.1}
-              value={[voiceSpeed]}
-              onValueChange={(value) => setVoiceSpeed(value[0])}
-              disabled={isLoading}
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Slow</span>
-              <span>Normal ({voiceSpeed.toFixed(1)}x)</span>
-              <span>Fast</span>
-            </div>
+            <p className="font-medium">Voice Type</p>
+            <Select 
+              value={voiceSettings.voice} 
+              onValueChange={(value) => handleVoiceSettingChange('voice', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select voice" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">Default</SelectItem>
+                <SelectItem value="feminine">Feminine</SelectItem>
+                <SelectItem value="masculine">Masculine</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="voice-pitch">Voice Pitch</Label>
-            <Slider
-              id="voice-pitch"
-              min={0.5}
-              max={1.5}
-              step={0.1}
-              value={[voicePitch]}
-              onValueChange={(value) => setVoicePitch(value[0])}
-              disabled={isLoading}
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Low</span>
-              <span>Normal ({voicePitch.toFixed(1)})</span>
-              <span>High</span>
+            <div className="flex items-center justify-between">
+              <p className="font-medium">Speed</p>
+              <p className="text-sm">{voiceSettings.speed.toFixed(1)}x</p>
             </div>
+            <Slider 
+              min={0.5} 
+              max={2} 
+              step={0.1} 
+              value={[voiceSettings.speed]} 
+              onValueChange={(values) => handleVoiceSettingChange('speed', values[0])}
+            />
           </div>
-          
-          <Button 
-            onClick={handleVoiceSettingChange} 
-            variant="outline" 
-            size="sm"
-            disabled={isLoading}
-          >
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="font-medium">Pitch</p>
+              <p className="text-sm">{voiceSettings.pitch.toFixed(1)}</p>
+            </div>
+            <Slider 
+              min={0.5} 
+              max={1.5} 
+              step={0.1}
+              value={[voiceSettings.pitch]} 
+              onValueChange={(values) => handleVoiceSettingChange('pitch', values[0])}
+            />
+          </div>
+
+          <Button onClick={handleSaveVoiceSettings} disabled={isLoading}>
             Save Voice Settings
           </Button>
         </div>
-        
+
         <div className="pt-4 border-t">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="text-lg font-medium">Reset All Settings</h3>
-              <p className="text-sm text-muted-foreground">
-                Restore all AI settings to default values
-              </p>
-            </div>
-            <Button 
-              onClick={handleReset} 
-              variant="destructive"
-              disabled={isLoading}
-            >
-              Reset
-            </Button>
-          </div>
+          <Button variant="destructive" onClick={handleReset} disabled={isLoading}>
+            Reset AI Preferences
+          </Button>
         </div>
       </CardContent>
     </Card>

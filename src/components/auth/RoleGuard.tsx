@@ -34,7 +34,7 @@ const RoleGuard = ({
       // Safely access name property with null check
       const name = roleItem.name;
       roleName = name ? String(name) : '';
-    } else {
+    } else if (roleItem !== null) {
       // Safely convert non-null roleItem to string
       roleName = String(roleItem);
     }
