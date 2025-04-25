@@ -43,13 +43,13 @@ export const useUserAIContext = (): UseAIContextReturn => {
             ...(userMetadata.aiPreferences)
           };
 
-          // Get the lastAiInteraction value and process it correctly
-          // Using the processLastInteractionDate function to handle any type properly
-          const lastInteraction = processLastInteractionDate(userMetadata.lastAiInteraction);
+          const lastInteractionDate = userMetadata.lastAiInteraction ? 
+            new Date(userMetadata.lastAiInteraction) : 
+            null;
 
           setAIContext({
             preferences,
-            lastInteraction,
+            lastInteraction: lastInteractionDate,
             conversationCount: userMetadata.aiConversationCount || 0,
             favoriteTopics: userMetadata.aiFavoriteTopics || [],
             isEnabled: userMetadata.aiEnabled === true,

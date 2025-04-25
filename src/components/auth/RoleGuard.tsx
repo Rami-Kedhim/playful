@@ -27,15 +27,11 @@ const RoleGuard = ({
   const hasRequiredRole = userRoles.some(roleItem => {
     if (!roleItem) return false;
     
-    // Initialize roleName as an empty string
     let roleName = '';
     
-    // Handle object type roleItems (with name property)
-    if (typeof roleItem === 'object' && roleItem !== null && 'name' in roleItem) {
-      roleName = roleItem.name || '';
-    } 
-    // Handle string/primitive roleItems
-    else {
+    if (typeof roleItem === 'object' && roleItem !== null && 'name' in roleItem && roleItem.name) {
+      roleName = roleItem.name;
+    } else {
       roleName = String(roleItem);
     }
     
