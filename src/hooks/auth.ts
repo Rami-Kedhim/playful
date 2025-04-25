@@ -5,9 +5,9 @@ export {
   AuthProvider, 
   useAuth,
   useAuthContext,
-  useRole,
   useAuthState,
-  useAuthActions
+  useAuthActions,
+  useRole
 } from './auth/index';
 
 // For backward compatibility with direct imports
