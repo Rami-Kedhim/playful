@@ -15,15 +15,15 @@ export const processLastInteractionDate = (
 ): Date | null => {
   if (!lastInteractionValue) return null;
 
+  // Handle boolean values
+  if (typeof lastInteractionValue === 'boolean') {
+    return lastInteractionValue ? new Date() : null;
+  }
+
   // Handle string dates
   if (typeof lastInteractionValue === 'string') {
     const date = new Date(lastInteractionValue);
     return isNaN(date.getTime()) ? null : date;
-  }
-
-  // Handle boolean - if true, return current date
-  if (typeof lastInteractionValue === 'boolean') {
-    return lastInteractionValue ? new Date() : null;
   }
 
   // Handle Date objects

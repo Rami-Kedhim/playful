@@ -43,9 +43,9 @@ export const useUserAIContext = (): UseAIContextReturn => {
             ...(userMetadata.aiPreferences)
           };
 
-          // Safely pass the lastAiInteraction to processLastInteractionDate
-          const lastInteractionValue = userMetadata.lastAiInteraction;
-          const lastInteraction = processLastInteractionDate(lastInteractionValue);
+          // Get the lastAiInteraction value and process it correctly
+          // This will handle any type (string, boolean, Date) appropriately
+          const lastInteraction = processLastInteractionDate(userMetadata.lastAiInteraction);
 
           setAIContext({
             preferences,
