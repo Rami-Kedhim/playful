@@ -64,10 +64,11 @@ export const useUserAIContext = () => {
           // Safely handle lastAiInteraction which might be a string or boolean
           let lastInteraction: Date | null = null;
           if (userMetadata.lastAiInteraction) {
+            // If it's a string, try to convert to Date
             if (typeof userMetadata.lastAiInteraction === 'string') {
               lastInteraction = new Date(userMetadata.lastAiInteraction);
             } else {
-              // If it's not a valid date string, set to current date
+              // If it's not a valid date string but exists (like boolean true), set to current date
               lastInteraction = new Date();
             }
           }

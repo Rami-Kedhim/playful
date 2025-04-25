@@ -38,6 +38,7 @@ const RoleGuard = ({
       : role;
     
     // Ensure roleName is not null before inclusion check
+    // TypeScript safeguard to ensure roleName is a string before using includes
     return typeof roleName === 'string' && allowedRoles.includes(roleName);
   });
   
