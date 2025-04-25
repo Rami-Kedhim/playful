@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { Navigate } from 'react-router-dom';
@@ -55,7 +54,7 @@ const RoleGuard = ({
   }
   
   // Otherwise redirect to the specified route
-  return <Navigate to={redirectTo} />;
+  return <Navigate to={redirectTo} replace />;
 };
 
 export default RoleGuard;

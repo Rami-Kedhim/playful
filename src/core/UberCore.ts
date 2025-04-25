@@ -1,12 +1,14 @@
 
-// Fix import casing to strict '@/types/UberPersona'.
-// Fix systemMetadata optional properties with proper access.
-// Fix usage of nonexisting properties as per typings.
+// UberCore - Central integration point for all core services
+// Combines: Lucie, Hermes, Oxum, Orus, UberWallet systems
 
 import { UberPersona } from '@/types/UberPersona';
-
 import { UberCoreSettings } from '@/services/neural/types/UberCoreService';
 import neuralServiceRegistry from './registry/NeuralServiceRegistry';
+import { hermes } from './Hermes';
+import { oxum } from './Oxum';
+import { orus } from './Orus';
+import { uberWallet } from './UberWallet';
 
 export class UberCore {
   private initialized: boolean = false;
@@ -34,6 +36,7 @@ export class UberCore {
 
     try {
       await neuralServiceRegistry.initialize();
+      await hermes.initialize();
       console.info('UberCore initialized with settings:', this.settings);
       this.initialized = true;
       return true;
@@ -83,23 +86,38 @@ export class UberCore {
         };
       }
 
-      // Fix: check existence of optional nested properties using optional chaining and existence check
+      // Check existence of optional nested properties using optional chaining and existence check
       const statusFlags = processedPersona.systemMetadata.statusFlags ?? undefined;
       const personalityIndex = processedPersona.systemMetadata.personalityIndex ?? undefined;
 
-      // Sample usage fixed for clarity, no actual logic inside switch
-      switch (processedPersona.type ?? '') {
-        case 'escort':
-          break;
-        case 'creator':
-          break;
-        case 'livecam':
-          break;
-        case 'ai':
-          break;
-        default:
-          break;
+      // Process using Oxum's boost allocation if needed
+      if (this.requiresNeuralBoost(processedPersona)) {
+        // Apply Oxum boosting
+        const boostMatrix = [
+          [0.7, 0.3, 0.2],
+          [0.3, 0.8, 0.1],
+          [0.2, 0.1, 0.9]
+        ];
+        
+        const boostValues = oxum.boostAllocationEigen(boostMatrix);
+        processedPersona.boostScore = boostValues[0] * 100;
       }
+
+      // Apply Hermes flow dynamics
+      const flowDynamics = hermes.resolveFlowDynamics({
+        personaType: processedPersona.type,
+        activityLevel: processedPersona.isOnline ? 0.8 : 0.2,
+        systemLoad: 0.5
+      });
+      
+      processedPersona.systemMetadata.flowScore = flowDynamics.flowScore;
+
+      // Log signal transformation with Orus
+      orus.logSignalTransform('persona_process', {
+        personaId: processedPersona.id,
+        type: processedPersona.type,
+        boostScore: processedPersona.boostScore
+      });
 
       return processedPersona;
     } catch (error) {
@@ -148,7 +166,55 @@ export class UberCore {
 
     return isPremium || useNeural;
   }
+  
+  // Load featured personas - integrates with Lucie system
+  public async loadFeaturedPersonas(count: number = 6): Promise<UberPersona[]> {
+    try {
+      // Simulate loading featured personas
+      const personas = Array(count).fill(null).map((_, index) => ({
+        id: `featured-${index}`,
+        name: `Featured Persona ${index}`,
+        type: index % 2 === 0 ? 'escort' : 'creator',
+        isOnline: Math.random() > 0.3,
+        isVerified: Math.random() > 0.2,
+        isPremium: Math.random() > 0.7,
+        location: ['New York', 'Los Angeles', 'Miami', 'Las Vegas'][Math.floor(Math.random() * 4)],
+        tags: ['premium', 'featured', 'recommended'],
+        boostScore: Math.random() * 100,
+        availability: {
+          nextAvailable: new Date(Date.now() + Math.random() * 1000000).toISOString(),
+          schedule: {}
+        },
+        systemMetadata: {
+          source: 'featured',
+          lastSynced: new Date(),
+          tagsGeneratedByAI: false,
+          hilbertSpaceVector: []
+        }
+      } as UberPersona));
+      
+      return personas;
+    } catch (error) {
+      console.error('Error loading featured personas:', error);
+      return [];
+    }
+  }
+  
+  // System status method for dashboard HUD
+  public getSystemStatus(): Record<string, any> {
+    return {
+      coreStatus: this.initialized ? 'online' : 'offline',
+      hermesStatus: 'operational',
+      oxumStatus: 'operational',
+      orusStatus: 'operational',
+      walletStatus: 'synced',
+      activeUsers: 1243,
+      activePersonas: 876,
+      boostPower: 87.3,
+      systemLoad: 42.1,
+      lastUpdated: new Date()
+    };
+  }
 }
 
 export const uberCoreInstance = new UberCore();
-
