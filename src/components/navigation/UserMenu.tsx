@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, LogOut, Settings, Wallet, Zap } from 'lucide-react';
+import { User, LogOut, Settings, Wallet, Zap, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const UserMenu = () => {
@@ -51,15 +51,21 @@ const UserMenu = () => {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/settings" className="cursor-pointer w-full flex items-center">
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
+          <Link to="/messages" className="cursor-pointer w-full flex items-center">
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Messages
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/wallet" className="cursor-pointer w-full flex items-center">
             <Wallet className="mr-2 h-4 w-4" />
             Wallet
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/settings" className="cursor-pointer w-full flex items-center">
+            <Settings className="mr-2 h-4 w-4" />
+            Settings
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

@@ -1,18 +1,23 @@
 
-import { AuthContext, AuthProvider } from '@/contexts/AuthContext';
-import { useAuthContext, useAuth } from './useAuthContext';
-import { useRole } from './useRole';
-import { useAuthState } from './useAuthState';
-import { useAuthActions } from './useAuthActions';
+// This file exports all auth hook components for easier imports
+import { 
+  useAuth, 
+  useAuthContext,
+  AuthProvider, 
+  AuthContext,
+  useAuthState,
+  useAuthActions,
+  useRole
+} from './useAuth';
 
-// Re-export the context and provider
-export { AuthContext, AuthProvider };
+export { 
+  useAuth, 
+  useAuthContext,
+  AuthProvider, 
+  AuthContext,
+  useAuthState,
+  useAuthActions,
+  useRole
+};
 
-// Re-export hooks with aliases
-export { useAuthContext, useAuth };
-
-// Export additional hooks
-export { useRole, useAuthState, useAuthActions };
-
-// Default export
 export default useAuth;
