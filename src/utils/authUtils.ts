@@ -16,7 +16,6 @@ export const mockLoginRequest = async (email: string, password: string): Promise
     username: email.split('@')[0],
     role: 'user',
     user_metadata: {},
-    aud: 'authenticated',
     created_at: new Date().toISOString(),
   };
 };
@@ -40,7 +39,6 @@ export const mockRegisterRequest = async (
     username: username || email.split('@')[0],
     role: 'user',
     user_metadata: {},
-    aud: 'authenticated',
     created_at: new Date().toISOString(),
   };
 };

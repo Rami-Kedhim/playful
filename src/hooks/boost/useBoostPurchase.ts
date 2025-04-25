@@ -17,8 +17,11 @@ export const useBoostPurchase = () => {
   } = useUBX();
 
   const { profile, user } = useAuth();
-  // Handle both profile types - using nullish coalescing to check all possible paths
-  const userBalance = profile?.ubx_balance ?? profile?.ubxBalance ?? user?.ubxBalance ?? 0;
+  // Safely access balance from multiple possible locations
+  const userBalance = profile?.ubx_balance ?? 
+                     profile?.ubxBalance ?? 
+                     user?.ubxBalance ?? 
+                     0;
 
   const purchaseBoost = async (boostPackage: BoostPackage): Promise<boolean> => {
     try {

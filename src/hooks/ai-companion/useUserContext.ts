@@ -19,8 +19,8 @@ export const useUserContext = () => {
       
       // Add more user context if available
       if (user.user_metadata) {
-        if (user.user_metadata.preferences) {
-          context += `Their preferences include: ${JSON.stringify(user.user_metadata.preferences)}. `;
+        if (user.user_metadata.aiPreferences) {
+          context += `Their preferences include: ${JSON.stringify(user.user_metadata.aiPreferences)}. `;
         }
       }
       

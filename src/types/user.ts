@@ -1,7 +1,7 @@
 
 import { VerificationLevel } from './verification';
 
-export type UserRole = 'admin' | 'user' | 'moderator' | string;
+export type UserRole = 'admin' | 'user' | 'moderator' | 'creator' | 'escort' | string;
 
 export interface RoleObject {
   name: string;
@@ -33,6 +33,8 @@ export interface User {
   ubxBalance?: number;
   website?: string;
   bio?: string;
+  aud?: string;
+  preferences?: Record<string, any>;
   user_metadata?: {
     verification_status?: string;
     verification_submitted?: boolean;
@@ -48,6 +50,12 @@ export interface User {
     aiEnabled?: boolean;
     aiContextCreated?: string;
     role?: string;
+    username?: string;
+    avatar_url?: string;
+    preferences?: Record<string, any>;
+    content_preferences?: Record<string, any>;
+    region?: string | Record<string, any>;
+    subscription_tier?: string;
   };
 }
 
@@ -55,6 +63,7 @@ export interface UserProfile {
   id: string;
   user_id: string;
   username?: string;
+  name?: string;
   avatarUrl?: string;
   avatar_url?: string;
   bio?: string;
@@ -67,4 +76,12 @@ export interface UserProfile {
   last_active?: string;
   is_verified?: boolean;
   verification_level?: VerificationLevel;
+  sexual_orientation?: string;
+  is_boosted?: boolean;
+  isBoosted?: boolean;
+  ubx_balance?: number;
+  ubxBalance?: number;
+  subscription_tier?: string;
+  preferences?: Record<string, any>;
+  region?: string | Record<string, any>;
 }

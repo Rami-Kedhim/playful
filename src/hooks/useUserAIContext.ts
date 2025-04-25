@@ -47,8 +47,22 @@ export const useUserAIContext = () => {
         
         // If user has existing AI preferences, use them
         if (userMetadata.aiPreferences) {
+          const defaultPreferences: AIPreferences = {
+            anonymized: false,
+            personalizedResponses: true,
+            adaptivePersonality: true,
+            rememberConversations: true,
+            suggestContent: true,
+            learningEnabled: true,
+          };
+
+          const preferences = {
+            ...defaultPreferences,
+            ...(userMetadata.aiPreferences as Partial<AIPreferences>)
+          };
+
           setAIContext({
-            preferences: userMetadata.aiPreferences as AIPreferences,
+            preferences,
             lastInteraction: userMetadata.lastAiInteraction ? new Date(userMetadata.lastAiInteraction) : null,
             conversationCount: userMetadata.aiConversationCount || 0,
             favoriteTopics: userMetadata.aiFavoriteTopics || [],

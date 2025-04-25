@@ -29,15 +29,20 @@ const UserProfile: React.FC<UserProfileProps> = ({ hideSignOut = false }) => {
     return null;
   }
 
-  const username = user.user_metadata?.username || user.email?.split('@')[0] || 'User';
+  // Safely access username from either direct property or metadata
+  const username = user.username || 
+                  user.user_metadata?.username || 
+                  user.email?.split('@')[0] || 
+                  'User';
   const initials = username.slice(0, 2).toUpperCase();
+  const avatarUrl = user.avatar_url || user.user_metadata?.avatar_url;
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center gap-4">
           <Avatar className="h-14 w-14">
-            <AvatarImage src={user.user_metadata?.avatar_url} />
+            <AvatarImage src={avatarUrl} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div>
