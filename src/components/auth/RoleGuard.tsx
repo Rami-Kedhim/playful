@@ -25,6 +25,7 @@ const RoleGuard = ({
   const userRoles = user.roles || [];
   
   const hasRequiredRole = userRoles.some(roleItem => {
+    // Skip null or undefined role items
     if (roleItem === null || roleItem === undefined) return false;
     
     let roleName = '';
@@ -34,7 +35,7 @@ const RoleGuard = ({
       // Safely access name property with null check
       const name = roleItem.name;
       roleName = name ? String(name) : '';
-    } else if (roleItem !== null) {
+    } else if (roleItem !== null && roleItem !== undefined) {
       // Safely convert non-null roleItem to string
       roleName = String(roleItem);
     }

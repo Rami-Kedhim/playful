@@ -56,8 +56,8 @@ export const useUserAIContext = (): UseAIContextReturn => {
             lastInteraction: lastInteractionDate,
             conversationCount: userMetadata.aiConversationCount || 0,
             favoriteTopics: userMetadata.aiFavoriteTopics || [],
-            isEnabled: userMetadata.aiEnabled === true,
-            createdAt: new Date(userMetadata.aiContextCreated || user.created_at),
+            isEnabled: userMetadata.aiEnabled !== false, // Default to true unless explicitly false
+            createdAt: new Date(userMetadata.aiContextCreated || user.created_at || Date.now()),
             updatedAt: new Date()
           });
         } else {
@@ -79,7 +79,7 @@ export const useUserAIContext = (): UseAIContextReturn => {
     };
 
     loadContext();
-  }, [user]);
+  }, [user, setAIContext, setError, setIsLoading]);
 
   return {
     aiContext,
