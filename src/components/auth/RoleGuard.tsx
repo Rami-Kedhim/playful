@@ -2,7 +2,7 @@
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { Navigate } from 'react-router-dom';
-import { RoleObject } from '@/types/auth';
+import { UserRole } from '@/types/user';
 
 interface RoleGuardProps {
   children: ReactNode;
@@ -30,9 +30,9 @@ const RoleGuard = ({
     
     let roleName = '';
     
-    if (typeof roleItem === 'object' && 'name' in roleItem) {
-      const roleObj = roleItem as RoleObject;
-      roleName = roleObj.name || '';
+    if (typeof roleItem === 'object' && roleItem !== null && 'name' in roleItem) {
+      // Use non-null assertion only after we've confirmed it's not null
+      roleName = (roleItem as { name: string }).name || '';
     } else {
       roleName = String(roleItem);
     }
