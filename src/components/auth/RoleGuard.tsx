@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { Navigate } from 'react-router-dom';
@@ -35,10 +34,9 @@ const RoleGuard = ({
     // Handle both string roles and object roles with a name property
     const roleName = typeof role === 'object' && role !== null 
       ? (role.name || '') // Use empty string as fallback if name property is missing
-      : role;
+      : (role || ''); // Add null/undefined check here by providing fallback
     
-    // Ensure roleName is not null before inclusion check
-    // TypeScript safeguard to ensure roleName is a string before using includes
+    // Ensure roleName is a string before inclusion check
     return typeof roleName === 'string' && allowedRoles.includes(roleName);
   });
   

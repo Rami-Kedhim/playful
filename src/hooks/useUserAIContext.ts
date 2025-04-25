@@ -68,7 +68,7 @@ export const useUserAIContext = () => {
             if (typeof userMetadata.lastAiInteraction === 'string') {
               lastInteraction = new Date(userMetadata.lastAiInteraction);
             } else {
-              // If it's not a valid date string but exists (like boolean true), set to current date
+              // If it's a boolean or any other non-string type, set to current date
               lastInteraction = new Date();
             }
           }
