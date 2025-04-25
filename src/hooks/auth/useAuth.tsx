@@ -133,7 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Additional hooks for granular access
+// These are the additional hooks that were missing
 export const useAuthState = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
   return { user, isAuthenticated, isLoading };
