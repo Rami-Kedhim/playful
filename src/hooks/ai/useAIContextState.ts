@@ -1,8 +1,8 @@
 
 import { useState } from 'react';
-import { AIContext } from './types';
+import { AIContext, UseAIContextStateReturn } from './types';
 
-export const useAIContextState = () => {
+export const useAIContextState = (): UseAIContextStateReturn => {
   const [aiContext, setAIContext] = useState<AIContext | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,4 +16,3 @@ export const useAIContextState = () => {
     setError
   };
 };
-

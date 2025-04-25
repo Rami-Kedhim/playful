@@ -1,113 +1,115 @@
 
+import { useCallback } from 'react';
 import { AIContext, AIPreferences } from './types';
 
 export const useAIContextOperations = (
   aiContext: AIContext | null,
-  setAIContext: (context: AIContext | null) => void,
-  setError: (error: string | null) => void,
-  setIsLoading: (loading: boolean) => void
+  setAIContext: React.Dispatch<React.SetStateAction<AIContext | null>>,
+  setError: React.Dispatch<React.SetStateAction<string | null>>,
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
-  const updatePreferences = async (newPreferences: Partial<AIPreferences>): Promise<boolean> => {
-    if (!aiContext) return false;
+  const updatePreferences = useCallback(async (preferences: Partial<AIPreferences>) => {
+    if (!aiContext) {
+      setError('No AI context available');
+      return;
+    }
     
     try {
       setIsLoading(true);
       
-      const updatedPreferences = {
-        ...aiContext.preferences,
-        ...newPreferences
-      };
-      
-      setAIContext({
-        ...aiContext,
-        preferences: updatedPreferences,
-        updatedAt: new Date()
-      });
-      
-      return true;
-    } catch (err) {
-      setError('Failed to update AI preferences');
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const trackInteraction = async (topic?: string): Promise<void> => {
-    if (!aiContext) return;
-    
-    try {
-      const updatedTopics = [...aiContext.favoriteTopics];
-      
-      if (topic && !updatedTopics.includes(topic)) {
-        updatedTopics.push(topic);
+      // In a real app, you would save these preferences to your backend
+      // For now, we just update the local state
+      setAIContext(prevContext => {
+        if (!prevContext) return null;
         
-        if (updatedTopics.length > 10) {
-          updatedTopics.shift();
-        }
-      }
-      
-      setAIContext({
-        ...aiContext,
-        lastInteraction: new Date(),
-        conversationCount: aiContext.conversationCount + 1,
-        favoriteTopics: updatedTopics,
-        updatedAt: new Date()
+        return {
+          ...prevContext,
+          preferences: {
+            ...prevContext.preferences,
+            ...preferences
+          },
+          updatedAt: new Date()
+        };
       });
-    } catch (err) {
-      console.error('Failed to track AI interaction:', err);
-    }
-  };
-
-  const toggleAI = async (enabled: boolean): Promise<boolean> => {
-    if (!aiContext) return false;
-    
-    try {
-      setAIContext({
-        ...aiContext,
-        isEnabled: enabled,
-        updatedAt: new Date()
-      });
-      
-      return true;
-    } catch (err) {
-      setError('Failed to toggle AI');
-      return false;
-    }
-  };
-
-  const resetAIContext = async (): Promise<boolean> => {
-    try {
-      setIsLoading(true);
-      
-      const freshContext: AIContext = {
-        preferences: {
-          anonymized: false,
-          personalizedResponses: true,
-          adaptivePersonality: true,
-          rememberConversations: true,
-          suggestContent: true,
-          learningEnabled: true,
-        },
-        lastInteraction: null,
-        conversationCount: 0,
-        favoriteTopics: [],
-        isEnabled: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      setAIContext(freshContext);
-      
-      return true;
-    } catch (err) {
-      setError('Failed to reset AI context');
-      return false;
+    } catch (err: any) {
+      setError(err.message || 'Failed to update preferences');
     } finally {
       setIsLoading(false);
     }
-  };
-
+  }, [aiContext, setAIContext, setError, setIsLoading]);
+  
+  const trackInteraction = useCallback(async (topic?: string) => {
+    if (!aiContext) {
+      setError('No AI context available');
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      
+      // Update interaction tracking in the context
+      setAIContext(prevContext => {
+        if (!prevContext) return null;
+        
+        const favoriteTopics = [...prevContext.favoriteTopics];
+        if (topic && !favoriteTopics.includes(topic)) {
+          favoriteTopics.push(topic);
+        }
+        
+        return {
+          ...prevContext,
+          lastInteraction: new Date(),
+          conversationCount: prevContext.conversationCount + 1,
+          favoriteTopics,
+          updatedAt: new Date()
+        };
+      });
+    } catch (err: any) {
+      setError(err.message || 'Failed to track interaction');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [aiContext, setAIContext, setError, setIsLoading]);
+  
+  const toggleAI = useCallback(async (enabled: boolean) => {
+    if (!aiContext) {
+      setError('No AI context available');
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      
+      // Toggle AI enabled state
+      setAIContext(prevContext => {
+        if (!prevContext) return null;
+        
+        return {
+          ...prevContext,
+          isEnabled: enabled,
+          updatedAt: new Date()
+        };
+      });
+    } catch (err: any) {
+      setError(err.message || 'Failed to toggle AI');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [aiContext, setAIContext, setError, setIsLoading]);
+  
+  const resetAIContext = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      
+      // Reset the context to null
+      setAIContext(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to reset AI context');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [setAIContext, setError, setIsLoading]);
+  
   return {
     updatePreferences,
     trackInteraction,
@@ -115,4 +117,3 @@ export const useAIContextOperations = (
     resetAIContext
   };
 };
-

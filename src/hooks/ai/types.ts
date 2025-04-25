@@ -6,11 +6,7 @@ export interface AIPreferences {
   rememberConversations: boolean;
   suggestContent: boolean;
   learningEnabled: boolean;
-  voiceSettings?: {
-    voice: string;
-    speed: number;
-    pitch: number;
-  };
+  [key: string]: boolean | string | number | undefined;
 }
 
 export interface AIContext {
@@ -27,9 +23,17 @@ export interface UseAIContextReturn {
   aiContext: AIContext | null;
   isLoading: boolean;
   error: string | null;
-  updatePreferences: (newPreferences: Partial<AIPreferences>) => Promise<boolean>;
+  updatePreferences: (preferences: Partial<AIPreferences>) => Promise<void>;
   trackInteraction: (topic?: string) => Promise<void>;
-  toggleAI: (enabled: boolean) => Promise<boolean>;
-  resetAIContext: () => Promise<boolean>;
+  toggleAI: (enabled: boolean) => Promise<void>;
+  resetAIContext: () => Promise<void>;
 }
 
+export interface UseAIContextStateReturn {
+  aiContext: AIContext | null;
+  setAIContext: React.Dispatch<React.SetStateAction<AIContext | null>>;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  error: string | null;
+  setError: React.Dispatch<React.SetStateAction<string | null>>;
+}
