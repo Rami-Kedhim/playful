@@ -29,8 +29,9 @@ const RoleGuard = ({
     
     let roleName = '';
     
-    if (roleItem && typeof roleItem === 'object' && 'name' in roleItem && roleItem.name) {
-      roleName = String(roleItem.name);
+    // Type guard to ensure roleItem exists and check its type
+    if (roleItem && typeof roleItem === 'object' && 'name' in roleItem) {
+      roleName = String(roleItem.name || '');
     } else if (roleItem) {
       roleName = String(roleItem);
     }
