@@ -25,14 +25,13 @@ const RoleGuard = ({
   const userRoles = user.roles || [];
   
   const hasRequiredRole = userRoles.some(roleItem => {
-    // First check if roleItem exists at all
-    if (roleItem === null || roleItem === undefined) return false;
+    if (!roleItem) return false;
     
     // Initialize roleName as an empty string
     let roleName = '';
     
     // Handle object type roleItems (with name property)
-    if (typeof roleItem === 'object' && roleItem !== null) {
+    if (typeof roleItem === 'object' && roleItem !== null && 'name' in roleItem) {
       roleName = roleItem.name || '';
     } 
     // Handle string/primitive roleItems
@@ -40,7 +39,7 @@ const RoleGuard = ({
       roleName = String(roleItem);
     }
     
-    return typeof roleName === 'string' && allowedRoles.includes(roleName);
+    return roleName && allowedRoles.includes(roleName);
   });
   
   if (hasRequiredRole) {
