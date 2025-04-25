@@ -1,4 +1,3 @@
-
 // Navigation constants and utilities
 
 export const AppRoutes = {
@@ -22,7 +21,9 @@ export const AppRoutes = {
   WALLET: '/wallet',
   VERIFICATION: '/verification',
   PERSONAS: '/personas',
-  SAFETY_ROUTE_SHARE: '/safety/route-share'
+  SAFETY_ROUTE_SHARE: '/safety/route-share',
+  PULSE_BOOST: '/pulse-boost',
+  SETTINGS: '/settings'
 };
 
 export const ServiceCategories = {

@@ -14,7 +14,7 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Messages from "./pages/Messages";
-import Search from "./pages/Search";
+import Search from "./pages/SearchPage";
 import WalletPage from "./pages/WalletPage";
 import PulseBoostPage from "./pages/PulseBoostPage";
 import NotFound from "./pages/NotFound";
@@ -35,29 +35,13 @@ function App() {
               <Routes>
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/" element={<Home />} />
-                <Route path="/profile" element={
-                  <Layout requireAuth>
-                    <Profile />
-                  </Layout>
-                } />
-                <Route path="/settings" element={
-                  <Layout requireAuth>
-                    <Settings />
-                  </Layout>
-                } />
-                <Route path="/messages" element={
-                  <Layout requireAuth>
-                    <Messages />
-                  </Layout>
-                } />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/messages" element={<Messages />} />
                 <Route path="/search" element={<Search />} />
                 <Route path="/wallet" element={<WalletPage />} />
                 <Route path="/pulse-boost" element={<PulseBoostPage />} />
-                <Route path="*" element={
-                  <Layout hideNavbar>
-                    <NotFound />
-                  </Layout>
-                } />
+                <Route path="*" element={<NotFound />} />
               </Routes>
               <Toaster />
             </Suspense>

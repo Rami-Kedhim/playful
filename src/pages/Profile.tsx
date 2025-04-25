@@ -1,28 +1,46 @@
 
 import React from 'react';
-import { useAuth } from "@/hooks/auth";
+import Layout from '@/components/layout/Layout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/hooks/auth';
 
 const Profile = () => {
   const { user } = useAuth();
 
+  const getUserInitials = () => {
+    if (user?.name) {
+      return user.name.substring(0, 1).toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.substring(0, 1).toUpperCase();
+    }
+    return 'U';
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">Profile</h1>
-      <div className="bg-card p-6 rounded-lg shadow">
-        <div className="space-y-4">
+    <Layout title="Profile" description="Your personal profile">
+      <Card className="mb-8">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pb-4">
+          <Avatar className="h-20 w-20">
+            <AvatarImage src={user?.avatarUrl} alt={user?.name || user?.email || 'User'} />
+            <AvatarFallback className="text-2xl">{getUserInitials()}</AvatarFallback>
+          </Avatar>
           <div>
-            <label className="text-sm font-medium text-muted-foreground">Email</label>
-            <p className="mt-1">{user?.email}</p>
+            <CardTitle>{user?.name || 'User'}</CardTitle>
+            <CardDescription>{user?.email}</CardDescription>
           </div>
-          {user?.username && (
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
             <div>
-              <label className="text-sm font-medium text-muted-foreground">Username</label>
-              <p className="mt-1">{user.username}</p>
+              <span className="font-medium">Member since: </span>
+              <span>{user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</span>
             </div>
-          )}
-        </div>
-      </div>
-    </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Layout>
   );
 };
 

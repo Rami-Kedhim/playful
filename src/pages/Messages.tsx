@@ -1,21 +1,17 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Layout from '@/components/layout/Layout';
 
 const Messages = () => {
   return (
-    <div className="container mx-auto py-10">
-      <Card>
-        <CardHeader>
-          <CardTitle>Messages</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center">
-            <p>Messages placeholder - not implemented yet</p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <Layout title="Messages" description="Your conversations">
+      <div className="bg-card rounded-lg shadow p-6">
+        <h2 className="text-2xl font-bold mb-4">Messages</h2>
+        <p className="text-muted-foreground">
+          Your messages will appear here.
+        </p>
+      </div>
+    </Layout>
   );
 };
 

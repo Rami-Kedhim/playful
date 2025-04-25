@@ -2,31 +2,23 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-
-interface NavItemProps {
-  to: string;
-  children: React.ReactNode;
-  className?: string;
-}
-
-const NavItem: React.FC<NavItemProps> = ({ to, children, className }) => (
-  <Link 
-    to={to} 
-    className={cn(
-      "px-3 py-2 text-sm font-medium transition-colors hover:text-primary", 
-      className
-    )}
-  >
-    {children}
-  </Link>
-);
+import { AppRoutes } from '@/utils/navigation';
 
 const NavItems = () => {
   return (
-    <nav className="flex items-center space-x-2">
-      <NavItem to="/">Home</NavItem>
-      <NavItem to="/search">Search</NavItem>
-      <NavItem to="/verification">Verification</NavItem>
+    <nav className="flex items-center space-x-4">
+      <Link to={AppRoutes.HOME} className={cn("text-sm font-medium transition-colors hover:text-primary")}>
+        Home
+      </Link>
+      <Link to={AppRoutes.SEARCH} className={cn("text-sm font-medium transition-colors hover:text-primary")}>
+        Search
+      </Link>
+      <Link to={AppRoutes.WALLET} className={cn("text-sm font-medium transition-colors hover:text-primary")}>
+        Wallet
+      </Link>
+      <Link to={AppRoutes.PULSE_BOOST} className={cn("text-sm font-medium transition-colors hover:text-primary")}>
+        Boost
+      </Link>
     </nav>
   );
 };
