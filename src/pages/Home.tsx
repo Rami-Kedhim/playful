@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import HeroSection from '@/components/home/HeroSection';
@@ -7,13 +8,13 @@ import { Users, MessageSquare, Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/auth';
 import WelcomeAlert from '@/components/layout/WelcomeAlert';
 
-// Mock data - in a real app this would come from an API
+// Mock data with proper typing
 const mockFeaturedEscorts = [
   {
     id: '1',
     title: 'Sophie',
     image: 'https://picsum.photos/seed/escort1/300/400',
-    type: 'escort',
+    type: 'escort' as const,
     rating: 4.8,
     location: 'New York',
     username: 'sophie_nyc',
@@ -23,7 +24,7 @@ const mockFeaturedEscorts = [
     id: '2',
     title: 'Jessica',
     image: 'https://picsum.photos/seed/escort2/300/400',
-    type: 'escort',
+    type: 'escort' as const,
     rating: 4.5,
     location: 'Los Angeles',
     username: 'jessica_la',
@@ -33,7 +34,7 @@ const mockFeaturedEscorts = [
     id: '3',
     title: 'Emily',
     image: 'https://picsum.photos/seed/escort3/300/400',
-    type: 'escort',
+    type: 'escort' as const,
     rating: 4.9,
     location: 'Chicago',
     username: 'emily_chi',
@@ -43,7 +44,7 @@ const mockFeaturedEscorts = [
     id: '4',
     title: 'Ashley',
     image: 'https://picsum.photos/seed/escort4/300/400',
-    type: 'escort',
+    type: 'escort' as const,
     rating: 4.7,
     location: 'Miami',
     username: 'ashley_mia',
@@ -51,15 +52,15 @@ const mockFeaturedEscorts = [
   }
 ];
 
-// Create livecam and creator mock data of the correct type
+// Create livecam and creator mock data with proper typing
 const mockFeaturedLivecams = mockFeaturedEscorts.map((item) => ({
   ...item,
-  type: 'livecam'
+  type: 'livecam' as const
 }));
 
 const mockFeaturedCreators = mockFeaturedEscorts.map((item) => ({
   ...item,
-  type: 'creator'
+  type: 'creator' as const
 }));
 
 const Home = () => {

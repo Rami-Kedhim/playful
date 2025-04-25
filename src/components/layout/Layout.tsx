@@ -13,6 +13,8 @@ interface LayoutProps {
   requireAuth?: boolean;
   className?: string;
   containerClass?: string;
+  title?: string;
+  description?: string;
 }
 
 const Layout: React.FC<LayoutProps> = ({
@@ -21,7 +23,9 @@ const Layout: React.FC<LayoutProps> = ({
   hideFooter = false,
   requireAuth = false,
   className,
-  containerClass = "container mx-auto px-4 py-8"
+  containerClass = "container mx-auto px-4 py-8",
+  title,
+  description
 }) => {
   const { isLoading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -49,6 +53,8 @@ const Layout: React.FC<LayoutProps> = ({
       {!hideNavbar && <Navbar />}
       <main className="flex-grow">
         <div className={containerClass}>
+          {title && <h1 className="text-3xl font-bold mb-2">{title}</h1>}
+          {description && <p className="text-muted-foreground mb-6">{description}</p>}
           {children}
         </div>
       </main>
