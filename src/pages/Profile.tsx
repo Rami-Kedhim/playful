@@ -35,7 +35,7 @@ const Profile = () => {
           <div className="space-y-2">
             <div>
               <span className="font-medium">Member since: </span>
-              <span>{user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</span>
+              <span>{user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}</span>
             </div>
           </div>
         </CardContent>
