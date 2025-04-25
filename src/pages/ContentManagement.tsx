@@ -22,12 +22,13 @@ const ContentManagementPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('gallery');
   
   // Properly check if user is verified by checking multiple possible locations of verification status
+  const userMetadata = user?.user_metadata || {};
   const isVerified = 
-    user?.user_metadata?.verification_status === 'approved' || 
-    user?.user_metadata?.verification_level === VerificationLevel.BASIC || 
-    user?.user_metadata?.verification_level === VerificationLevel.ENHANCED || 
-    user?.user_metadata?.verification_level === VerificationLevel.PREMIUM || 
-    user?.user_metadata?.isVerified === true;
+    userMetadata.verification_status === 'approved' || 
+    userMetadata.verification_level === VerificationLevel.BASIC || 
+    userMetadata.verification_level === VerificationLevel.ENHANCED || 
+    userMetadata.verification_level === VerificationLevel.PREMIUM || 
+    userMetadata.isVerified === true;
   
   if (!user) {
     return (

@@ -8,6 +8,7 @@ interface BrainHubContextPreferences {
   personalizedResponses: boolean;
   adaptivePersonality: boolean;
   rememberConversations: boolean;
+  region?: string | Record<string, any>;
 }
 
 interface BrainHubContext {
@@ -46,10 +47,17 @@ export const useBrainHubAIContext = () => {
             rememberConversations: true,
           };
 
+          // Handle region if it exists
+          let region = undefined;
+          if (userMetadata.region) {
+            region = userMetadata.region;
+          }
+
           setBrainHubContext({
             preferences: {
               ...defaultPreferences,
-              ...(userMetadata.aiPreferences as Partial<BrainHubContextPreferences>)
+              ...(userMetadata.aiPreferences as Partial<BrainHubContextPreferences>),
+              region
             },
             lastInteraction: userMetadata.lastAiInteraction ? new Date(userMetadata.lastAiInteraction) : null,
             conversationCount: userMetadata.aiConversationCount || 0,
@@ -94,7 +102,6 @@ export const useBrainHubAIContext = () => {
     
     // Add region info if available
     if (user.user_metadata?.region) {
-      // Handle both string and object region
       const region = user.user_metadata.region;
       if (typeof region === 'string') {
         context += `Region: ${region}. `;

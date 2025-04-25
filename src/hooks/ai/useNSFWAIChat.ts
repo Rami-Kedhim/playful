@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import useBrainHubAIContext from '@/hooks/ai-lucie/useBrainHubAIContext';
@@ -46,7 +47,7 @@ export const useNSFWAIChat = (profileId?: string) => {
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { brainHubContext } = useBrainHubAIContext();
+  const { brainHubContext, getUserContext } = useBrainHubAIContext();
 
   const preferredModel = mockModelPreference;
   const recordInteraction = () => {};
@@ -135,17 +136,21 @@ export const useNSFWAIChat = (profileId?: string) => {
         preferredModel.systemPrompt
       );
       
+      // Mock filters using brainHubContext data
+      const region = brainHubContext?.preferences?.region || null;
+      const legalCompliance = brainHubContext?.preferences?.anonymized || false;
+      
       const brainHubResponse = brainHub.processRequest({
         type: 'ai_chat',
         data: requestData,
         filters: {
-          region: brainHubContext?.userPreferences.region || null,
-          geoRestrictions: brainHubContext?.systemContext.legalCompliance || false
+          region: region,
+          geoRestrictions: legalCompliance
         }
       });
       
       if (!brainHubResponse.success) {
-        throw new Error(brainHubResponse.error || 'Brain Hub processing failed');
+        throw new Error('Brain Hub processing failed');
       }
       
       await new Promise(resolve => setTimeout(resolve, 1500));

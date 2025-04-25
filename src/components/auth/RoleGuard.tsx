@@ -36,7 +36,9 @@ const RoleGuard = ({
     const roleName = typeof role === 'object' && role !== null 
       ? (role.name || '') // Use empty string as fallback if name property is missing
       : role;
-    return allowedRoles.includes(roleName as string);
+    
+    // Ensure roleName is not null before inclusion check
+    return typeof roleName === 'string' && allowedRoles.includes(roleName);
   });
   
   // If user has the required role, render the children

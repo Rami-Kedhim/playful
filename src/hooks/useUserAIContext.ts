@@ -61,9 +61,20 @@ export const useUserAIContext = () => {
             ...(userMetadata.aiPreferences as Partial<AIPreferences>)
           };
 
+          // Safely handle lastAiInteraction which might be a string or boolean
+          let lastInteraction: Date | null = null;
+          if (userMetadata.lastAiInteraction) {
+            if (typeof userMetadata.lastAiInteraction === 'string') {
+              lastInteraction = new Date(userMetadata.lastAiInteraction);
+            } else {
+              // If it's not a valid date string, set to current date
+              lastInteraction = new Date();
+            }
+          }
+
           setAIContext({
             preferences,
-            lastInteraction: userMetadata.lastAiInteraction ? new Date(userMetadata.lastAiInteraction) : null,
+            lastInteraction,
             conversationCount: userMetadata.aiConversationCount || 0,
             favoriteTopics: userMetadata.aiFavoriteTopics || [],
             isEnabled: userMetadata.aiEnabled === true,
