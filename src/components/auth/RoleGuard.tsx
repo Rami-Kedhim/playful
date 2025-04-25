@@ -32,11 +32,12 @@ const RoleGuard = ({
     
     // Type guard to ensure roleItem exists and check its type
     if (typeof roleItem === 'object' && roleItem !== null && 'name' in roleItem) {
-      // Safely access name property with null check
+      // Access name property only after null check
       const name = roleItem.name;
+      // Convert to string with null check
       roleName = name ? String(name) : '';
     } else if (roleItem !== null && roleItem !== undefined) {
-      // Safely convert non-null roleItem to string
+      // Convert to string only if not null
       roleName = String(roleItem);
     }
     
