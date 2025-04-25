@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
 
@@ -47,7 +48,7 @@ export const useUserAIContext = () => {
         // If user has existing AI preferences, use them
         if (userMetadata.aiPreferences) {
           setAIContext({
-            preferences: userMetadata.aiPreferences,
+            preferences: userMetadata.aiPreferences as AIPreferences,
             lastInteraction: userMetadata.lastAiInteraction ? new Date(userMetadata.lastAiInteraction) : null,
             conversationCount: userMetadata.aiConversationCount || 0,
             favoriteTopics: userMetadata.aiFavoriteTopics || [],

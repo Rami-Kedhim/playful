@@ -25,6 +25,18 @@ export default function VerificationPage() {
     );
   }
 
+  // Safely get the verification level with a fallback to the default enum value
+  const getCurrentVerificationLevel = (): VerificationLevel => {
+    const levelFromMetadata = user.user_metadata?.verification_level;
+    
+    // Check if the level is a valid enum value
+    if (levelFromMetadata && Object.values(VerificationLevel).includes(levelFromMetadata as VerificationLevel)) {
+      return levelFromMetadata as VerificationLevel;
+    }
+    
+    return VerificationLevel.NONE;
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <Card>
@@ -53,7 +65,7 @@ export default function VerificationPage() {
             <TabsContent value="upgrade">
               <VerificationUpgradeTab
                 userId={user.id}
-                currentLevel={user.user_metadata?.verification_level || VerificationLevel.NONE}
+                currentLevel={getCurrentVerificationLevel()}
               />
             </TabsContent>
           </Tabs>

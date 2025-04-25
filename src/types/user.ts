@@ -1,7 +1,12 @@
 
 import { VerificationLevel } from './verification';
 
-export type UserRole = 'admin' | 'user' | 'moderator';
+export type UserRole = 'admin' | 'user' | 'moderator' | string;
+
+export interface RoleObject {
+  name: string;
+  [key: string]: any;
+}
 
 export interface LoginCredentials {
   email: string;
@@ -18,8 +23,16 @@ export interface User {
   email?: string;
   name?: string;
   role?: string;
+  roles?: Array<string | RoleObject>;
   isVerified?: boolean;
   created_at: string;
+  username?: string;
+  profileImageUrl?: string;
+  avatarUrl?: string;
+  avatar_url?: string;
+  ubxBalance?: number;
+  website?: string;
+  bio?: string;
   user_metadata?: {
     verification_status?: string;
     verification_submitted?: boolean;
@@ -28,6 +41,13 @@ export interface User {
       submittedAt: string;
       documentUrls: string[];
     };
+    aiPreferences?: any;
+    lastAiInteraction?: string;
+    aiConversationCount?: number;
+    aiFavoriteTopics?: string[];
+    aiEnabled?: boolean;
+    aiContextCreated?: string;
+    role?: string;
   };
 }
 

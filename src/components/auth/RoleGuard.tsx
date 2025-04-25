@@ -1,3 +1,4 @@
+
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { Navigate } from 'react-router-dom';
@@ -31,9 +32,9 @@ const RoleGuard = ({
   
   // Check if the user has at least one of the allowed roles
   const hasRequiredRole = userRoles.some(role => {
-    // Convert role to string if it's an object with a name property
-    const roleName = typeof role === 'string' ? role : role.name;
-    return allowedRoles.includes(roleName);
+    // Handle both string roles and object roles with a name property
+    const roleName = typeof role === 'object' && role !== null ? role.name : role;
+    return allowedRoles.includes(roleName as string);
   });
   
   // If user has the required role, render the children
