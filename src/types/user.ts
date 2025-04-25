@@ -56,6 +56,7 @@ export interface User {
     content_preferences?: Record<string, any>;
     region?: string | Record<string, any>;
     subscription_tier?: string;
+    isVerified?: boolean;
   };
 }
 
