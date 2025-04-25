@@ -29,9 +29,9 @@ const RoleGuard = ({
     
     let roleName = '';
     
-    if (typeof roleItem === 'object' && roleItem !== null && 'name' in roleItem && roleItem.name) {
-      roleName = roleItem.name;
-    } else {
+    if (roleItem && typeof roleItem === 'object' && 'name' in roleItem && roleItem.name) {
+      roleName = String(roleItem.name);
+    } else if (roleItem) {
       roleName = String(roleItem);
     }
     

@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/auth/useAuth';
 import { UseAIContextReturn } from './ai/types';
 import { useAIContextState } from './ai/useAIContextState';
 import { useAIContextOperations } from './ai/useAIContextOperations';
-import { getDefaultPreferences, processLastInteractionDate } from '@/utils/ai/aiPreferenceUtils';
+import { getDefaultPreferences } from '@/utils/ai/aiPreferenceUtils';
 
 export const useUserAIContext = (): UseAIContextReturn => {
   const { user } = useAuth();
@@ -43,9 +43,13 @@ export const useUserAIContext = (): UseAIContextReturn => {
             ...(userMetadata.aiPreferences)
           };
 
-          const lastInteractionDate = userMetadata.lastAiInteraction ? 
-            new Date(userMetadata.lastAiInteraction) : 
-            null;
+          let lastInteractionDate: Date | null = null;
+          if (typeof userMetadata.lastAiInteraction === 'string') {
+            const parsedDate = new Date(userMetadata.lastAiInteraction);
+            if (!isNaN(parsedDate.getTime())) {
+              lastInteractionDate = parsedDate;
+            }
+          }
 
           setAIContext({
             preferences,
