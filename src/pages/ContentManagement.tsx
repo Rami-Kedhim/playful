@@ -14,17 +14,20 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, Info, LockIcon, Clock, Coins, BarChart, Shield } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card } from '@/components/ui/card';
+import { VerificationLevel } from '@/types/verification';
 
 const ContentManagementPage: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('gallery');
   
-  // Properly check if user is verified
-  const isVerified = user?.user_metadata?.verification_status === 'approved' || 
-                    user?.user_metadata?.verification_level === 'basic' || 
-                    user?.user_metadata?.verification_level === 'enhanced' || 
-                    user?.user_metadata?.verification_level === 'premium';
+  // Properly check if user is verified by checking multiple possible locations of verification status
+  const isVerified = 
+    user?.user_metadata?.verification_status === 'approved' || 
+    user?.user_metadata?.verification_level === VerificationLevel.BASIC || 
+    user?.user_metadata?.verification_level === VerificationLevel.ENHANCED || 
+    user?.user_metadata?.verification_level === VerificationLevel.PREMIUM || 
+    user?.user_metadata?.isVerified === true;
   
   if (!user) {
     return (

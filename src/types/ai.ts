@@ -1,53 +1,22 @@
 
-// Define AI-related types
-
-export interface AIProfile {
-  id: string;
-  name: string;
-  gender: string;
-  age: number;
-  bio: string;
-  personality: string;
-  avatarUrl?: string;
-  tags?: string[];
-  isVerified?: boolean;
-  createdAt?: string;
-  createdBy?: string;
-  category?: string;
-  rating?: number;
-  reviewCount?: number;
-  price?: number;
-  isPremium?: boolean;
-  attributes?: Record<string, any>;
-  preferences?: Record<string, any>;
-  voiceId?: string;
-}
-
-export interface AIModelGeneratorOptions {
-  prompt: string;
-  style?: string;
-  count?: number;
-  maxTokens?: number;
+export interface AIModelPreference {
+  model: string;
   temperature?: number;
-  onSuccess?: (profiles: AIProfile[]) => void;
+  systemPrompt?: string;
+  outputFormat?: string;
+  maxTokens?: number;
+  provider?: string;
 }
 
-export interface AIMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: string;
-  attachments?: {
-    type: string;
-    url: string;
-  }[];
-}
-
-export interface AIConversation {
-  id: string;
-  profileId: string;
-  messages: AIMessage[];
-  lastMessage?: string;
-  lastTimestamp?: string;
-  unread?: number;
+export interface AIProvider {
+  name: string;
+  apiKey?: string;
+  baseUrl?: string;
+  models: string[];
+  capabilities: {
+    streaming: boolean;
+    functionCalling: boolean;
+    vision: boolean;
+    audio: boolean;
+  };
 }

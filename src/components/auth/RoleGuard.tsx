@@ -33,7 +33,9 @@ const RoleGuard = ({
   // Check if the user has at least one of the allowed roles
   const hasRequiredRole = userRoles.some(role => {
     // Handle both string roles and object roles with a name property
-    const roleName = typeof role === 'object' && role !== null ? role.name : role;
+    const roleName = typeof role === 'object' && role !== null 
+      ? (role.name || '') // Use empty string as fallback if name property is missing
+      : role;
     return allowedRoles.includes(roleName as string);
   });
   

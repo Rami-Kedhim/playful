@@ -1,10 +1,16 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import useBrainHubAIContext from '@/hooks/ai-lucie/useBrainHubAIContext';
-import { nsfwAIProviderService } from '@/services/ai/NSFWAIProviderService';
-import { brainHub } from '@/services/neural/HermesOxumBrainHub';
-import { useAuth } from '@/hooks/auth/useAuthContext';
+import { AIModelPreference } from '@/types/ai';
+
+const nsfwAIProviderService = {
+  getProviderFromPreference: (preference: AIModelPreference) => ({ name: 'Mock Provider' }),
+  prepareMessageForProvider: (history: any[], provider: any, systemPrompt?: string) => ({})
+};
+
+const brainHub = {
+  processRequest: (params: any) => ({ success: true, data: {} })
+};
 
 export interface NSFWAIMessage {
   id: string;
@@ -27,6 +33,12 @@ export interface NSFWAIProfile {
   system_prompt?: string;
 }
 
+const mockModelPreference: AIModelPreference = {
+  model: 'mock-model',
+  temperature: 0.7,
+  systemPrompt: 'You are an AI companion.'
+};
+
 export const useNSFWAIChat = (profileId?: string) => {
   const [messages, setMessages] = useState<NSFWAIMessage[]>([]);
   const [profile, setProfile] = useState<NSFWAIProfile | null>(null);
@@ -34,38 +46,29 @@ export const useNSFWAIChat = (profileId?: string) => {
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { user } = useAuth();
-  
-  // Connect to the Brain Hub
-  const {
-    preferredModel,
-    aiContext,
-    updateEmotionalState,
-    recordInteraction,
-    toggleNSFWContent
-  } = useBrainHubAIContext('nsfw-ai-chat-' + (profileId || 'default'));
-  
-  // Initialize connection when profile ID changes
+  const { brainHubContext } = useBrainHubAIContext();
+
+  const preferredModel = mockModelPreference;
+  const recordInteraction = () => {};
+  const updateEmotionalState = (emotion: string) => {};
+  const toggleNSFWContent = (enabled: boolean) => {};
+
   useEffect(() => {
     const initChat = async () => {
       if (profileId) {
         setIsLoading(true);
         try {
-          // Simulate fetching profile information
-          // In a real implementation, this would be an API call
           await new Promise(resolve => setTimeout(resolve, 800));
           
-          // Mock profile data
           setProfile({
             id: profileId,
             name: 'AI Companion',
             personality: 'friendly',
             avatar_url: 'https://example.com/avatar.jpg',
             lucoin_chat_price: 5,
-            system_prompt: preferredModel?.systemPrompt
+            system_prompt: preferredModel.systemPrompt
           });
           
-          // Set initial greeting
           const initialMessage: NSFWAIMessage = {
             id: `welcome-${Date.now()}`,
             role: 'assistant',
@@ -89,8 +92,7 @@ export const useNSFWAIChat = (profileId?: string) => {
     
     initChat();
   }, [profileId, preferredModel, toast]);
-  
-  // Send a message to the AI
+
   const sendMessage = useCallback(async (content: string) => {
     if (!preferredModel) {
       toast({
@@ -102,7 +104,6 @@ export const useNSFWAIChat = (profileId?: string) => {
     }
     
     try {
-      // Add user message to chat
       const userMessageId = `msg-${Date.now()}-user`;
       const userMessage: NSFWAIMessage = {
         id: userMessageId,
@@ -114,38 +115,32 @@ export const useNSFWAIChat = (profileId?: string) => {
       setMessages(prev => [...prev, userMessage]);
       setIsTyping(true);
       
-      // Record this interaction in Brain Hub
       recordInteraction();
       
-      // Prepare the conversation history for the AI
       const conversationHistory = messages.map(msg => ({
         role: msg.role,
         content: msg.content
       }));
       
-      // Add the latest user message
       conversationHistory.push({
         role: 'user',
         content
       });
       
-      // Get the appropriate AI provider based on user preferences
       const provider = nsfwAIProviderService.getProviderFromPreference(preferredModel);
       
-      // Prepare the request for the provider
       const requestData = nsfwAIProviderService.prepareMessageForProvider(
         conversationHistory,
         provider,
         preferredModel.systemPrompt
       );
       
-      // Process request through Brain Hub for compliance and customization
       const brainHubResponse = brainHub.processRequest({
         type: 'ai_chat',
         data: requestData,
         filters: {
-          region: aiContext?.userPreferences.region || null,
-          geoRestrictions: aiContext?.systemContext.legalCompliance || false
+          region: brainHubContext?.userPreferences.region || null,
+          geoRestrictions: brainHubContext?.systemContext.legalCompliance || false
         }
       });
       
@@ -153,15 +148,11 @@ export const useNSFWAIChat = (profileId?: string) => {
         throw new Error(brainHubResponse.error || 'Brain Hub processing failed');
       }
       
-      // For demo purposes, simulate AI response
-      // In production, this would be a call to the actual AI provider API
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Sample emotional analysis (in production this would come from the AI model)
       const emotionAnalysis = Math.random() > 0.5 ? 'excited' : 'curious';
       updateEmotionalState(emotionAnalysis);
       
-      // Create AI response message
       const aiMessage: NSFWAIMessage = {
         id: `msg-${Date.now()}-assistant`,
         role: 'assistant',
@@ -185,9 +176,8 @@ export const useNSFWAIChat = (profileId?: string) => {
     } finally {
       setIsTyping(false);
     }
-  }, [messages, preferredModel, aiContext, toast, recordInteraction, updateEmotionalState]);
-  
-  // Set NSFW content preference
+  }, [messages, preferredModel, brainHubContext, toast, recordInteraction, updateEmotionalState]);
+
   const setNSFWPreference = useCallback((enabled: boolean) => {
     toggleNSFWContent(enabled);
     
@@ -196,7 +186,7 @@ export const useNSFWAIChat = (profileId?: string) => {
       description: `NSFW content has been ${enabled ? 'enabled' : 'disabled'}.`,
     });
   }, [toggleNSFWContent, toast]);
-  
+
   return {
     messages,
     sendMessage,

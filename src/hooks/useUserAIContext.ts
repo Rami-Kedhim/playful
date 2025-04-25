@@ -66,7 +66,7 @@ export const useUserAIContext = () => {
             lastInteraction: userMetadata.lastAiInteraction ? new Date(userMetadata.lastAiInteraction) : null,
             conversationCount: userMetadata.aiConversationCount || 0,
             favoriteTopics: userMetadata.aiFavoriteTopics || [],
-            isEnabled: userMetadata.aiEnabled !== false,
+            isEnabled: userMetadata.aiEnabled === true,
             createdAt: new Date(userMetadata.aiContextCreated || user.created_at),
             updatedAt: new Date()
           });

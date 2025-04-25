@@ -38,7 +38,7 @@ export const useBrainHubAIContext = () => {
         const userMetadata = user.user_metadata || {};
         
         // If user has existing preferences, use them
-        if (userMetadata.brainHubPreferences) {
+        if (userMetadata.aiPreferences) {
           const defaultPreferences: BrainHubContextPreferences = {
             anonymized: false,
             personalizedResponses: true,
@@ -49,12 +49,12 @@ export const useBrainHubAIContext = () => {
           setBrainHubContext({
             preferences: {
               ...defaultPreferences,
-              ...(userMetadata.brainHubPreferences as Partial<BrainHubContextPreferences>)
+              ...(userMetadata.aiPreferences as Partial<BrainHubContextPreferences>)
             },
-            lastInteraction: userMetadata.lastBrainHubInteraction ? new Date(userMetadata.lastBrainHubInteraction) : null,
-            conversationCount: userMetadata.brainHubConversationCount || 0,
-            favoriteTopics: userMetadata.brainHubFavoriteTopics || [],
-            isEnabled: userMetadata.brainHubEnabled !== false,
+            lastInteraction: userMetadata.lastAiInteraction ? new Date(userMetadata.lastAiInteraction) : null,
+            conversationCount: userMetadata.aiConversationCount || 0,
+            favoriteTopics: userMetadata.aiFavoriteTopics || [],
+            isEnabled: userMetadata.aiEnabled !== false,
           });
         } else {
           // Create default context
@@ -95,10 +95,11 @@ export const useBrainHubAIContext = () => {
     // Add region info if available
     if (user.user_metadata?.region) {
       // Handle both string and object region
-      if (typeof user.user_metadata.region === 'string') {
-        context += `Region: ${user.user_metadata.region}. `;
-      } else if (typeof user.user_metadata.region === 'object' && user.user_metadata.region !== null) {
-        context += `Region: ${JSON.stringify(user.user_metadata.region)}. `;
+      const region = user.user_metadata.region;
+      if (typeof region === 'string') {
+        context += `Region: ${region}. `;
+      } else if (typeof region === 'object' && region !== null) {
+        context += `Region: ${JSON.stringify(region)}. `;
       }
     }
     
