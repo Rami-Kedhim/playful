@@ -51,13 +51,21 @@ export const useUserAIContext = (): UseAIContextReturn => {
             }
           }
 
+          // Safely determine creation date from various potential sources
+          let creationTimestamp: number | string | Date = Date.now();
+          if (typeof userMetadata.aiContextCreated === 'string' || typeof userMetadata.aiContextCreated === 'number') {
+            creationTimestamp = userMetadata.aiContextCreated;
+          } else if (typeof user.created_at === 'string' || typeof user.created_at === 'number') {
+            creationTimestamp = user.created_at;
+          }
+
           setAIContext({
             preferences,
             lastInteraction: lastInteractionDate,
             conversationCount: userMetadata.aiConversationCount || 0,
             favoriteTopics: userMetadata.aiFavoriteTopics || [],
             isEnabled: userMetadata.aiEnabled !== false, // Default to true unless explicitly false
-            createdAt: new Date(userMetadata.aiContextCreated || user.created_at || Date.now()),
+            createdAt: new Date(creationTimestamp),
             updatedAt: new Date()
           });
         } else {
