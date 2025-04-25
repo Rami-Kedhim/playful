@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
 
@@ -63,17 +62,15 @@ export const useUserAIContext = () => {
 
           // Safely handle lastAiInteraction which might be a string or boolean
           let lastInteraction: Date | null = null;
+          
           if (userMetadata.lastAiInteraction) {
-            // If it's a string, try to convert to Date
+            // Process based on the type of lastAiInteraction
             if (typeof userMetadata.lastAiInteraction === 'string') {
               lastInteraction = new Date(userMetadata.lastAiInteraction);
             } else if (typeof userMetadata.lastAiInteraction === 'boolean') {
-              // If it's a boolean, set to current date if true
-              if (userMetadata.lastAiInteraction === true) {
-                lastInteraction = new Date();
-              }
+              // If it's a boolean and true, set to current date
+              lastInteraction = userMetadata.lastAiInteraction === true ? new Date() : null;
             } else if (userMetadata.lastAiInteraction instanceof Date) {
-              // If it's already a Date object
               lastInteraction = userMetadata.lastAiInteraction;
             } else {
               // For any other type, set to current date

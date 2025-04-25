@@ -32,12 +32,13 @@ const RoleGuard = ({
   
   // Check if the user has at least one of the allowed roles
   const hasRequiredRole = userRoles.some(roleItem => {
-    if (roleItem === null) return false; // Explicitly handle null role
+    // Skip null/undefined roles entirely
+    if (roleItem === null || roleItem === undefined) return false;
     
     // Handle both string roles and object roles with a name property
     const roleName = typeof roleItem === 'object' && roleItem !== null 
       ? (roleItem.name || '') // Use empty string as fallback if name property is missing
-      : (roleItem || ''); // Add null/undefined check here by providing fallback
+      : String(roleItem); // Convert to string to ensure consistency
     
     // Ensure roleName is a string before inclusion check
     return typeof roleName === 'string' && allowedRoles.includes(roleName);
