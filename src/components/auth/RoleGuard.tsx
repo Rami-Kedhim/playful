@@ -2,6 +2,7 @@
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { Navigate } from 'react-router-dom';
+import { RoleObject } from '@/types/auth';
 
 interface RoleGuardProps {
   children: ReactNode;
@@ -25,19 +26,14 @@ const RoleGuard = ({
   const userRoles = user.roles || [];
   
   const hasRequiredRole = userRoles.some(roleItem => {
-    // Skip null or undefined role items
-    if (roleItem === null || roleItem === undefined) return false;
+    if (!roleItem) return false;
     
     let roleName = '';
     
-    // Type guard to ensure roleItem exists and check its type
-    if (typeof roleItem === 'object' && roleItem !== null && 'name' in roleItem) {
-      // Access name property only after null check
-      const name = roleItem.name;
-      // Convert to string with null check
-      roleName = name ? String(name) : '';
-    } else if (roleItem !== null && roleItem !== undefined) {
-      // Convert to string only if not null
+    if (typeof roleItem === 'object' && 'name' in roleItem) {
+      const roleObj = roleItem as RoleObject;
+      roleName = roleObj.name || '';
+    } else {
       roleName = String(roleItem);
     }
     
