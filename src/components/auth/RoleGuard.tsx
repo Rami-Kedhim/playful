@@ -32,7 +32,8 @@ const RoleGuard = ({
     
     if (typeof roleItem === 'object' && roleItem !== null && 'name' in roleItem) {
       // Use non-null assertion only after we've confirmed it's not null
-      roleName = (roleItem as { name: string }).name || '';
+      const roleObject = roleItem as { name: string };
+      roleName = roleObject.name || '';
     } else {
       roleName = String(roleItem);
     }
