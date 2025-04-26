@@ -2,7 +2,7 @@
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { Navigate } from 'react-router-dom';
-import { UserRole, RoleObject } from '@/types/user';
+import { useRole } from '@/hooks/auth/useRole';
 
 interface RoleGuardProps {
   children: ReactNode;
@@ -17,34 +17,14 @@ const RoleGuard = ({
   redirectTo = '/unauthorized', 
   fallback 
 }: RoleGuardProps) => {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const { hasAnyRole } = useRole();
   
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" />;
   }
   
-  const userRoles = user.roles || [];
-  
-  const hasRequiredRole = userRoles.some(roleItem => {
-    // Comprehensive null and type checking
-    if (roleItem == null) return false;
-    
-    let roleName = '';
-    
-    // Check if roleItem is an object with a name property
-    if (typeof roleItem === 'object' && roleItem !== null) {
-      const roleObject = roleItem as RoleObject;
-      roleName = roleObject.name?.toLowerCase() || '';
-    } else {
-      // Safely convert to lowercase string
-      roleName = String(roleItem).toLowerCase();
-    }
-    
-    // Check if roleName is not empty and matches allowed roles
-    return roleName && allowedRoles.some(role => role.toLowerCase() === roleName);
-  });
-  
-  if (hasRequiredRole) {
+  if (hasAnyRole(allowedRoles)) {
     return <>{children}</>;
   }
   
