@@ -31,11 +31,11 @@ const RoleGuard = ({
     let roleName = '';
     
     if (typeof roleItem === 'object' && roleItem !== null && 'name' in roleItem) {
-      // Use non-null assertion only after we've confirmed it's not null
+      // Only access name property after we've confirmed it's not null and has a name property
       const roleObject = roleItem as { name: string };
       roleName = roleObject.name || '';
     } else {
-      roleName = String(roleItem);
+      roleName = String(roleItem || '');
     }
     
     return roleName && allowedRoles.includes(roleName);
