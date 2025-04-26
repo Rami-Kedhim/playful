@@ -26,15 +26,16 @@ const RoleGuard = ({
   const userRoles = user.roles || [];
   
   const hasRequiredRole = userRoles.some(roleItem => {
-    // Ensure roleItem isn't null before accessing properties
+    // Early return if roleItem is null or undefined
     if (roleItem === null || roleItem === undefined) return false;
     
     let roleName = '';
     
     if (typeof roleItem === 'object' && roleItem !== null && 'name' in roleItem) {
-      // Only access name property after we've confirmed it's not null and has a name property
+      // Only access name property after we've confirmed it exists
       const roleObject = roleItem as { name: string };
-      roleName = roleObject.name || '';
+      // Use optional chaining to safely access the name property
+      roleName = roleObject.name ?? '';
     } else {
       // Convert roleItem to string safely
       roleName = String(roleItem);
