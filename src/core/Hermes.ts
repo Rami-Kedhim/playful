@@ -34,6 +34,14 @@ export interface FlowDynamics {
 
 export class Hermes {
   /**
+   * Initialize Hermes engine
+   */
+  public async initialize(): Promise<boolean> {
+    console.log('Initializing Hermes Flow Dynamics Engine');
+    return true;
+  }
+
+  /**
    * Process and analyze user journey to provide insights
    */
   public async processUserJourney(userId: string): Promise<UserJourney> {
@@ -76,6 +84,7 @@ export class Hermes {
   public resolveFlowDynamics(inputs: {
     systemLoad: number;
     activityLevel: number;
+    personaType?: string;
   }): FlowDynamics {
     const { systemLoad, activityLevel } = inputs;
     

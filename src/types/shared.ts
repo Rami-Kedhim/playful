@@ -4,8 +4,9 @@
 // Re-export existing types for backward compatibility
 export * from './UberPersona';
 export * from './user';
-export * from './ubercore';
-export * from './uber-ecosystem';
+// Import but don't re-export conflicting types
+import './ubercore';
+import './uber-ecosystem';
 
 // Basic ID type used throughout the application
 export type ID = string;

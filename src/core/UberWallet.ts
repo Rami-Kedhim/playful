@@ -99,6 +99,31 @@ export class UberWallet {
       message: `Successfully spent ${amount} UBX tokens for ${purpose}`
     };
   }
+
+  /**
+   * Debit UBX tokens from a user's wallet
+   */
+  public async debit(userId: string, amount: number, reason: string): Promise<{
+    success: boolean;
+    transactionId: string;
+    newBalance?: UbxBalance;
+  }> {
+    console.log(`Debiting ${amount} UBX from user ${userId} for: ${reason}`);
+    
+    // In production would validate sufficient balance before proceeding
+    const mockNewBalance = {
+      available: 200,
+      pending: 0,
+      reserved: 50,
+      total: 250
+    };
+    
+    return {
+      success: true,
+      transactionId: `debit-${Date.now()}`,
+      newBalance: mockNewBalance
+    };
+  }
 }
 
 // Export singleton instance

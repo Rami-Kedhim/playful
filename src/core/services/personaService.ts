@@ -37,9 +37,9 @@ export class PersonaService {
       }
 
       const flowDynamics = hermes.resolveFlowDynamics({
-        personaType: processedPersona.type,
+        systemLoad: 0.5,
         activityLevel: processedPersona.isOnline ? 0.8 : 0.2,
-        systemLoad: 0.5
+        personaType: processedPersona.type
       });
       
       if (processedPersona.systemMetadata) {
