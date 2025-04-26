@@ -2,49 +2,51 @@
 import { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth';
+import { useRole } from '@/hooks/auth/useRole';
 
 interface RoleBasedRouteProps {
   children: ReactNode;
   allowedRoles: string[];
   redirectTo?: string;
+  fallback?: ReactNode;
 }
 
 /**
- * A route component that restricts access based on user roles
+ * Route component that restricts access based on user roles
+ * Redirects unauthenticated users to login and unauthorized users to a specified path
  */
-const RoleBasedRoute = ({
-  children,
+const RoleBasedRoute = ({ 
+  children, 
   allowedRoles,
-  redirectTo = '/unauthorized'
+  redirectTo = '/unauthorized', 
+  fallback 
 }: RoleBasedRouteProps) => {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+  const { hasAnyRole } = useRole();
   const location = useLocation();
-
+  
   // Show loading state while checking authentication
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="flex justify-center items-center p-8">Loading...</div>;
   }
-
+  
   // Redirect to login if not authenticated
-  if (!isAuthenticated || !user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location.pathname }} />;
   }
-
-  // Check if the user has at least one of the allowed roles
-  const userRoles = user.roles || [];
-  const hasAllowedRole = userRoles.some(role => {
-    if (typeof role === 'string') {
-      return allowedRoles.includes(role);
-    }
-    return false;
-  });
-
-  if (!hasAllowedRole) {
-    return <Navigate to={redirectTo} replace />;
+  
+  // Check if user has any of the required roles
+  if (hasAnyRole(allowedRoles)) {
+    return <>{children}</>;
   }
-
-  // User has the required role
-  return <>{children}</>;
+  
+  // Show fallback if provided, otherwise redirect
+  if (fallback) {
+    return <>{fallback}</>;
+  }
+  
+  // Redirect to unauthorized page
+  return <Navigate to={redirectTo} replace />;
 };
 
 export default RoleBasedRoute;
