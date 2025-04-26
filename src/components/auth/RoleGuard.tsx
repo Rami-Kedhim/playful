@@ -2,7 +2,7 @@
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { Navigate } from 'react-router-dom';
-import { UserRole } from '@/types/user';
+import { UserRole, RoleObject } from '@/types/user';
 
 interface RoleGuardProps {
   children: ReactNode;
@@ -33,10 +33,10 @@ const RoleGuard = ({
     
     // Check if roleItem is an object with a name property
     if (typeof roleItem === 'object' && roleItem !== null) {
-      const roleObject = roleItem as { name?: string };
-      roleName = roleObject.name ?? (typeof roleObject === 'string' ? roleObject : '');
+      const roleObject = roleItem as RoleObject;
+      roleName = roleObject.name?.toLowerCase() || '';
     } else {
-      // Safely convert to string if not an object
+      // Safely convert to lowercase string
       roleName = String(roleItem).toLowerCase();
     }
     
@@ -56,3 +56,4 @@ const RoleGuard = ({
 };
 
 export default RoleGuard;
+
