@@ -35,7 +35,8 @@ const RoleGuard = ({
       const roleObject = roleItem as { name: string };
       roleName = roleObject.name || '';
     } else {
-      roleName = String(roleItem || '');
+      // Ensure we handle the case where roleItem itself might be null
+      roleName = roleItem ? String(roleItem) : '';
     }
     
     return roleName && allowedRoles.includes(roleName);
