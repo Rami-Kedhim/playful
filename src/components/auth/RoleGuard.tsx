@@ -26,7 +26,7 @@ const RoleGuard = ({
   const userRoles = user.roles || [];
   
   const hasRequiredRole = userRoles.some(roleItem => {
-    // Early return if roleItem is null or undefined
+    // Ensure roleItem isn't null before accessing properties
     if (roleItem === null || roleItem === undefined) return false;
     
     let roleName = '';

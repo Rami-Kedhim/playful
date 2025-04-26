@@ -26,7 +26,21 @@ export function usePulseBoost(profileId?: string) {
   const fetchPackages = useCallback(async () => {
     try {
       const packages = pulseBoostService.getBoostPackages();
-      setBoostPackages(packages);
+      // Convert from PulseBoostPackage to BoostPackage
+      const convertedPackages = packages.map(pkg => ({
+        id: pkg.id,
+        name: pkg.name,
+        description: pkg.description,
+        price: pkg.price,
+        duration: typeof pkg.duration === 'number' ? `${pkg.duration}:00:00` : pkg.duration,
+        features: pkg.features,
+        price_ubx: pkg.price,
+        durationMinutes: typeof pkg.duration === 'number' ? pkg.duration * 60 : 0,
+        visibility: 'homepage',
+        visibility_increase: 50
+      } as unknown as BoostPackage));
+      
+      setBoostPackages(convertedPackages);
     } catch (err: any) {
       setError(err.message || 'Failed to load boost packages');
     }
@@ -77,22 +91,32 @@ export function usePulseBoost(profileId?: string) {
     }
   }, []);
   
-  // Purchase a boost
+  // Purchase a boost - Fix the parameter structure to match service
   const purchaseBoost = async (request: BoostPurchaseRequest): Promise<BoostPurchaseResult> => {
     setLoading(true);
     setError(null);
     
     try {
-      const result = await pulseBoostService.purchaseBoost(request);
+      // Fix: Pass userId and packageId as required by the service method
+      const result = await pulseBoostService.purchaseBoost(
+        request.profileId, 
+        request.packageId
+      );
       
       if (result.success && profileId === request.profileId) {
         // Refresh boost status if successful
         fetchBoostStatus(profileId);
       } else if (!result.success) {
-        setError(result.error || 'Purchase failed');
+        // Check for error message from the response
+        setError(result.error || result.message || 'Purchase failed');
       }
       
-      return result;
+      // Convert to expected return type
+      return {
+        success: result.success,
+        boostId: result.transactionId,
+        error: result.error || result.message
+      };
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to purchase boost';
       setError(errorMessage);
@@ -106,7 +130,7 @@ export function usePulseBoost(profileId?: string) {
     }
   };
   
-  // Cancel a boost
+  // Cancel a boost - fix method call
   const cancelBoost = async (boostId: string): Promise<boolean> => {
     setLoading(true);
     setError(null);
