@@ -1,8 +1,48 @@
 
-// Consolidate all core utilities in this file for easier imports and organization
-// This file will re-export utilities from other core files for now with placeholders.
+// Consolidated core utilities
 
-export * from './aiOrchestration';
-// Removed navigation export since './navigation' file does not exist or is not correctly placed
-// Add more exports when more core utilities are consolidated here
+import { SystemStatus, AnalyticsData } from '@/types/shared';
 
+// System status check utility
+export const checkSystemStatus = async (): Promise<SystemStatus> => {
+  // This would actually connect to backend services in a real implementation
+  return {
+    operational: true,
+    lastUpdated: new Date(),
+    components: {
+      core: { status: 'operational' },
+      oxum: { status: 'operational' },
+      hermes: { status: 'operational' },
+      orus: { status: 'operational' },
+      wallet: { status: 'operational' },
+    },
+    metrics: {
+      responseTime: 120,
+      activeSessions: 53,
+      processingLoad: 12
+    }
+  };
+};
+
+// Analytics aggregation utility
+export const aggregateAnalytics = (data: Array<AnalyticsData>): AnalyticsData => {
+  return data.reduce((acc, curr) => {
+    return {
+      views: acc.views + curr.views,
+      interactions: acc.interactions + curr.interactions,
+      conversions: acc.conversions + curr.conversions,
+      boostEffectiveness: (acc.boostEffectiveness || 0) + (curr.boostEffectiveness || 0),
+      engagementRate: (acc.engagementRate || 0) + (curr.engagementRate || 0),
+    };
+  }, {
+    views: 0,
+    interactions: 0,
+    conversions: 0,
+    boostEffectiveness: 0,
+    engagementRate: 0
+  });
+};
+
+// Re-export any existing utilities that are still relevant
+export * from '../navigation';
+export * from '../boost';

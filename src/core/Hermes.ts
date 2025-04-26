@@ -1,177 +1,143 @@
 
-// Core Hermes engine - manages flow dynamics and behavior resolution
+// Core Hermes engine - manages user flow, insights and recommendations
 
-export interface FlowDynamicsInput {
-  personaType?: string;
-  activityLevel?: number;
-  systemLoad?: number;
-  timeOfDay?: string;
-  userPreferences?: Record<string, any>;
-  [key: string]: any;
+export interface UserJourney {
+  userId: string;
+  touchpoints: UserTouchpoint[];
+  currentState: string;
+  recommendedActions: RecommendedAction[];
+  timestamp: Date;
 }
 
-export interface FlowDynamicsOutput {
+interface UserTouchpoint {
+  path: string;
+  action: string;
+  duration: number;
+  timestamp: Date;
+  metadata?: Record<string, any>;
+}
+
+interface RecommendedAction {
+  type: string;
+  priority: number;
+  description: string;
+  confidence: number;
+  targetPath?: string;
+}
+
+export interface FlowDynamics {
+  status: 'optimal' | 'suboptimal' | 'disrupted';
   flowScore: number;
-  status: 'active' | 'idle' | 'busy' | 'limited';
-  recommendedActions?: string[];
-  optimizationTips?: string[];
-  resolvedAt: string;
-  [key: string]: any;
+  recommendedActions: string[];
+  hotspots: Record<string, number>;
 }
 
 export class Hermes {
-  private initialized: boolean = false;
-  
-  // System initialization
-  public async initialize(): Promise<boolean> {
-    this.initialized = true;
-    return true;
+  /**
+   * Process and analyze user journey to provide insights
+   */
+  public async processUserJourney(userId: string): Promise<UserJourney> {
+    console.log(`Processing journey for user ${userId}`);
+    
+    // This would fetch actual user data in a real implementation
+    return {
+      userId,
+      touchpoints: [
+        {
+          path: '/',
+          action: 'view',
+          duration: 45,
+          timestamp: new Date(Date.now() - 60000)
+        },
+        {
+          path: '/search',
+          action: 'search',
+          duration: 120,
+          timestamp: new Date()
+        }
+      ],
+      currentState: 'exploring',
+      recommendedActions: [
+        {
+          type: 'suggestion',
+          priority: 0.8,
+          description: 'View featured profiles',
+          confidence: 0.75,
+          targetPath: '/featured'
+        }
+      ],
+      timestamp: new Date()
+    };
   }
   
-  // Resolve system flow dynamics based on inputs and state
-  public resolveFlowDynamics(input: FlowDynamicsInput): FlowDynamicsOutput {
-    // Input validation
-    const validatedInput = {
-      personaType: input.personaType || 'generic',
-      activityLevel: typeof input.activityLevel === 'number' ? input.activityLevel : 0.5,
-      systemLoad: typeof input.systemLoad === 'number' ? input.systemLoad : 0.5,
-      timeOfDay: input.timeOfDay || this.getCurrentTimeOfDay(),
-      userPreferences: input.userPreferences || {}
-    };
+  /**
+   * Calculate flow dynamics across the system
+   */
+  public resolveFlowDynamics(inputs: {
+    systemLoad: number;
+    activityLevel: number;
+  }): FlowDynamics {
+    const { systemLoad, activityLevel } = inputs;
     
-    // Enhanced flow dynamics calculation
-    const activityFactor = validatedInput.activityLevel * 0.6;
-    const loadFactor = (1 - validatedInput.systemLoad) * 0.4;
-    const timeFactor = this.getTimeOfDayFactor(validatedInput.timeOfDay);
+    let status: 'optimal' | 'suboptimal' | 'disrupted';
+    let flowScore: number;
     
-    // Calculate flow score with multiple factors
-    const flowScore = (activityFactor + loadFactor) * timeFactor;
+    if (systemLoad > 0.8) {
+      status = 'disrupted';
+      flowScore = 0.3;
+    } else if (systemLoad > 0.5) {
+      status = 'suboptimal';
+      flowScore = 0.6;
+    } else {
+      status = 'optimal';
+      flowScore = 0.9;
+    }
     
-    // Determine status based on score
-    let status: 'active' | 'idle' | 'busy' | 'limited' = 'idle';
-    if (flowScore > 0.7) status = 'active';
-    else if (flowScore < 0.3) status = 'limited';
-    else if (validatedInput.systemLoad > 0.8) status = 'busy';
-    
-    // Generate recommendations based on status
-    const recommendations = this.generateRecommendations(status, flowScore, validatedInput);
+    // Apply activity level multiplier
+    flowScore *= Math.min(1, activityLevel + 0.3);
     
     return {
-      flowScore,
       status,
-      recommendedActions: recommendations.actions,
-      optimizationTips: recommendations.tips,
-      personaTypeFactors: this.getPersonaTypeFactors(validatedInput.personaType),
-      resolvedAt: new Date().toISOString()
+      flowScore,
+      recommendedActions: [
+        'Optimize popular routes',
+        'Enhance discovery mechanisms'
+      ],
+      hotspots: {
+        '/featured': 0.8,
+        '/search': 0.7,
+        '/profile': 0.5
+      }
     };
   }
   
-  private getCurrentTimeOfDay(): string {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return 'morning';
-    if (hour >= 12 && hour < 17) return 'afternoon';
-    if (hour >= 17 && hour < 22) return 'evening';
-    return 'night';
-  }
-  
-  private getTimeOfDayFactor(timeOfDay: string): number {
-    switch (timeOfDay) {
-      case 'morning': return 0.8;
-      case 'afternoon': return 1.0;
-      case 'evening': return 1.2;
-      case 'night': return 0.7;
-      default: return 1.0;
-    }
-  }
-  
-  private getPersonaTypeFactors(personaType: string): Record<string, number> {
-    const factors: Record<string, number> = {
-      visibility: 1.0,
-      engagement: 1.0,
-      conversion: 1.0
-    };
+  /**
+   * Determine next best action for a user
+   */
+  public getNextBestAction(userId: string, currentPath: string): RecommendedAction {
+    console.log(`Getting next best action for ${userId} on ${currentPath}`);
     
-    switch (personaType) {
-      case 'escort':
-        factors.visibility = 1.2;
-        factors.engagement = 0.9;
-        factors.conversion = 1.3;
-        break;
-      case 'creator':
-        factors.visibility = 1.1;
-        factors.engagement = 1.4;
-        factors.conversion = 0.8;
-        break;
-      case 'livecam':
-        factors.visibility = 1.0;
-        factors.engagement = 1.2;
-        factors.conversion = 1.1;
-        break;
-      case 'ai':
-        factors.visibility = 0.9;
-        factors.engagement = 1.3;
-        factors.conversion = 1.0;
-        break;
-    }
-    
-    return factors;
-  }
-  
-  private generateRecommendations(
-    status: 'active' | 'idle' | 'busy' | 'limited',
-    score: number,
-    input: FlowDynamicsInput
-  ): { actions: string[], tips: string[] } {
-    const actions: string[] = [];
-    const tips: string[] = [];
-    
-    switch (status) {
-      case 'active':
-        actions.push('Maximize visibility', 'Promote premium content');
-        tips.push('Great time for boosting', 'Consider cross-promotion');
-        break;
-      case 'busy':
-        actions.push('Optimize system resources', 'Prioritize premium users');
-        tips.push('Defer non-critical operations', 'Consider temporary caching');
-        break;
-      case 'idle':
-        actions.push('Increase promotion', 'Run engagement campaigns');
-        tips.push('Good time for system maintenance', 'Consider content refreshes');
-        break;
-      case 'limited':
-        actions.push('Focus on core functions', 'Reduce non-essential operations');
-        tips.push('Consider short boosts for visibility', 'Optimize resource usage');
-        break;
-    }
-    
-    // Add personalized recommendations based on score
-    if (score < 0.4) {
-      actions.push('Apply temporary discount to boost engagement');
-    } else if (score > 0.8) {
-      actions.push('Highlight premium offerings for maximum conversion');
-    }
-    
-    return { actions, tips };
-  }
-  
-  // Get SEO optimization recommendations for specified route
-  public getSeoRecommendations(route: string): Record<string, any> {
-    // Placeholder for SEO recommendations system
-    return {
-      title: `Optimized title for ${route}`,
-      description: `Engaging description for ${route} with relevant keywords`,
-      keywords: ['premium', 'verified', route.replace('/', '')],
-      structuredData: {
-        type: 'Product',
-        name: route === '/' ? 'UberEscorts' : `UberEscorts ${route.replace('/', '')}`
+    // Sample implementation - would use machine learning in production
+    const recommendations: RecommendedAction[] = [
+      {
+        type: 'boost_engagement',
+        priority: 0.9,
+        description: 'Check featured creators',
+        confidence: 0.85,
+        targetPath: '/creators/featured'
       },
-      recommendations: [
-        'Add more rich media content',
-        'Improve page loading speed',
-        'Enhance mobile responsiveness'
-      ]
-    };
+      {
+        type: 'conversion',
+        priority: 0.7,
+        description: 'Boost your profile',
+        confidence: 0.75,
+        targetPath: '/pulse-boost'
+      }
+    ];
+    
+    return recommendations[0];
   }
 }
 
+// Export singleton instance
 export const hermes = new Hermes();

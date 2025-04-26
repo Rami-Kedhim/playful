@@ -1,62 +1,105 @@
 
-// UberWallet core module - manages UBX currency and transactions
+// UberWallet - Manages UBX token economy and transactions
 
-export interface TransactionRecord {
+export interface UbxBalance {
+  available: number;
+  pending: number;
+  reserved: number;
+  total: number;
+}
+
+export interface UbxTransaction {
   id: string;
-  userId: string;
+  type: 'purchase' | 'spend' | 'earn' | 'refund';
   amount: number;
-  type: 'credit' | 'debit';
   description: string;
-  timestamp: string;
+  timestamp: Date;
+  metadata?: Record<string, any>;
+}
+
+export interface PurchaseOptions {
+  amount: number;
+  paymentMethod: string;
+  promoCode?: string;
 }
 
 export class UberWallet {
-  private balances: Record<string, number> = {};
-  private transactions: TransactionRecord[] = [];
-
-  // Get UBX balance or zero if no balance exists
-  public getBalance(userId: string): number {
-    return this.balances[userId] || 0;
-  }
-
-  // Credit user wallet
-  public credit(userId: string, amount: number, description: string): void {
-    if (amount <= 0) throw new Error('Credit amount must be positive');
-    this.balances[userId] = this.getBalance(userId) + amount;
-    this.recordTransaction(userId, amount, 'credit', description);
-  }
-
-  // Debit user wallet if sufficient balance
-  public debit(userId: string, amount: number, description: string): boolean {
-    if (amount <= 0) throw new Error('Debit amount must be positive');
-    const currentBalance = this.getBalance(userId);
-    if (currentBalance < amount) {
-      return false; // insufficient funds
-    }
-    this.balances[userId] = currentBalance - amount;
-    this.recordTransaction(userId, amount, 'debit', description);
-    return true;
-  }
-
-  // Record a transaction
-  private recordTransaction(userId: string, amount: number, type: 'credit' | 'debit', description: string): void {
-    const record: TransactionRecord = {
-      id: crypto.randomUUID(),
-      userId,
-      amount,
-      type,
-      description,
-      timestamp: new Date().toISOString()
+  /**
+   * Get current UBX balance for a user
+   */
+  public async getBalance(userId: string): Promise<UbxBalance> {
+    console.log(`Getting UBX balance for user ${userId}`);
+    
+    // This would fetch from backend in a real implementation
+    return {
+      available: 250,
+      pending: 0,
+      reserved: 50,
+      total: 300
     };
-    this.transactions.push(record);
-    console.debug(`[UberWallet] Transaction recorded:`, record);
   }
-
-  // Get transaction history for a user
-  public getTransactionHistory(userId: string): TransactionRecord[] {
-    return this.transactions.filter(tx => tx.userId === userId).sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+  
+  /**
+   * Get transaction history
+   */
+  public async getTransactionHistory(userId: string): Promise<UbxTransaction[]> {
+    console.log(`Getting transaction history for user ${userId}`);
+    
+    // Sample data - would be fetched from backend
+    return [
+      {
+        id: 'txn-001',
+        type: 'purchase',
+        amount: 100,
+        description: 'Purchase of 100 UBX',
+        timestamp: new Date(Date.now() - 86400000) // 1 day ago
+      },
+      {
+        id: 'txn-002',
+        type: 'spend',
+        amount: -50,
+        description: 'Profile boost',
+        timestamp: new Date()
+      }
+    ];
+  }
+  
+  /**
+   * Purchase UBX tokens
+   */
+  public async purchaseUbx(userId: string, options: PurchaseOptions): Promise<{
+    success: boolean;
+    transactionId?: string;
+    message?: string;
+  }> {
+    console.log(`Processing UBX purchase for user ${userId}:`, options);
+    
+    // This would call payment processing API in production
+    return {
+      success: true,
+      transactionId: `purchase-${Date.now()}`,
+      message: `Successfully purchased ${options.amount} UBX tokens`
+    };
+  }
+  
+  /**
+   * Spend UBX tokens
+   */
+  public async spendUbx(userId: string, amount: number, purpose: string): Promise<{
+    success: boolean;
+    transactionId?: string;
+    message?: string;
+  }> {
+    console.log(`Processing UBX spend for user ${userId}: ${amount} for ${purpose}`);
+    
+    // In production would check balance and process transaction
+    return {
+      success: true,
+      transactionId: `spend-${Date.now()}`,
+      message: `Successfully spent ${amount} UBX tokens for ${purpose}`
+    };
   }
 }
 
+// Export singleton instance
 export const uberWallet = new UberWallet();
-
