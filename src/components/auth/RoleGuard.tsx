@@ -26,22 +26,22 @@ const RoleGuard = ({
   const userRoles = user.roles || [];
   
   const hasRequiredRole = userRoles.some(roleItem => {
-    // Early return if roleItem is null or undefined
-    if (roleItem === null || roleItem === undefined) return false;
+    // Comprehensive null and type checking
+    if (roleItem == null) return false;
     
     let roleName = '';
     
-    if (typeof roleItem === 'object' && roleItem !== null && 'name' in roleItem) {
-      // Only access name property after we've confirmed it exists
-      const roleObject = roleItem as { name: string };
-      // Use optional chaining to safely access the name property
-      roleName = roleObject.name ?? '';
+    // Check if roleItem is an object with a name property
+    if (typeof roleItem === 'object' && roleItem !== null) {
+      const roleObject = roleItem as { name?: string };
+      roleName = roleObject.name ?? (typeof roleObject === 'string' ? roleObject : '');
     } else {
-      // Convert roleItem to string safely
-      roleName = String(roleItem);
+      // Safely convert to string if not an object
+      roleName = String(roleItem).toLowerCase();
     }
     
-    return roleName && allowedRoles.includes(roleName);
+    // Check if roleName is not empty and matches allowed roles
+    return roleName && allowedRoles.some(role => role.toLowerCase() === roleName);
   });
   
   if (hasRequiredRole) {
