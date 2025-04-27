@@ -3,6 +3,8 @@ import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { BrainHubHealth } from '@/types/brainHubHealth';
 import SystemHealthPanel from '@/components/brainHub/SystemHealthPanel';
+import BrainHubHealthStatus from '@/components/brainHub/BrainHubHealthStatus';
+import BrainHubAnalytics from '@/components/brainHub/BrainHubAnalytics';
 
 const BrainHubPage: React.FC = () => {
   const getStatusColor = (status: BrainHubHealth['status']) => {
@@ -20,7 +22,14 @@ const BrainHubPage: React.FC = () => {
       description="Monitor and manage neural system health"
     >
       <div className="space-y-6">
-        <SystemHealthPanel />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <BrainHubHealthStatus />
+          <SystemHealthPanel />
+        </div>
+        
+        <div className="grid grid-cols-1">
+          <BrainHubAnalytics />
+        </div>
       </div>
     </MainLayout>
   );

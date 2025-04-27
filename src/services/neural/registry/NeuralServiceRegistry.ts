@@ -1,73 +1,67 @@
 
-// Fix: no exported name 'neuralServiceRegistry' only default, adjust usage accordingly
-
-import { ModuleType, BaseNeuralService } from '../types/NeuralService';
-import { AICompanionNeuralService } from '../modules/AICompanionNeuralService';
+interface NeuralService {
+  id: string;
+  name: string;
+  status: 'active' | 'inactive' | 'maintenance';
+  getMetrics: () => {
+    operationsCount: number;
+    errorRate: number;
+    latency: number;
+    [key: string]: any;
+  };
+}
 
 class NeuralServiceRegistry {
-  private services: Map<string, BaseNeuralService> = new Map();
-  private initialized: boolean = false;
+  private services: NeuralService[] = [];
 
   constructor() {
-    this.registerCoreServices();
+    // Initialize with some mock services
+    this.initMockServices();
   }
 
-  private registerCoreServices() {
-    const aiCompanionService = new AICompanionNeuralService();
-    this.registerService(aiCompanionService);
-
-    // Register other core services if needed
+  private initMockServices() {
+    this.services = [
+      {
+        id: 'neural-1',
+        name: 'Cognitive Analysis Service',
+        status: 'active',
+        getMetrics: () => ({
+          operationsCount: 5000 + Math.floor(Math.random() * 3000),
+          errorRate: 0.5 + Math.random() * 1.5,
+          latency: 50 + Math.random() * 50
+        })
+      },
+      {
+        id: 'neural-2',
+        name: 'Semantic Processing Engine',
+        status: 'active',
+        getMetrics: () => ({
+          operationsCount: 7500 + Math.floor(Math.random() * 2500),
+          errorRate: 0.3 + Math.random(),
+          latency: 30 + Math.random() * 40
+        })
+      },
+      {
+        id: 'neural-3',
+        name: 'Image Recognition Service',
+        status: Math.random() > 0.8 ? 'maintenance' : 'active',
+        getMetrics: () => ({
+          operationsCount: 3000 + Math.floor(Math.random() * 2000),
+          errorRate: 1.0 + Math.random() * 2.0,
+          latency: 80 + Math.random() * 70
+        })
+      }
+    ];
   }
 
-  public async initialize(): Promise<boolean> {
-    if (this.initialized) {
-      console.log('Neural service registry already initialized');
-      return true;
-    }
-
-    console.log('Initializing neural service registry');
-
-    const initPromises = Array.from(this.services.values()).map(service => service.initialize());
-
-    try {
-      await Promise.all(initPromises);
-      this.initialized = true;
-      console.log('Neural service registry initialized successfully');
-      return true;
-    } catch (error) {
-      console.error('Failed to initialize neural service registry:', error);
-      return false;
-    }
+  getAllServices(): NeuralService[] {
+    return this.services;
   }
 
-  public registerService(service: BaseNeuralService): boolean {
-    if (this.services.has(service.id)) {
-      console.warn(`Service with ID ${service.id} already registered`);
-      return false;
-    }
-
-    this.services.set(service.id, service);
-    console.log(`Registered neural service: ${service.name} (${service.id})`);
-    return true;
-  }
-
-  public getService(id: string): BaseNeuralService | undefined {
-    return this.services.get(id);
-  }
-
-  public getServicesByModule(moduleType: ModuleType): BaseNeuralService[] {
-    return Array.from(this.services.values()).filter(service => service.moduleType === moduleType);
-  }
-
-  public getAllServices(): BaseNeuralService[] {
-    return Array.from(this.services.values());
-  }
-
-  public removeService(id: string): boolean {
-    return this.services.delete(id);
+  getService(id: string): NeuralService | undefined {
+    return this.services.find(service => service.id === id);
   }
 }
 
 const neuralServiceRegistry = new NeuralServiceRegistry();
 export default neuralServiceRegistry;
-

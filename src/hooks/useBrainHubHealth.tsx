@@ -26,6 +26,7 @@ export const useBrainHubHealth = (monitoringInterval = 30000) => {
   });
   
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isMonitoring, setIsMonitoring] = useState(false);
   
   const checkHealth = useCallback(() => {
@@ -59,9 +60,9 @@ export const useBrainHubHealth = (monitoringInterval = 30000) => {
       return analyticsData;
     } catch (error) {
       console.error('Error updating brain hub analytics:', error);
-      return null;
+      return analytics;
     }
-  }, []);
+  }, [analytics]);
   
   const startMonitoring = useCallback(() => {
     setIsMonitoring(true);
@@ -101,6 +102,7 @@ export const useBrainHubHealth = (monitoringInterval = 30000) => {
     health,
     analytics,
     loading,
+    error,
     isMonitoring,
     startMonitoring,
     stopMonitoring,
