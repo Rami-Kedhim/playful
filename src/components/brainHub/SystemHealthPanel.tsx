@@ -12,8 +12,16 @@ interface SystemHealthPanelProps {
 const SystemHealthPanel: React.FC<SystemHealthPanelProps> = ({ className = '' }) => {
   const { health, checkHealth } = useBrainHubHealth();
   
-  const getStatusIcon = (status: 'healthy' | 'warning' | 'error' | 'unknown') => {
-    switch (status) {
+  const getStatusIcon = (status: string) => {
+    // Map the status values to our icon states
+    const mappedStatus = (() => {
+      if (status === 'online' || status === 'healthy') return 'healthy';
+      if (status === 'degraded' || status === 'warning') return 'warning';
+      if (status === 'offline' || status === 'error') return 'error';
+      return 'unknown';
+    })();
+
+    switch (mappedStatus) {
       case 'healthy':
         return <CircleCheck className="w-10 h-10 text-green-500" />;
       case 'warning':

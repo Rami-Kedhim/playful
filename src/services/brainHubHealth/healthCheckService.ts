@@ -23,13 +23,24 @@ export default function checkBrainHubHealth(): BrainHubHealth {
     if (metrics.errorRate > 5) errors.push("Error rate critical");
     
     // Determine status
-    let status: 'healthy' | 'warning' | 'error' | 'unknown' = 'healthy';
+    let status: BrainHubHealth['status'] = 'online';
     if (errors.length > 0) status = 'error';
     else if (warnings.length > 0) status = 'warning';
+    else status = 'healthy';
+    
+    // Map the status to one of the allowed values in BrainHubHealth
+    const mappedStatus: BrainHubHealth['status'] = (() => {
+      switch(status) {
+        case 'healthy': return 'online';
+        case 'warning': return 'degraded';
+        case 'error': return 'offline';
+        default: return 'online';
+      }
+    })();
     
     // Build health object
     const health: BrainHubHealth = {
-      status,
+      status: mappedStatus,
       metrics: {
         cpuUsage: metrics.cpuUtilization,
         memoryUsage: metrics.memoryUtilization,
@@ -51,7 +62,7 @@ export default function checkBrainHubHealth(): BrainHubHealth {
     console.error("Error checking Brain Hub health:", error);
     
     return {
-      status: 'error',
+      status: 'offline',
       message: 'Failed to retrieve Brain Hub health status',
       metrics: {
         cpuUsage: 0,

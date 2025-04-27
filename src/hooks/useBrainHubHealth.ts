@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { BrainHubHealth, BrainHubAnalytics } from '@/types/brainHubHealth';
 import checkBrainHubHealth from '@/services/brainHubHealth/healthCheckService';
@@ -60,9 +59,6 @@ export function useBrainHubHealth(monitoringInterval = 30000) {
     }
   }, [analytics]);
   
-  /**
-   * Start monitoring Brain Hub health
-   */
   const startMonitoring = useCallback(() => {
     setIsMonitoring(true);
     
@@ -114,8 +110,8 @@ export function useBrainHubHealth(monitoringInterval = 30000) {
     checkHealth,
     updateAnalytics,
     isMonitoring,
-    startMonitoring,
-    stopMonitoring
+    startMonitoring: useCallback(() => setIsMonitoring(true), []),
+    stopMonitoring: useCallback(() => setIsMonitoring(false), [])
   };
 }
 
