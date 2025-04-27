@@ -114,14 +114,36 @@ class HermesOxumNeuralHub {
     return true;
   }
   
-  // Return health metrics for monitoring
+  // Return health metrics for monitoring - updated to include missing properties
   public getHealthMetrics() {
     return {
       cpuUsage: Math.random() * 100,
       memoryUsage: Math.random() * 100,
       requestsPerSecond: Math.floor(Math.random() * 1000),
-      errorRate: Math.random() * 5
+      errorRate: Math.random() * 5,
+      lastUpdated: Date.now(),
+      load: Math.random(),
+      userEngagement: Math.random()
     };
+  }
+  
+  // Add missing methods for NeuralSystemsPanel
+  public getActiveTrainingJobs() {
+    return []; // Mock implementation
+  }
+  
+  public getModels() {
+    return []; // Mock implementation
+  }
+  
+  public stopTraining(jobId: string) {
+    console.log(`Stopping training job ${jobId}`);
+    return true; // Mock implementation
+  }
+  
+  public startTraining(modelConfig: any) {
+    console.log(`Starting training with config:`, modelConfig);
+    return { jobId: `job-${Math.random().toString(36).substring(2, 9)}` }; // Mock implementation
   }
 }
 

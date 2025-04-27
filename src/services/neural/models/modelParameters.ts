@@ -15,3 +15,22 @@ export function createDefaultModelParameters(): ModelParameters {
     temperature: 0.7
   };
 }
+
+// Added missing functions referenced in ConfigurationPanel.tsx
+export function initializeDefaultParameters(): ModelParameters {
+  return createDefaultModelParameters();
+}
+
+export function calculateSystemEfficiency(parameters: ModelParameters): number {
+  // Simple mock implementation
+  return 0.75;
+}
+
+export function validateModelParameters(parameters: ModelParameters): boolean {
+  // Basic validation
+  return (
+    (parameters.decayConstant || 0) > 0 &&
+    (parameters.learningRate || 0) > 0 &&
+    (parameters.batchSize || 0) > 0
+  );
+}

@@ -3,7 +3,7 @@
 import { BaseNeuralService, NeuralServiceRegistry } from '../types/NeuralService';
 
 class NeuralServiceRegistryImplementation implements NeuralServiceRegistry {
-  private services: BaseNeuralService[] = [];
+  services: Map<string, BaseNeuralService> = new Map();
 
   constructor() {
     // Initialize with some mock services
@@ -12,7 +12,7 @@ class NeuralServiceRegistryImplementation implements NeuralServiceRegistry {
 
   private initMockServices() {
     // Will be populated by services registering themselves
-    this.services = [];
+    this.services = new Map();
   }
 
   async initialize(): Promise<void> {
@@ -21,20 +21,24 @@ class NeuralServiceRegistryImplementation implements NeuralServiceRegistry {
   }
 
   registerService(service: BaseNeuralService): boolean {
-    if (this.services.find(s => s.id === service.id)) {
+    if (this.services.has(service.id)) {
       console.warn(`Service with ID ${service.id} already exists`);
       return false;
     }
     
-    this.services.push(service);
+    this.services.set(service.id, service);
     console.log(`Service ${service.id} registered successfully`);
     return true;
   }
   
   getServicesByModule(moduleType: string): BaseNeuralService[] {
-    return this.services.filter(service => 
-      service.moduleType === moduleType
-    );
+    const result: BaseNeuralService[] = [];
+    this.services.forEach(service => {
+      if (service.moduleType === moduleType) {
+        result.push(service);
+      }
+    });
+    return result;
   }
 
   optimizeResourceAllocation(): void {
@@ -43,17 +47,15 @@ class NeuralServiceRegistryImplementation implements NeuralServiceRegistry {
   }
 
   getAllServices(): BaseNeuralService[] {
-    return this.services;
+    return Array.from(this.services.values());
   }
 
   getService(id: string): BaseNeuralService | undefined {
-    return this.services.find(service => service.id === id);
+    return this.services.get(id);
   }
   
   unregisterService(id: string): boolean {
-    const initialLength = this.services.length;
-    this.services = this.services.filter(service => service.id !== id);
-    return this.services.length < initialLength;
+    return this.services.delete(id);
   }
 }
 
