@@ -1,4 +1,8 @@
 
+import { BaseNeuralService } from './modules/BaseNeuralService';
+import { ModelParameters } from '../types/brainHub';
+import { BrainHubConfig } from '../types/brainHub';
+
 interface BrainHubStatus {
   cpuUtilization: number;
   memoryUtilization: number;
@@ -9,47 +13,6 @@ interface BrainHubStatus {
   neuralLatency: number;
   responseTime: number;
   stability: number;
-}
-
-export interface BrainHubConfig {
-  aiModelParameters: {
-    learningRate: number;
-    batchSize: number;
-    epochs: number;
-    optimizerType: string;
-  };
-  systemSettings: {
-    resourceAllocationMode: string;
-    autoOptimize: boolean;
-    debugMode: boolean;
-    loggingLevel: string;
-  };
-  neuralSettings: {
-    activationThreshold: number;
-    neuralDensity: number;
-    layerConfiguration: string;
-  };
-  // Add missing domain-specific settings
-  psychology: {
-    enabled: boolean;
-    confidenceThreshold: number;
-  };
-  physics: {
-    enabled: boolean;
-    simulationPrecision: number;
-  };
-  economics: {
-    enabled: boolean;
-    marketModelVersion: string;
-  };
-  robotics: {
-    enabled: boolean;
-    motorPrecision: number;
-  };
-  // Feature flags
-  geoLegalFilteringEnabled: boolean;
-  neuroEmotionEnabled: boolean;
-  predictiveModulationEnabled: boolean;
 }
 
 export class HermesOxumBrainHubService {
@@ -84,7 +47,6 @@ export class HermesOxumBrainHubService {
       neuralDensity: 0.5,
       layerConfiguration: 'auto'
     },
-    // Add domain-specific settings
     psychology: {
       enabled: true,
       confidenceThreshold: 0.75
@@ -101,7 +63,6 @@ export class HermesOxumBrainHubService {
       enabled: false,
       motorPrecision: 0.8
     },
-    // Feature flags
     geoLegalFilteringEnabled: true,
     neuroEmotionEnabled: true,
     predictiveModulationEnabled: false
@@ -113,12 +74,18 @@ export class HermesOxumBrainHubService {
     context?: any;
   }> = [];
   
-  getSystemStatus(): any {
+  getSystemStatus(): BrainHubStatus {
     // Mock implementation
     return {
       cpuUtilization: Math.random() * 100,
       memoryUtilization: Math.random() * 100,
       operationsPerSecond: Math.random() * 1000,
+      errorRate: Math.random() * 1,
+      neuralAccuracy: 0.85 + Math.random() * 0.15,
+      neuralEfficiency: 0.75 + Math.random() * 0.25,
+      neuralLatency: Math.random() * 50,
+      responseTime: Math.random() * 100,
+      stability: 0.9 + Math.random() * 0.1
     };
   }
   

@@ -1,7 +1,7 @@
 
-import { BaseNeuralService, NeuralServiceConfig } from '../types/NeuralService';
+import { BaseNeuralService as BaseNeuralServiceInterface, NeuralServiceConfig } from '../types/NeuralService';
 
-export class BaseBrainService implements BaseNeuralService {
+export class BaseBrainService implements BaseNeuralServiceInterface {
   id: string;
   name: string;
   moduleId: string;
@@ -11,7 +11,7 @@ export class BaseBrainService implements BaseNeuralService {
   status: 'active' | 'inactive' | 'maintenance';
   config: NeuralServiceConfig;
   
-  constructor(initialConfig: Partial<BaseNeuralService> = {}) {
+  constructor(initialConfig: Partial<BaseNeuralServiceInterface> = {}) {
     this.id = initialConfig.id || `service-${Math.random().toString(36).substring(2, 9)}`;
     this.name = initialConfig.name || 'Generic Neural Service';
     this.moduleId = initialConfig.moduleId || this.id;
@@ -47,6 +47,18 @@ export class BaseBrainService implements BaseNeuralService {
       latency: Math.floor(Math.random() * 100)
     };
   }
+  
+  // This method was missing and causing errors in consumer modules
+  configure(config: Partial<NeuralServiceConfig>): boolean {
+    this.updateConfig(config);
+    return true;
+  }
+  
+  // Add getCapabilities method that was expected by NeuralServiceCard
+  getCapabilities(): string[] {
+    return ['basic_processing', 'data_analysis'];
+  }
 }
 
-export { BaseNeuralService };
+// Use 'export type' when re-exporting with isolatedModules enabled
+export type { BaseNeuralServiceInterface };

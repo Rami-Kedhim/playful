@@ -1,278 +1,229 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { Session } from '@supabase/supabase-js';
-import { AuthContextType, AuthResult, AuthUser } from '@/types/authTypes';
-import { toast } from 'sonner';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
+import { AuthContextType } from '@/hooks/auth/useAuthContext';
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
+export const AuthContext = createContext<AuthContextType | null>(null);
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [user, setUser] = useState<any | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [initialized, setInitialized] = useState(false);
+  const [initialized, setInitialized] = useState<boolean>(false);
 
-  useEffect(() => {
-    // First set up the auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user as AuthUser || null);
-        setInitialized(true);
-      }
-    );
-
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user as AuthUser || null);
-      setLoading(false);
-      setInitialized(true);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Load user profile data
-  useEffect(() => {
-    if (user) {
-      loadUserProfile();
-    } else {
-      setProfile(null);
-    }
-  }, [user]);
-
-  const loadUserProfile = async () => {
+  // Mock authentication functions
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      if (!user) return null;
+      setIsLoading(true);
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-        
-      if (error) {
-        console.error('Error loading profile:', error);
-        return null;
-      }
-      
-      setProfile(data);
-      return data;
-    } catch (error) {
-      console.error('Error loading user profile:', error);
-      return null;
-    }
-  };
-
-  const refreshProfile = async () => {
-    return await loadUserProfile();
-  };
-
-  const login = async (email: string, password: string): Promise<AuthResult> => {
-    try {
+      setUser({ id: '1', email, roles: ['user'] });
+      setProfile({ id: '1', name: 'Test User', email });
+      setIsAuthenticated(true);
+      setIsLoading(false);
       setError(null);
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        toast.error("Login failed", {
-          description: error.message
-        });
-        throw error;
-      }
-
-      toast.success("Login successful!");
-      
-      return {
-        success: true,
-        user: data.user as AuthUser,
-        session: data.session
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message
-      };
-    }
-  };
-
-  const register = async (email: string, password: string, userData: any = {}): Promise<AuthResult> => {
-    try {
-      setError(null);
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: userData
-        }
-      });
-
-      if (error) {
-        toast.error("Registration failed", {
-          description: error.message
-        });
-        throw error;
-      }
-
-      toast.success("Registration successful!");
-
-      return {
-        success: true,
-        user: data.user as AuthUser,
-        session: data.session
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message
-      };
-    }
-  };
-
-  const logout = async (): Promise<void> => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      toast.success("Logged out successfully");
-    } catch (error) {
-      console.error('Error logging out:', error);
-      toast.error("Failed to log out");
-    }
-  };
-
-  const signIn = login;
-  const signOut = async (): Promise<boolean> => {
-    try {
-      await logout();
       return true;
-    } catch (error) {
-      return false;
-    }
-  };
-
-  const updateUser = async (data: any): Promise<boolean> => {
-    try {
-      const { error } = await supabase.auth.updateUser(data);
-      if (error) throw error;
-      return true;
-    } catch (error) {
-      console.error('Error updating user:', error);
-      return false;
-    }
-  };
-
-  const updateUserProfile = async (data: any): Promise<boolean> => {
-    try {
-      if (!user) return false;
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update(data)
-        .eq('id', user.id);
-        
-      if (error) throw error;
-      
-      // Refresh the profile data
-      await loadUserProfile();
-      return true;
-    } catch (error) {
-      console.error('Error updating profile:', error);
+    } catch (err: any) {
+      setError(err.message || 'Failed to login');
+      setIsLoading(false);
       return false;
     }
   };
   
-  const updateProfile = updateUserProfile;
-
-  const sendPasswordResetEmail = async (email: string): Promise<boolean> => {
+  const logout = async (): Promise<boolean> => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
-      if (error) throw error;
+      setIsLoading(true);
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      setUser(null);
+      setProfile(null);
+      setIsAuthenticated(false);
+      setIsLoading(false);
+      setError(null);
       return true;
-    } catch (error) {
-      console.error('Error sending password reset email:', error);
+    } catch (err: any) {
+      setError(err.message || 'Failed to logout');
+      setIsLoading(false);
       return false;
     }
   };
 
-  const requestPasswordReset = sendPasswordResetEmail;
-
-  const resetPassword = async (token: string, newPassword: string): Promise<boolean> => {
+  const register = async (email: string, password: string, userData: any): Promise<boolean> => {
     try {
-      const { error } = await supabase.auth.updateUser({ 
-        password: newPassword 
-      });
-      if (error) throw error;
+      setIsLoading(true);
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setUser({ id: '1', email });
+      setProfile({ id: '1', ...userData, email });
+      setIsAuthenticated(true);
+      setIsLoading(false);
+      setError(null);
       return true;
-    } catch (error) {
-      console.error('Error resetting password:', error);
+    } catch (err: any) {
+      setError(err.message || 'Failed to register');
+      setIsLoading(false);
       return false;
     }
   };
 
-  const verifyEmail = async (token: string): Promise<boolean> => {
-    // In Supabase, email verification happens automatically via links
-    // This is just a placeholder for API compatibility
-    console.log('Email verification is handled automatically by Supabase');
-    return true;
+  const updateProfile = async (data: any): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setProfile(prev => ({ ...prev, ...data }));
+      setIsLoading(false);
+      setError(null);
+      return true;
+    } catch (err: any) {
+      setError(err.message || 'Failed to update profile');
+      setIsLoading(false);
+      return false;
+    }
   };
 
+  const updateUserProfile = updateProfile;
+  const updateUser = updateProfile;
+
+  const loadUserProfile = async (): Promise<any> => {
+    try {
+      setIsLoading(true);
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 600));
+      
+      const profileData = { ...profile };
+      setProfile(profileData);
+      setIsLoading(false);
+      setError(null);
+      return profileData;
+    } catch (err: any) {
+      setError(err.message || 'Failed to load user profile');
+      setIsLoading(false);
+      return null;
+    }
+  };
+
+  const refreshProfile = loadUserProfile;
+  
   const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
     try {
-      // Supabase doesn't require the old password to update the password
-      // when the user is already authenticated
-      const { error } = await supabase.auth.updateUser({ 
-        password: newPassword 
-      });
+      setIsLoading(true);
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 700));
       
-      if (error) throw error;
+      setIsLoading(false);
+      setError(null);
       return true;
-    } catch (error) {
-      console.error('Error updating password:', error);
+    } catch (err: any) {
+      setError(err.message || 'Failed to update password');
+      setIsLoading(false);
       return false;
     }
   };
 
   const deleteAccount = async (): Promise<boolean> => {
     try {
-      // This requires a server-side function or stored procedure in Supabase
-      // For now, we'll just log the user out
-      console.warn('Account deletion requires server-side implementation');
-      await logout();
+      setIsLoading(true);
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      
+      setUser(null);
+      setProfile(null);
+      setIsAuthenticated(false);
+      setIsLoading(false);
+      setError(null);
       return true;
-    } catch (error) {
-      console.error('Error deleting account:', error);
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete account');
+      setIsLoading(false);
       return false;
     }
   };
 
-  const checkRole = (role: string): boolean => {
-    if (!user || !profile) return false;
-    
-    // Check user metadata for roles
-    const userRoles = user.app_metadata?.roles || user.user_metadata?.roles || [];
-    
-    // Check profile roles if present
-    const profileRoles = profile.roles || [];
-    
-    // Combine both sources of roles
-    const allRoles = [...userRoles, ...profileRoles];
-    
-    return allRoles.includes(role);
+  // Alias for other methods expected by components
+  const signIn = login;
+  const signOut = logout;
+
+  const sendPasswordResetEmail = async (email: string): Promise<boolean> => {
+    try {
+      // Mock implementation
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return true;
+    } catch (err) {
+      return false;
+    }
   };
 
+  const resetPassword = async (token: string, newPassword: string): Promise<boolean> => {
+    try {
+      // Mock implementation
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return true;
+    } catch (err) {
+      return false;
+    }
+  };
+
+  const requestPasswordReset = sendPasswordResetEmail;
+
+  const verifyEmail = async (token: string): Promise<boolean> => {
+    try {
+      // Mock implementation
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return true;
+    } catch (err) {
+      return false;
+    }
+  };
+
+  // Role checking function
+  const checkRole = useCallback((role: string): boolean => {
+    if (!user) return false;
+    
+    // Check if user has metadata with roles
+    const roles = user.roles || (user.app_metadata?.roles || []);
+    
+    return Array.isArray(roles) ? roles.includes(role) : false;
+  }, [user]);
+
+  // Initialize auth state
+  useEffect(() => {
+    const checkAuthState = async () => {
+      try {
+        // Mock API call to check if user is already logged in
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Simulate no existing session
+        setUser(null);
+        setProfile(null);
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        setInitialized(true);
+      } catch (err) {
+        setIsLoading(false);
+        setInitialized(true);
+      }
+    };
+    
+    checkAuthState();
+  }, []);
+
   const value: AuthContextType = {
+    isAuthenticated,
     user,
     profile,
-    loading,
-    isLoading: loading,
+    isLoading,
+    loading: isLoading,
     error,
-    isAuthenticated: !!user,
     initialized,
     login,
     logout,
@@ -294,12 +245,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };

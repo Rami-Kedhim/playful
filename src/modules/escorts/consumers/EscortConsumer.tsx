@@ -1,30 +1,35 @@
 
 import React, { useEffect } from 'react';
 import { EscortsNeuralService } from '@/services/neural/modules/EscortsNeuralService';
+import { useBrainHubAI } from '@/hooks/ai/useBrainHubAI';
 
 interface EscortConsumerProps {
-  neuralService?: EscortsNeuralService;
-  onUpdate?: (data: any) => void;
+  escortId?: string;
 }
 
-const EscortConsumer: React.FC<EscortConsumerProps> = ({ 
-  neuralService,
-  onUpdate
-}) => {
+const EscortConsumer: React.FC<EscortConsumerProps> = ({ escortId }) => {
+  const { isConnected, connectToBrainHub } = useBrainHubAI({
+    componentId: 'escort-consumer',
+    capabilities: ['profile_analysis', 'matching_optimization']
+  });
+  
   useEffect(() => {
-    const success = neuralService?.configure();
-
-    if (!success) {
-      console.error('Failed to configure EscortConsumer neural service');
-    }
-
-    return () => {
-      // Cleanup code here
-    };
-  }, [neuralService]);
-
-  return null;
+    // Initialize escorts neural service
+    const escortsService = new EscortsNeuralService();
+    escortsService.initialize();
+    
+    // Set configuration
+    escortsService.updateConfig({
+      sensitivity: 0.85,
+      threshold: 0.65,
+      mode: 'enhanced'
+    });
+    
+    // Connect to Brain Hub
+    connectToBrainHub();
+  }, [connectToBrainHub]);
+  
+  return null; // This is a non-visual component
 };
 
 export default EscortConsumer;
-

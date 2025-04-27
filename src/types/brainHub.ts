@@ -49,3 +49,54 @@ export interface EmotionalState {
   emotionIntensity: number;
   emotionVector: Record<string, number>;
 }
+
+export interface BrainHubConfig {
+  aiModelParameters: {
+    learningRate: number;
+    batchSize: number;
+    epochs: number;
+    optimizerType: string;
+  };
+  systemSettings: {
+    resourceAllocationMode: string;
+    autoOptimize: boolean;
+    debugMode: boolean;
+    loggingLevel: string;
+  };
+  neuralSettings: {
+    activationThreshold: number;
+    neuralDensity: number;
+    layerConfiguration: string;
+  };
+  psychology: {
+    enabled: boolean;
+    confidenceThreshold: number;
+  };
+  physics: {
+    enabled: boolean;
+    simulationPrecision: number;
+  };
+  economics: {
+    enabled: boolean;
+    marketModelVersion: string;
+  };
+  robotics: {
+    enabled: boolean;
+    motorPrecision: number;
+  };
+  geoLegalFilteringEnabled: boolean;
+  neuroEmotionEnabled: boolean;
+  predictiveModulationEnabled: boolean;
+}
+
+export interface ModelParameters {
+  decayConstant?: number;
+  growthFactor?: number;
+  cyclePeriod?: number;
+  harmonicCount?: number;
+  bifurcationPoint?: number;
+  attractorStrength?: number;
+  learningRate?: number;
+  batchSize?: number;
+  temperature?: number;
+}

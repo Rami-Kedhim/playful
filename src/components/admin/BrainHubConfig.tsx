@@ -1,258 +1,372 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { brainHub, BrainHubConfig as BrainHubConfigType } from '@/services/neural/HermesOxumBrainHub';
-import { PsychologyModel, PhysicsModel, EconomicsModel, RoboticsModel } from '@/types/brainHub';
-import { useToast } from '@/components/ui/use-toast';
-
-interface AcademicModelTabProps<T extends Record<string, boolean>> { 
-  model: T;
-  title: string;
-  description: string;
-  onToggle: (key: string, value: boolean) => void;
-}
-
-function AcademicModelTab<T extends Record<string, boolean>>({ 
-  model, 
-  title, 
-  description, 
-  onToggle 
-}: AcademicModelTabProps<T>) {
-  return (
-    <div className="space-y-4">
-      <div className="mb-4">
-        <h3 className="text-lg font-medium">{title}</h3>
-        <p className="text-muted-foreground text-sm">{description}</p>
-      </div>
-
-      <div className="space-y-2">
-        {Object.entries(model).map(([key, enabled]) => (
-          <div key={key} className="flex items-center justify-between">
-            <div>
-              <Label htmlFor={`toggle-${key}`} className="capitalize">
-                {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-              </Label>
-            </div>
-            <Switch
-              id={`toggle-${key}`}
-              checked={enabled}
-              onCheckedChange={(checked) => onToggle(key, checked)}
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-interface RestrictedRegion {
-  id: string;
-  name: string;
-}
+import React, { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
+import { Slider } from "@/components/ui/slider";
+import { brainHub } from "@/services/neural/HermesOxumBrainHub";
+import { BrainHubConfig } from "@/types/brainHub";
+import { PsychologyModel, PhysicsModel, EconomicsModel, RoboticsModel } from "@/types/brainHub";
 
 const BrainHubConfig: React.FC = () => {
-  const { toast } = useToast();
-  const [config, setConfig] = useState<BrainHubConfigType>(brainHub.getConfig());
-  const [restrictedRegions, setRestrictedRegions] = useState<RestrictedRegion[]>([
-    { id: '1', name: 'restricted-region-1' },
-    { id: '2', name: 'restricted-region-2' }
-  ]);
-  const [newRegion, setNewRegion] = useState('');
-  
-  const handleAcademicModelToggle = (model: keyof BrainHubConfigType, key: string, value: boolean) => {
-    setConfig(prev => {
-      const updatedConfig = { ...prev };
-      if (model === 'psychology' && updatedConfig.psychology) {
-        (updatedConfig.psychology as Record<string, boolean>)[key] = value;
-      } else if (model === 'physics' && updatedConfig.physics) {
-        (updatedConfig.physics as Record<string, boolean>)[key] = value;
-      } else if (model === 'economics' && updatedConfig.economics) {
-        (updatedConfig.economics as Record<string, boolean>)[key] = value;
-      } else if (model === 'robotics' && updatedConfig.robotics) {
-        (updatedConfig.robotics as Record<string, boolean>)[key] = value;
+  const [config, setConfig] = useState<BrainHubConfig | null>(null);
+  const [activeTab, setActiveTab] = useState("ai-parameters");
+
+  useEffect(() => {
+    // Load initial configuration
+    const currentConfig = brainHub.getConfig();
+    setConfig(currentConfig);
+  }, []);
+
+  const handleValueChange = (section: keyof BrainHubConfig, key: string, value: any) => {
+    if (!config) return;
+    
+    setConfig(prevConfig => {
+      if (!prevConfig) return null;
+      
+      const newConfig = { ...prevConfig };
+      
+      // Handle nested properties
+      if (typeof newConfig[section] === 'object' && newConfig[section] !== null) {
+        (newConfig[section] as any)[key] = value;
+      } else {
+        (newConfig as any)[section] = value;
       }
-      return updatedConfig;
+      
+      // Update the brain hub with new config
+      brainHub.updateConfig(newConfig);
+      
+      return newConfig;
     });
   };
-  
-  const handleFeatureToggle = (key: keyof BrainHubConfigType, value: boolean) => {
-    setConfig(prev => ({
-      ...prev,
-      [key]: value
-    }));
-  };
-  
-  const handleAddRestrictedRegion = () => {
-    if (!newRegion.trim()) return;
+
+  const handleToggleChange = (key: keyof BrainHubConfig | string, checked: boolean) => {
+    if (!config) return;
     
-    const region = newRegion.trim().toLowerCase();
-    if (restrictedRegions.some(r => r.name === region)) {
-      toast({
-        title: "Region already exists",
-        description: `${region} is already in the restricted regions list`,
-        variant: "destructive"
-      });
-      return;
+    // For domain-specific settings which are objects with enabled property
+    if (key === "psychology") {
+      handleValueChange("psychology" as keyof BrainHubConfig, "enabled", checked);
     }
-    
-    const newId = `${restrictedRegions.length + 1}`;
-    setRestrictedRegions([...restrictedRegions, { id: newId, name: region }]);
-    setNewRegion('');
+    else if (key === "physics") {
+      handleValueChange("physics" as keyof BrainHubConfig, "enabled", checked);
+    }
+    else if (key === "economics") {
+      handleValueChange("economics" as keyof BrainHubConfig, "enabled", checked);
+    }
+    else if (key === "robotics") {
+      handleValueChange("robotics" as keyof BrainHubConfig, "enabled", checked);
+    }
+    // For feature flags which are direct boolean values
+    else if (key === "geoLegalFilteringEnabled" || 
+             key === "neuroEmotionEnabled" || 
+             key === "predictiveModulationEnabled") {
+      setConfig(prevConfig => {
+        if (!prevConfig) return null;
+        const newConfig = { ...prevConfig, [key]: checked };
+        brainHub.updateConfig(newConfig);
+        return newConfig;
+      });
+    }
   };
-  
-  const handleRemoveRegion = (id: string) => {
-    setRestrictedRegions(restrictedRegions.filter(region => region.id !== id));
-  };
-  
-  const handleSaveConfig = () => {
-    brainHub.updateConfig(config);
-    
-    toast({
-      title: "Configuration updated",
-      description: "Brain Hub configuration has been successfully updated",
-    });
-  };
-  
+
+  if (!config) {
+    return <div>Loading configuration...</div>;
+  }
+
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Brain Hub Configuration</CardTitle>
-        <CardDescription>
-          Configure the Hermes Oxum Brain Hub for content filtering and AI behavior
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent>
-        <Tabs defaultValue="psychology" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="psychology">Psychology</TabsTrigger>
-            <TabsTrigger value="physics">Physics</TabsTrigger>
-            <TabsTrigger value="economics">Economics</TabsTrigger>
-            <TabsTrigger value="robotics">Robotics</TabsTrigger>
+      <CardContent className="pt-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-4 mb-4">
+            <TabsTrigger value="ai-parameters">AI Parameters</TabsTrigger>
+            <TabsTrigger value="system-settings">System Settings</TabsTrigger>
+            <TabsTrigger value="domain-settings">Domain Settings</TabsTrigger>
+            <TabsTrigger value="feature-flags">Feature Flags</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="psychology">
-            <AcademicModelTab<PsychologyModel>
-              model={config.psychology as PsychologyModel}
-              title="Psychological Models"
-              description="Configure the psychological models that drive AI personality and emotional responses"
-              onToggle={(key, value) => handleAcademicModelToggle('psychology', key, value)}
-            />
+          <TabsContent value="ai-parameters" className="space-y-4">
+            {/* AI Parameters Settings */}
+            <h3 className="text-lg font-semibold mb-4">AI Model Parameters</h3>
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label>Learning Rate: {config.aiModelParameters.learningRate}</Label>
+                </div>
+                <Slider 
+                  value={[config.aiModelParameters.learningRate * 1000]}
+                  min={1}
+                  max={100}
+                  step={1}
+                  onValueChange={([value]) => handleValueChange("aiModelParameters", "learningRate", value / 1000)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label>Batch Size: {config.aiModelParameters.batchSize}</Label>
+                </div>
+                <Slider 
+                  value={[config.aiModelParameters.batchSize]}
+                  min={16}
+                  max={128}
+                  step={8}
+                  onValueChange={([value]) => handleValueChange("aiModelParameters", "batchSize", value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label>Epochs: {config.aiModelParameters.epochs}</Label>
+                </div>
+                <Slider 
+                  value={[config.aiModelParameters.epochs]}
+                  min={5}
+                  max={50}
+                  step={5}
+                  onValueChange={([value]) => handleValueChange("aiModelParameters", "epochs", value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Optimizer Type</Label>
+                <select 
+                  className="w-full p-2 border rounded"
+                  value={config.aiModelParameters.optimizerType}
+                  onChange={(e) => handleValueChange("aiModelParameters", "optimizerType", e.target.value)}
+                >
+                  <option value="adam">Adam</option>
+                  <option value="sgd">SGD</option>
+                  <option value="rmsprop">RMSprop</option>
+                </select>
+              </div>
+            </div>
           </TabsContent>
           
-          <TabsContent value="physics">
-            <AcademicModelTab<PhysicsModel>
-              model={config.physics as PhysicsModel}
-              title="Physics Models"
-              description="Configure simulation models for physical behavior in virtual environments"
-              onToggle={(key, value) => handleAcademicModelToggle('physics', key, value)}
-            />
+          <TabsContent value="system-settings" className="space-y-4">
+            <h3 className="text-lg font-semibold mb-4">System Settings</h3>
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label>Resource Allocation Mode</Label>
+                <select 
+                  className="w-full p-2 border rounded"
+                  value={config.systemSettings.resourceAllocationMode}
+                  onChange={(e) => handleValueChange("systemSettings", "resourceAllocationMode", e.target.value)}
+                >
+                  <option value="balanced">Balanced</option>
+                  <option value="performance">Performance</option>
+                  <option value="economy">Economy</option>
+                </select>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="autoOptimize">Auto Optimize</Label>
+                  <p className="text-sm text-muted-foreground">Automatically adjust settings for optimal performance</p>
+                </div>
+                <Switch 
+                  id="autoOptimize" 
+                  checked={config.systemSettings.autoOptimize} 
+                  onCheckedChange={(checked) => handleValueChange("systemSettings", "autoOptimize", checked)}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="debugMode">Debug Mode</Label>
+                  <p className="text-sm text-muted-foreground">Enable detailed logging for debugging purposes</p>
+                </div>
+                <Switch 
+                  id="debugMode" 
+                  checked={config.systemSettings.debugMode} 
+                  onCheckedChange={(checked) => handleValueChange("systemSettings", "debugMode", checked)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Logging Level</Label>
+                <select 
+                  className="w-full p-2 border rounded"
+                  value={config.systemSettings.loggingLevel}
+                  onChange={(e) => handleValueChange("systemSettings", "loggingLevel", e.target.value)}
+                >
+                  <option value="info">Info</option>
+                  <option value="debug">Debug</option>
+                  <option value="warn">Warn</option>
+                  <option value="error">Error</option>
+                </select>
+              </div>
+            </div>
           </TabsContent>
           
-          <TabsContent value="economics">
-            <AcademicModelTab<EconomicsModel>
-              model={config.economics as EconomicsModel}
-              title="Economic Models"
-              description="Configure economic models that drive pricing, boosts, and monetization"
-              onToggle={(key, value) => handleAcademicModelToggle('economics', key, value)}
-            />
+          <TabsContent value="domain-settings" className="space-y-4">
+            <h3 className="text-lg font-semibold mb-4">Domain-Specific Settings</h3>
+            
+            <div className="grid gap-6">
+              {/* Psychology Domain */}
+              <div className="border rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium">Psychology Model</h4>
+                    <p className="text-sm text-muted-foreground">Emotional analysis & behavioral prediction</p>
+                  </div>
+                  <Switch 
+                    checked={config.psychology.enabled} 
+                    onCheckedChange={(checked) => handleToggleChange("psychology", checked)}
+                  />
+                </div>
+                
+                {config.psychology.enabled && (
+                  <div className="mt-4 space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <Label>Confidence Threshold: {config.psychology.confidenceThreshold}</Label>
+                      </div>
+                      <Slider 
+                        value={[config.psychology.confidenceThreshold * 100]}
+                        min={50}
+                        max={99}
+                        step={1}
+                        onValueChange={([value]) => handleValueChange("psychology", "confidenceThreshold", value / 100)}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Physics Domain */}
+              <div className="border rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium">Physics Model</h4>
+                    <p className="text-sm text-muted-foreground">Physical simulations & interactions</p>
+                  </div>
+                  <Switch 
+                    checked={config.physics.enabled} 
+                    onCheckedChange={(checked) => handleToggleChange("physics", checked)}
+                  />
+                </div>
+                
+                {config.physics.enabled && (
+                  <div className="mt-4 space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <Label>Simulation Precision: {config.physics.simulationPrecision.toFixed(2)}</Label>
+                      </div>
+                      <Slider 
+                        value={[config.physics.simulationPrecision * 100]}
+                        min={70}
+                        max={99}
+                        step={1}
+                        onValueChange={([value]) => handleValueChange("physics", "simulationPrecision", value / 100)}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Economics Domain */}
+              <div className="border rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium">Economics Model</h4>
+                    <p className="text-sm text-muted-foreground">Market dynamics & financial modeling</p>
+                  </div>
+                  <Switch 
+                    checked={config.economics.enabled} 
+                    onCheckedChange={(checked) => handleToggleChange("economics", checked)}
+                  />
+                </div>
+                
+                {/* No sliders for this one, just version selection */}
+                {config.economics.enabled && (
+                  <div className="mt-4 space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <Label>Current Model Version: {config.economics.marketModelVersion}</Label>
+                      </div>
+                      {/* No slider here */}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Robotics Domain */}
+              <div className="border rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium">Robotics Model</h4>
+                    <p className="text-sm text-muted-foreground">Movement control & spatial reasoning</p>
+                  </div>
+                  <Switch 
+                    checked={config.robotics.enabled} 
+                    onCheckedChange={(checked) => handleToggleChange("robotics", checked)}
+                  />
+                </div>
+                
+                {config.robotics.enabled && (
+                  <div className="mt-4 space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <Label>Motor Precision: {config.robotics.motorPrecision.toFixed(2)}</Label>
+                      </div>
+                      <Slider 
+                        value={[config.robotics.motorPrecision * 100]}
+                        min={50}
+                        max={99}
+                        step={1}
+                        onValueChange={([value]) => handleValueChange("robotics", "motorPrecision", value / 100)}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </TabsContent>
           
-          <TabsContent value="robotics">
-            <AcademicModelTab<RoboticsModel>
-              model={config.robotics as RoboticsModel}
-              title="Robotics Models"
-              description="Configure AI control interfaces and automation behavior"
-              onToggle={(key, value) => handleAcademicModelToggle('robotics', key, value)}
-            />
+          <TabsContent value="feature-flags" className="space-y-4">
+            <h3 className="text-lg font-semibold mb-4">Feature Flags</h3>
+            
+            <div className="space-y-6">
+              {/* Geo-Legal Filtering */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Geo-Legal Filtering</h4>
+                  <p className="text-sm text-muted-foreground">Region-specific content compliance</p>
+                </div>
+                <Switch 
+                  checked={config.geoLegalFilteringEnabled} 
+                  onCheckedChange={(checked) => handleToggleChange("geoLegalFilteringEnabled", checked)}
+                />
+              </div>
+              
+              {/* Neuro-Emotion */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Neuro-Emotion Processing</h4>
+                  <p className="text-sm text-muted-foreground">Advanced emotional intelligence</p>
+                </div>
+                <Switch 
+                  checked={config.neuroEmotionEnabled} 
+                  onCheckedChange={(checked) => handleToggleChange("neuroEmotionEnabled", checked)}
+                />
+              </div>
+              
+              {/* Predictive Modulation */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Predictive Modulation</h4>
+                  <p className="text-sm text-muted-foreground">Anticipatory behavior adaptation</p>
+                </div>
+                <Switch 
+                  checked={config.predictiveModulationEnabled} 
+                  onCheckedChange={(checked) => handleToggleChange("predictiveModulationEnabled", checked)}
+                />
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
-        
-        <div className="mt-8 space-y-6">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="toggle-geo-legal">Geo-Legal Filtering</Label>
-                <p className="text-sm text-muted-foreground">
-                  Enable location-based content filtering for legal compliance
-                </p>
-              </div>
-              <Switch
-                id="toggle-geo-legal"
-                checked={config.geoLegalFilteringEnabled}
-                onCheckedChange={(checked) => handleFeatureToggle('geoLegalFilteringEnabled', checked)}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="toggle-neural-emotion">Neuro-Emotional Engine</Label>
-                <p className="text-sm text-muted-foreground">
-                  Enable advanced emotional intelligence in AI responses
-                </p>
-              </div>
-              <Switch
-                id="toggle-neural-emotion"
-                checked={config.neuroEmotionEnabled}
-                onCheckedChange={(checked) => handleFeatureToggle('neuroEmotionEnabled', checked)}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="toggle-predictive">Predictive Modulation</Label>
-                <p className="text-sm text-muted-foreground">
-                  Enable predictive behavior learning based on user interactions
-                </p>
-              </div>
-              <Switch
-                id="toggle-predictive"
-                checked={config.predictiveModulationEnabled}
-                onCheckedChange={(checked) => handleFeatureToggle('predictiveModulationEnabled', checked)}
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-4 border-t pt-4">
-            <h3 className="text-lg font-medium">Geo-Legal Restricted Regions</h3>
-            <p className="text-sm text-muted-foreground">
-              Manage regions where NSFW content is restricted
-            </p>
-            
-            <div className="flex gap-2">
-              <Input
-                placeholder="Add restricted region code"
-                value={newRegion}
-                onChange={(e) => setNewRegion(e.target.value)}
-                className="flex-1"
-              />
-              <Button onClick={handleAddRestrictedRegion}>Add</Button>
-            </div>
-            
-            <div className="space-y-1 mt-2">
-              {restrictedRegions.map(region => (
-                <div key={region.id} className="flex items-center justify-between py-2 px-3 bg-secondary rounded-md">
-                  <span className="font-mono">{region.name}</span>
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
-                    onClick={() => handleRemoveRegion(region.id)}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-        
-        <div className="mt-8 flex justify-end">
-          <Button onClick={handleSaveConfig}>Save Configuration</Button>
-        </div>
       </CardContent>
     </Card>
   );

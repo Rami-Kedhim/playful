@@ -1,30 +1,35 @@
 
 import React, { useEffect } from 'react';
 import { AICompanionNeuralService } from '@/services/neural/modules/AICompanionNeuralService';
+import { useBrainHubAI } from '@/hooks/ai/useBrainHubAI';
 
 interface AICompanionConsumerProps {
-  neuralService?: AICompanionNeuralService;
-  onUpdate?: (data: any) => void;
+  companionId?: string;
 }
 
-const AICompanionConsumer: React.FC<AICompanionConsumerProps> = ({ 
-  neuralService,
-  onUpdate
-}) => {
+const AICompanionConsumer: React.FC<AICompanionConsumerProps> = ({ companionId }) => {
+  const { isConnected, connectToBrainHub } = useBrainHubAI({
+    componentId: 'ai-companion-consumer',
+    capabilities: ['conversation', 'personality_modeling', 'emotional_intelligence']
+  });
+  
   useEffect(() => {
-    const success = neuralService?.configure();
-
-    if (!success) {
-      console.error('Failed to configure AICompanionConsumer neural service');
-    }
-
-    return () => {
-      // Cleanup code here
-    };
-  }, [neuralService]);
-
-  return null;
+    // Initialize AI companion neural service
+    const aiCompanionService = new AICompanionNeuralService();
+    aiCompanionService.initialize();
+    
+    // Set configuration
+    aiCompanionService.updateConfig({
+      sensitivity: 0.95,
+      threshold: 0.8,
+      mode: 'empathetic'
+    });
+    
+    // Connect to Brain Hub
+    connectToBrainHub();
+  }, [connectToBrainHub]);
+  
+  return null; // This is a non-visual component
 };
 
 export default AICompanionConsumer;
-
