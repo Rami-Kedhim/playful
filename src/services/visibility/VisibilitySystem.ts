@@ -1,4 +1,3 @@
-
 // Fix method call to neuralHub to avoid missing applyBoostToContent method error
 /**
  * Unified visibility system that applies Hermes+Oxum algorithms
@@ -158,6 +157,26 @@ export class VisibilitySystem {
       case 'livecam': return 'livecam';
       default: return 'post';
     }
+  }
+  
+  /**
+   * Returns a score representing how visible the profile should be
+   * Higher scores mean more visible in search results and feed
+   */
+  calculateVisibilityScore(profileId: string, viewerId?: string): number {
+    // Start with a baseline score
+    let score = 50;
+    
+    // Check if neural suggestions are enabled
+    const neuralService = neuralHub.getService('visibility-processor');
+    if (neuralService && neuralService.config.enabled) {
+      // Increase score based on neural analysis (mocked for demo)
+      score += 15;
+    }
+    
+    // More calculations would go here...
+    
+    return Math.max(0, Math.min(100, score));
   }
 }
 

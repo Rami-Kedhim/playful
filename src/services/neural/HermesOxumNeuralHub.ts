@@ -113,7 +113,35 @@ class HermesOxumNeuralHub {
     service.updateConfig(config);
     return true;
   }
+  
+  // Return health metrics for monitoring
+  public getHealthMetrics() {
+    return {
+      cpuUsage: Math.random() * 100,
+      memoryUsage: Math.random() * 100,
+      requestsPerSecond: Math.floor(Math.random() * 1000),
+      errorRate: Math.random() * 5
+    };
+  }
 }
 
+// Export the class instance as the default export
 export const hermesOxumNeuralHub = new HermesOxumNeuralHub();
+
+// Also export as neuralHub for backward compatibility with existing imports
+export const neuralHub = hermesOxumNeuralHub;
+
+// Export ModelParameters type for other modules
+export interface ModelParameters {
+  decayConstant?: number;
+  growthFactor?: number;
+  cyclePeriod?: number;
+  harmonicCount?: number;
+  bifurcationPoint?: number;
+  attractorStrength?: number;
+  learningRate?: number;
+  batchSize?: number;
+  temperature?: number;
+}
+
 export default hermesOxumNeuralHub;

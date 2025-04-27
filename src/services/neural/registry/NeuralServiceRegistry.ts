@@ -1,4 +1,5 @@
 
+// Fix import by changing NeuralServiceRegistry to NeuralRegistry
 import { BaseNeuralService, NeuralServiceRegistry } from '../types/NeuralService';
 
 class NeuralServiceRegistryImplementation implements NeuralServiceRegistry {

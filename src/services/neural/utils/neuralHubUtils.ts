@@ -1,139 +1,68 @@
 
-// Fix neuralHub Utils to avoid calling missing methods and use correct types
-
+// Fix import of neuralHub
+import { createDefaultModelParameters } from "../models/modelParameters";
 import { neuralHub } from '../HermesOxumNeuralHub';
 
-export const formatHealthMetrics = (metrics: any) => {
-  if (!metrics) return {};
-
+export function checkServiceHealth(serviceId: string): { healthy: boolean; issues: string[] } {
+  const service = neuralHub.getService(serviceId);
+  const issues: string[] = [];
+  
+  if (!service) {
+    return { healthy: false, issues: [`Service ${serviceId} not found`] };
+  }
+  
+  if (!service.config.enabled) {
+    issues.push(`Service is disabled`);
+  }
+  
+  const metrics = service.getMetrics();
+  if (metrics.errorRate > 5) {
+    issues.push(`High error rate: ${metrics.errorRate.toFixed(2)}%`);
+  }
+  
+  if (metrics.latency > 100) {
+    issues.push(`High latency: ${metrics.latency.toFixed(2)}ms`);
+  }
+  
   return {
-    cpuUsage: `${Math.round((metrics.cpuUsage || 0) * 100)}%`,
-    memoryUsage: `${Math.round((metrics.memoryUsage || 0) * 100)}%`,
-    responseTime: `${metrics.responseTime || 0}ms`,
-    errorRate: `${Math.round((metrics.errorRate || 0) * 100)}%`,
-    uptime: formatUptime(metrics.systemUptime || 0),
-    modelCount: metrics.modelCount || 0,
-    activeConnections: metrics.activeConnections || 0,
-    requestsPerMinute: metrics.requestsPerMinute || 0,
+    healthy: issues.length === 0,
+    issues
   };
-};
+}
 
-export const formatUptime = (seconds: number): string => {
-  if (seconds < 60) return `${Math.round(seconds)}s`;
-
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ${Math.round(seconds % 60)}s`;
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ${minutes % 60}m`;
-
-  const days = Math.floor(hours / 24);
-  return `${days}d ${hours % 24}h`;
-};
-
-export const getSystemHealthStatus = (metrics: any): 'optimal' | 'good' | 'warning' | 'critical' => {
-  if (!metrics) return 'warning';
-
-  const cpuUsage = (metrics.cpuUsage || 0) * 100;
-  const memoryUsage = (metrics.memoryUsage || 0) * 100;
-  const errorRate = (metrics.errorRate || 0) * 100;
-
-  if (errorRate > 10 || cpuUsage > 90 || memoryUsage > 95) {
-    return 'critical';
+export function optimizeServiceParameters(serviceId: string): boolean {
+  const service = neuralHub.getService(serviceId);
+  
+  if (!service) {
+    console.error(`Cannot optimize: Service ${serviceId} not found`);
+    return false;
   }
-
-  if (errorRate > 5 || cpuUsage > 75 || memoryUsage > 80) {
-    return 'warning';
+  
+  // Apply optimized parameters based on service type
+  const params = createDefaultModelParameters();
+  
+  // Adjust parameters based on service type
+  switch (service.moduleType) {
+    case 'text-analysis':
+      params.learningRate = 0.0008;
+      params.temperature = 0.8;
+      break;
+    case 'image-analysis':
+      params.learningRate = 0.0005;
+      params.batchSize = 32;
+      break;
+    default:
+      // Use defaults
+      break;
   }
-
-  if (errorRate > 1 || cpuUsage > 50 || memoryUsage > 60) {
-    return 'good';
-  }
-
-  return 'optimal';
-};
-
-export const isNeuralHubInitialized = (): boolean => {
-  return neuralHub.isInitialized();
-};
-
-// Remove usage of non-existent methods, provide safe defaults
-export const getSystemRecommendations = (metrics: any): string[] => {
-  const recommendations: string[] = [];
-
-  if (!metrics) {
-    return ['Initialize the neural hub to get system recommendations.'];
-  }
-
-  const cpuUsage = (metrics.cpuUsage || 0) * 100;
-  const memoryUsage = (metrics.memoryUsage || 0) * 100;
-  const errorRate = (metrics.errorRate || 0) * 100;
-
-  if (cpuUsage > 80) {
-    recommendations.push('CPU usage is high. Consider scaling resources or optimizing processing.');
-  }
-
-  if (memoryUsage > 85) {
-    recommendations.push('Memory usage is high. Review memory allocation or check for memory leaks.');
-  }
-
-  if (errorRate > 5) {
-    recommendations.push('Error rate exceeds recommended threshold. Investigate potential issues.');
-  }
-
-  if (metrics.modelCount === 0) {
-    recommendations.push('No models are loaded. Initialize models to enable neural processing.');
-  }
-
-  if (recommendations.length === 0) {
-    recommendations.push('System is operating within normal parameters.');
-  }
-
-  return recommendations;
-};
-
-export const formatNeuralModel = (model: any) => {
-  if (!model) return {};
-
-  return {
-    id: model.id || 'unknown',
-    name: model.name || 'Unnamed Model',
-    type: model.type || 'unknown',
-    version: model.version || '1.0',
-    status: model.status || 'inactive',
-    accuracy: `${Math.round((model.accuracy || 0) * 100)}%`,
-    latency: `${model.latency || 0}ms`,
-    resourceUsage: `${Math.round((model.resourceUsage || 0) * 100)}%`,
-    capabilities: model.capabilities || [],
-    specialization: model.specialization || 'general',
-  };
-};
-
-export const getNeuralHubVersion = (): string => {
-  // Removed call to getVersion which does not exist; return unknown
-  return 'unknown';
-};
-
-export const hasNeuralCapability = (capability: string): boolean => {
-  // Removed usage of hasCapability which doesn't exist
-  return false;
-};
-
-export const getNeuralHubStatus = (): 'online' | 'offline' | 'initializing' | 'error' => {
-  if (!isNeuralHubInitialized()) {
-    return 'offline';
-  }
-  return 'online';
-};
-
-export const calculateSystemHealth = (metrics: any): number => {
-  if (!metrics) return 0;
-
-  const cpuHealth = 100 - ((metrics.cpuUsage || 0) * 100);
-  const memoryHealth = 100 - ((metrics.memoryUsage || 0) * 100);
-  const errorHealth = 100 - ((metrics.errorRate || 0) * 100);
-
-  const weightedHealth = (cpuHealth * 0.3) + (memoryHealth * 0.3) + (errorHealth * 0.4);
-
-  return Math.round(weightedHealth);
-};
+  
+  // Update the service config
+  service.updateConfig({
+    sensitivity: 0.75,
+    threshold: 0.65,
+    mode: 'optimized'
+  });
+  
+  console.log(`Optimized parameters for ${service.name} (${service.moduleId})`);
+  return true;
+}

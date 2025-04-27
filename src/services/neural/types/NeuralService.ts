@@ -1,4 +1,3 @@
-
 export type ModuleType = 'general' | 'psychology' | 'physics' | 'economics' | 'robotics' | 'analytics' | string;
 
 export interface NeuralServiceConfig {
@@ -38,6 +37,16 @@ export interface NeuralServiceMetrics {
   [key: string]: any;
 }
 
+// Rename to NeuralServiceRegistry to match usage in registry implementation
+export interface NeuralServiceRegistry {
+  services: Map<string, BaseNeuralService>;
+  getService(moduleId: string): BaseNeuralService | undefined;
+  getAllServices(): BaseNeuralService[];
+  registerService(service: BaseNeuralService): boolean;
+  initialize(): Promise<void>;
+}
+
+// Keep NeuralRegistry for backward compatibility
 export interface NeuralRegistry {
   services: Map<string, BaseNeuralService>;
   getService(moduleId: string): BaseNeuralService | undefined;
