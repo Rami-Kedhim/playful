@@ -6,18 +6,12 @@ import SystemHealthPanel from '@/components/brainHub/SystemHealthPanel';
 
 const BrainHubPage: React.FC = () => {
   const getStatusColor = (status: BrainHubHealth['status']) => {
-    switch (status) {
-      case 'online':
-        return 'text-green-500';
-      case 'offline':
-        return 'text-red-500';
-      case 'degraded':
-        return 'text-yellow-500';
-      case 'maintenance':
-        return 'text-blue-500';
-      default:
-        return 'text-gray-500';
-    }
+    // Map the status values to colors
+    if (status === 'online' || status === 'healthy') return 'text-green-500';
+    if (status === 'degraded' || status === 'warning') return 'text-yellow-500';
+    if (status === 'offline' || status === 'error') return 'text-red-500';
+    if (status === 'maintenance') return 'text-blue-500';
+    return 'text-gray-500';
   };
 
   return (

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { BrainHubHealth, BrainHubAnalytics } from '@/types/brainHubHealth';
 import checkBrainHubHealth from '@/services/brainHubHealth/healthCheckService';
@@ -16,7 +17,14 @@ export const useBrainHubHealth = (monitoringInterval = 30000) => {
     errors: []
   });
 
-  const [analytics, setAnalytics] = useState(() => updateBrainHubAnalytics());
+  const [analytics, setAnalytics] = useState<BrainHubAnalytics>({
+    dailyOperations: 0,
+    averageResponseTime: 0,
+    errorRate: 0,
+    utilizationTrend: [],
+    recommendations: []
+  });
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMonitoring, setIsMonitoring] = useState(false);
