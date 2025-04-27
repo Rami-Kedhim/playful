@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRole } from '@/hooks/auth/useRole';
+import { useTranslation } from 'react-i18next';
 
 const AdminDashboard = () => {
   const { highestRole } = useRole();
+  const { t } = useTranslation();
 
   return (
     <div className="container mx-auto p-6">
