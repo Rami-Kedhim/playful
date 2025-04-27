@@ -65,16 +65,16 @@ const AdminDashboard: React.FC = () => {
         <TabsContent value="users">
           <Card>
             <CardHeader>
-              <CardTitle>{t("admin.userManagement.title", "User Management")}</CardTitle>
-              <CardDescription>{t("admin.userManagement.description", "Manage user accounts and permissions")}</CardDescription>
+              <CardTitle>{t("admin.userManagement.title")}</CardTitle>
+              <CardDescription>{t("admin.userManagement.description")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex justify-end mb-4">
-                <Button>{t("admin.userManagement.addUser", "Add New User")}</Button>
+                <Button>{t("admin.userManagement.addUser")}</Button>
               </div>
               <div className="border rounded-md p-4">
                 <p className="text-center text-muted-foreground">
-                  {t("admin.userManagement.emptyState", "User list would appear here")}
+                  {t("admin.userManagement.emptyState")}
                 </p>
               </div>
             </CardContent>
@@ -84,13 +84,13 @@ const AdminDashboard: React.FC = () => {
         <TabsContent value="settings">
           <Card>
             <CardHeader>
-              <CardTitle>{t("admin.systemSettings.title", "System Settings")}</CardTitle>
-              <CardDescription>{t("admin.systemSettings.description", "Configure global system parameters")}</CardDescription>
+              <CardTitle>{t("admin.systemSettings.title")}</CardTitle>
+              <CardDescription>{t("admin.systemSettings.description")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="border rounded-md p-4">
                 <p className="text-center text-muted-foreground">
-                  {t("admin.systemSettings.emptyState", "System configuration options would appear here")}
+                  {t("admin.systemSettings.emptyState")}
                 </p>
               </div>
             </CardContent>
