@@ -1,329 +1,259 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Brain, Activity, ServerCrash, RefreshCw } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, Activity, Network, Cpu, Settings } from 'lucide-react';
-import { useNeuralRegistry } from '@/hooks/useNeuralRegistry';
-import { hermesEngine } from '@/services/boost/hermes/HermesEngine';
-import { oxumEngine } from '@/services/boost/oxum/OxumEngine';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import BrainHubDashboard from '@/components/brainHub/BrainHubDashboard';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useToast } from '@/components/ui/use-toast';
+import { SystemHealthMetrics } from '@/types/neural-system';
+import BrainHubProtected from '@/components/brainHub/BrainHubProtected';
 
 const BrainHubPage = () => {
-  const { services, loading, error } = useNeuralRegistry();
-  const [activeIndex, setActiveIndex] = React.useState(0);
-  const [systemMetrics, setSystemMetrics] = React.useState({
-    cpuLoad: 42,
-    memoryUsage: 68,
-    networkLatency: 125,
-    activeConnections: 254,
-    hermesEfficiency: 91,
-    oxumPrecision: 87
+  // State for system status
+  const [systemStatus, setSystemStatus] = useState<'online' | 'offline' | 'degraded' | 'maintenance'>('online');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  
+  // Mock system health metrics for demonstration
+  const [systemMetrics, setSystemMetrics] = useState<SystemHealthMetrics>({
+    modelCount: 5,
+    activeConnections: 23,
+    requestsPerMinute: 187,
+    averageResponseTime: 120,
+    errorRate: 0.5,
+    uptime: 99.97,
+    models: [],
+    cpuUtilization: 42,
+    memoryUtilization: 38,
+    errorFrequency: 0.8,
+    systemUptime: 48.5,
+    networkLatency: 45,
+    responseTime: 115,
+    userSatisfactionScore: 92,
+    systemLoad: 35,
+    memoryAllocation: 60,
+    networkThroughput: 250,
+    requestRate: 14.5,
   });
   
-  React.useEffect(() => {
-    // In a real implementation, this would fetch actual metrics
-    const interval = setInterval(() => {
+  // Mock function to refresh system status
+  const refreshSystemStatus = async () => {
+    setIsLoading(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      // Randomly select a status for demonstration
+      const statuses: Array<'online' | 'offline' | 'degraded' | 'maintenance'> = 
+        ['online', 'degraded', 'online', 'online'];
+      
+      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+      setSystemStatus(randomStatus);
+      
+      // Update some metrics for demonstration
       setSystemMetrics(prev => ({
         ...prev,
-        cpuLoad: Math.floor(Math.random() * 30) + 30,
-        memoryUsage: Math.floor(Math.random() * 20) + 60,
-        networkLatency: Math.floor(Math.random() * 50) + 100,
-        activeConnections: Math.floor(Math.random() * 100) + 200,
+        cpuUtilization: Math.floor(Math.random() * 30) + 30,
+        memoryUtilization: Math.floor(Math.random() * 40) + 30,
+        requestsPerMinute: Math.floor(Math.random() * 100) + 150,
       }));
-    }, 5000);
+      
+      toast({
+        title: 'Status Updated',
+        description: `System status: ${randomStatus.toUpperCase()}`,
+      });
+      
+      setIsLoading(false);
+    }, 1000);
+  };
+  
+  // Initial fetch on component mount
+  useEffect(() => {
+    refreshSystemStatus();
     
-    return () => clearInterval(interval);
+    // Set up interval for regular updates (every 30 seconds)
+    const intervalId = setInterval(refreshSystemStatus, 30000);
+    
+    // Clean up on unmount
+    return () => clearInterval(intervalId);
   }, []);
   
-  const handleOptimize = () => {
-    // This would trigger actual optimization in a real implementation
-    console.log("Optimizing neural systems");
-    
-    // Update Hermes and Oxum engines
-    hermesEngine.updateConfig({
-      aggressionFactor: 0.6,
-      timeOfDayFactor: 1.2
-    });
-    
-    oxumEngine.updateConfig({
-      rotationFactor: 0.9,
-      repetitionPenaltyFactor: 1.3
-    });
+  const getStatusIcon = () => {
+    switch (systemStatus) {
+      case 'online':
+        return <Activity className="h-8 w-8 text-green-500" />;
+      case 'degraded':
+        return <Activity className="h-8 w-8 text-yellow-500" />;
+      case 'offline':
+        return <ServerCrash className="h-8 w-8 text-red-500" />;
+      case 'maintenance':
+        return <RefreshCw className="h-8 w-8 text-blue-500" />;
+      default:
+        return <Brain className="h-8 w-8" />;
+    }
+  };
+  
+  const getStatusColor = () => {
+    switch (systemStatus) {
+      case 'online':
+        return 'bg-green-500 hover:bg-green-600';
+      case 'degraded':
+        return 'bg-yellow-500 hover:bg-yellow-600';
+      case 'offline':
+        return 'bg-red-500 hover:bg-red-600';
+      case 'maintenance':
+        return 'bg-blue-500 hover:bg-blue-600';
+      default:
+        return 'bg-green-500 hover:bg-green-600';
+    }
   };
 
   return (
-    <MainLayout title="Brain Hub" description="Neural systems management and optimization">
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <Brain className="h-8 w-8 text-primary mr-2" />
-            <h1 className="text-3xl font-bold">Brain Hub</h1>
+    <BrainHubProtected>
+      <MainLayout>
+        <div className="container mx-auto py-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <div className="flex items-center">
+              <Brain className="h-10 w-10 mr-3 text-primary" />
+              <h1 className="text-3xl font-bold">Brain Hub Control Center</h1>
+            </div>
+            
+            <div className="mt-4 md:mt-0 flex items-center">
+              <Badge className={`mr-4 ${getStatusColor()} text-white`}>
+                Status: {systemStatus.toUpperCase()}
+              </Badge>
+              <Button 
+                onClick={refreshSystemStatus} 
+                disabled={isLoading}
+                variant="outline"
+                size="sm"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh Status
+              </Button>
+            </div>
           </div>
-          <Button variant="outline" onClick={handleOptimize}>
-            <Settings className="h-4 w-4 mr-2" />
-            Optimize Neural Systems
-          </Button>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">CPU Load</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Cpu className="h-4 w-4 text-muted-foreground mr-2" />
-                <div className="text-2xl font-bold">{systemMetrics.cpuLoad}%</div>
-              </div>
-              <div className="mt-2 h-2 w-full bg-secondary rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary rounded-full" 
-                  style={{ width: `${systemMetrics.cpuLoad}%` }}
-                />
-              </div>
-            </CardContent>
-          </Card>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Memory Usage</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Activity className="h-4 w-4 text-muted-foreground mr-2" />
-                <div className="text-2xl font-bold">{systemMetrics.memoryUsage}%</div>
-              </div>
-              <div className="mt-2 h-2 w-full bg-secondary rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary rounded-full" 
-                  style={{ width: `${systemMetrics.memoryUsage}%` }}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          {systemStatus === 'offline' && (
+            <Alert variant="destructive" className="mb-6">
+              <ServerCrash className="h-4 w-4" />
+              <AlertTitle>System Offline</AlertTitle>
+              <AlertDescription>
+                The Brain Hub system is currently offline. Our engineers are working to restore service.
+              </AlertDescription>
+            </Alert>
+          )}
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Network Latency</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Network className="h-4 w-4 text-muted-foreground mr-2" />
-                <div className="text-2xl font-bold">{systemMetrics.networkLatency}ms</div>
-              </div>
-              <div className="mt-2 h-2 w-full bg-secondary rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary rounded-full" 
-                  style={{ width: `${Math.min(systemMetrics.networkLatency / 2, 100)}%` }}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          {systemStatus === 'maintenance' && (
+            <Alert className="mb-6 border-blue-200 bg-blue-50">
+              <RefreshCw className="h-4 w-4" />
+              <AlertTitle>Maintenance Mode</AlertTitle>
+              <AlertDescription>
+                Brain Hub is undergoing scheduled maintenance. Some features may be temporarily unavailable.
+              </AlertDescription>
+            </Alert>
+          )}
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Active Connections</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Brain className="h-4 w-4 text-muted-foreground mr-2" />
-                <div className="text-2xl font-bold">{systemMetrics.activeConnections}</div>
-              </div>
-              <div className="mt-2 h-2 w-full bg-secondary rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary rounded-full" 
-                  style={{ width: `${Math.min(systemMetrics.activeConnections / 5, 100)}%` }}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        <Tabs defaultValue="metrics" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="metrics">Neural Metrics</TabsTrigger>
-            <TabsTrigger value="services">Neural Services</TabsTrigger>
-            <TabsTrigger value="training">Training Data</TabsTrigger>
-            <TabsTrigger value="settings">Neural Settings</TabsTrigger>
-          </TabsList>
+          {systemStatus === 'degraded' && (
+            <Alert variant="warning" className="mb-6">
+              <Activity className="h-4 w-4" />
+              <AlertTitle>Degraded Performance</AlertTitle>
+              <AlertDescription>
+                Brain Hub is experiencing performance issues. You may notice slower response times.
+              </AlertDescription>
+            </Alert>
+          )}
           
-          <TabsContent value="metrics">
-            <Card>
-              <CardHeader>
-                <CardTitle>Neural System Performance</CardTitle>
-                <CardDescription>Real-time metrics from UberCore neural systems</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Hermes Flow Dynamics</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium">Efficiency</label>
-                        <div className="mt-1 h-2 w-full bg-secondary rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-green-500 rounded-full" 
-                            style={{ width: `${systemMetrics.hermesEfficiency}%` }}
-                          />
-                        </div>
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          {systemMetrics.hermesEfficiency}% - High efficiency
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label className="text-sm font-medium">Time Impact Factor</label>
-                        <div className="mt-1 h-2 w-full bg-secondary rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-blue-500 rounded-full" 
-                            style={{ width: `78%` }}
-                          />
-                        </div>
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          78% - Good temporal alignment
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label className="text-sm font-medium">Flow Prediction Accuracy</label>
-                        <div className="mt-1 h-2 w-full bg-secondary rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-purple-500 rounded-full" 
-                            style={{ width: `84%` }}
-                          />
-                        </div>
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          84% - Above target
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Oxum Boost System</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium">Precision</label>
-                        <div className="mt-1 h-2 w-full bg-secondary rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-indigo-500 rounded-full" 
-                            style={{ width: `${systemMetrics.oxumPrecision}%` }}
-                          />
-                        </div>
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          {systemMetrics.oxumPrecision}% - Within optimal range
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label className="text-sm font-medium">Fairness Distribution</label>
-                        <div className="mt-1 h-2 w-full bg-secondary rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-pink-500 rounded-full" 
-                            style={{ width: `92%` }}
-                          />
-                        </div>
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          92% - Excellent fairness allocation
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label className="text-sm font-medium">Attractor Stability</label>
-                        <div className="mt-1 h-2 w-full bg-secondary rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-amber-500 rounded-full" 
-                            style={{ width: `81%` }}
-                          />
-                        </div>
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          81% - Stable attractor mapping
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="services">
-            <Card>
-              <CardHeader>
-                <CardTitle>Neural Services</CardTitle>
-                <CardDescription>Manage active UberCore neural services</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="border rounded-md">
-                  {loading ? (
-                    <div className="p-8 text-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                      <p className="mt-4 text-muted-foreground">Loading neural services...</p>
-                    </div>
-                  ) : error ? (
-                    <div className="p-8 text-center text-red-500">
-                      <p>Error loading neural services: {error}</p>
-                    </div>
-                  ) : services.length === 0 ? (
-                    <div className="p-8 text-center text-muted-foreground">
-                      <p>No neural services registered</p>
-                    </div>
+          <Tabs defaultValue="dashboard">
+            <TabsList className="mb-4">
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="models">Neural Models</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="settings">System Settings</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="dashboard">
+              {systemStatus !== 'offline' ? (
+                <BrainHubDashboard />
+              ) : (
+                <Card>
+                  <CardContent className="pt-6 text-center">
+                    <ServerCrash className="h-16 w-16 mx-auto text-red-500 mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">System Offline</h3>
+                    <p className="text-muted-foreground">
+                      The Brain Hub dashboard is currently unavailable due to system outage.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="models">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Neural Models</CardTitle>
+                  <CardDescription>
+                    Manage and monitor neural models in the Brain Hub ecosystem
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {systemStatus !== 'offline' ? (
+                    <p>Neural models interface would be displayed here.</p>
                   ) : (
-                    <div className="divide-y">
-                      {services.map((service, index) => (
-                        <div key={service.id || index} className="p-4 flex items-center justify-between">
-                          <div>
-                            <h3 className="font-medium">{service.name}</h3>
-                            <p className="text-sm text-muted-foreground">v{service.version}</p>
-                          </div>
-                          <div className="flex items-center">
-                            <div className={`w-3 h-3 rounded-full mr-2 ${
-                              service.status === 'active' ? 'bg-green-500' :
-                              service.status === 'inactive' ? 'bg-amber-500' :
-                              'bg-red-500'
-                            }`}></div>
-                            <span className="text-sm">{service.status}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <p className="text-center text-muted-foreground">
+                      Neural models data is unavailable while the system is offline.
+                    </p>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="training">
-            <Card>
-              <CardHeader>
-                <CardTitle>Training Data</CardTitle>
-                <CardDescription>Neural network training datasets and performance</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center text-muted-foreground p-8">
-                  Training data visualization coming soon
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle>Neural Settings</CardTitle>
-                <CardDescription>Configure UberCore neural systems</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center text-muted-foreground p-8">
-                  Neural settings configuration coming soon
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </MainLayout>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="analytics">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Brain Hub Analytics</CardTitle>
+                  <CardDescription>
+                    View performance metrics and usage patterns
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {systemStatus !== 'offline' ? (
+                    <p>Analytics dashboard would be displayed here.</p>
+                  ) : (
+                    <p className="text-center text-muted-foreground">
+                      Analytics data is unavailable while the system is offline.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="settings">
+              <Card>
+                <CardHeader>
+                  <CardTitle>System Settings</CardTitle>
+                  <CardDescription>
+                    Configure Brain Hub settings and parameters
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {systemStatus !== 'offline' ? (
+                    <p>Settings interface would be displayed here.</p>
+                  ) : (
+                    <p className="text-center text-muted-foreground">
+                      Settings are unavailable while the system is offline.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </MainLayout>
+    </BrainHubProtected>
   );
 };
 

@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import RoleBasedRoute from '@/components/auth/RoleBasedRoute';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
-import AdminDashboard from '@/pages/AdminDashboard';
+import AdminPage from '@/pages/AdminPage';
 import { Button } from '@/components/ui/button';
 
 const HomePage = () => (
@@ -75,7 +75,7 @@ const RoleBasedRoutingExample = () => {
           path="/admin-dashboard" 
           element={
             <RoleBasedRoute allowedRoles={['admin']}>
-              <AdminDashboard />
+              <AdminPage />
             </RoleBasedRoute>
           } 
         />
