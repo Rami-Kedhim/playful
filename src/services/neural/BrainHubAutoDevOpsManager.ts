@@ -7,6 +7,9 @@ export interface MissingComponentAnalysis {
   suggestedName: string;
   suggestedProps: Record<string, any>;
   requiredFunctionality: string[];
+  description?: string; // Added missing property
+  estimatedComplexity?: number; // Added missing property
+  dependsOn?: string[]; // Added missing property
 }
 
 export interface CodeGenerationResult {
@@ -14,6 +17,10 @@ export interface CodeGenerationResult {
   componentName: string;
   code: string;
   error?: string;
+  fileName?: string; // Added missing property
+  language?: string; // Added missing property
+  warnings?: string[]; // Added missing property
+  integrationInstructions?: string; // Added missing property
 }
 
 export interface DeploymentResult {
@@ -21,6 +28,9 @@ export interface DeploymentResult {
   deploymentId?: string;
   deploymentUrl?: string;
   error?: string;
+  deployedComponent?: string; // Added missing property
+  timestamp?: string; // Added missing property
+  logs?: string[]; // Added missing property
 }
 
 export class BrainHubAutoDevOpsManager {
@@ -32,6 +42,7 @@ export class BrainHubAutoDevOpsManager {
     memoryUsage: 0.3,
     networkLatency: 120
   };
+  private autonomyLevel: number = 50; // Default autonomy level
 
   constructor() {
     // Initialize with some example data
@@ -45,7 +56,10 @@ export class BrainHubAutoDevOpsManager {
           size: 'string',
           isLoading: 'boolean'
         },
-        requiredFunctionality: ['click handling', 'loading state', 'different variants']
+        requiredFunctionality: ['click handling', 'loading state', 'different variants'],
+        description: 'Enhanced button component with loading state and multiple variants',
+        estimatedComplexity: 2,
+        dependsOn: []
       },
       {
         componentType: 'layout/sidebar',
@@ -55,7 +69,10 @@ export class BrainHubAutoDevOpsManager {
           isOpen: 'boolean', 
           onToggle: 'function' 
         },
-        requiredFunctionality: ['collapsible', 'navigation links', 'responsive']
+        requiredFunctionality: ['collapsible', 'navigation links', 'responsive'],
+        description: 'Collapsible sidebar navigation component with responsive design',
+        estimatedComplexity: 3,
+        dependsOn: ['EnhancedButton']
       }
     ];
 
@@ -117,7 +134,11 @@ export class BrainHubAutoDevOpsManager {
       return {
         success: true,
         componentName: componentInfo.suggestedName,
-        code
+        code,
+        fileName: `${componentInfo.suggestedName}.tsx`,
+        language: 'typescript',
+        warnings: [],
+        integrationInstructions: `Import this component using: import { ${componentInfo.suggestedName} } from './${componentInfo.suggestedName}';`
       };
     } catch (error: any) {
       return {
@@ -146,13 +167,17 @@ export class BrainHubAutoDevOpsManager {
       return {
         success: true,
         deploymentId: `deploy-${Date.now()}`,
-        deploymentUrl: `https://app.example.com/components/${componentName.toLowerCase()}`
+        deploymentUrl: `https://app.example.com/components/${componentName.toLowerCase()}`,
+        deployedComponent: componentName,
+        timestamp: new Date().toISOString(),
+        logs: ['Starting deployment', 'Compiling component', 'Running tests', 'Deployment successful']
       };
     } else {
       this.deploymentStatus.set(componentName, 'failed');
       return {
         success: false,
-        error: 'Deployment pipeline failed - mock error'
+        error: 'Deployment pipeline failed - mock error',
+        logs: ['Starting deployment', 'Compiling component', 'Test failure detected', 'Deployment aborted']
       };
     }
   }
@@ -201,6 +226,108 @@ export class BrainHubAutoDevOpsManager {
    */
   public getDeploymentStatus(componentName: string): 'pending' | 'deployed' | 'failed' {
     return this.deploymentStatus.get(componentName) || 'pending';
+  }
+  
+  /**
+   * Get detected missing components
+   */
+  public getDetectedMissingComponents(): MissingComponentAnalysis[] {
+    return this.analysisResults;
+  }
+  
+  /**
+   * Get code review queue
+   */
+  public getCodeReviewQueue(): CodeGenerationResult[] {
+    return Object.keys(this.generatedComponents).map(name => ({
+      success: true,
+      componentName: name,
+      code: this.generatedComponents[name],
+      fileName: `${name}.tsx`,
+      language: 'typescript'
+    }));
+  }
+  
+  /**
+   * Get pending deployments
+   */
+  public getPendingDeployments(): string[] {
+    return Array.from(this.deploymentStatus.entries())
+      .filter(([_, status]) => status === 'pending')
+      .map(([name]) => name);
+  }
+  
+  /**
+   * Get deployment history
+   */
+  public getDeploymentHistory(): DeploymentResult[] {
+    return Array.from(this.deploymentStatus.entries())
+      .filter(([_, status]) => status === 'deployed' || status === 'failed')
+      .map(([name, status]) => ({
+        success: status === 'deployed',
+        deploymentId: `deploy-${name}`,
+        deployedComponent: name,
+        timestamp: new Date().toISOString(),
+        logs: status === 'deployed' ? ['Deployment completed successfully'] : ['Deployment failed']
+      }));
+  }
+  
+  /**
+   * Get system status
+   */
+  public getSystemStatus(): Record<string, any> {
+    return {
+      autonomyLevel: this.autonomyLevel,
+      componentsDetected: this.analysisResults.length,
+      componentsDeployed: Array.from(this.deploymentStatus.values()).filter(v => v === 'deployed').length,
+      health: this.systemHealth
+    };
+  }
+  
+  /**
+   * Set autonomy level
+   */
+  public setAutonomyLevel(level: number): void {
+    this.autonomyLevel = Math.max(0, Math.min(100, level));
+  }
+  
+  /**
+   * Schedule system analysis
+   */
+  public scheduleSystemAnalysis(): boolean {
+    console.log("Scheduling system analysis...");
+    return true;
+  }
+  
+  /**
+   * Generate code
+   */
+  public generateCode(component: MissingComponentAnalysis): CodeGenerationResult {
+    return this.generateComponent(component);
+  }
+  
+  /**
+   * Approve code
+   */
+  public approveCode(componentName: string): boolean {
+    console.log(`Approving code for ${componentName}...`);
+    return true;
+  }
+  
+  /**
+   * Reject code
+   */
+  public rejectCode(componentName: string): boolean {
+    console.log(`Rejecting code for ${componentName}...`);
+    return true;
+  }
+  
+  /**
+   * Deploy code
+   */
+  public deployCode(componentName: string): DeploymentResult {
+    const code = this.generatedComponents[componentName] || '';
+    return this.deployComponent(componentName, code);
   }
 }
 

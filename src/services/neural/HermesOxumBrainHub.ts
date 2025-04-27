@@ -223,6 +223,21 @@ class HermesOxumBrainHubService {
       }
     ];
   }
+
+  // Add the missing getSystemStatus method
+  public getSystemStatus(): any {
+    return {
+      cpuUtilization: Math.random() * 100,
+      memoryUtilization: Math.random() * 100,
+      operationsPerSecond: Math.floor(Math.random() * 1000),
+      errorRate: Math.random() * 5,
+      responseTime: Math.floor(Math.random() * 500),
+      stability: Math.random() * 100,
+      neuralAccuracy: Math.random() * 100,
+      neuralEfficiency: Math.random() * 100,
+      neuralLatency: Math.floor(Math.random() * 200)
+    };
+  }
 }
 
 export const brainHub = new HermesOxumBrainHubService();

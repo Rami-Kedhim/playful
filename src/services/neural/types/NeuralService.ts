@@ -1,38 +1,47 @@
 
+export type ModuleType = 'general' | 'psychology' | 'physics' | 'economics' | 'robotics' | 'analytics' | string;
+
 export interface NeuralServiceConfig {
   enabled: boolean;
-  sensitivity: number;
-  threshold: number;
-  mode: string;
+  sensitivity?: number;
+  threshold?: number;
+  mode?: string;
+  apiEndpoint?: string;
+  apiKey?: string;
+  autonomyLevel?: number;
+  priority?: number;
+  resourceAllocation?: number;
   [key: string]: any;
 }
 
 export interface BaseNeuralService {
   id: string;
-  name: string;
   moduleId: string;
+  name: string;
   description: string;
-  moduleType: string;
+  moduleType: ModuleType;
   version: string;
   status: 'active' | 'inactive' | 'maintenance';
   config: NeuralServiceConfig;
-  initialize: () => Promise<boolean>;
-  updateConfig: (config: Partial<NeuralServiceConfig>) => void;
-  getMetrics: () => {
-    operationsCount: number;
-    errorRate: number;
-    latency: number;
-    [key: string]: any;
-  };
+  
+  initialize(): Promise<boolean>;
+  updateConfig(config: Partial<NeuralServiceConfig>): void;
+  getCapabilities(): string[];
+  getMetrics(): any;
+  configure?(config: Partial<NeuralServiceConfig>): boolean;
 }
 
-export interface NeuralServiceRegistry {
-  initialize: () => Promise<void>;
-  registerService: (service: BaseNeuralService) => boolean;
-  getService: (id: string) => BaseNeuralService | undefined;
-  getAllServices: () => BaseNeuralService[];
-  getServicesByModule: (moduleType: string) => BaseNeuralService[];
-  optimizeResourceAllocation: () => void;
+export interface NeuralServiceMetrics {
+  operationsCount: number;
+  errorRate: number;
+  latency: number;
+  [key: string]: any;
 }
 
-export type ModuleType = string;
+export interface NeuralRegistry {
+  services: Map<string, BaseNeuralService>;
+  getService(moduleId: string): BaseNeuralService | undefined;
+  getAllServices(): BaseNeuralService[];
+  registerService(service: BaseNeuralService): boolean;
+  initialize(): Promise<void>;
+}

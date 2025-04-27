@@ -1,474 +1,278 @@
+
 import React, { useState } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel 
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Loader2, Image, Plus, X, Download } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { useNSFWImageGenerator, NSFWImageGenerationParams } from '@/hooks/ai/useNSFWImageGenerator';
-import { brainHub } from '@/services/neural/HermesOxumBrainHub';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
+import { Loader2, ImagePlus, Download } from "lucide-react";
 
-const DEFAULT_VALUES = {
-  model: 'stablediffusionapi/realistic-vision-v5',
-  name: 'Lucia',
-  age: '25',
-  ethnicity: 'Latina',
-  style: 'Glamour',
-  skinTone: 'Light',
-  clothing: 'Elegant dress',
-  background: 'Luxury hotel suite',
-  pose: 'Seductive',
-  tags: []
-};
-
-const AVAILABLE_MODELS = [
-  { id: 'stablediffusionapi/realistic-vision-v5', name: 'Realistic Vision v5' },
-  { id: 'stabilityai/stable-diffusion-xl-base-1.0', name: 'Stable Diffusion XL' },
-  { id: 'playgroundai/playground-v2.5', name: 'Playground v2.5' },
-  { id: 'black-forest-labs/FLUX.1-schnell', name: 'FLUX.1 Schnell (Fast)' },
-];
-
-const STYLE_OPTIONS = [
-  'Glamour', 'Natural', 'Artistic', 'Fashion', 'Casual', 'Professional'
-];
-
-const ETHNICITY_OPTIONS = [
-  'Latina', 'Caucasian', 'Asian', 'Black', 'Indian', 'Middle Eastern', 'Mixed'
-];
-
-const SKIN_TONE_OPTIONS = [
-  'Light', 'Medium', 'Olive', 'Tan', 'Brown', 'Dark'
-];
-
-const CLOTHING_OPTIONS = [
-  'Elegant dress', 'Business attire', 'Casual wear', 'Swimwear', 'Lingerie', 'Evening gown'
-];
-
-const BACKGROUND_OPTIONS = [
-  'Luxury hotel suite', 'Beach resort', 'Urban cityscape', 'Cozy home', 'Studio setting', 'Natural outdoors'
-];
-
-const POSE_OPTIONS = [
-  'Seductive', 'Professional', 'Casual', 'Elegant', 'Playful', 'Serious'
-];
-
-interface FormValues extends NSFWImageGenerationParams {
-  tagInput?: string;
+interface ImageGenerationParams {
+  prompt: string;
+  negativePrompt?: string;
+  width?: number;
+  height?: number;
+  steps?: number;
+  cfgScale?: number;
+  seed?: number;
+  modelId?: string;
 }
 
 const NSFWImageGenerator: React.FC = () => {
-  const { generateImage, resetImage, loading, imageUrl, error } = useNSFWImageGenerator();
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState('');
-  
-  const form = useForm<FormValues>({
-    defaultValues: DEFAULT_VALUES
+  const [tab, setTab] = useState<string>("text-to-image");
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [params, setParams] = useState<ImageGenerationParams>({
+    prompt: "",
+    negativePrompt: "blurry, bad anatomy, bad hands, cropped, worst quality",
+    width: 512,
+    height: 768,
+    steps: 30,
+    cfgScale: 7,
+    seed: -1,
+    modelId: "realistic-vision-v5"
   });
   
-  const addTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      const newTags = [...tags, tagInput.trim()];
-      setTags(newTags);
-      form.setValue('tags', newTags);
-      setTagInput('');
+  const { toast } = useToast();
+
+  const updateParam = <K extends keyof ImageGenerationParams>(
+    key: K,
+    value: ImageGenerationParams[K]
+  ) => {
+    setParams((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleGenerate = async () => {
+    if (!params.prompt) {
+      toast({
+        title: "Error",
+        description: "Please enter a prompt",
+        variant: "destructive"
+      });
+      return;
     }
-  };
-  
-  const removeTag = (tagToRemove: string) => {
-    const newTags = tags.filter(tag => tag !== tagToRemove);
-    setTags(newTags);
-    form.setValue('tags', newTags);
-  };
-  
-  const onSubmit = async (values: FormValues) => {
+
     try {
-      const generationParams = {
-        ...values,
-        tags
-      };
+      setIsGenerating(true);
+      // Placeholder for API call - this would be replaced by actual implementation
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       
-      // Log the request through BrainHub
-      brainHub.logDecision('image_generation', `Generating NSFW image with model ${values.model}`);
+      // Mock generated image
+      setGeneratedImage(`https://picsum.photos/${params.width}/${params.height}?random=${Date.now()}`);
       
-      await generateImage(generationParams);
-    } catch (err) {
-      console.error('Error in form submission:', err);
+      toast({
+        title: "Image generated",
+        description: "Your image has been generated successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate image",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
-  const downloadImage = () => {
-    if (imageUrl) {
-      const link = document.createElement('a');
-      link.href = imageUrl;
-      link.download = `nsfw-image-${Date.now()}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+  const handleDownload = () => {
+    if (!generatedImage) return;
+    
+    // Fixed: Changed to use only one argument
+    downloadImage(generatedImage);
   };
-  
+
+  // Updated downloadImage function to take a single parameter
+  const downloadImage = (url: string) => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `generated-image-${Date.now()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle>NSFW Image Generator</CardTitle>
-        <CardDescription>
-          Generate NSFW images using AI models through Hugging Face API
-        </CardDescription>
       </CardHeader>
-      
       <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Form Section */}
-          <div>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="model"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>AI Model</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a model" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {AVAILABLE_MODELS.map((model) => (
-                            <SelectItem key={model.id} value={model.id}>
-                              {model.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Choose the AI model to use for image generation
-                      </FormDescription>
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Name" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="age"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Age</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Age" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
+        <Tabs value={tab} onValueChange={setTab} className="w-full">
+          <TabsList className="grid grid-cols-2 mb-4">
+            <TabsTrigger value="text-to-image">Text to Image</TabsTrigger>
+            <TabsTrigger value="advanced">Advanced Settings</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="text-to-image" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="prompt">Prompt</Label>
+                  <Textarea
+                    id="prompt"
+                    placeholder="Describe what you want to generate..."
+                    rows={4}
+                    value={params.prompt}
+                    onChange={(e) => updateParam('prompt', e.target.value)}
+                    className="resize-none"
                   />
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="ethnicity"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Ethnicity</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select ethnicity" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {ETHNICITY_OPTIONS.map((option) => (
-                              <SelectItem key={option} value={option}>
-                                {option}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="skinTone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Skin Tone</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select skin tone" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {SKIN_TONE_OPTIONS.map((option) => (
-                              <SelectItem key={option} value={option}>
-                                {option}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
+                
+                <div>
+                  <Label htmlFor="negative-prompt">Negative Prompt</Label>
+                  <Textarea
+                    id="negative-prompt"
+                    placeholder="Describe what to avoid..."
+                    rows={2}
+                    value={params.negativePrompt}
+                    onChange={(e) => updateParam('negativePrompt', e.target.value)}
+                    className="resize-none"
                   />
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="style"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Style</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select style" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {STYLE_OPTIONS.map((option) => (
-                              <SelectItem key={option} value={option}>
-                                {option}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="pose"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Pose</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select pose" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {POSE_OPTIONS.map((option) => (
-                              <SelectItem key={option} value={option}>
-                                {option}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="clothing"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Clothing</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select clothing" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {CLOTHING_OPTIONS.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="background"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Background</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select background" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {BACKGROUND_OPTIONS.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-
-                <FormItem>
-                  <FormLabel>Tags</FormLabel>
-                  <div className="flex space-x-2">
-                    <Input 
-                      value={tagInput} 
-                      onChange={(e) => setTagInput(e.target.value)}
-                      placeholder="Enter tag" 
-                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+              </div>
+              
+              <div className="flex flex-col items-center justify-center border rounded-lg p-4 min-h-[300px] bg-muted/30">
+                {isGenerating ? (
+                  <div className="flex flex-col items-center">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary mb-2" />
+                    <p className="text-sm text-muted-foreground">Generating image...</p>
+                  </div>
+                ) : generatedImage ? (
+                  <div className="w-full h-full flex flex-col items-center">
+                    <img
+                      src={generatedImage}
+                      alt="Generated"
+                      className="max-w-full max-h-[300px] object-contain rounded-md"
                     />
-                    <Button type="button" onClick={addTag} size="icon" variant="outline">
-                      <Plus className="h-4 w-4" />
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={handleDownload}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
                     </Button>
                   </div>
-                  <FormDescription>
-                    Add additional tags to enhance the image
-                  </FormDescription>
-                  
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {tags.map((tag) => (
-                      <Badge 
-                        key={tag} 
-                        variant="secondary"
-                        className="flex items-center gap-1"
-                      >
-                        {tag}
-                        <button 
-                          type="button" 
-                          onClick={() => removeTag(tag)}
-                          className="ml-1 rounded-full hover:bg-muted p-0.5"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
+                ) : (
+                  <div className="flex flex-col items-center text-center">
+                    <ImagePlus className="h-12 w-12 text-muted-foreground mb-2" />
+                    <p className="text-muted-foreground">Generated image will appear here</p>
                   </div>
-                </FormItem>
-
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Image className="mr-2 h-4 w-4" />
-                      Generate Image
-                    </>
-                  )}
-                </Button>
-              </form>
-            </Form>
-          </div>
-          
-          {/* Image Preview Section */}
-          <div className="flex flex-col">
-            <div className="text-lg font-medium mb-2">Image Preview</div>
-            
-            <div className="border rounded-lg flex items-center justify-center h-[400px] bg-muted/20 overflow-hidden">
-              {loading ? (
-                <div className="flex flex-col items-center justify-center text-muted-foreground">
-                  <Loader2 className="h-8 w-8 animate-spin mb-2" />
-                  <span>Generating image...</span>
-                </div>
-              ) : imageUrl ? (
-                <div className="relative w-full h-full">
-                  <img 
-                    src={imageUrl} 
-                    alt="Generated NSFW" 
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center text-muted-foreground">
-                  <Image className="h-10 w-10 mb-2 opacity-20" />
-                  <span>No image generated yet</span>
-                  {error && (
-                    <p className="text-sm text-destructive mt-2">{error}</p>
-                  )}
-                </div>
-              )}
-            </div>
-            
-            {imageUrl && (
-              <div className="flex justify-end space-x-2 mt-4">
-                <Button 
-                  variant="outline" 
-                  onClick={resetImage}
-                >
-                  Reset
-                </Button>
-                <Button
-                  onClick={downloadImage}
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Download
-                </Button>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="advanced" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+              <div>
+                <Label className="mb-2 block">Image Dimensions</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label htmlFor="width" className="text-xs">Width</Label>
+                    <Input
+                      id="width"
+                      type="number"
+                      value={params.width}
+                      onChange={(e) => updateParam('width', Number(e.target.value))}
+                      min={256}
+                      max={1024}
+                      step={64}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="height" className="text-xs">Height</Label>
+                    <Input
+                      id="height"
+                      type="number"
+                      value={params.height}
+                      onChange={(e) => updateParam('height', Number(e.target.value))}
+                      min={256}
+                      max={1024}
+                      step={64}
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <Label className="mb-1 block">Steps: {params.steps}</Label>
+                <Slider
+                  value={[params.steps || 30]}
+                  min={10}
+                  max={50}
+                  step={1}
+                  onValueChange={(value) => updateParam('steps', value[0])}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Higher values = better quality, slower generation
+                </p>
+              </div>
+              
+              <div>
+                <Label className="mb-1 block">CFG Scale: {params.cfgScale}</Label>
+                <Slider
+                  value={[params.cfgScale || 7]}
+                  min={1}
+                  max={14}
+                  step={0.5}
+                  onValueChange={(value) => updateParam('cfgScale', value[0])}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  How closely to follow the prompt
+                </p>
+              </div>
+              
+              <div>
+                <Label htmlFor="seed">Seed (-1 for random)</Label>
+                <Input
+                  id="seed"
+                  type="number"
+                  value={params.seed}
+                  onChange={(e) => updateParam('seed', Number(e.target.value))}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="model">Model</Label>
+                <select
+                  id="model"
+                  value={params.modelId}
+                  onChange={(e) => updateParam('modelId', e.target.value)}
+                  className="w-full border border-input bg-background px-3 py-2 rounded-md"
+                >
+                  <option value="realistic-vision-v5">Realistic Vision 5.0</option>
+                  <option value="dreamshaper-8">DreamShaper 8</option>
+                  <option value="deliberate-2">Deliberate 2</option>
+                  <option value="anything-v5">Anything V5</option>
+                </select>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
+      
+      <CardFooter>
+        <Button 
+          onClick={handleGenerate} 
+          disabled={isGenerating || !params.prompt}
+          className="w-full"
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Generating...
+            </>
+          ) : (
+            "Generate Image"
+          )}
+        </Button>
+      </CardFooter>
     </Card>
   );
 };
