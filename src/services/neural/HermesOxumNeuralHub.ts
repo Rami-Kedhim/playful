@@ -143,7 +143,10 @@ class HermesOxumNeuralHub {
   
   public startTraining(modelConfig: any) {
     console.log(`Starting training with config:`, modelConfig);
-    return { jobId: `job-${Math.random().toString(36).substring(2, 9)}` }; // Mock implementation
+    return { 
+      jobId: `job-${Math.random().toString(36).substring(2, 9)}`,
+      status: 'started'  // Add the status property to fix the error
+    };
   }
 }
 

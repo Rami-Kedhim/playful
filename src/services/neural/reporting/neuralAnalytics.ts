@@ -35,7 +35,59 @@ export function generateNeuralAnalytics(): NeuralAnalyticsReport {
     errorRate: Math.random() * 5,
   };
 
-  // Return the report
+  // Mock model performance metrics
+  const modelPerformance = {
+    accuracy: 0.85 + Math.random() * 0.1,
+    precision: 0.82 + Math.random() * 0.1,
+    recall: 0.79 + Math.random() * 0.1,
+    f1Score: 0.80 + Math.random() * 0.1,
+    latency: 15 + Math.random() * 10,
+    throughput: 250 + Math.random() * 100
+  };
+
+  // Mock operational metrics
+  const operationalMetrics = {
+    totalRequests: 15000 + Math.floor(Math.random() * 5000),
+    successfulRequests: 14500 + Math.floor(Math.random() * 500),
+    failedRequests: Math.floor(Math.random() * 500),
+    averageResponseTime: 120 + Math.random() * 50,
+    p95ResponseTime: 180 + Math.random() * 40, 
+    p99ResponseTime: 250 + Math.random() * 50,
+    requestsPerMinute: 120 + Math.random() * 30,
+    errorRate: Math.random() * 2,
+    activeConnections: 50 + Math.floor(Math.random() * 30)
+  };
+
+  // Mock usage metrics
+  const usageMetrics = {
+    dailyActiveUsers: 2500 + Math.floor(Math.random() * 500),
+    monthlyActiveUsers: 50000 + Math.floor(Math.random() * 10000),
+    totalUsers: 100000 + Math.floor(Math.random() * 20000),
+    sessionsPerUser: 3 + Math.random() * 2,
+    averageSessionDuration: 15 + Math.random() * 5,
+    retentionRate: 0.7 + Math.random() * 0.2
+  };
+
+  // Mock advanced metrics
+  const advancedMetrics = {
+    resourceUtilization: 0.75 + Math.random() * 0.2,
+    efficientUseScore: 0.8 + Math.random() * 0.15,
+    loadBalancingEfficiency: 0.82 + Math.random() * 0.1,
+    cachingEffectiveness: 0.7 + Math.random() * 0.2,
+    algorithmicEfficiency: 0.85 + Math.random() * 0.1
+  };
+
+  // Generate correlation matrix
+  const metricLabels = ['CPU', 'Memory', 'Latency', 'Throughput', 'Errors'];
+  const correlationMatrix = {
+    labels: metricLabels,
+    values: generateCorrelationMatrix(metricLabels.length),
+    maxCorrelation: 0.95,
+    minCorrelation: -0.2,
+    averageCorrelation: 0.45
+  };
+
+  // Return the report with all the new fields
   return {
     timestamp,
     serviceMetrics,
@@ -49,7 +101,13 @@ export function generateNeuralAnalytics(): NeuralAnalyticsReport {
     recommendations: [
       "Consider scaling up resources during peak hours",
       "Optimize neural text processor for better efficiency"
-    ]
+    ],
+    // Add the new fields
+    modelPerformance,
+    operationalMetrics,
+    usageMetrics,
+    advancedMetrics,
+    correlationMatrix
   };
 }
 
@@ -79,4 +137,30 @@ export function generatePerformanceForecast(days: number): PerformanceTrend[] {
   }
   
   return forecast;
+}
+
+/**
+ * Helper function to generate a correlation matrix
+ */
+function generateCorrelationMatrix(size: number): number[][] {
+  const matrix: number[][] = [];
+  
+  for (let i = 0; i < size; i++) {
+    const row: number[] = [];
+    for (let j = 0; j < size; j++) {
+      if (i === j) {
+        // Diagonal is always 1 (perfect correlation with self)
+        row.push(1);
+      } else if (matrix[j] && matrix[j][i] !== undefined) {
+        // Use already calculated value for symmetry
+        row.push(matrix[j][i]);
+      } else {
+        // Generate random correlation (-0.2 to 0.9)
+        row.push(Math.round((Math.random() * 1.1 - 0.2) * 100) / 100);
+      }
+    }
+    matrix.push(row);
+  }
+  
+  return matrix;
 }
