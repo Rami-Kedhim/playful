@@ -35,7 +35,7 @@ export interface BrainHubRequest {
   type: string;
   data: any;
   filters?: Record<string, any>;
-  options?: Record<string, any>; // Add options property
+  options?: Record<string, any>;
 }
 
 export interface BrainHubResponse {

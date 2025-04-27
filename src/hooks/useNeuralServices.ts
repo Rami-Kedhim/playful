@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { BaseNeuralService } from '@/services/neural/modules/BaseNeuralService';
+import { BaseBrainService } from '@/services/neural/modules/BaseNeuralService';
+import type { BaseNeuralService } from '@/services/neural/types/NeuralService';
 
 /**
  * Custom hook for initializing and managing neural services

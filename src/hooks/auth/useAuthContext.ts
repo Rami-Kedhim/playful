@@ -1,7 +1,7 @@
 
 import { createContext, useContext } from 'react';
 
-interface AuthContextType {
+export interface AuthContextType {
   isAuthenticated: boolean;
   user: any | null;
   profile: any | null;
@@ -12,7 +12,7 @@ interface AuthContextType {
   
   // Authentication methods
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => Promise<void>;
+  logout: () => Promise<boolean>;
   signIn: (email: string, password: string) => Promise<boolean>;
   signOut: () => Promise<boolean>;
   register: (email: string, password: string, userData: any) => Promise<boolean>;
@@ -56,7 +56,7 @@ export const useAuthContext = (): AuthContextType => {
       error: null,
       initialized: false,
       login: async () => false,
-      logout: async () => {},
+      logout: async () => false,
       signIn: async () => false,
       signOut: async () => false,
       register: async () => false,

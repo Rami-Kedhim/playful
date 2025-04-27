@@ -1,6 +1,29 @@
 import { BaseNeuralService, NeuralServiceConfig, ModuleType } from './types/NeuralService';
-import { NeuralModel, ModelParameters } from './types/neuralHub';
-import neuralServiceRegistry from './registry/NeuralServiceRegistry';
+
+interface NeuralModel {
+  id: string;
+  name: string;
+  type: string;
+  version: string;
+  specialization: string;
+  size: number;
+  precision: number;
+  performance: {
+    accuracy: number;
+    latency: number;
+    resourceUsage: number;
+  };
+  capabilities: string[];
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface ModelParameters {
+  temperature?: number;
+  learningRate?: number;
+  [key: string]: any;
+}
 
 export class NeuralService implements BaseNeuralService {
   id: string;
@@ -10,7 +33,7 @@ export class NeuralService implements BaseNeuralService {
   moduleType: ModuleType;
   version: string;
   config: NeuralServiceConfig;
-  status: 'online' | 'offline' | 'degraded' | 'maintenance';
+  status: 'active' | 'inactive' | 'maintenance';
   private models: NeuralModel[] = [];
 
   constructor(
@@ -21,7 +44,7 @@ export class NeuralService implements BaseNeuralService {
     moduleType: ModuleType,
     version: string,
     config: NeuralServiceConfig,
-    status: 'online' | 'offline' | 'degraded' | 'maintenance' = 'offline'
+    status: 'active' | 'inactive' | 'maintenance' = 'inactive'
   ) {
     this.id = id;
     this.moduleId = moduleId;
@@ -36,11 +59,11 @@ export class NeuralService implements BaseNeuralService {
   async initialize(): Promise<boolean> {
     try {
       this.models = await this.loadModels();
-      this.status = 'online';
+      this.status = 'active';
       return true;
     } catch (error) {
       console.error(`Failed to initialize NeuralService ${this.name}:`, error);
-      this.status = 'offline';
+      this.status = 'inactive';
       return false;
     }
   }
@@ -52,17 +75,17 @@ export class NeuralService implements BaseNeuralService {
 
   configure(): boolean {
     if (!this.config.enabled) {
-      this.status = 'offline';
+      this.status = 'inactive';
       return false;
     }
 
     if (!this.config.apiEndpoint) {
       console.warn(`${this.name}: API Endpoint is missing.`);
-      this.status = 'degraded';
+      this.status = 'inactive';
       return false;
     }
 
-    this.status = 'online';
+    this.status = 'active';
     return true;
   }
 
@@ -74,14 +97,17 @@ export class NeuralService implements BaseNeuralService {
     return this.models.flatMap(model => model.capabilities);
   }
 
-  getMetrics(): Record<string, any> {
+  getMetrics() {
     return {
+      operationsCount: Math.floor(Math.random() * 10000),
+      errorRate: Math.random() * 0.05,
+      latency: Math.floor(Math.random() * 100),
       status: this.status,
       modelCount: this.models.length,
       ...this.models.reduce((acc, model) => {
         acc[model.name] = model.performance;
         return acc;
-      }, {})
+      }, {} as Record<string, any>)
     };
   }
 

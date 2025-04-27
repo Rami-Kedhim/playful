@@ -62,3 +62,6 @@ export class BaseBrainService implements BaseNeuralServiceInterface {
 
 // Use 'export type' when re-exporting with isolatedModules enabled
 export type { BaseNeuralServiceInterface };
+
+// Export the class as the default for clean imports
+export default BaseBrainService;
