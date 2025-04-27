@@ -28,19 +28,9 @@ export default function checkBrainHubHealth(): BrainHubHealth {
     else if (warnings.length > 0) status = 'warning';
     else status = 'healthy';
     
-    // Map the status to one of the allowed values in BrainHubHealth
-    const mappedStatus: BrainHubHealth['status'] = (() => {
-      switch(status) {
-        case 'healthy': return 'online';
-        case 'warning': return 'degraded';
-        case 'error': return 'offline';
-        default: return 'online';
-      }
-    })();
-    
     // Build health object
     const health: BrainHubHealth = {
-      status: mappedStatus,
+      status,
       metrics: {
         cpuUsage: metrics.cpuUtilization,
         memoryUsage: metrics.memoryUtilization,
