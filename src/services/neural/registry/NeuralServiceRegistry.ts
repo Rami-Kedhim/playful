@@ -1,4 +1,3 @@
-
 interface NeuralService {
   id: string;
   name: string;
@@ -9,6 +8,11 @@ interface NeuralService {
     latency: number;
     [key: string]: any;
   };
+  moduleId?: string;
+  description?: string;
+  moduleType?: string;
+  version?: string;
+  config?: any;
 }
 
 class NeuralServiceRegistry {
@@ -52,6 +56,33 @@ class NeuralServiceRegistry {
         })
       }
     ];
+  }
+
+  async initialize(): Promise<void> {
+    console.log("Initializing Neural Service Registry");
+    return Promise.resolve();
+  }
+
+  registerService(service: NeuralService): boolean {
+    if (this.services.find(s => s.id === service.id)) {
+      console.warn(`Service with ID ${service.id} already exists`);
+      return false;
+    }
+    
+    this.services.push(service);
+    console.log(`Service ${service.id} registered successfully`);
+    return true;
+  }
+  
+  getServicesByModule(moduleType: string): NeuralService[] {
+    return this.services.filter(service => 
+      service.moduleType === moduleType
+    );
+  }
+
+  optimizeResourceAllocation(): void {
+    console.log("Optimizing resource allocation for neural services");
+    // Mock implementation
   }
 
   getAllServices(): NeuralService[] {

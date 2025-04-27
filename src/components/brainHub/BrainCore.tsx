@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { brainHubAutoDevOpsManager } from '../../services/neural/BrainHubAutoDevOpsManager';
+import { brainHub } from '../../services/neural/HermesOxumBrainHub';
 
 interface BrainCoreProps {
   initialRequestType: string;
@@ -18,8 +18,8 @@ const BrainCore: React.FC<BrainCoreProps> = ({ initialRequestType }) => {
       };
 
       try {
-        const result = await brainHubAutoDevOpsManager.processRequest(requestData);
-        setResponse(result);
+        const result = await brainHub.processRequest(requestData);
+        setResponse(JSON.stringify(result.data || "Success"));
       } catch (error) {
         console.error("Error processing request:", error);
         setResponse("Error processing request. See console for details.");

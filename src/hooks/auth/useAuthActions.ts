@@ -1,5 +1,5 @@
 
-import { useAuthContext } from './useAuthContext';
+import { useAuth } from './useAuthContext';
 
 export const useAuthActions = () => {
   const { 
@@ -19,7 +19,7 @@ export const useAuthActions = () => {
     verifyEmail,
     updatePassword,
     deleteAccount
-  } = useAuthContext();
+  } = useAuth();
 
   return {
     signIn,

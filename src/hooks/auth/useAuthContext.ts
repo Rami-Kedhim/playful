@@ -7,11 +7,19 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   register: (email: string, password: string, userData: any) => Promise<boolean>;
+  // Add missing properties that components are trying to use
+  signOut: () => Promise<boolean>;
+  isLoading: boolean;
+  updateUserProfile: (data: any) => Promise<boolean>;
+  deleteAccount: () => Promise<boolean>;
+  updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
+  checkRole: (role: string) => boolean;
+  profile: any | null;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-export const useAuth = (): AuthContextType => {
+export const useAuthContext = (): AuthContextType => {
   const context = useContext(AuthContext);
   
   if (!context) {
@@ -21,13 +29,22 @@ export const useAuth = (): AuthContextType => {
     return {
       isAuthenticated: false,
       user: null,
+      profile: null,
+      isLoading: false,
       login: async () => false,
       logout: async () => {},
-      register: async () => false
+      signOut: async () => false,
+      register: async () => false,
+      updateUserProfile: async () => false,
+      deleteAccount: async () => false,
+      updatePassword: async () => false,
+      checkRole: () => false
     };
   }
   
   return context;
 };
+
+export const useAuth = useAuthContext;
 
 export default useAuth;
