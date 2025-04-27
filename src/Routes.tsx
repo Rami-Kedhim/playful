@@ -6,6 +6,9 @@ import ProfilePage from './pages/ProfilePage';
 import WalletPage from './pages/WalletPage';
 import SearchPage from './pages/SearchPage';
 import PulseBoostPage from './pages/PulseBoostPage';
+import AdminPage from './pages/AdminPage';
+import ModerationPage from './pages/ModerationPage';
+import UnauthorizedPage from './pages/UnauthorizedPage';
 
 // Create stub components for missing pages
 const StubPage = ({ title }: { title: string }) => (
@@ -90,6 +93,11 @@ const Routes = () => {
       <Route path="/companion" element={<CompanionPage />} />
       <Route path="/personas" element={<PersonaListingPage />} />
       <Route path="/persona/:id" element={<PersonaDetailPage />} />
+      
+      {/* Admin and moderation routes */}
+      <Route path="/admin-dashboard" element={<AdminPage />} />
+      <Route path="/moderation" element={<ModerationPage />} />
+      <Route path="/unauthorized" element={<UnauthorizedPage />} />
       
       {/* Footer links from home page */}
       <Route path="/ethics" element={<EthicsPage />} />
