@@ -1,3 +1,4 @@
+
 interface BrainHubStatus {
   cpuUtilization: number;
   memoryUtilization: number;
@@ -28,6 +29,27 @@ export interface BrainHubConfig {
     neuralDensity: number;
     layerConfiguration: string;
   };
+  // Add missing domain-specific settings
+  psychology: {
+    enabled: boolean;
+    confidenceThreshold: number;
+  };
+  physics: {
+    enabled: boolean;
+    simulationPrecision: number;
+  };
+  economics: {
+    enabled: boolean;
+    marketModelVersion: string;
+  };
+  robotics: {
+    enabled: boolean;
+    motorPrecision: number;
+  };
+  // Feature flags
+  geoLegalFilteringEnabled: boolean;
+  neuroEmotionEnabled: boolean;
+  predictiveModulationEnabled: boolean;
 }
 
 export class HermesOxumBrainHubService {
@@ -61,7 +83,28 @@ export class HermesOxumBrainHubService {
       activationThreshold: 0.7,
       neuralDensity: 0.5,
       layerConfiguration: 'auto'
-    }
+    },
+    // Add domain-specific settings
+    psychology: {
+      enabled: true,
+      confidenceThreshold: 0.75
+    },
+    physics: {
+      enabled: true,
+      simulationPrecision: 0.95
+    },
+    economics: {
+      enabled: true,
+      marketModelVersion: "2.0"
+    },
+    robotics: {
+      enabled: false,
+      motorPrecision: 0.8
+    },
+    // Feature flags
+    geoLegalFilteringEnabled: true,
+    neuroEmotionEnabled: true,
+    predictiveModulationEnabled: false
   };
   
   private decisionLogs: Array<{
@@ -128,6 +171,22 @@ export class HermesOxumBrainHubService {
       neuralSettings: {
         ...this.config.neuralSettings,
         ...(config.neuralSettings || {})
+      },
+      psychology: {
+        ...this.config.psychology,
+        ...(config.psychology || {})
+      },
+      physics: {
+        ...this.config.physics,
+        ...(config.physics || {})
+      },
+      economics: {
+        ...this.config.economics,
+        ...(config.economics || {})
+      },
+      robotics: {
+        ...this.config.robotics,
+        ...(config.robotics || {})
       }
     };
   }

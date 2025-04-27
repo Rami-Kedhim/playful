@@ -1,26 +1,29 @@
 
-import { BaseNeuralService } from './BaseNeuralService';
-import { ModuleType } from '../types/NeuralService';
+import { BaseBrainService } from './BaseNeuralService';
 
-export class AICompanionNeuralService extends BaseNeuralService {
+export class AICompanionNeuralService extends BaseBrainService {
   constructor() {
-    super(
-      'AICompanionNeuralService', 
-      'ai_companions', 
-      'AI Companion Neural Service',
-      '1.0.0',
-      'Neural service for AI companions and virtual entities'
-    );
+    super({
+      name: 'AI Companion Neural Service',
+      moduleId: 'ai-companion-neural',
+      description: 'Neural processing for AI companions and conversations',
+      moduleType: 'ai-companion',
+      version: '2.0.1'
+    });
   }
   
-  override getCapabilities(): string[] {
-    return [
-      'personality-modeling',
-      'dialogue-generation',
-      'emotional-intelligence',
-      'memory-retention',
-      'contextual-responses',
-      'learning-adaptation'
-    ];
+  async initialize(): Promise<boolean> {
+    console.log(`Initializing AI Companion Neural Service...`);
+    // Mock initialization
+    return true;
+  }
+  
+  getMetrics() {
+    return {
+      ...super.getMetrics(),
+      conversationalDepth: 0.85 + Math.random() * 0.15,
+      personalityConsistency: 0.9 + Math.random() * 0.1,
+      responsiveness: 0.95 + Math.random() * 0.05
+    };
   }
 }

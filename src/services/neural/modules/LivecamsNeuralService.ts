@@ -1,24 +1,28 @@
 
-import { BaseNeuralService } from './BaseNeuralService';
-import { ModuleType } from '../types/NeuralService';
+import { BaseBrainService } from './BaseNeuralService';
 
-export class LivecamsNeuralService extends BaseNeuralService {
+export class LivecamsNeuralService extends BaseBrainService {
   constructor() {
-    super(
-      'LivecamsNeuralService', 
-      'livecams' as ModuleType, 
-      'Livecams Neural Service',
-      '1.0.0'
-    );
+    super({
+      name: 'Livecams Neural Service',
+      moduleId: 'livecams-neural',
+      description: 'Neural processing for livecam streams and interactions',
+      moduleType: 'livecams',
+      version: '1.1.2'
+    });
   }
   
-  override getCapabilities(): string[] {
-    return [
-      'stream-quality-optimization',
-      'audience-targeting',
-      'engagement-metrics',
-      'recommendation-engine',
-      'performance-analytics'
-    ];
+  async initialize(): Promise<boolean> {
+    console.log(`Initializing Livecams Neural Service...`);
+    // Mock initialization
+    return true;
+  }
+  
+  getMetrics() {
+    return {
+      ...super.getMetrics(),
+      streamQuality: 0.9 + Math.random() * 0.1,
+      viewerSatisfaction: 0.8 + Math.random() * 0.2
+    };
   }
 }

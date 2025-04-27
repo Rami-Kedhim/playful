@@ -1,46 +1,38 @@
 
-// Added export type for isolatedModules compliance
-
-export type ModuleType = 
-  | 'escorts'
-  | 'creators'
-  | 'livecams'
-  | 'ai_companions'
-  | 'core'
-  | 'security'
-  | 'analytics'
-  | 'ai-companion'; // Adding for backward compatibility
-
 export interface NeuralServiceConfig {
   enabled: boolean;
-  apiEndpoint?: string;
-  apiKey?: string;
-  version: string;
-  loadThreshold?: number;
-  debugMode?: boolean;
-  modelParameters?: Record<string, any>;
-  customSettings?: Record<string, any>;
-  priority?: number;
-  autonomyLevel?: number;
-  resourceAllocation?: number;
+  sensitivity: number;
+  threshold: number;
+  mode: string;
+  [key: string]: any;
 }
 
 export interface BaseNeuralService {
   id: string;
-  moduleId: string;
   name: string;
+  moduleId: string;
   description: string;
-  moduleType: ModuleType;
+  moduleType: string;
   version: string;
+  status: 'active' | 'inactive' | 'maintenance';
   config: NeuralServiceConfig;
-  status: 'online' | 'offline' | 'degraded' | 'maintenance';
-  
-  initialize(): Promise<boolean>;
-  updateConfig(config: Partial<NeuralServiceConfig>): void;
-  configure(): boolean;
-  getStatus(): string;
-  getCapabilities(): string[];
-  getMetrics(): Record<string, any>;
+  initialize: () => Promise<boolean>;
+  updateConfig: (config: Partial<NeuralServiceConfig>) => void;
+  getMetrics: () => {
+    operationsCount: number;
+    errorRate: number;
+    latency: number;
+    [key: string]: any;
+  };
 }
 
-export type { BaseNeuralService as BaseService };
+export interface NeuralServiceRegistry {
+  initialize: () => Promise<void>;
+  registerService: (service: BaseNeuralService) => boolean;
+  getService: (id: string) => BaseNeuralService | undefined;
+  getAllServices: () => BaseNeuralService[];
+  getServicesByModule: (moduleType: string) => BaseNeuralService[];
+  optimizeResourceAllocation: () => void;
+}
+
+export type ModuleType = string;

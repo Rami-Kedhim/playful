@@ -1,41 +1,34 @@
 
-import { ModuleType, NeuralServiceConfig, BaseNeuralService as INeuralService } from '../types/NeuralService';
+import { BaseNeuralService, NeuralServiceConfig } from '../types/NeuralService';
 
-export abstract class BaseNeuralService implements INeuralService {
+export class BaseBrainService implements BaseNeuralService {
   id: string;
-  moduleId: string;
   name: string;
+  moduleId: string;
   description: string;
-  moduleType: ModuleType;
+  moduleType: string;
   version: string;
+  status: 'active' | 'inactive' | 'maintenance';
   config: NeuralServiceConfig;
-  status: 'online' | 'offline' | 'degraded' | 'maintenance' = 'offline';
   
-  constructor(
-    id: string,
-    moduleType: ModuleType,
-    name: string,
-    version: string,
-    description: string = ''
-  ) {
-    this.id = id;
-    this.moduleId = id.toLowerCase().replace(/\s+/g, '-');
-    this.name = name;
-    this.description = description || `${name} neural service module`;
-    this.moduleType = moduleType;
-    this.version = version;
-    this.config = {
-      enabled: false,
-      version: version,
-      priority: 50,
-      autonomyLevel: 50,
-      resourceAllocation: 30
+  constructor(initialConfig: Partial<BaseNeuralService> = {}) {
+    this.id = initialConfig.id || `service-${Math.random().toString(36).substring(2, 9)}`;
+    this.name = initialConfig.name || 'Generic Neural Service';
+    this.moduleId = initialConfig.moduleId || this.id;
+    this.description = initialConfig.description || 'A generic neural service';
+    this.moduleType = initialConfig.moduleType || 'general';
+    this.version = initialConfig.version || '1.0.0';
+    this.status = initialConfig.status || 'active';
+    this.config = initialConfig.config || {
+      enabled: true,
+      sensitivity: 0.7,
+      threshold: 0.5,
+      mode: 'standard'
     };
   }
   
   async initialize(): Promise<boolean> {
-    console.log(`Initializing neural service: ${this.name}`);
-    this.status = 'online';
+    console.log(`Initializing ${this.name} (${this.moduleId})...`);
     return true;
   }
   
@@ -44,27 +37,16 @@ export abstract class BaseNeuralService implements INeuralService {
       ...this.config,
       ...config
     };
-    console.log(`Updated configuration for ${this.name}`);
+    console.log(`Updated config for ${this.name}:`, this.config);
   }
   
-  configure(): boolean {
-    console.log(`Configuring neural service: ${this.name}`);
-    return true;
-  }
-  
-  getStatus(): string {
-    return this.status;
-  }
-  
-  getCapabilities(): string[] {
-    return [];
-  }
-  
-  getMetrics(): Record<string, any> {
+  getMetrics() {
     return {
-      uptime: Math.floor(Math.random() * 1000000),
-      requests: Math.floor(Math.random() * 1000),
-      latency: Math.random() * 100
+      operationsCount: Math.floor(Math.random() * 10000),
+      errorRate: Math.random() * 2,
+      latency: Math.floor(Math.random() * 100)
     };
   }
 }
+
+export { BaseNeuralService };
