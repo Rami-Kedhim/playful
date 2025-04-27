@@ -1,6 +1,6 @@
 
 export interface BrainHubHealth {
-  status: 'online' | 'offline' | 'degraded' | 'maintenance' | 'healthy' | 'warning' | 'error' | 'unknown';
+  status: 'healthy' | 'warning' | 'error' | 'offline' | 'degraded' | 'maintenance' | 'online' | 'unknown';
   metrics: {
     cpuUsage: number;
     memoryUsage: number;
@@ -21,11 +21,11 @@ export interface BrainHubAnalytics {
   dailyOperations: number;
   averageResponseTime: number;
   errorRate: number;
-  utilizationTrend: {
+  utilizationTrend: Array<{
     timestamp: number;
     cpuUsage: number;
     memoryUsage: number;
     operations: number;
-  }[];
+  }>;
   recommendations: string[];
 }

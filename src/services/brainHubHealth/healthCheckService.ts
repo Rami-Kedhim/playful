@@ -2,9 +2,6 @@
 import { BrainHubHealth } from "@/types/brainHubHealth";
 import { brainHub } from "../neural/HermesOxumBrainHub";
 
-/**
- * Check the current health status of the Brain Hub
- */
 export default function checkBrainHubHealth(): BrainHubHealth {
   try {
     // Get system status from brain hub
@@ -35,7 +32,12 @@ export default function checkBrainHubHealth(): BrainHubHealth {
         cpuUsage: metrics.cpuUtilization,
         memoryUsage: metrics.memoryUtilization,
         requestsPerMinute: metrics.operationsPerSecond / 60,
-        lastOptimized: Date.now() - (1000 * 60 * 60) // 1 hour ago
+        lastOptimized: Date.now() - (1000 * 60 * 60), // 1 hour ago
+        neuralMetrics: {
+          accuracy: metrics.neuralAccuracy || 0,
+          efficiency: metrics.neuralEfficiency || 0,
+          latency: metrics.neuralLatency || 0
+        }
       },
       warnings,
       errors
