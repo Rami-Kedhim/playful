@@ -2,15 +2,16 @@
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import AdminDashboard from '@/components/admin/AdminDashboard';
-import RoleBasedRoute from '@/components/auth/RoleBasedRoute';
 
-const AdminPage = () => {
+const AdminPage: React.FC = () => {
   return (
-    <RoleBasedRoute allowedRoles={['admin']}>
-      <MainLayout>
-        <AdminDashboard />
-      </MainLayout>
-    </RoleBasedRoute>
+    <MainLayout
+      title="Admin Dashboard"
+      description="System administration and monitoring"
+      requireAuth={true}
+    >
+      <AdminDashboard />
+    </MainLayout>
   );
 };
 
