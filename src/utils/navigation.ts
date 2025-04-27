@@ -1,3 +1,4 @@
+
 // Navigation constants and utilities
 
 export const AppRoutes = {
@@ -21,16 +22,34 @@ export const AppRoutes = {
   WALLET: '/wallet',
   VERIFICATION: '/verification',
   PERSONAS: '/personas',
+  PERSONA_DETAIL: '/persona/:id',
   SAFETY_ROUTE_SHARE: '/safety/route-share',
   PULSE_BOOST: '/pulse-boost',
-  SETTINGS: '/settings'
+  SETTINGS: '/settings',
+  ADMIN: '/admin',
+  MODERATION: '/moderation',
+  LUCIE: '/lucie',
+  OXUM: '/oxum',
+  HERMES: '/hermes',
+  ORUS: '/orus',
+  ETHICS: '/ethics'
 };
 
 export const ServiceCategories = {
   LIVECAMS: 'livecams',
   AI_COMPANION: 'ai-companions',
   BRAIN_HUB: 'brain-hub',
-  SAFETY: 'safety'
+  SAFETY: 'safety',
+  UBERPERSONA: 'personas',
+  CORE_SYSTEMS: 'core'
+};
+
+export const UberCoreComponents = {
+  LUCIE: 'lucie',
+  OXUM: 'oxum',
+  HERMES: 'hermes',
+  ORUS: 'orus',
+  WALLET: 'wallet'
 };
 
 export interface Breadcrumb {
@@ -69,6 +88,9 @@ export const getBreadcrumbsFromPath = (path: string): Breadcrumb[] => {
       label = 'Brain Hub';
     } else if (part === 'route-share' && parts[i-1] === 'safety') {
       label = 'Route Sharing';
+    } else if (UberCoreComponents[part.toUpperCase()]) {
+      // Special handling for UberCore components
+      label = part.charAt(0).toUpperCase() + part.slice(1);
     }
     
     breadcrumbs.push({
@@ -78,4 +100,19 @@ export const getBreadcrumbsFromPath = (path: string): Breadcrumb[] => {
   }
 
   return breadcrumbs;
+};
+
+// Helper function to check if a path is related to UberCore
+export const isUberCorePath = (path: string): boolean => {
+  const corePaths = Object.values(UberCoreComponents).map(c => c.toLowerCase());
+  const pathSegment = path.split('/').filter(p => p)[0]?.toLowerCase();
+  return corePaths.includes(pathSegment);
+};
+
+// Helper function for determining active link
+export const isActivePath = (currentPath: string, linkPath: string): boolean => {
+  if (linkPath === '/') {
+    return currentPath === '/';
+  }
+  return currentPath.startsWith(linkPath);
 };

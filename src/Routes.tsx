@@ -9,6 +9,7 @@ import PulseBoostPage from './pages/PulseBoostPage';
 import AdminPage from './pages/AdminPage';
 import ModerationPage from './pages/ModerationPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
+import BrainHubPage from './pages/BrainHubPage';
 
 // Create stub components for missing pages
 const StubPage = ({ title }: { title: string }) => (
@@ -58,6 +59,10 @@ const Livecam = () => <StubPage title="Livecams" />;
 const LivecamDetail = () => <StubPage title="Livecam Detail" />;
 const AIModelPage = () => <StubPage title="AI Models" />;
 const AIModelDetail = () => <StubPage title="AI Model Detail" />;
+const LuciePage = () => <StubPage title="Lucie AI" />;
+const OxumPage = () => <StubPage title="Oxum Boosting System" />;
+const HermesPage = () => <StubPage title="Hermes Flow Dynamics" />;
+const OrusPage = () => <StubPage title="Orus Security" />;
 
 const Routes = () => {
   return (
@@ -94,8 +99,16 @@ const Routes = () => {
       <Route path="/personas" element={<PersonaListingPage />} />
       <Route path="/persona/:id" element={<PersonaDetailPage />} />
       
+      {/* UberCore components */}
+      <Route path="/brain-hub" element={<BrainHubPage />} />
+      <Route path="/lucie" element={<LuciePage />} />
+      <Route path="/oxum" element={<OxumPage />} />
+      <Route path="/hermes" element={<HermesPage />} />
+      <Route path="/orus" element={<OrusPage />} />
+      
       {/* Admin and moderation routes */}
-      <Route path="/admin-dashboard" element={<AdminPage />} />
+      <Route path="/admin" element={<AdminPage />} /> {/* Main admin route */}
+      <Route path="/admin-dashboard" element={<AdminPage />} /> {/* Alternate path for compatibility */}
       <Route path="/moderation" element={<ModerationPage />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
       

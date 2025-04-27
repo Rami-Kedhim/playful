@@ -11,15 +11,78 @@ import OxumRuleComplianceMonitor from './dashboard/OxumRuleComplianceMonitor';
 import TimeImpactCard from './dashboard/TimeImpactCard';
 import HermesSeoConnector from './dashboard/HermesSeoConnector';
 import SEOModule from './dashboard/SEOModule';
+import { uberCoreInstance } from '@/core/UberCore';
 
 const AdminDashboard: React.FC = () => {
   const { highestRole } = useRole();
   const { t } = useTranslation();
   
   const [systemLoad, setSystemLoad] = React.useState(42);
+  const [systemStatus, setSystemStatus] = React.useState(uberCoreInstance.getSystemStatus());
   
   const handleSystemLoadChange = (value: number[]) => {
     setSystemLoad(value[0]);
+    // Update UberCore system load
+    if (value[0] !== systemLoad) {
+      // This would update the actual system load in a real implementation
+      console.log(`Updating system load to ${value[0]}`);
+    }
+  };
+
+  // Fetch system status periodically
+  React.useEffect(() => {
+    const fetchSystemStatus = () => {
+      const status = uberCoreInstance.getSystemStatus();
+      setSystemStatus(status);
+    };
+
+    // Initial fetch
+    fetchSystemStatus();
+
+    // Set up interval for updates
+    const intervalId = setInterval(fetchSystemStatus, 30000);
+
+    // Clean up
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // Default translations
+  const defaultTranslations = {
+    admin: {
+      userManagement: {
+        title: "User Management",
+        description: "Manage user accounts and permissions",
+        addUser: "Add New User",
+        emptyState: "User list would appear here"
+      },
+      systemSettings: {
+        title: "System Settings",
+        description: "Configure global system parameters",
+        emptyState: "System configuration options would appear here"
+      }
+    }
+  };
+
+  const tWithFallback = (key: string) => {
+    // Try to use the translation from i18n, but fall back to our defaults if not available
+    const translation = t(key);
+    if (translation === key) {
+      // Translation not found, use our fallback
+      const parts = key.split('.');
+      let current: any = defaultTranslations;
+      
+      for (const part of parts) {
+        if (current && current[part]) {
+          current = current[part];
+        } else {
+          return key; // Fallback failed too
+        }
+      }
+      
+      return current;
+    }
+    
+    return translation;
   };
 
   return (
@@ -65,16 +128,16 @@ const AdminDashboard: React.FC = () => {
         <TabsContent value="users">
           <Card>
             <CardHeader>
-              <CardTitle>{t("admin.userManagement.title")}</CardTitle>
-              <CardDescription>{t("admin.userManagement.description")}</CardDescription>
+              <CardTitle>{tWithFallback("admin.userManagement.title")}</CardTitle>
+              <CardDescription>{tWithFallback("admin.userManagement.description")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex justify-end mb-4">
-                <Button>{t("admin.userManagement.addUser")}</Button>
+                <Button>{tWithFallback("admin.userManagement.addUser")}</Button>
               </div>
               <div className="border rounded-md p-4">
                 <p className="text-center text-muted-foreground">
-                  {t("admin.userManagement.emptyState")}
+                  {tWithFallback("admin.userManagement.emptyState")}
                 </p>
               </div>
             </CardContent>
@@ -84,13 +147,13 @@ const AdminDashboard: React.FC = () => {
         <TabsContent value="settings">
           <Card>
             <CardHeader>
-              <CardTitle>{t("admin.systemSettings.title")}</CardTitle>
-              <CardDescription>{t("admin.systemSettings.description")}</CardDescription>
+              <CardTitle>{tWithFallback("admin.systemSettings.title")}</CardTitle>
+              <CardDescription>{tWithFallback("admin.systemSettings.description")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="border rounded-md p-4">
                 <p className="text-center text-muted-foreground">
-                  {t("admin.systemSettings.emptyState")}
+                  {tWithFallback("admin.systemSettings.emptyState")}
                 </p>
               </div>
             </CardContent>
