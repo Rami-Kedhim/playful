@@ -2,37 +2,10 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNeuralAnalyticsDashboard } from '@/hooks/useNeuralAnalyticsDashboard';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import MainLayout from '@/components/layout/MainLayout';
-import { ArrowUp, ArrowDown } from 'lucide-react';
-
-const MetricCard = ({ title, value, change, unit }: { 
-  title: string;
-  value: number;
-  change: number;
-  unit: string;
-}) => (
-  <Card>
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        {change !== 0 && (
-          <span className={`flex items-center ${change > 0 ? 'text-green-500' : 'text-red-500'}`}>
-            {change > 0 ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
-            {Math.abs(change)}%
-          </span>
-        )}
-      </div>
-      <h3 className="text-2xl font-bold mt-2">
-        {value}
-        <span className="text-sm font-normal text-muted-foreground ml-1">
-          {unit}
-        </span>
-      </h3>
-    </CardContent>
-  </Card>
-);
+import MetricsGrid from '@/components/analytics/MetricsGrid';
+import PerformanceChart from '@/components/analytics/PerformanceChart';
 
 const NeuralAnalyticsDashboard = () => {
   const { 
@@ -68,34 +41,7 @@ const NeuralAnalyticsDashboard = () => {
           </Alert>
         )}
 
-        {keyMetrics && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <MetricCard 
-              title="Response Time" 
-              value={keyMetrics.responseTime.value} 
-              change={keyMetrics.responseTime.change}
-              unit={keyMetrics.responseTime.unit}
-            />
-            <MetricCard 
-              title="Accuracy" 
-              value={keyMetrics.accuracy.value} 
-              change={keyMetrics.accuracy.change}
-              unit={keyMetrics.accuracy.unit}
-            />
-            <MetricCard 
-              title="Error Rate" 
-              value={keyMetrics.errorRate.value} 
-              change={keyMetrics.errorRate.change}
-              unit={keyMetrics.errorRate.unit}
-            />
-            <MetricCard 
-              title="Total Operations" 
-              value={keyMetrics.operations.value} 
-              change={keyMetrics.operations.change}
-              unit={keyMetrics.operations.unit}
-            />
-          </div>
-        )}
+        {keyMetrics && <MetricsGrid metrics={Object.values(keyMetrics)} />}
 
         <Card>
           <CardHeader>
@@ -130,22 +76,11 @@ const NeuralAnalyticsDashboard = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="h-[400px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={analyticsData?.usageMetrics?.dailyUsageTrend || []}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke="#8884d8" 
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <PerformanceChart 
+              data={analyticsData?.usageMetrics?.dailyUsageTrend || []}
+              dataKey="value"
+              title={`${activeChart.charAt(0).toUpperCase() + activeChart.slice(1)} Metrics`}
+            />
           </CardContent>
         </Card>
       </div>
