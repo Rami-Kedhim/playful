@@ -61,7 +61,7 @@ export const generateNeuralAnalytics = (): NeuralAnalyticsReport => {
       'Implement caching layer for frequently analyzed content'
     ],
     
-    // Model performance metrics with map array for chart
+    // Model performance metrics with mapData array for chart
     modelPerformance: {
       accuracy: 0.921,
       precision: 0.934,
@@ -69,7 +69,7 @@ export const generateNeuralAnalytics = (): NeuralAnalyticsReport => {
       f1Score: 0.915,
       latency: 143,
       throughput: 1580,
-      map: [
+      mapData: [
         { key: 'Accuracy', value: 0.921 },
         { key: 'Precision', value: 0.934 },
         { key: 'Recall', value: 0.897 },
@@ -127,14 +127,14 @@ export const generateNeuralAnalytics = (): NeuralAnalyticsReport => {
       ]
     },
     
-    // Advanced metrics with map for chart
+    // Advanced metrics with mapData for chart
     advancedMetrics: {
       resourceUtilization: 0.78,
       efficientUseScore: 0.85,
       loadBalancingEfficiency: 0.92,
       cachingEffectiveness: 0.74,
       algorithmicEfficiency: 0.89,
-      map: [
+      mapData: [
         { key: "Resource Utilization", value: 0.78 },
         { key: "Efficient Use Score", value: 0.85 },
         { key: "Load Balancing", value: 0.92 },
@@ -156,7 +156,7 @@ export const generateNeuralAnalytics = (): NeuralAnalyticsReport => {
       maxCorrelation: 0.8,
       minCorrelation: -0.8,
       averageCorrelation: 0.4,
-      metrics: [
+      metricsList: [
         { name: "CPU-Memory", value: 0.8 },
         { name: "Latency-Throughput", value: -0.8 },
         { name: "CPU-Error Rate", value: 0.3 },

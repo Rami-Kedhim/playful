@@ -43,7 +43,7 @@ export interface NeuralAnalyticsReport {
     latency: number;
     throughput: number;
     // Changed to Array instead of function signature
-    map: Array<{
+    mapData: Array<{
       key: string;
       value: number;
     }>;
@@ -97,7 +97,7 @@ export interface NeuralAnalyticsReport {
     loadBalancingEfficiency: number;
     cachingEffectiveness: number;
     algorithmicEfficiency: number;
-    map: Array<{
+    mapData: Array<{
       key: string;
       value: number;
     }>;
@@ -110,7 +110,7 @@ export interface NeuralAnalyticsReport {
     maxCorrelation: number;
     minCorrelation: number;
     averageCorrelation: number;
-    metrics: Array<{
+    metricsList: Array<{
       name: string;
       value: number;
     }>;
