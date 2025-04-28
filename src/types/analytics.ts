@@ -13,4 +13,5 @@ export interface PerformanceChartProps {
   }[];
   dataKey: string;
   title?: string;
+  onRefresh?: () => void;
 }

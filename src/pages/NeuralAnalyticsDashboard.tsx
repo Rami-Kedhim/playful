@@ -6,6 +6,31 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import MainLayout from '@/components/layout/MainLayout';
 import MetricsGrid from '@/components/analytics/MetricsGrid';
 import PerformanceChart from '@/components/analytics/PerformanceChart';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const LoadingMetrics = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    {[...Array(4)].map((_, i) => (
+      <Card key={i} className="bg-card">
+        <CardContent className="p-6">
+          <Skeleton className="h-4 w-[100px] mb-2" />
+          <Skeleton className="h-8 w-[120px]" />
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+);
+
+const LoadingChart = () => (
+  <Card>
+    <CardHeader>
+      <Skeleton className="h-6 w-[200px]" />
+    </CardHeader>
+    <CardContent>
+      <Skeleton className="h-[400px] w-full" />
+    </CardContent>
+  </Card>
+);
 
 const NeuralAnalyticsDashboard = () => {
   const { 
@@ -19,14 +44,23 @@ const NeuralAnalyticsDashboard = () => {
   } = useNeuralAnalyticsDashboard();
 
   if (loading) {
-    return <div className="flex items-center justify-center h-96">Loading analytics...</div>;
+    return (
+      <MainLayout title="Neural Analytics Dashboard" description="Real-time neural system analytics">
+        <div className="space-y-6">
+          <LoadingMetrics />
+          <LoadingChart />
+        </div>
+      </MainLayout>
+    );
   }
 
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
+      <MainLayout title="Neural Analytics Dashboard" description="Real-time neural system analytics">
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      </MainLayout>
     );
   }
 
@@ -76,30 +110,17 @@ const NeuralAnalyticsDashboard = () => {
             <div className="flex items-center justify-between">
               <CardTitle>Neural System Performance</CardTitle>
               <div className="flex gap-2">
-                <button
-                  onClick={() => setActiveChart('usage')}
-                  className={`px-3 py-1 rounded ${
-                    activeChart === 'usage' ? 'bg-primary text-white' : 'bg-secondary'
-                  }`}
-                >
-                  Usage
-                </button>
-                <button
-                  onClick={() => setActiveChart('performance')}
-                  className={`px-3 py-1 rounded ${
-                    activeChart === 'performance' ? 'bg-primary text-white' : 'bg-secondary'
-                  }`}
-                >
-                  Performance
-                </button>
-                <button
-                  onClick={() => setActiveChart('forecast')}
-                  className={`px-3 py-1 rounded ${
-                    activeChart === 'forecast' ? 'bg-primary text-white' : 'bg-secondary'
-                  }`}
-                >
-                  Forecast
-                </button>
+                {['usage', 'performance', 'forecast'].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setActiveChart(type as any)}
+                    className={`px-3 py-1 rounded capitalize ${
+                      activeChart === type ? 'bg-primary text-white' : 'bg-secondary'
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
               </div>
             </div>
           </CardHeader>
