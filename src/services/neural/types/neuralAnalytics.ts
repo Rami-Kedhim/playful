@@ -34,7 +34,7 @@ export interface NeuralAnalyticsReport {
   };
   recommendations: string[];
   
-  // Add missing properties needed by NeuralAnalyticsPanel
+  // Model performance metrics with map as an array, not callable
   modelPerformance: {
     accuracy: number;
     precision: number;
@@ -42,13 +42,14 @@ export interface NeuralAnalyticsReport {
     f1Score: number;
     latency: number;
     throughput: number;
-    // Fix map property that component is trying to access
+    // Changed to Array instead of function signature
     map: Array<{
       key: string;
       value: number;
     }>;
   };
   
+  // Operational metrics with change indicators
   operationalMetrics: {
     totalRequests: number;
     successfulRequests: number;
@@ -59,7 +60,6 @@ export interface NeuralAnalyticsReport {
     requestsPerMinute: number;
     errorRate: number;
     activeConnections: number;
-    // Add missing properties used by NeuralAnalyticsPanel
     totalOperations: number;
     operationsChange: number;
     averageAccuracy: number;
@@ -68,6 +68,7 @@ export interface NeuralAnalyticsReport {
     errorRateChange: number;
   };
   
+  // Usage metrics
   usageMetrics: {
     dailyActiveUsers: number;
     monthlyActiveUsers: number;
@@ -75,7 +76,6 @@ export interface NeuralAnalyticsReport {
     sessionsPerUser: number;
     averageSessionDuration: number;
     retentionRate: number;
-    // Add missing properties used by NeuralAnalyticsPanel
     serviceTypeDistribution: Array<{
       name: string;
       value: number;
@@ -90,26 +90,26 @@ export interface NeuralAnalyticsReport {
     }>;
   };
   
+  // Advanced metrics with map as an array, not callable
   advancedMetrics: {
     resourceUtilization: number;
     efficientUseScore: number;
     loadBalancingEfficiency: number;
     cachingEffectiveness: number;
     algorithmicEfficiency: number;
-    // Fix map property that component is trying to access
     map: Array<{
       key: string;
       value: number;
     }>;
   };
   
+  // Correlation matrix with metrics for display
   correlationMatrix: {
     labels: string[];
     values: number[][];
     maxCorrelation: number;
     minCorrelation: number;
     averageCorrelation: number;
-    // Add metrics property used in NeuralAnalyticsPanel
     metrics: Array<{
       name: string;
       value: number;
