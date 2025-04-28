@@ -3,6 +3,9 @@ import { NeuralAnalyticsReport, PerformanceTrend } from '../types/neuralAnalytic
 
 // Generate mock neural analytics report for the demo
 export const generateNeuralAnalytics = (): NeuralAnalyticsReport => {
+  // Generate forecast data
+  const forecastData = generatePerformanceForecast(7);
+  
   return {
     timestamp: new Date().toISOString(),
     serviceMetrics: [
@@ -163,7 +166,10 @@ export const generateNeuralAnalytics = (): NeuralAnalyticsReport => {
         { name: "Memory-Throughput", value: -0.4 },
         { name: "Throughput-Error Rate", value: -0.6 }
       ]
-    }
+    },
+    
+    // Add the performance forecast data to the analytics report
+    performanceForecast: forecastData
   };
 };
 

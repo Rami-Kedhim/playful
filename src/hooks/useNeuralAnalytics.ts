@@ -11,7 +11,6 @@ import {
 
 export function useNeuralAnalytics(updateFrequencyMs = 30000) {
   const [analyticsData, setAnalyticsData] = useState<NeuralAnalyticsReport | null>(null);
-  const [forecastData, setForecastData] = useState<PerformanceTrend[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -21,11 +20,9 @@ export function useNeuralAnalytics(updateFrequencyMs = 30000) {
     const fetchAnalytics = () => {
       try {
         const report = generateNeuralAnalytics();
-        const forecast = generatePerformanceForecast(7);
         
         if (mounted) {
           setAnalyticsData(report);
-          setForecastData(forecast);
           setLoading(false);
           setError(null);
         }
@@ -53,9 +50,7 @@ export function useNeuralAnalytics(updateFrequencyMs = 30000) {
     setLoading(true);
     try {
       const report = generateNeuralAnalytics();
-      const forecast = generatePerformanceForecast(7);
       setAnalyticsData(report);
-      setForecastData(forecast);
       setError(null);
     } catch (err) {
       setError(`Failed to refresh analytics: ${err instanceof Error ? err.message : String(err)}`);
@@ -66,7 +61,6 @@ export function useNeuralAnalytics(updateFrequencyMs = 30000) {
   
   return {
     analyticsData,
-    forecastData,
     loading,
     error,
     refreshAnalytics

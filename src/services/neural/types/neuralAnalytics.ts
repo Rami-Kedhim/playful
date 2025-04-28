@@ -115,6 +115,9 @@ export interface NeuralAnalyticsReport {
       value: number;
     }>;
   };
+  
+  // Adding performance forecast data to the NeuralAnalyticsReport
+  performanceForecast: PerformanceTrend[];
 }
 
 export interface PerformanceTrend {
