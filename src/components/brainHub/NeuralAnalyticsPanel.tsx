@@ -1,6 +1,20 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useNeuralAnalytics } from '@/hooks/useNeuralAnalytics';
+
+import React, { useState } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { CircleHelp, RefreshCw } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -8,467 +22,636 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
+  AreaChart,
+  Area,
   BarChart,
-  Bar
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
-import { 
-  NeuralAnalyticsReport, 
-  PerformanceTrend 
-} from '@/services/neural/types/neuralAnalytics';
+import useNeuralAnalytics from '@/hooks/useNeuralAnalytics';
+import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-interface ServiceMetricsProps {
-  serviceMetrics: NeuralAnalyticsReport['serviceMetrics'];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+
+interface NeuralAnalyticsPanelProps {
+  className?: string;
 }
 
-const ServiceMetrics: React.FC<ServiceMetricsProps> = ({ serviceMetrics }) => {
-  return (
-    <Card className="col-span-1 md:col-span-2 lg:col-span-1">
-      <CardHeader>
-        <CardTitle>Service Metrics</CardTitle>
-        <CardDescription>Real-time performance of individual services</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {serviceMetrics.map((service) => (
-            <div key={service.id} className="border rounded-md p-3">
-              <h4 className="font-semibold">{service.name}</h4>
-              <p className="text-sm text-muted-foreground">{service.type}</p>
-              <div className="mt-2">
-                {Object.entries(service.metrics).map(([key, value]) => (
-                  <div key={key} className="flex justify-between text-xs">
-                    <span>{key}:</span>
-                    <span>{value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
+const NeuralAnalyticsPanel: React.FC<NeuralAnalyticsPanelProps> = ({ className = '' }) => {
+  const [selectedTab, setSelectedTab] = useState<string>('overview');
+  const { analyticsData, loading, error, refreshAnalytics } = useNeuralAnalytics(60000); // 1 minute refresh
 
-interface SystemMetricsProps {
-  systemMetrics: NeuralAnalyticsReport['systemMetrics'];
-}
+  const formatMetricValue = (value: number): string => {
+    if (value >= 1000000) {
+      return `${(value / 1000000).toFixed(1)}M`;
+    } else if (value >= 1000) {
+      return `${(value / 1000).toFixed(1)}K`;
+    }
+    return value.toString();
+  };
+  
+  const formatPercentage = (value: number): string => {
+    return `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
+  };
 
-const SystemMetrics: React.FC<SystemMetricsProps> = ({ systemMetrics }) => {
-  return (
-    <Card className="col-span-1 md:col-span-2 lg:col-span-1">
-      <CardHeader>
-        <CardTitle>System Metrics</CardTitle>
-        <CardDescription>Overall system performance indicators</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground">CPU Utilization</p>
-            <p className="text-2xl font-bold">{systemMetrics.cpuUtilization.toFixed(1)}%</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Memory Usage</p>
-            <p className="text-2xl font-bold">{systemMetrics.memoryUtilization.toFixed(1)}%</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Requests/sec</p>
-            <p className="text-2xl font-bold">{systemMetrics.requestsPerSecond}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Response Time</p>
-            <p className="text-2xl font-bold">{systemMetrics.responseTimeMs}ms</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Error Rate</p>
-            <p className="text-2xl font-bold">{systemMetrics.errorRate.toFixed(2)}%</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-interface AnomaliesProps {
-  anomalies: NeuralAnalyticsReport['anomalies'];
-}
-
-const Anomalies: React.FC<AnomaliesProps> = ({ anomalies }) => {
-  return (
-    <Card className="col-span-1 md:col-span-2">
-      <CardHeader>
-        <CardTitle>Anomalies</CardTitle>
-        <CardDescription>Detected anomalies in the system</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {anomalies.length === 0 ? (
-          <p>No anomalies detected</p>
-        ) : (
-          <ul className="list-disc pl-5">
-            {anomalies.map((anomaly) => (
-              <li key={anomaly.id} className="py-1">
-                <span className="font-semibold">{anomaly.type}:</span> {anomaly.description}
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
-
-interface TrendsProps {
-  trends: NeuralAnalyticsReport['trends'];
-}
-
-const Trends: React.FC<TrendsProps> = ({ trends }) => {
-  return (
-    <Card className="col-span-1 md:col-span-2 lg:col-span-1">
-      <CardHeader>
-        <CardTitle>Trends</CardTitle>
-        <CardDescription>System performance trends</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground">Request Volume</p>
-            <p className="text-2xl font-bold">{trends.requestVolume}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Error Rate</p>
-            <p className="text-2xl font-bold">{trends.errorRate}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Response Time</p>
-            <p className="text-2xl font-bold">{trends.responseTime}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-interface RecommendationsProps {
-  recommendations: NeuralAnalyticsReport['recommendations'];
-}
-
-const Recommendations: React.FC<RecommendationsProps> = ({ recommendations }) => {
-  return (
-    <Card className="col-span-1 md:col-span-2">
-      <CardHeader>
-        <CardTitle>Recommendations</CardTitle>
-        <CardDescription>Suggestions for system improvements</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ul className="list-disc pl-5">
-          {recommendations.map((recommendation, index) => (
-            <li key={index} className="py-1">
-              {recommendation}
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
-  );
-};
-
-interface ModelPerformanceProps {
-  modelPerformance: NeuralAnalyticsReport['modelPerformance'];
-}
-
-const ModelPerformance: React.FC<ModelPerformanceProps> = ({ modelPerformance }) => {
-  return (
-    <Card className="col-span-1 md:col-span-2 lg:col-span-1">
-      <CardHeader>
-        <CardTitle>Model Performance</CardTitle>
-        <CardDescription>Key metrics for model evaluation</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground">Accuracy</p>
-            <p className="text-2xl font-bold">{modelPerformance.accuracy.toFixed(3)}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Precision</p>
-            <p className="text-2xl font-bold">{modelPerformance.precision.toFixed(3)}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Recall</p>
-            <p className="text-2xl font-bold">{modelPerformance.recall.toFixed(3)}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">F1 Score</p>
-            <p className="text-2xl font-bold">{modelPerformance.f1Score.toFixed(3)}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Latency</p>
-            <p className="text-2xl font-bold">{modelPerformance.latency}ms</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Throughput</p>
-            <p className="text-2xl font-bold">{modelPerformance.throughput}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-interface OperationalMetricsProps {
-  operationalMetrics: NeuralAnalyticsReport['operationalMetrics'];
-}
-
-const OperationalMetrics: React.FC<OperationalMetricsProps> = ({ operationalMetrics }) => {
-  return (
-    <Card className="col-span-1 md:col-span-2 lg:col-span-1">
-      <CardHeader>
-        <CardTitle>Operational Metrics</CardTitle>
-        <CardDescription>Metrics related to system operations</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground">Total Requests</p>
-            <p className="text-xl font-bold">{operationalMetrics.totalRequests.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Successful Requests</p>
-            <p className="text-xl font-bold">{operationalMetrics.successfulRequests.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Failed Requests</p>
-            <p className="text-xl font-bold">{operationalMetrics.failedRequests.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Avg Response Time</p>
-            <p className="text-xl font-bold">{operationalMetrics.averageResponseTime.toFixed(1)}ms</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">P95 Response Time</p>
-            <p className="text-xl font-bold">{operationalMetrics.p95ResponseTime}ms</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">P99 Response Time</p>
-            <p className="text-xl font-bold">{operationalMetrics.p99ResponseTime}ms</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-interface UsageMetricsProps {
-  usageMetrics: NeuralAnalyticsReport['usageMetrics'];
-}
-
-const UsageMetrics: React.FC<UsageMetricsProps> = ({ usageMetrics }) => {
-  return (
-    <Card className="col-span-1 md:col-span-2">
-      <CardHeader>
-        <CardTitle>Usage Metrics</CardTitle>
-        <CardDescription>User engagement and resource allocation</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground">Daily Active Users</p>
-            <p className="text-xl font-bold">{usageMetrics.dailyActiveUsers.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Monthly Active Users</p>
-            <p className="text-xl font-bold">{usageMetrics.monthlyActiveUsers.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Total Users</p>
-            <p className="text-xl font-bold">{usageMetrics.totalUsers.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Sessions Per User</p>
-            <p className="text-xl font-bold">{usageMetrics.sessionsPerUser.toFixed(1)}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-interface AdvancedMetricsProps {
-  advancedMetrics: NeuralAnalyticsReport['advancedMetrics'];
-}
-
-const AdvancedMetrics: React.FC<AdvancedMetricsProps> = ({ advancedMetrics }) => {
-  return (
-    <Card className="col-span-1 md:col-span-2 lg:col-span-1">
-      <CardHeader>
-        <CardTitle>Advanced Metrics</CardTitle>
-        <CardDescription>In-depth system performance metrics</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground">Resource Utilization</p>
-            <p className="text-xl font-bold">{advancedMetrics.resourceUtilization.toFixed(2)}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Efficient Use Score</p>
-            <p className="text-xl font-bold">{advancedMetrics.efficientUseScore.toFixed(2)}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Load Balancing Efficiency</p>
-            <p className="text-xl font-bold">{advancedMetrics.loadBalancingEfficiency.toFixed(2)}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Caching Effectiveness</p>
-            <p className="text-xl font-bold">{advancedMetrics.cachingEffectiveness.toFixed(2)}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-interface CorrelationMatrixProps {
-  correlationMatrix: NeuralAnalyticsReport['correlationMatrix'];
-}
-
-const CorrelationMatrix: React.FC<CorrelationMatrixProps> = ({ correlationMatrix }) => {
-  return (
-    <Card className="col-span-1 md:col-span-2">
-      <CardHeader>
-        <CardTitle>Correlation Matrix</CardTitle>
-        <CardDescription>Relationships between different metrics</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead>
-              <tr>
-                <th></th>
-                {correlationMatrix.labels.map((label) => (
-                  <th key={label} className="text-left py-2 px-4">{label}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {correlationMatrix.labels.map((label, i) => (
-                <tr key={label}>
-                  <td className="py-2 px-4">{label}</td>
-                  {correlationMatrix.values[i].map((value, j) => (
-                    <td key={j} className="py-2 px-4">{value.toFixed(2)}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-interface PerformanceTrendChartProps {
-  forecastData: PerformanceTrend[];
-}
-
-const PerformanceTrendChart: React.FC<PerformanceTrendChartProps> = ({ forecastData }) => {
-  return (
-    <Card className="col-span-1 md:col-span-2">
-      <CardHeader>
-        <CardTitle>Performance Trend Forecast</CardTitle>
-        <CardDescription>Predicted performance trends for the next 7 days</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={forecastData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="metrics.predictedResponseTime" stroke="#8884d8" name="Response Time" />
-            <Line type="monotone" dataKey="metrics.predictedErrorRate" stroke="#82ca9d" name="Error Rate" />
-          </LineChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
-  );
-};
-
-interface ModelPerformanceChartProps {
-  mapData: NeuralAnalyticsReport['modelPerformance']['mapData'];
-}
-
-const ModelPerformanceChart: React.FC<ModelPerformanceChartProps> = ({ mapData }) => {
-  return (
-    <Card className="col-span-1 md:col-span-2">
-      <CardHeader>
-        <CardTitle>Model Performance Metrics</CardTitle>
-        <CardDescription>Visualization of key model performance indicators</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={mapData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="key" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
-  );
-};
-
-const NeuralAnalyticsPanel = () => {
-  const { analyticsData, loading, error } = useNeuralAnalytics();
+  const prepareMapData = (mapData?: Array<{key: string; value: number}>): Array<{name: string; value: number}> => {
+    if (!mapData) return [];
+    return mapData.map(item => ({
+      name: item.key,
+      value: item.value
+    }));
+  };
 
   if (loading) {
-    return <div>Loading analytics...</div>;
+    return (
+      <Card className={className}>
+        <CardContent className="flex items-center justify-center h-80">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-primary rounded-full mb-4"></div>
+            <p className="text-muted-foreground">Loading neural analytics...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   if (error || !analyticsData) {
-    return <div>Failed to load analytics data</div>;
+    return (
+      <Card className={className}>
+        <CardContent className="flex items-center justify-center h-80">
+          <div className="text-center">
+            <h3 className="text-lg font-medium text-red-500 mb-2">Analytics Error</h3>
+            <p className="text-muted-foreground">{error || "Failed to load neural analytics"}</p>
+            <Button className="mt-4" onClick={refreshAnalytics}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
-  return (
-    <div className="grid gap-4">
-      {/* Replace the incorrect > symbol with &gt; in the JSX */}
-      <Card className="p-4">
-        <h3 className="text-lg font-semibold mb-4">Performance Metrics</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground">CPU Utilization</p>
-            <p className="text-2xl font-bold">{analyticsData.systemMetrics.cpuUtilization.toFixed(1)}%</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Memory Usage</p>
-            <p className="text-2xl font-bold">{analyticsData.systemMetrics.memoryUtilization.toFixed(1)}%</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Response Time</p>
-            <p className="text-2xl font-bold">{analyticsData.systemMetrics.responseTimeMs}ms</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Requests/sec</p>
-            <p className="text-2xl font-bold">{analyticsData.systemMetrics.requestsPerSecond}&gt;/s</p>
-          </div>
-        </div>
-      </Card>
+  const {
+    timestamp,
+    serviceMetrics,
+    systemMetrics,
+    anomalies,
+    trends,
+    recommendations,
+    modelPerformance,
+    operationalMetrics,
+    usageMetrics,
+    advancedMetrics,
+    correlationMatrix,
+    performanceForecast
+  } = analyticsData;
 
-      <ServiceMetrics serviceMetrics={analyticsData.serviceMetrics} />
-      <SystemMetrics systemMetrics={analyticsData.systemMetrics} />
-      <Anomalies anomalies={analyticsData.anomalies} />
-      <Trends trends={analyticsData.trends} />
-      <Recommendations recommendations={analyticsData.recommendations} />
-      <ModelPerformance modelPerformance={analyticsData.modelPerformance} />
-      <OperationalMetrics operationalMetrics={analyticsData.operationalMetrics} />
-      <UsageMetrics usageMetrics={analyticsData.usageMetrics} />
-      <AdvancedMetrics advancedMetrics={analyticsData.advancedMetrics} />
-      <CorrelationMatrix correlationMatrix={analyticsData.correlationMatrix} />
-      <PerformanceTrendChart forecastData={analyticsData.forecastData || []} />
-      <ModelPerformanceChart mapData={analyticsData.modelPerformance.mapData} />
-    </div>
+  return (
+    <Card className={className}>
+      <CardHeader className="flex flex-row items-center">
+        <div className="flex-1">
+          <CardTitle>Neural Analytics</CardTitle>
+          <CardDescription>
+            Comprehensive view of system metrics and performance
+          </CardDescription>
+        </div>
+        <Button size="sm" variant="outline" onClick={refreshAnalytics}>
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Refresh
+        </Button>
+      </CardHeader>
+      <CardContent>
+        <div className="mb-6">
+          <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+            <TabsList className="w-full">
+              <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
+              <TabsTrigger value="performance" className="flex-1">Performance</TabsTrigger>
+              <TabsTrigger value="usage" className="flex-1">Usage</TabsTrigger>
+              <TabsTrigger value="forecast" className="flex-1">Forecast</TabsTrigger>
+            </TabsList>
+            
+            {/* Overview Tab */}
+            <TabsContent value="overview">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <h3 className="font-medium text-md mb-3">System Metrics</h3>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground text-sm mb-1">CPU Utilization</div>
+                        <div className="text-lg font-medium">{systemMetrics.cpuUtilization.toFixed(1)}%</div>
+                      </div>
+                      <div className="bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground text-sm mb-1">Memory</div>
+                        <div className="text-lg font-medium">{systemMetrics.memoryUtilization.toFixed(1)}%</div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground text-sm mb-1">Requests/Sec</div>
+                        <div className="text-lg font-medium">{systemMetrics.requestsPerSecond}</div>
+                      </div>
+                      <div className="bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground text-sm mb-1">Response Time</div>
+                        <div className="text-lg font-medium">{systemMetrics.responseTimeMs}ms</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-medium text-md mb-3">Key Metrics</h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="flex justify-between bg-background p-3 rounded-md border">
+                      <div>
+                        <div className="text-muted-foreground text-sm">Error Rate</div>
+                        <div className="text-lg font-medium">{systemMetrics.errorRate.toFixed(2)}%</div>
+                      </div>
+                      <div className={`text-sm flex items-center ${operationalMetrics.errorRateChange > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                        {formatPercentage(operationalMetrics.errorRateChange)}
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between bg-background p-3 rounded-md border">
+                      <div>
+                        <div className="text-muted-foreground text-sm">Operations</div>
+                        <div className="text-lg font-medium">{formatMetricValue(operationalMetrics.totalOperations)}</div>
+                      </div>
+                      <div className={`text-sm flex items-center ${operationalMetrics.operationsChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                        {formatPercentage(operationalMetrics.operationsChange)}
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between bg-background p-3 rounded-md border">
+                      <div>
+                        <div className="text-muted-foreground text-sm">Response Time</div>
+                        <div className="text-lg font-medium">{operationalMetrics.averageResponseTime}ms</div>
+                      </div>
+                      <div className={`text-sm flex items-center ${operationalMetrics.responseTimeChange <= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                        {formatPercentage(operationalMetrics.responseTimeChange)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <h3 className="font-medium text-md mb-3">Service Status</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {serviceMetrics.map((service) => (
+                    <div key={service.id} className="bg-background p-4 rounded-md border">
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="font-medium">{service.name}</div>
+                        <div className={`text-xs px-2 py-1 rounded ${
+                          service.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                          service.status === 'maintenance' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                          'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                        }`}>
+                          {service.status.charAt(0).toUpperCase() + service.status.slice(1)}
+                        </div>
+                      </div>
+                      <div className="text-xs text-muted-foreground mb-2">{service.type}</div>
+                      <div className="grid grid-cols-3 gap-2 text-sm">
+                        <div>
+                          <div className="text-muted-foreground">Accuracy</div>
+                          <div className="font-medium">{typeof service.metrics.accuracy === 'number' ? `${(service.metrics.accuracy * 100).toFixed(1)}%` : 'N/A'}</div>
+                        </div>
+                        <div>
+                          <div className="text-muted-foreground">Latency</div>
+                          <div className="font-medium">{service.metrics.latency}ms</div>
+                        </div>
+                        <div>
+                          <div className="text-muted-foreground">Throughput</div>
+                          <div className="font-medium">{service.metrics.throughput}/min</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {anomalies.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="font-medium text-md mb-3">Detected Anomalies</h3>
+                  <div className="bg-background p-4 rounded-md border">
+                    <ul className="space-y-3">
+                      {anomalies.map((anomaly, idx) => (
+                        <li key={anomaly.id || idx} className="flex items-start">
+                          <div className={`h-2 w-2 rounded-full mt-1.5 mr-2 flex-shrink-0 ${
+                            anomaly.severity === 'high' ? 'bg-red-500' :
+                            anomaly.severity === 'medium' ? 'bg-yellow-500' :
+                            'bg-blue-500'
+                          }`}></div>
+                          <div>
+                            <div className="font-medium text-sm">{anomaly.type}</div>
+                            <div className="text-xs text-muted-foreground">{anomaly.description}</div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+              
+              <div>
+                <h3 className="font-medium text-md mb-3">Recommendations</h3>
+                <div className="bg-background p-4 rounded-md border">
+                  <ul className="space-y-2">
+                    {recommendations.map((recommendation, idx) => (
+                      <li key={idx} className="flex items-start text-sm">
+                        <span className="text-primary mr-2">•</span>
+                        <span>{recommendation}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </TabsContent>
+            
+            {/* Performance Tab */}
+            <TabsContent value="performance">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-medium text-md mb-3">Model Performance</h3>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={prepareMapData(modelPerformance.mapData)}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                          nameKey="name"
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {prepareMapData(modelPerformance.mapData).map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="font-medium text-md mb-3">Processing Metrics</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">Accuracy</div>
+                        <div className="font-medium">{(modelPerformance.accuracy * 100).toFixed(1)}%</div>
+                      </div>
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">Precision</div>
+                        <div className="font-medium">{(modelPerformance.precision * 100).toFixed(1)}%</div>
+                      </div>
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">Recall</div>
+                        <div className="font-medium">{(modelPerformance.recall * 100).toFixed(1)}%</div>
+                      </div>
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">F1 Score</div>
+                        <div className="font-medium">{(modelPerformance.f1Score * 100).toFixed(1)}%</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium text-md mb-3">System Performance</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">Latency</div>
+                        <div className="font-medium">{modelPerformance.latency}ms</div>
+                      </div>
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">Throughput</div>
+                        <div className="font-medium">{formatMetricValue(modelPerformance.throughput)}/sec</div>
+                      </div>
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">P95 Response Time</div>
+                        <div className="font-medium">{operationalMetrics.p95ResponseTime}ms</div>
+                      </div>
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">P99 Response Time</div>
+                        <div className="font-medium">{operationalMetrics.p99ResponseTime}ms</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-medium text-md mb-3">Advanced Efficiency Metrics</h3>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={prepareMapData(advancedMetrics.mapData)}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip 
+                          formatter={(value) => [(value * 100).toFixed(1) + '%', 'Efficiency']}
+                        />
+                        <Legend />
+                        <Bar dataKey="value" name="Efficiency Score" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-medium text-md mb-3 flex items-center">
+                    <span>Correlation Matrix</span>
+                    <TooltipProvider>
+                      <UITooltip>
+                        <TooltipTrigger asChild>
+                          <CircleHelp className="h-4 w-4 ml-2 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Shows the correlation between different metrics from -1 to 1</p>
+                        </TooltipContent>
+                      </UITooltip>
+                    </TooltipProvider>
+                  </h3>
+                  <div className="bg-background p-3 rounded-md border overflow-x-auto">
+                    <table className="min-w-full text-sm">
+                      <thead>
+                        <tr>
+                          <th className="p-2"></th>
+                          {correlationMatrix.labels.map(label => (
+                            <th key={label} className="p-2 font-medium">{label}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {correlationMatrix.labels.map((rowLabel, rowIndex) => (
+                          <tr key={rowLabel}>
+                            <th className="p-2 font-medium text-left">{rowLabel}</th>
+                            {correlationMatrix.values[rowIndex].map((value, colIndex) => (
+                              <td 
+                                key={colIndex} 
+                                className="p-2 text-center"
+                                style={{
+                                  backgroundColor: value > 0 
+                                    ? `rgba(34, 197, 94, ${Math.abs(value) * 0.5})` 
+                                    : `rgba(239, 68, 68, ${Math.abs(value) * 0.5})`
+                                }}
+                              >
+                                {value.toFixed(2)}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div className="flex justify-between bg-background p-3 rounded-md border">
+                      <div className="text-muted-foreground">Max Correlation</div>
+                      <div className="font-medium">{correlationMatrix.maxCorrelation.toFixed(2)}</div>
+                    </div>
+                    <div className="flex justify-between bg-background p-3 rounded-md border">
+                      <div className="text-muted-foreground">Min Correlation</div>
+                      <div className="font-medium">{correlationMatrix.minCorrelation.toFixed(2)}</div>
+                    </div>
+                    <div className="flex justify-between bg-background p-3 rounded-md border">
+                      <div className="text-muted-foreground">Avg Correlation</div>
+                      <div className="font-medium">{correlationMatrix.averageCorrelation.toFixed(2)}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+            
+            {/* Usage Tab */}
+            <TabsContent value="usage">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-medium text-md mb-3">Daily Usage Trend</h3>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart
+                        data={usageMetrics.dailyUsageTrend}
+                        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Area type="monotone" dataKey="value" name="Daily Active Users" stroke="#8884d8" fill="#8884d8" fillOpacity={0.3} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="font-medium text-md mb-3">User Metrics</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">Daily Active Users</div>
+                        <div className="font-medium">{formatMetricValue(usageMetrics.dailyActiveUsers)}</div>
+                      </div>
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">Monthly Active Users</div>
+                        <div className="font-medium">{formatMetricValue(usageMetrics.monthlyActiveUsers)}</div>
+                      </div>
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">Total Users</div>
+                        <div className="font-medium">{formatMetricValue(usageMetrics.totalUsers)}</div>
+                      </div>
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">Retention Rate</div>
+                        <div className="font-medium">{(usageMetrics.retentionRate * 100).toFixed(1)}%</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium text-md mb-3">Session Metrics</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">Sessions Per User</div>
+                        <div className="font-medium">{usageMetrics.sessionsPerUser}</div>
+                      </div>
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">Avg Session Duration</div>
+                        <div className="font-medium">{usageMetrics.averageSessionDuration}s</div>
+                      </div>
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">Active Connections</div>
+                        <div className="font-medium">{operationalMetrics.activeConnections}</div>
+                      </div>
+                      <div className="flex justify-between bg-background p-3 rounded-md border">
+                        <div className="text-muted-foreground">Requests Per Minute</div>
+                        <div className="font-medium">{formatMetricValue(operationalMetrics.requestsPerMinute)}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="font-medium text-md mb-3">Service Type Distribution</h3>
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={usageMetrics.serviceTypeDistribution}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                            nameKey="name"
+                            label={({ name, value }) => `${name}: ${value}%`}
+                          >
+                            {usageMetrics.serviceTypeDistribution.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium text-md mb-3">Resource Allocation</h3>
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={usageMetrics.resourceAllocation}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                            nameKey="name"
+                            label={({ name, value }) => `${name}: ${value}%`}
+                          >
+                            {usageMetrics.resourceAllocation.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-medium text-md mb-3">Request Statistics</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="flex justify-between bg-background p-3 rounded-md border">
+                      <div className="text-muted-foreground">Total Requests</div>
+                      <div className="font-medium">{formatMetricValue(operationalMetrics.totalRequests)}</div>
+                    </div>
+                    <div className="flex justify-between bg-background p-3 rounded-md border">
+                      <div className="text-muted-foreground">Successful Requests</div>
+                      <div className="font-medium">{formatMetricValue(operationalMetrics.successfulRequests)}</div>
+                    </div>
+                    <div className="flex justify-between bg-background p-3 rounded-md border">
+                      <div className="text-muted-foreground">Failed Requests</div>
+                      <div className="font-medium">{formatMetricValue(operationalMetrics.failedRequests)}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+            
+            {/* Forecast Tab */}
+            <TabsContent value="forecast">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-medium text-md mb-3">Performance Forecast (7-day)</h3>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={performanceForecast}
+                        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" />
+                        <YAxis yAxisId="left" />
+                        <YAxis yAxisId="right" orientation="right" />
+                        <Tooltip />
+                        <Legend />
+                        <Line yAxisId="left" type="monotone" dataKey="metrics.expectedLoad" name="Expected Load (0-1)" stroke="#8884d8" activeDot={{ r: 8 }} />
+                        <Line yAxisId="left" type="monotone" dataKey="metrics.predictedErrorRate" name="Error Rate (%)" stroke="#ff7300" />
+                        <Line yAxisId="right" type="monotone" dataKey="metrics.predictedResponseTime" name="Response Time (ms)" stroke="#82ca9d" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-medium text-md mb-3">Forecast Data</h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full border-collapse">
+                      <thead>
+                        <tr className="bg-muted">
+                          <th className="p-2 text-left">Date</th>
+                          <th className="p-2 text-left">Expected Load</th>
+                          <th className="p-2 text-left">Predicted Response</th>
+                          <th className="p-2 text-left">Error Rate</th>
+                          <th className="p-2 text-left">Confidence</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {performanceForecast.map((day, idx) => (
+                          <tr key={idx} className={idx % 2 === 0 ? 'bg-background' : 'bg-muted/30'}>
+                            <td className="p-2 border">{day.date}</td>
+                            <td className="p-2 border">{(day.metrics.expectedLoad * 100).toFixed(1)}%</td>
+                            <td className="p-2 border">{day.metrics.predictedResponseTime.toFixed(1)}ms</td>
+                            <td className="p-2 border">{day.metrics.predictedErrorRate.toFixed(2)}%</td>
+                            <td className="p-2 border">{(day.metrics.confidenceScore * 100).toFixed(1)}%</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                
+                <div className="bg-background p-4 rounded-md border">
+                  <h3 className="font-medium text-md mb-2">Forecast Interpretation</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    This forecast predicts system performance based on historical trends and patterns. Use these projections to:
+                  </p>
+                  <ul className="list-disc pl-5 space-y-1 text-sm">
+                    <li>Proactively scale resources during expected high-load periods</li>
+                    <li>Schedule maintenance during projected low-utilization windows</li>
+                    <li>Prepare for potential performance degradations</li>
+                    <li>Set appropriate expectations for response times</li>
+                  </ul>
+                  <div className="mt-4 p-3 bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded text-sm">
+                    <strong>Note:</strong> Confidence scores &lt; 80% indicate higher uncertainty in the prediction.
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
