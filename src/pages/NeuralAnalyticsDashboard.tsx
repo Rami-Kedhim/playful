@@ -30,6 +30,34 @@ const NeuralAnalyticsDashboard = () => {
     );
   }
 
+  // Transform keyMetrics object into an array with proper title properties
+  const metricsArray = keyMetrics ? [
+    { 
+      title: "Response Time", 
+      value: keyMetrics.responseTime.value, 
+      change: keyMetrics.responseTime.change, 
+      unit: keyMetrics.responseTime.unit 
+    },
+    { 
+      title: "Accuracy", 
+      value: keyMetrics.accuracy.value, 
+      change: keyMetrics.accuracy.change, 
+      unit: keyMetrics.accuracy.unit 
+    },
+    { 
+      title: "Error Rate", 
+      value: keyMetrics.errorRate.value, 
+      change: keyMetrics.errorRate.change, 
+      unit: keyMetrics.errorRate.unit 
+    },
+    { 
+      title: "Operations", 
+      value: keyMetrics.operations.value, 
+      change: keyMetrics.operations.change, 
+      unit: keyMetrics.operations.unit 
+    }
+  ] : [];
+
   return (
     <MainLayout title="Neural Analytics Dashboard" description="Real-time neural system analytics">
       <div className="space-y-6">
@@ -41,7 +69,7 @@ const NeuralAnalyticsDashboard = () => {
           </Alert>
         )}
 
-        {keyMetrics && <MetricsGrid metrics={Object.values(keyMetrics)} />}
+        {keyMetrics && <MetricsGrid metrics={metricsArray} />}
 
         <Card>
           <CardHeader>

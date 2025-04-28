@@ -26,7 +26,7 @@ const MetricsGrid: React.FC<{ metrics: MetricCardProps[] }> = ({ metrics }) => {
               )}
             </div>
             <h3 className="text-2xl font-bold mt-2">
-              {value}
+              {metric.value}
               <span className="text-sm font-normal text-muted-foreground ml-1">{metric.unit}</span>
             </h3>
           </CardContent>
