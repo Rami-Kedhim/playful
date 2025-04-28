@@ -1,6 +1,5 @@
-
-import React, { Suspense } from 'react';
-import { Routes, Route } from "react-router-dom";
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from "./components/ui/toaster";
 import { AuthProvider } from '@/hooks/auth';
@@ -22,6 +21,7 @@ const SearchPage = React.lazy(() => import("./pages/SearchPage"));
 const WalletPage = React.lazy(() => import("./pages/WalletPage"));
 const PulseBoostPage = React.lazy(() => import("./pages/PulseBoostPage"));
 const NotFoundPage = React.lazy(() => import("./pages/NotFound"));
+const NeuralAnalyticsDashboard = React.lazy(() => import("./pages/NeuralAnalyticsDashboard"));
 
 const queryClient = new QueryClient();
 
@@ -72,6 +72,7 @@ function App() {
                   
                   {/* Catch all route */}
                   <Route path="*" element={<NotFoundPage />} />
+                  <Route path="/neural-analytics" element={<NeuralAnalyticsDashboard />} />
                 </Routes>
                 <Toaster />
               </Suspense>
