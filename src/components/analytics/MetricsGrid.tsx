@@ -2,19 +2,13 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowUp, ArrowDown } from 'lucide-react';
-
-interface MetricCardProps {
-  title: string;
-  value: number;
-  change: number;
-  unit: string;
-}
+import { MetricCardProps } from '@/types/analytics';
 
 const MetricsGrid: React.FC<{ metrics: MetricCardProps[] }> = ({ metrics }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {metrics.map((metric, index) => (
-        <Card key={index}>
+        <Card key={index} className="bg-card">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-muted-foreground">{metric.title}</p>
