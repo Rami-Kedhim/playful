@@ -42,8 +42,8 @@ export interface NeuralAnalyticsReport {
     f1Score: number;
     latency: number;
     throughput: number;
-    // Add map property that component is trying to access
-    map?: Array<{
+    // Fix map property that component is trying to access
+    map: Array<{
       key: string;
       value: number;
     }>;
@@ -76,18 +76,18 @@ export interface NeuralAnalyticsReport {
     averageSessionDuration: number;
     retentionRate: number;
     // Add missing properties used by NeuralAnalyticsPanel
-    serviceTypeDistribution: {
+    serviceTypeDistribution: Array<{
       name: string;
       value: number;
-    }[];
-    resourceAllocation: {
+    }>;
+    resourceAllocation: Array<{
       name: string;
       value: number;
-    }[];
-    dailyUsageTrend: {
+    }>;
+    dailyUsageTrend: Array<{
       date: string;
       value: number;
-    }[];
+    }>;
   };
   
   advancedMetrics: {
@@ -96,8 +96,8 @@ export interface NeuralAnalyticsReport {
     loadBalancingEfficiency: number;
     cachingEffectiveness: number;
     algorithmicEfficiency: number;
-    // Add map property that component is trying to access
-    map?: Array<{
+    // Fix map property that component is trying to access
+    map: Array<{
       key: string;
       value: number;
     }>;
@@ -110,10 +110,10 @@ export interface NeuralAnalyticsReport {
     minCorrelation: number;
     averageCorrelation: number;
     // Add metrics property used in NeuralAnalyticsPanel
-    metrics?: {
+    metrics: Array<{
       name: string;
       value: number;
-    }[];
+    }>;
   };
 }
 
