@@ -31,3 +31,10 @@ export interface UserRole {
   name: string;
   permissions: string[];
 }
+
+export enum UserRoleEnum {
+  ADMIN = 'admin',
+  CREATOR = 'creator',
+  MODERATOR = 'moderator',
+  USER = 'user'
+}

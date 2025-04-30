@@ -6,9 +6,11 @@ export interface BoostPackage {
   price_ubx?: number;
   description?: string;
   duration: string;
-  boost_power?: number; // Add this to support existing code
-  visibility_increase?: number;
+  durationMinutes?: number;
   features?: string[];
+  visibility?: string;
+  visibility_increase?: number;
+  boost_power?: number;
   color?: string;
   badgeColor?: string;
 }
@@ -19,7 +21,13 @@ export interface BoostStatus {
   endTime?: string | Date;
   packageId?: string;
   remainingTime?: string;
+  timeRemaining?: string;
   activeBoostId?: string;
+  packageName?: string;
+  boostPackage?: BoostPackage;
+  boost_level?: number;
+  expiresAt?: Date;
+  visibilityScore?: number;
 }
 
 export interface BoostEligibility {
@@ -46,13 +54,44 @@ export interface HermesBoostStatus {
 }
 
 export interface BoostAnalytics {
-  views: number;
-  impressions: number;
-  clicks: number;
-  conversions: number;
-  roi: number;
-  timeActive: number;
-  boostEfficiency: number;
+  views?: number;
+  impressions?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  interactions?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  rank?: {
+    current: number;
+    previous: number;
+    change: number;
+  };
+  clicks?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  trending?: boolean;
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  conversions?: number;
+  roi?: number;
+  timeActive?: number;
+  boostEfficiency?: number;
 }
 
 export interface BoostDialogTabsProps {
@@ -64,7 +103,7 @@ export interface BoostDialogTabsProps {
   boostPackages: BoostPackage[];
   selectedPackage: string;
   setSelectedPackage: (id: string) => void;
-  handleBoost: () => Promise<boolean>;
+  handleBoost: () => Promise<boolean> | void;
   handleCancel: () => Promise<boolean>;
   dailyBoostUsage: number;
   dailyBoostLimit: number;

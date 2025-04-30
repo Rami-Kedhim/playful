@@ -9,6 +9,7 @@ export interface SystemIntegrityResult {
   overallStatus?: string;
   modules?: { [key: string]: any };
   issues?: string[];
+  score?: number; // Add this property to support Oxum.ts usage
 }
 
 export interface SessionValidationResult {
@@ -63,7 +64,8 @@ class Orus {
         auth: 'operational',
         boost: 'operational'
       },
-      issues: []
+      issues: [],
+      score: 95 // Added score property
     };
   }
 

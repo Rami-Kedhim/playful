@@ -1,13 +1,4 @@
-
-import { UserRole } from '@/types/pulse-boost';
-
-// Define enum for UserRole
-enum UserRoleEnum {
-  ADMIN = 'admin',
-  CREATOR = 'creator',
-  MODERATOR = 'moderator',
-  USER = 'user'
-}
+import { UserRole, UserRoleEnum } from '@/types/pulse-boost';
 
 // This is a placeholder for the auth service
 // In a real implementation, this would handle authentication and authorization
