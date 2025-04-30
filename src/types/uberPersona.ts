@@ -3,11 +3,13 @@
  * UberPersona - Unified interface for all persona types in the UberEscorts ecosystem
  */
 
+export type PersonaSource = 'ai_generated' | 'scraped' | 'manual';
+
 export interface UberPersona {
   id: string;
   name: string;
   displayName?: string;
-  type: string;
+  type: UberPersonaType;
   avatarUrl?: string;
   location?: string;
   isVerified?: boolean;
@@ -19,7 +21,15 @@ export interface UberPersona {
     nextAvailable?: string;
   };
   tags?: string[];
-  systemMetadata?: Record<string, any>;
+  systemMetadata?: {
+    source: PersonaSource;
+    lastSynced?: Date;
+    tagsGeneratedByAI?: boolean;
+    hilbertSpaceVector?: number[];
+    personalityIndex?: number;
+    statusFlags?: Record<string, boolean>;
+    flowScore?: number;
+  };
   isLocked?: boolean;
 }
 

@@ -1,312 +1,332 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ArrowLeftIcon, ArrowRightIcon, DownloadIcon, RefreshCwIcon } from 'lucide-react';
-import useNeuralAnalyticsDashboard from '@/hooks/useNeuralAnalyticsDashboard';
+import { RefreshCw, ChevronLeft, Clock, LineChart, AlertOctagon, Zap } from 'lucide-react';
+import useNeuralAnalyticsDashboard, { MetricDetail } from '@/hooks/useNeuralAnalyticsDashboard';
 import PerformanceChart from './PerformanceChart';
 
-const NeuralAnalyticsDashboard = () => {
+const NeuralAnalyticsDashboard: React.FC = () => {
   const { 
     analyticsData, 
-    loading,
-    error,
-    refreshAnalytics,
-    dateRange,
-    handleDateChange,
+    loading, 
+    error, 
+    refreshAnalytics, 
     isAutoRefreshEnabled,
-    refreshInterval,
     toggleAutoRefresh,
-    changeRefreshInterval,
     selectedMetric,
     handleDrillDown,
     handleBackToOverview,
-    getMetricValue,
-    getTrendDataForMetric
+    getMetricValue
   } = useNeuralAnalyticsDashboard();
-
+  
+  const [activeTab, setActiveTab] = useState('overview');
+  
   if (loading) {
     return (
-      <div className="w-full flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <Card className="w-full h-[500px] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="text-muted-foreground">Loading neural analytics data...</p>
+        </div>
+      </Card>
     );
   }
   
   if (error || !analyticsData) {
     return (
-      <div className="w-full flex items-center justify-center py-12">
-        <div className="text-center space-y-4">
-          <p className="text-muted-foreground">Failed to load neural analytics</p>
-          <Button onClick={refreshAnalytics} variant="outline" size="sm">
-            <RefreshCwIcon className="h-4 w-4 mr-2" />
-            Try Again
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-red-500 flex items-center gap-2">
+            <AlertOctagon size={20} />
+            <span>Analytics Error</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            {error || "Failed to load neural analytics data. Please try again later."}
+          </p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="mt-4"
+            onClick={refreshAnalytics}
+          >
+            <RefreshCw size={16} className="mr-2" />
+            Retry
           </Button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
   
-  // If a specific metric is selected, show detailed view
+  // If we're viewing a specific metric
   if (selectedMetric) {
-    const metricData = getTrendDataForMetric(selectedMetric.key);
-    const { value, change } = getMetricValue(selectedMetric.key);
+    const metricData = getMetricValue(selectedMetric.key);
     
     return (
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <div className="space-y-1">
-            <Button variant="ghost" size="sm" onClick={handleBackToOverview} className="mb-2">
-              <ArrowLeftIcon className="h-4 w-4 mr-2" />
-              Back to Overview
-            </Button>
-            <CardTitle>{selectedMetric.title} Details</CardTitle>
-            <CardDescription>{selectedMetric.description}</CardDescription>
-          </div>
-          <Button variant="outline" size="sm" onClick={refreshAnalytics}>
-            <RefreshCwIcon className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <Card className="w-full">
+        <CardHeader>
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-3xl font-bold">{value.toFixed(2)}</p>
-              <p className={`text-sm ${change > 0 ? 'text-green-500' : change < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
-                {change > 0 ? '+' : ''}{change.toFixed(2)}% from last period
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <ArrowLeftIcon className="h-4 w-4" />
-              </Button>
-              <Select defaultValue="7d">
-                <SelectTrigger className="w-[100px]">
-                  <SelectValue placeholder="Period" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="24h">24 hours</SelectItem>
-                  <SelectItem value="7d">7 days</SelectItem>
-                  <SelectItem value="30d">30 days</SelectItem>
-                  <SelectItem value="90d">90 days</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline" size="sm">
-                <ArrowRightIcon className="h-4 w-4" />
-              </Button>
-            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="gap-2"
+              onClick={handleBackToOverview}
+            >
+              <ChevronLeft size={16} />
+              <span>Back to Overview</span>
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={refreshAnalytics}
+            >
+              <RefreshCw size={16} />
+            </Button>
           </div>
-          
-          <div className="h-80">
-            <PerformanceChart data={metricData} />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-            <Card>
-              <CardHeader className="py-2">
-                <CardTitle className="text-sm">Recommendations</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <ul className="text-sm space-y-1">
-                  {analyticsData?.recommendations?.slice(0, 3).map((rec, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
-                      <span>{rec}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+          <CardTitle className="mt-4">{selectedMetric.title}</CardTitle>
+          {selectedMetric.description && (
+            <p className="text-sm text-muted-foreground">{selectedMetric.description}</p>
+          )}
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="grid gap-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-3xl font-bold">
+                  {metricData.value.toFixed(2)}
+                  {selectedMetric.key === 'responseTime' && 'ms'}
+                  {selectedMetric.key === 'accuracy' && '%'}
+                  {selectedMetric.key === 'errorRate' && '%'}
+                </p>
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  {metricData.change >= 0 ? '+' : ''}{metricData.change.toFixed(2)}
+                  {selectedMetric.key === 'responseTime' && 'ms'}
+                  {selectedMetric.key === 'accuracy' && '%'}
+                  {selectedMetric.key === 'errorRate' && '%'}
+                  <span className={metricData.change >= 0 ? 'text-green-500' : 'text-red-500'}>
+                    {metricData.change >= 0 ? '↑' : '↓'}
+                  </span>
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Last updated</p>
+                <p className="text-sm">{new Date().toLocaleTimeString()}</p>
+              </div>
+            </div>
             
-            <Card>
-              <CardHeader className="py-2">
-                <CardTitle className="text-sm">Related Metrics</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <ul className="text-sm space-y-1">
-                  {['Accuracy', 'Throughput', 'System Load'].map((metric, idx) => (
-                    <li key={idx} className="flex items-center justify-between">
-                      <span>{metric}</span>
-                      <span className="font-mono">{(Math.random() * 100).toFixed(2)}%</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="py-2">
-                <CardTitle className="text-sm">Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 space-y-2">
-                <Button variant="outline" size="sm" className="w-full">
-                  <DownloadIcon className="h-4 w-4 mr-2" />
-                  Export Data
-                </Button>
-                <Button variant="outline" size="sm" className="w-full">
-                  Configure Alerts
-                </Button>
-              </CardContent>
-            </Card>
+            <div className="h-[350px] mt-4">
+              <PerformanceChart metricKey={selectedMetric.key as 'responseTime' | 'accuracy' | 'errorRate' | 'operations'} />
+            </div>
           </div>
         </CardContent>
       </Card>
     );
   }
   
-  // Overview dashboard
+  // Main overview dashboard
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold">Neural Analytics Dashboard</h2>
-          <p className="text-muted-foreground">Monitor neural network performance and metrics</p>
+    <Card className="w-full">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Neural System Analytics</CardTitle>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className={`gap-1 ${isAutoRefreshEnabled ? 'bg-primary/10' : ''}`}
+              onClick={toggleAutoRefresh}
+            >
+              <Clock size={16} />
+              <span>{isAutoRefreshEnabled ? 'Auto-refresh On' : 'Auto-refresh Off'}</span>
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={refreshAnalytics}
+            >
+              <RefreshCw size={16} />
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button 
-            variant={isAutoRefreshEnabled ? "secondary" : "outline"} 
-            size="sm" 
-            onClick={toggleAutoRefresh}
-          >
-            {isAutoRefreshEnabled ? "Auto-refresh On" : "Auto-refresh Off"}
-          </Button>
-          <Button onClick={refreshAnalytics} size="sm" variant="outline">
-            <RefreshCwIcon className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-        </div>
-      </div>
-      
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="predictions">Predictions</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="overview" className="space-y-4">
-          {/* Key Metrics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { key: 'responseTime', title: 'Response Time', icon: '⚡' },
-              { key: 'accuracy', title: 'Model Accuracy', icon: '🎯' },
-              { key: 'errorRate', title: 'Error Rate', icon: '⚠️' },
-              { key: 'operations', title: 'Operations', icon: '🔄' }
-            ].map((metric) => {
-              const { value, change } = getMetricValue(metric.key);
-              return (
-                <Card key={metric.key} className="relative overflow-hidden">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium">{metric.title}</CardTitle>
-                    <span className="text-lg">{metric.icon}</span>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {metric.key === 'errorRate' ? (value * 100).toFixed(2) + '%' : 
-                       metric.key === 'accuracy' ? value.toFixed(2) + '%' : 
-                       metric.key === 'responseTime' ? value.toFixed(2) + 'ms' : 
-                       value.toFixed(0)}
+      </CardHeader>
+      <CardContent className="pt-0">
+        <Tabs 
+          value={activeTab} 
+          onValueChange={setActiveTab}
+          className="space-y-4"
+        >
+          <TabsList className="grid grid-cols-2 mb-6">
+            <TabsTrigger value="overview">Performance Overview</TabsTrigger>
+            <TabsTrigger value="metrics">Key Metrics</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              {/* Response Time Card */}
+              <Card className="bg-card/50 backdrop-blur-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base font-medium flex items-center gap-2">
+                    <Clock size={18} />
+                    Response Time
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-2xl font-bold">
+                        {getMetricValue('responseTime').value.toFixed(2)}ms
+                      </p>
+                      <p className="text-sm text-muted-foreground flex items-center">
+                        {getMetricValue('responseTime').change >= 0 ? '+' : ''}
+                        {getMetricValue('responseTime').change.toFixed(2)}ms
+                        <span className={getMetricValue('responseTime').change < 0 ? 'text-green-500' : 'text-red-500'}>
+                          {getMetricValue('responseTime').change < 0 ? ' ↓' : ' ↑'}
+                        </span>
+                      </p>
                     </div>
-                    <p className={`text-xs ${change > 0 ? 
-                      (metric.key === 'errorRate' ? 'text-red-500' : 'text-green-500') : 
-                      change < 0 ? 
-                      (metric.key === 'errorRate' ? 'text-green-500' : 'text-red-500') : 
-                      'text-muted-foreground'}`}>
-                      {change > 0 ? '+' : ''}{change.toFixed(2)}% from last period
-                    </p>
                     <Button 
                       variant="ghost" 
-                      size="sm" 
-                      className="absolute inset-0 opacity-0 hover:opacity-100 bg-black/5 flex items-center justify-center"
-                      onClick={() => handleDrillDown(metric)}
+                      size="sm"
+                      onClick={() => handleDrillDown({
+                        key: 'responseTime',
+                        title: 'Response Time',
+                        description: 'Average time to process neural requests'
+                      })}
                     >
                       View Details
                     </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-          
-          {/* Performance Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>System Performance</CardTitle>
-              <CardDescription>Overall neural network performance over time</CardDescription>
-            </CardHeader>
-            <CardContent className="h-80">
-              <PerformanceChart data={analyticsData.performanceTrend || []} />
-            </CardContent>
-          </Card>
-          
-          {/* Recommendations & Insights */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recommendations</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {analyticsData.recommendations?.map((rec, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="text-primary font-bold">•</span>
-                      <span>{rec}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>System Health</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {Object.entries(analyticsData.systemMetrics || {}).map(([key, value], idx) => {
-                    if (['responseTimeMs', 'errorRate', 'throughput'].includes(key)) return null;
-                    return (
-                      <div key={idx} className="flex items-center justify-between">
-                        <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                        <span className="font-mono">
-                          {typeof value === 'number' ? (value * 100).toFixed(2) + '%' : value?.toString()}
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Accuracy Card */}
+              <Card className="bg-card/50 backdrop-blur-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base font-medium flex items-center gap-2">
+                    <LineChart size={18} />
+                    Accuracy
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-2xl font-bold">
+                        {getMetricValue('accuracy').value.toFixed(2)}%
+                      </p>
+                      <p className="text-sm text-muted-foreground flex items-center">
+                        {getMetricValue('accuracy').change >= 0 ? '+' : ''}
+                        {getMetricValue('accuracy').change.toFixed(2)}%
+                        <span className={getMetricValue('accuracy').change >= 0 ? 'text-green-500' : 'text-red-500'}>
+                          {getMetricValue('accuracy').change >= 0 ? ' ↑' : ' ↓'}
                         </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="performance">
-          <Card>
-            <CardHeader>
-              <CardTitle>Performance Analysis</CardTitle>
-              <CardDescription>Detailed neural system performance metrics</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">Select a metric from the overview tab to view detailed performance analysis.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="predictions">
-          <Card>
-            <CardHeader>
-              <CardTitle>Neural Predictions</CardTitle>
-              <CardDescription>AI-generated forecasts and trend analysis</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Forecasting module is initializing. Check back soon.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+                      </p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleDrillDown({
+                        key: 'accuracy',
+                        title: 'Accuracy',
+                        description: 'Precision of neural processing results'
+                      })}
+                    >
+                      View Details
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Error Rate Card */}
+              <Card className="bg-card/50 backdrop-blur-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base font-medium flex items-center gap-2">
+                    <AlertOctagon size={18} />
+                    Error Rate
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-2xl font-bold">
+                        {(getMetricValue('errorRate').value * 100).toFixed(2)}%
+                      </p>
+                      <p className="text-sm text-muted-foreground flex items-center">
+                        {getMetricValue('errorRate').change >= 0 ? '+' : ''}
+                        {(getMetricValue('errorRate').change * 100).toFixed(2)}%
+                        <span className={getMetricValue('errorRate').change >= 0 ? 'text-red-500' : 'text-green-500'}>
+                          {getMetricValue('errorRate').change >= 0 ? ' ↑' : ' ↓'}
+                        </span>
+                      </p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleDrillDown({
+                        key: 'errorRate',
+                        title: 'Error Rate',
+                        description: 'Frequency of neural processing errors'
+                      })}
+                    >
+                      View Details
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Operations Card */}
+              <Card className="bg-card/50 backdrop-blur-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base font-medium flex items-center gap-2">
+                    <Zap size={18} />
+                    Operations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-2xl font-bold">
+                        {getMetricValue('operations').value.toLocaleString()}
+                      </p>
+                      <p className="text-sm text-muted-foreground flex items-center">
+                        {getMetricValue('operations').change >= 0 ? '+' : ''}
+                        {getMetricValue('operations').change.toLocaleString()}
+                        <span className={getMetricValue('operations').change >= 0 ? 'text-green-500' : 'text-red-500'}>
+                          {getMetricValue('operations').change >= 0 ? ' ↑' : ' ↓'}
+                        </span>
+                      </p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleDrillDown({
+                        key: 'operations',
+                        title: 'Operations',
+                        description: 'Total neural operations processed'
+                      })}
+                    >
+                      View Details
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="h-[300px]">
+              <PerformanceChart />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="metrics">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Additional metric cards could go here */}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 };
 

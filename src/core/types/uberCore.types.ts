@@ -3,7 +3,7 @@
  * Core type definitions for UberCore systems
  */
 
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersona, PersonaSource } from '@/types/uberPersona';
 
 export interface UberCoreSettings {
   boostingEnabled: boolean;
@@ -76,11 +76,11 @@ export interface CoreModule {
   shutdown: () => Promise<boolean>;
 }
 
-// Add PersonaProcessingResult type which extends UberPersona with additional processing fields
+// Updated PersonaProcessingResult interface to align with UberPersona
 export interface PersonaProcessingResult extends UberPersona {
   boostScore?: number;
   systemMetadata?: {
-    source: string;
+    source: PersonaSource;
     lastSynced: Date;
     tagsGeneratedByAI: boolean;
     hilbertSpaceVector: number[];

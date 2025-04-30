@@ -1,176 +1,124 @@
 
-// Core Oxum engine - manages boost allocation and attractor mapping
+// Oxum - Core boosting system for UberEscorts
 
-export interface BoostAllocationInput {
-  profileCompleteness?: number;
-  verificationStatus?: boolean;
-  premiumStatus?: boolean;
-  activityScore?: number;
-  reviewScore?: number;
-  locationFactor?: number;
+import { LiveBoostMapEntry } from '@/types/home';
+
+export interface BoostAllocation {
+  amount: number;
+  duration: string;
+  expires: Date;
+  affected: {
+    visibility: number;
+    placement: number;
+    recommendations: number;
+  };
 }
 
-export interface BoostAllocationOutput {
-  score: number;
-  multipliers: Record<string, number>;
-  expiresAt: Date;
-  recommendations: string[];
-}
-
-export interface AttractorMapInput {
-  stateVector: number[];
-  initialConditions?: Record<string, number>;
-  stabilityFactor?: number;
-  iterationCount?: number;
-}
-
-export interface LiveBoostMapEntry {
-  id: string;
-  type: string;
-  location: string;
-  boostScore: number;
-  trend: 'rising' | 'stable' | 'falling';
-  lastUpdated: Date;
+export interface BoostCalculation {
+  baseScore: number;
+  modifiers: Record<string, number>;
+  finalScore: number;
+  positionImpact: number;
+  recommendation: string;
 }
 
 export class Oxum {
-  // Compute boost allocation using eigenvalue method (simplified placeholder)
-  public boostAllocationEigen(matrix: number[][]): number[] {
-    // Validate input matrix
-    if (!matrix || !matrix.length || !matrix[0].length) {
-      return [0];
-    }
-    
-    // For demo: sum of rows normalized
-    const sums = matrix.map(row => row.reduce((a, b) => a + b, 0));
-    const total = sums.reduce((a, b) => a + b, 0) || 1;
-    return sums.map(s => s / total);
-  }
-
-  // Dynamic attractor mapping (nonlinear system dynamics)
-  public dynamicAttractorMap(
-    stateVector: number[], 
-    params: Record<string, any> = {}
-  ): number[] {
-    if (!stateVector || !stateVector.length) {
-      return [0];
-    }
-    
-    // Extract parameters with defaults
-    const r = params.r || 3.7;  // Bifurcation parameter (chaotic at ~3.7)
-    const iterations = params.iterations || 1;
-    const dt = params.dt || 0.1; // Time step
-    
-    // Apply logistic map transformation
-    let result = [...stateVector];
-    
-    for (let i = 0; i < iterations; i++) {
-      result = result.map(x => {
-        // Logistic map: x_{n+1} = r * x_n * (1 - x_n)
-        let val = r * x * (1 - x);
-        
-        // Apply stabilization if specified
-        if (params.stabilize) {
-          const stabilizationFactor = params.stabilizationStrength || 0.1;
-          val = val * (1 - stabilizationFactor) + x * stabilizationFactor;
-        }
-        
-        // Clamp between 0 and 1 for stability
-        return Math.min(1, Math.max(0, val));
-      });
-    }
-    
-    return result;
+  /**
+   * Initialize Oxum boosting engine
+   */
+  public async initialize(): Promise<boolean> {
+    console.log('Initializing Oxum Boosting Engine');
+    return true;
   }
   
-  // Calculate profile boost score based on multiple factors
-  public calculateBoostScore(input: BoostAllocationInput = {}): BoostAllocationOutput {
-    // Default values for missing inputs
-    const data = {
-      profileCompleteness: input.profileCompleteness ?? 0.7,
-      verificationStatus: input.verificationStatus ?? false,
-      premiumStatus: input.premiumStatus ?? false,
-      activityScore: input.activityScore ?? 0.5,
-      reviewScore: input.reviewScore ?? 0.0,
-      locationFactor: input.locationFactor ?? 1.0
-    };
+  /**
+   * Calculate boost score for a persona
+   */
+  public calculateBoostScore(personaId: string): number {
+    // In a real implementation this would use complex algorithms
+    // For now, generate a weighted random score between 0 and 100
+    const baseScore = 50 + Math.random() * 30;
     
-    // Calculate multipliers
-    const multipliers: Record<string, number> = {
-      base: 1.0,
-      profile: 0.2 + (data.profileCompleteness * 0.8),
-      verified: data.verificationStatus ? 1.5 : 1.0,
-      premium: data.premiumStatus ? 2.0 : 1.0,
-      activity: 0.5 + (data.activityScore * 0.5),
-      review: data.reviewScore > 0 ? 0.8 + (data.reviewScore * 0.4) : 1.0,
-      location: data.locationFactor
-    };
+    // Apply some randomization to simulate boost effects
+    const hasBoost = Math.random() > 0.7;
+    const boostMultiplier = hasBoost ? 1.2 : 1.0;
     
-    // Calculate composite score
-    const score = multipliers.base * 
-                 multipliers.profile * 
-                 multipliers.verified * 
-                 multipliers.premium * 
-                 multipliers.activity *
-                 multipliers.review *
-                 multipliers.location;
+    return Math.min(100, baseScore * boostMultiplier);
+  }
+  
+  /**
+   * Get detailed boosting calculations
+   */
+  public getBoostCalculation(personaId: string): BoostCalculation {
+    const baseScore = 40 + Math.random() * 30;
+    const activityModifier = Math.random() * 10;
+    const completenessModifier = Math.random() * 15;
+    const popularityModifier = Math.random() * 20;
     
-    // Scale to 0-100 range with sigmoid function to prevent extremes
-    const scaledScore = 100 / (1 + Math.exp(-0.1 * (score - 5)));
-    
-    // Generate recommendations
-    const recommendations: string[] = [];
-    
-    if (data.profileCompleteness < 0.9) {
-      recommendations.push('Complete your profile to increase visibility');
-    }
-    
-    if (!data.verificationStatus) {
-      recommendations.push('Get verified for a significant boost');
-    }
-    
-    if (data.activityScore < 0.7) {
-      recommendations.push('Increase your activity to improve ranking');
-    }
-    
-    // Set expiration date (24 hours from now)
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24);
+    const finalScore = Math.min(100, baseScore + activityModifier + completenessModifier + popularityModifier);
     
     return {
-      score: Math.round(scaledScore),
-      multipliers,
-      expiresAt,
-      recommendations
+      baseScore,
+      modifiers: {
+        activity: activityModifier,
+        profileCompleteness: completenessModifier,
+        popularity: popularityModifier
+      },
+      finalScore,
+      positionImpact: finalScore > 70 ? 'high' : finalScore > 50 ? 'medium' : 'low',
+      recommendation: finalScore < 60 ? 'Consider boosting your profile' : 'Your profile has good visibility'
     };
   }
   
-  // Get live boost map data for visualization
+  /**
+   * Apply a boost to a persona
+   */
+  public async applyBoost(personaId: string, amount: number): Promise<BoostAllocation> {
+    console.log(`Applying boost of ${amount} to persona ${personaId}`);
+    
+    // Calculate boost duration based on amount
+    const days = Math.max(1, Math.floor(amount / 10));
+    const expires = new Date();
+    expires.setDate(expires.getDate() + days);
+    
+    return {
+      amount,
+      duration: `${days} days`,
+      expires,
+      affected: {
+        visibility: Math.min(100, 50 + amount / 2),
+        placement: Math.min(100, 40 + amount / 3),
+        recommendations: Math.min(100, 30 + amount / 4)
+      }
+    };
+  }
+  
+  /**
+   * Get live boost map showing active boosts
+   */
   public getLiveBoostMap(count: number = 10): LiveBoostMapEntry[] {
-    // Generate simulated live boost data
-    return Array(count).fill(null).map((_, index) => ({
-      id: `boost-${index}`,
-      type: ['escort', 'creator', 'livecam', 'ai'][Math.floor(Math.random() * 4)],
-      location: ['New York', 'Los Angeles', 'Miami', 'Las Vegas', 'Chicago', 'London', 'Paris'][Math.floor(Math.random() * 7)],
-      boostScore: Math.floor(Math.random() * 100),
+    // In a real implementation this would come from a real-time database
+    return Array.from({ length: count }).map((_, i) => ({
+      id: `boost-${i}`,
+      type: ['escort', 'creator', 'livecam', 'ai'][i % 4],
+      location: ['New York', 'Los Angeles', 'Miami', 'Virtual'][i % 4],
+      boostScore: 60 + Math.random() * 40,
       trend: ['rising', 'stable', 'falling'][Math.floor(Math.random() * 3)] as 'rising' | 'stable' | 'falling',
-      lastUpdated: new Date(Date.now() - Math.floor(Math.random() * 1000 * 60 * 60)) // Within the last hour
+      lastUpdated: new Date(Date.now() - Math.random() * 86400000)
     }));
   }
   
-  // Apply boost to a profile
-  public applyBoost(profileId: string, boostLevel: number, duration: number): Record<string, any> {
-    console.log(`Applying boost level ${boostLevel} to profile ${profileId} for ${duration} hours`);
-    
-    return {
-      profileId,
-      boostApplied: boostLevel,
-      startTime: new Date(),
-      endTime: new Date(Date.now() + duration * 60 * 60 * 1000), // Convert hours to ms
-      status: 'active',
-      transactionId: `txn-${Date.now()}-${Math.floor(Math.random() * 1000)}`
-    };
+  /**
+   * Get boost recommendations for a persona
+   */
+  public getBoostRecommendations(personaId: string): string[] {
+    return [
+      'Add more profile details to improve organic visibility',
+      'Consider a 7-day boost package for immediate results',
+      'Add tags that match trending search terms'
+    ];
   }
 }
 
+// Export singleton instance
 export const oxum = new Oxum();
