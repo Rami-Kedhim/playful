@@ -1,6 +1,6 @@
 
 // Update to use consistent import path casing
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/UberPersona';
 
 function generateRandomId(): string {
   return Math.random().toString(36).substr(2, 9);

@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import type { UberPersona } from '@/types/uberPersona';
+import type { UberPersona } from '@/types/UberPersona';
 
 export const useUberPersona = (personaId?: string) => {
   const [persona, setPersona] = useState<UberPersona | null>(null);
