@@ -6,6 +6,9 @@ export interface SystemIntegrityResult {
   isValid: boolean;
   message: string;
   timestamp: string;
+  overallStatus?: string;
+  modules?: { [key: string]: any };
+  issues?: string[];
 }
 
 export interface SessionValidationResult {
@@ -53,7 +56,14 @@ class Orus {
     return {
       isValid: true,
       message: 'System integrity verified',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      overallStatus: 'healthy',
+      modules: {
+        core: 'operational',
+        auth: 'operational',
+        boost: 'operational'
+      },
+      issues: []
     };
   }
 
@@ -62,6 +72,12 @@ class Orus {
    */
   public interfaceHermes(): boolean {
     try {
+      // Make sure hermes has connect method
+      if (typeof hermes.connect !== 'function') {
+        console.error('Hermes connect method not found');
+        return false;
+      }
+      
       const connectionResult = hermes.connect({
         system: this.systemName,
         connectionId: `${this.systemName}-${Date.now()}`

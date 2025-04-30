@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-// Fix the import casing issue
+// Fix the import casing issue by using consistent casing
 import type { UberPersona } from '@/types/uberPersona';
 
 interface PersonaContentTabProps {

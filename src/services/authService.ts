@@ -1,4 +1,13 @@
+
 import { UserRole } from '@/types/pulse-boost';
+
+// Define enum for UserRole
+enum UserRoleEnum {
+  ADMIN = 'admin',
+  CREATOR = 'creator',
+  MODERATOR = 'moderator',
+  USER = 'user'
+}
 
 // This is a placeholder for the auth service
 // In a real implementation, this would handle authentication and authorization
@@ -7,13 +16,13 @@ export const authService = {
   getUserRole: async (userId: string): Promise<UserRole> => {
     // In a real implementation, this would check the user's role in a database
     if (userId === 'admin-user-id') {
-      return UserRole.ADMIN;
+      return { id: 'admin', name: UserRoleEnum.ADMIN, permissions: ['all'] };
     } else if (userId.includes('creator')) {
-      return UserRole.CREATOR;
+      return { id: 'creator', name: UserRoleEnum.CREATOR, permissions: ['create', 'edit'] };
     } else if (userId.includes('mod')) {
-      return UserRole.MODERATOR;
+      return { id: 'moderator', name: UserRoleEnum.MODERATOR, permissions: ['moderate'] };
     } else {
-      return UserRole.USER;
+      return { id: 'user', name: UserRoleEnum.USER, permissions: ['read'] };
     }
   },
 

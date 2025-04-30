@@ -4,23 +4,21 @@
 import { 
   AuthContext, 
   AuthProvider, 
-  useAuth 
-} from './auth';
+  useAuth as useAuthHook
+} from './auth/AuthProvider';
 
-export { 
-  useAuth, 
-  AuthProvider, 
-  AuthContext
-};
+// Export with specific names to avoid circular references
+export const useAuth = useAuthHook; 
+export { AuthProvider, AuthContext };
 
 // Legacy exports to maintain backward compatibility
-export const useAuthState = useAuth;
-export const useAuthActions = useAuth;
+export const useAuthState = () => useAuthHook();
+export const useAuthActions = () => useAuthHook();
 export const useRole = () => {
-  const auth = useAuth();
+  const auth = useAuthHook();
   return {
     hasRole: auth.checkRole
   };
 };
 
-export default useAuth;
+export default useAuthHook;
