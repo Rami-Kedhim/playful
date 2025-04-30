@@ -1,135 +1,214 @@
 
-// Oxum - Core boosting system for UberEscorts
+/**
+ * Oxum - Boost and Visibility System
+ * Manages profile boosting, visibility, and ranking in the ecosystem
+ */
 
+import { UberPersona } from '@/types/uberPersona';
 import { LiveBoostMapEntry } from '@/types/home';
 
-export interface BoostAllocation {
-  amount: number;
-  duration: string;
-  expires: Date;
-  affected: {
-    visibility: number;
-    placement: number;
-    recommendations: number;
+export interface OxumBoostResult {
+  success: boolean;
+  transactionId?: string;
+  visibilityScore?: number;
+  expires?: Date;
+}
+
+export interface OxumBoostOptions {
+  duration?: number;  // Duration in hours
+  intensity?: number; // 1-100 scale
+  geoTargeting?: string[];
+  timeTargeting?: {
+    startHour: number;
+    endHour: number;
   };
 }
 
-export interface BoostCalculation {
-  baseScore: number;
-  modifiers: Record<string, number>;
-  finalScore: number;
-  positionImpact: number | string;
-  recommendation: string;
-}
-
 export class Oxum {
+  private initialized: boolean = false;
+  private activeBoosts: Map<string, {
+    level: number;
+    expires: Date;
+    boostId: string;
+  }> = new Map();
+  
   /**
-   * Initialize Oxum boosting engine
+   * Initialize the Oxum boosting system
    */
   public async initialize(): Promise<boolean> {
-    console.log('Initializing Oxum Boosting Engine');
+    if (this.initialized) {
+      return true;
+    }
+    
+    // In a real implementation, this would load boost data from storage
+    this.initialized = true;
     return true;
   }
   
   /**
-   * Calculate boost score for a persona
+   * Apply a boost to a profile
    */
-  public calculateBoostScore(personaId: string): number {
-    // In a real implementation this would use complex algorithms
-    // For now, generate a weighted random score between 0 and 100
-    const baseScore = 50 + Math.random() * 30;
+  public async applyBoost(
+    profileId: string, 
+    boostLevel: number, 
+    options?: OxumBoostOptions
+  ): Promise<OxumBoostResult> {
+    if (!this.initialized) {
+      await this.initialize();
+    }
     
-    // Apply some randomization to simulate boost effects
-    const hasBoost = Math.random() > 0.7;
-    const boostMultiplier = hasBoost ? 1.2 : 1.0;
-    
-    return Math.min(100, baseScore * boostMultiplier);
-  }
-  
-  /**
-   * Get detailed boosting calculations
-   */
-  public getBoostCalculation(personaId: string): BoostCalculation {
-    const baseScore = 40 + Math.random() * 30;
-    const activityModifier = Math.random() * 10;
-    const completenessModifier = Math.random() * 15;
-    const popularityModifier = Math.random() * 20;
-    
-    const finalScore = Math.min(100, baseScore + activityModifier + completenessModifier + popularityModifier);
-    
-    return {
-      baseScore,
-      modifiers: {
-        activity: activityModifier,
-        profileCompleteness: completenessModifier,
-        popularity: popularityModifier
-      },
-      finalScore,
-      positionImpact: finalScore > 70 ? 'high' : finalScore > 50 ? 'medium' : 'low',
-      recommendation: finalScore < 60 ? 'Consider boosting your profile' : 'Your profile has good visibility'
-    };
-  }
-  
-  /**
-   * Apply a boost to a persona
-   */
-  public async applyBoost(personaId: string, amount: number): Promise<BoostAllocation> {
-    console.log(`Applying boost of ${amount} to persona ${personaId}`);
-    
-    // Calculate boost duration based on amount
-    const days = Math.max(1, Math.floor(amount / 10));
+    // Default expiration is 24 hours from now
+    const expireHours = options?.duration || 24;
     const expires = new Date();
-    expires.setDate(expires.getDate() + days);
+    expires.setHours(expires.getHours() + expireHours);
+    
+    // Generate a boost ID
+    const boostId = `boost-${Date.now()}-${profileId.substring(0, 8)}`;
+    
+    // Store the boost
+    this.activeBoosts.set(profileId, {
+      level: boostLevel,
+      expires,
+      boostId
+    });
+    
+    // Calculate visibility score based on boost level
+    const visibilityScore = this.calculateVisibilityScore(boostLevel, options);
     
     return {
-      amount,
-      duration: `${days} days`,
-      expires,
-      affected: {
-        visibility: Math.min(100, 50 + amount / 2),
-        placement: Math.min(100, 40 + amount / 3),
-        recommendations: Math.min(100, 30 + amount / 4)
-      }
+      success: true,
+      transactionId: boostId,
+      visibilityScore,
+      expires
     };
   }
   
   /**
-   * Get live boost map showing active boosts
+   * Cancel an active boost
    */
-  public getLiveBoostMap(count: number = 10): LiveBoostMapEntry[] {
-    // In a real implementation this would come from a real-time database
-    return Array.from({ length: count }).map((_, i) => ({
-      id: `boost-${i}`,
-      type: ['escort', 'creator', 'livecam', 'ai'][i % 4],
-      location: ['New York', 'Los Angeles', 'Miami', 'Virtual'][i % 4],
-      boostScore: 60 + Math.random() * 40,
-      trend: ['rising', 'stable', 'falling'][Math.floor(Math.random() * 3)] as 'rising' | 'stable' | 'falling',
-      lastUpdated: new Date(Date.now() - Math.random() * 86400000)
-    }));
-  }
-  
-  /**
-   * Calculate boost allocation using eigenvectors
-   * This method is used by BoostManagerContainer and other components
-   */
-  public boostAllocationEigen(matrix: number[][]): number[] {
-    // Simplified implementation for demonstration
-    const rows = matrix.length;
-    const cols = matrix[0]?.length || 0;
+  public async cancelBoost(profileId: string): Promise<boolean> {
+    if (!this.activeBoosts.has(profileId)) {
+      return false;
+    }
     
-    // Generate normalized allocation vector
-    return Array.from({ length: cols }).map(() => Math.random());
+    this.activeBoosts.delete(profileId);
+    return true;
   }
   
   /**
-   * Get boost recommendations for a persona
+   * Check if a profile has an active boost
    */
-  public getBoostRecommendations(personaId: string): string[] {
-    return [
-      'Add more profile details to improve organic visibility',
-      'Consider a 7-day boost package for immediate results',
-      'Add tags that match trending search terms'
-    ];
+  public hasActiveBoost(profileId: string): boolean {
+    if (!this.activeBoosts.has(profileId)) {
+      return false;
+    }
+    
+    // Check if the boost has expired
+    const boost = this.activeBoosts.get(profileId);
+    if (!boost) {
+      return false;
+    }
+    
+    if (boost.expires < new Date()) {
+      // Boost has expired, remove it
+      this.activeBoosts.delete(profileId);
+      return false;
+    }
+    
+    return true;
+  }
+  
+  /**
+   * Get details of an active boost
+   */
+  public getBoostDetails(profileId: string): {
+    level: number;
+    expires: Date;
+    boostId: string;
+    remainingTime: number;  // in milliseconds
+  } | null {
+    if (!this.hasActiveBoost(profileId)) {
+      return null;
+    }
+    
+    const boost = this.activeBoosts.get(profileId);
+    if (!boost) {
+      return null;
+    }
+    
+    return {
+      ...boost,
+      remainingTime: boost.expires.getTime() - Date.now()
+    };
+  }
+  
+  /**
+   * Calculate boost score for a profile
+   */
+  public calculateBoostScore(profileId: string): number {
+    if (!this.hasActiveBoost(profileId)) {
+      return 0;
+    }
+    
+    const boost = this.activeBoosts.get(profileId);
+    if (!boost) {
+      return 0;
+    }
+    
+    // Calculate score based on level and remaining time
+    const remainingMs = boost.expires.getTime() - Date.now();
+    const remainingHours = remainingMs / (1000 * 60 * 60);
+    const remainingPercentage = Math.min(1, remainingHours / 24);
+    
+    // Score decreases as the boost approaches expiration
+    return boost.level * (0.7 + remainingPercentage * 0.3);
+  }
+  
+  /**
+   * Generate a live map of boosted profiles
+   */
+  public getLiveBoostMap(limit: number = 10): LiveBoostMapEntry[] {
+    const entries: LiveBoostMapEntry[] = [];
+    
+    // In a real implementation, this would use actual boosted profile data
+    // This implementation creates mock data
+    for (let i = 0; i < limit; i++) {
+      entries.push({
+        id: `profile-${i + 1}`,
+        type: ['escort', 'creator', 'livecam', 'ai'][Math.floor(Math.random() * 4)],
+        location: ['New York', 'Los Angeles', 'Miami', 'London', 'Paris'][Math.floor(Math.random() * 5)],
+        boostScore: Math.floor(Math.random() * 100) + 50,
+        trend: ['rising', 'stable', 'falling'][Math.floor(Math.random() * 3)] as 'rising' | 'stable' | 'falling',
+        lastUpdated: new Date(Date.now() - Math.floor(Math.random() * 60) * 60000)
+      });
+    }
+    
+    return entries;
+  }
+  
+  /**
+   * Sort a list of personas based on boost status
+   */
+  public sortByBoostScore(personas: UberPersona[]): UberPersona[] {
+    return [...personas].sort((a, b) => {
+      const scoreA = this.calculateBoostScore(a.id);
+      const scoreB = this.calculateBoostScore(b.id);
+      return scoreB - scoreA;
+    });
+  }
+  
+  /**
+   * Calculate visibility score based on boost level and options
+   */
+  private calculateVisibilityScore(boostLevel: number, options?: OxumBoostOptions): number {
+    let score = boostLevel * 10;
+    
+    if (options?.intensity) {
+      // Apply intensity modifier
+      score *= (0.5 + (options.intensity / 100) * 0.5);
+    }
+    
+    return Math.min(100, Math.max(0, score));
   }
 }
 

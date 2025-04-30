@@ -1,39 +1,58 @@
 
 import { UberPersona } from '@/types/uberPersona';
-import { oxum } from '../Oxum';
 
-export const featuredService = {
-  /**
-   * Load featured personas, boosted by the Oxum algorithm
-   */
-  async loadFeaturedPersonas(count: number = 4): Promise<UberPersona[]> {
-    // This would fetch from backend in a real implementation
-    // Here we generate some sample personas
-    const sampleTypes: ('escort' | 'creator' | 'livecam' | 'ai')[] = [
-      'escort', 'creator', 'livecam', 'ai'
+class FeaturedService {
+  public async loadFeaturedPersonas(count: number = 4): Promise<UberPersona[]> {
+    // In a real implementation, this would load from API or database
+    const mockPersonas: UberPersona[] = [
+      {
+        id: 'persona1',
+        name: 'Sophie',
+        displayName: 'Sophie Dreams',
+        type: 'escort',
+        avatarUrl: 'https://picsum.photos/seed/sophie/400/600',
+        location: 'New York',
+        isVerified: true,
+        isOnline: true,
+        tags: ['luxury', 'gfe', 'travel']
+      },
+      {
+        id: 'persona2',
+        name: 'Luna',
+        displayName: 'Luna Eclipse',
+        type: 'creator',
+        avatarUrl: 'https://picsum.photos/seed/luna/400/600',
+        location: 'Miami',
+        isVerified: true,
+        isOnline: false,
+        tags: ['photos', 'videos', 'exclusive']
+      },
+      {
+        id: 'persona3',
+        name: 'TiffanyLive',
+        displayName: 'Tiffany Stars',
+        type: 'livecam',
+        avatarUrl: 'https://picsum.photos/seed/tiffany/400/600',
+        location: 'Los Angeles',
+        isVerified: true,
+        isOnline: true,
+        tags: ['interactive', 'shows', 'private']
+      },
+      {
+        id: 'persona4',
+        name: 'Aria',
+        displayName: 'Aria Intelligence',
+        type: 'ai',
+        avatarUrl: 'https://picsum.photos/seed/aria/400/600',
+        location: 'Metaverse',
+        isVerified: true,
+        isOnline: true,
+        tags: ['adaptive', 'personalized', 'learning']
+      }
     ];
     
-    const featuredPersonas: UberPersona[] = Array.from({ length: count }).map((_, i) => {
-      const type = sampleTypes[i % sampleTypes.length];
-      
-      return {
-        id: `featured-${i}`,
-        name: `Featured ${type.charAt(0).toUpperCase() + type.slice(1)} ${i}`,
-        displayName: `Featured ${type.charAt(0).toUpperCase() + type.slice(1)} ${i}`,
-        type: type,
-        avatarUrl: `https://picsum.photos/seed/persona${i}/400/600`,
-        location: ['New York', 'Los Angeles', 'Miami', 'Virtual'][i % 4],
-        isVerified: true,
-        isOnline: Math.random() > 0.3,
-        tags: ['featured', 'premium', 'top-rated']
-      };
-    });
-    
-    // Apply boosting via Oxum
-    for (const persona of featuredPersonas) {
-      (persona as any).boostScore = oxum.calculateBoostScore(persona.id);
-    }
-    
-    return featuredPersonas;
+    return mockPersonas.slice(0, count);
   }
-};
+}
+
+export const featuredService = new FeaturedService();

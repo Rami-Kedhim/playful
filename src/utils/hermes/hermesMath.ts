@@ -115,3 +115,60 @@ export function calculateBoostVisibilityGain(
   
   return baseVisibility * boostFactor * completenessMultiplier;
 }
+
+/**
+ * Calculate geo-boost multiplier based on location and time
+ */
+export function calculateGeoBoostMultiplier(
+  location: string,
+  timeOfDay: number,
+  dayOfWeek: number
+): number {
+  // Basic implementation - would be more complex with real location data
+  const baseMultiplier = 1.0;
+  
+  // Evening hours get higher multiplier
+  const timeMultiplier = (timeOfDay >= 18 && timeOfDay <= 23) ? 1.3 : 1.0;
+  
+  // Weekend boost
+  const weekendMultiplier = (dayOfWeek === 5 || dayOfWeek === 6) ? 1.2 : 1.0;
+  
+  return baseMultiplier * timeMultiplier * weekendMultiplier;
+}
+
+/**
+ * Calculate engagement factor based on user interaction stats
+ */
+export function calculateEngagementFactor(
+  profileViews: number,
+  clickThroughRate: number,
+  averageTimeOnProfile: number
+): number {
+  // Higher views, CTR, and time on profile = higher engagement
+  const viewsFactor = Math.min(1, profileViews / 500) * 0.4;
+  const ctrFactor = Math.min(1, clickThroughRate * 10) * 0.4;
+  const timeFactor = Math.min(1, averageTimeOnProfile / 120) * 0.2; // Time in seconds
+  
+  return viewsFactor + ctrFactor + timeFactor;
+}
+
+/**
+ * Calculate boost priority for home page display
+ */
+export function calculateBoostPriority(
+  boostLevel: number,
+  profile: {
+    completeness: number,
+    activity: number,
+    popularity: number
+  }
+): number {
+  const boostFactor = Math.log(1 + boostLevel) * 0.5;
+  const profileFactor = (
+    profile.completeness * 0.3 +
+    profile.activity * 0.3 +
+    profile.popularity * 0.4
+  ) / 100;
+  
+  return boostFactor * profileFactor * 100;
+}

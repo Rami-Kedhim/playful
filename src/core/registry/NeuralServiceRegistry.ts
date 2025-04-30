@@ -1,76 +1,74 @@
 
 /**
- * Neural Service Registry - Manages neural service instances
+ * Neural Service Registry
+ * Manages and provides access to all neural services in the UberCore ecosystem
  */
 
-interface NeuralService {
-  id: string;
-  name: string;
-  type: string;
-  status: 'active' | 'inactive' | 'error';
-  initialize: () => Promise<boolean>;
-  metrics?: Record<string, any>;
-}
-
 class NeuralServiceRegistry {
-  private services: Map<string, NeuralService> = new Map();
+  private services: Map<string, any> = new Map();
   private initialized: boolean = false;
-
+  
+  /**
+   * Initialize the registry and all registered services
+   */
   public async initialize(): Promise<boolean> {
     if (this.initialized) {
       return true;
     }
-
-    console.info('Initializing Neural Service Registry');
     
-    // In a real implementation, would discover and initialize services dynamically
+    console.log('Initializing Neural Service Registry');
+    
+    // Initialize all registered services
+    for (const [name, service] of this.services.entries()) {
+      if (service.initialize && typeof service.initialize === 'function') {
+        try {
+          await service.initialize();
+          console.log(`Service ${name} initialized`);
+        } catch (error) {
+          console.error(`Failed to initialize service ${name}:`, error);
+          return false;
+        }
+      }
+    }
+    
     this.initialized = true;
     return true;
   }
-
-  public registerService(service: NeuralService): void {
-    this.services.set(service.id, service);
-    console.info(`Registered neural service: ${service.name} (${service.id})`);
+  
+  /**
+   * Register a service with the registry
+   */
+  public register(name: string, service: any): void {
+    this.services.set(name, service);
+    console.log(`Service ${name} registered`);
   }
-
-  public getService(id: string): NeuralService | undefined {
-    return this.services.get(id);
+  
+  /**
+   * Get a service by name
+   */
+  public get<T>(name: string): T | undefined {
+    return this.services.get(name) as T;
   }
-
-  public getServicesByType(type: string): NeuralService[] {
-    return Array.from(this.services.values())
-      .filter(service => service.type === type);
+  
+  /**
+   * Check if a service exists
+   */
+  public has(name: string): boolean {
+    return this.services.has(name);
   }
-
-  public getAllServices(): NeuralService[] {
-    return Array.from(this.services.values());
+  
+  /**
+   * Get all registered service names
+   */
+  public getServiceNames(): string[] {
+    return Array.from(this.services.keys());
   }
-
-  public getActiveServices(): NeuralService[] {
-    return Array.from(this.services.values())
-      .filter(service => service.status === 'active');
-  }
-
-  public getSystemStatus(): Record<string, any> {
-    return {
-      totalServices: this.services.size,
-      activeServices: this.getActiveServices().length,
-      servicesByType: this.getServiceTypeCounts(),
-      lastUpdate: new Date().toISOString()
-    };
-  }
-
-  private getServiceTypeCounts(): Record<string, number> {
-    const counts: Record<string, number> = {};
-    
-    this.services.forEach(service => {
-      if (!counts[service.type]) {
-        counts[service.type] = 0;
-      }
-      counts[service.type]++;
-    });
-    
-    return counts;
+  
+  /**
+   * Get the number of registered services
+   */
+  public get serviceCount(): number {
+    return this.services.size;
   }
 }
 

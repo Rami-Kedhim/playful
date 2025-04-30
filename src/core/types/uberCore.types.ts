@@ -1,9 +1,5 @@
 
-/**
- * Core type definitions for UberCore systems
- */
-
-import { UberPersona, PersonaSource } from '@/types/uberPersona';
+import { UberPersona } from '@/types/uberPersona';
 
 export interface UberCoreSettings {
   boostingEnabled: boolean;
@@ -15,86 +11,29 @@ export interface UberCoreSettings {
   aiEnhancementLevel: number;
 }
 
-export interface SystemHealthMetrics {
-  load: number;
-  memory: number;
-  latency: number;
-  errorRate: number;
-  averageResponseTime: number;
+export interface PersonaProcessingOptions {
+  applyBoosting?: boolean;
+  calculateFlow?: boolean;
+  enhanceWithAI?: boolean;
+  optimizeVisibility?: boolean;
 }
 
-export interface UberCoreStatus {
-  isRunning: boolean;
-  version: string;
-  uptime: number;
-  memoryUsage: number;
-  processorLoad: number;
-}
-
-export interface NeuralSystemMetricsResult {
-  metrics: {
-    processing: {
-      current: number;
-      historical: number[];
-      processingEfficiency: number;
-      processingTrend: 'up' | 'down' | 'stable';
-    };
-    accuracy: {
-      current: number;
-      historical: number[];
-      accuracyRate: number;
-      accuracyTrend: 'up' | 'down' | 'stable';
-    };
-    recommendations: string[];
-    history: any[];
-  };
-  systemHealth: SystemHealthMetrics;
-  performance: {
-    cpuUsage: number;
-    memoryUsage: number;
-    systemLoad: number;
-    memoryAllocation: number;
-    networkThroughput: number;
-    requestRate: number;
-    averageResponseTime: number;
-    errorRate: number;
-  };
-}
-
-export interface CoreInitOptions {
-  boostingEnabled?: boolean;
-  autonomyLevel?: number;
-  resourceAllocation?: number;
-  debug?: boolean;
-}
-
-export interface CoreModule {
-  name: string;
-  version: string;
-  status: 'active' | 'inactive' | 'error';
-  initialize: () => Promise<boolean>;
-  shutdown: () => Promise<boolean>;
-}
-
-// Updated PersonaProcessingResult interface to align with UberPersona
-export interface PersonaProcessingResult extends UberPersona {
+export interface PersonaProcessingResult {
+  persona: UberPersona;
   boostScore?: number;
-  systemMetadata?: {
-    source: PersonaSource;
-    lastSynced: Date;
-    tagsGeneratedByAI: boolean;
-    hilbertSpaceVector: number[];
-    flowScore?: number;
-    statusFlags?: {
-      needsModeration?: boolean;
-      [key: string]: boolean | undefined;
-    };
-    personalityIndex?: number;
-  };
-  processingStats?: {
-    viewCount: number;
-    interactionCount: number;
-    conversionRate: number;
-    engagementScore: number;
-  };
+  flowScore?: number;
+  visibilityScore?: number;
+}
+
+export interface SystemStatus {
+  coreStatus: 'online' | 'offline' | 'degraded';
+  hermesStatus: string;
+  oxumStatus: string;
+  orusStatus: string;
+  walletStatus: string;
+  activeUsers: number;
+  activePersonas: number;
+  boostPower: number;
+  systemLoad: number;
+  lastUpdated: Date;
 }

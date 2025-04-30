@@ -1,144 +1,123 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { NeuralModel } from '@/types/neural/NeuralSystemMetrics';
-import { Brain, Activity, Cpu, Server } from 'lucide-react';
-import PerformanceChart from '@/components/neural/PerformanceChart';
+import { CheckCircle2, XCircle, BarChart } from 'lucide-react';
+import { uberCoreInstance } from '@/core/UberCore';
 
-const NeuralAnalyticsPanel: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('performance');
-  
-  // Mock neural performance data
-  const cpuData = [28, 32, 45, 60, 52, 38];
-  const memoryData = [42, 45, 50, 58, 63, 60];
-  const requestData = [150, 220, 310, 400, 520, 480];
-  
-  // Labels for the timeline (last 6 hours)
-  const hourLabels = [...Array(6)].map((_, i) => {
-    const hour = new Date();
-    hour.setHours(hour.getHours() - (5 - i));
-    return `${hour.getHours()}:00`;
-  });
-  
-  // Mock active neural models
-  const activeModels: NeuralModel[] = [
-    {
-      id: 'model-1',
-      name: 'Persona Matcher',
-      version: '1.2.3',
-      type: 'escort',
-      size: 180,
-      precision: 0.93,
-      specialization: ['matching', 'recommendations'],
-      capabilities: ['pattern recognition', 'preference learning'],
-      status: 'active',
-      performance: {
-        accuracy: 0.91,
-        latency: 120,
-        throughput: 350,
-        errorRate: 0.09,
-        confidence: 0.88
+const NeuralAnalyticsPanel = () => {
+  const [healthData, setHealthData] = React.useState<Record<string, any> | null>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchHealthData = async () => {
+      try {
+        const data = uberCoreInstance.checkSubsystemHealth();
+        setHealthData(data);
+      } catch (error) {
+        console.error('Error fetching neural health data:', error);
+      } finally {
+        setLoading(false);
       }
-    },
-    {
-      id: 'model-2',
-      name: 'Content Analyzer',
-      version: '2.1.0',
-      type: 'creator',
-      size: 220,
-      precision: 0.96,
-      specialization: 'content analysis',
-      capabilities: ['nsfw detection', 'content tagging', 'quality assessment'],
-      status: 'active',
-      performance: {
-        accuracy: 0.94,
-        latency: 180,
-        throughput: 220,
-        errorRate: 0.06,
-        confidence: 0.92
-      }
-    }
-  ];
+    };
+
+    fetchHealthData();
+  }, []);
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart className="h-5 w-5" />
+            Neural Analytics
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-40">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="bg-card/50 backdrop-blur-sm border-white/10">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg flex items-center">
-          <Brain className="h-5 w-5 mr-2 text-primary" />
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <BarChart className="h-5 w-5" />
           Neural Analytics
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="performance" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="models">Active Models</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="performance" className="space-y-4">
-            <div>
-              <h4 className="text-sm font-medium mb-1 flex items-center">
-                <Cpu className="h-4 w-4 mr-1 text-muted-foreground" />
-                CPU Usage (%)
-              </h4>
-              <PerformanceChart 
-                data={cpuData} 
-                labels={hourLabels} 
-                color="#8b5cf6" 
-                height={60}
-              />
-            </div>
-            
-            <div>
-              <h4 className="text-sm font-medium mb-1 flex items-center">
-                <Server className="h-4 w-4 mr-1 text-muted-foreground" />
-                Memory Usage (%)
-              </h4>
-              <PerformanceChart 
-                data={memoryData} 
-                labels={hourLabels} 
-                color="#ec4899" 
-                height={60}
-              />
-            </div>
-            
-            <div>
-              <h4 className="text-sm font-medium mb-1 flex items-center">
-                <Activity className="h-4 w-4 mr-1 text-muted-foreground" />
-                Requests per Minute
-              </h4>
-              <PerformanceChart 
-                data={requestData} 
-                labels={hourLabels} 
-                color="#10b981" 
-                height={60}
-              />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="models">
-            <div className="space-y-3">
-              {activeModels.map(model => (
-                <div key={model.id} className="p-3 border border-border rounded-md">
-                  <div className="flex justify-between items-center mb-1">
-                    <h4 className="font-medium">{model.name}</h4>
-                    <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-500 rounded-full">
-                      {model.status}
-                    </span>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    v{model.version} • {Array.isArray(model.specialization) ? model.specialization.join(', ') : model.specialization}
-                  </div>
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-                    <div>Accuracy: {model.performance?.accuracy ? `${(model.performance.accuracy * 100).toFixed(1)}%` : 'N/A'}</div>
-                    <div>Latency: {model.performance?.latency ? `${model.performance.latency}ms` : 'N/A'}</div>
-                  </div>
+        {healthData ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-secondary/20 p-4 rounded-md">
+                <div className="text-sm text-muted-foreground mb-1">Hermes Status</div>
+                <div className="flex items-center">
+                  {healthData.hermes.status === 'operational' ? (
+                    <CheckCircle2 className="h-4 w-4 text-green-500 mr-2" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-yellow-500 mr-2" />
+                  )}
+                  <span className="font-medium">
+                    {healthData.hermes.status === 'operational' ? 'Operational' : 'Degraded'}
+                  </span>
                 </div>
-              ))}
+                <div className="mt-2">
+                  <div className="text-xs text-muted-foreground">Flow Score</div>
+                  <div className="font-bold">{healthData.hermes.flowScore.toFixed(2)}</div>
+                </div>
+              </div>
+
+              <div className="bg-secondary/20 p-4 rounded-md">
+                <div className="text-sm text-muted-foreground mb-1">Oxum Status</div>
+                <div className="flex items-center">
+                  {healthData.oxum.status === 'operational' ? (
+                    <CheckCircle2 className="h-4 w-4 text-green-500 mr-2" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-yellow-500 mr-2" />
+                  )}
+                  <span className="font-medium">
+                    {healthData.oxum.status === 'operational' ? 'Operational' : 'Degraded'}
+                  </span>
+                </div>
+                <div className="mt-2">
+                  <div className="text-xs text-muted-foreground">Live Maps</div>
+                  <div className="font-bold">{healthData.oxum.liveMaps}</div>
+                </div>
+              </div>
             </div>
-          </TabsContent>
-        </Tabs>
+
+            <div className="bg-secondary/20 p-4 rounded-md">
+              <div className="text-sm text-muted-foreground mb-2">Orus Module Status</div>
+              <div className="space-y-1.5">
+                {healthData.orus.modules.map((module: any) => (
+                  <div key={module.name} className="flex items-center justify-between">
+                    <span>{module.name}</span>
+                    <div className="flex items-center">
+                      <span className={`h-2 w-2 rounded-full mr-1.5 ${
+                        module.status === 'online' 
+                          ? 'bg-green-500' 
+                          : module.status === 'degraded' 
+                            ? 'bg-yellow-500' 
+                            : 'bg-red-500'
+                      }`} />
+                      <span className="text-xs text-muted-foreground">
+                        {(module.reliability * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center text-muted-foreground">
+            Neural analytics data unavailable
+          </div>
+        )}
       </CardContent>
     </Card>
   );

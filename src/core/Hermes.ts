@@ -1,205 +1,264 @@
 
 /**
- * Hermes - Flow Dynamics and Timing Optimization Engine for UberEscorts
- * Focuses on the temporal aspects of visibility and discoverability
+ * Hermes - Flow Dynamics Engine
+ * Responsible for calculating and optimizing visibility flow in the ecosystem
  */
+
+export interface FlowDynamicsOptions {
+  systemLoad: number;
+  activityLevel: number;
+  timeFactors?: {
+    hourOfDay?: number;
+    dayOfWeek?: number;
+  };
+  locationFactors?: {
+    region?: string;
+    countryCode?: string;
+  };
+}
 
 export interface FlowDynamicsResult {
   flowScore: number;
+  status: 'optimal' | 'normal' | 'suboptimal';
   recommendedActions: string[];
-  status: string;
-  activityTrend: 'rising' | 'stable' | 'falling';
-  peakTimes: string[];
-  timeZoneAdjustment?: number;
+  flowMap?: Record<string, number>;
 }
 
-interface FlowDynamicsParams {
-  systemLoad: number;
-  activityLevel: number;
-  personaType?: string;
-  timeZone?: string;
+export interface GeoActivityData {
+  region: string;
+  activityScore: number;
+  peakHours: number[];
+  boostMultiplier: number;
 }
 
 export class Hermes {
-  private initialized: boolean = false;
+  private systemLoad: number = 0.5;
+  private isInitialized: boolean = false;
+  
+  constructor() {
+    console.info('Initializing Hermes Flow Dynamics Engine');
+  }
   
   /**
-   * Initialize the Hermes Flow Dynamics Engine
+   * Initialize the Hermes flow dynamics system
    */
   public async initialize(): Promise<boolean> {
-    if (this.initialized) return true;
+    if (this.isInitialized) {
+      return true;
+    }
     
-    console.info('Initializing Hermes Flow Dynamics Engine');
-    this.initialized = true;
+    // Simulating initialization process
+    this.isInitialized = true;
     return true;
   }
   
   /**
-   * Resolve flow dynamics based on system parameters
-   * This calculates temporal visibility patterns and recommends actions
+   * Calculate flow dynamics based on current system conditions
    */
-  public resolveFlowDynamics(params: FlowDynamicsParams): FlowDynamicsResult {
-    const { systemLoad, activityLevel, personaType } = params;
+  public resolveFlowDynamics(options: FlowDynamicsOptions): FlowDynamicsResult {
+    const {
+      systemLoad = 0.5,
+      activityLevel = 0.6,
+      timeFactors = {},
+      locationFactors = {}
+    } = options;
     
-    // Basic flow score calculation based on system load and activity level
-    const baseFlowScore = 50 + (1 - systemLoad) * 30 + activityLevel * 20;
+    // Store system load for future calculations
+    this.systemLoad = systemLoad;
     
-    // Apply type-specific adjustments
-    let adjustedScore = baseFlowScore;
-    let typeSpecificRecommendations: string[] = [];
+    // Calculate base flow score
+    const baseFlowScore = 60 + (1 - systemLoad) * 20 + activityLevel * 20;
     
-    if (personaType) {
-      switch (personaType.toLowerCase()) {
-        case 'escort':
-          // Escorts perform best during evening hours
-          const hourOfDay = new Date().getHours();
-          const eveningBonus = (hourOfDay >= 18 || hourOfDay <= 2) ? 10 : 0;
-          adjustedScore += eveningBonus;
-          typeSpecificRecommendations.push('Optimal visibility hours are between 6pm and 2am');
-          break;
-          
-        case 'creator':
-          // Creators need consistent activity
-          if (activityLevel > 0.7) {
-            adjustedScore += 15;
-          }
-          typeSpecificRecommendations.push('Regular content updates boost visibility');
-          break;
-          
-        case 'livecam':
-          // LiveCam prioritizes real-time engagement
-          adjustedScore += activityLevel * 25;
-          typeSpecificRecommendations.push('Live streaming increases visibility by up to 200%');
-          break;
-          
-        case 'ai':
-          // AI profiles need algorithmic optimization
-          adjustedScore += systemLoad * 15; // AI performs better under higher system loads
-          typeSpecificRecommendations.push('AI profiles benefit from personality optimization');
-          break;
-      }
+    // Apply time-based adjustments
+    const hourOfDay = timeFactors.hourOfDay ?? new Date().getHours();
+    const dayOfWeek = timeFactors.dayOfWeek ?? new Date().getDay();
+    
+    const timeMultiplier = this.calculateTimeMultiplier(hourOfDay, dayOfWeek);
+    
+    // Apply location-based adjustments
+    const locationMultiplier = this.calculateLocationMultiplier(
+      locationFactors.region || 'global',
+      locationFactors.countryCode || 'US'
+    );
+    
+    // Calculate final flow score
+    const finalFlowScore = baseFlowScore * timeMultiplier * locationMultiplier;
+    
+    // Determine status based on score
+    let status: 'optimal' | 'normal' | 'suboptimal';
+    if (finalFlowScore >= 80) {
+      status = 'optimal';
+    } else if (finalFlowScore >= 60) {
+      status = 'normal';
+    } else {
+      status = 'suboptimal';
     }
     
-    // Calculate peak times - this would normally use more sophisticated algorithms
-    const now = new Date();
-    const hours = now.getHours();
-    const peakHour1 = (hours + 6) % 24;
-    const peakHour2 = (hours + 12) % 24;
-    
-    const formatHour = (h: number) => {
-      return `${h % 12 === 0 ? 12 : h % 12}${h < 12 ? 'am' : 'pm'}`;
-    };
+    // Generate recommendations
+    const recommendedActions = this.generateRecommendations(
+      finalFlowScore,
+      systemLoad,
+      activityLevel,
+      hourOfDay
+    );
     
     return {
-      flowScore: Math.min(100, Math.round(adjustedScore)),
-      status: adjustedScore > 70 ? 'optimal' : adjustedScore > 50 ? 'good' : 'suboptimal',
-      activityTrend: Math.random() > 0.6 ? 'rising' : Math.random() > 0.5 ? 'stable' : 'falling',
-      recommendedActions: [
-        'Optimize profile completeness for better visibility',
-        'Consider boost during peak hours',
-        ...typeSpecificRecommendations
-      ],
-      peakTimes: [formatHour(peakHour1), formatHour(peakHour2)]
+      flowScore: finalFlowScore,
+      status,
+      recommendedActions,
+      flowMap: this.generateFlowMap(systemLoad, activityLevel)
     };
   }
   
   /**
-   * Calculate optimal timing for a specific action
+   * Calculate visibility boost for a persona based on current flow dynamics
    */
-  public calculateOptimalTiming(
-    actionType: 'boost' | 'post' | 'livestream' | 'promotion',
-    userData?: Record<string, any>
-  ): { optimalTime: Date; confidence: number } {
-    const now = new Date();
-    const hours = now.getHours();
+  public calculateVisibilityBoost(
+    personaId: string,
+    boostLevel: number,
+    profileCompleteness: number
+  ): number {
+    // Base boost from boostLevel
+    const baseBoost = 10 * Math.log(1 + boostLevel);
     
-    // Determine peak hours based on action type
-    let peakHourStart = 0;
-    let peakHourEnd = 0;
-    let peakDayOffset = 0;
+    // Completeness factor
+    const completenessFactor = 0.5 + (profileCompleteness / 100) * 0.5;
     
-    switch (actionType) {
-      case 'boost':
-        // Boosts perform best in evening
-        peakHourStart = 19;
-        peakHourEnd = 23;
-        break;
-      case 'post':
-        // Posts perform best midday
-        peakHourStart = 11;
-        peakHourEnd = 14;
-        break;
-      case 'livestream':
-        // Livestreams perform best in evening
-        peakHourStart = 20;
-        peakHourEnd = 24;
-        break;
-      case 'promotion':
-        // Promotions perform best on weekends
-        const day = now.getDay(); // 0 = Sunday, 6 = Saturday
-        peakDayOffset = day === 5 || day === 6 ? 0 : 5 - day; // Next Friday
-        peakHourStart = 17;
-        peakHourEnd = 20;
-        break;
-    }
+    // System load adjustment - lower loads mean higher visibility
+    const loadFactor = 1 - (this.systemLoad * 0.3);
     
-    // Calculate optimal time
-    const optimalTime = new Date();
+    // Time-based adjustment
+    const hourOfDay = new Date().getHours();
+    const timeMultiplier = this.calculateTimeMultiplier(hourOfDay, new Date().getDay());
     
-    // If current time is before peak, use today's peak
-    if (hours < peakHourStart) {
-      optimalTime.setHours(peakHourStart, 0, 0, 0);
-    } 
-    // If current time is after peak, use tomorrow's peak
-    else if (hours >= peakHourEnd) {
-      optimalTime.setDate(optimalTime.getDate() + 1);
-      optimalTime.setHours(peakHourStart, 0, 0, 0);
-    } 
-    // If current time is within peak, use current time
-    else {
-      optimalTime.setHours(hours, now.getMinutes(), 0, 0);
-    }
-    
-    // Add any day offset (e.g., for weekend promotions)
-    if (peakDayOffset > 0) {
-      optimalTime.setDate(optimalTime.getDate() + peakDayOffset);
-    }
-    
-    return {
-      optimalTime,
-      confidence: 0.7 + Math.random() * 0.2 // Mock confidence level
-    };
+    return baseBoost * completenessFactor * loadFactor * timeMultiplier;
   }
   
   /**
-   * Get a timing map showing optimal hours of the day
+   * Get geo-targeted activity data for optimal boost timing
    */
-  public getTimingMap(): Record<number, number> {
-    const map: Record<number, number> = {};
+  public getGeoActivityData(region: string): GeoActivityData {
+    // In a real implementation, this would be based on actual activity data
+    // This is a simplified mock implementation
     
-    // Populate with hour -> activity score mapping
-    for (let hour = 0; hour < 24; hour++) {
-      // Simple model: score based on hour of day
-      // Higher scores in evening (6pm-12am), moderate during day, lowest late night
-      let score = 0;
-      
-      if (hour >= 9 && hour < 17) {
-        // Daytime: moderate activity
-        score = 60 + Math.sin(hour / 3) * 10;
-      } else if (hour >= 17 && hour < 24) {
-        // Evening: peak activity
-        score = 75 + Math.sin((hour - 12) / 3) * 15;
-      } else {
-        // Late night/early morning: low activity
-        score = 30 + Math.sin(hour / 6) * 15;
+    const mockData: Record<string, GeoActivityData> = {
+      'north_america': {
+        region: 'North America',
+        activityScore: 0.85,
+        peakHours: [20, 21, 22, 23],
+        boostMultiplier: 1.3
+      },
+      'europe': {
+        region: 'Europe',
+        activityScore: 0.8,
+        peakHours: [19, 20, 21, 22],
+        boostMultiplier: 1.25
+      },
+      'asia': {
+        region: 'Asia',
+        activityScore: 0.75,
+        peakHours: [21, 22, 23, 0],
+        boostMultiplier: 1.2
+      },
+      'global': {
+        region: 'Global',
+        activityScore: 0.7,
+        peakHours: [18, 19, 20, 21, 22, 23],
+        boostMultiplier: 1.15
       }
-      
-      // Add some randomness
-      score += (Math.random() - 0.5) * 10;
-      map[hour] = Math.max(10, Math.min(100, score));
+    };
+    
+    return mockData[region.toLowerCase()] || mockData['global'];
+  }
+  
+  /**
+   * Calculate time-based multiplier for flow dynamics
+   */
+  private calculateTimeMultiplier(hourOfDay: number, dayOfWeek: number): number {
+    // Prime time hours (evenings) get higher multipliers
+    let hourMultiplier = 1.0;
+    if (hourOfDay >= 20 && hourOfDay <= 23) {
+      hourMultiplier = 1.3;  // Prime time
+    } else if ((hourOfDay >= 17 && hourOfDay < 20) || (hourOfDay >= 0 && hourOfDay < 2)) {
+      hourMultiplier = 1.2;  // Shoulder hours
+    } else if (hourOfDay >= 10 && hourOfDay < 17) {
+      hourMultiplier = 0.9;  // Daytime
+    } else {
+      hourMultiplier = 0.8;  // Late night/early morning
     }
     
-    return map;
+    // Weekend adjustment
+    const weekendMultiplier = (dayOfWeek === 5 || dayOfWeek === 6) ? 1.2 : 1.0;
+    
+    return hourMultiplier * weekendMultiplier;
+  }
+  
+  /**
+   * Calculate location-based multiplier for flow dynamics
+   */
+  private calculateLocationMultiplier(region: string, countryCode: string): number {
+    // This would be based on actual regional activity data in a real implementation
+    const regionMultipliers: Record<string, number> = {
+      'north_america': 1.2,
+      'europe': 1.15,
+      'asia': 1.1,
+      'oceania': 1.05,
+      'south_america': 1.0,
+      'africa': 0.95,
+      'global': 1.0
+    };
+    
+    return regionMultipliers[region.toLowerCase()] || 1.0;
+  }
+  
+  /**
+   * Generate recommendations based on flow dynamics analysis
+   */
+  private generateRecommendations(
+    flowScore: number,
+    systemLoad: number,
+    activityLevel: number,
+    hourOfDay: number
+  ): string[] {
+    const recommendations: string[] = [];
+    
+    if (flowScore < 60) {
+      recommendations.push("Consider boosting during higher activity periods");
+    }
+    
+    if (systemLoad > 0.8) {
+      recommendations.push("System under heavy load, visibility may be affected");
+    }
+    
+    if (activityLevel < 0.4) {
+      recommendations.push("Low user activity detected, consider postponing major boosts");
+    }
+    
+    // Time-based recommendations
+    if (hourOfDay >= 2 && hourOfDay < 10) {
+      recommendations.push("Current time slot has lower visibility impact");
+    }
+    
+    if (recommendations.length === 0) {
+      recommendations.push("Flow dynamics optimal, no adjustments needed");
+    }
+    
+    return recommendations;
+  }
+  
+  /**
+   * Generate a flow map showing distribution of visibility across regions
+   */
+  private generateFlowMap(systemLoad: number, activityLevel: number): Record<string, number> {
+    // This would be more complex in a real implementation
+    return {
+      'north_america': 35 + Math.random() * 10,
+      'europe': 30 + Math.random() * 8,
+      'asia': 20 + Math.random() * 5,
+      'oceania': 5 + Math.random() * 3,
+      'south_america': 7 + Math.random() * 3,
+      'africa': 3 + Math.random() * 2
+    };
   }
 }
 

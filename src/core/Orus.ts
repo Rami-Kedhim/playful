@@ -1,5 +1,6 @@
-
 // Orus - Signal Processing and System Integrity
+
+import { SystemIntegrityResult, SignalAnalysisResult, SessionValidationResult } from './types/orus.types';
 
 export interface SystemIntegrityResult {
   overallStatus: 'healthy' | 'warning' | 'critical';
@@ -72,7 +73,7 @@ export class Orus {
       const index = 1; // Neural Network
       modules[index] = {
         ...modules[index],
-        status: 'degraded' as const, // Fixed the type error by using 'as const'
+        status: 'degraded' as const, // Use 'as const' to properly type this
         reliability: 0.75
       };
     }
@@ -141,3 +142,5 @@ export class Orus {
 
 // Export singleton instance
 export const orus = new Orus();
+
+export type { SystemIntegrityResult, SignalAnalysisResult, SessionValidationResult };
