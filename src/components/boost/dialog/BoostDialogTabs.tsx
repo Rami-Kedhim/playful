@@ -1,21 +1,41 @@
 
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { 
-  BoostStatus, 
-  BoostEligibility, 
-  BoostPackage, 
-  HermesStatus, 
-  BoostDialogTabsProps as TabProps 
-} from '@/types/boost';
-import BoostPackages from "../BoostPackages";
+import { Zap, BarChart2, Clock, XCircle } from "lucide-react";
+import BoostPackages from "./BoostPackages";
+import BoostActivePackage from "./BoostActivePackage";
 import BoostEligibilityCheck from "./BoostEligibilityCheck";
-import BoostActivePackage from "../BoostActivePackage";
-import HermesBoostInfo from './HermesBoostInfo';
+import HermesBoostInfo from "./HermesBoostInfo";
+import {
+  BoostStatus,
+  BoostEligibility,
+  BoostPackage,
+  HermesStatus,
+  BoostDialogTabsProps
+} from "@/types/boost";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-const BoostDialogTabs: React.FC<TabProps> = ({
+interface DialogTabsProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  loading: boolean;
+  boostStatus: BoostStatus;
+  eligibility: BoostEligibility;
+  boostPackages: BoostPackage[];
+  selectedPackage: string;
+  setSelectedPackage: (id: string) => void;
+  handleBoost: () => Promise<boolean> | void;
+  handleCancel: () => Promise<boolean>;
+  dailyBoostUsage: number;
+  dailyBoostLimit: number;
+  handleDialogClose: () => void;
+  getBoostPrice?: () => number;
+  hermesStatus: HermesStatus;
+  formatBoostDuration?: (duration: string) => string;
+}
+
+const BoostDialogTabs: React.FC<DialogTabsProps> = ({
   activeTab,
   setActiveTab,
   loading,
@@ -28,117 +48,108 @@ const BoostDialogTabs: React.FC<TabProps> = ({
   handleCancel,
   dailyBoostUsage,
   dailyBoostLimit,
-  hermesStatus,
-  formatBoostDuration = (duration) => {
-    const [hours] = duration.split(':').map(Number);
-    return hours >= 24 ? `${Math.floor(hours / 24)} days` : `${hours} hours`;
-  },
+  handleDialogClose,
   getBoostPrice = () => 0,
-  handleDialogClose
+  hermesStatus,
+  formatBoostDuration = (d) => d
 }) => {
+  // Don't show tabs if not eligible or if there's an active boost
+  const shouldShowTabs = eligibility.eligible && !boostStatus.isActive;
+
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="active">
-          {boostStatus?.isActive ? "Active Boost" : "Status"}
-        </TabsTrigger>
-        <TabsTrigger value="packages" disabled={loading}>
-          Packages
-        </TabsTrigger>
-        <TabsTrigger value="analytics" disabled={loading}>
-          Analytics
-        </TabsTrigger>
-      </TabsList>
-      
-      <div className="mt-4">
-        {/* Active Boost Tab */}
-        <TabsContent value="active">
-          {boostStatus?.isActive ? (
-            <div className="space-y-6">
-              <BoostActivePackage 
-                boostStatus={boostStatus}
+    <div className="space-y-4">
+      {/* Active Boost Status */}
+      {boostStatus.isActive && (
+        <div className="space-y-4">
+          <BoostActivePackage 
+            boostStatus={boostStatus} 
+            hermesData={hermesStatus} 
+          />
+          
+          <Button 
+            variant="outline"
+            className="w-full"
+            onClick={handleCancel}
+            disabled={loading}
+          >
+            <XCircle className="mr-2 h-4 w-4" />
+            Cancel Boost
+          </Button>
+        </div>
+      )}
+
+      {/* Eligibility Check */}
+      {!boostStatus.isActive && !eligibility.eligible && (
+        <BoostEligibilityCheck 
+          eligibility={eligibility} 
+          onClose={handleDialogClose}
+        />
+      )}
+
+      {/* Boost Package Selection */}
+      {shouldShowTabs && (
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-2 mb-2">
+            <TabsTrigger value="packages" className="flex items-center">
+              <Zap className="mr-2 h-4 w-4" />
+              Packages
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center">
+              <BarChart2 className="mr-2 h-4 w-4" />
+              Analytics
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="packages" className="space-y-4">
+            <ScrollArea className="max-h-[400px] pr-4">
+              <BoostPackages 
+                packages={boostPackages}
+                selectedId={selectedPackage}
+                onSelect={setSelectedPackage}
+                formatDuration={formatBoostDuration}
+                dailyUsage={dailyBoostUsage}
+                dailyLimit={dailyBoostLimit}
+                disabled={loading}
               />
-              
-              <div className="flex justify-end mt-4">
-                <Button 
-                  variant="destructive"
-                  onClick={handleCancel}
-                  disabled={loading}
-                  className="w-full"
-                >
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Cancel Boost
-                </Button>
-              </div>
+            </ScrollArea>
+
+            <div className="flex justify-end pt-2">
+              <Button
+                onClick={() => handleBoost()}
+                disabled={loading || !selectedPackage}
+              >
+                <Zap className="mr-2 h-4 w-4" />
+                {loading ? "Processing..." : `Boost Now (${getBoostPrice()} UBX)`}
+              </Button>
             </div>
-          ) : (
-            <div className="space-y-4">
-              <BoostEligibilityCheck eligibility={eligibility} />
-              
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-4">
+            <HermesBoostInfo hermesStatus={hermesStatus as HermesStatus} />
+            
+            <div className="bg-secondary/20 p-4 rounded-md">
+              <div className="flex items-center mb-2">
+                <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                <h3 className="text-sm font-medium">Best Time to Boost</h3>
+              </div>
               <p className="text-sm text-muted-foreground">
-                No active boost. Select a boost package to increase your profile visibility.
+                Based on current platform activity, the optimal time to boost your profile is
+                between 7PM and 10PM.
               </p>
-              
+            </div>
+            
+            <div className="flex justify-end pt-2">
               <Button 
-                onClick={() => setActiveTab('packages')} 
-                disabled={!eligibility?.isEligible || loading}
-                className="w-full"
+                variant="outline" 
+                onClick={() => setActiveTab("packages")}
               >
                 View Packages
               </Button>
             </div>
-          )}
-        </TabsContent>
-        
-        {/* Packages Tab */}
-        <TabsContent value="packages">
-          <div className="space-y-6">
-            <BoostEligibilityCheck eligibility={eligibility} />
-            
-            {eligibility?.isEligible && (
-              <>
-                <BoostPackages
-                  packages={boostPackages}
-                  selectedId={selectedPackage}
-                  onSelect={setSelectedPackage}
-                  formatDuration={formatBoostDuration}
-                  dailyUsage={dailyBoostUsage}
-                  dailyLimit={dailyBoostLimit}
-                  disabled={loading}
-                  getBoostPrice={getBoostPrice}
-                />
-                
-                <div className="flex justify-end gap-2 mt-4">
-                  <Button variant="outline" onClick={handleDialogClose}>
-                    Cancel
-                  </Button>
-                  <Button 
-                    onClick={handleBoost}
-                    disabled={!selectedPackage || loading}
-                  >
-                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Apply Boost
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-        </TabsContent>
-        
-        {/* Analytics Tab */}
-        <TabsContent value="analytics">
-          <div className="space-y-6">
-            <HermesBoostInfo hermesStatus={hermesStatus} />
-            
-            <div className="flex justify-end mt-4">
-              <Button variant="outline" onClick={handleDialogClose}>
-                Close
-              </Button>
-            </div>
-          </div>
-        </TabsContent>
-      </div>
-    </Tabs>
+          </TabsContent>
+        </Tabs>
+      )}
+    </div>
   );
 };
 

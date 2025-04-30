@@ -1,6 +1,6 @@
 
 import { HermesStatus } from '@/types/boost';
-import { BoostStatus } from '@/types/uberPersona';
+import { BoostStatus, BoostEligibility, HermesBoostStatus } from '@/types/boost';
 
 // Fix Date conversion issue at line 118
 // Just showing the relevant part - handling expiresAt
@@ -13,10 +13,20 @@ const adaptBoostStatus = (rawStatus: any): BoostStatus => {
     endTime: rawStatus.endTime || null,
     packageId: rawStatus.packageId || null,
     remainingTime: rawStatus.remainingTime || null,
+    timeRemaining: rawStatus.timeRemaining || null,
     packageName: rawStatus.packageName || null,
     boost_level: rawStatus.boost_level || 0,
     expiresAt: rawStatus.expiresAt ? new Date(rawStatus.expiresAt) : undefined, // Convert string to Date
-    visibilityScore: rawStatus.visibilityScore || 0
+    visibilityScore: rawStatus.visibilityScore || 0,
+    progress: rawStatus.progress || 0,
+    boostPackage: rawStatus.boostPackage || null,
+    activeBoostId: rawStatus.activeBoostId || null
+  };
+};
+
+export const useBoostAdapters = () => {
+  return {
+    adaptBoostStatus
   };
 };
 

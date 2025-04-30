@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import {
   Dialog,
@@ -120,8 +121,8 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           loading={isLoading}
-          boostStatus={boostStatus || { isActive: false, startTime: '', endTime: '', remainingTime: '' }}
-          eligibility={{ isEligible: true, reason: '' }}
+          boostStatus={boostStatus || { isActive: false }}
+          eligibility={{ eligible: true }}
           boostPackages={boostPackages || []}
           selectedPackage={selectedPackage}
           setSelectedPackage={setSelectedPackage}
@@ -132,6 +133,7 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
           handleDialogClose={handleDialogClose}
           getBoostPrice={getBoostPrice}
           hermesStatus={{
+            isActive: false,
             position: 0,
             activeUsers: 0,
             estimatedVisibility: 0,

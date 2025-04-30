@@ -155,14 +155,14 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
               id: pkg.id,
               name: pkg.name || 'Unnamed Boost',
               description: pkg.description || '',
-              durationMinutes: pkg.duration ? parseInt(pkg.duration.split(':')[0]) * 60 : 0,
-              duration: pkg.duration || '00:00:00',
+              durationMinutes: pkg.durationMinutes || (pkg.duration ? parseInt(String(pkg.duration).split(':')[0]) * 60 : 0),
+              duration: String(pkg.duration || '00:00:00'),
               visibility: pkg.visibility_increase ? 'homepage' : 'search',
               costUBX: pkg.price_ubx || 0,
               color: pkg.color || '#3b82f6',
               badgeColor: pkg.color || '#3b82f6',
               features: Array.isArray(pkg.features) ? pkg.features : [],
-              visibility_increase: pkg.visibility_increase,
+              visibility_increase: pkg.visibility_increase || 0,
               price: pkg.price || 0 // Ensure price is never undefined
             }}
             isActive={isActive}
