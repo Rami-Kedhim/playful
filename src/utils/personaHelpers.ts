@@ -1,3 +1,4 @@
+
 // Fix import case sensitivity
 import { UberPersona } from '@/types/uberPersona';
 
@@ -38,15 +39,15 @@ function getPersonaPrice(persona: UberPersona): number {
 }
 
 function hasRealMeets(persona: UberPersona): boolean {
-  return !!persona?.capabilities?.hasRealMeets;
+  return !!(persona as any)?.capabilities?.hasRealMeets;
 }
 
 function hasVirtualMeets(persona: UberPersona): boolean {
-  return !!persona?.capabilities?.hasVirtualMeets;
+  return !!(persona as any)?.capabilities?.hasVirtualMeets;
 }
 
 function hasContent(persona: UberPersona): boolean {
-  return !!persona?.capabilities?.hasContent;
+  return !!(persona as any)?.capabilities?.hasContent;
 }
 
 export {

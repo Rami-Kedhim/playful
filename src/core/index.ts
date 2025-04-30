@@ -1,10 +1,14 @@
 
-// Core UberConcepts export file
-// This provides centralized access to all UberCore components
-
-export * from './UberCore';
-export * from './Lucie';
-export * from './Oxum';
+// Export all core subsystems
 export * from './Hermes';
-export * from './Orus';
-export * from './UberWallet';
+export * from './Lucie';
+export * from './NeuralBrain';
+export { 
+  oxum, 
+  // Export SystemIntegrityResult and SessionValidationResult from Oxum explicitly
+  // to avoid ambiguity errors
+  SystemIntegrityResult, 
+  SessionValidationResult 
+} from './Oxum';
+export * from './Cognito';
+export * from './Pulse';

@@ -42,27 +42,26 @@ const useBoostPackages = (): BoostPackage[] => {
           'Priority in recommendation engine'
         ],
         visibility: 'high',
-        visibility_increase: 150,
-        boost_power: 150,
+        visibility_increase: 75,
+        boost_power: 75,
         color: 'purple',
         badgeColor: 'bg-purple-500'
       },
       {
         id: 'boost-3',
-        name: 'Quick Boost',
-        description: 'Short-term visibility increase',
+        name: 'Economy Boost',
+        description: 'Basic visibility boost for 12 hours',
         price: 25,
         price_ubx: 25,
         duration: '12:00:00',
         durationMinutes: 720,
         features: [
-          'Temporary visibility increase',
-          'Higher position in feeds',
-          'Ideal for quick promotions'
+          'Improved search visibility',
+          'Basic algorithm prioritization'
         ],
         visibility: 'low',
-        visibility_increase: 30,
-        boost_power: 30,
+        visibility_increase: 25,
+        boost_power: 25,
         color: 'green',
         badgeColor: 'bg-green-500'
       }

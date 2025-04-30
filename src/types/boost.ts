@@ -10,6 +10,7 @@ export interface BoostPackage {
   features?: string[];
   visibility?: string;
   visibility_increase?: number;
+  boost_power?: number;
   color?: string;
   badgeColor?: string;
 }
