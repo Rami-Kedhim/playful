@@ -69,6 +69,11 @@ export interface BoostStatus {
   remainingTime?: string;
   expiresAt?: string;
   boost_level?: number;
+  activeBoostId?: string;
+  packageId?: string;
+  timeRemaining?: string;
+  boostPackage?: BoostPackage;
+  packageName?: string;
 }
 
 export interface BoostEligibility {
@@ -83,4 +88,9 @@ export interface HermesStatus {
   lastUpdateTime: string;
   boostScore?: number;
   effectivenessScore?: number;
+}
+
+export interface HermesBoostStatus extends HermesStatus {
+  boostActive: boolean;
+  visibilityScore?: number;
 }

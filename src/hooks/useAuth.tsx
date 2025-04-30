@@ -4,21 +4,13 @@
 import { 
   AuthContext, 
   AuthProvider, 
-  useAuth, 
-  useAuthContext,
-  useAuthState,
-  useAuthActions,
-  useRole
+  useAuth 
 } from './auth';
 
 export { 
   useAuth, 
-  useAuthContext,
   AuthProvider, 
-  AuthContext,
-  useAuthState,
-  useAuthActions,
-  useRole
+  AuthContext
 };
 
 export default useAuth;
