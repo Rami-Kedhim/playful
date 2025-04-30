@@ -1,193 +1,117 @@
 
 /**
- * HERMES Mathematical Utility Functions
- * 
- * Advanced mathematical functions for the HERMES optimization system
+ * Mathematical utility functions for the Hermes flow dynamics system
  */
 
-// Calculate the dynamic decay constant based on user activity patterns
-export const calculateDynamicDecayConstant = (
-  baseDecayConstant: number,
-  systemLoad: number,
-  timeElapsed: number = 0,
-  activityIntensity: number = 50
-): number => {
-  const base = 0.1;
-  const activityFactor = Math.min(1, Math.max(0.1, activityIntensity / 100));
-  const timeFactor = timeElapsed > 0 ? Math.exp(-0.05 * timeElapsed) : 1;
-  
-  return base * (1 + baseDecayConstant * timeFactor * activityFactor);
-};
-
-// Calculate visibility decay over time
-export const calculateVisibilityDecay = (
+/**
+ * Calculate the decay of visibility over time using an exponential decay model
+ * 
+ * @param initialVisibility Starting visibility value (usually 100)
+ * @param decayConstant How quickly the visibility decays
+ * @param timeElapsedHours Time elapsed since boost in hours
+ * @returns Remaining visibility as a percentage
+ */
+export function calculateVisibilityDecay(
   initialVisibility: number,
   decayConstant: number,
   timeElapsedHours: number
-): number => {
+): number {
+  // Use exponential decay model: V(t) = V₀ * e^(-λt)
   return initialVisibility * Math.exp(-decayConstant * timeElapsedHours);
-};
+}
 
-// Calculate the geo-based boost multiplier
-export const calculateGeoBoostMultiplier = (
-  baseMultiplier: number,
-  geoActivityFactor: number,
-  timeOfDay: number
-): number => {
-  // Time of day effect (0-24 hours)
-  const timeEffect = Math.sin((Math.PI * (timeOfDay - 6)) / 12) * 0.2 + 1;
+/**
+ * Calculate dynamic decay constant based on system conditions
+ * 
+ * @param baseDecayConstant Base decay rate
+ * @param systemLoad Current system load (0-1)
+ * @param timeElapsed Time elapsed since boost
+ * @returns Adjusted decay constant
+ */
+export function calculateDynamicDecayConstant(
+  baseDecayConstant: number,
+  systemLoad: number,
+  timeElapsed: number
+): number {
+  // Decay happens faster under high system load
+  let adjustedDecay = baseDecayConstant * (1 + systemLoad * 0.5);
   
-  // Geo activity impact
-  const geoEffect = Math.log10(geoActivityFactor + 1) * 0.5;
+  // Decay accelerates as time passes
+  const timeAcceleration = Math.min(1, timeElapsed / 48); // Max effect after 48 hours
+  adjustedDecay *= (1 + timeAcceleration * 0.3);
   
-  return baseMultiplier * timeEffect * (1 + geoEffect);
-};
+  return adjustedDecay;
+}
 
-// Calculate boost score based on time of day
-export const calculateBoostScore = (
+/**
+ * Calculate boost score based on time of day
+ * 
+ * @param maxBoostEffect Maximum possible boost effect
+ * @param aggressionFactor How aggressive the boost curve is
+ * @param currentHour Current hour (0-23)
+ * @param optimalTime Optimal time window for boosting
+ * @returns Boost score
+ */
+export function calculateBoostScore(
   maxBoostEffect: number,
   aggressionFactor: number,
   currentHour: number,
-  optimalTimeWindow: { start: number, peak: number, end: number }
-): number => {
-  const { start, peak, end } = optimalTimeWindow;
-  
-  // If within optimal window
-  if (currentHour >= start && currentHour <= end) {
-    const distFromPeak = Math.abs(currentHour - peak);
-    const windowSize = (end - start) / 2;
+  optimalTime: { start: number; end: number }
+): number {
+  // Check if current hour is within optimal window
+  if (currentHour >= optimalTime.start && currentHour <= optimalTime.end) {
+    // Calculate position within optimal window (0-1)
+    const windowSize = optimalTime.end - optimalTime.start;
+    const position = (currentHour - optimalTime.start) / windowSize;
     
-    // Score decreases as we move away from peak time
-    return maxBoostEffect * Math.pow(1 - (distFromPeak / windowSize), aggressionFactor);
+    // Calculate score with a bell curve - highest in the middle of the window
+    const bellCurve = Math.sin(position * Math.PI) ** aggressionFactor;
+    return maxBoostEffect * bellCurve;
   }
   
-  // Outside optimal window, calculate lower score
-  const distFromWindow = Math.min(
-    Math.abs(currentHour - start),
-    Math.abs(currentHour - end)
+  // Outside optimal window, calculate distance to nearest boundary
+  const distToStart = Math.min(
+    Math.abs(currentHour - optimalTime.start),
+    Math.abs(currentHour - (optimalTime.start + 24))
   );
   
-  return Math.max(30, maxBoostEffect * Math.exp(-distFromWindow * 0.3));
-};
+  const distToEnd = Math.min(
+    Math.abs(currentHour - optimalTime.end),
+    Math.abs(currentHour - (optimalTime.end + 24))
+  );
+  
+  const distance = Math.min(distToStart, distToEnd);
+  
+  // Calculate falloff based on distance
+  const falloff = Math.max(0, 1 - (distance / 6)); // 6-hour falloff
+  return maxBoostEffect * falloff * 0.6; // Maximum 60% of optimal outside window
+}
 
-// Get optimal time window based on current day
-export const getOptimalTimeWindow = (): { start: number, peak: number, end: number } => {
-  const now = new Date();
-  const day = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
-  
-  // Weekend (Friday evening through Sunday)
-  if (day === 5 && now.getHours() >= 18 || day === 6 || day === 0) {
-    return { start: 20, peak: 22.5, end: 2 }; // 8PM to 2AM, peak at 10:30PM
-  }
-  
-  // Weekday
-  return { start: 19, peak: 21, end: 23 }; // 7PM to 11PM, peak at 9PM
-};
+/**
+ * Get optimal time window for boosting based on activity patterns
+ */
+export function getOptimalTimeWindow(): { start: number; end: number } {
+  // This would typically use real activity data, for now use hardcoded window
+  // Prime time is typically 8 PM - 11 PM
+  return {
+    start: 20, // 8 PM
+    end: 23    // 11 PM
+  };
+}
 
-// Calculate the engagement factor
-export const calculateEngagementFactor = (
-  views: number,
-  interactions: number,
-  timeSpent: number
-): number => {
-  if (views === 0) return 0;
+/**
+ * Calculate visibility gain from a boost
+ */
+export function calculateBoostVisibilityGain(
+  baseVisibility: number,
+  boostLevel: number,
+  profileCompleteness: number
+): number {
+  // Boost gives diminishing returns at higher levels
+  const boostFactor = 1 + Math.log(1 + boostLevel) / Math.log(5);
   
-  const interactionRate = interactions / views;
-  const avgTimePerView = timeSpent / views;
+  // Profile completeness affects boost effectiveness
+  const completenessMultiplier = 0.7 + (profileCompleteness / 100) * 0.3;
   
-  // Sigmoid function to normalize the engagement factor between 0 and 1
-  const engagementRaw = interactionRate * avgTimePerView;
-  const engagementFactor = 1 / (1 + Math.exp(-5 * (engagementRaw - 0.5)));
-  
-  return engagementFactor * 100; // Scale to percentage
-};
-
-// Calculate boost priority score
-export const calculateBoostPriority = (
-  timeSinceLastTop: number,
-  boostScore: number,
-  competitionLevel: number = 5
-): number => {
-  // Base priority from boost score (0-100)
-  const basePriority = boostScore * 0.6;
-  
-  // Urgency factor based on time since last top position
-  const urgencyFactor = Math.min(25, timeSinceLastTop * 5);
-  
-  // Competition adjustment
-  const competitionFactor = Math.min(competitionLevel, 10) * 1.5;
-  
-  return Math.min(100, basePriority + urgencyFactor + competitionFactor);
-};
-
-// Calculate the Laplace transform of a step response
-export const calculateLaplaceTransform = (
-  s: number, 
-  a: number
-): number => {
-  return 1 / (s * (s + a));
-};
-
-// Calculate differential equation solution using Euler method
-export const solveEulerMethod = (
-  initialValue: number,
-  timeStep: number,
-  steps: number,
-  rateFunction: (x: number, t: number) => number
-): number[] => {
-  const result: number[] = [initialValue];
-  let currentValue = initialValue;
-  
-  for (let i = 0; i < steps; i++) {
-    const time = i * timeStep;
-    const rate = rateFunction(currentValue, time);
-    currentValue += rate * timeStep;
-    result.push(currentValue);
-  }
-  
-  return result;
-};
-
-// HERMES core function: Calculate optimized boost allocation
-export const calculateOptimalBoostAllocation = (
-  availableBoost: number,
-  profiles: Array<{
-    id: string;
-    score: number;
-    competition: number;
-    timeRemaining: number;
-    currentAllocation: number;
-  }>
-): Array<{id: string; allocation: number}> => {
-  // Calculate initial priorities
-  const withPriorities = profiles.map(profile => ({
-    ...profile,
-    priority: calculateBoostPriority(
-      profile.timeRemaining,
-      profile.score,
-      profile.competition
-    )
-  }));
-  
-  // Sort by priority descending
-  const sorted = [...withPriorities].sort((a, b) => b.priority - a.priority);
-  
-  // Allocate boost proportionally to priority
-  const totalPriority = sorted.reduce((sum, p) => sum + p.priority, 0);
-  let remaining = availableBoost;
-  
-  const allocations = sorted.map(profile => {
-    if (totalPriority === 0) return { id: profile.id, allocation: 0 };
-    
-    const optimalAllocation = (profile.priority / totalPriority) * availableBoost;
-    const allocation = Math.min(remaining, optimalAllocation);
-    remaining -= allocation;
-    
-    return {
-      id: profile.id,
-      allocation
-    };
-  });
-  
-  return allocations;
-};
+  return baseVisibility * boostFactor * completenessMultiplier;
+}

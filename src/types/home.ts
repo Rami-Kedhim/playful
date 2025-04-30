@@ -1,5 +1,5 @@
 
-import { UberPersona } from './UberPersona';
+import { UberPersona } from '@/types/uberPersona';
 
 export interface FeaturedPersona {
   id: string;

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Brain, Users, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NeuralAnalyticsPanel from '@/components/brainHub/NeuralAnalyticsPanel';
+import HomeHeader from '@/components/home/HomeHeader';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -79,99 +80,84 @@ const Home = () => {
   const systemStatus = formatSystemStatus(uberCoreInstance.getSystemStatus());
   
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Hero Section */}
-      <section className="py-12 md:py-16">
-        <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
-            Real • Virtual • Intelligent
-          </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8">
-            Explore the UberPersona Multiverse
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" className="bg-gradient-to-r from-violet-600 to-fuchsia-600">
-              Boost Now with UBX
-            </Button>
-            <Button size="lg" variant="outline">
-              Explore Personas
-            </Button>
-          </div>
-        </div>
-      </section>
+    <div className="min-h-screen">
+      {/* Hero Header Section */}
+      <HomeHeader onExploreClick={() => navigate('/personas')} />
       
-      {/* Featured Personas */}
-      <FeaturedPersonas personas={featuredPersonas} />
-      
-      {/* Core Action Grid */}
-      <section className="py-12">
-        <h2 className="text-3xl font-bold text-center mb-10">UberEscorts Ecosystem</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-card/50 backdrop-blur-sm border-white/10">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="h-5 w-5" />
-                <span>Metaverse</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-6">
-                Experience spatial 3D encounters with realistic AI personas in our immersive metaverse.
-              </p>
-              <Button variant="outline" className="w-full" onClick={() => navigate('/metaverse')}>
-                Enter Metaverse
-              </Button>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-card/50 backdrop-blur-sm border-white/10">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                <span>UberWallet</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-6">
-                Manage your UBX tokens, boost profiles, and participate in the UberEscorts economy.
-              </p>
-              <Button variant="outline" className="w-full" onClick={() => navigate('/wallet')}>
-                Open Wallet
-              </Button>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-card/50 backdrop-blur-sm border-white/10">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                <span>AI Companion</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-6">
-                Connect with intelligent AI companions that adapt to your preferences and personality.
-              </p>
-              <Button variant="outline" className="w-full" onClick={() => navigate('/companion')}>
-                Meet Companions
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-      
-      {/* System Status & Neural Analytics */}
-      <section className="py-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div>
-          <h3 className="text-2xl font-semibold mb-4">System Status</h3>
-          <SystemStatusPanel status={systemStatus} />
-        </div>
+      <div className="container mx-auto px-4 py-8">
+        {/* Featured Personas */}
+        <FeaturedPersonas personas={featuredPersonas} />
         
-        <div>
-          <h3 className="text-2xl font-semibold mb-4">Neural Performance</h3>
-          <NeuralAnalyticsPanel />
-        </div>
-      </section>
+        {/* Core Action Grid */}
+        <section className="py-12">
+          <h2 className="text-3xl font-bold text-center mb-10">UberEscorts Ecosystem</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="bg-card/50 backdrop-blur-sm border-white/10">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5" />
+                  <span>Metaverse</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-6">
+                  Experience spatial 3D encounters with realistic AI personas in our immersive metaverse.
+                </p>
+                <Button variant="outline" className="w-full" onClick={() => navigate('/metaverse')}>
+                  Enter Metaverse
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-card/50 backdrop-blur-sm border-white/10">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  <span>UberWallet</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-6">
+                  Manage your UBX tokens, boost profiles, and participate in the UberEscorts economy.
+                </p>
+                <Button variant="outline" className="w-full" onClick={() => navigate('/wallet')}>
+                  Open Wallet
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-card/50 backdrop-blur-sm border-white/10">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  <span>AI Companion</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-6">
+                  Connect with intelligent AI companions that adapt to your preferences and personality.
+                </p>
+                <Button variant="outline" className="w-full" onClick={() => navigate('/companion')}>
+                  Meet Companions
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+        
+        {/* System Status & Neural Analytics */}
+        <section className="py-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div>
+            <h3 className="text-2xl font-semibold mb-4">System Status</h3>
+            <SystemStatusPanel status={systemStatus} />
+          </div>
+          
+          <div>
+            <h3 className="text-2xl font-semibold mb-4">Neural Performance</h3>
+            <NeuralAnalyticsPanel />
+          </div>
+        </section>
+      </div>
     </div>
   );
 };

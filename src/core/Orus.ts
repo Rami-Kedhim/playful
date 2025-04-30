@@ -72,7 +72,7 @@ export class Orus {
       const index = 1; // Neural Network
       modules[index] = {
         ...modules[index],
-        status: 'degraded' as const,
+        status: 'degraded' as const, // Fixed the type error by using 'as const'
         reliability: 0.75
       };
     }

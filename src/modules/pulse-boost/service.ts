@@ -1,169 +1,150 @@
 
-import { uberWallet } from '@/core/UberWallet';
 import { oxum } from '@/core/Oxum';
-import { BoostAnalytics, BoostHistory } from './types';
-import { EnhancedBoostStatus } from '@/types/pulse-boost';
+import { orus } from '@/core/Orus';
+import { hermes } from '@/core/Hermes';
+import { UberPersona } from '@/types/uberPersona';
 
-export interface PulseBoostPackage {
-  id: string;
-  name: string;
-  description: string;
-  duration: string | number; // Duration in hours or formatted string
-  price: number;
-  features: string[];
-  boostPower: number;
+interface BoostResult {
+  success: boolean;
+  boostId?: string;
+  message: string;
+  expiresAt?: Date;
+}
+
+interface BoostAnalytics {
+  totalBoosts: number;
+  activeBoosts: number;
+  averageBoostScore: number;
+  boostHistory: Array<{
+    date: Date;
+    score: number;
+  }>;
 }
 
 export class PulseBoostService {
   /**
-   * Get available boost packages
+   * Apply a boost to a persona profile
    */
-  public getBoostPackages(): PulseBoostPackage[] {
-    return [
-      {
-        id: 'basic',
-        name: 'Basic Boost',
-        description: 'Standard visibility boost for 24 hours',
-        duration: 24,
-        price: 50,
-        features: ['24-hour boost', 'Basic visibility increase'],
-        boostPower: 1.5
-      },
-      {
-        id: 'premium',
-        name: 'Premium Boost',
-        description: 'Enhanced visibility for 3 days',
-        duration: 72,
-        price: 120,
-        features: ['72-hour boost', 'Featured in search results'],
-        boostPower: 2.5
-      }
-    ];
-  }
-  
-  /**
-   * Get boost status for a profile
-   */
-  public async getBoostStatus(profileId: string): Promise<EnhancedBoostStatus> {
-    // Mock implementation
-    return {
-      isActive: false
-    };
-  }
-  
-  /**
-   * Get analytics for a boost
-   */
-  public async getBoostAnalytics(profileId: string): Promise<BoostAnalytics> {
-    // Mock implementation
-    return {
-      profileId,
-      impressions: {
-        beforeBoost: 100,
-        duringBoost: 250, 
-        percentageChange: 150
-      },
-      engagement: {
-        beforeBoost: 10,
-        duringBoost: 30,
-        percentageChange: 200
-      },
-      conversion: {
-        beforeBoost: 2,
-        duringBoost: 8,
-        percentageChange: 300
-      },
-      returnOnInvestment: 2.5
-    };
-  }
-  
-  /**
-   * Get boost history for a profile
-   */
-  public async getBoostHistory(profileId: string): Promise<BoostHistory> {
-    // Mock implementation
-    return {
-      boosts: [],
-      totalSpent: 0,
-      averagePerformance: 0
-    };
-  }
-  
-  /**
-   * Cancel an active boost
-   */
-  public async cancelBoost(boostId: string): Promise<boolean> {
-    // Mock implementation
-    return true;
-  }
-
-  /**
-   * Purchase a boost package with UBX tokens
-   */
-  public async purchaseBoost(
-    userId: string, 
-    packageId: string
-  ): Promise<{
-    success: boolean;
-    transactionId?: string;
-    message?: string;
-    error?: string; // Added error property to satisfy TypeScript
-  }> {
+  public async applyBoost(
+    personaId: string, 
+    boostLevel: number
+  ): Promise<BoostResult> {
     try {
-      // Get package details to determine price
-      const boostPackage = await this.getPackageById(packageId);
-      
-      if (!boostPackage) {
+      // Validate session first
+      const sessionCheck = orus.validateSession(personaId);
+      if (!sessionCheck.isValid) {
         return {
           success: false,
-          message: 'Boost package not found',
-          error: 'Boost package not found'
+          message: 'Session validation failed'
         };
       }
       
-      // Debit the user's wallet
-      const walletResult = await uberWallet.debit(
-        userId, 
-        boostPackage.price, 
-        `Purchase of ${boostPackage.name} boost package`
-      );
+      // Apply the boost through Oxum
+      const boostResult = await oxum.applyBoost(personaId, boostLevel);
       
-      if (!walletResult.success) {
-        return {
-          success: false,
-          message: 'Insufficient UBX balance',
-          error: 'Insufficient UBX balance'
-        };
-      }
-      
-      // Apply the boost with Oxum
-      await oxum.applyBoost(userId, boostPackage.boostPower, 
-        typeof boostPackage.duration === 'number' ? 
-          boostPackage.duration : 
-          parseInt(boostPackage.duration) || 24);
+      // Generate a unique boost ID
+      const boostId = `boost-${Date.now()}-${personaId.substring(0, 8)}`;
       
       return {
         success: true,
-        transactionId: walletResult.transactionId,
-        message: `Successfully purchased ${boostPackage.name} boost`
+        boostId,
+        message: 'Boost successfully applied',
+        expiresAt: boostResult.expires
       };
     } catch (error) {
-      console.error('Error purchasing boost:', error);
+      console.error('Error applying boost:', error);
       return {
         success: false,
-        message: 'An error occurred while purchasing the boost',
-        error: 'An error occurred while purchasing the boost'
+        message: 'Failed to apply boost. Please try again.'
       };
     }
   }
   
   /**
-   * Get boost package by ID
+   * Get analytics data for a persona's boost history
    */
-  private async getPackageById(id: string): Promise<PulseBoostPackage | null> {
-    // This would fetch from backend in a real implementation
-    const packages = this.getBoostPackages();
-    return packages.find(pkg => pkg.id === id) || null;
+  public async getBoostAnalytics(personaId: string): Promise<BoostAnalytics> {
+    // In a real implementation, this would fetch data from a database
+    
+    // Generate some mock data
+    const today = new Date();
+    const history = [];
+    
+    for (let i = 30; i > 0; i--) {
+      const date = new Date();
+      date.setDate(today.getDate() - i);
+      
+      history.push({
+        date,
+        score: 50 + Math.random() * 40 + Math.sin(i / 3) * 15
+      });
+    }
+    
+    return {
+      totalBoosts: Math.floor(Math.random() * 20) + 5,
+      activeBoosts: Math.floor(Math.random() * 3),
+      averageBoostScore: 70 + Math.random() * 15,
+      boostHistory: history
+    };
+  }
+  
+  /**
+   * Calculate optimal boost timing based on Hermes flow dynamics
+   */
+  public calculateOptimalBoostTime(): { time: Date; score: number } {
+    const now = new Date();
+    const hours = now.getHours();
+    
+    // Get flow dynamics data from Hermes
+    const flowDynamics = hermes.resolveFlowDynamics({
+      systemLoad: 0.6,
+      activityLevel: 0.7
+    });
+    
+    // Determine optimal time - in this mock, we'll set it a few hours ahead
+    const optimalHour = (hours + 3 + Math.floor(Math.random() * 4)) % 24;
+    const optimalTime = new Date(now);
+    optimalTime.setHours(optimalHour, 0, 0, 0);
+    
+    if (optimalTime < now) {
+      // If we wrapped around to the next day
+      optimalTime.setDate(optimalTime.getDate() + 1);
+    }
+    
+    return {
+      time: optimalTime,
+      score: flowDynamics.flowScore
+    };
+  }
+  
+  /**
+   * Calculate effectiveness of current boosts
+   */
+  public calculateBoostEffectiveness(persona: UberPersona): number {
+    if (!persona) return 0;
+    
+    const baseScore = oxum.calculateBoostScore(persona.id);
+    
+    // Factor in various components that might affect boost effectiveness
+    let effectiveness = baseScore;
+    
+    // Profile completeness factor
+    if (persona.systemMetadata?.personalityIndex) {
+      effectiveness *= (1 + persona.systemMetadata.personalityIndex / 100);
+    }
+    
+    // Activity factor if persona has been recently online
+    if (persona.isOnline) {
+      effectiveness *= 1.2;
+    } else if (persona.lastActive) {
+      const lastActiveDate = new Date(persona.lastActive);
+      const hoursSinceActive = (Date.now() - lastActiveDate.getTime()) / (1000 * 60 * 60);
+      if (hoursSinceActive < 24) {
+        effectiveness *= 1 + (24 - hoursSinceActive) / 24;
+      }
+    }
+    
+    return Math.min(100, effectiveness);
   }
 }
 

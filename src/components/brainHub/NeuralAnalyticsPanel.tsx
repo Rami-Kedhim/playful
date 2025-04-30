@@ -1,94 +1,144 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
-import useNeuralAnalytics from '@/hooks/useNeuralAnalytics';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NeuralModel } from '@/types/neural/NeuralSystemMetrics';
+import { Brain, Activity, Cpu, Server } from 'lucide-react';
+import PerformanceChart from '@/components/neural/PerformanceChart';
 
-const NeuralAnalyticsPanel = () => {
-  const { analyticsData, loading, error } = useNeuralAnalytics();
+const NeuralAnalyticsPanel: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('performance');
   
-  if (loading) {
-    return (
-      <Card className="w-full h-64 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </Card>
-    );
-  }
+  // Mock neural performance data
+  const cpuData = [28, 32, 45, 60, 52, 38];
+  const memoryData = [42, 45, 50, 58, 63, 60];
+  const requestData = [150, 220, 310, 400, 520, 480];
   
-  if (error || !analyticsData) {
-    return (
-      <Card className="w-full h-64 flex items-center justify-center">
-        <p className="text-muted-foreground">Failed to load neural analytics</p>
-      </Card>
-    );
-  }
+  // Labels for the timeline (last 6 hours)
+  const hourLabels = [...Array(6)].map((_, i) => {
+    const hour = new Date();
+    hour.setHours(hour.getHours() - (5 - i));
+    return `${hour.getHours()}:00`;
+  });
   
-  // Extract metrics from analytics data
-  const responseTime = analyticsData.systemMetrics?.responseTimeMs || 0;
-  const accuracy = analyticsData.modelPerformance?.accuracy * 100 || 0;
-  const throughput = analyticsData.systemMetrics?.throughput || 0;
-  const errorRate = analyticsData.systemMetrics?.errorRate || 0;
-  
-  // Determine change indicators
-  const responseTimeChange = analyticsData.operationalMetrics?.responseTimeChange || 0;
-  const accuracyChange = analyticsData.operationalMetrics?.accuracyChange || 0;
-  
+  // Mock active neural models
+  const activeModels: NeuralModel[] = [
+    {
+      id: 'model-1',
+      name: 'Persona Matcher',
+      version: '1.2.3',
+      type: 'escort',
+      size: 180,
+      precision: 0.93,
+      specialization: ['matching', 'recommendations'],
+      capabilities: ['pattern recognition', 'preference learning'],
+      status: 'active',
+      performance: {
+        accuracy: 0.91,
+        latency: 120,
+        throughput: 350,
+        errorRate: 0.09,
+        confidence: 0.88
+      }
+    },
+    {
+      id: 'model-2',
+      name: 'Content Analyzer',
+      version: '2.1.0',
+      type: 'creator',
+      size: 220,
+      precision: 0.96,
+      specialization: 'content analysis',
+      capabilities: ['nsfw detection', 'content tagging', 'quality assessment'],
+      status: 'active',
+      performance: {
+        accuracy: 0.94,
+        latency: 180,
+        throughput: 220,
+        errorRate: 0.06,
+        confidence: 0.92
+      }
+    }
+  ];
+
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Neural System Performance</CardTitle>
+    <Card className="bg-card/50 backdrop-blur-sm border-white/10">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg flex items-center">
+          <Brain className="h-5 w-5 mr-2 text-primary" />
+          Neural Analytics
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Response Time */}
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span className="text-sm font-medium">Response Time</span>
-            <span className="text-sm flex items-center gap-1">
-              {responseTime.toFixed(2)}ms
-              {responseTimeChange !== 0 && (
-                responseTimeChange < 0 ? 
-                <ArrowDownIcon className="h-4 w-4 text-green-500" /> : 
-                <ArrowUpIcon className="h-4 w-4 text-red-500" />
-              )}
-            </span>
-          </div>
-          <Progress value={Math.min(100, (responseTime / 500) * 100)} className="h-1" />
-        </div>
-        
-        {/* Accuracy */}
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span className="text-sm font-medium">Accuracy</span>
-            <span className="text-sm flex items-center gap-1">
-              {accuracy.toFixed(2)}%
-              {accuracyChange !== 0 && (
-                accuracyChange > 0 ? 
-                <ArrowUpIcon className="h-4 w-4 text-green-500" /> : 
-                <ArrowDownIcon className="h-4 w-4 text-red-500" />
-              )}
-            </span>
-          </div>
-          <Progress value={accuracy} className="h-1" />
-        </div>
-        
-        {/* Throughput */}
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span className="text-sm font-medium">Throughput</span>
-            <span className="text-sm">{throughput.toFixed(2)} req/s</span>
-          </div>
-          <Progress value={Math.min(100, (throughput / 50) * 100)} className="h-1" />
-        </div>
-        
-        {/* Error Rate */}
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span className="text-sm font-medium">Error Rate</span>
-            <span className="text-sm">{(errorRate * 100).toFixed(2)}%</span>
-          </div>
-          <Progress value={errorRate * 100} className="h-1" />
-        </div>
+      <CardContent>
+        <Tabs defaultValue="performance" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="performance">Performance</TabsTrigger>
+            <TabsTrigger value="models">Active Models</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="performance" className="space-y-4">
+            <div>
+              <h4 className="text-sm font-medium mb-1 flex items-center">
+                <Cpu className="h-4 w-4 mr-1 text-muted-foreground" />
+                CPU Usage (%)
+              </h4>
+              <PerformanceChart 
+                data={cpuData} 
+                labels={hourLabels} 
+                color="#8b5cf6" 
+                height={60}
+              />
+            </div>
+            
+            <div>
+              <h4 className="text-sm font-medium mb-1 flex items-center">
+                <Server className="h-4 w-4 mr-1 text-muted-foreground" />
+                Memory Usage (%)
+              </h4>
+              <PerformanceChart 
+                data={memoryData} 
+                labels={hourLabels} 
+                color="#ec4899" 
+                height={60}
+              />
+            </div>
+            
+            <div>
+              <h4 className="text-sm font-medium mb-1 flex items-center">
+                <Activity className="h-4 w-4 mr-1 text-muted-foreground" />
+                Requests per Minute
+              </h4>
+              <PerformanceChart 
+                data={requestData} 
+                labels={hourLabels} 
+                color="#10b981" 
+                height={60}
+              />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="models">
+            <div className="space-y-3">
+              {activeModels.map(model => (
+                <div key={model.id} className="p-3 border border-border rounded-md">
+                  <div className="flex justify-between items-center mb-1">
+                    <h4 className="font-medium">{model.name}</h4>
+                    <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-500 rounded-full">
+                      {model.status}
+                    </span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    v{model.version} • {Array.isArray(model.specialization) ? model.specialization.join(', ') : model.specialization}
+                  </div>
+                  <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                    <div>Accuracy: {model.performance?.accuracy ? `${(model.performance.accuracy * 100).toFixed(1)}%` : 'N/A'}</div>
+                    <div>Latency: {model.performance?.latency ? `${model.performance.latency}ms` : 'N/A'}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
