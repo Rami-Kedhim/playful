@@ -6,6 +6,12 @@ import { Anomaly } from '@/types/analytics';
 
 export type AnalyticsChartType = 'usage' | 'performance' | 'forecast';
 
+export interface MetricDetail {
+  key: 'responseTime' | 'accuracy' | 'errorRate' | 'operations';
+  title: string;
+  description: string;
+}
+
 export function useNeuralAnalyticsDashboard() {
   const { analyticsData, loading, error, refreshAnalytics } = useNeuralAnalytics();
   const [activeChart, setActiveChart] = useState<AnalyticsChartType>('usage');
@@ -15,6 +21,7 @@ export function useNeuralAnalyticsDashboard() {
   const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState<boolean>(false);
   const [refreshInterval, setRefreshInterval] = useState<number>(30); // Default: 30 seconds
   const refreshTimerRef = useRef<number | null>(null);
+  const [selectedMetric, setSelectedMetric] = useState<MetricDetail | null>(null);
   
   // Extract and format key metrics for display
   const keyMetrics = analyticsData ? {
@@ -70,6 +77,16 @@ export function useNeuralAnalyticsDashboard() {
   const changeRefreshInterval = useCallback((interval: number) => {
     setRefreshInterval(interval);
   }, []);
+  
+  // Drill down into a specific metric
+  const drillIntoMetric = useCallback((metric: MetricDetail) => {
+    setSelectedMetric(metric);
+  }, []);
+  
+  // Exit drill-down view
+  const exitDrillDown = useCallback(() => {
+    setSelectedMetric(null);
+  }, []);
 
   // Setup or clear auto-refresh timer
   useEffect(() => {
@@ -106,6 +123,24 @@ export function useNeuralAnalyticsDashboard() {
     });
   };
   
+  // Get trend data for the selected metric
+  const getMetricTrendData = useCallback((metricKey: string) => {
+    if (!analyticsData) return [];
+    
+    switch (metricKey) {
+      case 'responseTime':
+        return getFilteredChartData(analyticsData.operationalMetrics.responseTimeTrend || []);
+      case 'accuracy':
+        return getFilteredChartData(analyticsData.operationalMetrics.accuracyTrend || []);
+      case 'errorRate':
+        return getFilteredChartData(analyticsData.operationalMetrics.errorRateTrend || []);
+      case 'operations':
+        return getFilteredChartData(analyticsData.operationalMetrics.operationsTrend || []);
+      default:
+        return [];
+    }
+  }, [analyticsData, startDate, endDate]);
+  
   return {
     analyticsData: analyticsData ? {
       ...analyticsData,
@@ -138,7 +173,11 @@ export function useNeuralAnalyticsDashboard() {
     isAutoRefreshEnabled,
     refreshInterval,
     toggleAutoRefresh,
-    changeRefreshInterval
+    changeRefreshInterval,
+    selectedMetric,
+    drillIntoMetric,
+    exitDrillDown,
+    getMetricTrendData
   };
 }
 
