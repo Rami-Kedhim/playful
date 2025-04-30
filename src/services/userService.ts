@@ -1,5 +1,5 @@
 
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersona } from '@/types/uberPersona';
 
 export const userService = {
   getUserProfile: async (userId: string): Promise<UberPersona> => {

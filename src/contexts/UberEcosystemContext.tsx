@@ -1,9 +1,9 @@
 
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-// Use lowercase versions for consistency
+// Import from a consistent casing that matches the actual file names
 import authService from '@/services/authService';
 import userService from '@/services/userService';
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersona } from '@/types/uberPersona';
 
 // Create the context
 export interface UberEcosystemContextValue {

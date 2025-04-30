@@ -1,3 +1,3 @@
 
-// Direct re-export from the proper implementation file
+// Just re-export from the implementation file
 export * from './uberPersona';
