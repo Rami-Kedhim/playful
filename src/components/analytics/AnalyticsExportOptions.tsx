@@ -1,10 +1,12 @@
 
 import React, { useState } from 'react';
-import { Download, Check } from 'lucide-react';
+import { Download, Check, FileText, Table } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
@@ -20,9 +22,11 @@ const AnalyticsExportOptions: React.FC<AnalyticsExportOptionsProps> = ({
   filename = 'analytics-export'
 }) => {
   const [isExporting, setIsExporting] = useState(false);
+  const [lastExportFormat, setLastExportFormat] = useState<string | null>(null);
 
   const exportToJSON = () => {
     setIsExporting(true);
+    setLastExportFormat('JSON');
     try {
       const jsonString = JSON.stringify(data, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
@@ -35,7 +39,7 @@ const AnalyticsExportOptions: React.FC<AnalyticsExportOptionsProps> = ({
       link.click();
       document.body.removeChild(link);
       
-      toast.success('Analytics data exported successfully');
+      toast.success('Analytics data exported as JSON');
     } catch (error) {
       console.error('Error exporting data:', error);
       toast.error('Failed to export analytics data');
@@ -46,6 +50,7 @@ const AnalyticsExportOptions: React.FC<AnalyticsExportOptionsProps> = ({
 
   const exportToCSV = () => {
     setIsExporting(true);
+    setLastExportFormat('CSV');
     try {
       // Convert to CSV format
       let csvContent = '';
@@ -91,7 +96,7 @@ const AnalyticsExportOptions: React.FC<AnalyticsExportOptionsProps> = ({
       link.click();
       document.body.removeChild(link);
       
-      toast.success('Analytics data exported successfully');
+      toast.success('Analytics data exported as CSV');
     } catch (error) {
       console.error('Error exporting data:', error);
       toast.error('Failed to export analytics data');
@@ -105,16 +110,20 @@ const AnalyticsExportOptions: React.FC<AnalyticsExportOptionsProps> = ({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" disabled={isExporting}>
           <Download className="h-4 w-4 mr-2" />
-          Export
+          {isExporting ? 'Exporting...' : 'Export'}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Export Options</DropdownMenuLabel>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={exportToJSON} disabled={isExporting}>
-          {isExporting ? <Check className="h-4 w-4 mr-2" /> : null}
+          <FileText className="h-4 w-4 mr-2" />
+          {lastExportFormat === 'JSON' && <Check className="h-4 w-4 mr-2" />}
           Export as JSON
         </DropdownMenuItem>
         <DropdownMenuItem onClick={exportToCSV} disabled={isExporting}>
-          {isExporting ? <Check className="h-4 w-4 mr-2" /> : null}
+          <Table className="h-4 w-4 mr-2" />
+          {lastExportFormat === 'CSV' && <Check className="h-4 w-4 mr-2" />}
           Export as CSV
         </DropdownMenuItem>
       </DropdownMenuContent>
