@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { UberPersona } from '@/types/UberPersona';
+import { useState, useMemo } from 'react';
+import { UberPersona } from '@/types/uberPersona';
+import { getPersonaType } from '@/utils/personaHelpers';
 
 export interface FilterOptions {
   searchTerm: string;

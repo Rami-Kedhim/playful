@@ -6,8 +6,8 @@ import React, {
   ReactNode,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '@/services/AuthService';
-import { userService } from '@/services/UserService';
+import { authService } from '@/services/authService';
+import { userService } from '@/services/userService';
 import { UberPersona } from '@/types/uberPersona';
 import { uberCoreInstance } from '@/core/UberCore';
 import { SystemIntegrityResult } from '@/core/Orus';

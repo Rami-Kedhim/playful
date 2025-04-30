@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersona } from '@/types/uberPersona';
 import UberPersonaGrid from '@/components/personas/UberPersonaGrid';
 import { mapEscortToUberPersona } from '@/utils/profileMapping';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';

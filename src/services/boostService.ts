@@ -1,6 +1,4 @@
-
-// Fix BoostAnalytics shape and adapt getBoostAnalytics function accordingly
-
+// The file will now correctly reference the types exported from boost.ts
 import { BoostPackage, BoostStatus, BoostEligibility, BoostAnalytics } from '@/types/boost';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
