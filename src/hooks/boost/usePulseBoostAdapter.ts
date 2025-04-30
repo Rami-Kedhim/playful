@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { formatBoostDuration } from '@/utils/boostCalculator';
 import { supabase } from '@/integrations/supabase/client';
-import { EnhancedBoostStatus, PulseBoost } from '@/types/pulse-boost';
+import { PulseBoost, EnhancedBoostStatus } from '@/types/pulse-boost';
 
 const usePulseBoostAdapter = (profileId: string) => {
   const [realtimeStatus, setRealtimeStatus] = useState<EnhancedBoostStatus | null>(null);

@@ -61,6 +61,16 @@ export interface UserRole {
   createdAt: Date;
 }
 
+export interface EnhancedBoostStatus {
+  isActive: boolean;
+  packageId?: string;
+  activeBoostId?: string;
+  startTime?: Date;
+  endTime?: Date;
+  remainingTime?: string;
+  visibilityScore?: number;
+}
+
 export interface PulseBoost {
   id: string;
   name: string;
@@ -74,4 +84,6 @@ export interface PulseBoost {
   visibility_increase: number;
   color?: string;
   badgeColor?: string;
+  // Add the missing costUBX property
+  costUBX?: number;
 }

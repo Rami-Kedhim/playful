@@ -9,9 +9,9 @@ import type {
   BoostPurchaseRequest,
   BoostPurchaseResult,
   BoostAnalytics,
-  BoostHistory
-} from '../types';
-import type { EnhancedBoostStatus } from '@/types/pulse-boost';
+  BoostHistory,
+  EnhancedBoostStatus
+} from '@/types/pulse-boost';
 
 // Create an instance of the service
 const pulseBoostService = new PulseBoostService();

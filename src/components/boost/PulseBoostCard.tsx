@@ -28,7 +28,7 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
   if (!boost) return null;
   
   const handleActivate = () => {
-    if (!boost || disabled || userBalance < (boost.costUBX || 0)) return;
+    if (!boost || disabled || userBalance < (boost.price_ubx || 0)) return;
     return onActivate(boost);
   };
   
@@ -79,7 +79,7 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
             <CardDescription>{boost.description || ''}</CardDescription>
           </div>
           <div className="text-right">
-            <p className="text-lg font-semibold">{boost.costUBX || 0} UBX</p>
+            <p className="text-lg font-semibold">{boost.price_ubx || 0} UBX</p>
             <p className="text-sm text-muted-foreground">
               {(boost.durationMinutes || 0) / 60} hours
             </p>
@@ -116,9 +116,9 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
             <Button 
               className="w-full" 
               onClick={handleActivate}
-              disabled={disabled || userBalance < (boost.costUBX || 0)}
+              disabled={disabled || userBalance < (boost.price_ubx || 0)}
             >
-              {userBalance < (boost.costUBX || 0) ? "Insufficient UBX Balance" : "Activate Boost"}
+              {userBalance < (boost.price_ubx || 0) ? "Insufficient UBX Balance" : "Activate Boost"}
             </Button>
           )}
         </div>

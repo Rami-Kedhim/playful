@@ -38,7 +38,7 @@ export const useUberPersona = (personaId?: string) => {
           updatedAt: new Date(),
           status: 'active',
           systemMetadata: {
-            source: 'manual', // Changed from 'mock' to valid value
+            source: 'manual',
             tagsGeneratedByAI: false,
             hilbertSpaceVector: [],
             statusFlags: {
@@ -49,7 +49,7 @@ export const useUberPersona = (personaId?: string) => {
             }
           },
           age: 25,
-          gender: 'female',
+          // Remove gender as it doesn't exist in UberPersona
           location: 'New York, USA', // Using string type for location
           languages: ['English', 'Spanish'],
           traits: ['Friendly', 'Outgoing', 'Creative'],
