@@ -3,6 +3,28 @@ import { NeuralAnalyticsReport, PerformanceTrend } from '../types/neuralAnalytic
 
 // Generate mock neural analytics report for the demo
 export const generateNeuralAnalytics = (): NeuralAnalyticsReport => {
+  // Generate trend dates for the past 30 days
+  const generateDateSeries = (days: number) => {
+    const dates = [];
+    const today = new Date();
+    
+    for (let i = days; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(today.getDate() - i);
+      dates.push(date.toISOString().split('T')[0]);
+    }
+    
+    return dates;
+  };
+  
+  const dates = generateDateSeries(30);
+  
+  // Generate usage trend data with realistic dates
+  const usageTrendData = dates.map(date => ({
+    date,
+    value: 40000 + Math.floor(Math.random() * 8000) // Random value between 40,000 and 48,000
+  }));
+  
   // Generate forecast data
   const forecastData = generatePerformanceForecast(7);
   
@@ -43,16 +65,7 @@ export const generateNeuralAnalytics = (): NeuralAnalyticsReport => {
       responseTimeMs: Math.floor(Math.random() * 200),
       errorRate: Math.random() * 5,
     },
-    anomalies: [
-      {
-        id: 'anomaly-1',
-        type: 'latency-spike',
-        severity: 'medium',
-        description: 'Unexpected latency increase in text processing',
-        timestamp: new Date(Date.now() - 1800000).toISOString(),
-        relatedComponentId: 'neural-text-processor',
-      }
-    ],
+    anomalies: generateRandomAnomalies(),
     trends: {
       requestVolume: 'increasing',
       errorRate: 'stable',
@@ -119,15 +132,7 @@ export const generateNeuralAnalytics = (): NeuralAnalyticsReport => {
         { name: "Network", value: 22 },
         { name: "Storage", value: 15 }
       ],
-      dailyUsageTrend: [
-        { date: "2023-04-22", value: 42500 },
-        { date: "2023-04-23", value: 44200 },
-        { date: "2023-04-24", value: 43800 },
-        { date: "2023-04-25", value: 45100 },
-        { date: "2023-04-26", value: 46300 },
-        { date: "2023-04-27", value: 45800 },
-        { date: "2023-04-28", value: 45920 }
-      ]
+      dailyUsageTrend: usageTrendData
     },
     
     // Advanced metrics with mapData for chart
@@ -173,13 +178,68 @@ export const generateNeuralAnalytics = (): NeuralAnalyticsReport => {
   };
 };
 
+// Helper to generate random anomalies
+function generateRandomAnomalies() {
+  const anomalyTypes = [
+    'latency-spike', 
+    'error-rate-increase', 
+    'memory-leak', 
+    'resource-contention',
+    'network-timeout', 
+    'data-inconsistency'
+  ];
+  
+  const anomalyDescriptions = {
+    'latency-spike': 'Unexpected increase in response times detected',
+    'error-rate-increase': 'Error rate exceeded normal threshold',
+    'memory-leak': 'Possible memory leak detected in processing pipeline',
+    'resource-contention': 'Resource contention affecting overall performance',
+    'network-timeout': 'Network timeouts affecting connectivity',
+    'data-inconsistency': 'Data inconsistency detected in processing results'
+  };
+  
+  const relatedComponents = [
+    'neural-text-processor',
+    'neural-image-processor',
+    'data-pipeline',
+    'storage-system',
+    'inference-engine'
+  ];
+  
+  // Generate 1-3 random anomalies
+  const count = Math.floor(Math.random() * 3) + 1;
+  const anomalies = [];
+  
+  for (let i = 0; i < count; i++) {
+    const typeIndex = Math.floor(Math.random() * anomalyTypes.length);
+    const type = anomalyTypes[typeIndex];
+    const severity = Math.random() > 0.7 ? 'high' : Math.random() > 0.4 ? 'medium' : 'low';
+    
+    // Generate a timestamp within the last 24 hours
+    const timestamp = new Date();
+    timestamp.setHours(timestamp.getHours() - Math.floor(Math.random() * 24));
+    
+    anomalies.push({
+      id: `anomaly-${Date.now()}-${i}`,
+      type,
+      severity,
+      description: anomalyDescriptions[type as keyof typeof anomalyDescriptions],
+      timestamp: timestamp.toISOString(),
+      relatedComponentId: relatedComponents[Math.floor(Math.random() * relatedComponents.length)]
+    });
+  }
+  
+  return anomalies;
+}
+
 // Generate mock performance forecast for predicting future trends
 export const generatePerformanceForecast = (days: number): PerformanceTrend[] => {
   const trends: PerformanceTrend[] = [];
+  const today = new Date();
   
   for (let i = 0; i < days; i++) {
     const date = new Date();
-    date.setDate(date.getDate() + i);
+    date.setDate(today.getDate() + i);
     
     trends.push({
       date: date.toISOString().split('T')[0],

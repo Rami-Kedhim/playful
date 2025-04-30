@@ -8,6 +8,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import MetricsGrid from '@/components/analytics/MetricsGrid';
 import PerformanceChart from '@/components/analytics/PerformanceChart';
 import AnomalyDetails from '@/components/analytics/AnomalyDetails';
+import DateRangeFilter from '@/components/analytics/DateRangeFilter';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -45,7 +46,10 @@ const NeuralAnalyticsDashboard = () => {
     setActiveChart,
     hasCriticalAnomalies,
     refreshAnalytics,
-    acknowledgeAnomaly
+    acknowledgeAnomaly,
+    startDate,
+    endDate,
+    handleDateRangeChange
   } = useNeuralAnalyticsDashboard();
 
   if (loading) {
@@ -163,6 +167,12 @@ const NeuralAnalyticsDashboard = () => {
           </TabsList>
           
           <TabsContent value="charts">
+            <DateRangeFilter
+              startDate={startDate}
+              endDate={endDate}
+              onDateChange={handleDateRangeChange}
+              onRefresh={refreshAnalytics}
+            />
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">

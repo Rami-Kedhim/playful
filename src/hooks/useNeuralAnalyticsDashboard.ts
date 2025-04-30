@@ -10,6 +10,8 @@ export function useNeuralAnalyticsDashboard() {
   const { analyticsData, loading, error, refreshAnalytics } = useNeuralAnalytics();
   const [activeChart, setActiveChart] = useState<AnalyticsChartType>('usage');
   const [acknowledgedAnomalies, setAcknowledgedAnomalies] = useState<string[]>([]);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   
   // Extract and format key metrics for display
   const keyMetrics = analyticsData ? {
@@ -49,11 +51,42 @@ export function useNeuralAnalyticsDashboard() {
   const acknowledgeAnomaly = (id: string) => {
     setAcknowledgedAnomalies(prev => [...prev, id]);
   };
+
+  // Handle date range changes
+  const handleDateRangeChange = (start: Date | undefined, end: Date | undefined) => {
+    setStartDate(start);
+    setEndDate(end);
+  };
+  
+  // Filter chart data based on date range
+  const getFilteredChartData = (data: Array<{date: string, value: number}>) => {
+    if (!startDate && !endDate) return data;
+    
+    return data.filter(item => {
+      const itemDate = new Date(item.date);
+      const isAfterStart = !startDate || itemDate >= startDate;
+      const isBeforeEnd = !endDate || itemDate <= endDate;
+      return isAfterStart && isBeforeEnd;
+    });
+  };
   
   return {
     analyticsData: analyticsData ? {
       ...analyticsData,
-      anomalies: filteredAnomalies
+      anomalies: filteredAnomalies,
+      usageMetrics: {
+        ...analyticsData.usageMetrics,
+        dailyUsageTrend: getFilteredChartData(analyticsData.usageMetrics.dailyUsageTrend)
+      },
+      // We also need to filter performanceForecast if it exists
+      performanceForecast: analyticsData.performanceForecast ? 
+        analyticsData.performanceForecast.filter(item => {
+          const itemDate = new Date(item.date);
+          const isAfterStart = !startDate || itemDate >= startDate;
+          const isBeforeEnd = !endDate || itemDate <= endDate;
+          return isAfterStart && isBeforeEnd;
+        }) : 
+        analyticsData.performanceForecast
     } : null,
     loading,
     error,
@@ -62,7 +95,10 @@ export function useNeuralAnalyticsDashboard() {
     setActiveChart,
     keyMetrics,
     hasCriticalAnomalies,
-    acknowledgeAnomaly
+    acknowledgeAnomaly,
+    startDate,
+    endDate,
+    handleDateRangeChange
   };
 }
 
