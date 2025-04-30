@@ -9,8 +9,6 @@ import { Zap, TrendingUp, BarChart } from "lucide-react";
 import { useBoostManager } from "@/hooks/boost";
 import { BoostAnalytics } from "@/types/boost";
 
-interface AnalyticsData extends BoostAnalytics {}
-
 interface CreatorBoostTabProps {
   creatorId: string;
   profile: any;
@@ -26,11 +24,12 @@ const CreatorBoostTab = ({ creatorId, profile }: CreatorBoostTabProps) => {
     getBoostAnalytics
   } = useBoostManager(creatorId);
   
-  const getAnalyticsWrapper = async (): Promise<AnalyticsData | null> => {
+  // This wrapper ensures the returned data conforms to BoostAnalytics type
+  const getAnalyticsWrapper = async (): Promise<BoostAnalytics> => {
     const data = await getBoostAnalytics();
     
-    // Ensure data has all required properties
-    const analyticsData: AnalyticsData = {
+    // Ensure data has all required properties with non-optional fields
+    const analyticsData: BoostAnalytics = {
       views: data?.views || 0,
       additionalViews: data?.additionalViews || 0,
       engagementIncrease: data?.engagementIncrease || 0,
@@ -40,28 +39,34 @@ const CreatorBoostTab = ({ creatorId, profile }: CreatorBoostTabProps) => {
       boostEfficiency: data?.boostEfficiency || 0,
       trending: data?.trending || false,
       roi: data?.roi || 0,
-      impressions: data?.impressions || {
-        today: 0,
-        yesterday: 0,
-        weeklyAverage: 0,
-        withBoost: 0
+      impressions: {
+        today: data?.impressions?.today || 0,
+        yesterday: data?.impressions?.yesterday || 0,
+        weeklyAverage: data?.impressions?.weeklyAverage || 0,
+        withBoost: data?.impressions?.withBoost || 0,
+        withoutBoost: data?.impressions?.withoutBoost || 0,
+        increase: data?.impressions?.increase || 0
       },
-      interactions: data?.interactions || {
-        today: 0,
-        yesterday: 0,
-        weeklyAverage: 0,
-        withBoost: 0
+      interactions: {
+        today: data?.interactions?.today || 0,
+        yesterday: data?.interactions?.yesterday || 0,
+        weeklyAverage: data?.interactions?.weeklyAverage || 0,
+        withBoost: data?.interactions?.withBoost || 0,
+        withoutBoost: data?.interactions?.withoutBoost || 0,
+        increase: data?.interactions?.increase || 0
       },
-      rank: data?.rank || {
-        current: 0,
-        previous: 0,
-        change: 0
+      rank: {
+        current: data?.rank?.current || 0,
+        previous: data?.rank?.previous || 0,
+        change: data?.rank?.change || 0
       },
-      clicks: data?.clicks || {
-        today: 0,
-        yesterday: 0,
-        weeklyAverage: 0,
-        withBoost: 0
+      clicks: {
+        today: data?.clicks?.today || 0,
+        yesterday: data?.clicks?.yesterday || 0,
+        weeklyAverage: data?.clicks?.weeklyAverage || 0,
+        withBoost: data?.clicks?.withBoost || 0,
+        withoutBoost: data?.clicks?.withoutBoost || 0,
+        increase: data?.clicks?.increase || 0
       }
     };
     

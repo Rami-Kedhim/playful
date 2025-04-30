@@ -1,10 +1,9 @@
-
 /**
  * usePulseBoost Hook
  * React hook for interacting with the Pulse Boost system
  */
 import { useState, useEffect, useCallback } from 'react';
-import { pulseBoostService } from '../service';
+import { PulseBoostService } from '../service';
 import type { 
   BoostPackage, 
   BoostPurchaseRequest,
@@ -13,6 +12,9 @@ import type {
   BoostHistory
 } from '../types';
 import type { EnhancedBoostStatus } from '@/types/pulse-boost';
+
+// Create an instance of the service
+const pulseBoostService = new PulseBoostService();
 
 export function usePulseBoost(profileId?: string) {
   const [boostStatus, setBoostStatus] = useState<EnhancedBoostStatus>({ isActive: false });

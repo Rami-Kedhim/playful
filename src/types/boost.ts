@@ -85,34 +85,34 @@ export interface BoostAnalytics {
   roi?: number;
   
   // Detailed metrics
-  impressions?: {
+  impressions: {
     today: number;
     yesterday: number;
     weeklyAverage: number;
     withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
+    withoutBoost: number;
+    increase: number;
   };
-  interactions?: {
+  interactions: {
     today: number;
     yesterday: number;
     weeklyAverage: number;
     withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
+    withoutBoost: number;
+    increase: number;
   };
-  rank?: {
+  rank: {
     current: number;
     previous: number;
     change: number;
   };
-  clicks?: {
+  clicks: {
     today: number;
     yesterday: number;
     weeklyAverage: number;
     withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
+    withoutBoost: number;
+    increase: number;
   };
   
   // Legacy fields for backward compatibility

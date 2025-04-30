@@ -1,7 +1,7 @@
 
 import { UserRole, UserRoleEnum } from '@/types/pulse-boost';
 
-export class AuthService {
+export const authService = {
   // Mock implementation
   async getUserRole(userId: string): Promise<UserRole> {
     // Simulate API call
@@ -13,7 +13,7 @@ export class AuthService {
       role: UserRoleEnum.USER,
       createdAt: new Date()
     };
-  }
+  },
 
   // Add this missing method
   async validateToken(token: string): Promise<boolean> {
@@ -23,6 +23,6 @@ export class AuthService {
     // Simple validation: token must be 10+ characters
     return token && token.length >= 10;
   }
-}
+};
 
-export default AuthService;
+export default authService;

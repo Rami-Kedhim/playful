@@ -38,36 +38,39 @@ export const useUberPersona = (personaId?: string) => {
           createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
           updatedAt: new Date(),
           status: 'active',
-          dataSource: 'ai_generated',
           systemMetadata: {
+            source: 'ai_generated',
+            tagsGeneratedByAI: false,
+            hilbertSpaceVector: [],
             statusFlags: {
               isVerified: true, 
               isActive: true,
               isFreemium: false,
               isSubscriber: true
-            },
+            }
           },
           age: 25,
           gender: 'female',
-          location: {
-            city: 'New York',
-            country: 'USA'
-          },
+          location: 'New York, USA',  // Changed to string to match type definition
           languages: ['English', 'Spanish'],
           traits: ['Friendly', 'Outgoing', 'Creative'],
           stats: {
-            followers: 1200,
-            likes: 3500,
-            views: 12000
+            rating: 4.5,
+            reviewCount: 120,
+            viewCount: 12000,
+            favoriteCount: 350
           },
           availability: {
-            monday: true,
-            tuesday: true,
-            wednesday: true,
-            thursday: true,
-            friday: true,
-            saturday: false,
-            sunday: false
+            nextAvailable: '2023-10-15T14:00:00Z',
+            schedule: {
+              monday: { available: true },
+              tuesday: { available: true },
+              wednesday: { available: true },
+              thursday: { available: true },
+              friday: { available: true },
+              saturday: { available: false },
+              sunday: { available: false }
+            }
           }
         };
         

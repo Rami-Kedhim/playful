@@ -1,4 +1,3 @@
-
 export interface UberPersonaType {
   escort: 'escort';
   creator: 'creator';
@@ -39,6 +38,8 @@ export interface StatusFlags {
   needsModeration?: boolean;
   hasPendingUpdates?: boolean;
   isPremiumExpiring?: boolean;
+  isFreemium?: boolean;
+  isSubscriber?: boolean;
   [key: string]: boolean | undefined; // Allow string indexing
 }
 

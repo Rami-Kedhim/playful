@@ -10,11 +10,11 @@ export class PulseBoostService {
       return false;
     }
     
-    // Check when the persona was last active
+    // Check when the persona was last active using updatedAt
     if (persona.updatedAt) {
-      const lastActive = new Date(persona.updatedAt);
+      const lastUpdateTime = new Date(persona.updatedAt);
       const now = new Date();
-      const daysSinceActive = Math.floor((now.getTime() - lastActive.getTime()) / (1000 * 60 * 60 * 24));
+      const daysSinceActive = Math.floor((now.getTime() - lastUpdateTime.getTime()) / (1000 * 60 * 60 * 24));
       
       // If not active in last 30 days, not eligible
       if (daysSinceActive > 30) {

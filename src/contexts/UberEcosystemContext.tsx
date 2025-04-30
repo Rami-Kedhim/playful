@@ -1,7 +1,7 @@
 
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { AuthService } from '@/services/AuthService';
-import { UserService } from '@/services/UserService';
+import { authService } from '@/services/authService';
+import { userService } from '@/services/userService';
 import { UberPersona } from '@/types/uberPersona';
 
 // Create the context
@@ -75,7 +75,6 @@ export const UberEcosystemProvider: React.FC<UberEcosystemProviderProps> = ({
   const validateToken = async (token: string): Promise<boolean> => {
     try {
       // Implement token validation here using AuthService
-      const authService = new AuthService();
       const isValid = await authService.validateToken(token);
       return isValid;
     } catch (error) {
