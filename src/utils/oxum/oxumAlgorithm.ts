@@ -13,6 +13,9 @@ export interface ProfileScoreData {
   region?: string;
   language?: string;
   tags?: string[];
+  boostScore?: number;  // Added missing property
+  engagementScore?: number;  // Added missing property
+  repetitionPenalty?: number; // Added missing property
 }
 
 /**

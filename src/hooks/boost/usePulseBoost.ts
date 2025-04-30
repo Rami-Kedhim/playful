@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { PulseBoost } from '@/types/pulse-boost';
 import { pulseBoostService } from '@/services/boost/pulseBoostService';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useAuth } from '@/hooks/auth';
 import { BoostPackage } from '@/types/boost';
 
@@ -16,7 +15,6 @@ const usePulseBoost = (profileId?: string) => {
     paidBalance: 0
   });
   
-  const supabase = useSupabaseClient();
   const { user } = useAuth();
   const effectiveProfileId = profileId || user?.id;
 
@@ -77,7 +75,7 @@ const usePulseBoost = (profileId?: string) => {
     };
     
     fetchBoostPackages();
-  }, [effectiveProfileId, supabase]);
+  }, [effectiveProfileId]);
   
   // Purchase a boost package
   const purchaseBoost = async (boostPackage: BoostPackage): Promise<boolean> => {

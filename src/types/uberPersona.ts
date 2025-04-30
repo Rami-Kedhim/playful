@@ -35,6 +35,27 @@ export interface UberPersona {
     nextAvailable?: string;
   };
   tags?: string[];
+  bio?: string;
+  description?: string;
+  languages?: string[];
+  services?: string[];
+  traits?: string[];
+  stats?: {
+    rating: number;
+    reviewCount: number;
+    responseTime: number;
+    viewCount?: number;
+    favoriteCount?: number;
+    bookingCount?: number;
+  };
+  monetization?: {
+    acceptsLucoin?: boolean;
+    acceptsTips?: boolean;
+    subscriptionPrice?: number;
+    unlockingPrice?: number;
+    boostingActive?: boolean;
+    meetingPrice?: number;
+  };
   systemMetadata?: {
     source: PersonaSource;
     lastSynced?: Date;

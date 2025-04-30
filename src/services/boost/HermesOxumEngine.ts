@@ -25,13 +25,15 @@ export class HermesOxumEngine {
     
     const profileData: ProfileScoreData = {
       profileId,
-      boostScore,
-      engagementScore,
+      baseScore: 100,
+      boostMultiplier: 1.0,
       timeSinceLastTop,
-      repetitionPenalty: 0, // Start with no penalty
+      penaltyFactor: 1.0,
+      lastCalculated: currentTime,
       region: '',
       language: '',
-      lastCalculated: currentTime
+      boostScore, // Now matches the interface
+      engagementScore // Now matches the interface
     };
     
     // Calculate time of day impact using Hermes
