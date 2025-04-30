@@ -34,7 +34,7 @@ export const useBoostDialog = (profileId: string) => {
   };
 
   const getBoostPrice = (pkg: BoostPackage) => {
-    return pkg?.price_ubx || pkg?.price_lucoin || pkg?.price || 0;
+    return pkg?.price_ubx || pkg?.price || 0;
   };
 
   const handleBoost = async () => {

@@ -25,3 +25,9 @@ export interface EnhancedBoostStatus {
   visibilityScore?: number;
   activeBoostId?: string;
 }
+
+export interface UserRole {
+  id: string;
+  name: string;
+  permissions: string[];
+}

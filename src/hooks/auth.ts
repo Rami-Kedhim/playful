@@ -1,14 +1,26 @@
 
-// Re-export all auth-related hooks and components
-export { 
+// This file is kept for backward compatibility
+// It re-exports components from the auth folder
+import { 
   AuthContext, 
   AuthProvider, 
-  useAuth,
-  useAuthContext,
-  useAuthState,
-  useAuthActions,
-  useRole
-} from './auth/index';
+  useAuth 
+} from './auth';
 
-// For backward compatibility with direct imports
-export * from './auth/useAuthContext';
+export { 
+  useAuth, 
+  AuthProvider, 
+  AuthContext
+};
+
+// Legacy exports to maintain backward compatibility
+export const useAuthState = useAuth;
+export const useAuthActions = useAuth;
+export const useRole = () => {
+  const auth = useAuth();
+  return {
+    hasRole: auth.checkRole
+  };
+};
+
+export default useAuth;

@@ -13,6 +13,10 @@ export interface BoostPackage {
   boostLevel?: number;
   boost_power?: number;
   visibility_increase?: number;
+  visibility?: string;
+  color?: string;
+  badgeColor?: string;
+  progress?: number;
 }
 
 // Additional interfaces used in our components
@@ -60,6 +64,7 @@ export interface BoostAnalytics {
     withoutBoost: number;
     increase: number;
   };
+  viewsIncrease?: number;
 }
 
 export interface BoostStatus {
@@ -74,11 +79,14 @@ export interface BoostStatus {
   timeRemaining?: string;
   boostPackage?: BoostPackage;
   packageName?: string;
+  progress?: number;
 }
 
 export interface BoostEligibility {
   isEligible: boolean;
   reason?: string;
+  reasons?: string[];
+  eligible?: boolean; // For backward compatibility
 }
 
 export interface HermesStatus {
@@ -88,9 +96,30 @@ export interface HermesStatus {
   lastUpdateTime: string;
   boostScore?: number;
   effectivenessScore?: number;
+  isActive?: boolean;
 }
 
 export interface HermesBoostStatus extends HermesStatus {
   boostActive: boolean;
   visibilityScore?: number;
+}
+
+// Types for dialog component props
+export interface BoostDialogTabsProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  loading: boolean;
+  boostStatus: BoostStatus;
+  eligibility: BoostEligibility;
+  boostPackages: BoostPackage[];
+  selectedPackage: string;
+  setSelectedPackage: (id: string) => void;
+  handleBoost: () => void;
+  handleCancel: () => Promise<boolean>;
+  dailyBoostUsage: number;
+  dailyBoostLimit: number;
+  hermesStatus: HermesStatus;
+  formatBoostDuration?: (duration: string) => string;
+  getBoostPrice?: () => number;
+  handleDialogClose: () => void;
 }

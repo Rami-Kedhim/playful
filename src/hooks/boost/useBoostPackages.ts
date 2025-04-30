@@ -17,7 +17,7 @@ export const useBoostPackages = (): BoostPackage[] => {
           price_ubx: 150,
           description: '6-hour visibility boost',
           duration: '06:00:00',
-          boost_power: 20,
+          boost_power: 20, // Now properly defined in BoostPackage type
           visibility_increase: 25,
           features: ['Featured in search results', 'Higher ranking'],
           color: '#3b82f6'
@@ -29,7 +29,7 @@ export const useBoostPackages = (): BoostPackage[] => {
           price_ubx: 300,
           description: '24-hour visibility boost',
           duration: '24:00:00',
-          boost_power: 50,
+          boost_power: 50, // Now properly defined in BoostPackage type
           visibility_increase: 75,
           features: ['Featured in search results', 'Higher ranking', 'Featured on homepage'],
           color: '#8b5cf6' 
@@ -41,7 +41,7 @@ export const useBoostPackages = (): BoostPackage[] => {
           price_ubx: 500,
           description: '3-day visibility boost',
           duration: '72:00:00',
-          boost_power: 100,
+          boost_power: 100, // Now properly defined in BoostPackage type
           visibility_increase: 150,
           features: ['Featured in search results', 'Higher ranking', 'Featured on homepage', 'Premium badge'],
           color: '#ec4899'

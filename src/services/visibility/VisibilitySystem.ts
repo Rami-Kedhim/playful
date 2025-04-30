@@ -1,62 +1,96 @@
 
-import { ProfileScoreData } from "@/utils/oxum/oxumAlgorithm";
-
-export class VisibilitySystem {
-  private profiles: ProfileScoreData[] = [];
-  private systemLoad: number = 0.5;
+/**
+ * Visibility System for boosting and ranking items
+ */
+class VisibilitySystem {
+  private items: Map<string, any> = new Map();
+  private scores: Map<string, number> = new Map();
   
   /**
-   * Add a profile to the visibility system
+   * Register an item with the visibility system
    */
-  public addProfile(profile: ProfileScoreData): void {
-    const existingIndex = this.profiles.findIndex(p => p.profileId === profile.profileId);
-    if (existingIndex >= 0) {
-      this.profiles[existingIndex] = profile;
-    } else {
-      this.profiles.push(profile);
-    }
-  }
-  
-  /**
-   * Get all profiles in the visibility system
-   */
-  public getProfiles(): ProfileScoreData[] {
-    return [...this.profiles];
-  }
-  
-  /**
-   * Calculate visibility score for a profile
-   */
-  public calculateVisibility(profileId: string, boostFactor: number = 1): number {
-    // Simple scoring algorithm
-    const baseScore = 50;
-    const profile = this.profiles.find(p => p.profileId === profileId);
-    
-    if (!profile) {
-      const newProfile: ProfileScoreData = {
-        profileId,
-        baseScore: 100,
-        boostMultiplier: boostFactor,
-        timeSinceLastTop: 0,
-        penaltyFactor: 1.0,
-        lastCalculated: new Date(),
-        boostScore: baseScore * boostFactor // Now matches interface
-      };
-      
-      this.addProfile(newProfile);
-      return baseScore * boostFactor;
+  registerItem(id: string, data: any): boolean {
+    if (this.items.has(id)) {
+      return false; // Item already exists
     }
     
-    // Apply boost factor and penalty
-    const score = profile.baseScore * profile.boostMultiplier / profile.penaltyFactor;
-    return Math.min(100, Math.max(0, score));
+    this.items.set(id, data);
+    this.scores.set(id, 50); // Default score
+    return true;
   }
   
   /**
-   * Set system load
+   * Get an item from the system
    */
-  public setSystemLoad(load: number): void {
-    this.systemLoad = Math.max(0, Math.min(1, load));
+  getItem(id: string): any {
+    return this.items.get(id);
+  }
+  
+  /**
+   * Update an item's score
+   */
+  updateItemScore(id: string, score: number): boolean {
+    if (!this.items.has(id)) {
+      return false;
+    }
+    
+    // Ensure the score is within valid range
+    const validScore = Math.min(Math.max(score, 0), 100);
+    this.scores.set(id, validScore);
+    return true;
+  }
+  
+  /**
+   * Get top items based on score
+   */
+  getTopItems(limit: number = 10): Array<{ id: string, data: any, score: number }> {
+    const result: Array<{ id: string, data: any, score: number }> = [];
+    
+    // Convert maps to array and sort
+    const entries = Array.from(this.items.entries())
+      .map(([id, data]) => ({
+        id,
+        data,
+        score: this.scores.get(id) || 0
+      }))
+      .sort((a, b) => b.score - a.score);
+    
+    // Return the top N items
+    return entries.slice(0, limit);
+  }
+  
+  /**
+   * Boost an item's visibility
+   */
+  boostItem(id: string, amount: number, duration: number): boolean {
+    if (!this.items.has(id)) {
+      return false;
+    }
+    
+    // Get current score
+    const currentScore = this.scores.get(id) || 50;
+    
+    // Calculate new score with boost
+    const newScore = Math.min(currentScore + amount, 100);
+    this.scores.set(id, newScore);
+    
+    // Schedule score to return to normal after duration
+    setTimeout(() => {
+      // Only reduce if the item still exists
+      if (this.items.has(id)) {
+        this.scores.set(id, currentScore);
+      }
+    }, duration);
+    
+    return true;
+  }
+  
+  /**
+   * Clear all items
+   */
+  clear(): void {
+    this.items.clear();
+    this.scores.clear();
   }
 }
 
