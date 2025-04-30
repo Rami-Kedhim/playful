@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNeuralAnalytics } from './useNeuralAnalytics';
 import { NeuralAnalyticsReport } from '@/services/neural/types/neuralAnalytics';
 import { Anomaly } from '@/types/analytics';
@@ -12,6 +12,9 @@ export function useNeuralAnalyticsDashboard() {
   const [acknowledgedAnomalies, setAcknowledgedAnomalies] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState<boolean>(false);
+  const [refreshInterval, setRefreshInterval] = useState<number>(30); // Default: 30 seconds
+  const refreshTimerRef = useRef<number | null>(null);
   
   // Extract and format key metrics for display
   const keyMetrics = analyticsData ? {
@@ -58,6 +61,39 @@ export function useNeuralAnalyticsDashboard() {
     setEndDate(end);
   };
   
+  // Toggle auto-refresh
+  const toggleAutoRefresh = useCallback(() => {
+    setIsAutoRefreshEnabled(prev => !prev);
+  }, []);
+
+  // Change refresh interval
+  const changeRefreshInterval = useCallback((interval: number) => {
+    setRefreshInterval(interval);
+  }, []);
+
+  // Setup or clear auto-refresh timer
+  useEffect(() => {
+    // Clear existing timer
+    if (refreshTimerRef.current) {
+      window.clearInterval(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+
+    // Set new timer if auto-refresh is enabled
+    if (isAutoRefreshEnabled) {
+      refreshTimerRef.current = window.setInterval(() => {
+        refreshAnalytics();
+      }, refreshInterval * 1000);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (refreshTimerRef.current) {
+        window.clearInterval(refreshTimerRef.current);
+      }
+    };
+  }, [isAutoRefreshEnabled, refreshInterval, refreshAnalytics]);
+  
   // Filter chart data based on date range
   const getFilteredChartData = (data: Array<{date: string, value: number}>) => {
     if (!startDate && !endDate) return data;
@@ -98,7 +134,11 @@ export function useNeuralAnalyticsDashboard() {
     acknowledgeAnomaly,
     startDate,
     endDate,
-    handleDateRangeChange
+    handleDateRangeChange,
+    isAutoRefreshEnabled,
+    refreshInterval,
+    toggleAutoRefresh,
+    changeRefreshInterval
   };
 }
 

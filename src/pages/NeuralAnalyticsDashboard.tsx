@@ -9,6 +9,7 @@ import MetricsGrid from '@/components/analytics/MetricsGrid';
 import PerformanceChart from '@/components/analytics/PerformanceChart';
 import AnomalyDetails from '@/components/analytics/AnomalyDetails';
 import DateRangeFilter from '@/components/analytics/DateRangeFilter';
+import AutoRefreshControl from '@/components/analytics/AutoRefreshControl';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -49,7 +50,11 @@ const NeuralAnalyticsDashboard = () => {
     acknowledgeAnomaly,
     startDate,
     endDate,
-    handleDateRangeChange
+    handleDateRangeChange,
+    isAutoRefreshEnabled,
+    refreshInterval,
+    toggleAutoRefresh,
+    changeRefreshInterval
   } = useNeuralAnalyticsDashboard();
 
   if (loading) {
@@ -167,12 +172,20 @@ const NeuralAnalyticsDashboard = () => {
           </TabsList>
           
           <TabsContent value="charts">
-            <DateRangeFilter
-              startDate={startDate}
-              endDate={endDate}
-              onDateChange={handleDateRangeChange}
-              onRefresh={refreshAnalytics}
-            />
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
+              <DateRangeFilter
+                startDate={startDate}
+                endDate={endDate}
+                onDateChange={handleDateRangeChange}
+                onRefresh={refreshAnalytics}
+              />
+              <AutoRefreshControl
+                isAutoRefreshEnabled={isAutoRefreshEnabled}
+                refreshInterval={refreshInterval}
+                onToggleAutoRefresh={toggleAutoRefresh}
+                onChangeInterval={changeRefreshInterval}
+              />
+            </div>
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
