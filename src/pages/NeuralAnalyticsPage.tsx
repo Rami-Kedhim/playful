@@ -2,9 +2,10 @@
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import NeuralAnalytics from '@/components/neural/NeuralAnalytics';
-import { ArrowUpRight, Brain } from 'lucide-react';
+import { ArrowUpRight, Brain, LineChart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Link } from 'react-router-dom';
 
 const NeuralAnalyticsPage: React.FC = () => {
   return (
@@ -23,7 +24,13 @@ const NeuralAnalyticsPage: React.FC = () => {
               </p>
             </div>
           </div>
-          <div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/dashboard">
+                <LineChart className="h-4 w-4 mr-2" />
+                <span>Advanced Dashboard</span>
+              </Link>
+            </Button>
             <Button variant="outline" size="sm" className="flex items-center gap-2">
               <span>View Documentation</span>
               <ArrowUpRight className="h-4 w-4" />

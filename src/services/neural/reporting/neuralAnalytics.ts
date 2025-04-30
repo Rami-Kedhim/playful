@@ -1,277 +1,464 @@
+
 import { NeuralAnalyticsReport, PerformanceTrend } from '@/services/neural/types/neuralAnalytics';
+import { format, subDays, addDays } from 'date-fns';
 
-// Helper function to generate random number within range
-function randomInRange(min: number, max: number): number {
-  return Math.random() * (max - min) + min;
-}
-
-// Helper function to generate trend data with realistic patterns
-function generateTrendData(
-  days: number = 30, 
-  baseValue: number, 
-  volatility: number, 
-  trend: 'up' | 'down' | 'stable' = 'stable',
-  min: number = 0
-): Array<{ date: string, value: number }> {
-  const result = [];
-  const now = new Date();
-  let value = baseValue;
-  
-  // Trend factors
-  const trendFactor = trend === 'up' ? 0.02 : trend === 'down' ? -0.02 : 0;
-  
-  for (let i = days - 1; i >= 0; i--) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    
-    // Add some randomness and trend
-    const change = (Math.random() * volatility * 2 - volatility) + (value * trendFactor);
-    value = Math.max(min, value + change);
-    
-    result.push({
-      date: date.toISOString(),
-      value: Number(value.toFixed(2))
-    });
-  }
-  
-  return result;
-}
-
-// Generate a performance forecast
-export function generatePerformanceForecast(days: number = 30): PerformanceTrend[] {
-  const trends: PerformanceTrend[] = [];
-  const now = new Date();
-  
-  // Initial values
-  let expectedLoad = 5000 + Math.random() * 1000;
-  let predictedResponseTime = 85 + Math.random() * 20;
-  let predictedErrorRate = 0.01 + Math.random() * 0.01;
-  let confidenceScore = 0.9;
-  
-  for (let i = 0; i < days; i++) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - days + i + 1);
-    
-    // Add daily variations with some patterns
-    // More load on weekdays
-    const dayOfWeek = date.getDay();
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-    
-    // Weekend load is typically lower
-    const loadFactor = isWeekend ? 0.7 : 1.0 + (dayOfWeek === 1 ? 0.2 : 0); // Mondays have higher load
-    
-    // Add some random daily fluctuation
-    expectedLoad = Math.max(3000, expectedLoad * (1 + (Math.random() * 0.06 - 0.03)) * loadFactor);
-    
-    // Response time tends to increase with load, but also has random variation
-    predictedResponseTime = Math.max(60, 
-      predictedResponseTime * (1 + (Math.random() * 0.04 - 0.02) + (expectedLoad > 5500 ? 0.01 : -0.005))
-    );
-    
-    // Error rate can spike occasionally
-    if (Math.random() < 0.05) {
-      predictedErrorRate = predictedErrorRate * (1 + Math.random() * 0.5);
-    } else {
-      // Otherwise it fluctuates normally
-      predictedErrorRate = Math.max(0.001, predictedErrorRate * (1 + (Math.random() * 0.04 - 0.02)));
-    }
-    
-    // Confidence decreases for future predictions
-    confidenceScore = Math.max(0.5, 0.95 - (i/days) * 0.3 - Math.random() * 0.05);
-    
-    trends.push({
-      date: date.toISOString(),
-      metrics: {
-        expectedLoad: Math.round(expectedLoad),
-        predictedResponseTime: Number(predictedResponseTime.toFixed(1)),
-        predictedErrorRate: Number(predictedErrorRate.toFixed(4)),
-        confidenceScore: Number(confidenceScore.toFixed(2))
-      }
-    });
-  }
-  
-  return trends;
-}
-
-// Generate synthetic neural analytics data for demo purposes
+/**
+ * Generate mock analytics data for neural systems
+ */
 export function generateNeuralAnalytics(): NeuralAnalyticsReport {
-  const timestamp = new Date().toISOString();
-  const cpuUtilization = 60 + Math.random() * 20;
-  const memoryUtilization = 50 + Math.random() * 30;
-  const requestsPerSecond = 80 + Math.random() * 40;
-  const responseTimeMs = 90 + Math.random() * 30;
-  const errorRate = 0.5 + Math.random() * 1.5;
+  const now = new Date();
+  const timestamp = now.toISOString();
   
   // Generate performance forecast data
   const performanceForecast = generatePerformanceForecast();
   
-  // Calculate changes for operational metrics
-  const responseTimeChange = Number((Math.random() * 10 - 5).toFixed(1));
-  const errorRateChange = Number((Math.random() * 1 - 0.5).toFixed(1));
-  const operationsChange = Number((Math.random() * 8 - 2).toFixed(1));
-  const accuracyChange = Number((Math.random() * 3 - 1).toFixed(1));
-  
-  // Generate recommendation based on metrics
-  const recommendations: string[] = [];
-  if (cpuUtilization > 75) {
-    recommendations.push("Consider scaling out neural processing capacity to reduce CPU load");
-  }
-  if (memoryUtilization > 70) {
-    recommendations.push("Memory utilization is high - optimize cache usage for neural models");
-  }
-  if (errorRate > 1.5) {
-    recommendations.push("Error rate exceeds threshold - verify input data quality and model calibration");
-  }
-  if (responseTimeMs > 110) {
-    recommendations.push("Response latency is increasing - consider optimizing neural inference paths");
-  }
-  if (recommendations.length === 0) {
-    recommendations.push("All neural systems operating within optimal parameters");
-  }
-  
-  // Randomly decide if we should generate anomalies
-  const hasAnomalies = Math.random() < 0.7; // 70% chance of having anomalies
-  const anomalies = hasAnomalies ? [
-    {
-      id: `anom-${Math.floor(Math.random() * 1000)}`,
-      type: Math.random() < 0.5 ? 'Performance Degradation' : 'Error Rate Spike',
-      severity: Math.random() < 0.2 ? 'high' : Math.random() < 0.6 ? 'medium' : 'low',
-      description: Math.random() < 0.5 
-        ? 'Unusual response time patterns detected in neural processing pipeline' 
-        : 'Abnormal error rate detected in semantic analysis module',
-      timestamp: new Date().toISOString(),
-      relatedComponentId: `comp-${Math.floor(Math.random() * 100)}`
-    }
-  ] : [];
-  
-  // Generate neural service metrics
-  const serviceMetrics = [
-    {
-      id: 'svc-1',
-      name: 'Neural Language Processor',
-      type: 'language-processing',
-      status: 'active' as const,
-      metrics: {
-        throughput: 450 + Math.random() * 100,
-        latency: 75 + Math.random() * 25,
-        errorRate: 0.4 + Math.random() * 0.8,
-      },
-      enabled: true,
-      lastActivity: new Date().toISOString()
-    },
-    {
-      id: 'svc-2',
-      name: 'Visual Recognition Service',
-      type: 'computer-vision',
-      status: 'active' as const,
-      metrics: {
-        throughput: 280 + Math.random() * 80,
-        latency: 110 + Math.random() * 40,
-        errorRate: 0.8 + Math.random() * 1.2,
-      },
-      enabled: true,
-      lastActivity: new Date().toISOString()
-    }
-  ];
-  
-  // Generate usage metrics with daily trend
-  const usageTrend = generateTrendData(30, 1200, 200, 'up', 800);
-  
   return {
     timestamp,
-    systemMetrics: {
-      cpuUtilization,
-      memoryUtilization,
-      requestsPerSecond,
-      responseTimeMs,
-      errorRate,
-    },
-    serviceMetrics,
-    anomalies,
-    trends: {
-      requestVolume: 'increasing',
-      errorRate: errorRateChange > 0 ? 'increasing' : 'decreasing',
-      responseTime: responseTimeChange > 0 ? 'increasing' : 'decreasing',
-    },
-    recommendations,
-    modelPerformance: {
-      accuracy: 0.94 + Math.random() * 0.05,
-      precision: 0.92 + Math.random() * 0.04,
-      recall: 0.90 + Math.random() * 0.06,
-      f1Score: 0.91 + Math.random() * 0.05,
-      latency: 95 + Math.random() * 20,
-      throughput: 800 + Math.random() * 200,
-      mapData: [
-        { key: 'textAnalysis', value: 0.95 + Math.random() * 0.04 },
-        { key: 'imageClassification', value: 0.92 + Math.random() * 0.05 },
-        { key: 'sentimentAnalysis', value: 0.89 + Math.random() * 0.06 }
-      ]
-    },
-    operationalMetrics: {
-      totalRequests: Math.floor(1200000 + Math.random() * 200000),
-      successfulRequests: Math.floor(1180000 + Math.random() * 190000),
-      failedRequests: Math.floor(10000 + Math.random() * 5000),
-      averageResponseTime: responseTimeMs,
-      p95ResponseTime: responseTimeMs * 1.5,
-      p99ResponseTime: responseTimeMs * 2.2,
-      requestsPerMinute: Math.floor(requestsPerSecond * 60),
-      errorRate: errorRate,
-      activeConnections: Math.floor(200 + Math.random() * 100),
-      totalOperations: Math.floor(5000000 + Math.random() * 1000000),
-      operationsChange: operationsChange,
-      averageAccuracy: 0.94 + Math.random() * 0.05,
-      accuracyChange: accuracyChange,
-      responseTimeChange: responseTimeChange,
-      errorRateChange: errorRateChange,
-    },
-    usageMetrics: {
-      dailyActiveUsers: Math.floor(5000 + Math.random() * 1000),
-      monthlyActiveUsers: Math.floor(50000 + Math.random() * 10000),
-      totalUsers: Math.floor(100000 + Math.random() * 20000),
-      sessionsPerUser: 3 + Math.random() * 2,
-      averageSessionDuration: 600 + Math.random() * 300,
-      retentionRate: 0.7 + Math.random() * 0.2,
-      serviceTypeDistribution: [
-        { name: 'Text Processing', value: 45 + Math.random() * 10 },
-        { name: 'Image Analysis', value: 30 + Math.random() * 10 },
-        { name: 'Voice Processing', value: 25 + Math.random() * 10 }
-      ],
-      resourceAllocation: [
-        { name: 'Language Models', value: 40 + Math.random() * 10 },
-        { name: 'Vision Models', value: 35 + Math.random() * 10 },
-        { name: 'Infrastructure', value: 25 + Math.random() * 5 }
-      ],
-      dailyUsageTrend: usageTrend
-    },
-    advancedMetrics: {
-      resourceUtilization: 0.65 + Math.random() * 0.2,
-      efficientUseScore: 0.75 + Math.random() * 0.15,
-      loadBalancingEfficiency: 0.8 + Math.random() * 0.15,
-      cachingEffectiveness: 0.7 + Math.random() * 0.2,
-      algorithmicEfficiency: 0.85 + Math.random() * 0.1,
-      mapData: [
-        { key: 'modelSize', value: 2.4 + Math.random() * 0.4 },
-        { key: 'inferenceTime', value: 45 + Math.random() * 10 },
-        { key: 'memoryFootprint', value: 1.8 + Math.random() * 0.3 }
-      ]
-    },
-    correlationMatrix: {
-      labels: ['Response Time', 'Error Rate', 'User Load', 'CPU Usage'],
-      values: [
-        [1.0, 0.4, 0.7, 0.8],
-        [0.4, 1.0, 0.3, 0.5],
-        [0.7, 0.3, 1.0, 0.9],
-        [0.8, 0.5, 0.9, 1.0]
-      ],
-      maxCorrelation: 0.9,
-      minCorrelation: 0.3,
-      averageCorrelation: 0.6,
-      metricsList: [
-        { name: 'Response/CPU', value: 0.8 },
-        { name: 'Error/User', value: 0.3 },
-        { name: 'Load/Response', value: 0.7 }
-      ]
-    },
+    serviceMetrics: generateServiceMetrics(),
+    systemMetrics: generateSystemMetrics(),
+    anomalies: generateAnomalies(),
+    trends: generateTrends(),
+    recommendations: generateRecommendations(),
+    modelPerformance: generateModelPerformance(),
+    operationalMetrics: generateOperationalMetrics(),
+    usageMetrics: generateUsageMetrics(),
+    advancedMetrics: generateAdvancedMetrics(),
+    correlationMatrix: generateCorrelationMatrix(),
     performanceForecast
   };
+}
+
+/**
+ * Generate mock service metrics
+ */
+function generateServiceMetrics() {
+  const serviceTypes = ['processor', 'analyzer', 'reasoner', 'memory', 'interface'];
+  const statuses = ['active', 'active', 'active', 'maintenance', 'inactive'];
+  
+  return Array(5).fill(null).map((_, i) => ({
+    id: `svc-${i + 1}`,
+    name: `Neural ${serviceTypes[i % serviceTypes.length]} ${i + 1}`,
+    type: serviceTypes[i % serviceTypes.length],
+    status: statuses[i % statuses.length] as 'active' | 'inactive' | 'maintenance',
+    metrics: {
+      load: Math.random() * 100,
+      latency: Math.round(Math.random() * 100 + 10),
+      errorRate: Math.random() * 2,
+      throughput: Math.round(Math.random() * 1000 + 100),
+    },
+    enabled: Math.random() > 0.1,
+    lastActivity: new Date(Date.now() - Math.random() * 3600000).toISOString()
+  }));
+}
+
+/**
+ * Generate mock system metrics
+ */
+function generateSystemMetrics() {
+  return {
+    cpuUtilization: Math.random() * 90 + 10,
+    memoryUtilization: Math.random() * 85 + 15,
+    requestsPerSecond: Math.round(Math.random() * 500 + 50),
+    responseTimeMs: Math.round(Math.random() * 200 + 30),
+    errorRate: Math.random() * 1.5,
+  };
+}
+
+/**
+ * Generate mock anomalies
+ */
+function generateAnomalies() {
+  const types = ['latency_spike', 'error_rate_increase', 'memory_leak', 'request_surge'];
+  const severityLevels: Array<'low' | 'medium' | 'high'> = ['low', 'medium', 'high'];
+  const now = new Date();
+  
+  // Generate between 0 and 3 anomalies
+  const count = Math.floor(Math.random() * 3);
+  
+  return Array(count).fill(null).map((_, i) => ({
+    id: `anomaly-${i + 1}`,
+    type: types[Math.floor(Math.random() * types.length)],
+    severity: severityLevels[Math.floor(Math.random() * severityLevels.length)],
+    description: `Detected unusual pattern in neural processing subsystem ${i + 1}`,
+    timestamp: new Date(now.getTime() - Math.random() * 86400000).toISOString(),
+    relatedComponentId: `svc-${Math.floor(Math.random() * 5) + 1}`
+  }));
+}
+
+/**
+ * Generate mock trends
+ */
+function generateTrends() {
+  return {
+    requestVolume: Math.random() > 0.5 ? 'increasing' : 'stable',
+    errorRate: Math.random() > 0.7 ? 'increasing' : 'stable',
+    responseTime: Math.random() > 0.6 ? 'stable' : 'decreasing',
+  };
+}
+
+/**
+ * Generate mock recommendations
+ */
+function generateRecommendations() {
+  const possibleRecommendations = [
+    'Optimize neural memory allocation for improved latency',
+    'Scale cognitive processing units during peak hours',
+    'Update connection weights in reasoning module',
+    'Implement error recovery mechanisms in analyzer service',
+    'Increase caching for frequently accessed memory patterns',
+    'Reduce batch size for real-time processing jobs',
+    'Implement circuit breakers for unstable downstream services',
+    'Upgrade to latest neural processing model',
+    'Adjust learning rate for better convergence',
+    'Implement Blue-Green deployment for zero-downtime updates',
+    'Consider A/B testing for new processing algorithm'
+  ];
+  
+  // Select 2-5 random recommendations
+  const count = Math.floor(Math.random() * 3) + 2;
+  const recommendations = [];
+  
+  for (let i = 0; i < count; i++) {
+    const index = Math.floor(Math.random() * possibleRecommendations.length);
+    recommendations.push(possibleRecommendations[index]);
+    possibleRecommendations.splice(index, 1);
+  }
+  
+  return recommendations;
+}
+
+/**
+ * Generate mock model performance metrics
+ */
+function generateModelPerformance() {
+  return {
+    accuracy: Math.random() * 0.2 + 0.8, // 80-100%
+    precision: Math.random() * 0.25 + 0.75, // 75-100%
+    recall: Math.random() * 0.3 + 0.7, // 70-100%
+    f1Score: Math.random() * 0.25 + 0.75, // 75-100%
+    latency: Math.random() * 100 + 20, // 20-120ms
+    throughput: Math.random() * 1000 + 500, // 500-1500 req/sec
+    mapData: [
+      { key: 'BLEU Score', value: Math.random() * 30 + 20 },
+      { key: 'ROUGE Score', value: Math.random() * 40 + 30 },
+      { key: 'Perplexity', value: Math.random() * 10 + 5 },
+      { key: 'Cross-Entropy Loss', value: Math.random() * 0.5 + 0.1 }
+    ]
+  };
+}
+
+/**
+ * Generate mock operational metrics
+ */
+function generateOperationalMetrics() {
+  return {
+    totalRequests: Math.round(Math.random() * 100000 + 50000),
+    successfulRequests: Math.round(Math.random() * 95000 + 45000),
+    failedRequests: Math.round(Math.random() * 5000),
+    averageResponseTime: Math.random() * 100 + 50,
+    p95ResponseTime: Math.random() * 200 + 100,
+    p99ResponseTime: Math.random() * 300 + 200,
+    requestsPerMinute: Math.round(Math.random() * 1000 + 500),
+    errorRate: Math.random() * 2,
+    activeConnections: Math.round(Math.random() * 100 + 50),
+    totalOperations: Math.round(Math.random() * 500000 + 100000),
+    operationsChange: Math.round(Math.random() * 20 - 5),
+    averageAccuracy: Math.random() * 0.2 + 0.8,
+    accuracyChange: (Math.random() * 4 - 2).toFixed(2),
+    responseTimeChange: (Math.random() * 10 - 5).toFixed(2),
+    errorRateChange: (Math.random() * 0.4 - 0.2).toFixed(2)
+  };
+}
+
+/**
+ * Generate mock usage metrics
+ */
+function generateUsageMetrics() {
+  const now = new Date();
+  const dailyUsageTrend = Array(14).fill(null).map((_, i) => {
+    const date = new Date(now);
+    date.setDate(date.getDate() - (13 - i));
+    
+    return {
+      date: format(date, 'yyyy-MM-dd'),
+      value: Math.round(Math.random() * 10000 + 5000 + i * 200 + Math.sin(i) * 1000)
+    };
+  });
+  
+  return {
+    dailyActiveUsers: Math.round(Math.random() * 50000 + 10000),
+    monthlyActiveUsers: Math.round(Math.random() * 200000 + 50000),
+    totalUsers: Math.round(Math.random() * 1000000 + 500000),
+    sessionsPerUser: Math.random() * 5 + 1,
+    averageSessionDuration: Math.round(Math.random() * 600 + 120),
+    retentionRate: Math.random() * 0.4 + 0.6,
+    serviceTypeDistribution: [
+      { name: 'Cognitive', value: Math.random() * 100 },
+      { name: 'Analytic', value: Math.random() * 100 },
+      { name: 'Generative', value: Math.random() * 100 },
+      { name: 'Predictive', value: Math.random() * 100 }
+    ],
+    resourceAllocation: [
+      { name: 'Memory', value: Math.random() * 100 },
+      { name: 'Processing', value: Math.random() * 100 },
+      { name: 'Storage', value: Math.random() * 100 },
+      { name: 'Bandwidth', value: Math.random() * 100 }
+    ],
+    dailyUsageTrend
+  };
+}
+
+/**
+ * Generate mock advanced metrics
+ */
+function generateAdvancedMetrics() {
+  return {
+    resourceUtilization: Math.random() * 0.3 + 0.7,
+    efficientUseScore: Math.random() * 20 + 80,
+    loadBalancingEfficiency: Math.random() * 0.3 + 0.7,
+    cachingEffectiveness: Math.random() * 0.4 + 0.6,
+    algorithmicEfficiency: Math.random() * 0.3 + 0.7,
+    mapData: [
+      { key: 'Model Latency', value: Math.random() * 100 + 50 },
+      { key: 'Inference Cost', value: Math.random() * 0.1 + 0.01 },
+      { key: 'Token Efficiency', value: Math.random() * 0.5 + 0.5 },
+      { key: 'Energy Efficiency', value: Math.random() * 0.7 + 0.3 }
+    ]
+  };
+}
+
+/**
+ * Generate mock correlation matrix
+ */
+function generateCorrelationMatrix() {
+  const labels = ['CPU', 'Memory', 'Latency', 'ErrorRate', 'Throughput'];
+  const n = labels.length;
+  
+  // Create correlation matrix (symmetric)
+  const values: number[][] = [];
+  for (let i = 0; i < n; i++) {
+    values[i] = [];
+    for (let j = 0; j < n; j++) {
+      if (i === j) {
+        values[i][j] = 1; // Diagonal is always 1 (perfect correlation)
+      } else if (j > i) {
+        values[i][j] = Math.round((Math.random() * 2 - 1) * 100) / 100; // Random between -1 and 1
+      } else {
+        values[i][j] = values[j][i]; // Make symmetric
+      }
+    }
+  }
+  
+  // Calculate stats
+  let sum = 0;
+  let count = 0;
+  let min = 1;
+  let max = -1;
+  
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      if (i !== j) {
+        const val = Math.abs(values[i][j]);
+        sum += val;
+        count++;
+        min = Math.min(min, val);
+        max = Math.max(max, val);
+      }
+    }
+  }
+  
+  return {
+    labels,
+    values,
+    maxCorrelation: max,
+    minCorrelation: min,
+    averageCorrelation: sum / count,
+    metricsList: labels.map(label => ({
+      name: label,
+      value: Math.random() * 100
+    }))
+  };
+}
+
+/**
+ * Generate performance forecast data
+ */
+export function generatePerformanceForecast(): PerformanceTrend[] {
+  const now = new Date();
+  const forecast: PerformanceTrend[] = [];
+  
+  // Generate data for the last 7 days plus next 7 days (forecast)
+  for (let i = -7; i < 8; i++) {
+    const date = i < 0 ? subDays(now, Math.abs(i)) : addDays(now, i);
+    
+    // Base values with some randomization
+    const baseLoad = i < 0 ? 5000 + Math.random() * 2000 : 5000 + i * 200 + Math.random() * 2000;
+    const baseResponseTime = i < 0 ? 80 + Math.random() * 40 : 80 + i * 2 + Math.random() * 40;
+    const baseErrorRate = i < 0 ? 0.01 + Math.random() * 0.005 : 0.01 + i * 0.001 + Math.random() * 0.005;
+    
+    // Add some sinusoidal variation to make it look more realistic
+    const dayFactor = Math.sin((i + 7) * 0.8) * 0.2;
+    
+    forecast.push({
+      date: format(date, 'yyyy-MM-dd'),
+      metrics: {
+        expectedLoad: Math.round(baseLoad * (1 + dayFactor)),
+        predictedResponseTime: Math.round(baseResponseTime * (1 + dayFactor * 0.5)),
+        predictedErrorRate: Number((baseErrorRate * (1 + dayFactor * 0.3)).toFixed(4)),
+        confidenceScore: Number((0.9 - Math.abs(i) * 0.03).toFixed(2))
+      }
+    });
+  }
+  
+  return forecast;
+}
+
+/**
+ * Generate hourly trend data for a specific metric
+ */
+export function generateHourlyTrendData(metricKey: string, days: number = 3): Array<{timestamp: string, value: number}> {
+  const now = new Date();
+  const data: Array<{timestamp: string, value: number}> = [];
+  
+  // Hours to go back: days * 24
+  const hoursToGenerate = days * 24;
+  
+  // Base values for different metrics
+  let baseValue: number;
+  let volatility: number;
+  let trend: number;
+  
+  switch(metricKey) {
+    case 'responseTime':
+      baseValue = 80;
+      volatility = 15;
+      trend = -0.01; // Slightly decreasing over time
+      break;
+    case 'accuracy':
+      baseValue = 97;
+      volatility = 1;
+      trend = 0.005; // Slightly increasing over time
+      break;
+    case 'errorRate':
+      baseValue = 1.5;
+      volatility = 0.5;
+      trend = -0.002; // Slightly decreasing over time
+      break;
+    case 'operations':
+      baseValue = 5000;
+      volatility = 1000;
+      trend = 0.5; // Increasing over time
+      break;
+    default:
+      baseValue = 100;
+      volatility = 20;
+      trend = 0;
+  }
+  
+  // Generate per-hour data with realistic patterns
+  for (let i = hoursToGenerate; i >= 0; i--) {
+    const hourTime = new Date(now.getTime() - i * 60 * 60 * 1000);
+    const hourOfDay = hourTime.getHours();
+    
+    // Daily pattern factors - busier during business hours
+    const timeOfDayFactor = hourOfDay >= 8 && hourOfDay <= 18 
+      ? 1 + Math.sin((hourOfDay - 8) * Math.PI / 10) * 0.3 // peak at mid-day
+      : 0.7 + Math.random() * 0.1; // quieter at night
+    
+    // Weekly pattern - quieter on weekends
+    const dayOfWeek = hourTime.getDay(); // 0 = Sunday, 6 = Saturday  
+    const weekendFactor = (dayOfWeek === 0 || dayOfWeek === 6) ? 0.7 : 1;
+    
+    // Trend factor - gradual change over time
+    const trendFactor = 1 + (hoursToGenerate - i) * trend / 100;
+    
+    // Random volatility
+    const randomFactor = 1 + (Math.random() - 0.5) * 0.1;
+    
+    // Calculate value with all factors
+    let value = baseValue * timeOfDayFactor * weekendFactor * trendFactor * randomFactor;
+    
+    // Add occasional spikes
+    if (Math.random() > 0.97) {
+      value *= 1.5;
+    }
+    
+    // Format timestamp
+    const timestamp = format(hourTime, "yyyy-MM-dd'T'HH:mm:ss");
+    
+    data.push({ timestamp, value });
+  }
+  
+  return data;
+}
+
+/**
+ * Generate daily trend data for a specific metric
+ */
+export function generateDailyTrendData(metricKey: string, days: number = 30): Array<{date: string, value: number}> {
+  const now = new Date();
+  const data: Array<{date: string, value: number}> = [];
+  
+  // Base values for different metrics
+  let baseValue: number;
+  let volatility: number;
+  let trend: number;
+  
+  switch(metricKey) {
+    case 'responseTime':
+      baseValue = 80;
+      volatility = 10;
+      trend = -0.05; // Slightly decreasing over time
+      break;
+    case 'accuracy':
+      baseValue = 97;
+      volatility = 0.5;
+      trend = 0.02; // Slightly increasing over time
+      break;
+    case 'errorRate':
+      baseValue = 1.5;
+      volatility = 0.3;
+      trend = -0.01; // Slightly decreasing over time
+      break;
+    case 'operations':
+      baseValue = 5000;
+      volatility = 500;
+      trend = 2; // Increasing over time
+      break;
+    default:
+      baseValue = 100;
+      volatility = 10;
+      trend = 0;
+  }
+  
+  // Generate data with weekly patterns
+  for (let i = days; i >= 0; i--) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+    
+    // Weekly pattern - quieter on weekends
+    const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+    const weekendFactor = (dayOfWeek === 0 || dayOfWeek === 6) ? 0.7 : 1;
+    
+    // Monthly pattern - busier at month start and end
+    const dayOfMonth = date.getDate();
+    const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    const monthFactor = (dayOfMonth <= 5 || dayOfMonth >= daysInMonth - 5) ? 1.2 : 1;
+    
+    // Trend factor - gradual change over time
+    const trendFactor = 1 + (days - i) * trend / 100;
+    
+    // Random volatility (lower than hourly data)
+    const randomFactor = 1 + (Math.random() - 0.5) * 0.05;
+    
+    // Calculate value with all factors
+    let value = baseValue * weekendFactor * monthFactor * trendFactor * randomFactor;
+    
+    // Format date
+    const dateString = format(date, 'yyyy-MM-dd');
+    
+    data.push({ date: dateString, value });
+  }
+  
+  return data;
 }
