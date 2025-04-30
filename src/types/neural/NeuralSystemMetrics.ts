@@ -1,74 +1,68 @@
 
+export interface NeuralSystemPerformance {
+  accuracy: number;
+  latency: number;
+  throughput?: number;
+  errorRate?: number;
+  confidence?: number;
+}
+
+export interface NeuralModelTraining {
+  epochs: number;
+  batchSize: number;
+  learningRate: number;
+  validationAccuracy: number;
+  trainLoss: number;
+  validationLoss: number;
+  datasetSize: number;
+  completedEpochs?: number;
+  timeElapsed?: number;
+}
+
 export interface NeuralModel {
   id: string;
   name: string;
   version: string;
-  specialization: string;
+  specialization: string | string[];
+  type: string;
+  capabilities: string[];
   size: number;
   precision: number;
-  performance: {
-    accuracy: number;
-    latency: number;
-    resourceUsage?: number;
-  };
-  type?: string;
-  status?: 'active' | 'inactive' | 'training' | 'error';
-  capabilities?: string[];
+  parameters?: Record<string, any>;
+  performance?: NeuralSystemPerformance;
+  training?: NeuralModelTraining;
+  status?: 'active' | 'training' | 'offline' | 'error';
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-export interface SystemHealthMetrics {
-  modelCount: number;
+export interface NeuralSystemMetrics {
+  cpuUsage: number;
+  memoryUsage: number;
+  gpuUsage?: number;
   activeConnections: number;
-  requestsPerMinute: number;
+  requestsPerSecond: number;
   averageResponseTime: number;
   errorRate: number;
   uptime: number;
-  models: NeuralModel[];
-  cpuUtilization: number;
-  memoryUtilization: number;
-  errorFrequency: number;
-  systemUptime: number;
-  networkLatency: number;
-  responseTime: number;
-  userSatisfactionScore: number;
-  algorithmEfficiency?: number;
-  dataPrecision?: number;
-  lastMaintenanceDate?: Date;
-  load?: number;
-  userEngagement?: number;
-  lastUpdated?: number;
+  lastUpdated: Date;
 }
 
-export interface NeuralSystemMetricsResult {
-  metrics: SystemHealthMetrics;
-  status: 'operational' | 'degraded' | 'error';
+export interface NeuralServiceStatus {
+  isOnline: boolean;
+  health: 'excellent' | 'good' | 'fair' | 'poor';
+  activeModels: number;
+  pendingRequests: number;
+  warnings: string[];
+  errors: string[];
+  latestHeartbeat: Date;
+}
+
+export interface NeuralSystemTimeSeries {
   timestamp: Date;
-  logs: any[];
-  performance: any;
-  refreshMetrics: () => void;
-  errorMessage: string | null;
-  isLoading: boolean;
-  isMonitoring: boolean;
-  startMonitoring: () => void;
-  stopMonitoring: () => void;
-}
-
-// Updated TrainingProgress with epoch and timeRemaining
-export interface TrainingProgress {
-  id: string;
-  modelId: string;
-  progress: number;
-  epoch: number;
-  accuracy: number;
-  loss: number;
-  timeRemaining: number;
-  status: 'training' | 'paused' | 'completed' | 'failed';
-  type?: string;
-  startTime?: Date;
-  currentEpoch?: number;
-  totalEpochs?: number;
-  targetAccuracy?: number;
-  estimatedCompletionTime?: Date;
+  cpuUsage: number;
+  memoryUsage: number;
+  requestCount: number;
+  errorCount: number;
+  avgResponseTime: number;
 }

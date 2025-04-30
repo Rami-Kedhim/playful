@@ -1,5 +1,5 @@
 
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersona } from '@/types/uberPersona';
 import { UberCoreSettings } from './types/uberCore.types';
 import { personaService } from './services/personaService';
 import { featuredService } from './services/featuredService';

@@ -1,116 +1,89 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FeaturedPersona } from '@/types/home';
-import { Check, Star, MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { UberPersona } from '@/types/UberPersona';
 
 interface FeaturedPersonasProps {
-  personas: FeaturedPersona[];
-  title?: string;
-  subtitle?: string;
+  personas: UberPersona[];
 }
 
-const FeaturedPersonas: React.FC<FeaturedPersonasProps> = ({ 
-  personas, 
-  title = "Featured Personas",
-  subtitle = "Discover our verified UberPersonas"
-}) => {
-  if (!personas || personas.length === 0) {
-    return (
-      <div className="py-12 text-center text-muted-foreground">
-        <p>No featured personas available at the moment</p>
-      </div>
+const FeaturedPersonas: React.FC<FeaturedPersonasProps> = ({ personas = [] }) => {
+  const getStatusIndicator = (persona: UberPersona) => {
+    return persona.isOnline ? (
+      <span className="flex items-center">
+        <span className="h-2 w-2 rounded-full bg-green-500 mr-1.5"></span>
+        Online
+      </span>
+    ) : (
+      <span className="flex items-center">
+        <span className="h-2 w-2 rounded-full bg-gray-400 mr-1.5"></span>
+        Offline
+      </span>
     );
-  }
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'escort':
+        return 'Escort';
+      case 'creator':
+        return 'Content Creator';
+      case 'livecam':
+        return 'Live Cam';
+      case 'ai':
+        return 'AI Companion';
+      default:
+        return type.charAt(0).toUpperCase() + type.slice(1);
+    }
+  };
 
   return (
-    <section className="py-16">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-3">{title}</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">{subtitle}</p>
-        </div>
+    <section className="py-12">
+      <div className="container">
+        <h2 className="text-3xl font-bold mb-8">Featured Personas</h2>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {personas.map((persona) => (
-            <Link 
-              to={`/persona/${persona.id}`} 
-              key={persona.id}
-              className="block hover:scale-[1.02] transition-transform duration-200"
-            >
-              <Card className="overflow-hidden h-full bg-card/50 backdrop-blur-sm border-white/10">
-                <div className="relative aspect-[3/4] bg-gradient-to-b from-transparent to-background/50">
-                  {persona.avatarUrl ? (
-                    <img 
-                      src={persona.avatarUrl} 
-                      alt={persona.displayName} 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                      <span className="text-4xl font-bold opacity-50">
-                        {persona.displayName.charAt(0)}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {/* Status indicator */}
-                  {persona.isOnline !== undefined && (
-                    <div className="absolute top-3 right-3">
-                      <div className={`w-3 h-3 rounded-full ${persona.isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                    </div>
-                  )}
-                  
-                  {/* Type badge */}
-                  <div className="absolute top-3 left-3">
-                    <Badge variant="secondary" className="capitalize">
-                      {persona.type}
+            <Card key={persona.id} className="overflow-hidden">
+              <div className="relative h-48 overflow-hidden">
+                <img 
+                  src={persona.avatarUrl || 'https://via.placeholder.com/400x600'} 
+                  alt={persona.name} 
+                  className="object-cover w-full h-full"
+                />
+                <div className="absolute top-3 right-3">
+                  <Badge className="bg-black/60 hover:bg-black/70">
+                    {getTypeLabel(persona.type)}
+                  </Badge>
+                </div>
+                {persona.isVerified && (
+                  <div className="absolute bottom-3 left-3">
+                    <Badge variant="secondary" className="bg-white text-black">
+                      Verified
                     </Badge>
                   </div>
+                )}
+              </div>
+              
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl">{persona.displayName || persona.name}</CardTitle>
+                <CardDescription className="flex justify-between">
+                  <span>{persona.location || 'Unknown Location'}</span>
+                  {getStatusIndicator(persona)}
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent>
+                <div className="flex flex-wrap gap-1.5">
+                  {persona.tags?.slice(0, 3).map((tag, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
                 </div>
-                
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h3 className="font-medium text-lg flex items-center">
-                        {persona.displayName}
-                        {persona.isVerified && (
-                          <Check className="h-4 w-4 ml-1 text-blue-500" />
-                        )}
-                      </h3>
-                      {persona.location && (
-                        <p className="text-sm text-muted-foreground flex items-center">
-                          <MapPin className="h-3 w-3 mr-1" /> {persona.location}
-                        </p>
-                      )}
-                    </div>
-                    {/* Add a simple rating display if we have enough data */}
-                    <div className="flex items-center">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium ml-1">4.9</span>
-                    </div>
-                  </div>
-                  
-                  {/* Tags */}
-                  {persona.tags && persona.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-3">
-                      {persona.tags.slice(0, 3).map(tag => (
-                        <Badge key={tag} variant="outline" className="text-xs py-0">
-                          {tag}
-                        </Badge>
-                      ))}
-                      {persona.tags.length > 3 && (
-                        <Badge variant="outline" className="text-xs py-0">
-                          +{persona.tags.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </Link>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>

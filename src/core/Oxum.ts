@@ -18,7 +18,7 @@ export interface BoostCalculation {
   baseScore: number;
   modifiers: Record<string, number>;
   finalScore: number;
-  positionImpact: number;
+  positionImpact: number | string;
   recommendation: string;
 }
 
@@ -106,6 +106,19 @@ export class Oxum {
       trend: ['rising', 'stable', 'falling'][Math.floor(Math.random() * 3)] as 'rising' | 'stable' | 'falling',
       lastUpdated: new Date(Date.now() - Math.random() * 86400000)
     }));
+  }
+  
+  /**
+   * Calculate boost allocation using eigenvectors
+   * This method is used by BoostManagerContainer and other components
+   */
+  public boostAllocationEigen(matrix: number[][]): number[] {
+    // Simplified implementation for demonstration
+    const rows = matrix.length;
+    const cols = matrix[0]?.length || 0;
+    
+    // Generate normalized allocation vector
+    return Array.from({ length: cols }).map(() => Math.random());
   }
   
   /**

@@ -32,14 +32,14 @@ export const personaSystem = {
    */
   boostPersona: async (personaId: string, boostLevel: number): Promise<boolean> => {
     try {
-      const sessionValidation = orus.validateSession();
+      const sessionValidation = orus.validateSession(personaId);
       if (!sessionValidation.isValid) {
         console.error('Cannot boost: Session validation failed');
         return false;
       }
       
       // Use Oxum for boosting logic
-      const boostResult = oxum.applyBoost(personaId, boostLevel, 24);
+      const boostResult = await oxum.applyBoost(personaId, boostLevel);
       console.log('Boost applied:', boostResult);
       return true;
     } catch (error) {

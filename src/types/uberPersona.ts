@@ -5,6 +5,20 @@
 
 export type PersonaSource = 'ai_generated' | 'scraped' | 'manual';
 
+export interface AvailabilityScheduleSlot {
+  start: string;
+  end: string;
+}
+
+export interface AvailabilityScheduleDay {
+  available: boolean;
+  slots?: AvailabilityScheduleSlot[];
+}
+
+export interface AvailabilitySchedule {
+  [day: string]: AvailabilityScheduleDay;
+}
+
 export interface UberPersona {
   id: string;
   name: string;
@@ -17,7 +31,7 @@ export interface UberPersona {
   lastActive?: Date;
   isPremium?: boolean;
   availability?: {
-    schedule?: Record<string, string[]>;
+    schedule?: AvailabilitySchedule;
     nextAvailable?: string;
   };
   tags?: string[];

@@ -1,12 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { useBoostManager } from '@/hooks/boost/useBoostManager';
 import { Card } from '@/components/ui/card';
 import BoostDialogContainer from '@/components/boost/BoostDialogContainer';
 import { useAuth } from '@/hooks/auth';
 import { useToast } from '@/hooks/use-toast';
 import { oxum } from '@/core/Oxum';
-import { useBoostAdapters } from '@/hooks/boost/useBoostAdapters';
 
 const BoostManagerContainer = ({ profileId }: { profileId?: string }) => {
   const { user } = useAuth();
@@ -14,11 +12,6 @@ const BoostManagerContainer = ({ profileId }: { profileId?: string }) => {
   const [loading, setLoading] = useState(false);
   const [activeProfileId, setActiveProfileId] = useState<string>('');
   
-  const {
-    formatBoostDuration,
-    adaptFormatBoostDuration
-  } = useBoostAdapters(profileId || user?.id || '');
-
   const userId = profileId || user?.id;
 
   useEffect(() => {
@@ -49,14 +42,6 @@ const BoostManagerContainer = ({ profileId }: { profileId?: string }) => {
     }
 
     return true;
-  };
-
-  // Apply our own custom formatter
-  const formatDuration = (duration: string) => {
-    const [hours, minutes] = duration.split(':').map(Number);
-    return hours >= 24 ? 
-      `${Math.floor(hours / 24)} days` : 
-      `${hours} hours`;
   };
 
   return (

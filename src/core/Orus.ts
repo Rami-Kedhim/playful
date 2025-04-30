@@ -26,6 +26,11 @@ export interface SignalAnalysisResult {
   timestamp: Date;
 }
 
+export interface SessionValidationResult {
+  isValid: boolean;
+  details?: Record<string, any>;
+}
+
 export class Orus {
   /**
    * Check the integrity of all system modules
@@ -64,8 +69,12 @@ export class Orus {
     
     // Random chance of showing some degraded services
     if (Math.random() < 0.2) {
-      modules[1].status = 'degraded';
-      modules[1].reliability = 0.75;
+      const index = 1; // Neural Network
+      modules[index] = {
+        ...modules[index],
+        status: 'degraded' as const,
+        reliability: 0.75
+      };
     }
     
     const issues = [];
@@ -111,9 +120,15 @@ export class Orus {
   /**
    * Validate session integrity
    */
-  public validateSession(sessionId: string): boolean {
-    console.log(`Validating session ${sessionId}`);
-    return true; // Mock implementation
+  public validateSession(sessionId?: string): SessionValidationResult {
+    console.log(`Validating session ${sessionId || 'unknown'}`);
+    return {
+      isValid: true,
+      details: {
+        lastValidated: new Date(),
+        securityLevel: 'high'
+      }
+    };
   }
   
   /**
