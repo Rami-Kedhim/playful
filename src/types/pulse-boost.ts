@@ -8,6 +8,7 @@ export interface EnhancedBoostStatus {
   remainingTime?: string;
   visibilityScore?: number;
   packageName?: string;
+  expiresAt?: Date; // Added this property
 }
 
 export interface PulseBoost {
@@ -23,4 +24,21 @@ export interface PulseBoost {
   features: string[];
   visibility_increase: number;
   price: number;
+}
+
+// Add missing types that were referenced in errors
+export interface ActiveBoost {
+  id: string;
+  profileId: string;
+  packageId: string;
+  startTime: Date;
+  endTime: Date;
+  status: 'active' | 'expired' | 'cancelled';
+}
+
+export enum UserRole {
+  USER = 'user',
+  CREATOR = 'creator',
+  ADMIN = 'admin',
+  MODERATOR = 'moderator'
 }

@@ -1,6 +1,5 @@
-// Orus - Signal Processing and System Integrity
 
-import { SystemIntegrityResult, SignalAnalysisResult, SessionValidationResult } from './types/orus.types';
+// Orus - Signal Processing and System Integrity
 
 export interface SystemIntegrityResult {
   overallStatus: 'healthy' | 'warning' | 'critical';
@@ -142,5 +141,3 @@ export class Orus {
 
 // Export singleton instance
 export const orus = new Orus();
-
-export type { SystemIntegrityResult, SignalAnalysisResult, SessionValidationResult };

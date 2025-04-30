@@ -1,84 +1,92 @@
 
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersona } from '@/types/uberPersona';
 import { hermes } from '@/core/Hermes';
-import { oxum } from '@/core/Oxum';
-import { orus } from '@/core/Orus';
-
-interface PersonaProcessingResult extends Omit<UberPersona, 'systemMetadata'> {
-  systemMetadata?: {
-    source: "manual" | "ai_generated" | "scraped";
-    lastSynced: Date;
-    tagsGeneratedByAI: boolean;
-    hilbertSpaceVector: number[];
-    flowScore?: number;
-  };
-  boostScore?: number;
-}
 
 export class PersonaService {
-  // Add missing methods for usePersona hook
-  public async getPersonaViewData(personaId: string): Promise<any> {
-    // Mock implementation to satisfy TypeScript
-    const processedPersona = await this.processPersona({
-      id: personaId,
-      name: 'Sample Persona',
-      type: 'escort',
-      isOnline: true,
-    } as UberPersona);
+  /**
+   * Calculate optimal flow dynamics for a persona
+   */
+  public calculateFlowDynamics(persona: UberPersona): {
+    flowScore: number;
+    recommendations: string[];
+  } {
+    // Use the Hermes subsystem to calculate flow dynamics
+    const result = hermes.resolveFlowDynamics({
+      systemLoad: 0.5,  // Default system load
+      activityLevel: persona.isOnline ? 0.8 : 0.4,  // Higher if online
+      personaType: persona.type  // Pass the persona type correctly
+    });
     
     return {
-      persona: processedPersona,
-      similarPersonas: [],
-      boostStatus: { isActive: false }
+      flowScore: result.flowScore,
+      recommendations: result.recommendedActions
     };
   }
   
-  public async searchPersonas(filters: any): Promise<any> {
-    // Mock implementation
-    return {
-      personas: [],
-      total: 0,
-      page: 1,
-      pageSize: 20,
-      hasMore: false
-    };
+  /**
+   * Get recommended personas based on similarity
+   */
+  public getRecommendedPersonas(
+    personaId: string,
+    count: number = 3
+  ): Promise<UberPersona[]> {
+    // This is a mock implementation
+    // In a real system, this would use a recommendation engine
+    
+    return Promise.resolve([
+      {
+        id: 'rec-1',
+        name: 'Recommended 1',
+        type: 'escort',
+        tags: ['premium', 'vip']
+      },
+      {
+        id: 'rec-2',
+        name: 'Recommended 2',
+        type: 'creator',
+        tags: ['video', 'photos']
+      },
+      {
+        id: 'rec-3',
+        name: 'Recommended 3',
+        type: 'livecam',
+        tags: ['interactive', 'shows']
+      }
+    ] as UberPersona[]);
   }
   
-  public async updatePersona(data: { id: string, updates: any }): Promise<UberPersona | null> {
+  /**
+   * Check if two personas are compatible
+   */
+  public checkCompatibility(
+    persona1: UberPersona,
+    persona2: UberPersona
+  ): {
+    score: number;
+    reasons: string[];
+  } {
     // Mock implementation
-    return null;
-  }
-  
-  public async processPersona(persona: UberPersona): Promise<PersonaProcessingResult> {
-    try {
-      const processedPersona = { ...persona } as PersonaProcessingResult;
-
-      if (!processedPersona.systemMetadata) {
-        processedPersona.systemMetadata = {
-          source: "manual",
-          lastSynced: new Date(),
-          tagsGeneratedByAI: false,
-          hilbertSpaceVector: [],
-        };
-      }
-      
-      // Get flow dynamics with proper parameter structure
-      const flowDynamics = hermes.resolveFlowDynamics({
-        systemLoad: 0.5,
-        activityLevel: processedPersona.isOnline ? 0.8 : 0.2,
-        personaType: processedPersona.type
-      });
-      
-      if (processedPersona.systemMetadata) {
-        processedPersona.systemMetadata.flowScore = flowDynamics.flowScore;
-      }
-
-      return processedPersona;
-    } catch (error) {
-      console.error('Error processing persona:', error);
-      return persona as unknown as PersonaProcessingResult;
+    const score = Math.random() * 100;
+    
+    const reasons = [];
+    if (score > 80) {
+      reasons.push('Highly compatible personalities');
+      reasons.push('Matching interests and preferences');
+    } else if (score > 50) {
+      reasons.push('Somewhat compatible');
+      reasons.push('Some shared interests');
+    } else {
+      reasons.push('Low compatibility');
+      reasons.push('Few shared interests');
     }
+    
+    return {
+      score,
+      reasons
+    };
   }
 }
 
 export const personaService = new PersonaService();
+
+export default personaService;

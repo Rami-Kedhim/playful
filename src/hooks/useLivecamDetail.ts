@@ -1,134 +1,171 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { LivecamModel } from '@/types/livecam';
+import { useState, useEffect } from 'react';
 import { oxum } from '@/core/Oxum';
 
-export const useLivecamDetail = (livecamId: string) => {
+interface LivecamModel {
+  id: string;
+  name: string;
+  displayName: string;
+  avatar: string;
+  tags: string[];
+  categories: string[];
+  type: string;
+  rating: number;
+  viewCount: number;
+  description: string;
+  isOnline: boolean;
+  pricePerMinute: number;
+  country: string;
+  languages: string[];
+  category?: string; // Legacy field
+}
+
+interface LivecamStats {
+  viewers: number;
+  likes: number;
+  followCount: number;
+  uptime: number; // in minutes
+}
+
+interface LivecamBoostStatus {
+  isActive: boolean;
+  remainingTime?: number;
+  boostLevel?: number;
+  expiration?: Date;
+}
+
+export function useLivecamDetail(livecamId: string) {
   const [livecam, setLivecam] = useState<LivecamModel | null>(null);
+  const [stats, setStats] = useState<LivecamStats | null>(null);
+  const [boostStatus, setBoostStatus] = useState<LivecamBoostStatus>({ isActive: false });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [relatedLivecams, setRelatedLivecams] = useState<LivecamModel[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchLivecamDetail = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Mock API request with a delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      // Generate mock data for the livecam
-      const mockLivecam: LivecamModel = {
-        id: livecamId,
-        username: `user_${livecamId}`,
-        name: `Livecam Model ${livecamId}`,
-        displayName: `Model ${livecamId}`,
-        imageUrl: `https://source.unsplash.com/random/600x900?portrait&sig=${livecamId}`,
-        thumbnailUrl: `https://source.unsplash.com/random/300x450?portrait&sig=${livecamId}`,
-        isLive: Math.random() > 0.3,
-        isStreaming: Math.random() > 0.3,
-        viewerCount: Math.floor(Math.random() * 1000),
-        country: 'United States',
-        region: 'US',
-        language: 'English',
-        tags: ['Amateur', 'Couples', 'Fetish'],
-        category: 'Amateur',
-        categories: ['Amateur', 'Couples'],
-        rating: Math.floor(Math.random() * 5) + 1,
-        age: Math.floor(Math.random() * 10) + 20,
-        description: 'This is a sample livecam model description that would typically contain information about the model, their interests, and what viewers can expect during their streams.',
-        streamUrl: 'https://example.com/stream',
-        previewVideoUrl: 'https://example.com/preview.mp4'
-      };
-
-      setLivecam(mockLivecam);
-      
-      // Also fetch related livecams while we're at it
-      fetchRelatedLivecams(mockLivecam);
-      
-      return mockLivecam;
-    } catch (err) {
-      const caughtError = err instanceof Error ? err : new Error('Failed to fetch livecam detail');
-      setError(caughtError);
-      console.error('Error fetching livecam detail:', caughtError);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [livecamId]);
-
-  const fetchRelatedLivecams = useCallback(async (currentLivecam: LivecamModel) => {
-    try {
-      // Mock API request with a delay
-      await new Promise(resolve => setTimeout(resolve, 600));
-
-      // Generate mock data for related livecams
-      const mockRelated: LivecamModel[] = Array.from({ length: 4 }, (_, index) => {
-        const id = `related-${index}`;
-        const isLive = Math.random() > 0.3;
-        
-        return {
-          id,
-          username: `user${index}`,
-          name: `Related Model ${index}`,
-          displayName: `Related ${index}`,
-          imageUrl: `https://source.unsplash.com/random/300x300?portrait&sig=${id}`,
-          thumbnailUrl: `https://source.unsplash.com/random/300x300?portrait&sig=${id}`,
-          isLive,
-          isStreaming: isLive,
-          viewerCount: isLive ? Math.floor(Math.random() * 500) : 0,
-          region: currentLivecam.region,
-          language: currentLivecam.language,
-          tags: [...currentLivecam.tags].sort(() => Math.random() - 0.5).slice(0, 2),
-          category: currentLivecam.category,
-          rating: Math.floor(Math.random() * 5) + 1
-        };
-      });
-
-      // Apply Oxum's boost allocation to order the related livecams
-      try {
-        const boostMatrix = mockRelated.map(livecam => [
-          Math.random() * 5,  // Random boost score 
-          livecam.viewerCount / 100, 
-          livecam.rating / 5
-        ]);
-        
-        const boostAllocation = oxum.boostAllocationEigen(boostMatrix);
-        
-        // Apply boost allocation to sort the related livecams
-        const sortedRelated = mockRelated
-          .map((livecam, i) => ({
-            ...livecam,
-            boostScore: boostAllocation[i] * 10 // Scale from 0-1 to 0-10
-          }))
-          .sort((a, b) => (b.boostScore || 0) - (a.boostScore || 0));
-
-        setRelatedLivecams(sortedRelated);
-      } catch (error) {
-        console.error("Error applying boost allocation:", error);
-        // Fall back to unsorted related livecams
-        setRelatedLivecams(mockRelated);
-      }
-    } catch (err) {
-      console.error('Error fetching related livecams:', err);
-      setRelatedLivecams([]);
-    }
-  }, []);
-
-  // Load data on mount and when livecamId changes
   useEffect(() => {
-    if (livecamId) {
-      fetchLivecamDetail();
-    }
-  }, [livecamId, fetchLivecamDetail]);
+    const fetchLivecam = async () => {
+      if (!livecamId) {
+        setError('Livecam ID is required');
+        setLoading(false);
+        return;
+      }
 
+      try {
+        // In a real app, this would be an API call
+        // For now, we'll just simulate some data
+        
+        // Simulate a delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Mock data for a specific livecam
+        const mockLivecam: LivecamModel = {
+          id: livecamId,
+          name: livecamId === 'sophie123' ? 'Sophie Dreams' : 'Crystal Clear',
+          displayName: livecamId === 'sophie123' ? 'Sophie Dreams' : 'Crystal Clear',
+          avatar: `https://picsum.photos/seed/${livecamId}/200/200`,
+          tags: ['popular', 'featured', 'HD'],
+          categories: ['solo', 'dance', 'chat'],
+          type: 'premium',
+          rating: 4.8,
+          viewCount: 1245,
+          description: 'Experience the ultimate interactive live show with me. I love connecting with my viewers and making your fantasies come true.',
+          isOnline: true,
+          pricePerMinute: 2.5,
+          country: 'United States',
+          languages: ['English', 'Spanish'],
+          category: 'premium' // Legacy field
+        };
+        
+        const mockStats: LivecamStats = {
+          viewers: 127,
+          likes: 1843,
+          followCount: 12500,
+          uptime: 45 // minutes
+        };
+        
+        const mockBoostStatus: LivecamBoostStatus = {
+          isActive: livecamId === 'crystal456',
+          remainingTime: livecamId === 'crystal456' ? 10800 : undefined, // 3 hours in seconds
+          boostLevel: livecamId === 'crystal456' ? 2 : undefined,
+          expiration: livecamId === 'crystal456' ? new Date(Date.now() + 10800000) : undefined
+        };
+        
+        setLivecam(mockLivecam);
+        setStats(mockStats);
+        setBoostStatus(mockBoostStatus);
+      } catch (err: any) {
+        console.error('Error fetching livecam:', err);
+        setError(err.message || 'Failed to load livecam');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchLivecam();
+  }, [livecamId]);
+  
+  const boostLivecam = async (): Promise<boolean> => {
+    try {
+      // In a real app, this would be an API call
+      // For now, we'll just simulate a successful boost
+      
+      // Simulate a delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Use Oxum to calculate some boost scores
+      const matrix = [
+        [0.7, 0.2, 0.1],
+        [0.2, 0.6, 0.2],
+        [0.1, 0.2, 0.7]
+      ];
+      
+      // Correctly use the boostAllocationEigen method
+      const boostAllocation = oxum.boostAllocationEigen(matrix);
+      console.log('Boost allocation:', boostAllocation);
+      
+      // Update the local state
+      setBoostStatus({
+        isActive: true,
+        remainingTime: 86400, // 24 hours in seconds
+        boostLevel: 1,
+        expiration: new Date(Date.now() + 86400000)
+      });
+      
+      return true;
+    } catch (err) {
+      console.error('Error boosting livecam:', err);
+      return false;
+    }
+  };
+  
+  const cancelBoost = async (): Promise<boolean> => {
+    try {
+      // In a real app, this would be an API call
+      // For now, we'll just simulate a successful cancellation
+      
+      // Simulate a delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Update the local state
+      setBoostStatus({
+        isActive: false
+      });
+      
+      return true;
+    } catch (err) {
+      console.error('Error cancelling boost:', err);
+      return false;
+    }
+  };
+  
   return {
     livecam,
+    stats,
+    boostStatus,
     loading,
     error,
-    relatedLivecams,
-    refresh: fetchLivecamDetail
+    boostLivecam,
+    cancelBoost
   };
-};
+}
 
 export default useLivecamDetail;

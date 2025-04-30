@@ -26,7 +26,7 @@ const BoostManagerContainer = ({ profileId }: { profileId?: string }) => {
       description: "Your profile boost has been successfully applied!",
     });
 
-    // Connect to Oxum's boost allocation for real-time boost updates
+    // Define a matrix for boost allocation calculation
     const matrix = [
       [0.6, 0.2, 0.1],
       [0.3, 0.7, 0.4],
@@ -35,6 +35,7 @@ const BoostManagerContainer = ({ profileId }: { profileId?: string }) => {
 
     // Use Oxum's boost allocation algorithm
     try {
+      // Use the new boostAllocationEigen method instead
       const allocationVector = oxum.boostAllocationEigen(matrix);
       console.log("Boost allocation vector:", allocationVector);
     } catch (e) {
