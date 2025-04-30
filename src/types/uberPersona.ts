@@ -139,6 +139,9 @@ export interface UberPersona {
   boostStatus?: BoostStatus;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  profileImageUrl?: string;
+  galleryImages?: string[];
+  status?: string;
 }
 
 export interface NeuralModel {

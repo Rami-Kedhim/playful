@@ -1,35 +1,77 @@
 
-import { BoostStatus } from './boost';
-
-export interface PulseBoost {
+export interface BoostPackage {
   id: string;
   name: string;
-  description?: string;
-  durationMinutes?: number;
+  description: string;
+  price: number;
+  price_ubx: number;
   duration: string;
+  durationMinutes: number;
+  features: string[];
   visibility: string;
-  costUBX: number;
+  visibility_increase: number;
   color?: string;
   badgeColor?: string;
-  features: string[];
-  visibility_increase: number;
-  price: number;
 }
 
-export interface EnhancedBoostStatus extends BoostStatus {
-  activeBoostId?: string;
+export interface BoostPurchaseRequest {
+  profileId: string;
+  packageId: string;
 }
 
+export interface BoostPurchaseResult {
+  success: boolean;
+  boostId?: string;
+  error?: string | null;
+}
+
+export interface BoostAnalytics {
+  totalBoosts: number;
+  activeBoosts: number;
+  averageBoostScore: number;
+  boostHistory: Array<{
+    date: Date;
+    score: number;
+  }>;
+}
+
+export interface BoostHistory {
+  items: Array<{
+    id: string;
+    packageId: string;
+    startDate: Date;
+    endDate: Date;
+    price: number;
+    status: string;
+  }>;
+}
+
+// Add UserRole and UserRoleEnum types for authService
 export enum UserRoleEnum {
   ADMIN = 'admin',
   MODERATOR = 'moderator',
   USER = 'user',
-  CREATOR = 'creator'
+  GUEST = 'guest',
 }
 
-export type UserRole = {
+export interface UserRole {
   id: string;
   userId: string;
   role: UserRoleEnum;
   createdAt: Date;
-};
+}
+
+export interface PulseBoost {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  price_ubx: number;
+  duration: string;
+  durationMinutes: number;
+  features: string[];
+  visibility: string;
+  visibility_increase: number;
+  color?: string;
+  badgeColor?: string;
+}

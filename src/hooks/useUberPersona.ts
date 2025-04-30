@@ -27,7 +27,6 @@ export const useUberPersona = (personaId?: string) => {
           description: 'A longer description of the persona.',
           isActive: true,
           isVerified: true,
-          verified: true,
           rating: 4.5,
           profileImageUrl: `https://picsum.photos/id/${parseInt(personaId.slice(0, 5), 16) % 100}/200/300`,
           galleryImages: [
@@ -39,7 +38,7 @@ export const useUberPersona = (personaId?: string) => {
           updatedAt: new Date(),
           status: 'active',
           systemMetadata: {
-            source: 'ai_generated',
+            source: 'manual', // Changed from 'mock' to valid value
             tagsGeneratedByAI: false,
             hilbertSpaceVector: [],
             statusFlags: {
@@ -51,7 +50,7 @@ export const useUberPersona = (personaId?: string) => {
           },
           age: 25,
           gender: 'female',
-          location: 'New York, USA',  // Changed to string to match type definition
+          location: 'New York, USA', // Using string type for location
           languages: ['English', 'Spanish'],
           traits: ['Friendly', 'Outgoing', 'Creative'],
           stats: {

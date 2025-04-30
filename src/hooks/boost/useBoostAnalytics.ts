@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 
+// Create a consistent BoostAnalytics type
 export interface BoostAnalytics {
   impressions: {
     today: number;
@@ -35,6 +36,22 @@ export interface BoostAnalytics {
     withoutBoost: number;
     increase: number;
   };
+  // Optional fields for compatibility
+  views?: number;
+  conversions?: number;
+  timeActive?: number;
+  boostEfficiency?: number;
+  roi?: number;
+  ctr?: number;
+  conversionRate?: number;
+  averagePosition?: number;
+  totalSpent?: number;
+  lastUpdated?: Date | string;
+  dailyStats?: {
+    date: string;
+    impressions: number;
+    clicks: number;
+  }[];
 }
 
 export type AnalyticsData = BoostAnalytics;
