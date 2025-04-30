@@ -1,8 +1,8 @@
 
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-// Fix the import paths to use consistent casing
-import { authService } from '@/services/AuthService';
-import { userService } from '@/services/UserService';
+// Use a consistent import path for auth and user services
+import authService from '@/services/authService';
+import userService from '@/services/userService';
 import { UberPersona } from '@/types/uberPersona';
 
 // Create the context
@@ -41,8 +41,8 @@ export const UberEcosystemProvider: React.FC<UberEcosystemProviderProps> = ({
         const token = localStorage.getItem('auth_token');
         
         if (token) {
-          const valid = await validateToken(token);
-          if (valid) {
+          const isValid = await validateToken(token);
+          if (isValid) {
             // If token is valid, get the user data
             const userData = { id: 'user-123', name: 'Test User' }; // Mock user data
             setCurrentUser(userData);
@@ -72,12 +72,13 @@ export const UberEcosystemProvider: React.FC<UberEcosystemProviderProps> = ({
     initializeAuth();
   }, []);
   
-  // Validate JWT token
+  // Validate JWT token - Fixed the return type to boolean
   const validateToken = async (token: string): Promise<boolean> => {
     try {
-      // Implement token validation here using AuthService
-      const isValid = await authService.validateToken(token);
-      return isValid;
+      // Use authService to validate token and return a boolean result
+      const response = await authService.validateToken(token);
+      // Return true if we get a valid response
+      return !!response;
     } catch (error) {
       console.error('Token validation error:', error);
       return false;

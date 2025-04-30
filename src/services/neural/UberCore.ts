@@ -1,4 +1,5 @@
 
+// Update to use consistent import path casing
 import { UberPersona } from '@/types/uberPersona';
 
 function generateRandomId(): string {

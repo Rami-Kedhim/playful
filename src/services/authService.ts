@@ -15,7 +15,6 @@ export const authService = {
     };
   },
 
-  // Add this missing method
   async validateToken(token: string): Promise<boolean> {
     // Simulate token validation
     await new Promise(resolve => setTimeout(resolve, 100));

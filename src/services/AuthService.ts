@@ -9,14 +9,9 @@ export interface AuthUser {
 }
 
 export const authService = {
-  validateToken: async (token: string): Promise<AuthUser | null> => {
-    // Mock implementation
-    return {
-      id: 'user-1',
-      email: 'user@example.com',
-      displayName: 'Demo User',
-      isVerified: true
-    };
+  validateToken: async (token: string): Promise<boolean> => {
+    // Match implementation with the other authService file
+    return token && token.length >= 10;
   },
   
   login: async (email: string, password: string): Promise<string> => {

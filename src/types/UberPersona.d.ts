@@ -1,3 +1,3 @@
 
-// Re-export from the updated uberPersona.ts file
+// Ensure this correctly re-exports from the lowercase file
 export * from './uberPersona';
