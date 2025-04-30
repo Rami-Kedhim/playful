@@ -1,122 +1,94 @@
 
+export interface BoostStatus {
+  isActive: boolean;
+  startTime?: Date | null;
+  endTime?: Date | null;
+  packageId?: string | null;
+  remainingTime?: string | null;
+  packageName?: string | null;
+  boost_level?: number;
+  expiresAt?: Date;
+  visibilityScore?: number;
+}
+
+export enum BoostTier {
+  NONE = 'none',
+  BASIC = 'basic',
+  PREMIUM = 'premium',
+  ULTRA = 'ultra',
+}
+
+export interface BoostEligibility {
+  eligible: boolean;
+  message?: string;
+  reasons?: string[];
+  blockedUntil?: Date | string;
+  minimumRequirements?: Record<string, any>;
+}
+
+export interface HermesBoostStatus {
+  isActive: boolean;
+  boostScore?: number;
+  effectivenessScore?: number;
+  tier?: number;
+  score?: number;
+  multiplier?: number;
+}
+
+export interface HermesStatus extends HermesBoostStatus {
+  position: number;
+  activeUsers: number;
+  estimatedVisibility: number;
+  lastUpdateTime: string;
+}
+
+export interface BoostAnalytics {
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  conversionRate: number;
+  averagePosition: number;
+  totalSpent: number;
+  roi: number;
+  lastUpdated: Date | string;
+  dailyStats?: {
+    date: string;
+    impressions: number;
+    clicks: number;
+  }[];
+}
+
 export interface BoostPackage {
   id: string;
   name: string;
   description: string;
   price: number;
-  price_ubx?: number;
-  duration: string;
-  durationMinutes?: number;
-  features?: string[];
-  visibility?: string;
-  visibility_increase?: number;
-  boost_power?: number;
-  color?: string;
-  badgeColor?: string;
-}
-
-export interface BoostStatus {
-  isActive: boolean;
-  startTime?: string | Date;
-  endTime?: string | Date;
-  packageId?: string;
-  remainingTime?: string;
-  timeRemaining?: string;
-  activeBoostId?: string;
-  packageName?: string;
-  boostPackage?: BoostPackage;
-  boost_level?: number;
-  expiresAt?: Date;
-  visibilityScore?: number;
-  progress?: number;
-}
-
-export interface BoostEligibility {
-  isEligible: boolean;
-  reason?: string;
-  restrictions?: string[];
-  reasons?: string[];
-}
-
-export interface HermesStatus {
-  position: number;
-  activeUsers: number;
-  estimatedVisibility: number;
-  lastUpdateTime: string;
-  boostScore?: number;
-  effectivenessScore?: number;
-  isActive?: boolean;
-  tier?: number;
-  score?: number;
-  multiplier?: number;
-  expiresAt?: Date | string;
-}
-
-// Update to include all properties from HermesStatus
-export interface HermesBoostStatus extends HermesStatus {
-  isActive: boolean;
-  tier: number;
-  score: number;
+  currency: string;
+  duration: number; // in hours
+  features: string[];
+  tier: BoostTier;
+  visibilityScore: number;
   multiplier: number;
-  expiresAt?: Date | string;
 }
 
-export interface BoostAnalytics {
-  views?: number;
-  impressions?: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-  interactions?: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-  rank?: {
-    current: number;
-    previous: number;
-    change: number;
-  };
-  clicks?: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-  trending?: boolean;
-  additionalViews?: number;
-  engagementIncrease?: number;
-  rankingPosition?: number;
-  conversions?: number;
-  roi?: number;
-  timeActive?: number;
-  boostEfficiency?: number;
+export interface BoostPurchase {
+  id: string;
+  packageId: string;
+  userId: string;
+  profileId: string;
+  purchaseDate: Date | string;
+  expiryDate: Date | string;
+  status: 'active' | 'expired' | 'cancelled' | 'pending';
+  paymentStatus: 'pending' | 'completed' | 'failed';
+  price: number;
+  currency: string;
 }
 
 export interface BoostDialogTabsProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  loading: boolean;
-  boostStatus: BoostStatus;
+  currentTab: 'status' | 'packages' | 'analytics' | 'history';
+  setCurrentTab: (tab: 'status' | 'packages' | 'analytics' | 'history') => void;
+  boostStatus: BoostStatus | null;
+  hermesStatus: HermesStatus | null;
   eligibility: BoostEligibility;
-  boostPackages: BoostPackage[];
-  selectedPackage: string;
-  setSelectedPackage: (id: string) => void;
-  handleBoost: () => Promise<boolean> | void;
-  handleCancel: () => Promise<boolean>;
-  dailyBoostUsage: number;
-  dailyBoostLimit: number;
-  handleDialogClose: () => void;
-  getBoostPrice?: () => number;
-  hermesStatus: HermesStatus;
-  formatBoostDuration?: (duration: string) => string;
+  profileId?: string;
 }

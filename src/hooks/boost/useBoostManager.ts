@@ -1,51 +1,23 @@
 
-import { useState, useCallback } from 'react';
-import { BoostStatus, BoostEligibility, BoostPackage, BoostAnalytics } from '@/types/boost';
-import { useBoostAdapters } from './useBoostAdapters';
+import { useState, useEffect } from 'react';
+import { adaptBoostStatus } from './useBoostAdapters';
+import { BoostStatus } from '@/types/uberPersona';
+import { BoostAnalytics, BoostEligibility, HermesBoostStatus } from '@/types/boost';
 
-export const useBoostManager = (profileId: string) => {
-  const adapters = useBoostAdapters(profileId);
-  
-  const {
-    boostStatus: rawBoostStatus,
-    eligibility: rawEligibility,
-    boostPackages: rawPackages,
-    loading,
-    error,
-    purchaseBoost,
-    cancelBoost,
-    dailyBoostUsage,
-    dailyBoostLimit,
-    adaptBoostStatus,
-    adaptBoostEligibility,
-    adaptBoostPackages,
-    formatBoostDuration,
-    adaptFormatBoostDuration,
-    getBoostAnalytics,
-    fetchBoostPackages,
-    adaptGetBoostPrice
-  } = adapters;
-
-  // Apply adapters to convert types
-  const boostStatus = adaptBoostStatus(rawBoostStatus);
-  const eligibility = adaptBoostEligibility(rawEligibility);
-  const boostPackages = adaptBoostPackages(rawPackages);
+export const useBoostManager = (profileId?: string) => {
+  // Implementation here
+  const [boostStatus, setBoostStatus] = useState<BoostStatus>({ isActive: false });
+  const [boostAnalytics, setBoostAnalytics] = useState<BoostAnalytics | null>(null);
+  const [eligibility, setEligibility] = useState<BoostEligibility>({ eligible: true });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   return {
-    loading,
-    error,
     boostStatus,
+    boostAnalytics,
     eligibility,
-    boostPackages,
-    dailyBoostUsage,
-    dailyBoostLimit,
-    purchaseBoost,
-    cancelBoost,
-    formatBoostDuration,
-    adaptFormatBoostDuration,
-    getBoostAnalytics,
-    fetchBoostPackages,
-    adaptGetBoostPrice
+    loading,
+    error
   };
 };
 

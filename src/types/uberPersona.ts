@@ -36,46 +36,120 @@ export interface StatusFlags {
   isVerified?: boolean;
   isFeatured?: boolean;
   isPopular?: boolean;
+  needsModeration?: boolean;
+  hasPendingUpdates?: boolean;
+  isPremiumExpiring?: boolean;
   [key: string]: boolean | undefined; // Allow string indexing
 }
 
+export interface BoostStatus {
+  isActive: boolean;
+  tier?: 'basic' | 'premium' | 'none';
+  remainingTime?: string;
+  expiresAt?: Date;
+  boostLevel?: number;
+}
+
+export interface AvailabilityScheduleSlot {
+  start: string;
+  end: string;
+}
+
+export interface AvailabilityScheduleDay {
+  available: boolean;
+  slots?: AvailabilityScheduleSlot[];
+}
+
+export interface AvailabilitySchedule {
+  [day: string]: AvailabilityScheduleDay;
+}
+
+export interface Availability {
+  schedule?: AvailabilitySchedule;
+  nextAvailable?: string;
+}
+
+export interface SystemMetadata {
+  source: 'ai_generated' | 'scraped' | 'manual';
+  lastSynced?: Date;
+  tagsGeneratedByAI: boolean;
+  hilbertSpaceVector: number[];
+  personalityIndex?: number;
+  statusFlags?: StatusFlags;
+  [key: string]: any; // Allow additional system metadata
+}
+
+export interface Monetization {
+  acceptsLucoin?: boolean;
+  acceptsTips?: boolean;
+  subscriptionPrice?: number;
+  unlockingPrice?: number;
+  boostingActive?: boolean;
+  meetingPrice?: number;
+}
+
+export interface Stats {
+  rating?: number;
+  reviewCount?: number;
+  responseTime?: number;
+  viewCount?: number;
+  favoriteCount?: number;
+  bookingCount?: number;
+}
+
+// Comprehensive UberPersona interface that includes all required properties
 export interface UberPersona {
   id: string;
   name: string;
   displayName?: string;
+  username?: string;
   type: keyof UberPersonaType | string;
-  tags?: string[];
-  isVerified?: boolean;
-  isOnline?: boolean;
-  imageUrl?: string;
+  personality?: string;
+  traits?: string[];
+  interests?: string[];
+  mood?: string;
+  energyLevel?: number;
+  rating?: number;
   avatarUrl?: string;
-  location?: string;
+  imageUrl?: string;
   bio?: string;
   description?: string;
-  services?: string[];
-  roleFlags?: RoleFlags;
-  capabilities?: Capabilities;
-  monetization?: {
-    acceptsLucoin?: boolean;
-    acceptsTips?: boolean;
-    subscriptionPrice?: number;
-    unlockingPrice?: number;
-    boostingActive?: boolean;
-    meetingPrice?: number;
-  };
-  systemMetadata?: {
-    source?: string;
-    lastSynced?: Date;
-    tagsGeneratedByAI?: boolean;
-    hilbertSpaceVector?: number[];
-    personalityIndex?: number;
-    statusFlags?: StatusFlags | Record<string, boolean>;
-    [key: string]: any;
-  };
-  lastActive?: Date | string;
-  isPremium?: boolean;
+  location?: string;
+  age?: number;
+  ethnicity?: string;
+  isVerified?: boolean;
+  isOnline?: boolean;
+  verificationLevel?: 'basic' | 'verified' | 'premium';
   isActive?: boolean;
   isAI?: boolean;
+  isPremium?: boolean;
+  isLocked?: boolean;
+  tags?: string[];
+  featured?: boolean;
+  languages?: string[];
+  services?: string[];
+  availability?: Availability;
+  systemMetadata?: SystemMetadata;
+  roleFlags?: RoleFlags;
+  capabilities?: Capabilities;
+  monetization?: Monetization;
+  price?: number;
+  stats?: Stats;
+  boostStatus?: BoostStatus;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+}
+
+export interface NeuralModel {
+  id: string;
+  name: string;
+  version?: string;
+  type: 'escort' | 'creator' | 'livecam' | 'ai';
+  capabilities: string[];
+  specialization: string | string[];
+  size?: number;
+  precision?: number;
+  parameters?: {
+    [key: string]: any;
+  };
 }

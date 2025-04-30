@@ -74,4 +74,3 @@ export const useUberPersona = (userId: string | undefined) => {
 
   return { persona, loading, error };
 };
-

@@ -1,4 +1,7 @@
 
+import { HermesStatus } from '@/types/boost';
+import { BoostStatus } from '@/types/uberPersona';
+
 // Fix Date conversion issue at line 118
 // Just showing the relevant part - handling expiresAt
 const adaptBoostStatus = (rawStatus: any): BoostStatus => {
@@ -16,3 +19,5 @@ const adaptBoostStatus = (rawStatus: any): BoostStatus => {
     visibilityScore: rawStatus.visibilityScore || 0
   };
 };
+
+export { adaptBoostStatus };
