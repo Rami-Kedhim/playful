@@ -1,7 +1,8 @@
 
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { authService } from '@/services/authService';
-import { userService } from '@/services/userService';
+// Fix the import paths to use consistent casing
+import { authService } from '@/services/AuthService';
+import { userService } from '@/services/UserService';
 import { UberPersona } from '@/types/uberPersona';
 
 // Create the context
