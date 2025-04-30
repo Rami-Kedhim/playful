@@ -100,5 +100,5 @@ export interface Stats {
   bookingCount?: number;
 }
 
-// Export the UberPersona type from lowercase file as well
+// Export the UberPersona type from UberPersona.ts properly
 export type { UberPersona } from './UberPersona';

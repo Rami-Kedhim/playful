@@ -55,9 +55,10 @@ export const useUberPersona = (personaId?: string) => {
           stats: {
             rating: 4.5,
             reviewCount: 120,
-            responseTime: 30, // Adding responseTime as it's required
+            responseTime: 30, // Added required responseTime
             viewCount: 12000,
-            favoriteCount: 350
+            favoriteCount: 350,
+            bookingCount: 45 // Added optional bookingCount
           },
           availability: {
             nextAvailable: '2023-10-15T14:00:00Z',

@@ -1,8 +1,29 @@
 
-import { UberPersonaType, RoleFlags, Capabilities, StatusFlags, BoostStatus, Availability, SystemMetadata, Monetization, Stats } from './uberPersona';
+// Use proper import path with consistent casing
+import { 
+  UberPersonaType,
+  RoleFlags, 
+  Capabilities, 
+  StatusFlags, 
+  BoostStatus, 
+  Availability, 
+  SystemMetadata, 
+  Monetization, 
+  Stats 
+} from './uberPersona';
 
-// Re-export interfaces from lowercase file to maintain consistent exports
-export { UberPersonaType, RoleFlags, Capabilities, StatusFlags, BoostStatus, Availability, SystemMetadata, Monetization, Stats };
+// Re-export interfaces from lowercase file using proper 'export type' syntax
+export type { 
+  UberPersonaType, 
+  RoleFlags, 
+  Capabilities, 
+  StatusFlags, 
+  BoostStatus, 
+  Availability, 
+  SystemMetadata, 
+  Monetization, 
+  Stats 
+};
 
 // Comprehensive UberPersona interface that includes all required properties
 export interface UberPersona {
