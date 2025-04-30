@@ -1,6 +1,5 @@
-
-// Adjusted import casing to '@/types/UberPersona'
-import { UberPersona } from '@/types/UberPersona';
+// Fix import case sensitivity
+import { UberPersona } from '@/types/uberPersona';
 
 // Added checks for the newly ensured properties in UberPersona
 

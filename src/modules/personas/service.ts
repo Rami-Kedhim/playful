@@ -63,7 +63,7 @@ export class PersonaService {
     
     return {
       flowScore: result.flowScore,
-      recommendations: result.recommendedActions
+      recommendations: result.recommendedActions || []
     };
   }
   

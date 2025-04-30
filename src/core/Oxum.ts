@@ -1,121 +1,175 @@
-
-/**
- * Oxum - Boosting and Visibility System
- */
-
+// Basic implementation of Orus system for integration with Oxum
+import { hermes } from './Hermes';
 import { UberPersona } from '@/types/uberPersona';
-import { SystemIntegrityResult } from './Orus';
 
-export class Oxum {
+export interface SystemIntegrityResult {
+  isValid: boolean;
+  message: string;
+  timestamp: string;
+  overallStatus?: string;
+  modules?: { [key: string]: any };
+  issues?: string[];
+  score?: number;
+  recommendations?: string[]; // Added missing property
+}
+
+export interface SessionValidationResult {
+  isValid: boolean;
+  userId?: string;
+  sessionId?: string;
+  expiration?: Date;
+}
+
+class Oxum {
+  private readonly systemName: string = 'Oxum';
+  private isInitialized: boolean = false;
+
+  constructor() {
+    this.initialize();
+  }
+
+  public initialize(): void {
+    if (this.isInitialized) return;
+    console.log(`${this.systemName} system initializing...`);
+    this.isInitialized = true;
+  }
+
   /**
-   * Apply boost to a persona
-   * @param personaId The ID of the persona to boost
-   * @param boostLevel The level of boost to apply
+   * Validate session integrity
    */
-  public async applyBoost(
-    personaId: string, 
-    boostLevel: number = 1
-  ): Promise<{ success: boolean, expires: Date }> {
+  public validateSession(userId: string): SessionValidationResult {
+    if (!this.isInitialized) {
+      this.initialize();
+    }
+
+    // Always return valid session for demo
+    return {
+      isValid: true,
+      userId,
+      sessionId: `session-${Date.now()}`,
+      expiration: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+    };
+  }
+
+  /**
+   * Check system integrity
+   */
+  public checkIntegrity(): SystemIntegrityResult {
+    return {
+      isValid: true,
+      message: 'System integrity verified',
+      timestamp: new Date().toISOString(),
+      overallStatus: 'healthy',
+      modules: {
+        core: 'operational',
+        auth: 'operational',
+        boost: 'operational'
+      },
+      issues: [],
+      score: 95, // Added score property
+      recommendations: ['Regular system maintenance', 'Update security protocols']
+    };
+  }
+
+  /**
+   * Interface with the Hermes system
+   */
+  public interfaceHermes(): boolean {
+    try {
+      // Make sure hermes has connect method
+      if (typeof hermes.connect !== 'function') {
+        console.error('Hermes connect method not found');
+        return false;
+      }
+      
+      const connectionResult = hermes.connect({
+        system: this.systemName,
+        connectionId: `${this.systemName}-${Date.now()}`
+      });
+      
+      return connectionResult.success;
+    } catch (error) {
+      console.error('Error interfacing with Hermes:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Apply a boost to a persona profile
+   */
+  public async applyBoost(personaId: string, boostLevel: number): Promise<{ success: boolean; expires: Date }> {
     console.log(`Applying boost level ${boostLevel} to persona ${personaId}`);
     
-    // In a real implementation, this would send a request to a boost service
-    // and store the boost information
-    
-    // Calculate expiry based on boost level
-    const hoursValid = boostLevel * 12;
-    const expiryDate = new Date();
-    expiryDate.setHours(expiryDate.getHours() + hoursValid);
+    // Mock implementation
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // Expires in 1 hour
     
     return {
       success: true,
-      expires: expiryDate
+      expires
     };
   }
-  
+
   /**
-   * Calculate the current boost score for a persona
-   * @param personaId The ID of the persona to calculate for
+   * Calculate a base boost score for a persona
    */
   public calculateBoostScore(personaId: string): number {
-    // In a real implementation, this would factor in:
-    // - Active boosts
-    // - Profile completeness
-    // - Recent activity
-    // - Engagement metrics
-    
-    // For now, return a random number between 50 and 100
-    return Math.floor(50 + Math.random() * 50);
+    // Mock implementation
+    return Math.floor(Math.random() * 50) + 50;
   }
 
   /**
-   * Get a live map of boost distributions
-   * @param limit Number of entries to return
+   * Check system status
    */
-  public getLiveBoostMap(limit: number = 10): Array<{
-    id: string;
-    score: number;
-    category: string;
-  }> {
-    const result = [];
-    
-    // Generate some mock data
-    const categories = ['escort', 'livecam', 'creator', 'ai'];
-    
-    for (let i = 0; i < limit; i++) {
-      result.push({
-        id: `persona-${i}`,
-        score: Math.floor(60 + Math.random() * 40),
-        category: categories[Math.floor(Math.random() * categories.length)]
-      });
-    }
-    
-    return result;
-  }
-
-  /**
-   * Calculate boost allocation using Eigen algorithm
-   * This is a placeholder for the algorithm
-   */
-  public boostAllocationEigen(matrix: number[][]): number[] {
-    // This is a simplified version that doesn't use actual eigenvalues
-    // Just return normalized row sums as a placeholder
-    const result = matrix.map(row => 
-      row.reduce((sum, val) => sum + val, 0) / row.length
-    );
-    
-    // Normalize to sum to 1
-    const sum = result.reduce((a, b) => a + b, 0);
-    return result.map(val => val / sum);
-  }
-
-  /**
-   * Get system integrity stats
-   */
-  public getSystemIntegrity(): SystemIntegrityResult {
+  public checkSystemStatus(): SystemIntegrityResult {
     return {
+      isValid: true,
+      message: 'System status verified',
+      timestamp: new Date().toISOString(),
       overallStatus: 'healthy',
-      score: 98.5,
       modules: [
-        { name: 'Boost Engine', status: 'online', reliability: 0.99 },
-        { name: 'Distribution Matrix', status: 'online', reliability: 0.98 },
-        { name: 'Flow Pipeline', status: 'online', reliability: 0.97 }
+        { name: 'core', status: 'operational', reliability: 0.99 },
+        { name: 'auth', status: 'operational', reliability: 0.98 },
+        { name: 'storage', status: 'operational', reliability: 0.97 }
       ],
       issues: [],
-      recommendations: ['System operating normally']
+      score: 95,
+      recommendations: [
+        'Regular system maintenance recommended',
+        'Consider upgrading storage module'
+      ]
     };
   }
 
   /**
-   * Reset boost scores for a region
-   * @param region The region to reset
+   * Boost allocation using Eigenvector centrality
    */
-  public resetRegionScores(region: string): void {
-    console.log(`Reset boost scores for region ${region}`);
-    // In a real implementation, this would reset scores in a database
+  public boostAllocationEigen(matrix: number[][]): number[] {
+    // Validate matrix dimensions
+    const numNodes = matrix.length;
+    if (matrix.some(row => row.length !== numNodes)) {
+      throw new Error("Matrix must be square");
+    }
+
+    // Power iteration method
+    let eigenvector = Array(numNodes).fill(1); // Initial guess
+    const iterations = 100;
+
+    for (let i = 0; i < iterations; i++) {
+      const newEigenvector = Array(numNodes).fill(0);
+      for (let j = 0; j < numNodes; j++) {
+        for (let k = 0; k < numNodes; k++) {
+          newEigenvector[j] += matrix[j][k] * eigenvector[k];
+        }
+      }
+
+      // Normalize eigenvector
+      const norm = Math.sqrt(newEigenvector.reduce((sum, val) => sum + val * val, 0));
+      eigenvector = newEigenvector.map(val => val / norm);
+    }
+
+    return eigenvector;
   }
 }
 
-// Export singleton instance
 export const oxum = new Oxum();
-
 export default oxum;

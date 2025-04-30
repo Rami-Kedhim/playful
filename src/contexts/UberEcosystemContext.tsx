@@ -1,204 +1,227 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { UberPersona } from '@/types/UberPersona';
-import { Escort } from '@/types/Escort';
-import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
-import { mapEscortToUberPersona } from '@/utils/profileMapping';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  ReactNode,
+} from 'react';
+import { useNavigate } from 'react-router-dom';
+import { authService } from '@/services/AuthService';
+import { userService } from '@/services/UserService';
+import { UberPersona } from '@/types/uberPersona';
 import { uberCoreInstance } from '@/core/UberCore';
+import { SystemIntegrityResult } from '@/core/Orus';
+import { useToast } from '@/hooks/use-toast';
 
-export interface HilbertSpace {
-  dimension: number;
-  getCoordinates: (persona: UberPersona) => number[];
-}
-
-interface UberPersonaContextType {
-  allPersonas: UberPersona[];
-  escortPersonas: UberPersona[];
-  creatorPersonas: UberPersona[];
-  livecamPersonas: UberPersona[];
-  aiPersonas: UberPersona[];
+interface UberEcosystemContextType {
+  user: any | null;
+  profile: UberPersona | null;
   loading: boolean;
   error: string | null;
-  refreshEcosystem: () => Promise<void>;
-  getPersonaById: (id: string) => UberPersona | undefined;
-  boostedPersonas: UberPersona[];
-  rankPersonas: (personas: UberPersona[], boostFactor?: number) => UberPersona[];
-  hilbertSpace: HilbertSpace;
+  login: (token: string) => Promise<boolean>;
+  logout: () => Promise<boolean>;
+  checkSystemIntegrity: () => Promise<SystemIntegrityResult>;
+  shutdown: () => Promise<boolean>;
 }
 
-const defaultHilbertSpace: HilbertSpace = {
-  dimension: 4,
-  getCoordinates: (_: UberPersona): number[] => [0.5, 0.5, 0.5, 0.5],
-};
+const UberEcosystemContext = createContext<UberEcosystemContextType | undefined>(
+  undefined
+);
 
-// Helpers
-const filterByTypeFlag = (
-  personas: UberPersona[],
-  typeFlag: keyof UberPersona['roleFlags'] | string
-) => {
-  return personas.filter(
-    persona =>
-      persona.roleFlags?.[typeFlag as keyof UberPersona['roleFlags']] || false
-  );
-};
-
-const getEscorts = (allPersonas: UberPersona[]) => filterByTypeFlag(allPersonas, 'isEscort');
-const getCreators = (allPersonas: UberPersona[]) => filterByTypeFlag(allPersonas, 'isCreator');
-const getLivecams = (allPersonas: UberPersona[]) => filterByTypeFlag(allPersonas, 'isLivecam');
-const getAIPersonas = (allPersonas: UberPersona[]) => filterByTypeFlag(allPersonas, 'isAI');
-
-const getBoostedPersonas = (allPersonas: UberPersona[]): UberPersona[] =>
-  allPersonas.filter(p => p.monetization?.boostingActive || p.roleFlags?.isFeatured);
-
-const getBoostStatus = (persona: UberPersona) => {
-  if (persona?.monetization?.boostingActive && persona?.roleFlags?.isFeatured) {
-    return {
-      isActive: true,
-      tier: 'premium',
-      remainingTime: '2 days'
-    };
-  }
-  return persona?.boostStatus || {
-    isActive: false,
-    tier: 'none',
-    remainingTime: '0'
-  };
-};
-
-const getIsFeatured = (persona: UberPersona) => {
-  return persona?.roleFlags?.isFeatured || false;
-};
-
-const rankPersonas = (personas: UberPersona[], boostFactor = 1.0) => {
-  const copy = [...personas];
-  copy.sort((a, b) => {
-    const aRating = a.stats?.rating ?? 0;
-    const aReviewCount = a.stats?.reviewCount ?? 0;
-    const bRating = b.stats?.rating ?? 0;
-    const bReviewCount = b.stats?.reviewCount ?? 0;
-
-    let aScore = aRating * 2 + aReviewCount / 10;
-    let bScore = bRating * 2 + bReviewCount / 10;
-
-    if (a.roleFlags?.isFeatured) aScore *= boostFactor;
-    if (b.roleFlags?.isFeatured) bScore *= boostFactor;
-
-    return bScore - aScore;
-  });
-  return copy;
-};
-
-const UberEcosystemContext = createContext<UberPersonaContextType | undefined>(undefined);
-
-interface CompatibleEscort extends Omit<Escort, 'height'> {
-  height?: string;
-  id: string;
-  name: string;
+interface UberEcosystemProviderProps {
+  children: ReactNode;
 }
 
-const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) => {
-  const { escorts } = useEscortContext();
-
-  const [allPersonas, setAllPersonas] = useState<UberPersona[]>([]);
+export const UberEcosystemProvider: React.FC<UberEcosystemProviderProps> = ({
+  children,
+}) => {
+  const [user, setUser] = useState<any | null>(null);
+  const [profile, setProfile] = useState<UberPersona | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [initialized, setInitialized] = useState<boolean>(false);
-  const [hilbertSpace, setHilbertSpace] = useState(defaultHilbertSpace);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
-    async function init() {
+    const initializeAuth = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-        await uberCoreInstance.initialize();
-        if (escorts && escorts.length > 0) {
-          const sanitizedEscorts: CompatibleEscort[] = escorts.map(e => ({
-            ...e,
-            id: e.id,
-            name: e.name,
-            height: e.height !== undefined && e.height !== null ? e.height.toString() : '',
-          }));
-          const mappedPersonas = sanitizedEscorts.map(e => mapEscortToUberPersona(e));
-          setAllPersonas(mappedPersonas);
+        const storedToken = localStorage.getItem('authToken');
+        if (storedToken) {
+          const userData = await authService.validateToken(storedToken);
+          if (userData) {
+            setUser(userData);
+            // Fetch profile immediately after setting user
+            await fetchProfile(userData.id);
+          }
         }
-        setHilbertSpace({
-          dimension: 4,
-          getCoordinates: (persona: UberPersona): number[] => {
-            const seed = persona.id
-              .split('')
-              .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-
-            return [
-              Math.sin(seed * 0.1) * 0.5 + 0.5,
-              Math.cos(seed * 0.1) * 0.5 + 0.5,
-              Math.sin(seed * 0.2) * 0.5 + 0.5,
-              Math.cos(seed * 0.2) * 0.5 + 0.5,
-            ];
-          },
-        });
-        setInitialized(true);
-        setError(null);
       } catch (err: any) {
-        setError(err.message || 'Failed to initialize UberPersona ecosystem');
-        console.error('UberPersona initialization error:', err);
+        console.error('Authentication initialization error:', err);
+        setError(err.message || 'Failed to initialize authentication.');
       } finally {
         setLoading(false);
       }
-    }
-    init();
-
-    return () => {
-      uberCoreInstance.shutdown?.()?.catch(console.error);
     };
-  }, [escorts]);
 
-  const refreshEcosystem = async () => {
+    initializeAuth();
+  }, []);
+
+  const fetchProfile = async (userId: string) => {
     try {
-      setLoading(true);
+      const userProfile = await userService.getUserProfile(userId);
+      setProfile(userProfile);
+    } catch (profileError: any) {
+      console.error('Failed to fetch profile:', profileError);
+      setError(profileError.message || 'Failed to fetch profile.');
+      toast({
+        title: "Error fetching profile",
+        description: "Please try again later",
+        variant: "destructive",
+      });
+    }
+  };
 
-      if (escorts && escorts.length > 0) {
-        const sanitizedEscorts: CompatibleEscort[] = escorts.map(e => ({
-          ...e,
-          height: e.height !== undefined && e.height !== null ? e.height.toString() : '',
-        })) as CompatibleEscort[];
-        const mappedPersonas = sanitizedEscorts.map(e => mapEscortToUberPersona(e));
-        setAllPersonas(mappedPersonas);
+  const login = async (token: string): Promise<boolean> => {
+    setLoading(true);
+    try {
+      localStorage.setItem('authToken', token);
+      const userData = await authService.validateToken(token);
+      if (userData) {
+        setUser(userData);
+        await fetchProfile(userData.id); // Fetch profile on login
+        navigate('/home');
+        toast({
+          title: "Login successful",
+          description: "Welcome to the ecosystem!",
+        });
+        return true;
+      } else {
+        setError('Invalid token');
+        return false;
       }
-
-      setError(null);
     } catch (err: any) {
-      setError(err.message || 'Failed to refresh UberPersona ecosystem');
+      console.error('Login error:', err);
+      setError(err.message || 'Login failed');
+      toast({
+        title: "Login failed",
+        description: "Please check your credentials and try again",
+        variant: "destructive",
+      });
+      return false;
     } finally {
       setLoading(false);
     }
   };
 
-  const getPersonaById = (id: string): UberPersona | undefined =>
-    allPersonas.find(p => p.id === id);
-
-  const value: UberPersonaContextType = {
-    allPersonas,
-    escortPersonas: getEscorts(allPersonas),
-    creatorPersonas: getCreators(allPersonas),
-    livecamPersonas: getLivecams(allPersonas),
-    aiPersonas: getAIPersonas(allPersonas),
-    loading,
-    error,
-    refreshEcosystem,
-    getPersonaById,
-    boostedPersonas: getBoostedPersonas(allPersonas),
-    rankPersonas,
-    hilbertSpace,
+  const logout = async (): Promise<boolean> => {
+    setLoading(true);
+    try {
+      localStorage.removeItem('authToken');
+      setUser(null);
+      setProfile(null);
+      navigate('/login');
+      toast({
+        title: "Logout successful",
+        description: "You have been successfully logged out.",
+      });
+      return true;
+    } catch (err: any) {
+      console.error('Logout error:', err);
+      setError(err.message || 'Logout failed');
+      toast({
+        title: "Logout failed",
+        description: "Please try again later",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (loading && !initialized) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="h-12 w-12 rounded-full border-4 border-t-ubx animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Initializing UberPersona ecosystem...</p>
-        </div>
-      </div>
-    );
-  }
+  const checkSystemIntegrity = async (): Promise<SystemIntegrityResult> => {
+    setLoading(true);
+    try {
+      const integrityResult = uberCoreInstance.checkSystemIntegrity();
+      toast({
+        title: "System integrity check",
+        description: integrityResult.message,
+      });
+      return integrityResult;
+    } catch (err: any) {
+      console.error('System integrity check error:', err);
+      setError(err.message || 'System integrity check failed');
+      toast({
+        title: "System integrity check failed",
+        description: "Please contact support",
+        variant: "destructive",
+      });
+      return {
+        isValid: false,
+        message: err.message || 'System integrity check failed',
+        timestamp: new Date().toISOString(),
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fix the shutdown method usage
+  const handleShutdown = async () => {
+    try {
+      uberCoreInstance.shutdown();
+      // No need to catch a void return type
+      return true;
+    } catch (error) {
+      console.error('Error shutting down UberCore:', error);
+      return false;
+    }
+  };
+
+  const shutdown = async (): Promise<boolean> => {
+    setLoading(true);
+    try {
+      const shutdownSuccess = await handleShutdown();
+      if (shutdownSuccess) {
+        console.log('UberCore shutdown successfully.');
+        toast({
+          title: "System shutdown",
+          description: "System shutdown was successful.",
+        });
+        return true;
+      } else {
+        setError('System shutdown failed.');
+        toast({
+          title: "System shutdown failed",
+          description: "Please check the console for more details.",
+          variant: "destructive",
+        });
+        return false;
+      }
+    } catch (err: any) {
+      console.error('Shutdown error:', err);
+      setError(err.message || 'Shutdown failed');
+      toast({
+        title: "Shutdown failed",
+        description: "Please check the console for more details.",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const value: UberEcosystemContextType = {
+    user,
+    profile,
+    loading,
+    error,
+    login,
+    logout,
+    checkSystemIntegrity,
+    shutdown,
+  };
 
   return (
     <UberEcosystemContext.Provider value={value}>
@@ -207,12 +230,12 @@ const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) =>
   );
 };
 
-export const useUberEcosystemContext = () => {
+export const useUberEcosystem = (): UberEcosystemContextType => {
   const context = useContext(UberEcosystemContext);
   if (!context) {
-    throw new Error('useUberEcosystemContext must be used within UberEcosystemProvider');
+    throw new Error(
+      'useUberEcosystem must be used within a UberEcosystemProvider'
+    );
   }
   return context;
 };
-
-export default UberEcosystemContext;

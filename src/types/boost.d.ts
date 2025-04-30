@@ -35,6 +35,7 @@ export interface BoostEligibility {
   isEligible: boolean;
   reason?: string;
   restrictions?: string[];
+  reasons?: string[];
 }
 
 export interface HermesStatus {
@@ -109,7 +110,7 @@ export interface BoostDialogTabsProps {
   dailyBoostUsage: number;
   dailyBoostLimit: number;
   handleDialogClose: () => void;
-  getBoostPrice: () => number;
+  getBoostPrice?: () => number;
   hermesStatus: HermesStatus;
-  formatBoostDuration: (duration: string) => string;
+  formatBoostDuration?: (duration: string) => string;
 }
