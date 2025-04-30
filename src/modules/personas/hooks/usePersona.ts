@@ -1,98 +1,94 @@
 
-/**
- * usePersona Hook
- * React hook for interacting with the UberPersona system
- */
-import { useState, useEffect, useCallback } from 'react';
-import { personaService } from '../service';
-import type { PersonaFilters, PersonaSearchResult, PersonaViewData } from '../types';
-import type { UberPersona } from '@/types/UberPersona';
+import { useState, useEffect } from 'react';
+import { UberPersona } from '@/types/uberPersona';
+import { personaService } from '@/modules/personas/service';
 
-export function usePersona(personaId?: string) {
-  const [persona, setPersona] = useState<UberPersona | null>(null);
-  const [similarPersonas, setSimilarPersonas] = useState<UberPersona[]>([]);
-  const [boostStatus, setBoostStatus] = useState<{isActive: boolean, remainingTime?: string}>({isActive: false});
+export const usePersona = (personaId?: string) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  
-  const fetchPersona = useCallback(async (id: string) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const result = await personaService.getPersonaViewData(id);
-      
-      if (result) {
-        setPersona(result.persona);
-        setSimilarPersonas(result.similarPersonas);
-        setBoostStatus(result.boostStatus);
-      } else {
-        setError('Persona not found');
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load persona');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-  
+  const [persona, setPersona] = useState<UberPersona | null>(null);
+  const [recommendations, setRecommendations] = useState<UberPersona[]>([]);
+
+  // Fetch persona data when personaId changes
   useEffect(() => {
-    if (personaId) {
-      fetchPersona(personaId);
-    }
-  }, [personaId, fetchPersona]);
-  
-  const search = async (filters: PersonaFilters): Promise<PersonaSearchResult> => {
-    setLoading(true);
-    setError(null);
-    
+    const fetchPersonaData = async () => {
+      if (!personaId) {
+        setPersona(null);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const personaData = await personaService.getPersonaViewData(personaId);
+        setPersona(personaData);
+
+        // Get recommendations based on the persona
+        const recommendedPersonas = await personaService.getRecommendedPersonas(personaId);
+        setRecommendations(recommendedPersonas);
+      } catch (err: any) {
+        console.error('Error fetching persona data:', err);
+        setError(err.message || 'Failed to load persona data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPersonaData();
+  }, [personaId]);
+
+  // Search personas with given criteria
+  const searchPersonas = async (criteria: Record<string, any>) => {
     try {
-      const result = await personaService.searchPersonas(filters);
-      return result;
+      setLoading(true);
+      setError(null);
+      return await personaService.searchPersonas(criteria);
     } catch (err: any) {
+      console.error('Error searching personas:', err);
       setError(err.message || 'Failed to search personas');
-      return {
-        personas: [],
-        total: 0,
-        page: 1,
-        pageSize: 20,
-        hasMore: false
-      };
+      return [];
     } finally {
       setLoading(false);
     }
   };
-  
-  const updatePersona = async (id: string, updates: Partial<Omit<UberPersona, 'id' | 'type'>>): Promise<UberPersona | null> => {
-    setLoading(true);
-    setError(null);
-    
+
+  // Update persona data
+  const updatePersona = async (data: Partial<UberPersona>) => {
+    if (!personaId || !persona) {
+      setError('No persona selected for update');
+      return false;
+    }
+
     try {
-      const updated = await personaService.updatePersona({id, updates});
+      setLoading(true);
+      setError(null);
+      const success = await personaService.updatePersona(personaId, data);
       
-      if (updated && persona && persona.id === id) {
-        setPersona(updated);
+      if (success) {
+        // Refresh persona data after update
+        const updatedPersona = await personaService.getPersonaViewData(personaId);
+        setPersona(updatedPersona);
       }
       
-      return updated;
+      return success;
     } catch (err: any) {
+      console.error('Error updating persona:', err);
       setError(err.message || 'Failed to update persona');
-      return null;
+      return false;
     } finally {
       setLoading(false);
     }
   };
-  
+
   return {
-    persona,
-    similarPersonas,
-    boostStatus,
     loading,
     error,
-    fetchPersona,
-    search,
+    persona,
+    recommendations,
+    searchPersonas,
     updatePersona
   };
-}
+};
 
 export default usePersona;

@@ -4,6 +4,51 @@ import { hermes } from '@/core/Hermes';
 
 export class PersonaService {
   /**
+   * Get persona data for viewing
+   */
+  public getPersonaViewData(personaId: string): Promise<UberPersona | null> {
+    // Mock implementation
+    return Promise.resolve({
+      id: personaId,
+      name: 'Sample Persona',
+      type: 'escort',
+      tags: ['premium', 'verified'],
+      isVerified: true,
+      isOnline: true
+    } as UberPersona);
+  }
+  
+  /**
+   * Search personas based on criteria
+   */
+  public searchPersonas(criteria: Record<string, any>): Promise<UberPersona[]> {
+    // Mock implementation
+    return Promise.resolve([
+      {
+        id: 'result-1',
+        name: 'Search Result 1',
+        type: 'escort',
+        tags: ['premium']
+      },
+      {
+        id: 'result-2',
+        name: 'Search Result 2',
+        type: 'creator',
+        tags: ['verified']
+      }
+    ] as UberPersona[]);
+  }
+  
+  /**
+   * Update a persona
+   */
+  public updatePersona(personaId: string, data: Partial<UberPersona>): Promise<boolean> {
+    // Mock implementation
+    console.log(`Updating persona ${personaId} with data:`, data);
+    return Promise.resolve(true);
+  }
+  
+  /**
    * Calculate optimal flow dynamics for a persona
    */
   public calculateFlowDynamics(persona: UberPersona): {

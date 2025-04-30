@@ -1,9 +1,9 @@
 
-import { UberPersona } from '@/types/UberPersona';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, MapPin, Languages, Info, Award, Users, Stars } from 'lucide-react';
+import { UberPersona } from '@/types/uberPersona';
 
 interface PersonaAboutTabProps {
   persona: UberPersona;

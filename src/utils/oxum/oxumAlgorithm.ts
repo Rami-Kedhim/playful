@@ -1,135 +1,129 @@
 
 /**
- * Oxum Algorithm - Core algorithms for the Oxum boosting system
+ * Oxum Algorithm - Core utilities for fair rotation and boosting algorithms
  */
 
 export interface ProfileScoreData {
   profileId: string;
-  boostScore: number;
-  engagementScore: number;
+  baseScore: number;
+  boostMultiplier: number;
   timeSinceLastTop: number;
-  repetitionPenalty: number;
-  region: string;
-  language: string;
+  penaltyFactor: number;
   lastCalculated: Date;
-}
-
-interface ProfileFilters {
   region?: string;
   language?: string;
+  tags?: string[];
 }
 
 /**
- * Compute a composite score for a profile based on various factors
+ * Calculate a composite score for a profile based on multiple factors
  */
-export function computeCompositeScore(profile: ProfileScoreData): number {
-  // Weights for different factors
-  const boostWeight = 0.6;
-  const engagementWeight = 0.3;
-  const timeWeight = 0.1;
+export const computeCompositeScore = (profile: ProfileScoreData): number => {
+  const baseScore = profile.baseScore;
+  const boostFactor = profile.boostMultiplier;
+  const timeFactor = Math.min(5, profile.timeSinceLastTop); // Cap time factor at 5
+  const penaltyFactor = profile.penaltyFactor;
   
-  // Calculate time factor - decreases as time since last top increases
-  const timeFactor = Math.max(0, 1 - (profile.timeSinceLastTop / 48)); // Normalize to 48 hours
-  
-  // Apply repetition penalty
-  const repetitionFactor = Math.max(0.2, 1 - profile.repetitionPenalty);
-  
-  // Compute weighted score
-  const rawScore = (
-    (profile.boostScore * boostWeight) +
-    (profile.engagementScore * engagementWeight) +
-    (timeFactor * timeWeight)
-  );
-  
-  // Apply repetition factor
-  return rawScore * repetitionFactor;
-}
+  // Formula for composite score
+  const score = baseScore * boostFactor * (1 + timeFactor * 0.2) / penaltyFactor;
+  return Math.round(score * 100) / 100; // Round to 2 decimal places
+};
 
 /**
- * Sort profiles by their composite score
+ * Sort profiles by their computed composite scores
  */
-export function sortProfilesByScore(
+export const sortProfilesByScore = (
   profiles: ProfileScoreData[],
-  filters?: ProfileFilters
-): ProfileScoreData[] {
-  // Filter profiles if needed
-  let filteredProfiles = [...profiles];
-  
-  if (filters) {
-    if (filters.region) {
-      filteredProfiles = filteredProfiles.filter(
-        p => p.region === filters.region
-      );
-    }
+  filters?: { region?: string, language?: string }
+): ProfileScoreData[] => {
+  const filteredProfiles = filters 
+    ? profiles.filter(profile => 
+        (!filters.region || profile.region === filters.region) && 
+        (!filters.language || profile.language === filters.language))
+    : profiles;
     
-    if (filters.language) {
-      filteredProfiles = filteredProfiles.filter(
-        p => p.language === filters.language
-      );
-    }
-  }
-  
-  // Compute scores for each profile
-  const withScores = filteredProfiles.map(profile => ({
-    profile,
-    score: computeCompositeScore(profile)
-  }));
-  
-  // Sort by score descending
-  withScores.sort((a, b) => b.score - a.score);
-  
-  // Return sorted profiles
-  return withScores.map(item => item.profile);
-}
+  return [...filteredProfiles].sort((a, b) => {
+    const scoreA = computeCompositeScore(a);
+    const scoreB = computeCompositeScore(b);
+    return scoreB - scoreA; // Sort in descending order
+  });
+};
 
 /**
- * Apply repetition penalty to profiles that have been viewed recently
+ * Apply repetition penalty for profiles that have been viewed recently
  */
-export function applyRepetitionPenalty(
+export const applyRepetitionPenalty = (
   profiles: ProfileScoreData[],
   recentlyViewedIds: string[],
   penaltyFactor: number
-): ProfileScoreData[] {
+): ProfileScoreData[] => {
   return profiles.map(profile => {
     if (recentlyViewedIds.includes(profile.profileId)) {
-      // Apply penalty to this profile
+      // Apply penalty to recently viewed profiles
       return {
         ...profile,
-        repetitionPenalty: profile.repetitionPenalty + penaltyFactor
+        penaltyFactor: profile.penaltyFactor * penaltyFactor
       };
     }
     return profile;
   });
-}
+};
 
 /**
- * Reset repetition penalties for all profiles
+ * Reset repetition penalties for profiles after a certain time
  */
-export function resetRepetitionPenalties(profiles: ProfileScoreData[]): ProfileScoreData[] {
-  return profiles.map(profile => ({
-    ...profile,
-    repetitionPenalty: 0
-  }));
-}
+export const resetRepetitionPenalties = (
+  profiles: ProfileScoreData[],
+  thresholdHours: number
+): ProfileScoreData[] => {
+  return profiles.map(profile => {
+    if (profile.timeSinceLastTop >= thresholdHours) {
+      // Reset penalty if profile hasn't been at top for threshold hours
+      return {
+        ...profile,
+        penaltyFactor: 1.0
+      };
+    }
+    return profile;
+  });
+};
 
 /**
- * Calculate fair boost duration based on profile stats
+ * Calculate fair boost duration based on system conditions
+ * @param activeProfilesCount Number of active profiles in the boost system
+ * @param systemLoad Optional system load factor (0-1)
  */
-export function calculateFairBoostDuration(
-  profileCompleteness: number,
-  activity: { completeness: number; activity: number; popularity: number; }
-): number {
+export const calculateFairBoostDuration = (
+  activeProfilesCount: number,
+  systemLoad: number = 0.5
+): number => {
   // Base duration in hours
   const baseDuration = 24;
   
-  // Adjust based on profile completeness (0-100%)
-  const completenessMultiplier = 1 + (profileCompleteness / 100);
+  // Adjust based on active profiles - more profiles means shorter durations
+  const profileFactor = Math.max(0.5, Math.min(1.5, 10 / Math.max(1, activeProfilesCount)));
   
-  // Adjust based on activity metrics
-  const activityMultiplier = 1 + (
-    (activity.completeness + activity.activity + activity.popularity) / 300
-  );
+  // Adjust based on system load - higher load means shorter durations
+  const loadFactor = 1 - (systemLoad * 0.3);
   
-  // Calculate final duration
-  return Math.round(baseDuration * completenessMultiplier * activityMultiplier);
-}
+  // Calculate final duration in hours
+  return Math.round(baseDuration * profileFactor * loadFactor);
+};
+
+/**
+ * Create a new profile score data object with default values
+ */
+export const createProfileScoreData = (
+  profileId: string,
+  baseScore: number = 100,
+  boostMultiplier: number = 1
+): ProfileScoreData => {
+  return {
+    profileId,
+    baseScore,
+    boostMultiplier,
+    timeSinceLastTop: 0,
+    penaltyFactor: 1.0,
+    lastCalculated: new Date()
+  };
+};
