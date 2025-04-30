@@ -1,6 +1,7 @@
-
 import React from 'react';
-import { Routes as RouterRoutes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import NeuralAnalyticsPage from './pages/NeuralAnalyticsPage';
+import NeuralAnalyticsDashboard from './pages/NeuralAnalyticsDashboard';
 import Home from './pages/Home';
 import ProfilePage from './pages/ProfilePage';
 import WalletPage from './pages/WalletPage';
@@ -64,69 +65,71 @@ const OxumPage = () => <StubPage title="Oxum Boosting System" />;
 const HermesPage = () => <StubPage title="Hermes Flow Dynamics" />;
 const OrusPage = () => <StubPage title="Orus Security" />;
 
-const Routes = () => {
+const AppRoutes: React.FC = () => {
   return (
-    <RouterRoutes>
-      <Route path="/" element={<Home />} />
-      <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/settings" element={<SettingsPage />} />
-      <Route path="/about" element={<AboutPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/wallet" element={<WalletPage />} />
-      <Route path="/product/:id" element={<ProductPage />} />
-      <Route path="/help" element={<HelpPage />} />
-      <Route path="/contact" element={<ContactPage />} />
-      <Route path="/privacy" element={<PrivacyPage />} />
-      <Route path="/terms" element={<TermsPage />} />
-      <Route path="/faq" element={<FaqPage />} />
-      <Route path="/blog" element={<BlogPage />} />
-      <Route path="/post/:id" element={<PostPage />} />
-      <Route path="/category/:id" element={<CategoryPage />} />
-      <Route path="/search" element={<SearchPage />} />
-      <Route path="/escorts" element={<EscortPage />} />
-      <Route path="/escort/:id" element={<EscortProfilePage />} />
-      <Route path="/creators" element={<CreatorPage />} />
-      <Route path="/creator/:id" element={<CreatorProfilePage />} />
-      <Route path="/livecams" element={<Livecam />} />
-      <Route path="/livecam/:id" element={<LivecamDetail />} />
-      <Route path="/ai-models" element={<AIModelPage />} />
-      <Route path="/ai-model/:id" element={<AIModelDetail />} />
-      <Route path="/pulse-boost" element={<PulseBoostPage />} />
-      <Route path="/metaverse" element={<MetaversePage />} />
-      <Route path="/companion" element={<CompanionPage />} />
-      <Route path="/personas" element={<PersonaListingPage />} />
-      <Route path="/persona/:id" element={<PersonaDetailPage />} />
-      
-      {/* UberCore components */}
-      <Route path="/brain-hub" element={<BrainHubPage />} />
-      <Route path="/lucie" element={<LuciePage />} />
-      <Route path="/oxum" element={<OxumPage />} />
-      <Route path="/hermes" element={<HermesPage />} />
-      <Route path="/orus" element={<OrusPage />} />
-      
-      {/* Admin and moderation routes */}
-      <Route path="/admin" element={<AdminPage />} /> {/* Main admin route */}
-      <Route path="/admin-dashboard" element={<AdminPage />} /> {/* Alternate path for compatibility */}
-      <Route path="/moderation" element={<ModerationPage />} />
-      <Route path="/unauthorized" element={<UnauthorizedPage />} />
-      
-      {/* Footer links from home page */}
-      <Route path="/ethics" element={<EthicsPage />} />
-      <Route path="/feedback" element={<FeedbackPage />} />
-      <Route path="/report" element={<ReportPage />} />
-      <Route path="/creators-guide" element={<CreatorsGuidePage />} />
-      <Route path="/verification" element={<VerificationPage />} />
-      <Route path="/boost-guide" element={<BoostGuidePage />} />
-      <Route path="/wallet-guide" element={<WalletGuidePage />} />
-      <Route path="/legal/compliance" element={<CompliancePage />} />
-      <Route path="/legal/copyright" element={<CopyrightPage />} />
-      <Route path="/legal/cookies" element={<CookiesPage />} />
-      
-      <Route path="*" element={<NotFoundPage />} />
-    </RouterRoutes>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<NeuralAnalyticsPage />} />
+        <Route path="/dashboard" element={<NeuralAnalyticsDashboard />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/wallet" element={<WalletPage />} />
+        <Route path="/product/:id" element={<ProductPage />} />
+        <Route path="/help" element={<HelpPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/faq" element={<FaqPage />} />
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/post/:id" element={<PostPage />} />
+        <Route path="/category/:id" element={<CategoryPage />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/escorts" element={<EscortPage />} />
+        <Route path="/escort/:id" element={<EscortProfilePage />} />
+        <Route path="/creators" element={<CreatorPage />} />
+        <Route path="/creator/:id" element={<CreatorProfilePage />} />
+        <Route path="/livecams" element={<Livecam />} />
+        <Route path="/livecam/:id" element={<LivecamDetail />} />
+        <Route path="/ai-models" element={<AIModelPage />} />
+        <Route path="/ai-model/:id" element={<AIModelDetail />} />
+        <Route path="/pulse-boost" element={<PulseBoostPage />} />
+        <Route path="/metaverse" element={<MetaversePage />} />
+        <Route path="/companion" element={<CompanionPage />} />
+        <Route path="/personas" element={<PersonaListingPage />} />
+        <Route path="/persona/:id" element={<PersonaDetailPage />} />
+        
+        {/* UberCore components */}
+        <Route path="/brain-hub" element={<BrainHubPage />} />
+        <Route path="/lucie" element={<LuciePage />} />
+        <Route path="/oxum" element={<OxumPage />} />
+        <Route path="/hermes" element={<HermesPage />} />
+        <Route path="/orus" element={<OrusPage />} />
+        
+        {/* Admin and moderation routes */}
+        <Route path="/admin" element={<AdminPage />} /> {/* Main admin route */}
+        <Route path="/admin-dashboard" element={<AdminPage />} /> {/* Alternate path for compatibility */}
+        <Route path="/moderation" element={<ModerationPage />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        
+        {/* Footer links from home page */}
+        <Route path="/ethics" element={<EthicsPage />} />
+        <Route path="/feedback" element={<FeedbackPage />} />
+        <Route path="/report" element={<ReportPage />} />
+        <Route path="/creators-guide" element={<CreatorsGuidePage />} />
+        <Route path="/verification" element={<VerificationPage />} />
+        <Route path="/boost-guide" element={<BoostGuidePage />} />
+        <Route path="/wallet-guide" element={<WalletGuidePage />} />
+        <Route path="/legal/compliance" element={<CompliancePage />} />
+        <Route path="/legal/copyright" element={<CopyrightPage />} />
+        <Route path="/legal/cookies" element={<CookiesPage />} />
+        
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 
-export default Routes;
+export default AppRoutes;

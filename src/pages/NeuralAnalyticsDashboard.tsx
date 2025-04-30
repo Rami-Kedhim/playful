@@ -1,68 +1,54 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useNeuralAnalyticsDashboard } from '@/hooks/useNeuralAnalyticsDashboard';
+import useNeuralAnalyticsDashboard from '@/hooks/useNeuralAnalyticsDashboard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
+import { InfoIcon, AlertCircle } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
-import MetricsGrid from '@/components/analytics/MetricsGrid';
-import PerformanceChart from '@/components/analytics/PerformanceChart';
-import AnomalyDetails from '@/components/analytics/AnomalyDetails';
-import DateRangeFilter from '@/components/analytics/DateRangeFilter';
+import { Separator } from '@/components/ui/separator';
 import AutoRefreshControl from '@/components/analytics/AutoRefreshControl';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import DateRangeFilter from '@/components/analytics/DateRangeFilter';
+import DrillableMetricCard from '@/components/analytics/DrillableMetricCard';
+import DetailedMetricView from '@/components/analytics/DetailedMetricView';
+import AnalyticsExportOptions from '@/components/analytics/AnalyticsExportOptions';
+import { Button } from '@/components/ui/button';
 
-const LoadingMetrics = () => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-    {[...Array(4)].map((_, i) => (
-      <Card key={i} className="bg-card">
-        <CardContent className="p-6">
-          <Skeleton className="h-4 w-[100px] mb-2" />
-          <Skeleton className="h-8 w-[120px]" />
-        </CardContent>
-      </Card>
-    ))}
-  </div>
-);
-
-const LoadingChart = () => (
-  <Card>
-    <CardHeader>
-      <Skeleton className="h-6 w-[200px]" />
-    </CardHeader>
-    <CardContent>
-      <Skeleton className="h-[400px] w-full" />
-    </CardContent>
-  </Card>
-);
-
-const NeuralAnalyticsDashboard = () => {
-  const { 
+const NeuralAnalyticsDashboard: React.FC = () => {
+  const {
     analyticsData,
     loading,
     error,
-    keyMetrics,
-    activeChart,
-    setActiveChart,
-    hasCriticalAnomalies,
     refreshAnalytics,
-    acknowledgeAnomaly,
-    startDate,
-    endDate,
-    handleDateRangeChange,
+    handleDateChange,
     isAutoRefreshEnabled,
     refreshInterval,
     toggleAutoRefresh,
-    changeRefreshInterval
+    changeRefreshInterval,
+    selectedMetric,
+    handleDrillDown,
+    handleBackToOverview,
+    getMetricValue,
+    getTrendDataForMetric
   } = useNeuralAnalyticsDashboard();
 
-  if (loading) {
+  // Handle manual refresh
+  const handleRefresh = () => {
+    refreshAnalytics();
+    toast.success("Analytics data refreshed");
+  };
+
+  if (loading && !analyticsData) {
     return (
-      <MainLayout title="Neural Analytics Dashboard" description="Real-time neural system analytics">
-        <div className="space-y-6">
-          <LoadingMetrics />
-          <LoadingChart />
+      <MainLayout
+        title="Neural System Analytics"
+        description="Loading neural system metrics..."
+      >
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <div className="h-16 w-16 mx-auto mb-4 border-t-2 border-primary rounded-full animate-spin"></div>
+            <p className="text-muted-foreground">Loading analytics data...</p>
+          </div>
         </div>
       </MainLayout>
     );
@@ -70,159 +56,186 @@ const NeuralAnalyticsDashboard = () => {
 
   if (error) {
     return (
-      <MainLayout title="Neural Analytics Dashboard" description="Real-time neural system analytics">
+      <MainLayout
+        title="Neural System Analytics"
+        description="Error loading neural system metrics"
+      >
         <Alert variant="destructive" className="mb-6">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertCircle className="h-4 w-4 mr-2" />
+          <AlertDescription>
+            {error}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="ml-4" 
+              onClick={refreshAnalytics}
+            >
+              Retry
+            </Button>
+          </AlertDescription>
         </Alert>
       </MainLayout>
     );
   }
 
-  // Transform keyMetrics object into an array with proper title properties
-  const metricsArray = keyMetrics ? [
-    { 
-      title: "Response Time", 
-      value: keyMetrics.responseTime.value, 
-      change: keyMetrics.responseTime.change, 
-      unit: keyMetrics.responseTime.unit 
-    },
-    { 
-      title: "Accuracy", 
-      value: keyMetrics.accuracy.value, 
-      change: keyMetrics.accuracy.change, 
-      unit: keyMetrics.accuracy.unit 
-    },
-    { 
-      title: "Error Rate", 
-      value: keyMetrics.errorRate.value, 
-      change: keyMetrics.errorRate.change, 
-      unit: keyMetrics.errorRate.unit 
-    },
-    { 
-      title: "Operations", 
-      value: keyMetrics.operations.value, 
-      change: keyMetrics.operations.change, 
-      unit: keyMetrics.operations.unit 
-    }
-  ] : [];
-
-  // Get chart data based on active chart type
-  const getChartData = () => {
-    if (!analyticsData) return [];
+  // If a specific metric is selected, show the detailed view
+  if (selectedMetric) {
+    const metricData = getMetricValue(selectedMetric.key);
+    const trendData = getTrendDataForMetric(selectedMetric.key);
     
-    switch (activeChart) {
-      case 'usage':
-        return analyticsData.usageMetrics.dailyUsageTrend || [];
-      case 'performance':
-        // Create performance trend data from operational metrics
-        return analyticsData.usageMetrics.dailyUsageTrend.map((item, index) => ({
-          date: item.date,
-          value: analyticsData.operationalMetrics.averageAccuracy * 100 - (index * 0.5 * (Math.random() - 0.5))
-        }));
-      case 'forecast':
-        // Use the performance forecast data if available
-        return analyticsData.performanceForecast?.map(item => ({
-          date: item.date,
-          value: item.metrics.expectedLoad
-        })) || [];
-      default:
-        return analyticsData.usageMetrics.dailyUsageTrend || [];
+    let unit = '';
+    switch(selectedMetric.key) {
+      case 'responseTime': unit = 'ms'; break;
+      case 'accuracy': unit = '%'; break;
+      case 'errorRate': unit = '%'; break;
+      case 'operations': unit = ''; break;
     }
-  };
-
-  // Get chart title based on active chart type
-  const getChartTitle = () => {
-    switch (activeChart) {
-      case 'usage':
-        return 'Daily System Usage';
-      case 'performance':
-        return 'System Performance Metrics';
-      case 'forecast':
-        return 'Neural System Forecast';
-      default:
-        return 'Neural System Analytics';
-    }
-  };
-
-  const handleAcknowledgeAnomaly = (id: string) => {
-    acknowledgeAnomaly(id);
-    toast({
-      title: "Anomaly acknowledged",
-      description: "The anomaly has been acknowledged and will be monitored.",
-    });
-  };
+    
+    return (
+      <MainLayout
+        title={`${selectedMetric.title} Analytics`}
+        description="Detailed metric analysis"
+      >
+        <DetailedMetricView
+          title={selectedMetric.title}
+          description={selectedMetric.description}
+          value={metricData.value}
+          unit={unit}
+          change={metricData.change}
+          trendData={trendData}
+          onBack={handleBackToOverview}
+        />
+      </MainLayout>
+    );
+  }
 
   return (
-    <MainLayout title="Neural Analytics Dashboard" description="Real-time neural system analytics">
-      <div className="space-y-6">
-        {hasCriticalAnomalies && (
-          <Alert className="bg-red-50 border-red-200">
-            <AlertDescription className="text-red-800">
-              Critical anomalies detected in the neural system. Immediate attention required.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {keyMetrics && <MetricsGrid metrics={metricsArray} />}
-
-        <Tabs defaultValue="charts" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="charts">Charts</TabsTrigger>
-            <TabsTrigger value="anomalies">Anomalies</TabsTrigger>
-          </TabsList>
+    <MainLayout
+      title="Neural System Analytics"
+      description="Advanced neural system metrics and monitoring"
+    >
+      <div className="space-y-4">
+        <div className="flex justify-between flex-col md:flex-row gap-4">
+          <DateRangeFilter onDateChange={handleDateChange} onRefresh={handleRefresh} />
           
-          <TabsContent value="charts">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
-              <DateRangeFilter
-                startDate={startDate}
-                endDate={endDate}
-                onDateChange={handleDateRangeChange}
-                onRefresh={refreshAnalytics}
+          <div className="flex items-center space-x-2">
+            <AutoRefreshControl 
+              isAutoRefreshEnabled={isAutoRefreshEnabled}
+              refreshInterval={refreshInterval}
+              onToggleAutoRefresh={toggleAutoRefresh}
+              onChangeInterval={changeRefreshInterval}
+            />
+            
+            {analyticsData && (
+              <AnalyticsExportOptions data={analyticsData} filename="neural-analytics" />
+            )}
+          </div>
+        </div>
+        
+        {analyticsData?.systemMetrics && (
+          <>
+            <Alert className="bg-blue-50 border-blue-200">
+              <InfoIcon className="h-4 w-4 text-blue-800" />
+              <AlertDescription className="text-blue-800">
+                System is operating at {analyticsData.systemMetrics.cpuUtilization}% CPU utilization and {analyticsData.systemMetrics.memoryUtilization}% memory utilization.
+              </AlertDescription>
+            </Alert>
+            
+            <h2 className="text-xl font-semibold mt-6 mb-2">Key Performance Metrics</h2>
+            <Separator className="mb-4" />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <DrillableMetricCard
+                title="Response Time"
+                value={getMetricValue('responseTime').value}
+                change={getMetricValue('responseTime').change}
+                unit="ms"
+                metricKey="responseTime"
+                description="Average time to respond to neural processing requests"
+                onDrillDown={handleDrillDown}
               />
-              <AutoRefreshControl
-                isAutoRefreshEnabled={isAutoRefreshEnabled}
-                refreshInterval={refreshInterval}
-                onToggleAutoRefresh={toggleAutoRefresh}
-                onChangeInterval={changeRefreshInterval}
+              
+              <DrillableMetricCard
+                title="Accuracy"
+                value={getMetricValue('accuracy').value}
+                change={getMetricValue('accuracy').change}
+                unit="%"
+                metricKey="accuracy"
+                description="Overall accuracy of neural processing operations"
+                onDrillDown={handleDrillDown}
+              />
+              
+              <DrillableMetricCard
+                title="Error Rate"
+                value={getMetricValue('errorRate').value}
+                change={getMetricValue('errorRate').change}
+                unit="%"
+                metricKey="errorRate"
+                description="Percentage of failed neural processing operations"
+                onDrillDown={handleDrillDown}
+              />
+              
+              <DrillableMetricCard
+                title="Total Operations"
+                value={getMetricValue('operations').value}
+                change={getMetricValue('operations').change}
+                unit=""
+                metricKey="operations"
+                description="Total number of neural processing operations"
+                onDrillDown={handleDrillDown}
               />
             </div>
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Neural System Analytics</CardTitle>
-                  <div className="flex gap-2">
-                    {['usage', 'performance', 'forecast'].map((type) => (
-                      <button
-                        key={type}
-                        onClick={() => setActiveChart(type as any)}
-                        className={`px-3 py-1 rounded capitalize text-sm ${
-                          activeChart === type ? 'bg-primary text-white' : 'bg-secondary'
-                        }`}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <PerformanceChart 
-                  data={getChartData()}
-                  dataKey="value"
-                  title={getChartTitle()}
-                  onRefresh={refreshAnalytics}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="anomalies">
-            <AnomalyDetails 
-              anomalies={analyticsData?.anomalies || []}
-              onAcknowledge={handleAcknowledgeAnomaly}
-            />
-          </TabsContent>
-        </Tabs>
+            
+            {analyticsData.anomalies && analyticsData.anomalies.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-2">Detected Anomalies</h2>
+                <Separator className="mb-4" />
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg text-amber-600">System Anomalies Detected</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {analyticsData.anomalies.map((anomaly, index) => (
+                        <li key={anomaly.id || index} className="flex items-start">
+                          <span className={`inline-block h-2 w-2 rounded-full mr-2 mt-2 ${
+                            anomaly.severity === 'high' ? 'bg-red-500' :
+                            anomaly.severity === 'medium' ? 'bg-amber-500' : 'bg-yellow-400'
+                          }`}></span>
+                          <div>
+                            <p className="font-medium">{anomaly.type}</p>
+                            <p className="text-sm text-muted-foreground">{anomaly.description}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+            
+            {analyticsData.recommendations && (
+              <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-2">Recommendations</h2>
+                <Separator className="mb-4" />
+                
+                <Card>
+                  <CardContent className="pt-6">
+                    <ul className="space-y-2">
+                      {analyticsData.recommendations.map((recommendation, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary mr-2 mt-2"></span>
+                          <p>{recommendation}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </MainLayout>
   );
