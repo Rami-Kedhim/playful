@@ -3,10 +3,13 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNeuralAnalyticsDashboard } from '@/hooks/useNeuralAnalyticsDashboard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from "@/components/ui/use-toast";
 import MainLayout from '@/components/layout/MainLayout';
 import MetricsGrid from '@/components/analytics/MetricsGrid';
 import PerformanceChart from '@/components/analytics/PerformanceChart';
+import AnomalyDetails from '@/components/analytics/AnomalyDetails';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const LoadingMetrics = () => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -41,7 +44,8 @@ const NeuralAnalyticsDashboard = () => {
     activeChart,
     setActiveChart,
     hasCriticalAnomalies,
-    refreshAnalytics 
+    refreshAnalytics,
+    acknowledgeAnomaly
   } = useNeuralAnalyticsDashboard();
 
   if (loading) {
@@ -131,6 +135,14 @@ const NeuralAnalyticsDashboard = () => {
     }
   };
 
+  const handleAcknowledgeAnomaly = (id: string) => {
+    acknowledgeAnomaly(id);
+    toast({
+      title: "Anomaly acknowledged",
+      description: "The anomaly has been acknowledged and will be monitored.",
+    });
+  };
+
   return (
     <MainLayout title="Neural Analytics Dashboard" description="Real-time neural system analytics">
       <div className="space-y-6">
@@ -144,34 +156,50 @@ const NeuralAnalyticsDashboard = () => {
 
         {keyMetrics && <MetricsGrid metrics={metricsArray} />}
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Neural System Analytics</CardTitle>
-              <div className="flex gap-2">
-                {['usage', 'performance', 'forecast'].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setActiveChart(type as any)}
-                    className={`px-3 py-1 rounded capitalize text-sm ${
-                      activeChart === type ? 'bg-primary text-white' : 'bg-secondary'
-                    }`}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <PerformanceChart 
-              data={getChartData()}
-              dataKey="value"
-              title={getChartTitle()}
-              onRefresh={refreshAnalytics}
+        <Tabs defaultValue="charts" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="charts">Charts</TabsTrigger>
+            <TabsTrigger value="anomalies">Anomalies</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="charts">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Neural System Analytics</CardTitle>
+                  <div className="flex gap-2">
+                    {['usage', 'performance', 'forecast'].map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => setActiveChart(type as any)}
+                        className={`px-3 py-1 rounded capitalize text-sm ${
+                          activeChart === type ? 'bg-primary text-white' : 'bg-secondary'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <PerformanceChart 
+                  data={getChartData()}
+                  dataKey="value"
+                  title={getChartTitle()}
+                  onRefresh={refreshAnalytics}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="anomalies">
+            <AnomalyDetails 
+              anomalies={analyticsData?.anomalies || []}
+              onAcknowledge={handleAcknowledgeAnomaly}
             />
-          </CardContent>
-        </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </MainLayout>
   );

@@ -2,12 +2,14 @@
 import { useState } from 'react';
 import { useNeuralAnalytics } from './useNeuralAnalytics';
 import { NeuralAnalyticsReport } from '@/services/neural/types/neuralAnalytics';
+import { Anomaly } from '@/types/analytics';
 
 export type AnalyticsChartType = 'usage' | 'performance' | 'forecast';
 
 export function useNeuralAnalyticsDashboard() {
   const { analyticsData, loading, error, refreshAnalytics } = useNeuralAnalytics();
   const [activeChart, setActiveChart] = useState<AnalyticsChartType>('usage');
+  const [acknowledgedAnomalies, setAcknowledgedAnomalies] = useState<string[]>([]);
   
   // Extract and format key metrics for display
   const keyMetrics = analyticsData ? {
@@ -33,20 +35,34 @@ export function useNeuralAnalyticsDashboard() {
     }
   } : null;
   
+  // Filter anomalies to exclude acknowledged ones
+  const filteredAnomalies = analyticsData?.anomalies.filter(
+    anomaly => !acknowledgedAnomalies.includes(anomaly.id || '')
+  ) || [];
+  
   // Check if there are any critical anomalies
-  const hasCriticalAnomalies = analyticsData?.anomalies.some(
+  const hasCriticalAnomalies = filteredAnomalies.some(
     anomaly => anomaly.severity === 'high'
   ) || false;
   
+  // Function to acknowledge an anomaly
+  const acknowledgeAnomaly = (id: string) => {
+    setAcknowledgedAnomalies(prev => [...prev, id]);
+  };
+  
   return {
-    analyticsData,
+    analyticsData: analyticsData ? {
+      ...analyticsData,
+      anomalies: filteredAnomalies
+    } : null,
     loading,
     error,
     refreshAnalytics,
     activeChart,
     setActiveChart,
     keyMetrics,
-    hasCriticalAnomalies
+    hasCriticalAnomalies,
+    acknowledgeAnomaly
   };
 }
 

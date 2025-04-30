@@ -15,3 +15,12 @@ export interface PerformanceChartProps {
   title?: string;
   onRefresh?: () => void;
 }
+
+export interface Anomaly {
+  id?: string;
+  type?: string;
+  severity?: 'low' | 'medium' | 'high';
+  description?: string;
+  timestamp?: string;
+  relatedComponentId?: string;
+}
