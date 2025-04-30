@@ -1,94 +1,16 @@
 
-// Merged and updated UberPersona interface to include all required properties used across the codebase
+import { UberPersonaType, RoleFlags, Capabilities, StatusFlags, BoostStatus, Availability, SystemMetadata, Monetization, Stats } from './uberPersona';
 
-export interface BoostStatus {
-  isActive: boolean;
-  tier?: 'basic' | 'premium' | 'none';
-  remainingTime?: string;
-  expiresAt?: string | Date;
-  boostLevel?: number;
-}
+// Re-export interfaces from lowercase file to maintain consistent exports
+export { UberPersonaType, RoleFlags, Capabilities, StatusFlags, BoostStatus, Availability, SystemMetadata, Monetization, Stats };
 
-export interface AvailabilityScheduleSlot {
-  start: string;
-  end: string;
-}
-
-export interface AvailabilityScheduleDay {
-  available: boolean;
-  slots?: AvailabilityScheduleSlot[];
-}
-
-export interface AvailabilitySchedule {
-  [day: string]: AvailabilityScheduleDay;
-}
-
-export interface Availability {
-  schedule?: AvailabilitySchedule;
-  nextAvailable?: string;
-}
-
-export interface StatusFlags {
-  needsModeration?: boolean;
-  hasPendingUpdates?: boolean;
-  isPremiumExpiring?: boolean;
-}
-
-export interface SystemMetadata {
-  source: 'ai_generated' | 'scraped' | 'manual';
-  lastSynced?: Date;
-  tagsGeneratedByAI: boolean;
-  hilbertSpaceVector: number[];
-  personalityIndex?: number;
-  statusFlags?: StatusFlags;
-}
-
-export interface RoleFlags {
-  isEscort: boolean;
-  isCreator: boolean;
-  isLivecam: boolean;
-  isAI: boolean;
-  isVerified: boolean;
-  isFeatured: boolean;
-}
-
-export interface Capabilities {
-  hasPhotos: boolean;
-  hasVideos: boolean;
-  hasStories: boolean;
-  hasChat: boolean;
-  hasBooking: boolean;
-  hasLiveStream: boolean;
-  hasExclusiveContent: boolean;
-  hasContent: boolean;
-  hasRealMeets: boolean;
-  hasVirtualMeets: boolean;
-}
-
-export interface Monetization {
-  acceptsLucoin?: boolean;
-  acceptsTips?: boolean;
-  subscriptionPrice?: number;
-  unlockingPrice?: number;
-  boostingActive?: boolean;
-  meetingPrice?: number;
-}
-
-export interface Stats {
-  rating: number;
-  reviewCount: number;
-  responseTime: number;
-  viewCount: number;
-  favoriteCount: number;
-  bookingCount?: number;
-}
-
+// Comprehensive UberPersona interface that includes all required properties
 export interface UberPersona {
   id: string;
   name: string;
   displayName?: string;
   username?: string;
-  type: 'escort' | 'creator' | 'livecam' | 'ai';
+  type: keyof UberPersonaType | string;
   personality?: string;
   traits?: string[];
   interests?: string[];
@@ -123,6 +45,9 @@ export interface UberPersona {
   boostStatus?: BoostStatus;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  profileImageUrl?: string;
+  galleryImages?: string[];
+  status?: string;
 }
 
 export interface NeuralModel {
@@ -138,4 +63,3 @@ export interface NeuralModel {
     [key: string]: any;
   };
 }
-

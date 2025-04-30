@@ -1,3 +1,3 @@
 
-// Ensure this correctly re-exports from the lowercase file
-export * from './uberPersona';
+// Direct re-export from the proper implementation file
+export * from './UberPersona';

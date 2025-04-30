@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 // Use a consistent import path for auth and user services
 import authService from '@/services/AuthService';

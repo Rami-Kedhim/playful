@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import type { UberPersona } from '@/types/UberPersona';
 
@@ -48,13 +49,13 @@ export const useUberPersona = (personaId?: string) => {
             }
           },
           age: 25,
-          // Remove gender as it doesn't exist in UberPersona
           location: 'New York, USA', // Using string type for location
           languages: ['English', 'Spanish'],
           traits: ['Friendly', 'Outgoing', 'Creative'],
           stats: {
             rating: 4.5,
             reviewCount: 120,
+            responseTime: 30, // Adding responseTime as it's required
             viewCount: 12000,
             favoriteCount: 350
           },

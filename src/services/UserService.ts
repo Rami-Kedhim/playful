@@ -1,5 +1,5 @@
 
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/UberPersona';
 
 export const userService = {
   getUserProfile: async (userId: string): Promise<UberPersona> => {
@@ -8,10 +8,37 @@ export const userService = {
       id: userId,
       name: 'Demo User',
       displayName: 'Demo User',
-      type: 'user' as any, // Casting to any to bypass type check or using a valid type
+      type: 'user', 
       tags: ['new'],
       isVerified: false,
       isOnline: true,
+      roleFlags: {
+        isEscort: false,
+        isCreator: false,
+        isLivecam: false,
+        isAI: false,
+        isVerified: false,
+        isFeatured: false,
+      },
+      capabilities: {
+        hasPhotos: false,
+        hasVideos: false,
+        hasStories: false,
+        hasChat: true,
+        hasBooking: false,
+        hasLiveStream: false,
+        hasExclusiveContent: false,
+        hasContent: false,
+        hasRealMeets: false,
+        hasVirtualMeets: false,
+      },
+      systemMetadata: {
+        source: 'manual',
+        lastSynced: new Date(),
+        tagsGeneratedByAI: false,
+        hilbertSpaceVector: [],
+        statusFlags: {} // Added to match UberPersona interface
+      },
       monetization: {
         meetingPrice: 50
       }
