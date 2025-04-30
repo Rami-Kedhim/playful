@@ -1,4 +1,5 @@
-import { UberPersona } from '@/types/UberPersona';
+
+import { UberPersona } from '@/types/uberPersona';
 
 function generateRandomId(): string {
   return Math.random().toString(36).substr(2, 9);
