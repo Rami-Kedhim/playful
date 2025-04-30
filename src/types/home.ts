@@ -30,7 +30,7 @@ export function convertToFeaturedPersonas(personas: UberPersona[]): FeaturedPers
     id: persona.id,
     name: persona.name,
     displayName: persona.displayName || persona.name, // Ensure displayName is always provided
-    type: persona.type,
+    type: persona.type as 'escort' | 'creator' | 'livecam' | 'ai',
     avatarUrl: persona.avatarUrl,
     location: persona.location,
     isVerified: persona.isVerified,
@@ -44,11 +44,20 @@ export function formatSystemStatus(statusData: Record<string, any>): SystemStatu
   return {
     operational: statusData.coreStatus === 'online',
     components: {
-      lucie: statusData.hermesStatus || 'unknown',
+      lucie: statusData.lucieStatus || 'unknown',
       hermes: statusData.hermesStatus || 'unknown',
       oxum: statusData.oxumStatus || 'unknown',
       orus: statusData.orusStatus || 'unknown',
       wallet: statusData.walletStatus || 'unknown'
     }
   };
+}
+
+export interface LiveBoostMapEntry {
+  id: string;
+  type: string;
+  location: string;
+  boostScore: number;
+  trend: 'rising' | 'stable' | 'falling';
+  lastUpdated: Date;
 }

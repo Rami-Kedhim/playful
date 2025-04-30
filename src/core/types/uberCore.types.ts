@@ -3,6 +3,8 @@
  * Core type definitions for UberCore systems
  */
 
+import { UberPersona } from '@/types/UberPersona';
+
 export interface UberCoreSettings {
   boostingEnabled: boolean;
   boostingAlgorithm: string;
@@ -72,4 +74,27 @@ export interface CoreModule {
   status: 'active' | 'inactive' | 'error';
   initialize: () => Promise<boolean>;
   shutdown: () => Promise<boolean>;
+}
+
+// Add PersonaProcessingResult type which extends UberPersona with additional processing fields
+export interface PersonaProcessingResult extends UberPersona {
+  boostScore?: number;
+  systemMetadata?: {
+    source: string;
+    lastSynced: Date;
+    tagsGeneratedByAI: boolean;
+    hilbertSpaceVector: number[];
+    flowScore?: number;
+    statusFlags?: {
+      needsModeration?: boolean;
+      [key: string]: boolean | undefined;
+    };
+    personalityIndex?: number;
+  };
+  processingStats?: {
+    viewCount: number;
+    interactionCount: number;
+    conversionRate: number;
+    engagementScore: number;
+  };
 }

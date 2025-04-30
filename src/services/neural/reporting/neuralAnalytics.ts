@@ -1,119 +1,108 @@
 
-import { SystemHealthMetrics } from '@/types/ubercore';
+// This file provides mock data for neural analytics
+// In a production environment, this would be replaced with real API calls
 
-export interface NeuralAnalyticsResult {
-  modelPerformance: {
-    accuracy: number;
-    precision: number;
-    recall: number;
-    f1Score: number;
-    auc: number;
-    inferenceTime: number;
-  };
-  systemMetrics: {
-    responseTimeMs: number;
-    errorRate: number;
-    qps: number;
-    cpuUsage: number;
-    memoryUsage: number;
-    gpuUsage?: number;
-  };
-  operationalMetrics: {
-    totalOperations: number;
-    successfulOperations: number;
-    failedOperations: number;
-    responseTimeChange: number;
-    errorRateChange: number;
-    accuracyChange: number;
-    operationsChange: number;
-  };
-  performanceForecast: Array<{
-    date: string;
-    metrics: {
-      predictedResponseTime: number;
-      predictedErrorRate: number;
-      expectedLoad: number;
-    };
-  }>;
-}
-
-export function generateMockNeuralAnalytics(): NeuralAnalyticsResult {
+export function generateMockNeuralAnalytics() {
   return {
-    modelPerformance: {
-      accuracy: 0.97,
-      precision: 0.95,
-      recall: 0.94,
-      f1Score: 0.945,
-      auc: 0.98,
-      inferenceTime: 120,
-    },
     systemMetrics: {
-      responseTimeMs: 145,
-      errorRate: 0.02,
-      qps: 240,
-      cpuUsage: 65,
-      memoryUsage: 82,
-      gpuUsage: 72,
+      responseTimeMs: 120 + Math.random() * 80,
+      errorRate: 0.02 + Math.random() * 0.03,
+      throughput: 25 + Math.random() * 15,
+      cpuUtilization: 0.45 + Math.random() * 0.2,
+      memoryUtilization: 0.55 + Math.random() * 0.15,
+      networkLatency: 75 + Math.random() * 25
+    },
+    modelPerformance: {
+      accuracy: 0.92 + Math.random() * 0.07,
+      precision: 0.91 + Math.random() * 0.08,
+      recall: 0.89 + Math.random() * 0.09,
+      f1Score: 0.90 + Math.random() * 0.08
     },
     operationalMetrics: {
-      totalOperations: 15420,
-      successfulOperations: 15112,
-      failedOperations: 308,
-      responseTimeChange: -5.2, // Improved by 5.2%
-      errorRateChange: -0.5,    // Improved by 0.5%
-      accuracyChange: 0.8,      // Improved by 0.8%
-      operationsChange: 12.4,   // Increased by 12.4%
+      uptime: 99.98,
+      totalOperations: Math.floor(50000 + Math.random() * 10000),
+      operationsChange: -2 + Math.random() * 10,
+      responseTimeChange: -5 + Math.random() * 10,
+      accuracyChange: -1 + Math.random() * 5,
+      errorRateChange: Math.random() > 0.5 ? (2 + Math.random() * 3) : (-2 - Math.random() * 3)
     },
-    performanceForecast: Array.from({ length: 7 }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() + i);
-      return {
-        date: date.toISOString().split('T')[0],
-        metrics: {
-          predictedResponseTime: 145 - (i * 2),
-          predictedErrorRate: Math.max(0.01, 0.02 - (i * 0.002)),
-          expectedLoad: 240 + (i * 20),
-        }
-      };
-    }),
+    performanceTrend: Array(24).fill(0).map((_, i) => ({
+      timestamp: new Date(Date.now() - (24 - i) * 60 * 60 * 1000).toISOString(),
+      responseTime: 110 + Math.sin(i / 3) * 30 + Math.random() * 20,
+      accuracy: 91 + Math.cos(i / 5) * 5 + Math.random() * 3,
+      errorRate: 2 + Math.sin(i / 4) * 1 + Math.random()
+    })),
+    performanceForecast: Array(24).fill(0).map((_, i) => ({
+      date: new Date(Date.now() + i * 60 * 60 * 1000).toISOString(),
+      metrics: {
+        predictedResponseTime: 120 + Math.sin(i / 6) * 20 + Math.random() * 15,
+        predictedErrorRate: 0.02 + Math.sin(i / 8) * 0.01 + Math.random() * 0.01,
+        expectedLoad: 100 + Math.sin(i / 4) * 30 + Math.random() * 20
+      }
+    })),
+    recommendations: [
+      "Optimize response handling in the Lucie module to improve latency",
+      "Consider scaling up resources during peak usage hours (18:00-22:00)",
+      "Implement batch processing for non-critical operations to reduce system load",
+      "Activate advanced caching for frequency-accessed persona data",
+      "Update the neural model to version 3.4.2 for improved accuracy"
+    ]
   };
 }
 
-// Generate detailed metrics for performance monitoring
-export function generateDetailedPerformanceMetrics(): {
-  totalRequests: number;
-  successfulRequests: number;
-  failedRequests: number;
-  averageResponseTime: number;
-  p95ResponseTime: number;
-  p99ResponseTime: number;
-  requestsPerMinute: number;
-  errorRate: number;
-  successRate: number;
-  processingEfficiency: number;
-  resourceUtilization: number;
-  operationalStatus: string;
-  lastUpdated: string;
-  responseTimeChange: number;
-  errorRateChange: number;
-  accuracyChange: number;
-} {
+export function generateDetailedPerformanceMetrics() {
   return {
-    totalRequests: 45820,
-    successfulRequests: 44903,
-    failedRequests: 917,
-    averageResponseTime: 145.3,
-    p95ResponseTime: 230.5,
-    p99ResponseTime: 312.8,
-    requestsPerMinute: 267.4,
-    errorRate: 2.0,
-    successRate: 98.0,
-    processingEfficiency: 92.3,
-    resourceUtilization: 68.5,
-    operationalStatus: 'Optimal',
-    lastUpdated: new Date().toISOString(),
-    responseTimeChange: -5.2, // Changed from string to number
-    errorRateChange: -0.5,    // Changed from string to number
-    accuracyChange: 0.8       // Changed from string to number
+    processingMetrics: {
+      averageThroughput: 42.5,
+      peakThroughput: 78.2,
+      bottlenecks: [
+        { module: "Hermes", impact: "High", recommendation: "Increase flow capacity" },
+        { module: "Oxum", impact: "Medium", recommendation: "Optimize boost allocation" }
+      ]
+    },
+    resourceAllocation: {
+      cpu: {
+        usage: 0.68,
+        distribution: [
+          { module: "Lucie", percent: 40 },
+          { module: "Hermes", percent: 25 },
+          { module: "Oxum", percent: 20 },
+          { module: "Orus", percent: 10 },
+          { module: "Other", percent: 5 }
+        ]
+      },
+      memory: {
+        usage: 0.72,
+        distribution: [
+          { module: "Lucie", percent: 45 },
+          { module: "Hermes", percent: 20 },
+          { module: "Oxum", percent: 15 },
+          { module: "Orus", percent: 15 },
+          { module: "Other", percent: 5 }
+        ]
+      }
+    },
+    modelPerformanceDetails: {
+      accuracyByDomain: [
+        { domain: "Persona Verification", accuracy: 0.98 },
+        { domain: "Content Moderation", accuracy: 0.95 },
+        { domain: "User Intent", accuracy: 0.87 },
+        { domain: "Flow Prediction", accuracy: 0.83 }
+      ],
+      trainingStatus: {
+        lastTraining: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        samples: 124567,
+        epochsCompleted: 42,
+        improvementFromBaseline: "12.5%"
+      }
+    },
+    integrations: {
+      services: [
+        { name: "Persona Service", status: "Healthy", latency: 28 },
+        { name: "Payment Gateway", status: "Healthy", latency: 145 },
+        { name: "Content Delivery", status: "Degraded", latency: 310 },
+        { name: "Analytics Pipeline", status: "Healthy", latency: 67 }
+      ]
+    }
   };
 }

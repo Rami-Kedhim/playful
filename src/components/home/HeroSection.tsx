@@ -16,8 +16,8 @@ const HeroSection = ({ searchLocation, setSearchLocation }: HeroSectionProps) =>
 
   return (
     <section className="relative min-h-[85vh] flex items-center py-20 overflow-hidden">
-      {/* Background with gradient overlay */}
-      <div className="absolute inset-0 bg-[url('/images/hero-bg.jpg')] bg-cover bg-center opacity-20"></div>
+      {/* Background with gradient overlay - use a background color instead of an image */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black opacity-90"></div>
       <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background"></div>
       
       <div className="container mx-auto px-4 relative z-10">
