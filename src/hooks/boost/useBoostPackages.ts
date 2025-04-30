@@ -2,56 +2,73 @@
 import { useState, useEffect } from 'react';
 import { BoostPackage } from '@/types/boost';
 
-export const useBoostPackages = (): BoostPackage[] => {
+const useBoostPackages = (): BoostPackage[] => {
   const [packages, setPackages] = useState<BoostPackage[]>([]);
   
   useEffect(() => {
-    // Simulated API fetch of boost packages
-    const fetchPackages = async () => {
-      // Mock data
-      const mockPackages: BoostPackage[] = [
-        {
-          id: 'basic',
-          name: 'Basic Boost',
-          price: 15,
-          price_ubx: 150,
-          description: '6-hour visibility boost',
-          duration: '06:00:00',
-          boost_power: 20, // Now properly defined in BoostPackage type
-          visibility_increase: 25,
-          features: ['Featured in search results', 'Higher ranking'],
-          color: '#3b82f6'
-        },
-        {
-          id: 'standard',
-          name: 'Standard Boost',
-          price: 30,
-          price_ubx: 300,
-          description: '24-hour visibility boost',
-          duration: '24:00:00',
-          boost_power: 50, // Now properly defined in BoostPackage type
-          visibility_increase: 75,
-          features: ['Featured in search results', 'Higher ranking', 'Featured on homepage'],
-          color: '#8b5cf6' 
-        },
-        {
-          id: 'premium',
-          name: 'Premium Boost',
-          price: 50,
-          price_ubx: 500,
-          description: '3-day visibility boost',
-          duration: '72:00:00',
-          boost_power: 100, // Now properly defined in BoostPackage type
-          visibility_increase: 150,
-          features: ['Featured in search results', 'Higher ranking', 'Featured on homepage', 'Premium badge'],
-          color: '#ec4899'
-        }
-      ];
-      
-      setPackages(mockPackages);
-    };
+    // Mock data for boost packages
+    const mockPackages: BoostPackage[] = [
+      {
+        id: 'boost-1',
+        name: 'Standard Boost',
+        description: 'Increase your visibility for 24 hours',
+        price: 50,
+        price_ubx: 50,
+        duration: '24:00:00',
+        durationMinutes: 1440,
+        features: [
+          'Featured in search results',
+          'Higher visibility in feeds',
+          'Priority in matching algorithm'
+        ],
+        visibility: 'medium',
+        visibility_increase: 50,
+        boost_power: 50,
+        color: 'blue',
+        badgeColor: 'bg-blue-500'
+      },
+      {
+        id: 'boost-2',
+        name: 'Premium Boost',
+        description: 'Maximum visibility for 3 days',
+        price: 120,
+        price_ubx: 120,
+        duration: '72:00:00',
+        durationMinutes: 4320,
+        features: [
+          'Top position in search results',
+          'Featured profile highlight',
+          'Maximum visibility in feeds',
+          'Priority in recommendation engine'
+        ],
+        visibility: 'high',
+        visibility_increase: 150,
+        boost_power: 150,
+        color: 'purple',
+        badgeColor: 'bg-purple-500'
+      },
+      {
+        id: 'boost-3',
+        name: 'Quick Boost',
+        description: 'Short-term visibility increase',
+        price: 25,
+        price_ubx: 25,
+        duration: '12:00:00',
+        durationMinutes: 720,
+        features: [
+          'Temporary visibility increase',
+          'Higher position in feeds',
+          'Ideal for quick promotions'
+        ],
+        visibility: 'low',
+        visibility_increase: 30,
+        boost_power: 30,
+        color: 'green',
+        badgeColor: 'bg-green-500'
+      }
+    ];
     
-    fetchPackages();
+    setPackages(mockPackages);
   }, []);
   
   return packages;

@@ -2,9 +2,9 @@
 export interface BoostPackage {
   id: string;
   name: string;
-  price?: number;
+  description: string;
+  price: number;
   price_ubx?: number;
-  description?: string;
   duration: string;
   durationMinutes?: number;
   features?: string[];
@@ -28,6 +28,7 @@ export interface BoostStatus {
   boost_level?: number;
   expiresAt?: Date;
   visibilityScore?: number;
+  progress?: number;
 }
 
 export interface BoostEligibility {

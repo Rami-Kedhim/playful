@@ -12,14 +12,16 @@ interface ConnectResult {
   error?: string;
 }
 
-interface FlowDynamicsOptions {
+export interface FlowDynamicsOptions {
   systemLoad: number;
   activityLevel: number;
+  personaType?: string;  // Added missing property
 }
 
-interface FlowDynamicsResult {
+export interface FlowDynamicsResult {
   flowScore: number;
   recommendation?: string;
+  recommendedActions?: string[];  // Added missing property
   optimalTime?: Date;
 }
 
@@ -63,7 +65,7 @@ class Hermes {
    * Resolve flow dynamics for optimal timing
    */
   public resolveFlowDynamics(options: FlowDynamicsOptions): FlowDynamicsResult {
-    const { systemLoad, activityLevel } = options;
+    const { systemLoad, activityLevel, personaType } = options;
     
     // Calculate a flow score based on system load and activity level
     const flowScore = Math.round(((1 - systemLoad) * 0.6 + activityLevel * 0.4) * 100);
@@ -97,9 +99,16 @@ class Hermes {
       recommendation = "Consider delaying for optimal visibility";
     }
     
+    const recommendedActions = [
+      "Review content quality",
+      "Optimize profile settings",
+      flowScore < 70 ? "Consider different timing" : "Proceed with posting"
+    ];
+    
     return {
       flowScore,
       recommendation,
+      recommendedActions,
       optimalTime
     };
   }

@@ -1,4 +1,3 @@
-
 import { UberPersona } from '@/types/uberPersona';
 import { hermes } from '@/core/Hermes';
 
@@ -128,6 +127,35 @@ export class PersonaService {
     return {
       score,
       reasons
+    };
+  }
+}
+
+export function getPersonaOptimalVisibilityTime(personaId: string): { 
+  time: Date;
+  score: number;
+  recommendations: string[]; 
+} {
+  try {
+    // Use Hermes to determine optimal visibility time
+    const flowDynamics = hermes.resolveFlowDynamics({
+      systemLoad: 0.6,
+      activityLevel: 0.75,
+      personaType: 'premium' // Add the personaType property
+    });
+    
+    // Fixed property name to match FlowDynamicsResult interface
+    return {
+      time: flowDynamics.optimalTime || new Date(),
+      score: flowDynamics.flowScore,
+      recommendations: flowDynamics.recommendation ? [flowDynamics.recommendation] : []
+    };
+  } catch (error) {
+    console.error("Error getting persona optimal visibility time:", error);
+    return {
+      time: new Date(),
+      score: 0,
+      recommendations: ["Error occurred, using default values"]
     };
   }
 }

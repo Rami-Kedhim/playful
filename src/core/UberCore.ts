@@ -23,6 +23,22 @@ class UberCore {
       uptime: 99.9
     };
   }
+
+  // Add missing checkSubsystemHealth method
+  public checkSubsystemHealth(): { status: string, health: number }[] {
+    return [
+      { status: 'Authentication', health: 98 },
+      { status: 'Database', health: 99.5 },
+      { status: 'Storage', health: 97.8 },
+      { status: 'API', health: 99.2 }
+    ];
+  }
+
+  // Add missing shutdown method
+  public shutdown(): void {
+    this.initialized = false;
+    console.log("UberCore shutdown complete");
+  }
 }
 
 export const uberCore = new UberCore();
