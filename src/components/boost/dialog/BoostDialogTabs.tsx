@@ -125,7 +125,7 @@ const BoostDialogTabs: React.FC<DialogTabsProps> = ({
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
-            <HermesBoostInfo hermesStatus={hermesStatus as HermesStatus} />
+            <HermesBoostInfo hermesStatus={hermesStatus} />
             
             <div className="bg-secondary/20 p-4 rounded-md">
               <div className="flex items-center mb-2">

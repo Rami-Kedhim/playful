@@ -1,45 +1,104 @@
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import { AuthService } from '@/services/AuthService';
+import { UserService } from '@/services/UserService';
+import { UberPersona } from '@/types/uberPersona';
 
-// Use consistent casing for imports
-import { authService } from '@/services/authService';
-import { userService } from '@/services/userService';
-
-interface UberPersonaContextType {
-  persona: any | null;
-  isLoading: boolean;
+// Create the context
+export interface UberEcosystemContextValue {
+  currentUser: any;
+  isAuthenticated: boolean;
+  selectedPersona: UberPersona | null;
+  setSelectedPersona: (persona: UberPersona | null) => void;
+  validateToken: (token: string) => Promise<boolean>;
+  loading: boolean;
   error: string | null;
-  loadPersona: (id: string) => Promise<void>;
-  updatePersona: (data: any) => Promise<boolean>;
 }
 
-const UberPersonaContext = createContext<UberPersonaContextType | undefined>(undefined);
+const UberEcosystemContext = createContext<UberEcosystemContextValue | undefined>(undefined);
 
-export function UberPersonaProvider({ children }: { children: ReactNode }) {
-  const personaValue: UberPersonaContextType = {
-    persona: null,
-    isLoading: false,
-    error: null,
-    loadPersona: async (id) => {
-      console.log(`Loading persona ${id}`);
-    },
-    updatePersona: async (data) => {
-      console.log('Updating persona', data);
-      return true;
+// Provider component
+interface UberEcosystemProviderProps {
+  children: ReactNode;
+}
+
+export const UberEcosystemProvider: React.FC<UberEcosystemProviderProps> = ({ 
+  children 
+}) => {
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [selectedPersona, setSelectedPersona] = useState<UberPersona | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        setLoading(true);
+        
+        // Check for an existing token
+        const token = localStorage.getItem('auth_token');
+        
+        if (token) {
+          const valid = await validateToken(token);
+          if (valid) {
+            // If token is valid, get the user data
+            const userData = { id: 'user-123', name: 'Test User' }; // Mock user data
+            setCurrentUser(userData);
+            setIsAuthenticated(true);
+          } else {
+            // If token is not valid, clear it
+            localStorage.removeItem('auth_token');
+            setCurrentUser(null);
+            setIsAuthenticated(false);
+          }
+        } else {
+          // No token found
+          setCurrentUser(null);
+          setIsAuthenticated(false);
+        }
+        setError(null);
+      } catch (err: any) {
+        console.error('Auth initialization error:', err);
+        setError(err.message || 'Failed to initialize authentication');
+        setCurrentUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    initializeAuth();
+  }, []);
+  
+  // Validate JWT token
+  const validateToken = async (token: string): Promise<boolean> => {
+    try {
+      // Implement token validation here using AuthService
+      const authService = new AuthService();
+      const isValid = await authService.validateToken(token);
+      return isValid;
+    } catch (error) {
+      console.error('Token validation error:', error);
+      return false;
     }
+  };
+  
+  const value = {
+    currentUser,
+    isAuthenticated,
+    selectedPersona,
+    setSelectedPersona,
+    validateToken,
+    loading,
+    error
   };
 
   return (
-    <UberPersonaContext.Provider value={personaValue}>
+    <UberEcosystemContext.Provider value={value}>
       {children}
-    </UberPersonaContext.Provider>
+    </UberEcosystemContext.Provider>
   );
-}
+};
 
-export function useUberPersona() {
-  const context = useContext(UberPersonaContext);
-  if (context === undefined) {
-    throw new Error('useUberPersona must be used within a UberPersonaProvider');
-  }
-  return context;
-}
+export default UberEcosystemContext;

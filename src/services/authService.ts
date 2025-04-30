@@ -1,21 +1,28 @@
 
 import { UserRole, UserRoleEnum } from '@/types/pulse-boost';
 
-export const authService = {
-  getUserRole: async (userId: string): Promise<UserRole> => {
-    // Mock implementation
+export class AuthService {
+  // Mock implementation
+  async getUserRole(userId: string): Promise<UserRole> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     return {
-      id: userId,
-      name: 'Regular User',
-      permissions: ['view_profile', 'edit_own_profile']
+      id: 'role-123',
+      userId,
+      role: UserRoleEnum.USER,
+      createdAt: new Date()
     };
-  },
-  
-  validateToken: async (token: string): Promise<boolean> => {
-    // Mock implementation
-    console.log('Validating token:', token);
-    return token.length > 10;
   }
-};
 
-export default authService;
+  // Add this missing method
+  async validateToken(token: string): Promise<boolean> {
+    // Simulate token validation
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Simple validation: token must be 10+ characters
+    return token && token.length >= 10;
+  }
+}
+
+export default AuthService;

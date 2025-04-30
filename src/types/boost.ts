@@ -4,19 +4,19 @@ export interface BoostPackage {
   name: string;
   description: string;
   price: number;
-  price_ubx?: number; // Add this property
+  price_ubx?: number;
   currency?: string;
   duration: string;
   durationMinutes?: number;
   features?: string[];
   visibility?: string;
-  visibility_increase?: number; // Add this property
-  boost_power?: number; // Add this property
+  visibility_increase?: number;
+  boost_power?: number;
   tier?: BoostTier;
   visibilityScore?: number;
   multiplier?: number;
-  color?: string; // Add this property
-  badgeColor?: string; // Add this property
+  color?: string;
+  badgeColor?: string;
 }
 
 export enum BoostTier {
@@ -32,20 +32,20 @@ export interface BoostStatus {
   endTime?: string | Date | null;
   packageId?: string | null;
   remainingTime?: string | null;
-  timeRemaining?: string | null; // Add this property
-  activeBoostId?: string; // Add this property
+  timeRemaining?: string | null;
+  activeBoostId?: string;
   packageName?: string | null;
-  boostPackage?: BoostPackage; // Add this property
+  boostPackage?: BoostPackage;
   boost_level?: number;
   expiresAt?: Date;
   visibilityScore?: number;
-  progress?: number; // Add this property
+  progress?: number;
 }
 
 export interface BoostEligibility {
-  eligible: boolean; // Use 'eligible' instead of 'isEligible'
+  eligible: boolean;
   message?: string;
-  reason?: string; // Add this property for backward compatibility
+  reason?: string;
   reasons?: string[];
   blockedUntil?: Date | string;
   minimumRequirements?: Record<string, any>;
@@ -59,6 +59,10 @@ export interface HermesBoostStatus {
   score?: number;
   multiplier?: number;
   expiresAt?: Date | string;
+  position?: number;
+  activeUsers?: number;
+  estimatedVisibility?: number;
+  lastUpdateTime?: string;
 }
 
 export interface HermesStatus extends HermesBoostStatus {
@@ -69,14 +73,7 @@ export interface HermesStatus extends HermesBoostStatus {
 }
 
 export interface BoostAnalytics {
-  impressions?: number;
-  clicks?: number;
-  ctr?: number;
-  conversionRate?: number;
-  averagePosition?: number;
-  totalSpent?: number;
-  roi?: number;
-  lastUpdated?: Date | string;
+  // Basic metrics
   views?: number;
   additionalViews?: number;
   engagementIncrease?: number;
@@ -84,11 +81,10 @@ export interface BoostAnalytics {
   conversions?: number;
   timeActive?: number;
   boostEfficiency?: number;
-  dailyStats?: {
-    date: string;
-    impressions: number;
-    clicks: number;
-  }[];
+  trending?: boolean;
+  roi?: number;
+  
+  // Detailed metrics
   impressions?: {
     today: number;
     yesterday: number;
@@ -118,7 +114,18 @@ export interface BoostAnalytics {
     withoutBoost?: number;
     increase?: number;
   };
-  trending?: boolean;
+  
+  // Legacy fields for backward compatibility
+  ctr?: number;
+  conversionRate?: number;
+  averagePosition?: number;
+  totalSpent?: number;
+  lastUpdated?: Date | string;
+  dailyStats?: {
+    date: string;
+    impressions: number;
+    clicks: number;
+  }[];
 }
 
 export interface BoostPurchase {
@@ -135,14 +142,14 @@ export interface BoostPurchase {
 }
 
 export interface BoostDialogTabsProps {
-  currentTab: 'status' | 'packages' | 'analytics' | 'history';
-  setCurrentTab: (tab: 'status' | 'packages' | 'analytics' | 'history') => void;
+  currentTab?: 'status' | 'packages' | 'analytics' | 'history';
+  setCurrentTab?: (tab: 'status' | 'packages' | 'analytics' | 'history') => void;
   boostStatus: BoostStatus | null;
-  hermesStatus: HermesStatus | null;
+  hermesStatus?: HermesStatus | null;
   eligibility: BoostEligibility;
   profileId?: string;
   
-  // Add these properties for the dialog tabs
+  // Dialog tab properties
   activeTab: string;
   setActiveTab: (tab: string) => void;
   loading: boolean;
@@ -153,8 +160,7 @@ export interface BoostDialogTabsProps {
   handleCancel: () => Promise<boolean>;
   dailyBoostUsage: number;
   dailyBoostLimit: number;
-  hermesStatus: HermesStatus;
-  formatBoostDuration?: (duration: string) => string;
   getBoostPrice?: () => number;
+  formatBoostDuration?: (duration: string) => string;
   handleDialogClose: () => void;
 }

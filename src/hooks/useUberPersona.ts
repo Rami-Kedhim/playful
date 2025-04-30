@@ -1,76 +1,95 @@
-import { useState, useEffect } from 'react';
-import { toast } from '@/components/ui/use-toast';
-import { UberPersona } from '@/types/uberPersona'; // Correct casing
-import { lucie } from '@/core/Lucie';
 
-export const useUberPersona = (userId: string | undefined) => {
+import { useState, useEffect } from 'react';
+import type { UberPersona } from '@/types/uberPersona';
+
+export const useUberPersona = (personaId?: string) => {
   const [persona, setPersona] = useState<UberPersona | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!userId) {
-      setLoading(false);
-      return;
-    }
+    if (!personaId) return;
 
     const fetchPersona = async () => {
       setLoading(true);
       try {
+        // Mock API call
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Generate mock data
         const mockPersona: UberPersona = {
-          id: userId,
-          name: 'Demo User',
-          displayName: 'Demo User',
-          type: 'user',
-          tags: ['new'],
+          id: personaId,
+          type: 'escort',
+          name: `Persona ${personaId.slice(0, 5)}`,
+          displayName: `Persona ${personaId.slice(0, 5)}`,
+          username: `persona_${personaId.slice(0, 5)}`,
+          bio: 'This is a test persona.',
+          description: 'A longer description of the persona.',
+          isActive: true,
           isVerified: true,
-          isOnline: true,
-          roleFlags: {
-            isEscort: false,
-            isCreator: false,
-            isLivecam: false,
-            isAI: false,
-            isVerified: true,
-            isFeatured: false,
-          },
-          capabilities: {
-            hasPhotos: false,
-            hasVideos: false,
-            hasStories: false,
-            hasChat: true,
-            hasBooking: false,
-            hasLiveStream: false,
-            hasExclusiveContent: false,
-            hasContent: false,
-            hasRealMeets: false,
-            hasVirtualMeets: false,
-          },
+          verified: true,
+          rating: 4.5,
+          profileImageUrl: `https://picsum.photos/id/${parseInt(personaId.slice(0, 5), 16) % 100}/200/300`,
+          galleryImages: [
+            `https://picsum.photos/id/${(parseInt(personaId.slice(0, 5), 16) + 1) % 100}/200/300`,
+            `https://picsum.photos/id/${(parseInt(personaId.slice(0, 5), 16) + 2) % 100}/200/300`,
+            `https://picsum.photos/id/${(parseInt(personaId.slice(0, 5), 16) + 3) % 100}/200/300`,
+          ],
+          createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          updatedAt: new Date(),
+          status: 'active',
+          dataSource: 'ai_generated',
           systemMetadata: {
-            source: 'mock',
-            lastSynced: new Date(),
-            tagsGeneratedByAI: false,
-            hilbertSpaceVector: [],
-            statusFlags: {}
+            statusFlags: {
+              isVerified: true, 
+              isActive: true,
+              isFreemium: false,
+              isSubscriber: true
+            },
           },
-          monetization: {
-            meetingPrice: 50
+          age: 25,
+          gender: 'female',
+          location: {
+            city: 'New York',
+            country: 'USA'
+          },
+          languages: ['English', 'Spanish'],
+          traits: ['Friendly', 'Outgoing', 'Creative'],
+          stats: {
+            followers: 1200,
+            likes: 3500,
+            views: 12000
+          },
+          availability: {
+            monday: true,
+            tuesday: true,
+            wednesday: true,
+            thursday: true,
+            friday: true,
+            saturday: false,
+            sunday: false
           }
         };
+        
         setPersona(mockPersona);
+        setError(null);
       } catch (err: any) {
-        setError(err.message);
-        toast({
-          title: "Error fetching persona",
-          description: "Please try again later",
-          variant: "destructive",
-        });
+        console.error('Failed to fetch persona:', err);
+        setError(err.message || 'Failed to fetch persona');
+        setPersona(null);
       } finally {
         setLoading(false);
       }
     };
 
     fetchPersona();
-  }, [userId]);
+  }, [personaId]);
 
-  return { persona, loading, error };
+  return {
+    persona,
+    loading,
+    error
+  };
 };
+
+export default useUberPersona;

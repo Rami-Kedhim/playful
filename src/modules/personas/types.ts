@@ -1,68 +1,34 @@
 
-/**
- * UberPersona Module Types
- * Central type definitions for the UberPersona system
- */
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersona } from '@/types/uberPersona';
 
-export type PersonaType = 'escort' | 'creator' | 'livecam' | 'ai';
+export const PERSONA_TYPES = ['escort', 'creator', 'livecam', 'ai'] as const;
+export type PersonaType = typeof PERSONA_TYPES[number];
 
-export interface PersonaFilters {
-  type?: PersonaType | PersonaType[];
-  location?: string | string[];
+export interface PersonaFilter {
+  type?: PersonaType[];
+  gender?: string[];
+  age?: [number, number];
+  languages?: string[];
+  location?: string;
+  rating?: number;
+  verified?: boolean;
+  price?: [number, number];
+  availability?: string[];
   services?: string[];
-  isVerified?: boolean;
-  isOnline?: boolean;
-  isPremium?: boolean; 
-  minRating?: number;
-  tags?: string[];
-  searchTerm?: string;
-  sortBy?: 'boost' | 'rating' | 'created' | 'price';
-  sortDirection?: 'asc' | 'desc';
+}
+
+export interface PersonaListParams {
   page?: number;
   limit?: number;
+  filter?: PersonaFilter;
+  sort?: string;
+  search?: string;
 }
 
-export interface PersonaSearchResult {
-  personas: UberPersona[];
+export interface PersonaListResult {
+  items: UberPersona[];
   total: number;
   page: number;
-  pageSize: number;
-  hasMore: boolean;
-}
-
-export interface PersonaViewData {
-  persona: UberPersona;
-  similarPersonas: UberPersona[];
-  recommendedServices?: string[];
-  boostStatus: {
-    isActive: boolean;
-    remainingTime?: string;
-  };
-}
-
-export interface PersonaCreationData {
-  type: PersonaType;
-  name: string;
-  displayName?: string;
-  location?: string;
-  bio?: string;
-  tags?: string[];
-  avatarUrl?: string;
-  services?: string[];
-  languages?: string[];
-}
-
-export interface PersonaUpdateData {
-  id: string;
-  updates: Partial<Omit<UberPersona, 'id' | 'type'>>;
-}
-
-export interface PersonaStats {
-  views: number;
-  engagementRate: number;
-  conversionRate: number;
-  averageSessionTime: number;
-  bookmarkCount: number;
-  lastViewedAt?: Date;
+  limit: number;
+  totalPages: number;
 }

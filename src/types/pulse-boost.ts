@@ -19,3 +19,17 @@ export interface PulseBoost {
 export interface EnhancedBoostStatus extends BoostStatus {
   activeBoostId?: string;
 }
+
+export enum UserRoleEnum {
+  ADMIN = 'admin',
+  MODERATOR = 'moderator',
+  USER = 'user',
+  CREATOR = 'creator'
+}
+
+export type UserRole = {
+  id: string;
+  userId: string;
+  role: UserRoleEnum;
+  createdAt: Date;
+};

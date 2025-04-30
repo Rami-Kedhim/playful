@@ -2,9 +2,9 @@
 import { useState, useEffect } from 'react';
 import { adaptBoostStatus } from '@/hooks/boost/useBoostAdapters';
 import { BoostStatus, BoostEligibility, BoostAnalytics, BoostPackage } from '@/types/boost';
+import BoostService from '@/services/boostService';
 
 export const useBoostManager = (profileId?: string) => {
-  // Implementation here
   const [boostStatus, setBoostStatus] = useState<BoostStatus>({ isActive: false });
   const [boostAnalytics, setBoostAnalytics] = useState<BoostAnalytics | null>(null);
   const [eligibility, setEligibility] = useState<BoostEligibility>({ eligible: true });
@@ -13,31 +13,119 @@ export const useBoostManager = (profileId?: string) => {
   const [dailyBoostUsage] = useState(0);
   const [dailyBoostLimit] = useState(5);
   const [boostPackages, setBoostPackages] = useState<BoostPackage[]>([]);
+  
+  const boostService = new BoostService();
+  
+  useEffect(() => {
+    if (profileId) {
+      fetchBoostStatus();
+      fetchBoostPackages();
+      checkEligibility();
+    }
+  }, [profileId]);
+  
+  const fetchBoostStatus = async () => {
+    if (!profileId) return;
+    
+    try {
+      setLoading(true);
+      const status = await boostService.getBoostStatus(profileId);
+      setBoostStatus(status);
+    } catch (err) {
+      console.error('Error fetching boost status:', err);
+      setError('Failed to fetch boost status');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const checkEligibility = async () => {
+    if (!profileId) return;
+    
+    try {
+      setLoading(true);
+      const eligibilityData = await boostService.getBoostEligibility(profileId);
+      setEligibility(eligibilityData);
+    } catch (err) {
+      console.error('Error checking eligibility:', err);
+      setError('Failed to check eligibility');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Add missing methods
   const getBoostAnalytics = async () => {
-    // Mock implementation
-    return {
-      impressions: Math.floor(Math.random() * 1000),
-      clicks: Math.floor(Math.random() * 300),
-      ctr: Math.random() * 0.1,
-      engagementIncrease: Math.random() * 50
-    };
+    if (!profileId) return null;
+    
+    try {
+      setLoading(true);
+      const analytics = await boostService.getBoostAnalytics(profileId);
+      setBoostAnalytics(analytics);
+      return analytics;
+    } catch (err) {
+      console.error('Error fetching boost analytics:', err);
+      setError('Failed to fetch boost analytics');
+      return null;
+    } finally {
+      setLoading(false);
+    }
   };
   
   const fetchBoostPackages = async () => {
-    // Mock implementation
-    return boostPackages;
+    try {
+      setLoading(true);
+      const packages = await boostService.getBoostPackages();
+      setBoostPackages(packages);
+      return packages;
+    } catch (err) {
+      console.error('Error fetching boost packages:', err);
+      setError('Failed to fetch boost packages');
+      return [];
+    } finally {
+      setLoading(false);
+    }
   };
 
   const purchaseBoost = async (pkg: BoostPackage) => {
-    // Mock implementation
-    return true;
+    if (!profileId) return false;
+    
+    try {
+      setLoading(true);
+      const success = await boostService.purchaseBoost(profileId, pkg.id);
+      
+      if (success) {
+        await fetchBoostStatus();
+      }
+      
+      return success;
+    } catch (err) {
+      console.error('Error purchasing boost:', err);
+      setError('Failed to purchase boost');
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const cancelBoost = async () => {
-    // Mock implementation
-    return true;
+    if (!profileId) return false;
+    
+    try {
+      setLoading(true);
+      const success = await boostService.cancelBoost(profileId);
+      
+      if (success) {
+        await fetchBoostStatus();
+      }
+      
+      return success;
+    } catch (err) {
+      console.error('Error cancelling boost:', err);
+      setError('Failed to cancel boost');
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
   
   const formatBoostDuration = (duration: string): string => {

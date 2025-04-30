@@ -33,7 +33,7 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
   });
   
   const [eligibility, setEligibility] = useState<BoostEligibility>({
-    isEligible: true,
+    eligible: true,
   });
   
   const [loading, setLoading] = useState(false);

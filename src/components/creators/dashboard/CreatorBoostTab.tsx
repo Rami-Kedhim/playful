@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import BoostManager from "./boost/BoostManager";
 import BoostAnalyticsCard from "./boost/BoostAnalyticsCard";
@@ -6,7 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Zap, TrendingUp, BarChart } from "lucide-react";
 import { useBoostManager } from "@/hooks/boost";
-import { AnalyticsData } from "@/hooks/boost/useBoostAnalytics";
+import { BoostAnalytics } from "@/types/boost";
+
+interface AnalyticsData extends BoostAnalytics {}
 
 interface CreatorBoostTabProps {
   creatorId: string;
@@ -24,7 +27,45 @@ const CreatorBoostTab = ({ creatorId, profile }: CreatorBoostTabProps) => {
   } = useBoostManager(creatorId);
   
   const getAnalyticsWrapper = async (): Promise<AnalyticsData | null> => {
-    return await getBoostAnalytics();
+    const data = await getBoostAnalytics();
+    
+    // Ensure data has all required properties
+    const analyticsData: AnalyticsData = {
+      views: data?.views || 0,
+      additionalViews: data?.additionalViews || 0,
+      engagementIncrease: data?.engagementIncrease || 0,
+      rankingPosition: data?.rankingPosition || 0,
+      conversions: data?.conversions || 0,
+      timeActive: data?.timeActive || 0,
+      boostEfficiency: data?.boostEfficiency || 0,
+      trending: data?.trending || false,
+      roi: data?.roi || 0,
+      impressions: data?.impressions || {
+        today: 0,
+        yesterday: 0,
+        weeklyAverage: 0,
+        withBoost: 0
+      },
+      interactions: data?.interactions || {
+        today: 0,
+        yesterday: 0,
+        weeklyAverage: 0,
+        withBoost: 0
+      },
+      rank: data?.rank || {
+        current: 0,
+        previous: 0,
+        change: 0
+      },
+      clicks: data?.clicks || {
+        today: 0,
+        yesterday: 0,
+        weeklyAverage: 0,
+        withBoost: 0
+      }
+    };
+    
+    return analyticsData;
   };
   
   useEffect(() => {

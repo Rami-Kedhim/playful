@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import BoostDialogTabs from './dialog/BoostDialogTabs';
 import { useBoostContext } from '@/hooks/boost/useBoostContext';
+import { HermesStatus } from '@/types/boost';
 
 export interface BoostDialogContainerProps {
   profileId: string;
@@ -105,6 +106,14 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
     return pkg?.price_ubx || pkg?.price || 0;
   }, [selectedPackage, boostPackages]);
 
+  const hermesStatusData: HermesStatus = {
+    isActive: false,
+    position: 0,
+    activeUsers: 0,
+    estimatedVisibility: 0,
+    lastUpdateTime: ''
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -132,13 +141,7 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
           dailyBoostLimit={boostContext.dailyBoostLimit || 5}
           handleDialogClose={handleDialogClose}
           getBoostPrice={getBoostPrice}
-          hermesStatus={{
-            isActive: false,
-            position: 0,
-            activeUsers: 0,
-            estimatedVisibility: 0,
-            lastUpdateTime: ''
-          }}
+          hermesStatus={hermesStatusData}
           formatBoostDuration={(duration) => `${duration}`}
         />
       </DialogContent>

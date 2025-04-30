@@ -1,6 +1,5 @@
 
-import { HermesStatus } from '@/types/boost';
-import { BoostStatus, BoostEligibility, HermesBoostStatus } from '@/types/boost';
+import { HermesStatus, BoostStatus, BoostEligibility, HermesBoostStatus } from '@/types/boost';
 
 // Fix Date conversion issue at line 118
 // Just showing the relevant part - handling expiresAt
