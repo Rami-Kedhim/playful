@@ -1,17 +1,20 @@
 
 import { useState, useEffect } from 'react';
-import { HermesBoostStatus } from '@/types/boost';
+import { HermesStatus } from '@/types/boost';
 
 /**
  * Hook for tracking and managing Hermes-Oxum boost status
  */
 export const useHermesOxumBoost = (profileId?: string) => {
-  const [hermesStatus, setHermesStatus] = useState<HermesBoostStatus>({
+  const [hermesStatus, setHermesStatus] = useState<HermesStatus>({
+    isActive: false,
     position: 0,
     activeUsers: 0,
     estimatedVisibility: 0,
     lastUpdateTime: new Date().toISOString(),
-    isActive: false
+    tier: 0,
+    score: 0,
+    multiplier: 0
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,14 +31,17 @@ export const useHermesOxumBoost = (profileId?: string) => {
         
         const isProfileBoosted = Math.random() > 0.6; // 40% chance of being boosted
         
-        const updatedStatus: HermesBoostStatus = {
+        const updatedStatus: HermesStatus = {
           isActive: isProfileBoosted,
           position: Math.floor(Math.random() * 20) + 1,
           activeUsers: Math.floor(Math.random() * 500) + 100,
           estimatedVisibility: Math.floor(Math.random() * 50) + 20,
           lastUpdateTime: new Date().toISOString(),
           boostScore: Math.floor(Math.random() * 100),
-          effectivenessScore: Math.floor(Math.random() * 100)
+          effectivenessScore: Math.floor(Math.random() * 100),
+          tier: isProfileBoosted ? Math.floor(Math.random() * 3) + 1 : 0,
+          score: Math.floor(Math.random() * 100),
+          multiplier: isProfileBoosted ? (Math.random() * 2) + 1 : 1
         };
         
         setHermesStatus(updatedStatus);
@@ -60,3 +66,5 @@ export const useHermesOxumBoost = (profileId?: string) => {
     error
   };
 };
+
+export default useHermesOxumBoost;

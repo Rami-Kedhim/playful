@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+
+import { useState, useEffect, useMemo } from 'react';
 import { UberPersona } from '@/types/uberPersona';
 import { getPersonaType } from '@/utils/personaHelpers';
 

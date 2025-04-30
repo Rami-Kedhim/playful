@@ -1,76 +1,23 @@
 
-/**
- * UberPersona - Unified interface for all persona types in the UberEscorts ecosystem
- */
-
-export type PersonaSource = 'ai_generated' | 'scraped' | 'manual';
-
-export interface AvailabilityScheduleSlot {
-  start: string;
-  end: string;
+export interface UberPersonaType {
+  escort: 'escort';
+  creator: 'creator';
+  livecam: 'livecam';
+  ai: 'ai';
+  user: 'user';
 }
 
-export interface AvailabilityScheduleDay {
-  available: boolean;
-  slots?: AvailabilityScheduleSlot[];
+export interface RoleFlags {
+  isEscort: boolean;
+  isCreator: boolean;
+  isLivecam: boolean;
+  isAI: boolean;
+  isVerified: boolean;
+  isFeatured: boolean;
+  [key: string]: boolean; // Allow string indexing
 }
 
-export interface AvailabilitySchedule {
-  [day: string]: AvailabilityScheduleDay;
-}
-
-export interface UberPersona {
-  id: string;
-  name: string;
-  displayName?: string;
-  type: UberPersonaType;
-  avatarUrl?: string;
-  location?: string;
-  isVerified?: boolean;
-  isOnline?: boolean;
-  lastActive?: Date;
-  isPremium?: boolean;
-  availability?: {
-    schedule?: AvailabilitySchedule;
-    nextAvailable?: string;
-  };
-  tags?: string[];
-  bio?: string;
-  description?: string;
-  languages?: string[];
-  services?: string[];
-  traits?: string[];
-  stats?: {
-    rating: number;
-    reviewCount: number;
-    responseTime: number;
-    viewCount?: number;
-    favoriteCount?: number;
-    bookingCount?: number;
-  };
-  monetization?: {
-    acceptsLucoin?: boolean;
-    acceptsTips?: boolean;
-    subscriptionPrice?: number;
-    unlockingPrice?: number;
-    boostingActive?: boolean;
-    meetingPrice?: number;
-  };
-  systemMetadata?: {
-    source: PersonaSource;
-    lastSynced?: Date;
-    tagsGeneratedByAI?: boolean;
-    hilbertSpaceVector?: number[];
-    personalityIndex?: number;
-    statusFlags?: Record<string, boolean>;
-    flowScore?: number;
-  };
-  isLocked?: boolean;
-}
-
-export type UberPersonaType = 'escort' | 'creator' | 'livecam' | 'ai';
-
-export interface UberPersonaFeatures {
+export interface Capabilities {
   hasPhotos: boolean;
   hasVideos: boolean;
   hasStories: boolean;
@@ -81,13 +28,54 @@ export interface UberPersonaFeatures {
   hasContent: boolean;
   hasRealMeets: boolean;
   hasVirtualMeets: boolean;
+  [key: string]: boolean; // Allow string indexing
 }
 
-export interface UberPersonaPricing {
-  acceptsLucoin: boolean;
-  acceptsTips: boolean;
-  subscriptionPrice?: number;
-  unlockingPrice?: number;
-  boostingActive?: boolean;
-  meetingPrice?: number;
+export interface StatusFlags {
+  isOnline?: boolean;
+  isVerified?: boolean;
+  isFeatured?: boolean;
+  isPopular?: boolean;
+  [key: string]: boolean | undefined; // Allow string indexing
+}
+
+export interface UberPersona {
+  id: string;
+  name: string;
+  displayName?: string;
+  type: keyof UberPersonaType | string;
+  tags?: string[];
+  isVerified?: boolean;
+  isOnline?: boolean;
+  imageUrl?: string;
+  avatarUrl?: string;
+  location?: string;
+  bio?: string;
+  description?: string;
+  services?: string[];
+  roleFlags?: RoleFlags;
+  capabilities?: Capabilities;
+  monetization?: {
+    acceptsLucoin?: boolean;
+    acceptsTips?: boolean;
+    subscriptionPrice?: number;
+    unlockingPrice?: number;
+    boostingActive?: boolean;
+    meetingPrice?: number;
+  };
+  systemMetadata?: {
+    source?: string;
+    lastSynced?: Date;
+    tagsGeneratedByAI?: boolean;
+    hilbertSpaceVector?: number[];
+    personalityIndex?: number;
+    statusFlags?: StatusFlags | Record<string, boolean>;
+    [key: string]: any;
+  };
+  lastActive?: Date | string;
+  isPremium?: boolean;
+  isActive?: boolean;
+  isAI?: boolean;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }

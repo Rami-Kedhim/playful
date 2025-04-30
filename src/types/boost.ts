@@ -45,9 +45,15 @@ export interface HermesStatus {
   lastUpdateTime: string;
   boostScore?: number;
   effectivenessScore?: number;
+  isActive?: boolean;
+  tier?: number;
+  score?: number;
+  multiplier?: number;
+  expiresAt?: Date | string;
 }
 
-export interface HermesBoostStatus {
+// Update to include all properties from HermesStatus
+export interface HermesBoostStatus extends HermesStatus {
   isActive: boolean;
   tier: number;
   score: number;

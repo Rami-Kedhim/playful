@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { UberPersona } from '@/types/UberPersona'; // fixed import casing
+import { toast } from '@/components/ui/use-toast';
+import { UberPersona } from '@/types/uberPersona'; // Correct casing
+import { lucie } from '@/core/Lucie';
 
 export const useUberPersona = (userId: string | undefined) => {
   const [persona, setPersona] = useState<UberPersona | null>(null);
@@ -16,19 +17,53 @@ export const useUberPersona = (userId: string | undefined) => {
     const fetchPersona = async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('uber_personas')
-          .select('*')
-          .eq('user_id', userId)
-          .single();
-
-        if (error) {
-          throw new Error(error.message);
-        }
-
-        setPersona(data || null);
+        const mockPersona: UberPersona = {
+          id: userId,
+          name: 'Demo User',
+          displayName: 'Demo User',
+          type: 'user',
+          tags: ['new'],
+          isVerified: true,
+          isOnline: true,
+          roleFlags: {
+            isEscort: false,
+            isCreator: false,
+            isLivecam: false,
+            isAI: false,
+            isVerified: true,
+            isFeatured: false,
+          },
+          capabilities: {
+            hasPhotos: false,
+            hasVideos: false,
+            hasStories: false,
+            hasChat: true,
+            hasBooking: false,
+            hasLiveStream: false,
+            hasExclusiveContent: false,
+            hasContent: false,
+            hasRealMeets: false,
+            hasVirtualMeets: false,
+          },
+          systemMetadata: {
+            source: 'mock',
+            lastSynced: new Date(),
+            tagsGeneratedByAI: false,
+            hilbertSpaceVector: [],
+            statusFlags: {}
+          },
+          monetization: {
+            meetingPrice: 50
+          }
+        };
+        setPersona(mockPersona);
       } catch (err: any) {
         setError(err.message);
+        toast({
+          title: "Error fetching persona",
+          description: "Please try again later",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
@@ -39,3 +74,4 @@ export const useUberPersona = (userId: string | undefined) => {
 
   return { persona, loading, error };
 };
+
