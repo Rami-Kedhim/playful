@@ -10,6 +10,7 @@ import DetailedMetricView from '@/components/analytics/DetailedMetricView';
 import PerformanceChart from '@/components/analytics/PerformanceChart';
 import AutoRefreshControl from '@/components/analytics/AutoRefreshControl';
 import DateRangeFilter from '@/components/analytics/DateRangeFilter';
+import AnalyticsExportOptions from '@/components/analytics/AnalyticsExportOptions';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const NeuralAnalytics: React.FC = () => {
@@ -103,12 +104,15 @@ const NeuralAnalytics: React.FC = () => {
           </Button>
         </div>
         
-        <AutoRefreshControl
-          isAutoRefreshEnabled={isAutoRefreshEnabled}
-          refreshInterval={refreshInterval}
-          onToggleAutoRefresh={toggleAutoRefresh}
-          onChangeInterval={changeRefreshInterval}
-        />
+        <div className="flex items-center gap-2">
+          <AnalyticsExportOptions data={analyticsData} filename="neural-analytics" />
+          <AutoRefreshControl
+            isAutoRefreshEnabled={isAutoRefreshEnabled}
+            refreshInterval={refreshInterval}
+            onToggleAutoRefresh={toggleAutoRefresh}
+            onChangeInterval={changeRefreshInterval}
+          />
+        </div>
       </div>
 
       {/* Key Metrics Cards */}

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { Button } from '@/components/ui/button';
@@ -11,12 +11,14 @@ interface DateRangeFilterProps {
   startDate?: Date;
   endDate?: Date;
   onDateChange: (start: Date | undefined, end: Date | undefined) => void;
+  onRefresh?: () => void;
 }
 
 const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ 
   startDate, 
   endDate, 
-  onDateChange 
+  onDateChange,
+  onRefresh
 }) => {
   const [date, setDate] = React.useState<DateRange | undefined>(
     startDate && endDate ? { from: startDate, to: endDate } : undefined
@@ -64,6 +66,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
             selected={date}
             onSelect={handleDateChange}
             numberOfMonths={2}
+            className="p-3 pointer-events-auto"
           />
           <div className="flex justify-end p-3 border-t">
             <Button 
@@ -77,6 +80,13 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
           </div>
         </PopoverContent>
       </Popover>
+      
+      {onRefresh && (
+        <Button onClick={onRefresh} variant="outline" size="sm">
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Refresh
+        </Button>
+      )}
     </div>
   );
 };
