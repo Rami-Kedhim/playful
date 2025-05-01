@@ -1,19 +1,19 @@
 
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
 import SignupPage from '@/pages/SignupPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import MainLayout from '@/components/layout/MainLayout';
-import { AppRoutes as Routes } from '@/utils/navigation';
+import { AppRoutes as AppRoutePaths } from '@/utils/navigation';
 
 /**
  * Main application routes component
  */
 const AppRoutes = () => {
   return (
-    <Routes>
+    <RouterRoutes>
       <Route path="/" element={
         <MainLayout hideNavbar hideFooter>
           <HomePage />
@@ -33,7 +33,7 @@ const AppRoutes = () => {
       
       {/* 404 - Not Found */}
       <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+    </RouterRoutes>
   );
 };
 

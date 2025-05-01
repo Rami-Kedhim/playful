@@ -9,6 +9,12 @@ export const checkSystemStatus = async (): Promise<SystemStatus> => {
   return {
     operational: true,
     lastUpdated: new Date(),
+    latency: 120,
+    aiModels: {
+      conversation: 'active',
+      generation: 'active',
+      analysis: 'active',
+    },
     components: {
       core: { status: 'operational' },
       oxum: { status: 'operational' },
@@ -26,21 +32,25 @@ export const checkSystemStatus = async (): Promise<SystemStatus> => {
 
 // Analytics aggregation utility
 export const aggregateAnalytics = (data: Array<AnalyticsData>): AnalyticsData => {
-  return data.reduce((acc, curr) => {
-    return {
-      views: acc.views + curr.views,
-      interactions: acc.interactions + curr.interactions,
-      conversions: acc.conversions + curr.conversions,
-      boostEffectiveness: (acc.boostEffectiveness || 0) + (curr.boostEffectiveness || 0),
-      engagementRate: (acc.engagementRate || 0) + (curr.engagementRate || 0),
-    };
-  }, {
+  const result: AnalyticsData = {
     views: 0,
     interactions: 0,
     conversions: 0,
     boostEffectiveness: 0,
     engagementRate: 0
-  });
+  };
+  
+  return data.reduce((acc, curr) => {
+    return {
+      views: (acc.views || 0) + (curr.views || 0),
+      interactions: typeof acc.interactions === 'number' && typeof curr.interactions === 'number' 
+        ? acc.interactions + curr.interactions 
+        : (acc.interactions || 0),
+      conversions: (acc.conversions || 0) + (curr.conversions || 0),
+      boostEffectiveness: (acc.boostEffectiveness || 0) + (curr.boostEffectiveness || 0),
+      engagementRate: (acc.engagementRate || 0) + (curr.engagementRate || 0),
+    };
+  }, result);
 };
 
 // Re-export any existing utilities that are still relevant

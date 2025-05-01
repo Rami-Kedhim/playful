@@ -3,12 +3,44 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { UberPersona } from '@/types/uberPersona';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface FeaturedPersonasProps {
   personas: UberPersona[];
+  isLoading?: boolean;
 }
 
-const FeaturedPersonas: React.FC<FeaturedPersonasProps> = ({ personas = [] }) => {
+const FeaturedPersonas: React.FC<FeaturedPersonasProps> = ({ personas = [], isLoading = false }) => {
+  if (isLoading) {
+    return (
+      <section className="py-12">
+        <div className="container">
+          <Skeleton className="h-10 w-48 mb-8" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {Array(4).fill(0).map((_, i) => (
+              <Card key={i} className="overflow-hidden">
+                <div className="relative h-48 overflow-hidden">
+                  <Skeleton className="h-48 w-full" />
+                </div>
+                <CardHeader className="pb-2">
+                  <Skeleton className="h-6 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-1/2" />
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[1, 2, 3].map((tag) => (
+                      <Skeleton key={tag} className="h-5 w-16" />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+  
   const getStatusIndicator = (persona: UberPersona) => {
     return persona.isOnline ? (
       <span className="flex items-center">

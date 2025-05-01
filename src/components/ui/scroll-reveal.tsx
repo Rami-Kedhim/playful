@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 interface ScrollRevealProps {
   children: React.ReactNode;
   className?: string;
-  animation?: 'fade-up' | 'fade-in' | 'slide-in' | 'scale-in';
+  animation?: 'fade-up' | 'fade-in' | 'slide-in' | 'scale-in' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom-in';
   threshold?: number;
   delay?: number;
   duration?: number;
@@ -51,11 +51,19 @@ export const ScrollReveal: React.FC<ScrollRevealProps> = ({
     switch (animation) {
       case 'fade-up':
         return 'opacity-0 translate-y-8 transition-all duration-700';
+      case 'fade-down':
+        return 'opacity-0 -translate-y-8 transition-all duration-700';
+      case 'fade-left':
+        return 'opacity-0 translate-x-8 transition-all duration-700';
+      case 'fade-right':
+        return 'opacity-0 -translate-x-8 transition-all duration-700';
       case 'fade-in':
         return 'opacity-0 transition-opacity duration-700';
       case 'slide-in':
         return 'opacity-0 -translate-x-8 transition-all duration-700';
       case 'scale-in':
+        return 'opacity-0 scale-95 transition-all duration-700';
+      case 'zoom-in':
         return 'opacity-0 scale-95 transition-all duration-700';
       default:
         return 'opacity-0 translate-y-8 transition-all duration-700';
@@ -65,12 +73,16 @@ export const ScrollReveal: React.FC<ScrollRevealProps> = ({
   const getVisibleClass = () => {
     switch (animation) {
       case 'fade-up':
+      case 'fade-down':
         return 'opacity-100 translate-y-0';
-      case 'fade-in':
-        return 'opacity-100';
+      case 'fade-left':
+      case 'fade-right':
       case 'slide-in':
         return 'opacity-100 translate-x-0';
+      case 'fade-in':
+        return 'opacity-100';
       case 'scale-in':
+      case 'zoom-in':
         return 'opacity-100 scale-100';
       default:
         return 'opacity-100 translate-y-0';
