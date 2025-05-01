@@ -24,6 +24,16 @@ export interface AIProfile {
   reviewCount?: number;
   isPremium?: boolean;
   availability_status: 'available' | 'away' | 'offline';
+  description?: string;
+  tags?: string[];
+  displayName?: string;
+  thumbnailUrl?: string;
+  imageUrl?: string;
+  avatarUrl?: string;
+  subscription_price?: number;
+  premium_content_count?: number;
+  type?: string;
+  livecam_enabled?: boolean;
 }
 
 export interface AIChat {
@@ -41,12 +51,19 @@ export interface AIMessage {
   sender: 'ai' | 'user';
   content: string;
   created_at: string;
+  isAI?: boolean;
+  timestamp?: string;
+  attachments?: any[];
+  status?: string;
   metadata?: {
     emotion?: string;
     attachment?: {
       type: 'image' | 'audio';
       url: string;
     };
+    requires_payment?: boolean;
+    payment_status?: string;
+    price?: number;
   };
 }
 
@@ -60,4 +77,11 @@ export interface AISubscription {
   benefits: string[];
   auto_renew: boolean;
   price_paid: number;
+}
+
+export enum ProcessingStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed'
 }

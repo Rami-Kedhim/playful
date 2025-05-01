@@ -9,19 +9,22 @@ export const useBoost = () => {
     throw new Error('useBoost must be used within a BoostProvider');
   }
   
+  const {
+    boostStatus,
+    packages,
+    boostProfile,
+    cancelBoost,
+    loading,
+    error
+  } = context;
+  
   return {
-    isActive: context.boostStatus?.isActive || false,
-    boostStatus: context.boostStatus,
-    eligibility: context.eligibility,
-    packages: context.packages,
-    boostProfile: context.boostProfile,
-    cancelBoost: context.cancelBoost,
-    loading: context.loading,
-    error: context.error,
-    refreshBoostStatus: context.refreshBoostStatus,
-    dailyBoostUsage: context.dailyBoostUsage,
-    dailyBoostLimit: context.dailyBoostLimit,
-    formatBoostDuration: context.formatBoostDuration
+    isActive: boostStatus?.isActive || false,
+    packages,
+    boostProfile,
+    cancelBoost,
+    loading,
+    error
   };
 };
 

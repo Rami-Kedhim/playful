@@ -1,159 +1,129 @@
 
-import React, { createContext, ReactNode, useEffect, useState } from 'react';
-import { BoostPackage, BoostStatus, BoostEligibility } from '@/types/boost';
-import { useAuth } from '@/hooks/auth';
-import useBoostPackages from '@/hooks/boost/useBoostPackages';
+import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import { BoostStatus, BoostPackage } from '@/types/boost';
 
-export interface BoostContextType {
+interface BoostContextType {
   boostStatus: BoostStatus;
-  eligibility: BoostEligibility;
   packages: BoostPackage[];
   loading: boolean;
   error: string | null;
   boostProfile: (profileId: string, packageId: string) => Promise<boolean>;
   cancelBoost: () => Promise<boolean>;
-  refreshBoostStatus: (profileId?: string) => Promise<void>;
-  dailyBoostUsage: number;
-  dailyBoostLimit: number;
-  formatBoostDuration: (duration: string) => string;
 }
 
-export const BoostContext = createContext<BoostContextType | undefined>(undefined);
+export const BoostContext = createContext<BoostContextType | null>(null);
 
 interface BoostProviderProps {
   children: ReactNode;
 }
 
 export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
-  const { user } = useAuth();
-  const boostPackages = useBoostPackages();
-  
   const [boostStatus, setBoostStatus] = useState<BoostStatus>({
     isActive: false,
   });
-  
-  const [eligibility, setEligibility] = useState<BoostEligibility>({
-    eligible: true,
-  });
-  
-  const [loading, setLoading] = useState(false);
+  const [packages, setPackages] = useState<BoostPackage[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dailyBoostUsage, setDailyBoostUsage] = useState(0);
-  const [dailyBoostLimit, setDailyBoostLimit] = useState(5);
-
-  const formatBoostDuration = (duration: string): string => {
-    const [hours, minutes] = duration.split(':').map(Number);
-    if (hours >= 24) {
-      const days = Math.floor(hours / 24);
-      return `${days} ${days === 1 ? 'day' : 'days'}`;
-    }
-    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
-  };
-
-  const refreshBoostStatus = async (profileId?: string): Promise<void> => {
-    if (!user && !profileId) return;
-    
-    try {
+  
+  useEffect(() => {
+    const fetchBoostData = async () => {
       setLoading(true);
-      const mockStatus: BoostStatus = {
-        isActive: false,
-        startTime: '',
-        endTime: '',
-        remainingTime: ''
-      };
-      
-      setBoostStatus(mockStatus);
-    } catch (err) {
-      console.error("Error fetching boost status:", err);
-      setError("Failed to fetch boost status");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+      try {
+        // Mock data
+        setPackages([
+          {
+            id: 'boost-1',
+            name: '24 Hour Boost',
+            description: 'Boost your profile for 24 hours',
+            duration: '24:00:00',
+            price: 29.99,
+            price_ubx: 300,
+            boostMultiplier: 1.5,
+            features: ['Top search results', 'Featured profile'],
+            isMostPopular: true
+          },
+          {
+            id: 'boost-2',
+            name: 'Weekend Boost',
+            description: 'Boost your profile for the entire weekend',
+            duration: '72:00:00',
+            price: 69.99,
+            price_ubx: 700,
+            boostMultiplier: 2,
+            features: ['Top search results', 'Featured profile', 'Homepage feature']
+          }
+        ]);
+        
+        setBoostStatus({
+          isActive: false,
+          remainingTime: '00:00:00'
+        });
+      } catch (err: any) {
+        setError(err.message || 'Failed to load boost data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchBoostData();
+  }, []);
+  
   const boostProfile = async (profileId: string, packageId: string): Promise<boolean> => {
     try {
-      setLoading(true);
-      
       console.log(`Boosting profile ${profileId} with package ${packageId}`);
       
-      const selectedPackage = boostPackages.find(pkg => pkg.id === packageId);
+      // Set active boost status
+      const selectedPackage = packages.find(p => p.id === packageId);
       
       if (!selectedPackage) {
-        throw new Error("Selected package not found");
+        throw new Error('Selected package not found');
       }
-      
-      const now = new Date();
-      const durationParts = selectedPackage.duration.split(':').map(Number);
-      const hours = durationParts[0] || 0;
-      
-      const endTime = new Date(now.getTime() + hours * 60 * 60 * 1000);
       
       setBoostStatus({
         isActive: true,
-        startTime: now.toISOString(),
-        endTime: endTime.toISOString(),
-        remainingTime: selectedPackage.duration,
-        timeRemaining: selectedPackage.duration,
-        boostPackage: selectedPackage,
+        packageId: packageId,
+        startedAt: new Date(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+        remainingTime: '24:00:00',
         packageName: selectedPackage.name,
-      } as BoostStatus);
-      
-      setDailyBoostUsage(prev => prev + 1);
-      
-      return true;
-    } catch (err) {
-      console.error("Error boosting profile:", err);
-      setError("Failed to boost profile");
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const cancelBoost = async (): Promise<boolean> => {
-    try {
-      setLoading(true);
-      
-      console.log("Cancelling boost");
-      
-      setBoostStatus({
-        isActive: false,
-        startTime: '',
-        endTime: '',
-        remainingTime: ''
+        boostMultiplier: selectedPackage.boostMultiplier,
+        boostPackage: selectedPackage,
+        progress: 0
       });
       
       return true;
-    } catch (err) {
-      console.error("Error cancelling boost:", err);
-      setError("Failed to cancel boost");
+    } catch (error) {
+      console.error('Failed to boost profile', error);
       return false;
-    } finally {
-      setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (user) {
-      refreshBoostStatus(user.id);
+  
+  const cancelBoost = async (): Promise<boolean> => {
+    try {
+      console.log('Cancelling active boost');
+      
+      // Reset boost status
+      setBoostStatus({
+        isActive: false,
+        remainingTime: '00:00:00'
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to cancel boost', error);
+      return false;
     }
-  }, [user]);
-
-  const value: BoostContextType = {
+  };
+  
+  const value = {
     boostStatus,
-    eligibility,
-    packages: boostPackages,
+    packages,
     loading,
     error,
     boostProfile,
-    cancelBoost,
-    refreshBoostStatus,
-    dailyBoostUsage,
-    dailyBoostLimit,
-    formatBoostDuration
+    cancelBoost
   };
-
+  
   return (
     <BoostContext.Provider value={value}>
       {children}

@@ -1,83 +1,50 @@
 
 import { useState, useEffect } from 'react';
-import { formatBoostDuration } from '@/utils/boostCalculator';
-import { supabase } from '@/integrations/supabase/client';
-import { PulseBoost, EnhancedBoostStatus } from '@/types/pulse-boost';
+import { BoostStatus } from '@/types/boost';
 
-const usePulseBoostAdapter = (profileId: string) => {
-  const [realtimeStatus, setRealtimeStatus] = useState<EnhancedBoostStatus | null>(null);
-
+export const usePulseBoostAdapter = (profileId: string) => {
+  const [realtimeStatus, setRealtimeStatus] = useState<BoostStatus | null>(null);
+  
   useEffect(() => {
     if (!profileId) return;
-
-    // Subscribe to changes in the pulse_boosts_active table
-    const channel = supabase
-      .channel('pulse-boost-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'pulse_boosts_active',
-          filter: `user_id=eq.${profileId}`
-        },
-        (payload) => {
-          console.log('Pulse boost update received:', payload);
-          
-          // Update real-time status
-          if (payload.eventType === 'DELETE') {
-            setRealtimeStatus({ isActive: false });
-          } else {
-            const boostData = payload.new;
-            if (boostData) {
-              const expiresAt = boostData.expires_at ? new Date(boostData.expires_at) : new Date();
-              const now = new Date();
-              const diff = expiresAt.getTime() - now.getTime();
-              
-              if (diff > 0) {
-                const hours = Math.floor(diff / (1000 * 60 * 60));
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const remainingTime = `${hours}h ${minutes}m`;
-
-                setRealtimeStatus({
-                  isActive: true,
-                  startTime: new Date(boostData.started_at),
-                  endTime: expiresAt,
-                  remainingTime,
-                  activeBoostId: boostData.boost_id,
-                  packageId: boostData.boost_id // Make sure we're using boost_id for packageId
-                });
-              } else {
-                setRealtimeStatus({ isActive: false });
-              }
-            }
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
+    
+    // This would connect to a real-time service like Supabase or Firebase
+    const fetchRealtimeStatus = () => {
+      // Mock data
+      if (Math.random() > 0.7) {
+        setRealtimeStatus({
+          isActive: true,
+          packageName: 'Pulse Boost',
+          remainingTime: '04:32:12',
+          progress: 70,
+          packageId: 'pulse-boost-1',
+          activeBoostId: 'active-pulse-1'
+        });
+      }
     };
+    
+    fetchRealtimeStatus();
+    const interval = setInterval(fetchRealtimeStatus, 30000);
+    
+    return () => clearInterval(interval);
   }, [profileId]);
-
-  // Format pulse duration in a user-friendly way
+  
   const formatPulseDuration = (duration: string): string => {
-    return formatBoostDuration(duration);
+    // Format duration string like "24:00:00" to "24 hours"
+    const parts = duration.split(':');
+    const hours = parseInt(parts[0]);
+    
+    if (hours < 24) {
+      return `${hours} hour${hours > 1 ? 's' : ''}`;
+    } else {
+      const days = Math.floor(hours / 24);
+      return `${days} day${days > 1 ? 's' : ''}`;
+    }
   };
-
-  const adaptPulseBoost = (pulseBoost: PulseBoost) => {
-    // Transform PulseBoost to a format needed by components
-    return {
-      ...pulseBoost,
-      formattedDuration: formatPulseDuration(pulseBoost.duration || '00:00:00')
-    };
-  };
-
+  
   return {
-    formatPulseDuration,
-    adaptPulseBoost,
-    realtimeStatus
+    realtimeStatus,
+    formatPulseDuration
   };
 };
 

@@ -1,124 +1,109 @@
 
 import { useState, useEffect } from 'react';
+import { BoostAnalytics as BoostAnalyticsType } from '@/types/boost';
 
-// Create a consistent BoostAnalytics type
-export interface BoostAnalytics {
-  impressions: {
+export interface AnalyticsData {
+  views?: number;
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  conversions?: number;
+  timeActive?: number;
+  boostEfficiency?: number;
+  trending?: boolean;
+  roi?: number;
+  impressions?: {
     today: number;
     yesterday: number;
     weeklyAverage: number;
     withBoost: number;
-    withoutBoost: number;
-    increase: number;
+    withoutBoost?: number;
+    increase?: number;
   };
-  interactions: {
+  interactions?: {
     today: number;
     yesterday: number;
     weeklyAverage: number;
     withBoost: number;
-    withoutBoost: number;
-    increase: number;
+    withoutBoost?: number;
+    increase?: number;
   };
-  rank: {
+  rank?: {
     current: number;
     previous: number;
     change: number;
   };
-  trending: boolean;
-  additionalViews: number;
-  engagementIncrease: number;
-  rankingPosition: number;
-  clicks: {
+  clicks?: {
     today: number;
     yesterday: number;
     weeklyAverage: number;
     withBoost: number;
-    withoutBoost: number;
-    increase: number;
+    withoutBoost?: number;
+    increase?: number;
   };
-  // Optional fields for compatibility
-  views?: number;
-  conversions?: number;
-  timeActive?: number;
-  boostEfficiency?: number;
-  roi?: number;
-  ctr?: number;
-  conversionRate?: number;
-  averagePosition?: number;
-  totalSpent?: number;
-  lastUpdated?: Date | string;
-  dailyStats?: {
-    date: string;
-    impressions: number;
-    clicks: number;
-  }[];
 }
 
-export type AnalyticsData = BoostAnalytics;
+export type BoostAnalytics = Required<AnalyticsData>;
 
 export const useBoostAnalytics = (profileId: string) => {
-  const [data, setData] = useState<AnalyticsData | null>(null);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    const fetchAnalytics = async () => {
-      if (!profileId) return;
-      
-      setLoading(true);
-      
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // Mock data with proper typing
-        const mockData: AnalyticsData = {
-          impressions: {
-            today: 324,
-            yesterday: 217,
-            weeklyAverage: 245,
-            withBoost: 324,
-            withoutBoost: 120,
-            increase: 170
-          },
-          interactions: {
-            today: 87,
-            yesterday: 42,
-            weeklyAverage: 53,
-            withBoost: 87,
-            withoutBoost: 29,
-            increase: 200
-          },
-          rank: {
-            current: 14,
-            previous: 73,
-            change: 59
-          },
-          trending: true,
-          additionalViews: 204,
-          engagementIncrease: 107,
-          rankingPosition: 14,
-          clicks: {
-            today: 42,
-            yesterday: 21,
-            weeklyAverage: 25,
-            withBoost: 42,
-            withoutBoost: 15,
-            increase: 180
-          }
-        };
-        
-        setData(mockData);
-      } catch (error) {
-        console.error('Failed to fetch boost analytics:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchAnalytics = async (): Promise<AnalyticsData | null> => {
+    setLoading(true);
     
-    fetchAnalytics();
+    try {
+      // Mock data for now - this would be a real API call
+      const mockData: AnalyticsData = {
+        additionalViews: 103,
+        engagementIncrease: 24,
+        rankingPosition: 12,
+        conversions: 5,
+        timeActive: 72,
+        boostEfficiency: 87,
+        trending: true,
+        roi: 2.4,
+        impressions: {
+          today: 180,
+          yesterday: 120,
+          weeklyAverage: 100,
+          withBoost: 180,
+          withoutBoost: 100,
+          increase: 80
+        },
+        interactions: {
+          today: 45,
+          yesterday: 32,
+          weeklyAverage: 30,
+          withBoost: 45,
+          withoutBoost: 30,
+          increase: 50
+        }
+      };
+      
+      setAnalytics(mockData);
+      return mockData;
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch analytics');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (profileId) {
+      fetchAnalytics();
+    }
   }, [profileId]);
   
-  return { data, loading };
+  return {
+    analytics,
+    loading,
+    error,
+    fetchAnalytics
+  };
 };
 
 export default useBoostAnalytics;

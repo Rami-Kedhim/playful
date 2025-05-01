@@ -34,3 +34,18 @@ export interface BoostRecommendation {
   estimatedConversions: number;
   reason: string;
 }
+
+export interface PulseBoost {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  price_ubx?: number;
+  duration: string;
+  durationMinutes?: number;
+  features?: string[];
+  visibility?: string;
+  visibility_increase?: number;
+  color?: string;
+  badgeColor?: string;
+}
