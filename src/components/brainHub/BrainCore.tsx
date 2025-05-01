@@ -40,7 +40,7 @@ const BrainCore: React.FC<BrainCoreProps> = ({
         } else {
           throw new Error(result.error || "Unknown error occurred");
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error processing request:", error);
         setError(error.message || "Error processing request");
         setResponse("Error processing request. See console for details.");

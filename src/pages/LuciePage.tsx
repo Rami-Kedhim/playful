@@ -1,84 +1,96 @@
 
 import React from 'react';
-import { lucie } from '@/core/Lucie';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { lucie } from '@/core/Lucie';
+import { hermes } from '@/core/Hermes';
 
-const LuciePage = () => {
-  const [status, setStatus] = React.useState<any>(null);
-
+const LuciePage: React.FC = () => {
   React.useEffect(() => {
-    // Get system status from Lucie
-    const systemStatus = lucie.getSystemStatus();
-    setStatus(systemStatus);
+    // Initialize Lucie
+    lucie.initialize();
+    
+    // Log page view with Hermes
+    hermes.connect({
+      system: 'LuciePage',
+      connectionId: `lucie-${Date.now()}`,
+      metadata: {
+        page: 'lucie',
+        timestamp: new Date().toISOString()
+      }
+    });
   }, []);
-
+  
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between space-y-4 md:space-y-0 md:space-x-4">
-        <div>
-          <h1 className="text-3xl font-bold">Lucie AI System</h1>
-          <p className="text-muted-foreground mt-1">
-            AI Content Generation and Orchestration
+    <div className="container mx-auto px-4 py-8">
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Lucie AI Assistant</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-4">
+            Lucie is an advanced AI assistant integrated with the UberCore ecosystem.
           </p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          
+          <div className="p-4 border rounded-md bg-background">
+            <h3 className="text-lg font-medium mb-2">Lucie Status</h3>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <span>Active and Ready</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>System Status</CardTitle>
+            <CardTitle>Features</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="flex items-center mb-2">
-              <span className={`w-3 h-3 rounded-full mr-2 ${status?.operational ? 'bg-green-500' : 'bg-red-500'}`}></span>
-              {status?.operational ? 'Operational' : 'Degraded'}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Last updated: {status?.lastUpdated ? new Date(status.lastUpdated).toLocaleString() : 'Unknown'}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Models</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-1">
-              {status?.modelStatus && Object.entries(status.modelStatus).map(([model, status]) => (
-                <li key={model} className="flex items-center justify-between">
-                  <span>{model}</span>
-                  <span className="text-sm font-medium">{status}</span>
-                </li>
-              ))}
+            <ul className="list-disc pl-5 space-y-2">
+              <li>Natural language interactions</li>
+              <li>Content moderation</li>
+              <li>Personalized responses</li>
+              <li>Integration with Hermes, Oxum and Orus</li>
+              <li>Multi-modal capabilities</li>
             </ul>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+            <CardTitle>System Integration</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <button className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-md">
-                Content Generation
-              </button>
-              <button className="w-full bg-secondary text-secondary-foreground px-4 py-2 rounded-md">
-                Content Moderation
-              </button>
+            <p className="mb-4">Lucie is seamlessly integrated with the UberCore ecosystem:</p>
+            
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span>Hermes Communication</span>
+                <span className="text-green-500">Connected</span>
+              </div>
+              <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-green-500 w-[95%]"></div>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span>Oxum Monetization</span>
+                <span className="text-green-500">Active</span>
+              </div>
+              <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-green-500 w-[88%]"></div>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span>Orus Security</span>
+                <span className="text-green-500">Protected</span>
+              </div>
+              <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-green-500 w-[92%]"></div>
+              </div>
             </div>
           </CardContent>
         </Card>
-      </div>
-      
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">Documentation</h2>
-        <p className="text-muted-foreground">
-          Lucie is the central AI component for NSFW generation, moderation, and content orchestration 
-          in the UberEscorts ecosystem. It provides advanced AI capabilities for content 
-          generation, moderation, and personalization.
-        </p>
       </div>
     </div>
   );

@@ -81,7 +81,7 @@ class NeuralHub {
         default:
           throw new Error(`Unknown request type: ${request.type}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error processing ${request.type} request:`, error);
       return { 
         success: false, 
@@ -139,4 +139,5 @@ class NeuralHub {
 }
 
 export const brainHub = new NeuralHub();
+export const neuralHub = brainHub; // Add this export to fix the references
 export default brainHub;
