@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Users, Filter, Layers } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const PersonaListingPage: React.FC = () => {
   return (
@@ -53,7 +54,9 @@ const PersonaListingPage: React.FC = () => {
                 This is a sample persona with unique personality traits and interaction patterns.
               </p>
               <div className="mt-4 flex justify-end">
-                <Button variant="ghost" size="sm">View Details</Button>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to={`/persona/${i + 1}`}>View Details</Link>
+                </Button>
               </div>
             </CardContent>
           </Card>

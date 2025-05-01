@@ -213,4 +213,8 @@ class NeuralHub implements INeuralHub {
 
 // Export singleton instance
 export const neuralHub = new NeuralHub();
+
+// Also export as brainHub for compatibility with other components
+export const brainHub = neuralHub;
+
 export default neuralHub;

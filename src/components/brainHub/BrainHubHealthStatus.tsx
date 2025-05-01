@@ -1,174 +1,161 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, CheckCircle, XCircle, RotateCw } from 'lucide-react';
-import { useBrainHubHealth } from '@/hooks/useBrainHubHealth';
+import { CircleCheck, AlertTriangle, AlertCircle, RefreshCw } from 'lucide-react';
+import { checkBrainHubHealth } from '@/services/brainHubHealth';
 import { BrainHubHealth } from '@/types/brainHubHealth';
-import { cn } from '@/lib/utils';
 
-interface BrainHubHealthStatusProps {
-  className?: string;
-  onRefresh?: () => void;
-}
-
-const BrainHubHealthStatus: React.FC<BrainHubHealthStatusProps> = ({
-  className,
-  onRefresh
-}) => {
-  const { health, checkHealth, loading } = useBrainHubHealth();
-
-  const handleRefresh = () => {
-    checkHealth();
-    if (onRefresh) onRefresh();
+const BrainHubHealthStatus: React.FC = () => {
+  const [health, setHealth] = useState<BrainHubHealth>({
+    status: 'loading',
+    metrics: {
+      cpuUsage: 0,
+      memoryUsage: 0,
+      requestsPerMinute: 0,
+      lastOptimized: Date.now()
+    },
+    warnings: [],
+    errors: []
+  });
+  
+  const [refreshing, setRefreshing] = useState(false);
+  
+  const fetchHealthStatus = async () => {
+    setRefreshing(true);
+    try {
+      const result = checkBrainHubHealth();
+      setHealth(result);
+    } catch (error) {
+      console.error('Failed to check brain hub health', error);
+      setHealth({
+        status: 'error',
+        message: 'Failed to retrieve health status',
+        metrics: {
+          cpuUsage: 0,
+          memoryUsage: 0,
+          requestsPerMinute: 0,
+          lastOptimized: Date.now()
+        },
+        warnings: [],
+        errors: ['Connection error']
+      });
+    } finally {
+      setRefreshing(false);
+    }
   };
-
-  const getStatusInfo = (status: BrainHubHealth['status']) => {
-    // Map the status values to our display states
-    const mappedStatus = (() => {
-      if (status === 'online' || status === 'healthy') return 'healthy';
-      if (status === 'degraded' || status === 'warning') return 'warning';
-      if (status === 'offline' || status === 'error') return 'error';
-      return 'unknown';
-    })();
+  
+  useEffect(() => {
+    fetchHealthStatus();
     
-    switch (mappedStatus) {
+    // Set up periodic health checks
+    const intervalId = setInterval(fetchHealthStatus, 60000);
+    
+    return () => clearInterval(intervalId);
+  }, []);
+  
+  const getStatusIcon = () => {
+    switch (health.status) {
       case 'healthy':
-        return {
-          icon: <CheckCircle className="h-6 w-6" />,
-          color: 'text-green-500',
-          bgColor: 'bg-green-50',
-          borderColor: 'border-green-200',
-          label: 'Operational'
-        };
+      case 'online':
+        return <CircleCheck className="w-10 h-10 text-green-500" />;
       case 'warning':
-        return {
-          icon: <AlertTriangle className="h-6 w-6" />,
-          color: 'text-yellow-500',
-          bgColor: 'bg-yellow-50',
-          borderColor: 'border-yellow-200',
-          label: 'Performance Issues'
-        };
+      case 'degraded':
+        return <AlertTriangle className="w-10 h-10 text-yellow-500" />;
       case 'error':
-        return {
-          icon: <XCircle className="h-6 w-6" />,
-          color: 'text-red-500',
-          bgColor: 'bg-red-50',
-          borderColor: 'border-red-200',
-          label: 'System Outage'
-        };
+      case 'offline':
+        return <AlertCircle className="w-10 h-10 text-red-500" />;
       default:
-        return {
-          icon: <RotateCw className="h-6 w-6" />,
-          color: 'text-blue-500',
-          bgColor: 'bg-blue-50',
-          borderColor: 'border-blue-200',
-          label: 'Checking Status'
-        };
+        return <RefreshCw className="w-10 h-10 text-blue-500 animate-spin" />;
     }
   };
   
-  const statusInfo = getStatusInfo(health.status);
-  
-  const formatLastOptimized = (timestamp: number) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    
-    if (diffMins < 60) {
-      return `${diffMins} minutes ago`;
-    } else if (diffMins < 1440) {
-      const hours = Math.floor(diffMins / 60);
-      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    } else {
-      return date.toLocaleString();
-    }
+  const getMetricColor = (value: number, thresholds: [number, number]) => {
+    const [warning, critical] = thresholds;
+    if (value >= critical) return 'text-red-500';
+    if (value >= warning) return 'text-yellow-500';
+    return 'text-green-500';
   };
-
+  
   return (
-    <Card className={cn("overflow-hidden", className)}>
-      <CardHeader className={cn("pb-4", statusInfo.bgColor, statusInfo.borderColor)}>
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-lg font-medium flex items-center gap-2">
-            <span className={statusInfo.color}>{statusInfo.icon}</span>
-            System Status
-          </CardTitle>
-          <Badge variant="outline" className={cn("font-normal", statusInfo.color)}>
-            {statusInfo.label}
-          </Badge>
-        </div>
-        <CardDescription>
-          {health.message || "System health metrics and status"}
-        </CardDescription>
+    <Card>
+      <CardHeader>
+        <CardTitle>Brain Hub Health</CardTitle>
+        <CardDescription>Neural system health and monitoring</CardDescription>
       </CardHeader>
-      <CardContent className="pt-4">
-        <div className="space-y-6">
-          {/* CPU Usage */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-sm">
-              <span>CPU Usage</span>
-              <span>{health.metrics.cpuUsage}%</span>
+      <CardContent>
+        <div className="flex items-center space-x-4 mb-6">
+          {getStatusIcon()}
+          <div>
+            <h3 className="text-xl font-medium capitalize">{health.status}</h3>
+            <p className="text-muted-foreground">{health.message || 'System operational'}</p>
+          </div>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <h4 className="font-medium mb-2">System Metrics</h4>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span>CPU Usage</span>
+                <span className={getMetricColor(health.metrics.cpuUsage, [70, 90])}>
+                  {health.metrics.cpuUsage.toFixed(1)}%
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Memory Usage</span>
+                <span className={getMetricColor(health.metrics.memoryUsage, [80, 95])}>
+                  {health.metrics.memoryUsage.toFixed(1)}%
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Requests Per Minute</span>
+                <span>{health.metrics.requestsPerMinute.toFixed(0)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Last Optimized</span>
+                <span>{new Date(health.metrics.lastOptimized).toLocaleTimeString()}</span>
+              </div>
             </div>
-            <Progress value={health.metrics.cpuUsage} className="h-2" />
           </div>
           
-          {/* Memory Usage */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-sm">
-              <span>Memory Usage</span>
-              <span>{health.metrics.memoryUsage}%</span>
+          {(health.warnings && health.warnings.length > 0) && (
+            <div>
+              <h4 className="font-medium mb-2 text-yellow-500 flex items-center">
+                <AlertTriangle className="h-4 w-4 mr-1" /> Warnings
+              </h4>
+              <ul className="space-y-1 text-sm">
+                {health.warnings.map((warning, i) => (
+                  <li key={i} className="text-yellow-500">{warning}</li>
+                ))}
+              </ul>
             </div>
-            <Progress value={health.metrics.memoryUsage} className="h-2" />
-          </div>
-          
-          {/* Requests per minute */}
-          <div className="flex justify-between items-center text-sm">
-            <span>Requests / min</span>
-            <span>{health.metrics.requestsPerMinute}</span>
-          </div>
-          
-          {/* Last optimization timestamp */}
-          <div className="flex justify-between items-center text-sm">
-            <span>Last Optimized</span>
-            <span>{formatLastOptimized(health.metrics.lastOptimized)}</span>
-          </div>
-          
-          {/* Neural metrics if available */}
-          {health.metrics.neuralMetrics && (
-            <>
-              <div className="mt-4 mb-2 text-sm font-medium">Neural System Metrics</div>
-              
-              <div className="flex justify-between items-center text-sm">
-                <span>Accuracy</span>
-                <span>{health.metrics.neuralMetrics.accuracy}%</span>
-              </div>
-              
-              <div className="flex justify-between items-center text-sm">
-                <span>Efficiency</span>
-                <span>{health.metrics.neuralMetrics.efficiency}%</span>
-              </div>
-              
-              <div className="flex justify-between items-center text-sm">
-                <span>Latency</span>
-                <span>{health.metrics.neuralMetrics.latency}ms</span>
-              </div>
-            </>
           )}
           
-          {/* Refresh button */}
-          <Button 
-            onClick={handleRefresh} 
-            disabled={loading}
-            variant="outline" 
-            size="sm" 
-            className="w-full mt-4"
-          >
-            <RotateCw className={cn("mr-2 h-4 w-4", loading && "animate-spin")} />
-            {loading ? 'Refreshing...' : 'Refresh Status'}
-          </Button>
+          {(health.errors && health.errors.length > 0) && (
+            <div>
+              <h4 className="font-medium mb-2 text-red-500 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-1" /> Errors
+              </h4>
+              <ul className="space-y-1 text-sm">
+                {health.errors.map((error, i) => (
+                  <li key={i} className="text-red-500">{error}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          <div>
+            <Button 
+              onClick={fetchHealthStatus} 
+              disabled={refreshing} 
+              variant="outline" 
+              className="w-full"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              {refreshing ? 'Refreshing...' : 'Refresh Health Status'}
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
