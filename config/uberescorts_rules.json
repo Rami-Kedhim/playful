@@ -1,0 +1,42 @@
+
+{
+  "blocked_paths": [
+    "/legacy/",
+    "/deprecated/",
+    "/old-components/",
+    "/temp/",
+    "/experimental/"
+  ],
+  "approved_pages": [
+    "index.tsx",
+    "app.tsx",
+    "brain-hub.tsx",
+    "profile.tsx",
+    "wallet.tsx",
+    "search.tsx",
+    "escorts.tsx",
+    "wallet.tsx",
+    "verification.tsx",
+    "moderation.tsx",
+    "admin.tsx"
+  ],
+  "rules": [
+    {
+      "action": "enforce",
+      "modules": [
+        "UberCore.ts",
+        "Hermes.ts",
+        "Oxum.ts",
+        "Lucie.ts",
+        "Orus.ts",
+        "HermesOxumNeuralHub.ts",
+        "uberCore.ts",
+        "neuralHub"
+      ]
+    }
+  ],
+  "monitoring": {
+    "log_modifications": true,
+    "strict_enforcement": false
+  }
+}
