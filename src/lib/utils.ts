@@ -1,56 +1,68 @@
 
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
-
+ 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatCurrency(amount: number, currency = 'USD'): string {
+export function formatCurrency(amount: number, currency: string = 'USD'): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
   }).format(amount);
 }
 
+export function formatNumber(value: number): string {
+  return new Intl.NumberFormat('en-US').format(value);
+}
+
 export function truncateText(text: string, maxLength: number): string {
-  if (!text) return '';
-  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength)}...`;
 }
 
-export function getInitials(name: string | null | undefined): string {
-  if (!name) return 'U';
-  
-  const parts = name.trim().split(' ');
-  if (parts.length === 1) {
-    return name.substring(0, 2).toUpperCase();
-  }
-  
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+export function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(part => part.charAt(0))
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
-export function formatDate(date: Date | string | number): string {
+export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOptions): string {
   if (!date) return '';
-  const d = new Date(date);
-  return d.toLocaleDateString('en-US', {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  const defaultOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
-  });
+  };
+  
+  return new Intl.DateTimeFormat('en-US', options || defaultOptions).format(dateObj);
 }
 
-export function formatDateTime(date: Date | string | number): string {
-  if (!date) return '';
-  const d = new Date(date);
-  return d.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-export function generateUniqueId(): string {
-  return Math.random().toString(36).substring(2, 11);
+export function formatDistanceToNow(date: Date | string): string {
+  const now = new Date();
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000);
+  
+  if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
+  
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes} min${diffInMinutes === 1 ? '' : 's'} ago`;
+  
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
+  
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 30) return `${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
+  
+  const diffInMonths = Math.floor(diffInDays / 30);
+  if (diffInMonths < 12) return `${diffInMonths} month${diffInMonths === 1 ? '' : 's'} ago`;
+  
+  const diffInYears = Math.floor(diffInMonths / 12);
+  return `${diffInYears} year${diffInYears === 1 ? '' : 's'} ago`;
 }

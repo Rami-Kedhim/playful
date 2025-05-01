@@ -1,42 +1,78 @@
 
-import React from 'react';
-import { ScrollReveal } from './scroll-reveal';
+import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
-interface ScrollRevealGroupProps {
-  children: React.ReactNode;
-  className?: string;
-  animation?: 'fade-up' | 'fade-in' | 'slide-in' | 'scale-in';
+interface ScrollRevealGroupProps extends React.HTMLAttributes<HTMLDivElement> {
+  animation?: 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom-in';
   staggerDelay?: number;
-  baseDelay?: number;
+  threshold?: number;
   containerClassName?: string;
 }
 
-export function ScrollRevealGroup({
+export const ScrollRevealGroup = ({
   children,
-  className,
   animation = 'fade-up',
   staggerDelay = 0.1,
-  baseDelay = 0,
-  containerClassName
-}: ScrollRevealGroupProps) {
-  // Convert children to array to work with them
+  threshold = 0.1,
+  containerClassName,
+  ...props
+}: ScrollRevealGroupProps) => {
+  const [isIntersecting, setIsIntersecting] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsIntersecting(entry.isIntersecting);
+      },
+      { threshold }
+    );
+
+    const currentElement = ref.current;
+    if (currentElement) {
+      observer.observe(currentElement);
+    }
+
+    return () => {
+      if (currentElement) {
+        observer.unobserve(currentElement);
+      }
+    };
+  }, [ref, threshold]);
+
+  // Define animation classes
+  const getAnimationClass = (index: number) => {
+    const baseClasses = {
+      'fade-up': 'opacity-0 translate-y-10',
+      'fade-down': 'opacity-0 -translate-y-10',
+      'fade-left': 'opacity-0 translate-x-10',
+      'fade-right': 'opacity-0 -translate-x-10',
+      'zoom-in': 'opacity-0 scale-95',
+    };
+    
+    return isIntersecting
+      ? `transition-all duration-700 ease-out opacity-100 translate-y-0 translate-x-0 scale-100 delay-[${index * staggerDelay * 1000}ms]`
+      : `transition-all duration-500 ease-out ${baseClasses[animation]}`;
+  };
+
   const childrenArray = React.Children.toArray(children);
 
   return (
-    <div className={cn(containerClassName)}>
-      {childrenArray.map((child, index) => (
-        <ScrollReveal
-          key={index}
-          animation={animation}
-          delay={baseDelay + index * staggerDelay}
-          className={className}
-        >
-          {child}
-        </ScrollReveal>
-      ))}
+    <div ref={ref} {...props} className={cn(containerClassName)}>
+      {childrenArray.map((child, index) => {
+        if (!React.isValidElement(child)) return child;
+        
+        return React.cloneElement(child, {
+          ...child.props,
+          className: cn(
+            child.props.className,
+            getAnimationClass(index)
+          ),
+          key: `scroll-reveal-${index}`
+        });
+      })}
     </div>
   );
-}
+};
 
 export default ScrollRevealGroup;

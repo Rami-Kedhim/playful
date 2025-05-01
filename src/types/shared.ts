@@ -1,103 +1,99 @@
 
-// Consolidated shared types for the UberConcepts ecosystem
+// Consolidated type definitions for UberEscorts ecosystem
+import { ID, PersonaType, UberPersona } from './uberPersona';
+import { PulseBoost, BoostPackage, UserRole } from './pulse-boost';
 
-// Re-export existing types for backward compatibility
-export * from './uberPersona';
-export * from './home';
+// Re-export core types
+export { ID, PersonaType, UberPersona, PulseBoost, BoostPackage, UserRole };
 
-// Basic ID type used throughout the application
-export type ID = string;
-
-// Base persona type that all persona types extend
-export interface BasePersona {
-  id: ID;
-  displayName: string;
-  avatarUrl?: string;
-  location?: string;
-  type?: string;
-  [key: string]: any;
+// Homepage component prop types
+export interface HeroProps {
+  searchLocation: string;
+  setSearchLocation: (location: string) => void;
 }
 
-// Core UberSystem status interface
+export interface ProfileProps {
+  id: string;
+  name: string;
+  imageUrl?: string;
+  location?: string;
+  rating?: number;
+  price?: number;
+  isPremium?: boolean;
+}
+
 export interface SystemStatus {
   operational: boolean;
+  latency: number;
+  aiModels: {
+    conversation: string;
+    generation: string;
+    analysis: string;
+  };
   lastUpdated: Date;
-  components: Record<string, {
-    status: 'operational' | 'degraded' | 'offline';
-    latency?: number;
-    message?: string;
-  }>;
-  metrics: Record<string, number>;
 }
 
-// Common user interaction types
-export interface UserInteraction {
-  userId: string;
-  targetId?: string;
-  type: string;
-  timestamp: Date;
-  metadata?: Record<string, any>;
+export interface BoostStats {
+  activeBoosts: number;
+  topBoostScore: number;
+  averageVisibility: number;
+  peakHours: string[];
+  recentChanges: number[];
 }
 
-// Metrics and analytics
+// Add types for the Boost system
+export interface BoostStatus {
+  isActive: boolean;
+  packageId?: string;
+  expiresAt?: Date;
+  timeRemaining?: string;
+  boostPackage?: BoostPackage;
+  progress?: number;
+  packageName?: string;
+  startedAt?: Date;
+  activeBoostId?: string;
+  startTime?: Date;
+  endTime?: Date;
+}
+
+export interface BoostEligibility {
+  isEligible: boolean;
+  reason?: string;
+  reasons?: string[];
+  nextEligibleTime?: string;
+  remainingBoosts?: number;
+  maxBoostsPerDay?: number;
+}
+
 export interface AnalyticsData {
-  views: number;
-  interactions: number;
-  conversions: number;
-  boostEffectiveness?: number;
-  engagementRate?: number;
-  period?: {
-    start: Date;
-    end: Date;
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  views?: number;
+  impressions?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+  };
+  interactions?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+  };
+  rank?: {
+    current: number;
+    previous: number;
+    change: number;
   };
 }
 
-// UBX Token types
-export interface UbxBalance {
-  available: number;
-  pending: number;
-  reserved: number;
-  total: number;
-}
-
-export interface UbxTransaction {
-  id: string;
-  type: 'purchase' | 'spend' | 'earn' | 'refund';
-  amount: number;
-  description: string;
-  timestamp: Date;
-  metadata?: Record<string, any>;
-}
-
-// Brain Hub types
-export interface BrainHubConfig {
-  aiModelParameters: {
-    learningRate: number;
-    batchSize: number;
-    epochs: number;
-    optimizerType: string;
-  };
-  systemSettings: {
-    resourceAllocationMode: string;
-    autoOptimize: boolean;
-    debugMode: boolean;
-    loggingLevel: string;
-  };
-  neuralSettings: {
-    activationThreshold: number;
-    neuralDensity: number;
-    layerConfiguration: string;
-  };
-  [key: string]: any;
-}
-
-export interface BrainHubRequest {
-  type: string;
-  data?: any;
-}
-
-export interface BrainHubResponse {
-  success: boolean;
-  data: any | null;
-  error?: string;
+export interface HermesStatus {
+  position: number;
+  activeUsers: number;
+  estimatedVisibility: number;
+  lastUpdateTime: string;
+  boostScore: number;
+  effectivenessScore: number;
 }

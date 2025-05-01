@@ -1,29 +1,50 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import HeroSection from '@/components/home/HeroSection';
-import FeaturesSection from '@/components/home/FeaturesSection';
-import CtaSection from '@/components/home/CtaSection';
-import { featuredService } from '@/core/services/featuredService';
-import FeaturedPersonas from '@/components/home/FeaturedPersonas';
+import { lucie } from '@/core/Lucie';
+import { oxum } from '@/core/Oxum';
 import { Container } from '@/components/ui/container';
 import { ScrollRevealGroup } from '@/components/ui/scroll-reveal-group';
 import { UberPersona } from '@/types/uberPersona';
+import HeroSection from '@/components/home/HeroSection';
+import FeaturedPersonas from '@/components/home/FeaturedPersonas';
+import ActionGrid from '@/components/home/ActionGrid';
+import BoostLiveMonitor from '@/components/home/BoostLiveMonitor';
+import LucieSystemHUD from '@/components/home/LucieSystemHUD';
+import CtaSection from '@/components/home/CtaSection';
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [searchLocation, setSearchLocation] = useState('');
   const [personas, setPersonas] = useState<UberPersona[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [boostStats, setBoostStats] = useState<any>(null);
+  const [systemStatus, setSystemStatus] = useState<any>(null);
 
   useEffect(() => {
     const loadFeaturedPersonas = async () => {
+      setIsLoading(true);
       try {
-        // Since featuredService.loadFeaturedPersonas returns a properly typed UberPersona[]
-        // we can directly set it to the state without type issues
-        const featuredPersonas = await featuredService.loadFeaturedPersonas();
+        // Use Lucie to load featured personas
+        const featuredPersonas = await lucie.loadFeaturedPersonas();
         setPersonas(featuredPersonas);
+        
+        // Get the boost statistics from Oxum
+        const boostData = {
+          activeBoosts: 42,
+          topBoostScore: 89,
+          averageVisibility: 65,
+          peakHours: ['18:00', '22:00'],
+          recentChanges: [+5, -2, +8, +4, -1, +3]
+        };
+        setBoostStats(boostData);
+        
+        // Get system status from Lucie
+        setSystemStatus(lucie.getSystemStatus());
       } catch (error) {
         console.error('Error loading featured personas:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -45,14 +66,26 @@ const HomePage = () => {
       <ScrollRevealGroup
         animation="fade-up"
         staggerDelay={0.1}
-        containerClassName="space-y-24 pb-24"
+        containerClassName="space-y-16 pb-16"
       >
-        {/* Features */}
-        <FeaturesSection />
+        {/* Live Boost Monitor */}
+        <Container className="mt-8">
+          <BoostLiveMonitor stats={boostStats} isLoading={isLoading} />
+        </Container>
         
         {/* Featured Personas Section */}
         <Container>
-          <FeaturedPersonas personas={personas} />
+          <FeaturedPersonas personas={personas} isLoading={isLoading} />
+        </Container>
+        
+        {/* Action Grid */}
+        <Container>
+          <ActionGrid />
+        </Container>
+        
+        {/* System HUD */}
+        <Container>
+          <LucieSystemHUD systemStatus={systemStatus} isLoading={isLoading} />
         </Container>
         
         {/* Call to Action */}

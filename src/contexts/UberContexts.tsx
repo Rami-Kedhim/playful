@@ -1,20 +1,25 @@
 
-import React, { ReactNode } from 'react';
-import { BoostProvider } from './BoostContext';
+import React from 'react';
+import { AuthProvider } from '@/hooks/auth';
+import { LucieProvider } from '@/contexts/LucieContext';
+import { HermesProvider } from '@/contexts/HermesContext';
+import { OxumProvider } from '@/contexts/OxumContext';
 
 interface UberContextsProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
-/**
- * UberContexts - Unified context provider for the UberEscorts ecosystem
- * This component wraps all the context providers in the application
- */
-export const UberContextsProvider: React.FC<UberContextsProviderProps> = ({ children }) => {
+const UberContextsProvider = ({ children }: UberContextsProviderProps) => {
   return (
-    <BoostProvider>
-      {children}
-    </BoostProvider>
+    <AuthProvider>
+      <LucieProvider>
+        <HermesProvider>
+          <OxumProvider>
+            {children}
+          </OxumProvider>
+        </HermesProvider>
+      </LucieProvider>
+    </AuthProvider>
   );
 };
 
