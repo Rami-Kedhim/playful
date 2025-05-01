@@ -30,6 +30,7 @@ const BrainCore: React.FC<BrainCoreProps> = ({
       };
 
       try {
+        // Now properly awaiting the Promise returned by processRequest
         const result = await brainHub.processRequest(requestData);
         
         if (result.success) {

@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { brainHub } from '@/services/neural/HermesOxumBrainHub';
+import { brainHub } from '@/services/neural/HermesOxumNeuralHub';
 
 /**
  * Brain Hub AI integration types
@@ -38,11 +38,11 @@ export const useBrainHubAI = (config: BrainHubAIConfig) => {
   }, []);
   
   // Connect to Brain Hub
-  const connectToBrainHub = useCallback(() => {
+  const connectToBrainHub = useCallback(async () => {
     try {
       console.log(`Connecting ${config.componentId} to Brain Hub...`);
       
-      const result = brainHub.processRequest({
+      const result = await brainHub.processRequest({
         type: "register_capabilities",
         data: {
           componentId: config.componentId,
@@ -68,14 +68,14 @@ export const useBrainHubAI = (config: BrainHubAIConfig) => {
   }, [config.componentId, config.capabilities, config.userContext]);
   
   // Process request through Brain Hub
-  const processRequest = useCallback(<T = any>(
+  const processRequest = useCallback(async <T = any>(
     requestType: string,
     requestData: any,
     filters?: Record<string, any>
-  ): BrainHubAIResult<T> => {
+  ): Promise<BrainHubAIResult<T>> => {
     if (!isConnected) {
       // Try to connect first
-      const connected = connectToBrainHub();
+      const connected = await connectToBrainHub();
       
       if (!connected) {
         return {
@@ -89,7 +89,7 @@ export const useBrainHubAI = (config: BrainHubAIConfig) => {
       setIsProcessing(true);
       setError(null);
       
-      const result = brainHub.processRequest({
+      const result = await brainHub.processRequest({
         type: requestType,
         data: requestData,
         filters: filters
@@ -111,17 +111,17 @@ export const useBrainHubAI = (config: BrainHubAIConfig) => {
   }, [isConnected, connectToBrainHub]);
   
   // Record interaction in Brain Hub
-  const recordInteraction = useCallback((
+  const recordInteraction = useCallback(async (
     interactionType: string,
     interactionData?: any
-  ): void => {
+  ): Promise<void> => {
     if (!isConnected) {
       // Skip if not connected to avoid errors
       return;
     }
     
     try {
-      brainHub.processRequest({
+      await brainHub.processRequest({
         type: "record_interaction",
         data: {
           componentId: config.componentId,

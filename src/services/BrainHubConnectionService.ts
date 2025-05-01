@@ -34,13 +34,15 @@ export class BrainHubConnectionService {
     console.log(`Connecting component ${componentId} to Brain Hub`);
     this.connectedComponents.add(componentId);
     
-    // Register component with Brain Hub
+    // Register component with Brain Hub - now handling as async call
     brainHub.processRequest({
       type: "register_component",
       data: { componentId },
       filters: {
         geoRestrictions: false
       }
+    }).catch(error => {
+      console.error(`Failed to register component ${componentId}:`, error);
     });
     
     return true;
@@ -59,10 +61,12 @@ export class BrainHubConnectionService {
     console.log(`Disconnecting component ${componentId} from Brain Hub`);
     this.connectedComponents.delete(componentId);
     
-    // Unregister component with Brain Hub
+    // Unregister component with Brain Hub - now handling as async call
     brainHub.processRequest({
       type: "unregister_component",
       data: { componentId }
+    }).catch(error => {
+      console.error(`Failed to unregister component ${componentId}:`, error);
     });
     
     return true;
@@ -82,7 +86,7 @@ export class BrainHubConnectionService {
     
     console.log(`Synchronizing data from ${sourceComponentId} to ${targetComponentId}`);
     
-    // Process synchronization through Brain Hub
+    // Process synchronization through Brain Hub - now handling as async call
     brainHub.processRequest({
       type: "sync_components",
       data: {
@@ -90,6 +94,8 @@ export class BrainHubConnectionService {
         targetComponentId,
         payload: data
       }
+    }).catch(error => {
+      console.error(`Failed to synchronize components ${sourceComponentId} -> ${targetComponentId}:`, error);
     });
     
     return true;
