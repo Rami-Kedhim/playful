@@ -5,7 +5,19 @@
 // Core AI Systems
 export * from './Lucie';          // AI Generation, Content Moderation
 export * from './Hermes';         // Flow Dynamics, User Routing
-export * from './Oxum';           // Boost System, Visibility Engine
+
+// Export types, but rename conflicting types to avoid ambiguity
+import { 
+  oxum, 
+  SystemIntegrityResult as OxumSystemIntegrityResult,
+  SessionValidationResult as OxumSessionValidationResult
+} from './Oxum';
+export { 
+  oxum, 
+  OxumSystemIntegrityResult, 
+  OxumSessionValidationResult 
+};
+
 export * from './Orus';           // Security, Session Validation
 export * from './UberWallet';     // UBX Token Economy, Transactions
 
