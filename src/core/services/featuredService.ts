@@ -12,7 +12,7 @@ export class FeaturedService {
   public async loadFeaturedPersonas(): Promise<UberPersona[]> {
     try {
       // Use the lucie system to get featured persona recommendations
-      const featuredPersonas = await lucie.loadFeaturedPersonas();
+      const featuredPersonas = await lucie.loadFeaturedUsers(8);
       return featuredPersonas;
     } catch (error) {
       console.error('Error loading featured personas:', error);

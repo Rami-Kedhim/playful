@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import AICompanionChatList from './companion-chat/AICompanionChatList';
 import AICompanionChatControls from './companion-chat/AICompanionChatControls';
 import AICompanionChatHeader from './companion-chat/AICompanionChatHeader';
-import { lucieOrchestrator } from '@/core/Lucie';
+import { lucie } from '@/core/Lucie';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { toast } from 'sonner';
 
@@ -74,10 +74,16 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
         characterId: companionId,
       };
 
-      // Call Lucie AI routePrompt method with context that includes wallet for token deductions
-      const response = await lucieOrchestrator.routePrompt(userInput, userContext);
+      // Call Lucie AI to generate response
+      const response = await lucie.generateContent({
+        prompt: userInput,
+        type: 'text',
+        nsfw: false,
+        userId: user.id,
+      });
 
-      const assistantMessage = { id: `assistant-${Date.now()}`, role: 'assistant', content: response.responseText, timestamp: new Date() };
+      const responseText = response.text || "I'm sorry, I couldn't generate a response.";
+      const assistantMessage = { id: `assistant-${Date.now()}`, role: 'assistant', content: responseText, timestamp: new Date() };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err: any) {
       setError('Failed to get a response. Please try again.');

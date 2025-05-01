@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { lucieOrchestrator } from '@/core/Lucie';
+import { lucie } from '@/core/Lucie';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/auth/useAuth';
 
@@ -66,7 +66,7 @@ export function useLucieAssistant() {
     }
   }, [isOpen]);
 
-  // Send a message to Lucie orchestrator
+  // Send a message to Lucie
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim()) return;
 
@@ -87,37 +87,42 @@ export function useLucieAssistant() {
       // Provide userId for context or fallback to 'anonymous'
       const userId = user?.id || 'anonymous';
 
-      const userContext: RouteContextSafe = { 
+      // Use Lucie's generateContent method to get a response
+      const response = await lucie.generateContent({
+        prompt: content,
+        type: 'text',
+        nsfw: false,
         userId,
-        walletId: user ? (user as any).walletId : undefined,
-        actionType: 'chat',
-        contentPurpose: 'assistant'
-      };
+      });
 
-      const response = await lucieOrchestrator.routePrompt(content, userContext);
+      if (!response.success) {
+        throw new Error("Failed to generate response");
+      }
 
       // Determine emotion based on response content
       let emotion: LucieMessage['emotion'] = 'neutral';
-      if (response.responseText.includes('sorry') || response.responseText.includes('apologize')) {
+      const responseText = response.text || '';
+      
+      if (responseText.includes('sorry') || responseText.includes('apologize')) {
         emotion = 'concerned';
-      } else if (response.responseText.includes('great') || response.responseText.includes('happy')) {
+      } else if (responseText.includes('great') || responseText.includes('happy')) {
         emotion = 'happy';
-      } else if (response.responseText.includes('let me think') || response.responseText.includes('hmm')) {
+      } else if (responseText.includes('let me think') || responseText.includes('hmm')) {
         emotion = 'thinking';
-      } else if (response.responseText.includes('?')) {
+      } else if (responseText.includes('?')) {
         emotion = 'confused';
       } else {
         emotion = 'friendly';
       }
 
       // Generate relevant suggested actions based on the response
-      const suggestedActions = response.suggestedActions || generateSuggestedActions(content, response.responseText);
+      const suggestedActions = generateSuggestedActions(content, responseText);
 
       // Create the Lucie response message
       const lucieMessage: LucieMessage = {
         id: 'lucie-' + Date.now().toString(),
         role: 'assistant',
-        content: response.responseText,
+        content: responseText,
         timestamp: new Date(),
         emotion,
         suggestedActions

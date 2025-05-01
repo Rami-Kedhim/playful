@@ -5,6 +5,7 @@
 // Core AI Systems
 export * from './Lucie';          // AI Generation, Content Moderation
 export * from './Hermes';         // Flow Dynamics, User Routing
+export * from './LucieOrchestratorAdapter'; // Backward compatibility for lucieOrchestrator
 
 // Export types, but rename conflicting types to avoid ambiguity
 import { 
