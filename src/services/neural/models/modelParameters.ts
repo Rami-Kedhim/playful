@@ -1,36 +1,35 @@
 
-// Fix import to use the correct type
-import { ModelParameters } from '../HermesOxumNeuralHub';
+import { ModelParameters } from '@/types/brainHub';
+import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
 
-export function createDefaultModelParameters(): ModelParameters {
+/**
+ * Update neural model parameters
+ * @param parameters Parameters to update
+ */
+export const updateModelParameters = (parameters: ModelParameters): void => {
+  try {
+    neuralHub.updateModelParameters(parameters);
+    console.log('Model parameters updated successfully');
+  } catch (error) {
+    console.error('Failed to update model parameters:', error);
+  }
+};
+
+/**
+ * Get default model parameters
+ */
+export const getDefaultModelParameters = (): ModelParameters => {
   return {
-    decayConstant: 0.05,
-    growthFactor: 1.5,
+    temperature: 0.7,
+    topP: 0.9,
+    frequencyPenalty: 0,
+    presencePenalty: 0,
+    maxTokens: 2048,
+    stopSequences: [],
+    modelName: 'default',
+    decayConstant: 0.85,
+    growthFactor: 1.05,
     cyclePeriod: 24,
     harmonicCount: 3,
-    bifurcationPoint: 3.57,
-    attractorStrength: 0.8,
-    learningRate: 0.001,
-    batchSize: 16,
-    temperature: 0.7
   };
-}
-
-// Added missing functions referenced in ConfigurationPanel.tsx
-export function initializeDefaultParameters(): ModelParameters {
-  return createDefaultModelParameters();
-}
-
-export function calculateSystemEfficiency(parameters: ModelParameters): number {
-  // Simple mock implementation
-  return 0.75;
-}
-
-export function validateModelParameters(parameters: ModelParameters): boolean {
-  // Basic validation
-  return (
-    (parameters.decayConstant || 0) > 0 &&
-    (parameters.learningRate || 0) > 0 &&
-    (parameters.batchSize || 0) > 0
-  );
-}
+};

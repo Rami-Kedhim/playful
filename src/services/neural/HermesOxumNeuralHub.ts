@@ -1,442 +1,194 @@
 
-import { hermes } from "@/core/Hermes";
-import { oxum } from "@/core/Oxum";
-import { hermesOrusOxum } from "@/core/HermesOrusOxum";
-import { orus } from "@/core/Orus";
-import { SystemHealthMetrics } from "@/types/neural-system";
+import { BrainHubRequest, BrainHubResponse, ModelParameters } from '@/types/brainHub';
+import { TrainingProgress, NeuralModel } from './types/neuralHub';
 
 /**
- * Interface for model parameters used in neural modules
- */
-export interface ModelParameters {
-  decayConstant: number;
-  growthFactor: number;
-  cyclePeriod: number;
-  harmonicCount: number;
-  bifurcationPoint: number;
-  attractorStrength: number;
-  learningRate: number;
-  batchSize: number;
-  temperature: number;
-}
-
-/**
- * Interface for neural service
- */
-export interface NeuralService {
-  id: string;
-  moduleId: string;
-  name: string;
-  config: any;
-  moduleType: string;
-  getMetrics: () => any;
-  updateConfig: (config: any) => void;
-}
-
-/**
- * Interface for training job status
- */
-export interface TrainingJob {
-  id: string;
-  modelId: string;
-  progress: number;
-  status: 'training' | 'paused' | 'completed' | 'failed';
-  startTime: Date;
-  endTime?: Date;
-  currentEpoch: number;
-  totalEpochs: number;
-  loss: number;
-  accuracy: number;
-  type: string;
-  timeRemaining: number;
-}
-
-/**
- * Interface for neural model
- */
-export interface NeuralModel {
-  id: string;
-  name: string;
-  type: string;
-  version: string;
-  specialization: string;
-  size: number;
-  precision: number;
-  capabilities: string[];
-  status: 'active' | 'inactive' | 'training' | 'error';
-  performance: {
-    accuracy: number;
-    latency: number;
-    resourceUsage: number;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-/**
- * Neural Hub for connecting brain components 
- * with Hermes, Oxum, and Orus systems
+ * Unified Neural Hub for Hermes, Orus, and Oxum integration
+ * Provides centralized access to neural processing capabilities
  */
 export class HermesOxumNeuralHub {
-  private isInitialized: boolean = false;
-  private registeredModules: Map<string, any> = new Map();
-  private lastOptimizationTime: Date | null = null;
-  private services: Map<string, NeuralService> = new Map();
-  private models: NeuralModel[] = [];
-  private trainingJobs: TrainingJob[] = [];
+  private activeTrainingJobs: TrainingProgress[] = [];
+  private availableModels: NeuralModel[] = [];
   
-  /**
-   * Initialize the neural hub and connect to core systems
-   */
-  public initialize(): boolean {
-    if (this.isInitialized) return true;
-    
-    console.log('Brain Hub Connection Service initialized');
-    
-    // Connect with core systems
-    this.registerCoreConnections();
-    
-    // Initialize mock data
-    this.initializeMockData();
-    
-    this.isInitialized = true;
-    return true;
-  }
-  
-  /**
-   * Initialize mock data for testing
-   */
-  private initializeMockData(): void {
-    // Add some mock models
-    this.models = [
+  constructor() {
+    // Initialize with some mock models
+    this.availableModels = [
       {
         id: 'model-1',
-        name: 'TextGenerator',
-        type: 'text',
-        version: '1.0',
-        specialization: 'content-generation',
-        size: 1024,
-        precision: 32,
-        capabilities: ['text-generation', 'content-creation'],
+        name: 'TextAnalysis-v2',
+        type: 'nlp',
+        version: '2.3.1',
+        specialization: 'sentiment-analysis',
+        size: 128,
+        precision: 16,
+        capabilities: ['text-analysis', 'sentiment-detection', 'intent-classification'],
         status: 'active',
-        performance: { accuracy: 0.85, latency: 50, resourceUsage: 0.3 },
+        performance: {
+          accuracy: 0.92,
+          latency: 45,
+          resourceUsage: 0.3
+        },
         createdAt: new Date(),
         updatedAt: new Date()
       },
       {
         id: 'model-2',
-        name: 'ImageEnhancer',
-        type: 'image',
-        version: '1.2',
-        specialization: 'image-processing',
-        size: 2048,
-        precision: 16,
-        capabilities: ['image-enhancement', 'resolution-upscaling'],
-        status: 'training',
-        performance: { accuracy: 0.92, latency: 75, resourceUsage: 0.5 },
+        name: 'ImageEnhancer-v3',
+        type: 'vision',
+        version: '3.1.0',
+        specialization: 'image-enhancement',
+        size: 256,
+        precision: 32,
+        capabilities: ['image-upscaling', 'noise-reduction', 'color-correction'],
+        status: 'active',
+        performance: {
+          accuracy: 0.89,
+          latency: 120,
+          resourceUsage: 0.7
+        },
         createdAt: new Date(),
         updatedAt: new Date()
       }
     ];
-    
-    // Add some mock training jobs
-    this.trainingJobs = [
+
+    // Initialize with a mock training job
+    this.activeTrainingJobs = [
       {
         id: 'job-1',
-        modelId: 'model-2',
-        progress: 45,
+        modelId: 'custom-model-1',
+        progress: 67,
+        epoch: 34,
         status: 'training',
-        startTime: new Date(Date.now() - 2 * 60 * 60 * 1000),
-        currentEpoch: 45,
-        totalEpochs: 100,
+        startTime: new Date(),
+        currentEpoch: 34,
+        totalEpochs: 50,
         loss: 0.23,
-        accuracy: 0.87,
-        type: 'fine-tuning',
-        timeRemaining: 120
+        accuracy: 0.78,
+        type: 'natural-language',
+        timeRemaining: 1200,
+        targetAccuracy: 0.85,
+        estimatedCompletionTime: new Date(Date.now() + 1200000)
       }
     ];
-    
-    // Add mock services
-    const mockServices: NeuralService[] = [
-      {
-        id: 'service-1',
-        moduleId: 'text-analysis',
-        name: 'Text Analyzer',
-        moduleType: 'text-analysis',
-        config: {
-          enabled: true,
-          priority: 1,
-          threshold: 0.75
-        },
-        getMetrics: () => ({
-          errorRate: 2.3,
-          latency: 85,
-          successRate: 0.95
-        }),
-        updateConfig: () => {}
-      },
-      {
-        id: 'service-2',
-        moduleId: 'image-analysis',
-        name: 'Image Analyzer',
-        moduleType: 'image-analysis',
-        config: {
-          enabled: true,
-          priority: 2,
-          threshold: 0.65
-        },
-        getMetrics: () => ({
-          errorRate: 3.7,
-          latency: 120,
-          successRate: 0.92
-        }),
-        updateConfig: () => {}
-      }
-    ];
-    
-    mockServices.forEach(service => {
-      this.services.set(service.id, service);
-    });
   }
   
   /**
-   * Register connections to core systems
+   * Process a request through the neural hub
    */
-  private registerCoreConnections(): void {
-    try {
-      // Register with Hermes for flow dynamics
-      hermes.connect({
-        system: 'NeuralHub',
-        connectionId: `neural-hub-${Date.now()}`
-      });
-      
-      // Register with Orus for security validation
-      const sessionValidation = orus.validateSession('system');
-      
-      if (!sessionValidation.isValid) {
-        console.warn('Neural hub system session validation failed');
-      }
-      
-      // Set up the optimization schedule
-      this.scheduleOptimization();
-    } catch (error) {
-      console.error('Error registering core connections:', error);
-    }
-  }
-  
-  /**
-   * Schedule periodic optimization
-   */
-  private scheduleOptimization(): void {
-    // Schedule optimization every 15 minutes
-    setInterval(() => {
-      this.optimizeNeuralConnections();
-    }, 15 * 60 * 1000);
-  }
-  
-  /**
-   * Register a neural module with the hub
-   */
-  public registerModule(moduleId: string, moduleInterface: any): boolean {
-    if (this.registeredModules.has(moduleId)) {
-      console.warn(`Module with ID ${moduleId} is already registered`);
-      return false;
-    }
-    
-    this.registeredModules.set(moduleId, {
-      interface: moduleInterface,
-      registeredAt: new Date(),
-      lastAccessed: new Date()
-    });
-    
-    // Log with Hermes
-    hermes.connect({
-      system: 'NeuralHub',
-      connectionId: `register-${moduleId}-${Date.now()}`,
-      metadata: {
-        action: 'register_module',
-        moduleId
-      }
-    });
-    
-    return true;
-  }
-  
-  /**
-   * Get a registered module by ID
-   */
-  public getModule(moduleId: string): any {
-    const module = this.registeredModules.get(moduleId);
-    
-    if (module) {
-      module.lastAccessed = new Date();
-      this.registeredModules.set(moduleId, module);
-      return module.interface;
-    }
-    
-    return null;
-  }
-  
-  /**
-   * Run neural optimization for all registered modules
-   */
-  public optimizeNeuralConnections(): void {
-    console.log('Running neural optimization');
-    
-    this.lastOptimizationTime = new Date();
-    
-    // For each registered module, run optimization if available
-    this.registeredModules.forEach((module, id) => {
-      try {
-        if (module.interface && typeof module.interface.optimize === 'function') {
-          module.interface.optimize();
-          console.log(`Optimized neural module: ${id}`);
-        }
-      } catch (error) {
-        console.error(`Error optimizing module ${id}:`, error);
-      }
-    });
-    
-    // Use hermesOrusOxum for profile rotation
-    const now = new Date();
-    const currentHour = now.getHours();
-    const optimalWindow = hermesOrusOxum.getOptimalTimeWindow();
-    const timeImpact = hermesOrusOxum.calculateTimeImpact(currentHour, optimalWindow);
-    
-    console.log(`Neural optimization complete. Current time impact: ${timeImpact.toFixed(2)}`);
-  }
-  
-  /**
-   * Get optimization status
-   */
-  public getOptimizationStatus(): {
-    lastOptimized: Date | null;
-    registeredModules: number;
-    activeModules: number;
-  } {
-    // Count active modules (accessed in the last hour)
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    let activeCount = 0;
-    
-    this.registeredModules.forEach(module => {
-      if (module.lastAccessed > oneHourAgo) {
-        activeCount++;
-      }
-    });
+  processRequest(request: BrainHubRequest): BrainHubResponse {
+    console.log(`Processing request: ${request.type}`);
     
     return {
-      lastOptimized: this.lastOptimizationTime,
-      registeredModules: this.registeredModules.size,
-      activeModules: activeCount
+      success: true,
+      data: { processed: true, timestamp: new Date() }
     };
   }
   
   /**
-   * Interface with Oxum boost system
+   * Get system health metrics
    */
-  public interfaceWithBoost(): boolean {
-    try {
-      // Calculate a boost score for a system-level profile
-      const boostScore = oxum.calculateBoostScore('system-neural-hub');
-      
-      // Log the boost score
-      hermesOrusOxum.logSignalTransform('system-boost-score', boostScore);
-      
-      return true;
-    } catch (error) {
-      console.error('Error interfacing with boost system:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Get health metrics for the neural system
-   */
-  public getHealthMetrics(): {
-    load: number;
-    userEngagement: number;
-    cpuUsage: number;
-    memoryUsage: number;
-    requestsPerSecond: number;
-    errorRate: number;
-    lastUpdated: number;
-  } {
+  getHealthMetrics() {
     return {
-      load: 0.65,
-      userEngagement: 0.78,
-      cpuUsage: 45,
-      memoryUsage: 62,
-      requestsPerSecond: 87,
-      errorRate: 1.2,
-      lastUpdated: Date.now()
+      systemLoad: Math.random() * 100,
+      memoryUsage: Math.random() * 100,
+      activeModels: this.availableModels.length,
+      errorRate: Math.random() * 0.05,
+      requestsPerMinute: Math.floor(Math.random() * 1000),
+      uptime: Math.floor(Math.random() * 10000),
+      lastUpdated: new Date()
     };
   }
-
+  
   /**
-   * Get a service by ID
+   * Get active training jobs
    */
-  public getService(serviceId: string): NeuralService | undefined {
-    return this.services.get(serviceId);
+  getActiveTrainingJobs(): TrainingProgress[] {
+    return this.activeTrainingJobs;
   }
-
+  
   /**
-   * Get all active training jobs
+   * Get available neural models
    */
-  public getActiveTrainingJobs(): TrainingJob[] {
-    return this.trainingJobs.filter(job => job.status === 'training' || job.status === 'paused');
+  getModels(): NeuralModel[] {
+    return this.availableModels;
   }
-
+  
   /**
-   * Get all models
+   * Stop a training job
    */
-  public getModels(): NeuralModel[] {
-    return [...this.models];
+  stopTraining(jobId: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      const jobIndex = this.activeTrainingJobs.findIndex(job => job.id === jobId);
+      
+      if (jobIndex !== -1) {
+        this.activeTrainingJobs = this.activeTrainingJobs.filter(job => job.id !== jobId);
+        console.log(`Stopped training job: ${jobId}`);
+        resolve(true);
+      } else {
+        console.log(`Job ${jobId} not found`);
+        resolve(false);
+      }
+    });
   }
-
+  
   /**
-   * Stop training for a specific job
+   * Start a new training job
+   * @param type The type of training to start
+   * @param options Additional options for training
+   * @returns Object with jobId and status
    */
-  public stopTraining(jobId: string): boolean {
-    const jobIndex = this.trainingJobs.findIndex(job => job.id === jobId);
-    if (jobIndex === -1) return false;
-    
-    this.trainingJobs[jobIndex].status = 'paused';
-    return true;
+  startTraining(type: string, options: Record<string, any> = {}): Promise<{ jobId: string; status: string }> {
+    return new Promise((resolve) => {
+      const jobId = `job-${Date.now()}`;
+      
+      const newJob: TrainingProgress = {
+        id: jobId,
+        modelId: `model-${Date.now()}`,
+        progress: 0,
+        epoch: 0,
+        status: 'training',
+        startTime: new Date(),
+        currentEpoch: 0,
+        totalEpochs: options.epochs || 100,
+        loss: 1.0,
+        accuracy: 0.5,
+        type: type,
+        timeRemaining: 3600,
+        targetAccuracy: options.targetAccuracy || 0.85,
+        estimatedCompletionTime: new Date(Date.now() + 3600000)
+      };
+      
+      this.activeTrainingJobs.push(newJob);
+      console.log(`Started new training job: ${jobId} of type ${type}`);
+      
+      resolve({ jobId, status: 'training' });
+    });
   }
-
+  
   /**
-   * Start training for a model
+   * Get a specific neural service by ID
    */
-  public startTraining(modelId: string, trainingConfig: any): string {
-    const model = this.models.find(m => m.id === modelId);
-    if (!model) throw new Error(`Model ${modelId} not found`);
-    
-    model.status = 'training';
-    
-    const jobId = `job-${Date.now()}`;
-    const newJob: TrainingJob = {
-      id: jobId,
-      modelId,
-      progress: 0,
-      status: 'training',
-      startTime: new Date(),
-      currentEpoch: 0,
-      totalEpochs: trainingConfig.epochs || 100,
-      loss: 0.5,
-      accuracy: 0.5,
-      type: trainingConfig.type || 'fine-tuning',
-      timeRemaining: trainingConfig.epochs * 2 || 200
+  getService(serviceId: string): any {
+    return {
+      id: serviceId,
+      name: `Service ${serviceId}`,
+      status: 'active',
+      metrics: {
+        accuracy: 0.91,
+        latency: 45
+      }
     };
-    
-    this.trainingJobs.push(newJob);
-    return jobId;
+  }
+  
+  /**
+   * Update model parameters
+   */
+  updateModelParameters(parameters: ModelParameters): void {
+    console.log('Updating model parameters:', parameters);
+    // Implementation would update the model's parameters
   }
 }
 
-// Export singleton instance
+// Export a singleton instance
 export const neuralHub = new HermesOxumNeuralHub();
 export default neuralHub;
-
-// Initialize on import
-neuralHub.initialize();
-
