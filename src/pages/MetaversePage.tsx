@@ -8,7 +8,7 @@ import { ScrollRevealGroup } from '@/components/ui/scroll-reveal-group';
 import { hermes } from '@/core/Hermes';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Cube, 
+  Box, 
   Users, 
   Building, 
   Map, 
@@ -82,14 +82,14 @@ const MetaversePage: React.FC = () => {
       case 'private': return <Building className="h-5 w-5 text-purple-400" />;
       case 'entertainment': return <Map className="h-5 w-5 text-green-400" />;
       case 'business': return <Compass className="h-5 w-5 text-blue-400" />;
-      default: return <Cube className="h-5 w-5" />;
+      default: return <Box className="h-5 w-5" />;
     }
   };
 
   const handleEnterRoom = (roomId: string) => {
     console.log(`Entering room: ${roomId}`);
     // Call Hermes to register this interaction
-    hermes.interfaceHermes();
+    hermes.connect({ system: 'metaverse', connectionId: roomId });
     // In a real implementation, this would use the Hermes module:
     // hermes.enterSpatialFlow({ roomId, userId: currentUser.id });
   };
@@ -108,7 +108,7 @@ const MetaversePage: React.FC = () => {
         <Card className="bg-gradient-to-br from-purple-900/30 to-background border-purple-500/30">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Cube className="h-6 w-6 text-purple-400" />
+              <Box className="h-6 w-6 text-purple-400" />
               <CardTitle>Metaverse Experience</CardTitle>
             </div>
             <CardDescription>
@@ -133,7 +133,7 @@ const MetaversePage: React.FC = () => {
                 onClick={handleCreateRoom}
                 className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600"
               >
-                <Cube className="h-4 w-4" />
+                <Box className="h-4 w-4" />
                 <span>Create Room</span>
               </Button>
             </div>
