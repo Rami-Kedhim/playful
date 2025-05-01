@@ -1,3 +1,4 @@
+
 export interface TrainingProgress {
   id: string;
   modelId: string;
@@ -38,7 +39,6 @@ export interface NeuralModel {
 
 export interface ModelParameters {
   temperature: number;
-  topP: number;
   frequencyPenalty: number;
   presencePenalty: number;
   maxTokens: number;

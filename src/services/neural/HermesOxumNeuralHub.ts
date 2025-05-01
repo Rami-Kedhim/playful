@@ -95,7 +95,12 @@ export class HermesOxumNeuralHub {
       errorRate: Math.random() * 0.05,
       requestsPerMinute: Math.floor(Math.random() * 1000),
       uptime: Math.floor(Math.random() * 10000),
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
+      // Add the required properties that were missing
+      load: Math.random() * 0.8,
+      userEngagement: Math.random() * 0.9,
+      cpuUsage: Math.random() * 80,
+      requestsPerSecond: Math.floor(Math.random() * 80)
     };
   }
   
@@ -173,6 +178,17 @@ export class HermesOxumNeuralHub {
       id: serviceId,
       name: `Service ${serviceId}`,
       status: 'active',
+      config: {
+        enabled: true
+      },
+      getMetrics: () => ({
+        accuracy: 0.91,
+        latency: 45,
+        operationsCount: 1000
+      }),
+      updateConfig: (config: any) => {
+        console.log(`Updated config for service ${serviceId}:`, config);
+      },
       metrics: {
         accuracy: 0.91,
         latency: 45

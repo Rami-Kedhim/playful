@@ -82,9 +82,9 @@ const HermesSeoConnector: React.FC<HermesSeoConnectorProps> = ({ userId }) => {
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
                 <span>Neural Load</span>
-                <span>{Math.round((systemHealthMetrics.load || 0.5) * 100)}%</span>
+                <span>{Math.round((systemHealthMetrics.systemLoad || 0.5) * 100)}%</span>
               </div>
-              <Progress value={(systemHealthMetrics.load || 0.5) * 100} />
+              <Progress value={(systemHealthMetrics.systemLoad || 0.5) * 100} />
             </div>
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
@@ -149,4 +149,3 @@ const HermesSeoConnector: React.FC<HermesSeoConnectorProps> = ({ userId }) => {
 };
 
 export default HermesSeoConnector;
-

@@ -1,5 +1,5 @@
 
-import { ModelParameters } from '@/types/brainHub';
+import { ModelParameters } from '@/types/neural/types/neuralHub';
 import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
 
 /**
@@ -21,7 +21,6 @@ export const updateModelParameters = (parameters: ModelParameters): void => {
 export const getDefaultModelParameters = (): ModelParameters => {
   return {
     temperature: 0.7,
-    topP: 0.9,
     frequencyPenalty: 0,
     presencePenalty: 0,
     maxTokens: 2048,
@@ -32,4 +31,35 @@ export const getDefaultModelParameters = (): ModelParameters => {
     cyclePeriod: 24,
     harmonicCount: 3,
   };
+};
+
+/**
+ * Initialize default parameters
+ */
+export const initializeDefaultParameters = (): ModelParameters => {
+  return getDefaultModelParameters();
+};
+
+/**
+ * Calculate system efficiency based on parameters
+ */
+export const calculateSystemEfficiency = (params: ModelParameters): number => {
+  // Simple algorithm to calculate efficiency
+  const baseEfficiency = 0.75;
+  const tempFactor = 1 - Math.abs(params.temperature - 0.7) * 0.5;
+  const decayFactor = params.decayConstant ? (params.decayConstant / 0.85) : 1;
+  
+  return Math.min(1, Math.max(0, baseEfficiency * tempFactor * decayFactor));
+};
+
+/**
+ * Validate model parameters
+ */
+export const validateModelParameters = (params: ModelParameters): boolean => {
+  // Basic validation
+  if (params.temperature < 0 || params.temperature > 1) return false;
+  if (params.decayConstant && (params.decayConstant < 0 || params.decayConstant > 1)) return false;
+  if (params.maxTokens < 1 || params.maxTokens > 4096) return false;
+  
+  return true;
 };

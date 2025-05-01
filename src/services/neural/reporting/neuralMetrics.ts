@@ -49,9 +49,8 @@ class NeuralMetricsService {
       systemMetrics: {
         cpuUsage: systemHealth.cpuUsage ?? 0,
         memoryUsage: systemHealth.memoryUsage ?? 0,
-        // Removed responseTime because property missing on type
         responseTime: 0,
-        operationsPerSecond: systemHealth.requestsPerSecond ?? 0,
+        operationsPerSecond: systemHealth.requestsPerMinute / 60 ?? 0,
         errorRate: systemHealth.errorRate ?? 0
       },
       recommendations

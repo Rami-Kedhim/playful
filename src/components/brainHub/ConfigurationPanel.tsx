@@ -49,4 +49,3 @@ const ConfigurationPanel = () => {
 };
 
 export default ConfigurationPanel;
-
