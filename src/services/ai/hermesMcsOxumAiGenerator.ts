@@ -1,7 +1,6 @@
 
 import { AIProfile } from '@/types/ai-profile';
 import { aiProfileGenerator } from '@/services/aiProfileGenerator';
-import * as aiProfilesService from '@/services/ai/aiProfilesService';
 
 /**
  * Specialized AI generator using Hermes-MCS-Oxum technology
@@ -18,7 +17,7 @@ export class HermesMcsOxumAiGenerator {
   async generateProfiles(count: number = this.defaultCount): Promise<AIProfile[]> {
     // In a real implementation, this would use more advanced algorithms
     // For now, we'll use the existing profile generator but enhance the results
-    const baseProfiles = await aiProfilesService.getAIProfiles(count);
+    const baseProfiles = await aiProfileGenerator.generateMultipleProfiles(count);
     
     // Enhance the profiles with Hermes-MCS-Oxum specific attributes
     return baseProfiles.map(profile => this.enhanceProfile(profile));

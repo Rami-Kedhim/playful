@@ -1,80 +1,79 @@
 
-import React from "react";
-import { LivecamModel } from "@/types/livecams";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Eye, MapPin, Flag, Tag, Heart } from "lucide-react";
-import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { AIProfile } from '@/types/ai-profile';
+import { Livecam } from '@/types/livecams';
 
-interface LivecamGridProps {
-  models: LivecamModel[];
-  className?: string;
+export interface LivecamGridProps {
+  livecams?: Livecam[];
+  loading?: boolean;
+  onItemClick?: (id: string) => void;
 }
 
-const LivecamGridCard = ({ model }: { model: LivecamModel }) => {
-  return (
-    <Card className="overflow-hidden group">
-      <div className="aspect-video relative">
-        <img
-          src={model.thumbnailUrl}
-          alt={model.displayName || model.name}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-        {model.isLive && (
-          <Badge className="absolute top-2 left-2 bg-red-500 border-none">
-            Live
-          </Badge>
-        )}
-        <div className="absolute top-2 right-2 flex flex-col gap-1">
-          <Badge variant="outline" className="bg-black/60 backdrop-blur-sm">
-            <Eye className="mr-1 h-3 w-3" />
-            {model.viewerCount}
-          </Badge>
-        </div>
+const LivecamGrid: React.FC<LivecamGridProps> = ({ 
+  livecams = [], 
+  loading = false,
+  onItemClick 
+}) => {
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Array(6).fill(0).map((_, i) => (
+          <Card key={`skeleton-${i}`} className="overflow-hidden">
+            <Skeleton className="h-48 w-full" />
+            <CardContent className="p-4">
+              <Skeleton className="h-4 w-2/3 mb-2" />
+              <Skeleton className="h-4 w-1/2" />
+            </CardContent>
+          </Card>
+        ))}
       </div>
+    );
+  }
 
-      <CardContent className="p-3">
-        <Link to={`/livecams/${model.id}`}>
-          <h3 className="font-medium hover:text-primary transition-colors truncate">
-            {model.displayName || model.name}
-          </h3>
-        </Link>
-        <div className="mt-2 flex flex-wrap gap-1 text-xs">
-          {model.country && (
-            <div className="flex items-center text-muted-foreground mr-2">
-              <MapPin className="mr-1 h-3 w-3" />
-              <span>{model.country}</span>
-            </div>
-          )}
+  if (livecams.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">No livecams available</p>
+      </div>
+    );
+  }
 
-          {model.category && (
-            <div className="flex items-center text-muted-foreground">
-              <Tag className="mr-1 h-3 w-3" />
-              <span>{model.category}</span>
-            </div>
-          )}
-        </div>
-      </CardContent>
-
-      <CardFooter className="p-3 pt-0 flex justify-between">
-        <Button asChild size="sm" variant="ghost" className="text-xs">
-          <Link to={`/livecams/${model.id}`}>View Profile</Link>
-        </Button>
-        <Button size="icon" variant="outline" className="h-8 w-8">
-          <Heart className="h-4 w-4" />
-        </Button>
-      </CardFooter>
-    </Card>
-  );
-};
-
-const LivecamGrid: React.FC<LivecamGridProps> = ({ models, className }) => {
   return (
-    <div className={cn("grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4", className)}>
-      {models.map((model) => (
-        <LivecamGridCard key={model.id} model={model} />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {livecams.map((livecam) => (
+        <Card 
+          key={livecam.id} 
+          className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => onItemClick && onItemClick(livecam.id)}
+        >
+          <div className="aspect-video relative bg-muted overflow-hidden">
+            <img 
+              src={livecam.thumbnailUrl || livecam.imageUrl} 
+              alt={livecam.name || "Livecam"} 
+              className="w-full h-full object-cover"
+            />
+            {livecam.isLive && (
+              <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                LIVE
+              </div>
+            )}
+            {livecam.viewerCount !== undefined && livecam.viewerCount > 0 && (
+              <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                {livecam.viewerCount} viewers
+              </div>
+            )}
+          </div>
+          <CardContent className="p-4">
+            <h3 className="font-medium">{livecam.name || livecam.displayName}</h3>
+            <p className="text-sm text-muted-foreground">
+              {livecam.categories && livecam.categories.length > 0 
+                ? livecam.categories.join(", ") 
+                : livecam.category || "General"}
+            </p>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

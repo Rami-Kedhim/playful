@@ -1,20 +1,18 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useBoostDialog } from '@/hooks/useBoostDialog';
-import { useAuth } from '@/hooks/auth';
 import { Zap } from 'lucide-react';
 import LivecamGrid from '@/components/livecams/LivecamGrid';
 import LivecamFeatured from '@/components/livecams/LivecamFeatured';
 import LivecamFilters from '@/components/livecams/LivecamFilters';
 import { useLivecams } from '@/hooks/useLivecams';
-import { Livecam } from '@/types/livecam';
 import { useToast } from '@/hooks/use-toast';
 import BoostDialog from '@/components/boost/BoostDialog';
 
 const Livecams = () => {
-  const { user } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('all');
   const [selectedFilters, setSelectedFilters] = useState({
@@ -24,16 +22,18 @@ const Livecams = () => {
     onlineOnly: true
   });
   
-  const { livecams, featured, isLoading: livecamsLoading } = useLivecams({
-    filters: selectedFilters,
-    category: activeTab === 'all' ? undefined : activeTab
+  const { livecams, featured, isLoading } = useLivecams({
+    filters: {
+      ...selectedFilters,
+      category: activeTab === 'all' ? undefined : activeTab
+    }
   });
   
-  const profileId = user?.id || 'guest';
+  const profileId = 'guest';
   
   const { 
     showDialog, 
-    isLoading, 
+    isLoading: boostLoading, 
     boostStatus, 
     handleOpenDialog,
     handleCloseDialog,
@@ -69,8 +69,6 @@ const Livecams = () => {
   };
 
   const renderBoostButton = () => {
-    if (!user) return null;
-    
     if (boostStatus.isActive) {
       return (
         <Button 
@@ -143,7 +141,7 @@ const Livecams = () => {
           
           <LivecamGrid 
             livecams={livecams} 
-            loading={livecamsLoading}
+            loading={isLoading}
           />
         </div>
       </div>

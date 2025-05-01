@@ -1,61 +1,62 @@
 
-import { PulseBoost } from './pulse-boost';
-
-// Export the BoostPackage type properly
-export type { BoostPackage } from './pulse-boost';
+// Basic boost types
+export interface BoostPackage {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  price_ubx?: number;
+  duration: string;
+  durationMinutes?: number;
+  features?: string[];
+  visibility?: string;
+  visibility_increase?: number;
+  boost_power?: number;
+  color?: string;
+  badgeColor?: string;
+}
 
 export interface BoostStatus {
   isActive: boolean;
-  // Adding the properties that are referenced in components
-  startTime?: Date | string;
-  endTime?: Date | string;
+  startTime?: string | Date;
+  endTime?: string | Date;
+  packageId?: string;
   remainingTime?: string;
   timeRemaining?: string;
-  packageId?: string;
   activeBoostId?: string;
-  startedAt?: Date;
-  expiresAt?: Date | string;
   packageName?: string;
-  boostMultiplier?: number;
   boostPackage?: BoostPackage;
-  progress?: number;
   boost_level?: number;
+  expiresAt?: Date;
   visibilityScore?: number;
-  boostType?: string;
+  progress?: number;
+}
+
+export interface BoostEligibility {
+  isEligible: boolean;
+  reason?: string;
+  restrictions?: string[];
+  reasons?: string[];
 }
 
 export interface HermesStatus {
-  isActive?: boolean;
   position: number;
   activeUsers: number;
   estimatedVisibility: number;
   lastUpdateTime: string;
   boostScore: number;
   effectivenessScore: number;
-  tier?: number;
-  score?: number;
-  multiplier?: number;
+}
+
+export interface HermesBoostStatus {
+  isActive: boolean;
+  tier: number;
+  score: number;
+  multiplier: number;
   expiresAt?: Date | string;
 }
 
-// Use HermesStatus instead of creating a new type
-export type HermesBoostStatus = HermesStatus;
-
-export interface BoostEligibility {
-  eligible: boolean;
-  isEligible?: boolean;
-  reason?: string;
-  reasons?: string[];
-  nextEligibleTime?: string;
-  remainingBoosts?: number;
-  maxBoostsPerDay?: number;
-  restrictions?: string[];
-}
-
-export interface AnalyticsData {
-  additionalViews?: number;
-  engagementIncrease?: number;
-  rankingPosition?: number;
+export interface BoostAnalytics {
   views?: number;
   impressions?: {
     today: number;
@@ -86,37 +87,16 @@ export interface AnalyticsData {
     withoutBoost?: number;
     increase?: number;
   };
+  trending?: boolean;
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
   conversions?: number;
+  roi?: number;
   timeActive?: number;
   boostEfficiency?: number;
-  trending?: boolean;
-  roi?: number;
 }
 
-// Define BoostAnalytics properly
-export interface BoostAnalytics extends AnalyticsData {
-  // All fields are already in AnalyticsData
-}
-
-export interface BoostContextType {
-  boostStatus: BoostStatus;
-  hermesStatus: HermesStatus;
-  eligibility: BoostEligibility;
-  packages: BoostPackage[];
-  boostPackages: BoostPackage[];
-  loading: boolean;
-  error: string | null;
-  boostProfile: (profileId: string, packageId: string) => Promise<boolean>;
-  cancelBoost: () => Promise<boolean>;
-  getBoostAnalytics: () => Promise<AnalyticsData>;
-  fetchBoostPackages: () => Promise<BoostPackage[]>;
-  dailyBoostUsage: number;
-  dailyBoostLimit: number;
-  formatBoostDuration: (duration: string) => string;
-  adaptGetBoostPrice: () => number;
-}
-
-// Define BoostDialogTabsProps properly
 export interface BoostDialogTabsProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;

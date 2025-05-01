@@ -44,8 +44,8 @@ export const getAIProfileById = async (id: string): Promise<AIProfile | null> =>
   
   // If not found, generate a new profile with the ID
   if (!profile) {
-    const generator = new AIProfileGenerator();
-    const newProfile = await generator.generateRandomProfile();
+    // Note: Use the aiProfileGenerator instance directly, not a class constructor
+    const newProfile = await aiProfileGenerator.generateRandomProfile();
     newProfile.id = id;
     cachedProfiles.push(newProfile);
     return newProfile;
@@ -60,8 +60,8 @@ export const getAIProfileById = async (id: string): Promise<AIProfile | null> =>
  * @returns The created AI profile
  */
 export const createAIProfile = async (profileData: Partial<AIProfile>): Promise<AIProfile> => {
-  const generator = new AIProfileGenerator();
-  const baseProfile = await generator.generateRandomProfile();
+  // Note: Use the aiProfileGenerator instance directly, not a class constructor
+  const baseProfile = await aiProfileGenerator.generateRandomProfile();
   
   // Merge the provided data with the base profile
   const newProfile: AIProfile = {
