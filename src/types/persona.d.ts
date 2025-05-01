@@ -14,9 +14,16 @@ export interface PersonaSearchParams {
   minRating?: number;
   services?: string[];
   features?: string[];
-  pagination?: {
-    total: number;
-    page: number;
-    pageSize: number;
+  filters?: {
+    searchQuery: string;
+    types: string[];
+    tags: string[];
+    verifiedOnly: boolean;
+    onlineOnly: boolean;
+    premiumOnly: boolean;
+    location?: string;
+    roleFilters?: string[];
+    capabilityFilters?: string[];
   };
+  pageSize?: number;
 }

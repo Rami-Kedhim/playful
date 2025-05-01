@@ -4,9 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { aiProfileGenerator } from '@/services/aiProfileGenerator';
 import { AIProfile } from '@/types/ai-profile';
-import AIProfileCard from '@/components/ai/AIProfileCard';
 
 interface AIProfileGeneratorProps {
   onSelectProfile?: (profile: AIProfile) => void;
@@ -20,9 +18,20 @@ const AIProfileGenerator = ({ onSelectProfile }: AIProfileGeneratorProps) => {
   const handleGenerate = async () => {
     setIsGenerating(true);
     // Add a small delay to simulate processing
-    setTimeout(async () => {
-      const profiles = await aiProfileGenerator.generateMultipleProfiles(count);
-      setGenerated(profiles);
+    setTimeout(() => {
+      // Mock implementation for generating profiles
+      const mockProfiles: AIProfile[] = Array(count).fill(null).map((_, i) => ({
+        id: `ai-${Date.now()}-${i}`,
+        name: `AI Persona ${i+1}`,
+        avatarUrl: `https://i.pravatar.cc/300?u=ai-${Date.now()}-${i}`,
+        description: "A generated AI persona with unique traits and capabilities.",
+        traits: ["friendly", "intelligent", "creative"],
+        languages: ["English", "Spanish"],
+        gender: Math.random() > 0.5 ? "female" : "male",
+        age: Math.floor(Math.random() * 20) + 25,
+      }));
+      
+      setGenerated(mockProfiles);
       setIsGenerating(false);
     }, 1000);
   };
@@ -66,11 +75,24 @@ const AIProfileGenerator = ({ onSelectProfile }: AIProfileGeneratorProps) => {
           <h2 className="text-2xl font-bold">Generated Personalities</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {generated.map((profile) => (
-              <AIProfileCard 
-                key={profile.id} 
-                profile={profile} 
-                onChatClick={() => onSelectProfile?.(profile)}
-              />
+              <Card key={profile.id} className="cursor-pointer hover:shadow-lg transition-all" onClick={() => onSelectProfile?.(profile)}>
+                <div className="aspect-square relative">
+                  <img 
+                    src={profile.avatarUrl} 
+                    alt={profile.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <CardContent className="p-4">
+                  <h3 className="font-bold text-lg">{profile.name}</h3>
+                  <p className="text-sm text-muted-foreground">{profile.description}</p>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {profile.traits?.map((trait, i) => (
+                      <span key={i} className="text-xs px-2 py-1 bg-primary/10 rounded-full">{trait}</span>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>

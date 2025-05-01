@@ -1,8 +1,22 @@
 
 import { useState, useEffect } from 'react';
-import { EnhancedBoostStatus, BoostAnalytics } from '@/types/ai-profile';
+import { EnhancedBoostStatus } from '@/types/ai-profile';
 import { BoostPackage } from '@/types/boost';
 import { PulseBoost } from '@/types/pulse-boost';
+
+// Define BoostAnalytics interface here since it's missing from ai-profile
+interface BoostAnalytics {
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  boostHistory: Array<{
+    date: Date;
+    score: number;
+  }>;
+  totalBoosts?: number;
+  activeBoosts?: number;
+  averageBoostScore?: number;
+}
 
 export const usePulseBoost = (profileId?: string) => {
   const [pulseBoostPackages, setPulseBoostPackages] = useState<PulseBoost[]>([]);
@@ -77,7 +91,7 @@ export const usePulseBoost = (profileId?: string) => {
       // This would be a real API call
       
       // Update boost status
-      setBoostStatus({
+      const updatedStatus: EnhancedBoostStatus = {
         isActive: true,
         packageId: boostPackage.id,
         packageName: boostPackage.name,
@@ -86,7 +100,8 @@ export const usePulseBoost = (profileId?: string) => {
         timeRemaining: '24:00:00',
         progress: 0,
         boostPackage
-      });
+      };
+      setBoostStatus(updatedStatus);
       
       return true;
     } catch (error) {
@@ -114,14 +129,18 @@ export const usePulseBoost = (profileId?: string) => {
   
   const getAnalytics = async () => {
     // Mock analytics data
-    setBoostAnalytics({
+    const mockAnalytics: BoostAnalytics = {
       additionalViews: 145,
       engagementIncrease: 32,
       rankingPosition: 8,
       boostHistory: [
         { date: new Date(), score: 90 }
       ],
-    });
+      totalBoosts: 1,
+      activeBoosts: 1,
+      averageBoostScore: 90
+    };
+    setBoostAnalytics(mockAnalytics);
   };
   
   useEffect(() => {

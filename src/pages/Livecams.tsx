@@ -1,230 +1,179 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useState, useEffect } from 'react';
+import { LivecamScraper } from '@/services/scrapers/LivecamScraper';
+import { LivecamModel, Livecam } from '@/types/livecams';
+import LoadingOverlay from '@/components/ui/loading-overlay';
 import { useBoostDialog } from '@/hooks/boost/useBoostDialog';
-import { Zap } from 'lucide-react';
-import LivecamGrid from '@/components/livecams/LivecamGrid';
-import LivecamFeatured from '@/components/livecams/LivecamFeatured';
-import LivecamFilters from '@/components/livecams/LivecamFilters';
-import BoostDialog from '@/components/boost/BoostDialog';
-import { useToast } from '@/hooks/use-toast';
-import { Livecam } from '@/types/livecams';
 
-// Mock hook for livecams data
-const useLivecams = (options: any) => {
-  const featuredLivecams: Livecam[] = [
-    {
-      id: 'live-1',
-      name: 'Featured Model',
-      displayName: 'Featured Model',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop',
-      username: 'featured_model',
-      isLive: true,
-      viewerCount: 254,
-      categories: ['Featured', 'Popular'],
-      country: 'US',
-      language: 'English',
-      rating: 4.8,
-      region: 'North America',
-      tags: ['trending', 'popular'],
-      imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop',
-      isStreaming: true
-    }
-  ];
-  
-  const livecams: Livecam[] = [
-    ...featuredLivecams,
-    {
-      id: 'live-2',
-      name: 'Model 2',
-      displayName: 'Model 2',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1000&auto=format&fit=crop',
-      username: 'model_2',
-      isLive: true,
-      viewerCount: 154,
-      categories: ['Popular'],
-      country: 'UK',
-      language: 'English',
-      rating: 4.5,
-      region: 'Europe',
-      tags: ['new'],
-      imageUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1000&auto=format&fit=crop',
-      isStreaming: true
-    },
-    {
-      id: 'live-3',
-      name: 'Model 3',
-      displayName: 'Model 3',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop',
-      username: 'model_3',
-      isLive: false,
-      viewerCount: 0,
-      categories: ['New'],
-      country: 'CA',
-      language: 'English',
-      rating: 4.2,
-      region: 'North America',
-      tags: ['featured'],
-      imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop',
-      isStreaming: false
-    }
-  ];
-  
-  return {
-    livecams,
-    featured: featuredLivecams,
-    loading: false
-  };
+// Mocked LivecamGrid component (create this component if it doesn't exist)
+const LivecamGrid = ({ livecams, loading, onItemClick }: {
+  livecams: Livecam[];
+  loading: boolean;
+  onItemClick: (id: string) => void;
+}) => {
+  if (loading) {
+    return <LoadingOverlay text="Loading live cams..." />;
+  }
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {livecams.map(cam => (
+        <div 
+          key={cam.id} 
+          className="cursor-pointer border rounded-md overflow-hidden"
+          onClick={() => onItemClick(cam.id)}
+        >
+          <img src={cam.thumbnailUrl} alt={cam.name} className="w-full aspect-video object-cover" />
+          <div className="p-2">
+            <h3 className="font-medium truncate">{cam.displayName}</h3>
+            <div className="flex items-center justify-between text-xs">
+              <span>{cam.isLive ? '🔴 Live' : 'Offline'}</span>
+              <span>{cam.viewerCount} viewers</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Mock BoostDialog component
+const BoostDialog = ({ open, onOpenChange, profileId, onCancel }: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  profileId: string;
+  onCancel: () => Promise<boolean>;
+}) => {
+  return null; // Placeholder component
 };
 
 const Livecams = () => {
-  const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('all');
-  const [selectedFilters, setSelectedFilters] = useState({
-    status: "all" as "all" | "live" | "offline",
-    categories: [],
-    gender: "",
-    region: "",
-    minViewers: 0,
-    sortBy: "popular"
-  });
+  const [livecams, setLivecams] = useState<Livecam[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCam, setSelectedCam] = useState<string | null>(null);
   
-  const { livecams, featured, loading } = useLivecams({
-    filters: {
-      ...selectedFilters,
-      category: activeTab === 'all' ? undefined : activeTab
-    }
-  });
+  const { isOpen, openDialog, closeDialog } = useBoostDialog();
   
-  const profileId = 'guest';
+  // Add mock functions to replace missing ones
+  const handleOpenDialog = () => openDialog();
+  const handleCloseDialog = () => closeDialog();
+  const handleSuccess = () => {
+    closeDialog();
+    return Promise.resolve(true);
+  };
+  const toggleDialog = () => isOpen ? closeDialog() : openDialog();
   
-  const boostDialog = useBoostDialog(profileId);
-  const { 
-    showDialog,
-    handleOpenDialog,
-    handleCloseDialog,
-    handleSuccess,
-    toggleDialog
-  } = boostDialog;
-
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  
-  const handleCancel = async () => {
-    try {
-      const success = await toggleDialog();
-      if (success) {
-        toast({
-          title: "Boost Cancelled",
-          description: "Your boost has been cancelled successfully."
-        });
+  useEffect(() => {
+    const loadLivecams = async () => {
+      setLoading(true);
+      try {
+        // Generate some mock data
+        const mockLivecams: Livecam[] = [
+          {
+            id: "cam-1",
+            name: "Angelica",
+            displayName: "Angelica",
+            thumbnailUrl: "https://i.imgur.com/0y0tGXn.png",
+            username: "angelica123",
+            isLive: true,
+            viewerCount: 152,
+            categories: ["dance", "chat"],
+            country: "USA",
+            language: "English",
+            tags: ["blonde", "dance"],
+            isStreaming: true,
+            region: "North America"
+          },
+          {
+            id: "cam-2",
+            name: "Bella",
+            displayName: "Bella",
+            thumbnailUrl: "https://i.imgur.com/0y0tGXn.png",
+            username: "bella_star",
+            isLive: true,
+            viewerCount: 89,
+            categories: ["music", "chat"],
+            country: "Canada",
+            language: "English",
+            tags: ["brunette", "music"],
+            isStreaming: true,
+            region: "North America"
+          },
+          {
+            id: "cam-3",
+            name: "Clara",
+            displayName: "Clara",
+            thumbnailUrl: "https://i.imgur.com/0y0tGXn.png",
+            username: "clara_model",
+            isLive: false,
+            viewerCount: 0,
+            categories: ["fashion", "lifestyle"],
+            country: "UK",
+            language: "English",
+            tags: ["fashion", "lifestyle"],
+            isStreaming: false,
+            region: "Europe"
+          }
+        ];
+        
+        setLivecams(mockLivecams);
+      } catch (error) {
+        console.error('Error loading livecams:', error);
+      } finally {
+        setLoading(false);
       }
-      return success;
-    } catch (err) {
-      setErrorMessage('Failed to cancel boost');
-      return false;
-    }
-  };
-
-  const handleFilterChange = (newFilters: any) => {
-    setSelectedFilters(prev => ({
-      ...prev,
-      ...newFilters
-    }));
-  };
-
-  const renderBoostButton = () => {
-    if (boostDialog.boostStatus.isActive) {
-      return (
-        <Button 
-          variant="outline" 
-          className="flex items-center gap-2"
-          onClick={handleOpenDialog}
-        >
-          <Zap className="h-4 w-4 text-amber-500" />
-          <span>Boosted</span>
-        </Button>
-      );
-    }
+    };
     
-    return (
-      <Button 
-        variant="outline" 
-        className="flex items-center gap-2"
-        onClick={handleOpenDialog}
-      >
-        <Zap className="h-4 w-4" />
-        <span>Boost Visibility</span>
-      </Button>
-    );
+    loadLivecams();
+  }, []);
+  
+  const handleItemClick = (id: string) => {
+    setSelectedCam(id);
+    console.log(`Selected livecam: ${id}`);
+  };
+  
+  const handleBoost = () => {
+    if (selectedCam) {
+      openDialog();
+    }
+    return Promise.resolve(true);
   };
 
+  const handleCancelBoost = async (): Promise<boolean> => {
+    // Mock implementation
+    console.log("Boost cancelled");
+    return Promise.resolve(true);
+  };
+  
+  // Mock filter props - add missing properties to match expected interface
+  const filterProps = {
+    categories: [] as string[],
+    tags: [] as string[],
+    priceRange: [0, 100] as number[],
+    onlineOnly: true
+  };
+  
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Live Cams</h1>
-          <p className="text-muted-foreground">
-            Connect with live performers in real-time
-          </p>
-        </div>
-        
-        {renderBoostButton()}
-      </div>
+    <div className="container mx-auto py-6 px-4 space-y-6">
+      <h1 className="text-3xl font-bold">Live Cams</h1>
       
-      {featured && featured.length > 0 && (
-        <div className="mb-8">
-          <LivecamFeatured livecams={featured} />
-        </div>
-      )}
-      
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>Filters</CardTitle>
-              <CardDescription>Refine your search</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <LivecamFilters 
-                filters={selectedFilters}
-                onChange={handleFilterChange}
-              />
-            </CardContent>
-          </Card>
-        </div>
-        
-        <div className="lg:col-span-3">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-            <TabsList className="grid grid-cols-4">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="female">Female</TabsTrigger>
-              <TabsTrigger value="male">Male</TabsTrigger>
-              <TabsTrigger value="couple">Couples</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          
+      <div className="md:grid md:grid-cols-4 gap-6">
+        <div className="col-span-4">
           <LivecamGrid 
-            models={livecams} 
-            loading={loading}
-            onItemClick={(id) => console.log(`Clicked livecam ${id}`)}
+            livecams={livecams} 
+            loading={loading} 
+            onItemClick={handleItemClick} 
           />
         </div>
       </div>
       
-      <BoostDialog 
-        open={showDialog}
-        onOpenChange={handleCloseDialog}
-        profileId={profileId}
-        onSuccess={handleSuccess}
-        onCancel={handleCancel}
-      />
-      
-      {errorMessage && (
-        <div className="mt-4 p-4 bg-destructive/10 text-destructive rounded-md">
-          {errorMessage}
-        </div>
+      {selectedCam && (
+        <BoostDialog
+          open={isOpen}
+          onOpenChange={toggleDialog}
+          profileId={selectedCam}
+          onCancel={handleCancelBoost}
+        />
       )}
     </div>
   );

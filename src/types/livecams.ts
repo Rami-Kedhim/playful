@@ -1,3 +1,4 @@
+
 export interface LivecamModel {
   id: string;
   displayName: string;
@@ -12,12 +13,13 @@ export interface LivecamModel {
   rating?: number;
   language?: string;
   country?: string;
-  category?: string; // Add this missing property
+  category?: string; 
   categories?: string[];
   tags?: string[];
   age?: number;
   description?: string;
   streamUrl?: string;
+  region?: string;
 }
 
 export interface LivecamCardProps {
@@ -31,4 +33,7 @@ export interface LivecamCardProps {
 
 export interface Livecam extends LivecamModel {
   // Add any specific properties for Livecam type
+  region?: string;
+  displayName: string;
 }
+

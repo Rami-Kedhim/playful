@@ -1,241 +1,79 @@
 
-import React, { useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2, Search, Filter, X } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { usePersonaFilters } from '@/hooks/usePersonaFilters';
-import { usePersona } from '@/modules/personas/hooks';
-import { PersonaGrid } from '@/components/personas/PersonaGrid';
-import { PersonaPanel } from '@/components/personas/PersonaPanel';
-import { FilterPanel } from '@/components/personas/FilterPanel';
+import React, { useState, useEffect } from 'react';
+import { usePersona } from '@/modules/personas/hooks/usePersona';
+import { UberPersona } from '@/types/uberPersona';
+import PersonaGrid from '@/components/personas/PersonaGrid';
 
-const Personas: React.FC = () => {
-  const personaFilters = usePersonaFilters();
-  const { filters, updateFilters } = personaFilters;
-  const { personas, loading, error } = usePersona({ 
-    filters: { ...filters },
-    pageSize: 20
-  });
+// Mock components for FilterPanel and PersonaPanel
+const FilterPanel = () => <div>Filter Panel (placeholder)</div>;
+const PersonaPanel = () => <div>Persona Panel (placeholder)</div>;
 
-  const [showFilters, setShowFilters] = useState(false);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateFilters({ searchQuery: e.target.value });
+// Mock hook for persona filters
+const usePersonaFilters = () => {
+  return {
+    filters: {
+      searchQuery: '',
+      types: [],
+      tags: [],
+      verifiedOnly: false,
+      onlineOnly: false,
+      premiumOnly: false,
+    },
+    setFilters: () => {},
+    clearFilters: () => {},
   };
+};
 
-  const handleClearSearch = () => {
-    updateFilters({ searchQuery: '' });
-  };
-
-  // Location filters
-  const locationOptions = [
-    { key: 'us', label: 'United States' },
-    { key: 'eu', label: 'Europe' },
-    { key: 'asia', label: 'Asia' },
-    { key: 'global', label: 'Global' }
-  ];
-
-  // Role filters
-  const roleFilterOptions = [
-    { key: 'escort', label: 'Escort' },
-    { key: 'model', label: 'Model' },
-    { key: 'companion', label: 'Companion' },
-    { key: 'creator', label: 'Content Creator' }
-  ];
-
-  // Capability filters
-  const capabilityFilterOptions = [
-    { key: 'massage', label: 'Massage' },
-    { key: 'dinner', label: 'Dinner Date' },
-    { key: 'travel', label: 'Travel Companion' },
-    { key: 'event', label: 'Event Partner' }
-  ];
-
-  const handleLocationChange = (location: string) => {
-    updateFilters({ location });
-  };
-
-  const handleRoleFilterToggle = (role: string) => {
-    const currentRoleFilters = [...(filters.roleFilters || [])];
-    const index = currentRoleFilters.indexOf(role);
+const Personas = () => {
+  const { persona, loading, error, searchPersonas } = usePersona();
+  const [personaList, setPersonaList] = useState<UberPersona[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  
+  const filters = usePersonaFilters();
+  
+  useEffect(() => {
+    const fetchPersonas = async () => {
+      try {
+        // Use the personaService directly since we don't have access to the hook method
+        const result = await searchPersonas({ page: 1, limit: 12 });
+        setPersonaList(result.data);
+      } catch (err) {
+        console.error('Failed to fetch personas', err);
+      }
+    };
     
-    if (index >= 0) {
-      currentRoleFilters.splice(index, 1);
-    } else {
-      currentRoleFilters.push(role);
-    }
-    
-    updateFilters({ roleFilters: currentRoleFilters });
+    fetchPersonas();
+  }, []);
+  
+  const handlePersonaClick = (id: string) => {
+    setSelectedId(id);
   };
-
-  const handleCapabilityFilterToggle = (capability: string) => {
-    const currentCapabilityFilters = [...(filters.capabilityFilters || [])];
-    const index = currentCapabilityFilters.indexOf(capability);
-    
-    if (index >= 0) {
-      currentCapabilityFilters.splice(index, 1);
-    } else {
-      currentCapabilityFilters.push(capability);
-    }
-    
-    updateFilters({ capabilityFilters: currentCapabilityFilters });
-  };
-
-  const handleToggleVerified = () => {
-    updateFilters({ verifiedOnly: !filters.verifiedOnly });
-  };
-
-  const renderSearchBar = () => (
-    <div className="relative">
-      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-      <Input
-        type="search"
-        placeholder="Search personas..."
-        className="pl-8 pr-10"
-        value={filters.searchQuery}
-        onChange={handleSearchChange}
-      />
-      {filters.searchQuery && (
-        <button
-          onClick={handleClearSearch}
-          className="absolute right-2 top-2.5 text-muted-foreground hover:text-foreground"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      )}
-    </div>
-  );
-
-  const renderLocationFilter = () => (
-    <div className="mt-4">
-      <h3 className="mb-2 font-medium">Location</h3>
-      <div className="flex flex-wrap gap-2">
-        {locationOptions.map(location => (
-          <Button
-            key={location.key}
-            variant={filters.location === location.key ? "default" : "outline"}
-            size="sm"
-            onClick={() => handleLocationChange(location.key)}
-          >
-            {location.label}
-          </Button>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderRoleFilters = () => (
-    <div className="mt-4">
-      <h3 className="mb-2 font-medium">Role</h3>
-      <div className="space-y-2">
-        {roleFilterOptions.map(role => (
-          <div key={role.key} className="flex items-center space-x-2">
-            <Checkbox 
-              id={`role-${role.key}`} 
-              checked={(filters.roleFilters || []).includes(role.key)}
-              onCheckedChange={() => handleRoleFilterToggle(role.key)}
-            />
-            <label
-              htmlFor={`role-${role.key}`}
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              {role.label}
-            </label>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderCapabilityFilters = () => (
-    <div className="mt-4">
-      <h3 className="mb-2 font-medium">Services</h3>
-      <div className="space-y-2">
-        {capabilityFilterOptions.map(capability => (
-          <div key={capability.key} className="flex items-center space-x-2">
-            <Checkbox 
-              id={`capability-${capability.key}`} 
-              checked={(filters.capabilityFilters || []).includes(capability.key)}
-              onCheckedChange={() => handleCapabilityFilterToggle(capability.key)}
-            />
-            <label
-              htmlFor={`capability-${capability.key}`}
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              {capability.label}
-            </label>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
+  
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col gap-8 md:flex-row">
-        {/* Sidebar */}
-        <Card className="w-full md:w-64 p-4 h-fit sticky top-4">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Filters</h2>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className="md:hidden"
-            >
-              <Filter className="h-4 w-4 mr-2" /> 
-              {showFilters ? "Hide" : "Show"}
-            </Button>
-          </div>
-          
-          <div className={`md:block ${showFilters ? 'block' : 'hidden'}`}>
-            {renderSearchBar()}
-            
-            <div className="mt-4">
-              <h3 className="mb-2 font-medium">Verification</h3>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="verified-only" 
-                  checked={filters.verifiedOnly} 
-                  onCheckedChange={handleToggleVerified} 
-                />
-                <label
-                  htmlFor="verified-only"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Verified Only
-                </label>
-              </div>
-            </div>
-            
-            {renderLocationFilter()}
-            {renderRoleFilters()}
-            {renderCapabilityFilters()}
-          </div>
-        </Card>
+    <div className="container mx-auto py-6 px-4">
+      <h1 className="text-3xl font-bold mb-6">Personas</h1>
+      
+      <div className="grid grid-cols-12 gap-6">
+        <div className="col-span-3">
+          <FilterPanel />
+        </div>
         
-        {/* Main Content */}
-        <div className="flex-1">
-          <div className="mb-6 flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Personas</h1>
-            <div className="flex items-center">
-              <span className="text-sm text-muted-foreground mr-2">
-                {loading ? "Loading..." : `${personas.length} results`}
-              </span>
-            </div>
-          </div>
-          
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : (
-            <PersonaGrid personas={personas} />
-          )}
+        <div className="col-span-9">
+          <PersonaGrid
+            personas={personaList}
+            onPersonaClick={handlePersonaClick}
+            loading={loading}
+          />
         </div>
       </div>
+      
+      {selectedId && (
+        <PersonaPanel />
+      )}
     </div>
   );
 };

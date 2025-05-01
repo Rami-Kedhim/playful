@@ -135,3 +135,30 @@ export interface EnhancedBoostStatus {
   startedAt?: Date; // Added to fix usePulseBoost
 }
 
+export interface BoostAnalytics {
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  boostHistory: Array<{
+    date: Date;
+    score: number;
+  }>;
+  totalBoosts?: number;
+  activeBoosts?: number;
+  averageBoostScore?: number;
+}
+
+export interface BoostPackage {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  price_ubx: number;
+  duration: string;
+  durationMinutes?: number;
+  visibility?: string;
+  visibility_increase?: number;
+  color?: string;
+  badgeColor?: string;
+  features: string[];
+}

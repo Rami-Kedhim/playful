@@ -68,7 +68,7 @@ const PersonaGrid: React.FC<PersonaGridProps> = ({
             <div className="flex items-center justify-between">
               <h3 className="font-medium truncate flex items-center gap-1">
                 {persona.name}
-                {persona.verified && <VerifiedMark className="ml-1" />}
+                {persona.isVerified && <VerifiedMark className="ml-1" />}
               </h3>
               {typeof persona.rating === 'number' && (
                 <Badge variant="outline" className="text-sm">

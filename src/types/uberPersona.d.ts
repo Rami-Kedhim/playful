@@ -3,6 +3,7 @@ export interface UberPersona {
   id: string;
   name: string;
   type: string;
+  avatarUrl?: string;
   personality?: string;
   traits?: string[];
   interests?: string[];
@@ -11,4 +12,16 @@ export interface UberPersona {
   energyLevel?: number;
   lastModified?: Date | string;
   createdAt?: Date | string;
+  location?: string;
+  services?: string[];
+  languages?: string[];
+  available?: boolean;
+  isVerified?: boolean;
+  verified?: boolean;
+  reviews?: any[];
+  isOnline?: boolean;
+  isPremium?: boolean;
+  isFeatured?: boolean;
+  isAI?: boolean;
+  description?: string;
 }

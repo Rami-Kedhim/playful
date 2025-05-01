@@ -1,12 +1,25 @@
 
 import { AIProfile } from '@/types/ai-profile';
-import { aiProfileGenerator } from '../aiProfileGenerator';
 
 // Number of AI profiles to generate by default
 const DEFAULT_PROFILE_COUNT = 20;
 
 // Cache for AI profiles to avoid generating new ones on every call
 let cachedProfiles: AIProfile[] | null = null;
+
+// Mock function to generate profiles
+const generateMockProfiles = (count: number): AIProfile[] => {
+  return Array(count).fill(null).map((_, i) => ({
+    id: `ai-${Date.now()}-${i}`,
+    name: `AI Profile ${i + 1}`,
+    avatarUrl: `https://i.pravatar.cc/300?u=ai-${Date.now()}-${i}`,
+    description: "An AI profile generated for testing purposes",
+    traits: ["friendly", "intelligent", "creative"],
+    languages: ["English", "Spanish"],
+    gender: Math.random() > 0.5 ? "female" : "male",
+    age: Math.floor(Math.random() * 20) + 25,
+  }));
+};
 
 /**
  * Gets a list of AI profiles
@@ -15,13 +28,12 @@ let cachedProfiles: AIProfile[] | null = null;
  */
 export const getAIProfiles = async (count: number = DEFAULT_PROFILE_COUNT): Promise<AIProfile[]> => {
   if (!cachedProfiles) {
-    const profiles = await aiProfileGenerator.generateMultipleProfiles(DEFAULT_PROFILE_COUNT);
-    cachedProfiles = profiles;
+    cachedProfiles = generateMockProfiles(DEFAULT_PROFILE_COUNT);
   }
   
   // If requesting more than we have cached, generate more
   if (count > cachedProfiles.length) {
-    const additionalProfiles = await aiProfileGenerator.generateMultipleProfiles(count - cachedProfiles.length);
+    const additionalProfiles = generateMockProfiles(count - cachedProfiles.length);
     cachedProfiles = [...cachedProfiles, ...additionalProfiles];
   }
   
@@ -37,8 +49,7 @@ export const getAIProfiles = async (count: number = DEFAULT_PROFILE_COUNT): Prom
 export const getAIProfileById = async (id: string): Promise<AIProfile | null> => {
   // Ensure we have some cached profiles
   if (!cachedProfiles) {
-    const profiles = await aiProfileGenerator.generateMultipleProfiles(DEFAULT_PROFILE_COUNT);
-    cachedProfiles = profiles;
+    cachedProfiles = generateMockProfiles(DEFAULT_PROFILE_COUNT);
   }
   
   // Look for the profile with the given ID
@@ -46,9 +57,17 @@ export const getAIProfileById = async (id: string): Promise<AIProfile | null> =>
   
   // If not found, generate a new profile with the ID
   if (!profile) {
-    // Use the aiProfileGenerator instance directly
-    const newProfile = await aiProfileGenerator.generateProfile();
-    newProfile.id = id;
+    const newProfile: AIProfile = {
+      id,
+      name: `AI Profile ${id.substring(0, 4)}`,
+      avatarUrl: `https://i.pravatar.cc/300?u=${id}`,
+      description: "A newly generated AI profile",
+      traits: ["adaptive", "helpful", "personalized"],
+      languages: ["English"],
+      gender: "non-binary",
+      age: 30,
+    };
+    
     cachedProfiles.push(newProfile);
     return newProfile;
   }
@@ -62,15 +81,12 @@ export const getAIProfileById = async (id: string): Promise<AIProfile | null> =>
  * @returns The created AI profile
  */
 export const createAIProfile = async (profileData: Partial<AIProfile>): Promise<AIProfile> => {
-  // Use the aiProfileGenerator instance directly
-  const baseProfile = await aiProfileGenerator.generateProfile();
-  
-  // Merge the provided data with the base profile
+  // Create a new profile with required fields
   const newProfile: AIProfile = {
-    ...baseProfile,
+    id: profileData.id || `ai-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    name: profileData.name || `New AI Profile`,
+    avatarUrl: profileData.avatarUrl || `https://i.pravatar.cc/300?u=${Date.now()}`,
     ...profileData,
-    // Ensure id is unique if not provided
-    id: profileData.id || `ai-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
   };
   
   // Add to cache

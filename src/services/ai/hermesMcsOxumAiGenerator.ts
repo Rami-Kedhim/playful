@@ -36,7 +36,6 @@ class HermesMcsOxumAiGenerator {
       name: profile.name,
       avatarUrl: profile.avatar || `https://i.pravatar.cc/300?u=${profile.id}`,
       description: profile.description || "",
-      // Add any other required fields
       traits: profile.personalityTraits || [],
       languages: profile.languages || [],
     };
