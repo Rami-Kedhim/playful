@@ -1,9 +1,9 @@
 
 // Authentication and user utilities
-
-import { useAuth } from '@/hooks/auth';
+import { AuthProvider, useAuth } from '@/hooks/auth';
 
 // Re-export auth utilities
 export {
+  AuthProvider,
   useAuth
 };
