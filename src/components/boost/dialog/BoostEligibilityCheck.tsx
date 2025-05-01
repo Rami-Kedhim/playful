@@ -1,47 +1,60 @@
-
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
-import { BoostEligibility } from "@/types/boost";
+import React from 'react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { AlertCircle, ShieldAlert, AlertTriangle } from "lucide-react";
+import { BoostEligibility } from "@/types/boost";
 
 interface BoostEligibilityCheckProps {
   eligibility: BoostEligibility;
   onClose: () => void;
 }
 
-const BoostEligibilityCheck = ({ eligibility, onClose }: BoostEligibilityCheckProps) => {
-  if (!eligibility) return null;
+const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({
+  eligibility,
+  onClose
+}) => {
+  // Handle both eligible and isEligible
+  const isEligible = eligibility.eligible || eligibility.isEligible;
   
-  if (eligibility.eligible) {
-    return (
-      <Alert variant="default" className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900/50">
-        <CheckCircle2 className="h-4 w-4 text-green-500" />
-        <AlertTitle>Eligible for boost</AlertTitle>
-        <AlertDescription>
-          Your profile meets all requirements for boosting
-        </AlertDescription>
-      </Alert>
-    );
+  if (isEligible) {
+    return null;
   }
-  
+
+  const getReasonMessage = () => {
+    if (eligibility.reason) {
+      return eligibility.reason;
+    }
+    
+    // If we have a reasons array, use the first reason
+    if (eligibility.reasons && eligibility.reasons.length > 0) {
+      return eligibility.reasons[0];
+    }
+    
+    // Otherwise use a default message
+    return "You are not currently eligible to boost your profile. Please try again later.";
+  };
+
   return (
     <div className="space-y-4">
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Not eligible for boost</AlertTitle>
+        <AlertTitle>Not Eligible for Boost</AlertTitle>
         <AlertDescription>
-          {eligibility.reason || "Your profile does not meet the requirements for boosting"}
-          {eligibility.reasons && eligibility.reasons.length > 0 && (
-            <ul className="list-disc pl-5 mt-2 space-y-1">
-              {eligibility.reasons.map((reason, index) => (
-                <li key={index} className="text-sm">{reason}</li>
-              ))}
-            </ul>
-          )}
+          {getReasonMessage()}
         </AlertDescription>
       </Alert>
-      
-      <Button variant="outline" className="w-full" onClick={onClose}>
+
+      {eligibility.nextEligibleTime && (
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Next Eligibility</AlertTitle>
+          <AlertDescription>
+            You will be eligible for a new boost in {eligibility.nextEligibleTime}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <Button onClick={onClose} className="w-full">
         Close
       </Button>
     </div>

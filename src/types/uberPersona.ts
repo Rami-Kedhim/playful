@@ -22,7 +22,7 @@ export interface UberPersona {
   rating?: number;
   reviewCount?: number;
   isPremium?: boolean;
-  availability?: Array<{ start: Date; end: Date }> | { nextAvailable: Date };
+  availability?: Array<{ start: Date; end: Date; schedule?: any }> | { nextAvailable: Date; };
   boostScore?: number;
   systemMetadata?: {
     boostScore?: number;
@@ -87,5 +87,14 @@ export interface UberPersona {
     hasContent?: boolean;
     hasRealMeets?: boolean;
     hasVirtualMeets?: boolean;
+  };
+  // For PersonaService compatibility
+  data?: UberPersona[];
+  meta?: {
+    pagination?: {
+      total?: number;
+      page?: number;
+      pageSize?: number;
+    };
   };
 }

@@ -55,7 +55,7 @@ export interface AIProfile {
   traits?: string[];
   interests?: string[];
   tags?: string[];
-  type?: string;
+  type?: string | string[];
   isPremium?: boolean;
   gender?: string;
   age?: number;
@@ -101,4 +101,3 @@ export interface AIMessage {
     url: string;
   }>;
 }
-

@@ -106,12 +106,15 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
     return pkg?.price_ubx || pkg?.price || 0;
   }, [selectedPackage, boostPackages]);
 
+  // Provide all required properties for HermesStatus
   const hermesStatusData: HermesStatus = {
     isActive: false,
     position: 0,
     activeUsers: 0,
     estimatedVisibility: 0,
-    lastUpdateTime: ''
+    lastUpdateTime: '',
+    boostScore: 0,
+    effectivenessScore: 0
   };
 
   return (

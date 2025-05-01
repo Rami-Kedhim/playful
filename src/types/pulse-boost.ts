@@ -59,7 +59,7 @@ export interface PulseBoost {
   boostMultiplier?: number;
 }
 
-// Add missing type exports for pulse-boost
+// Export BoostPackage properly
 export interface BoostPackage {
   id: string;
   name: string;
@@ -75,6 +75,7 @@ export interface BoostPackage {
   badgeColor?: string;
   boostMultiplier?: number;
   isMostPopular?: boolean;
+  boost_power?: number;
 }
 
 export interface BoostPurchaseRequest {
@@ -102,6 +103,40 @@ export interface BoostAnalytics {
   engagementIncrease?: number;
   rankingPosition?: number;
   views?: number;
+  impressions?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  interactions?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  clicks?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  rank?: {
+    current: number;
+    previous: number;
+    change: number;
+  };
+  trending?: boolean;
+  conversions?: number;
+  roi?: number;
+  timeActive?: number;
+  boostEfficiency?: number;
 }
 
 export interface EnhancedBoostStatus {
@@ -114,4 +149,8 @@ export interface EnhancedBoostStatus {
   boostMultiplier?: number;
   boostPackage?: BoostPackage;
   progress?: number;
+  startTime?: Date | string;
+  endTime?: Date | string;
+  activeBoostId?: string;
+  timeRemaining?: string;
 }

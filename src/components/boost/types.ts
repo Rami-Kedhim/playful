@@ -1,5 +1,5 @@
 
-import { BoostPackage, BoostStatus, BoostEligibility, HermesBoostStatus } from '@/types/boost';
+import { BoostPackage, BoostStatus, BoostEligibility, HermesStatus } from '@/types/boost';
 
 export interface BoostDialogContainerProps {
   profileId: string;
@@ -29,7 +29,7 @@ export interface BoostDialogTabsProps {
   handleCancel: () => Promise<boolean>;
   dailyBoostUsage: number;
   dailyBoostLimit: number;
-  hermesStatus: HermesBoostStatus;
+  hermesStatus: HermesStatus;
   formatBoostDuration?: (duration: string) => string;
   getBoostPrice?: () => number;
   handleDialogClose: () => void;
@@ -58,6 +58,6 @@ export interface BoostActivePackageProps {
 }
 
 export interface HermesBoostInfoProps {
-  hermesStatus: HermesBoostStatus;
+  hermesStatus: HermesStatus;
   isActive?: boolean;
 }

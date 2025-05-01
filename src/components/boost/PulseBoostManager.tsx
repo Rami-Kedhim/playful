@@ -7,7 +7,7 @@ import { useBoostStatus } from '@/hooks/boost/useBoostStatus';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { BoostPackage } from '@/types/boost';
+import { BoostPackage } from '@/types/pulse-boost';
 import { PulseBoost } from '@/types/pulse-boost';
 import { toast } from '@/hooks/use-toast';
 
@@ -162,7 +162,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
         
         const isActive = Boolean(
           currentStatus?.isActive && 
-          (currentStatus?.activeBoostId === pkg.id || currentStatus?.packageId === pkg.id)
+          (currentStatus?.packageId === pkg.id)
         );
         
         return (
@@ -183,7 +183,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
               price: pkg.price || 0 // Ensure price is never undefined
             }}
             isActive={isActive}
-            timeRemaining={currentStatus?.remainingTime || ''}
+            timeRemaining={currentStatus?.remainingTime || currentStatus?.timeRemaining || ''}
             onActivate={handlePurchaseBoost}
             onCancel={handleCancelBoost}
             userBalance={userEconomy?.ubxBalance || 0}

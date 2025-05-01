@@ -24,10 +24,18 @@ const BoostActivePackage = ({
 
   // Calculate progress as a percentage
   const calculateProgress = (): number => {
-    if (!boostStatus.startTime || !boostStatus.endTime) return 0;
+    if (!boostStatus.startedAt && !boostStatus.startTime) return 0;
+    if (!boostStatus.expiresAt && !boostStatus.endTime) return 0;
     
-    const start = new Date(boostStatus.startTime).getTime();
-    const end = new Date(boostStatus.endTime).getTime();
+    // Use either startedAt/expiresAt or startTime/endTime
+    const start = boostStatus.startedAt ? 
+      new Date(boostStatus.startedAt).getTime() : 
+      new Date(boostStatus.startTime as string).getTime();
+      
+    const end = boostStatus.expiresAt ? 
+      new Date(boostStatus.expiresAt).getTime() : 
+      new Date(boostStatus.endTime as string).getTime();
+      
     const now = Date.now();
     
     const total = end - start;
@@ -37,10 +45,8 @@ const BoostActivePackage = ({
     return Math.min(Math.max(progress, 0), 100); // Clamp between 0-100
   };
 
-  const progress = calculateProgress();
-  const remainingFormatted = boostStatus.remainingTime ? 
-    formatDuration(boostStatus.remainingTime) : 
-    "Unknown";
+  const progress = boostStatus.progress || calculateProgress();
+  const remainingFormatted = boostStatus.remainingTime || boostStatus.timeRemaining || "Unknown";
 
   return (
     <div className="space-y-4">
@@ -66,13 +72,13 @@ const BoostActivePackage = ({
         </div>
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>
-            Started: {boostStatus.startTime ? 
-              new Date(boostStatus.startTime).toLocaleString() : 
+            Started: {(boostStatus.startedAt || boostStatus.startTime) ? 
+              new Date(boostStatus.startedAt || boostStatus.startTime as string).toLocaleString() : 
               "Unknown"}
           </span>
           <span>
-            Expires: {boostStatus.endTime ? 
-              new Date(boostStatus.endTime).toLocaleString() : 
+            Expires: {(boostStatus.expiresAt || boostStatus.endTime) ? 
+              new Date(boostStatus.expiresAt || boostStatus.endTime as string).toLocaleString() : 
               "Unknown"}
           </span>
         </div>

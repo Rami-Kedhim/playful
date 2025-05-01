@@ -3,9 +3,27 @@ import { UberPersona } from '@/types/uberPersona';
 import { PersonaSearchParams } from './types';
 
 export class PersonaService {
-  async searchPersonas(params: PersonaSearchParams): Promise<UberPersona[]> {
+  async searchPersonas(params: PersonaSearchParams): Promise<{
+    data: UberPersona[];
+    meta: {
+      pagination: {
+        total: number;
+        page: number;
+        pageSize: number;
+      };
+    };
+  }> {
     // Mock implementation
-    return [];
+    return {
+      data: [],
+      meta: {
+        pagination: {
+          total: 0,
+          page: 1,
+          pageSize: 10
+        }
+      }
+    };
   }
   
   async updatePersona(id: string, data: Partial<UberPersona>): Promise<UberPersona> {
