@@ -1,4 +1,4 @@
-import { VerificationRequest, VerificationStatus, VerificationLevel } from '@/types/verification';
+import { VerificationRequest, VerificationStatus, VerificationLevel, VerificationDocument } from '@/types/verification';
 
 // Mock verification requests data
 const mockVerificationRequests: VerificationRequest[] = [
