@@ -1,92 +1,113 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Upload, X } from 'lucide-react';
+import React, { useCallback, useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Upload, File, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface DocumentUploadHandlerProps {
   label: string;
   onFileSelect: (file: File) => void;
   error?: string;
+  accept?: string;
+  disabled?: boolean;
 }
 
 const DocumentUploadHandler: React.FC<DocumentUploadHandlerProps> = ({
   label,
   onFileSelect,
-  error
+  error,
+  accept = "image/*",
+  disabled = false
 }) => {
-  const [file, setFile] = useState<File | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const selectedFile = event.target.files[0];
-      setFile(selectedFile);
-      onFileSelect(selectedFile);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  
+  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+  
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+  
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+  
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  }, []);
+  
+  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleFile(e.target.files[0]);
+    }
+  }, []);
+  
+  const handleFile = (file: File) => {
+    if (disabled) return;
+    
+    setIsLoading(true);
+    try {
+      onFileSelect(file);
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  const handleButtonClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleRemoveFile = () => {
-    setFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
+  
   return (
-    <div className="space-y-2">
-      <Label className="mb-2">{label}</Label>
-      
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept="image/jpeg,image/png,image/heic"
-        className="hidden"
-      />
-      
-      {file ? (
-        <div className="flex items-center justify-between p-3 border rounded-md bg-muted/30">
-          <div className="flex items-center space-x-2">
-            <div className="flex-shrink-0 w-10 h-10 bg-muted flex items-center justify-center rounded-md">
-              <Upload className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <div className="overflow-hidden">
-              <p className="text-sm font-medium truncate">{file.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {(file.size / (1024 * 1024)).toFixed(2)} MB
-              </p>
-            </div>
-          </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleRemoveFile}
-            className="text-muted-foreground hover:text-destructive"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      ) : (
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleButtonClick}
-          className="w-full h-24 border-dashed flex flex-col gap-1"
+    <div className="w-full">
+      <div
+        className={cn(
+          "border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors",
+          isDragging ? "border-primary bg-primary/5" : "border-muted",
+          error ? "border-destructive" : "",
+          disabled ? "opacity-50 cursor-not-allowed" : ""
+        )}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <input
+          type="file"
+          id={`file-upload-${label.replace(/\s+/g, '-').toLowerCase()}`}
+          className="sr-only"
+          onChange={handleFileInput}
+          accept={accept}
+          disabled={disabled || isLoading}
+        />
+        <label
+          htmlFor={`file-upload-${label.replace(/\s+/g, '-').toLowerCase()}`}
+          className="flex flex-col items-center justify-center w-full cursor-pointer"
         >
-          <Upload className="h-5 w-5" />
-          <span className="text-sm">Choose file or drag and drop</span>
-          <span className="text-xs text-muted-foreground">
-            JPG, PNG, or HEIC (max 10MB)
-          </span>
-        </Button>
-      )}
-      
-      {error && <p className="text-destructive text-sm">{error}</p>}
+          {isLoading ? (
+            <Loader2 className="h-8 w-8 text-primary animate-spin" />
+          ) : (
+            <>
+              <div className="p-3 bg-primary/10 rounded-full">
+                <Upload className="h-6 w-6 text-primary" />
+              </div>
+              <p className="mt-3 text-sm font-medium">{label}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Drag & drop or click to browse
+              </p>
+            </>
+          )}
+        </label>
+      </div>
+      {error && <p className="text-sm text-destructive mt-2">{error}</p>}
     </div>
   );
 };

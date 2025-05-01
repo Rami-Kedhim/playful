@@ -1,65 +1,58 @@
 
 import { useState } from 'react';
-import { useAuth } from '@/hooks/auth';
-import { submitVerificationRequest, uploadDocumentFile, validateFile } from '@/utils/verification';
 import { toast } from '@/components/ui/use-toast';
-
-interface VerificationData {
-  documentType: string;
-  frontFile: File;
-  backFile?: File | null;
-  selfieFile: File;
-  acceptTerms: boolean;
-}
+import { useAuth } from '@/hooks/auth';
+import { uploadDocumentFile, validateFile } from '@/utils/verification/documentUpload';
+import { submitVerificationRequest } from '@/utils/verification';
 
 export const useVerificationProcess = () => {
-  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
-  const submitVerification = async (data: VerificationData): Promise<boolean> => {
+  const { user } = useAuth();
+  
+  const submitVerification = async (data: any): Promise<boolean> => {
     if (!user?.id) {
-      setError('You must be logged in to submit verification');
       toast({
-        title: "Authentication Error",
-        description: "You must be logged in to submit verification documents.",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    if (!data.acceptTerms) {
-      setError('You must accept the terms and privacy policy');
-      toast({
-        title: "Submission Error",
-        description: "You must accept the terms and privacy policy to proceed.",
+        title: "Authentication required",
+        description: "You must be logged in to submit verification documents",
         variant: "destructive",
       });
       return false;
     }
 
     setLoading(true);
-    setError(null);
-    setSuccess(false);
-
+    
     try {
       // Validate files
       const frontValidation = validateFile(data.frontFile);
       if (!frontValidation.valid) {
-        throw new Error(frontValidation.error || 'Invalid front document');
+        toast({
+          title: "Invalid front document",
+          description: frontValidation.error || "Please check your front document",
+          variant: "destructive",
+        });
+        return false;
       }
 
       if (data.backFile) {
         const backValidation = validateFile(data.backFile);
         if (!backValidation.valid) {
-          throw new Error(backValidation.error || 'Invalid back document');
+          toast({
+            title: "Invalid back document",
+            description: backValidation.error || "Please check your back document",
+            variant: "destructive",
+          });
+          return false;
         }
       }
 
       const selfieValidation = validateFile(data.selfieFile);
       if (!selfieValidation.valid) {
-        throw new Error(selfieValidation.error || 'Invalid selfie');
+        toast({
+          title: "Invalid selfie",
+          description: selfieValidation.error || "Please check your selfie photo",
+          variant: "destructive",
+        });
+        return false;
       }
 
       // Submit verification request
@@ -72,22 +65,25 @@ export const useVerificationProcess = () => {
       );
 
       if (!result.success) {
-        throw new Error(result.message || 'Failed to submit verification');
+        toast({
+          title: "Verification submission failed",
+          description: result.message || "There was an error submitting your verification request.",
+          variant: "destructive",
+        });
+        return false;
       }
 
       toast({
-        title: "Verification Submitted",
-        description: "Your verification documents have been submitted successfully and are pending review.",
+        title: "Verification submitted successfully",
+        description: "Your verification documents have been submitted for review.",
       });
       
-      setSuccess(true);
       return true;
-    } catch (err: any) {
-      console.error('Verification submission error:', err);
-      setError(err.message || 'An unexpected error occurred');
+    } catch (error: any) {
+      console.error('Verification submission error:', error);
       toast({
-        title: "Verification Failed",
-        description: err.message || "There was an error submitting your verification documents.",
+        title: "Verification submission failed",
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
       return false;
@@ -95,13 +91,9 @@ export const useVerificationProcess = () => {
       setLoading(false);
     }
   };
-
+  
   return {
-    submitVerification,
     loading,
-    error,
-    success
+    submitVerification
   };
 };
-
-export default useVerificationProcess;

@@ -1,65 +1,71 @@
 
+import { supabase } from '@/lib/supabase';
+
 /**
  * Validates a file before upload
- * @param file The file to validate
- * @returns Object with validation result and error message if any
+ * @param file File to validate
+ * @returns Validation result
  */
 export const validateFile = (file: File): { valid: boolean; error?: string } => {
   if (!file) {
     return { valid: false, error: 'No file selected' };
   }
 
-  // Check file type
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic'];
-  if (!allowedTypes.includes(file.type.toLowerCase())) {
-    return { 
-      valid: false, 
-      error: 'Invalid file type. Please upload a JPEG, PNG, or HEIC image.' 
-    };
+  // Check file size (max 10MB)
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  if (file.size > MAX_FILE_SIZE) {
+    return { valid: false, error: 'File size exceeds 10MB limit' };
   }
 
-  // Check file size (max 10MB)
-  const maxSize = 10 * 1024 * 1024; // 10MB in bytes
-  if (file.size > maxSize) {
-    return { 
-      valid: false, 
-      error: 'File is too large. Maximum file size is 10MB.' 
-    };
+  // Check file type
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+  if (!allowedTypes.includes(file.type)) {
+    return { valid: false, error: 'File format not supported. Please use JPG, PNG or PDF' };
   }
 
   return { valid: true };
 };
 
 /**
- * Uploads a document file to storage
- * @param userId The user ID
- * @param file The file to upload
- * @param docType The document type
- * @returns Object with upload result
+ * Uploads a document file to Supabase storage
+ * @param userId User ID
+ * @param file File to upload
+ * @param type Document type
+ * @returns Upload result
  */
 export const uploadDocumentFile = async (
   userId: string,
   file: File,
-  docType: string
+  type: string
 ): Promise<{ success: boolean; url?: string; error?: string }> => {
   try {
-    // Create a unique file name
+    // Generate a unique filename
+    const timestamp = new Date().getTime();
     const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}/${docType}_${Date.now()}.${fileExt}`;
-    
-    // For demo purposes, we'll just return a mock URL
-    // In production, you would upload to storage
-    const mockUrl = `https://storage.example.com/${fileName}`;
-    
-    return {
-      success: true,
-      url: mockUrl
-    };
-  } catch (error) {
-    console.error('Error uploading document:', error);
-    return {
-      success: false,
-      error: 'Failed to upload document file'
-    };
+    const fileName = `${userId}/${type}_${timestamp}.${fileExt}`;
+    const filePath = `verification/${fileName}`;
+
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('verification-documents')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
+
+    if (error) {
+      console.error('Error uploading file:', error);
+      return { success: false, error: error.message };
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('verification-documents')
+      .getPublicUrl(filePath);
+
+    return { success: true, url: publicUrl };
+  } catch (error: any) {
+    console.error('Error in document upload:', error);
+    return { success: false, error: error.message || 'Failed to upload document' };
   }
 };
