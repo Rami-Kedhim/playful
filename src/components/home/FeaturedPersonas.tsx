@@ -23,7 +23,7 @@ const FeaturedPersonas: React.FC<FeaturedPersonasProps> = ({ personas = [] }) =>
     );
   };
 
-  const getTypeLabel = (type: string) => {
+  const getTypeLabel = (type: UberPersona['type']) => {
     switch (type) {
       case 'escort':
         return 'Escort';
