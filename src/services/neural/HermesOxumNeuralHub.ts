@@ -1,172 +1,187 @@
 
-import BaseBrainService from './modules/BaseNeuralService';
-import type { BaseNeuralService } from './types/NeuralService';
-import { NeuralServiceConfig } from './types/NeuralService';
+import { hermes } from "@/core/Hermes";
+import { oxum } from "@/core/Oxum";
+import { hermesOrusOxum } from "@/core/HermesOrusOxum";
+import { orus } from "@/core/Orus";
 
-class HermesOxumNeuralHub {
-  private services: Map<string, BaseNeuralService> = new Map();
-  private initialized = false;
-
-  constructor() {
-    // Initialize with empty services map
+/**
+ * Neural Hub for connecting brain components 
+ * with Hermes, Oxum, and Orus systems
+ */
+export class HermesOxumNeuralHub {
+  private isInitialized: boolean = false;
+  private registeredModules: Map<string, any> = new Map();
+  private lastOptimizationTime: Date | null = null;
+  
+  /**
+   * Initialize the neural hub and connect to core systems
+   */
+  public initialize(): boolean {
+    if (this.isInitialized) return true;
+    
+    console.log('Brain Hub Connection Service initialized');
+    
+    // Connect with core systems
+    this.registerCoreConnections();
+    
+    this.isInitialized = true;
+    return true;
   }
-
-  public async initialize(): Promise<boolean> {
-    if (this.initialized) {
+  
+  /**
+   * Register connections to core systems
+   */
+  private registerCoreConnections(): void {
+    try {
+      // Register with Hermes for flow dynamics
+      hermes.connect({
+        system: 'NeuralHub',
+        connectionId: `neural-hub-${Date.now()}`
+      });
+      
+      // Register with Orus for security validation
+      const sessionValidation = orus.validateSession('system');
+      
+      if (!sessionValidation.isValid) {
+        console.warn('Neural hub system session validation failed');
+      }
+      
+      // Set up the optimization schedule
+      this.scheduleOptimization();
+    } catch (error) {
+      console.error('Error registering core connections:', error);
+    }
+  }
+  
+  /**
+   * Schedule periodic optimization
+   */
+  private scheduleOptimization(): void {
+    // Schedule optimization every 15 minutes
+    setInterval(() => {
+      this.optimizeNeuralConnections();
+    }, 15 * 60 * 1000);
+  }
+  
+  /**
+   * Register a neural module with the hub
+   */
+  public registerModule(moduleId: string, moduleInterface: any): boolean {
+    if (this.registeredModules.has(moduleId)) {
+      console.warn(`Module with ID ${moduleId} is already registered`);
+      return false;
+    }
+    
+    this.registeredModules.set(moduleId, {
+      interface: moduleInterface,
+      registeredAt: new Date(),
+      lastAccessed: new Date()
+    });
+    
+    // Log with Hermes
+    hermes.connect({
+      system: 'NeuralHub',
+      connectionId: `register-${moduleId}-${Date.now()}`,
+      metadata: {
+        action: 'register_module',
+        moduleId
+      }
+    });
+    
+    return true;
+  }
+  
+  /**
+   * Get a registered module by ID
+   */
+  public getModule(moduleId: string): any {
+    const module = this.registeredModules.get(moduleId);
+    
+    if (module) {
+      module.lastAccessed = new Date();
+      this.registeredModules.set(moduleId, module);
+      return module.interface;
+    }
+    
+    return null;
+  }
+  
+  /**
+   * Run neural optimization for all registered modules
+   */
+  public optimizeNeuralConnections(): void {
+    console.log('Running neural optimization');
+    
+    this.lastOptimizationTime = new Date();
+    
+    // For each registered module, run optimization if available
+    this.registeredModules.forEach((module, id) => {
+      try {
+        if (module.interface && typeof module.interface.optimize === 'function') {
+          module.interface.optimize();
+          console.log(`Optimized neural module: ${id}`);
+        }
+      } catch (error) {
+        console.error(`Error optimizing module ${id}:`, error);
+      }
+    });
+    
+    // Use hermesOrusOxum for profile rotation
+    const now = new Date();
+    const currentHour = now.getHours();
+    const optimalWindow = hermesOrusOxum.getOptimalTimeWindow();
+    const timeImpact = hermesOrusOxum.calculateTimeImpact(currentHour, optimalWindow);
+    
+    console.log(`Neural optimization complete. Current time impact: ${timeImpact.toFixed(2)}`);
+  }
+  
+  /**
+   * Get optimization status
+   */
+  public getOptimizationStatus(): {
+    lastOptimized: Date | null;
+    registeredModules: number;
+    activeModules: number;
+  } {
+    // Count active modules (accessed in the last hour)
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    let activeCount = 0;
+    
+    this.registeredModules.forEach(module => {
+      if (module.lastAccessed > oneHourAgo) {
+        activeCount++;
+      }
+    });
+    
+    return {
+      lastOptimized: this.lastOptimizationTime,
+      registeredModules: this.registeredModules.size,
+      activeModules: activeCount
+    };
+  }
+  
+  /**
+   * Interface with Oxum boost system
+   */
+  public interfaceWithBoost(): boolean {
+    try {
+      // Calculate a boost score for a system-level profile
+      const boostScore = oxum.calculateBoostScore('system-neural-hub');
+      
+      // Log the boost score
+      hermesOrusOxum.logSignalTransform('system-boost-score', boostScore);
+      
       return true;
-    }
-
-    console.log("Initializing Hermes-Oxum Neural Hub...");
-    
-    // Add some default services for demo
-    const defaultServices = [
-      new BaseBrainService({
-        id: "neural-text-processor",
-        moduleId: "text-processor",
-        name: "Neural Text Processor",
-        description: "Processes and analyzes text input using neural networks",
-        moduleType: "text-analysis",
-        version: "2.1.0",
-        config: {
-          enabled: true,
-          sensitivity: 0.8,
-          threshold: 0.6,
-          mode: "advanced"
-        }
-      }),
-      new BaseBrainService({
-        id: "neural-image-processor",
-        moduleId: "image-processor",
-        name: "Neural Image Processor",
-        description: "Analyzes and processes images using neural networks",
-        moduleType: "image-analysis",
-        version: "1.5.0",
-        config: {
-          enabled: true,
-          sensitivity: 0.7,
-          threshold: 0.5,
-          mode: "standard"
-        }
-      })
-    ];
-
-    // Register the services
-    for (const service of defaultServices) {
-      this.registerService(service);
-      await service.initialize();
-    }
-
-    this.initialized = true;
-    return true;
-  }
-
-  public registerService(service: BaseNeuralService): boolean {
-    if (this.services.has(service.moduleId)) {
-      console.warn(`Service with moduleId ${service.moduleId} already registered. Skipping.`);
+    } catch (error) {
+      console.error('Error interfacing with boost system:', error);
       return false;
     }
-
-    this.services.set(service.moduleId, service);
-    console.log(`Registered neural service: ${service.name} (${service.moduleId})`);
-    return true;
-  }
-
-  public getService(moduleId: string): BaseNeuralService | undefined {
-    return this.services.get(moduleId);
-  }
-
-  public getAllServices(): BaseNeuralService[] {
-    return Array.from(this.services.values());
-  }
-
-  public getServicesByType(moduleType: string): BaseNeuralService[] {
-    return this.getAllServices().filter(service => service.moduleType === moduleType);
-  }
-
-  public async processRequest(moduleId: string, requestType: string, data: any): Promise<any> {
-    const service = this.getService(moduleId);
-    if (!service) {
-      throw new Error(`Service ${moduleId} not found`);
-    }
-
-    if (!service.config.enabled) {
-      throw new Error(`Service ${moduleId} is disabled`);
-    }
-
-    // This would normally dispatch to the appropriate handler on the service
-    console.log(`Processing ${requestType} request for ${moduleId} with data:`, data);
-    
-    // Mock processing result
-    return {
-      success: true,
-      result: `Processed ${requestType} with ${moduleId}`,
-      timestamp: new Date().toISOString()
-    };
-  }
-
-  public updateServiceConfig(moduleId: string, config: Partial<NeuralServiceConfig>): boolean {
-    const service = this.getService(moduleId);
-    if (!service) {
-      return false;
-    }
-
-    service.updateConfig(config);
-    return true;
-  }
-  
-  // Return health metrics for monitoring - updated to include missing properties
-  public getHealthMetrics() {
-    return {
-      cpuUsage: Math.random() * 100,
-      memoryUsage: Math.random() * 100,
-      requestsPerSecond: Math.floor(Math.random() * 1000),
-      errorRate: Math.random() * 5,
-      lastUpdated: Date.now(),
-      load: Math.random(),
-      userEngagement: Math.random()
-    };
-  }
-  
-  // Add missing methods for NeuralSystemsPanel
-  public getActiveTrainingJobs() {
-    return []; // Mock implementation
-  }
-  
-  public getModels() {
-    return []; // Mock implementation
-  }
-  
-  public stopTraining(jobId: string) {
-    console.log(`Stopping training job ${jobId}`);
-    return true; // Mock implementation
-  }
-  
-  public startTraining(modelConfig: any) {
-    console.log(`Starting training with config:`, modelConfig);
-    return { 
-      jobId: `job-${Math.random().toString(36).substring(2, 9)}`,
-      status: 'started'  // Add the status property to fix the error
-    };
   }
 }
 
-// Export the class instance as the default export
-export const hermesOxumNeuralHub = new HermesOxumNeuralHub();
+// Export singleton instance
+export const neuralHub = new HermesOxumNeuralHub();
+export default neuralHub;
 
-// Also export as neuralHub for backward compatibility with existing imports
-export const neuralHub = hermesOxumNeuralHub;
-
-// Export ModelParameters type for other modules
-export interface ModelParameters {
-  decayConstant?: number;
-  growthFactor?: number;
-  cyclePeriod?: number;
-  harmonicCount?: number;
-  bifurcationPoint?: number;
-  attractorStrength?: number;
-  learningRate?: number;
-  batchSize?: number;
-  temperature?: number;
-}
-
-export default hermesOxumNeuralHub;
+// Initialize on import
+neuralHub.initialize();

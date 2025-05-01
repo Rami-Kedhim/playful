@@ -1,8 +1,10 @@
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Users, Zap } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { BarChart3, Users, ArrowUpRight, ArrowDown } from "lucide-react";
+import { hermesOrusOxum } from "@/core/HermesOrusOxum";
+import { logInteraction } from "@/utils/uberCore";
 
 interface HermesOxumQueueVisualizationProps {
   profileId: string;
@@ -10,110 +12,143 @@ interface HermesOxumQueueVisualizationProps {
 
 const HermesOxumQueueVisualization = ({ profileId }: HermesOxumQueueVisualizationProps) => {
   const [loading, setLoading] = useState(true);
-  const [hermesData, setHermesData] = useState({
-    position: 0,
-    activeUsers: 0,
-    estimatedVisibility: 0,
-    lastUpdateTime: new Date().toISOString()
-  });
+  const [queuePosition, setQueuePosition] = useState(0);
+  const [totalProfiles, setTotalProfiles] = useState(0);
+  const [visibilityScore, setVisibilityScore] = useState(0);
+  const [positionChange, setPositionChange] = useState<number | null>(null);
   
   useEffect(() => {
-    // Fetch Hermes queue data for the profile
-    const fetchHermesData = async () => {
-      setLoading(true);
+    const fetchQueueData = async () => {
       try {
-        // In a real implementation, this would be an API call
-        // For now, simulate with mock data
-        setTimeout(() => {
-          setHermesData({
-            position: Math.floor(Math.random() * 20) + 1,
-            activeUsers: Math.floor(Math.random() * 500) + 50,
-            estimatedVisibility: Math.floor(Math.random() * 100),
-            lastUpdateTime: new Date().toISOString()
-          });
-          setLoading(false);
-        }, 1000);
-      } catch (error) {
-        console.error("Error fetching Hermes data:", error);
+        setLoading(true);
+        
+        // Get the optimal time window
+        const optimalWindow = hermesOrusOxum.getOptimalTimeWindow();
+        const currentHour = new Date().getHours();
+        
+        // Calculate current visibility impact
+        const timeImpact = hermesOrusOxum.calculateTimeImpact(
+          currentHour,
+          optimalWindow
+        );
+        
+        // In a real system, we would get actual data
+        // For demo, we're generating plausible data
+        const mockQueue = hermesOrusOxum.getBoostQueue();
+        const position = Math.floor(Math.random() * 20) + 1;
+        const totalInQueue = position + Math.floor(Math.random() * 30) + 10;
+        
+        // Record that this profile was viewed
+        hermesOrusOxum.recordProfileView(profileId);
+        
+        // Log interaction with Hermes
+        logInteraction('BoostVisualization', 'view-queue-status', {
+          profileId,
+          queuePosition: position,
+          totalInQueue,
+          timeImpact
+        });
+        
+        // Simulate position change from last check
+        // Negative number is good (moved up in queue)
+        const change = Math.random() > 0.5 ? 
+          -Math.floor(Math.random() * 5) : 
+          Math.floor(Math.random() * 3);
+        
+        setQueuePosition(position);
+        setTotalProfiles(totalInQueue);
+        setVisibilityScore(timeImpact);
+        setPositionChange(change);
+        
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching Hermes-Oxum queue data:", err);
         setLoading(false);
       }
     };
     
-    fetchHermesData();
+    fetchQueueData();
     
-    // Set up polling every 30 seconds
-    const interval = setInterval(fetchHermesData, 30000);
-    return () => clearInterval(interval);
+    // Refresh data every 30 seconds
+    const intervalId = setInterval(fetchQueueData, 30000);
+    return () => clearInterval(intervalId);
   }, [profileId]);
   
-  const calculateVisibilityColor = (value: number) => {
-    if (value > 80) return "bg-green-500";
-    if (value > 50) return "bg-blue-500";
-    if (value > 30) return "bg-yellow-500";
-    return "bg-red-500";
-  };
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <BarChart3 className="h-5 w-5 mr-2" />
+            Visibility Queue
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <Skeleton className="h-[100px] w-full" />
+            <div className="flex justify-between">
+              <Skeleton className="h-8 w-24" />
+              <Skeleton className="h-8 w-24" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  // Calculate percentile - lower position is better
+  const percentile = Math.max(0, Math.min(99, Math.floor((1 - (queuePosition / totalProfiles)) * 100)));
   
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center text-lg">
-          <BarChart className="h-5 w-5 mr-2" />
-          Hermes-Oxum Queue Status
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <BarChart3 className="h-5 w-5 mr-2" />
+          Visibility Queue
         </CardTitle>
-        <CardDescription>
-          Real-time visibility metrics for your boost
-        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {loading ? (
-          <div className="h-32 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <CardContent>
+        <div className="text-center mb-4">
+          <div className="text-4xl font-bold">#{queuePosition}</div>
+          <div className="text-muted-foreground text-sm">
+            Position in visibility queue
+            {positionChange !== null && (
+              <span className={`ml-2 ${positionChange < 0 ? 'text-green-500' : positionChange > 0 ? 'text-red-500' : ''}`}>
+                {positionChange < 0 ? (
+                  <span className="flex items-center justify-center">
+                    <ArrowUpRight className="h-3 w-3 mr-1" />
+                    {Math.abs(positionChange)} up
+                  </span>
+                ) : positionChange > 0 ? (
+                  <span className="flex items-center justify-center">
+                    <ArrowDown className="h-3 w-3 mr-1" />
+                    {positionChange} down
+                  </span>
+                ) : null}
+              </span>
+            )}
           </div>
-        ) : (
-          <>
-            <div className="space-y-1">
-              <div className="flex justify-between text-sm">
-                <span>Queue Position</span>
-                <span className="font-medium">#{hermesData.position}</span>
-              </div>
-              <Progress 
-                value={100 - (hermesData.position / 20 * 100)} 
-                className="h-2" 
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4 pt-2">
-              <div className="bg-secondary/20 p-3 rounded-md text-center">
-                <Users className="h-4 w-4 mx-auto mb-1" />
-                <div className="text-lg font-semibold">{hermesData.activeUsers}</div>
-                <div className="text-xs text-muted-foreground">Active Users</div>
-              </div>
-              
-              <div className="bg-secondary/20 p-3 rounded-md text-center">
-                <Zap className="h-4 w-4 mx-auto mb-1" />
-                <div className="text-lg font-semibold">{hermesData.estimatedVisibility}%</div>
-                <div className="text-xs text-muted-foreground">Visibility</div>
-              </div>
-            </div>
-            
-            <div className="space-y-1 pt-2">
-              <div className="flex justify-between text-sm">
-                <span>Visibility Impact</span>
-                <span className={`text-${calculateVisibilityColor(hermesData.estimatedVisibility).replace("bg-", "")}`}>
-                  {hermesData.estimatedVisibility}%
-                </span>
-              </div>
-              <Progress 
-                value={hermesData.estimatedVisibility} 
-                className={`h-2 ${calculateVisibilityColor(hermesData.estimatedVisibility)}`} 
-              />
-            </div>
-            
-            <div className="text-xs text-muted-foreground text-right pt-1">
-              Last updated: {new Date(hermesData.lastUpdateTime).toLocaleTimeString()}
-            </div>
-          </>
-        )}
+        </div>
+        
+        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full mb-6">
+          <div 
+            className="h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" 
+            style={{ width: `${percentile}%` }}
+          ></div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col items-center p-3 bg-secondary/20 rounded-md">
+            <Users className="h-5 w-5 mb-1 text-blue-500" />
+            <span className="text-2xl font-bold">{totalProfiles}</span>
+            <span className="text-xs text-muted-foreground">Total Profiles</span>
+          </div>
+          <div className="flex flex-col items-center p-3 bg-secondary/20 rounded-md">
+            <BarChart3 className="h-5 w-5 mb-1 text-purple-500" />
+            <span className="text-2xl font-bold">{visibilityScore.toFixed(0)}</span>
+            <span className="text-xs text-muted-foreground">Visibility Score</span>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
