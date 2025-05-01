@@ -70,10 +70,11 @@ export const submitVerificationRequest = async (
     // Upload back document if provided
     let backResult = { success: true, url: '' };
     if (backImage) {
-      backResult = await uploadDocumentFile(userId, backImage, `${documentType}_back`);
-      if (!backResult.success) {
-        return { success: false, message: backResult.error || 'Failed to upload back document' };
+      const result = await uploadDocumentFile(userId, backImage, `${documentType}_back`);
+      if (!result.success) {
+        return { success: false, message: result.error || 'Failed to upload back document' };
       }
+      backResult = { success: true, url: result.url || '' };
     }
 
     // Upload selfie
@@ -102,7 +103,7 @@ export const submitVerificationRequest = async (
             {
               id: `doc-front-${Date.now()}`,
               documentType: documentType,
-              fileUrl: frontResult.url,
+              fileUrl: frontResult.url || '',
               uploadedAt: new Date().toISOString(),
               status: 'pending'
             },
@@ -116,7 +117,7 @@ export const submitVerificationRequest = async (
             {
               id: `doc-selfie-${Date.now()}`,
               documentType: 'selfie',
-              fileUrl: selfieResult.url,
+              fileUrl: selfieResult.url || '',
               uploadedAt: new Date().toISOString(),
               status: 'pending'
             }
