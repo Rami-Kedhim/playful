@@ -1,82 +1,140 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useVerificationStatus } from '@/hooks/verification/useVerificationStatus';
-import { useAuth } from '@/hooks/auth';
-import { VerificationStatus as VerificationStatusEnum } from '@/types/verification';
-import { Shield, CheckCircle, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, CheckCircle, Clock, Shield } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useVerificationStatus } from './hooks/useVerificationStatus';
+import { VerificationLevel, VerificationStatus as VerificationStatusEnum } from '@/types/verification';
 
-export const VerificationStatus = () => {
-  const { user } = useAuth();
-  const { status, isVerified, verificationRequest } = useVerificationStatus();
-
-  if (!user) return null;
+const VerificationStatus: React.FC = () => {
+  const { status, loading, error, verificationRequest } = useVerificationStatus();
   
-  const getStatusIcon = () => {
-    if (isVerified) return <CheckCircle className="h-4 w-4 mr-1" />;
-    if (status.status === VerificationStatusEnum.PENDING) return <Clock className="h-4 w-4 mr-1" />;
-    return <Shield className="h-4 w-4 mr-1" />;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
+  
+  const getStatusBadge = () => {
+    switch (status.status) {
+      case VerificationStatusEnum.APPROVED:
+        return <Badge className="bg-green-500">Verified</Badge>;
+      case VerificationStatusEnum.PENDING:
+        return <Badge className="bg-yellow-500">Pending</Badge>;
+      case VerificationStatusEnum.IN_REVIEW:
+        return <Badge className="bg-blue-500">In Review</Badge>;
+      case VerificationStatusEnum.REJECTED:
+        return <Badge className="bg-red-500">Rejected</Badge>;
+      default:
+        return <Badge>Not Verified</Badge>;
+    }
   };
   
-  const getStatusBadgeVariant = () => {
-    if (isVerified) return "success";
-    if (status.status === VerificationStatusEnum.PENDING) return "warning";
-    return "default";
-  };
+  if (!verificationRequest) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            Verification Status
+            <Badge variant="outline">Not Submitted</Badge>
+          </CardTitle>
+          <CardDescription>You have not submitted any verification documents yet.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Verify your identity to unlock all features and build trust with other users.
+            </p>
+            <Button>Start Verification</Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   
-  const getStatusText = () => {
-    if (isVerified) return "Verified";
-    if (status.status === VerificationStatusEnum.PENDING) return "Pending";
-    if (status.status === VerificationStatusEnum.IN_REVIEW) return "In Review";
-    if (status.status === VerificationStatusEnum.REJECTED) return "Rejected";
-    return "Not Started";
-  };
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Verification Status</CardTitle>
+        <CardTitle className="flex items-center justify-between">
+          Verification Status
+          {getStatusBadge()}
+        </CardTitle>
+        <CardDescription>
+          {verificationRequest.requested_level === VerificationLevel.BASIC 
+            ? "Basic verification" 
+            : verificationRequest.requested_level === VerificationLevel.ENHANCED
+              ? "Enhanced verification"
+              : "Premium verification"}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span>Status:</span>
-            <Badge variant={getStatusBadgeVariant()} className="flex items-center">
-              {getStatusIcon()}
-              {getStatusText()}
-            </Badge>
-          </div>
+          {status.status === VerificationStatusEnum.PENDING && (
+            <Alert>
+              <Clock className="h-4 w-4" />
+              <AlertTitle>Pending Review</AlertTitle>
+              <AlertDescription>
+                Your verification is pending review. This typically takes 1-3 business days.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {status.status === VerificationStatusEnum.APPROVED && (
+            <Alert className="bg-green-50 border-green-200">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              <AlertTitle className="text-green-700">Verification Approved</AlertTitle>
+              <AlertDescription className="text-green-600">
+                Your account has been verified. You now have access to all features.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {status.status === VerificationStatusEnum.REJECTED && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Verification Rejected</AlertTitle>
+              <AlertDescription>
+                {status.reason || "Your verification was rejected. Please submit clearer documents."}
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {verificationRequest.documents && verificationRequest.documents.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-sm font-semibold mb-2">Submitted Documents</h3>
+              <ul className="space-y-2">
+                {verificationRequest.documents.map((doc, index) => (
+                  <li key={index} className="text-sm flex items-center">
+                    <Shield className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <span className="capitalize">{doc.documentType.replace('_', ' ')}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          {status.status === VerificationStatusEnum.REJECTED && (
+            <Button className="w-full mt-4">Submit New Verification</Button>
+          )}
           
           {status.lastSubmitted && (
-            <div className="flex items-center justify-between text-sm">
-              <span>Last submitted:</span>
-              <span className="text-muted-foreground">
-                {new Date(status.lastSubmitted).toLocaleDateString()}
-              </span>
-            </div>
-          )}
-          
-          {status.reason && (
-            <div className="mt-4 text-sm">
-              <span className="font-medium">Reason:</span>
-              <p className="text-muted-foreground mt-1">{status.reason}</p>
-            </div>
-          )}
-          
-          {verificationRequest?.requested_level && (
-            <div className="flex items-center justify-between text-sm">
-              <span>Requested level:</span>
-              <Badge variant="outline" className="capitalize">
-                {verificationRequest.requested_level}
-              </Badge>
-            </div>
-          )}
-          
-          {!isVerified && !status.lastSubmitted && (
-            <div className="mt-4 text-sm text-muted-foreground">
-              Complete the verification process to unlock all platform features.
-            </div>
+            <p className="text-xs text-muted-foreground mt-4">
+              Submitted on: {new Date(status.lastSubmitted).toLocaleDateString()}
+            </p>
           )}
         </div>
       </CardContent>

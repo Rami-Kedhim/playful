@@ -1,39 +1,61 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth';
-import { VerificationStatus as VerificationStatusEnum, VerificationRequest } from '@/types/verification';
+import { supabase } from '@/lib/supabase';
+import { VerificationRequest, VerificationStatus, VerificationLevel } from '@/types/verification';
 
-export const useVerificationStatus = () => {
+export function useVerificationStatus() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [verificationRequest, setVerificationRequest] = useState<VerificationRequest | null>(null);
-  const [status, setStatus] = useState<VerificationStatusEnum>(VerificationStatusEnum.NONE);
+  const [status, setStatus] = useState<VerificationStatus>(VerificationStatus.NONE);
 
   useEffect(() => {
-    const fetchVerificationStatus = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
-      setLoading(true);
-      setError(null);
-
+    async function fetchVerificationStatus() {
       try {
-        // In a real app, this would be an API call to fetch the user's verification request
-        // For now, we'll use a mock implementation
-        await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
+        setLoading(true);
+        setError(null);
 
-        // Mock data - in a real app we'd fetch this from the backend
-        if (user.user_metadata?.verification_status) {
-          setStatus(user.user_metadata.verification_status as VerificationStatusEnum);
+        // In a real application, this would be an API call to your backend
+        // For now, we'll simulate getting the verification status from user metadata
+        const { data: { user: userData }, error: userError } = await supabase.auth.getUser();
+
+        if (userError) {
+          throw userError;
+        }
+
+        if (!userData) {
+          setLoading(false);
+          return;
+        }
+
+        // Check if verification data exists in the user metadata
+        if (userData.user_metadata?.verification_request) {
+          const verificationData = userData.user_metadata.verification_request;
           
-          if (user.user_metadata.verification_request) {
-            setVerificationRequest(user.user_metadata.verification_request as VerificationRequest);
-          }
-        } else {
-          setStatus(VerificationStatusEnum.NONE);
+          setVerificationRequest({
+            id: verificationData.id,
+            profile_id: verificationData.profile_id || userData.id,
+            requested_level: verificationData.requested_level || VerificationLevel.BASIC,
+            status: verificationData.status || VerificationStatus.PENDING,
+            documents: verificationData.documents || [],
+            created_at: verificationData.created_at,
+            submittedAt: verificationData.submittedAt,
+            reviewedAt: verificationData.reviewedAt,
+            reviewer_notes: verificationData.reviewer_notes,
+            rejectionReason: verificationData.rejectionReason,
+          });
+          
+          setStatus(verificationData.status);
+        } else if (userData.user_metadata?.verification_status) {
+          // If only a status exists without a full request record
+          setStatus(userData.user_metadata.verification_status as VerificationStatus);
         }
       } catch (err: any) {
         console.error('Error fetching verification status:', err);
@@ -41,7 +63,7 @@ export const useVerificationStatus = () => {
       } finally {
         setLoading(false);
       }
-    };
+    }
 
     fetchVerificationStatus();
   }, [user]);
@@ -51,10 +73,7 @@ export const useVerificationStatus = () => {
     error,
     status,
     verificationRequest,
-    isVerified: status === VerificationStatusEnum.APPROVED,
-    // Helper functions
-    canSubmitNew: status !== VerificationStatusEnum.PENDING && status !== VerificationStatusEnum.IN_REVIEW,
   };
-};
+}
 
 export default useVerificationStatus;
