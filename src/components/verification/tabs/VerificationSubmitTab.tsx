@@ -14,7 +14,7 @@ const VerificationSubmitTab: React.FC<VerificationSubmitTabProps> = ({
 }) => {
   const { submitVerification, loading } = useVerificationProcess()
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: any): Promise<boolean> => {
     const success = await submitVerification(data)
     if (success) {
       onComplete()
@@ -22,6 +22,7 @@ const VerificationSubmitTab: React.FC<VerificationSubmitTabProps> = ({
     if (onSubmit) {
       onSubmit(data)
     }
+    return success; // Return the success boolean to match the expected return type
   }
 
   return (
