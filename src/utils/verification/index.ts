@@ -1,4 +1,5 @@
-import { VerificationLevel, VerificationStatus, VerificationDocument } from '@/types/verification';
+
+import { VerificationLevel, VerificationStatus } from '@/types/verification';
 
 export const canSubmitVerification = async (userId: string): Promise<{ canSubmit: boolean; reason?: string; cooldownRemaining?: number }> => {
   return { canSubmit: true };
@@ -55,7 +56,7 @@ export const getVerificationStatusColor = (status: VerificationStatus | string):
   }
 };
 
-export const normalizeDocument = (doc: any): VerificationDocument => {
+export const normalizeDocument = (doc: any): any => {
   return {
     id: doc.id,
     documentType: doc.document_type || doc.documentType || doc.type,

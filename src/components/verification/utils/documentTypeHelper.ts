@@ -1,28 +1,28 @@
 
-import { DocumentType } from '@/types/verification';
+import { getDocumentTypeLabel } from '@/utils/verification';
 
-export function toDocumentType(value: string): DocumentType {
-  switch(value) {
-    case 'id_card':
-      return 'id_card';
-    case 'passport':
-      return 'passport';
-    case 'driver_license':
-      return 'driver_license';
-    default:
-      return 'id_card';
-  }
-}
+export const documentTypeOptions = [
+  { value: 'id_card', label: 'ID Card' },
+  { value: 'passport', label: 'Passport' },
+  { value: 'drivers_license', label: "Driver's License" },
+  { value: 'residence_permit', label: 'Residence Permit' }
+];
 
-export function getDocumentTypeLabel(type: DocumentType): string {
-  switch(type) {
+export const getRequiredFiles = (documentType: string): string[] => {
+  switch (documentType) {
     case 'id_card':
-      return 'ID Card';
+      return ['front', 'back', 'selfie'];
     case 'passport':
-      return 'Passport';
-    case 'driver_license':
-      return 'Driver\'s License';
+      return ['data_page', 'selfie'];
+    case 'drivers_license':
+      return ['front', 'back', 'selfie'];
+    case 'residence_permit':
+      return ['front', 'back', 'selfie'];
     default:
-      return 'ID Document';
+      return ['front', 'selfie'];
   }
-}
+};
+
+export const getDocumentTypeName = (documentType: string): string => {
+  return getDocumentTypeLabel(documentType);
+};

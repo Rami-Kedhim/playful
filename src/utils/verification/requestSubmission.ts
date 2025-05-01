@@ -1,5 +1,5 @@
+
 import { supabase } from '@/lib/supabase';
-import { DocumentType } from '@/types/verification';
 
 export const submitVerificationRequest = async (
   userId: string,

@@ -1,44 +1,20 @@
 
-import { DocumentType } from '@/types/verification';
+import { z } from 'zod';
+import { documentTypeOptions } from './documentTypeHelper';
 
-export const getDocumentTypeLabel = (type: string): string => {
-  const DOCUMENT_TYPES: Record<string, string> = {
-    'id_card': 'ID Card',
-    'passport': 'Passport',
-    'drivers_license': 'Driver\'s License',
-    'residence_permit': 'Residence Permit'
+export const verificationFormSchema = z.object({
+  documentType: z.string().min(1, 'Please select an ID type'),
+  documentFile: z.instanceof(File, { message: 'Please upload your ID document' }),
+  selfieFile: z.instanceof(File, { message: 'Please upload your selfie' }),
+  backFile: z.instanceof(File).optional(),
+  privacyConsent: z.boolean().refine(val => val === true, { message: 'You must agree to the privacy policy' }),
+});
+
+export type VerificationFormValues = z.infer<typeof verificationFormSchema>;
+
+export const getInitialValues = (): Partial<VerificationFormValues> => {
+  return {
+    documentType: documentTypeOptions[0].value,
+    privacyConsent: false
   };
-  
-  return DOCUMENT_TYPES[type] || type;
-};
-
-export const getRequiredDocumentSides = (documentType: DocumentType): {
-  front: boolean;
-  back: boolean;
-  selfie: boolean;
-} => {
-  const DOCUMENT_REQUIREMENTS: Record<string, { front: boolean; back: boolean; selfie: boolean }> = {
-    'id_card': {
-      front: true,
-      back: true,
-      selfie: true
-    },
-    'passport': {
-      front: true,
-      back: false,
-      selfie: true
-    },
-    'drivers_license': {
-      front: true,
-      back: true,
-      selfie: true
-    },
-    'residence_permit': {
-      front: true,
-      back: true,
-      selfie: true
-    }
-  };
-
-  return DOCUMENT_REQUIREMENTS[documentType] || { front: true, back: false, selfie: true };
 };

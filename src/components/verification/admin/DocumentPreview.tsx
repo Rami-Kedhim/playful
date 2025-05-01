@@ -1,7 +1,3 @@
-
-// Fix property names to camelCase and remove usage of url that doesn't exist on VerificationDocument
-// Use documentType, fileUrl, uploadedAt properties properly
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from 'lucide-react';

@@ -1,43 +1,36 @@
 
-import { DocumentType } from '@/types/verification';
+import { z } from 'zod';
 
-// File validation constants
-export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-
-export const validateDocumentFile = (file: File | null, documentType: DocumentType): string | null => {
-  if (!file) {
-    return 'Document file is required';
+export const validateDocumentFile = (file: File | null): boolean => {
+  if (!file) return false;
+  
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+  
+  if (file.size > maxSize) {
+    return false;
   }
   
-  if (file.size > MAX_FILE_SIZE) {
-    return `File size should be less than ${MAX_FILE_SIZE / (1024 * 1024)}MB`;
+  if (!validTypes.includes(file.type)) {
+    return false;
   }
   
-  if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-    return `File type must be one of: ${ACCEPTED_IMAGE_TYPES.join(', ')}`;
-  }
-  
-  return null;
+  return true;
 };
 
-export const validateSelfieFile = (file: File | null, documentType: DocumentType): string | null => {
-  // Check if selfie is required for this document type
-  const isRequired = ['id_card', 'passport', 'drivers_license', 'residence_permit'].includes(documentType);
+export const validateSelfieFile = (file: File | null): boolean => {
+  if (!file) return false;
   
-  if (isRequired && !file) {
-    return 'Selfie is required for verification';
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  
+  if (file.size > maxSize) {
+    return false;
   }
   
-  if (file) {
-    if (file.size > MAX_FILE_SIZE) {
-      return `File size should be less than ${MAX_FILE_SIZE / (1024 * 1024)}MB`;
-    }
-    
-    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-      return `File type must be one of: ${ACCEPTED_IMAGE_TYPES.join(', ')}`;
-    }
+  if (!validTypes.includes(file.type)) {
+    return false;
   }
   
-  return null;
+  return true;
 };

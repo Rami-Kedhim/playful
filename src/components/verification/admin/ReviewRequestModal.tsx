@@ -1,6 +1,4 @@
 
-// Fix property references for userId and requested_level; use camelCase consistently
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -52,7 +50,7 @@ const ReviewRequestModal: React.FC<ReviewRequestModalProps> = ({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="font-medium">User ID:</div>
-              <div>{request.userId || request.profile_id || ''}</div>
+              <div>{request.profile_id || ''}</div>
 
               <div className="font-medium">Status:</div>
               <div className="capitalize">{request.status}</div>

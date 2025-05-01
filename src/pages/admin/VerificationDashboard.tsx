@@ -1,6 +1,4 @@
 
-// Fix property references to correct camelCase properties on request and documents
-
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,7 +30,7 @@ const VerificationDashboard = () => {
       const data = await getAllVerificationRequests();
       const normalizedRequests = data.map(request => ({
         ...request,
-        userId: request.userId || request.profile_id || request.profile_id || '',
+        profile_id: request.profile_id || '',
         requested_level: (request.requested_level as VerificationLevel) || VerificationLevel.BASIC,
         documents: request.documents || [],
       }));
@@ -58,7 +56,7 @@ const VerificationDashboard = () => {
       <TableBody>
         {requests.map(request => (
           <TableRow key={request.id}>
-            <TableCell>{request.userId || request.profile_id}</TableCell>
+            <TableCell>{request.profile_id}</TableCell>
             <TableCell>
               {request.status === VerificationStatus.APPROVED && (
                 <span className="text-green-600">Approved</span>

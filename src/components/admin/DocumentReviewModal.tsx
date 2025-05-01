@@ -1,8 +1,3 @@
-
-// Fix property accesses that reference deprecated or missing keys to use correct camelCase keys
-// Remove usage of unused props like url or file_path on VerificationDocument (they don't exist anymore)
-// Correct all document property accesses to use documentType, fileUrl, uploadedAt, etc.
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
@@ -163,4 +158,3 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
 };
 
 export default DocumentReviewModal;
-
