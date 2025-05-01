@@ -30,6 +30,8 @@ export const getDefaultModelParameters = (): ModelParameters => {
     growthFactor: 1.05,
     cyclePeriod: 24,
     harmonicCount: 3,
+    learningRate: 0.001,
+    batchSize: 32
   };
 };
 

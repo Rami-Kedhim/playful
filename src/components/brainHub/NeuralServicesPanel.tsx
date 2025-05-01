@@ -1,242 +1,112 @@
 
-import React, { useEffect, useState } from 'react';
-import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Brain, Activity, RefreshCw, Zap, Plus } from "lucide-react";
-import { useNeuralRegistry } from "@/hooks/useNeuralRegistry";
-import { 
-  AICompanionNeuralService,
-  EscortsNeuralService,
-  CreatorsNeuralService,
-  LivecamsNeuralService
-} from "@/services/neural";
-import NeuralModuleRegistration from './NeuralModuleRegistration';
-import NeuralServiceCard from './NeuralServiceCard';
-import EmptyServiceState from './EmptyServiceState';
-import { toast } from "@/hooks/use-toast";
-import { ModuleType } from '@/services/neural/types/NeuralService';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Activity, CheckCircle, Settings } from 'lucide-react';
+import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
 import { TrainingProgress } from '@/services/neural/types/neuralHub';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import useNeuralRegistry from '@/hooks/useNeuralRegistry';
 
 interface NeuralServicesPanelProps {
-  models?: any[];
-  advancedMode?: boolean;
+  systemId?: string;
 }
 
-const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ models: providedModels, advancedMode = false }) => {
-  const { 
-    services, 
-    loading, 
-    error, 
-    loadServices, 
-    optimizeResources,
-    getServicesByType,
-    registerService
-  } = useNeuralRegistry();
-  
-  // Use ModuleType for the active tab state
-  const [activeTab, setActiveTab] = useState<ModuleType>('ai_companions');
-  const [showRegistration, setShowRegistration] = useState(false);
+const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ systemId }) => {
+  const { services, loading, error, optimizeResources } = useNeuralRegistry();
+  const [activeJobs, setActiveJobs] = useState<TrainingProgress[]>([]);
   
   useEffect(() => {
-    // Initial load of services
-    loadServices().catch(err => {
-      console.error("Failed to load neural services:", err);
-      toast({
-        title: "Failed to load neural services",
-        description: err?.message || "An unexpected error occurred",
-        variant: "destructive"
-      });
-    });
-  }, [loadServices]);
-  
-  const handleOptimize = () => {
-    try {
-      optimizeResources();
-      toast({
-        title: "Resources optimized",
-        description: "Neural resources have been optimized successfully",
-      });
-    } catch (err: any) {
-      console.error("Failed to optimize neural resources:", err);
-      toast({
-        title: "Optimization failed",
-        description: err?.message || "An unexpected error occurred",
-        variant: "destructive"
-      });
-    }
-  };
-  
-  // Create default service handlers
-  const createDefaultService = (moduleType: ModuleType) => {
-    try {
-      let service;
-      
-      switch (moduleType) {
-        case 'ai_companions':
-          service = new AICompanionNeuralService();
-          break;
-        case 'escorts':
-          service = new EscortsNeuralService();
-          break;
-        case 'creators':
-          service = new CreatorsNeuralService();
-          break;
-        case 'livecams':
-          service = new LivecamsNeuralService();
-          break;
-        default:
-          throw new Error(`Unsupported module type: ${moduleType}`);
+    const fetchJobs = async () => {
+      try {
+        const jobs = await neuralHub.getActiveTrainingJobs();
+        setActiveJobs(jobs);
+      } catch (err) {
+        console.error('Failed to fetch training jobs:', err);
       }
-      
-      // Register and reload
-      const success = registerService(service);
-      if (success) {
-        loadServices();
-        toast({
-          title: "Service registered",
-          description: `${moduleType} neural service has been registered successfully`,
-        });
-      } else {
-        toast({
-          title: "Registration failed",
-          description: "Failed to register neural service",
-          variant: "destructive"
-        });
-      }
-    } catch (err: any) {
-      console.error(`Failed to create ${moduleType} neural service:`, err);
-      toast({
-        title: "Service creation failed",
-        description: err?.message || "An unexpected error occurred",
-        variant: "destructive"
-      });
-    }
-  };
+    };
+    
+    fetchJobs();
+    const intervalId = setInterval(fetchJobs, 30000);
+    return () => clearInterval(intervalId);
+  }, []);
   
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Neural Services</h3>
-        <div className="space-x-2">
-          <Button 
-            size="sm" 
-            variant={showRegistration ? "default" : "outline"} 
-            onClick={() => setShowRegistration(!showRegistration)}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            {showRegistration ? 'Hide Registration' : 'Register Service'}
-          </Button>
-          <Button size="sm" variant="outline" onClick={loadServices}>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh
-          </Button>
-          <Button size="sm" onClick={handleOptimize}>
-            <Zap className="mr-2 h-4 w-4" />
-            Optimize Resources
-          </Button>
-        </div>
-      </div>
-      
-      {showRegistration && (
-        <NeuralModuleRegistration onRegistered={loadServices} />
-      )}
-      
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      
-      {loading ? (
-        <div className="flex items-center justify-center p-8">
-          <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : (
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ModuleType)}>
-          <TabsList className="grid grid-cols-4 mb-4">
-            <TabsTrigger value="ai_companions">AI Companion</TabsTrigger>
-            <TabsTrigger value="escorts">Escorts</TabsTrigger>
-            <TabsTrigger value="creators">Content Creators</TabsTrigger>
-            <TabsTrigger value="livecams">Livecams</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="ai_companions">
-            {getServicesByType('ai_companions').length > 0 ? (
-              getServicesByType('ai_companions').map(service => (
-                <NeuralServiceCard 
-                  key={service.moduleId} 
-                  service={service}
-                  onRefresh={loadServices} 
-                />
-              ))
-            ) : (
-              <EmptyServiceState
-                icon={<Brain className="h-12 w-12 text-muted-foreground" />}
-                title="AI Companion"
-                onRegister={() => createDefaultService('ai_companions')}
-              />
+    <Card>
+      <CardHeader>
+        <CardTitle>Neural Services</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {loading ? (
+          <div className="flex items-center justify-center p-4">
+            <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium">Active Services</h3>
+              <Button variant="outline" size="sm" onClick={optimizeResources}>
+                <Settings className="h-4 w-4 mr-2" /> Optimize Resources
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              {services.map(service => (
+                <div key={service.moduleId} className="p-4 border rounded-md">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Badge variant={service.config.enabled ? 'default' : 'secondary'}>
+                        {service.config.enabled ? 'Active' : 'Inactive'}
+                      </Badge>
+                      <h4 className="font-medium">{service.name}</h4>
+                    </div>
+                    <Switch checked={service.config.enabled} />
+                  </div>
+                  
+                  <div className="mt-2">
+                    <p className="text-sm text-muted-foreground">{service.moduleType}</p>
+                    <div className="mt-2 space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span>Usage</span>
+                        <span>78%</span>
+                      </div>
+                      <Progress value={78} className="h-1" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {services.length === 0 && (
+                <div className="text-center p-4 border border-dashed rounded-md">
+                  <p className="text-muted-foreground">No neural services available</p>
+                </div>
+              )}
+            </div>
+            
+            {activeJobs.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-lg font-medium mb-2">Active Training Jobs</h3>
+                {activeJobs.map(job => (
+                  <div key={job.id} className="p-3 bg-secondary/20 rounded-md mt-2">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="font-medium text-sm">{job.type} Training</h4>
+                        <p className="text-xs text-muted-foreground">Progress: {job.progress.toFixed(1)}%</p>
+                      </div>
+                      <Activity className="h-4 w-4 text-primary animate-pulse" />
+                    </div>
+                    <Progress value={job.progress} className="h-1 mt-2" />
+                  </div>
+                ))}
+              </div>
             )}
-          </TabsContent>
-          
-          <TabsContent value="escorts">
-            {getServicesByType('escorts').length > 0 ? (
-              getServicesByType('escorts').map(service => (
-                <NeuralServiceCard 
-                  key={service.moduleId} 
-                  service={service}
-                  onRefresh={loadServices} 
-                />
-              ))
-            ) : (
-              <EmptyServiceState
-                icon={<Activity className="h-12 w-12 text-muted-foreground" />}
-                title="Escorts"
-                onRegister={() => createDefaultService('escorts')}
-              />
-            )}
-          </TabsContent>
-          
-          <TabsContent value="creators">
-            {getServicesByType('creators').length > 0 ? (
-              getServicesByType('creators').map(service => (
-                <NeuralServiceCard 
-                  key={service.moduleId} 
-                  service={service}
-                  onRefresh={loadServices} 
-                />
-              ))
-            ) : (
-              <EmptyServiceState
-                icon={<Activity className="h-12 w-12 text-muted-foreground" />}
-                title="Content Creators"
-                onRegister={() => createDefaultService('creators')}
-              />
-            )}
-          </TabsContent>
-          
-          <TabsContent value="livecams">
-            {getServicesByType('livecams').length > 0 ? (
-              getServicesByType('livecams').map(service => (
-                <NeuralServiceCard 
-                  key={service.moduleId} 
-                  service={service}
-                  onRefresh={loadServices} 
-                />
-              ))
-            ) : (
-              <EmptyServiceState
-                icon={<Activity className="h-12 w-12 text-muted-foreground" />}
-                title="Livecams"
-                onRegister={() => createDefaultService('livecams')}
-              />
-            )}
-          </TabsContent>
-        </Tabs>
-      )}
-    </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

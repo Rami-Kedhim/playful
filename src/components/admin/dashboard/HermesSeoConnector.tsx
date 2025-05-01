@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useHermesInsights } from '@/hooks/useHermesInsights';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,14 +16,10 @@ interface HermesSeoConnectorProps {
 
 const HermesSeoConnector: React.FC<HermesSeoConnectorProps> = ({ userId }) => {
   const { insights, loading, error, refreshInsights } = useHermesInsights();
-  // We removed getHealthMetrics because it's not a property of useHermesInsights
-  // Let's use neuralHub.getHealthMetrics() directly, assuming that's correct
+  // Use neuralHub.getHealthMetrics() to get system health metrics
   const [systemHealthMetrics, setSystemHealthMetrics] = useState(neuralHub.getHealthMetrics());
 
   const [lastOptimizedContent, setLastOptimizedContent] = useState<SeoOptimizationResult | null>(null);
-
-  // Syncing with SEO module - assuming we have a mechanism for optimizationResult elsewhere or use state
-  // For now, we'll comment out optimizationResult related code until provided
 
   // Periodically update system health metrics
   useEffect(() => {
