@@ -1,316 +1,298 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Search, Compass, MessageSquare, Wallet, User, Shield, Globe, Zap, Star, HeartPulse } from 'lucide-react';
-import MainLayout from '@/components/layout/MainLayout';
-import { useHermesFlow } from '@/hooks/useHermesFlow';
-import { RecommendedActions } from '@/components/hermes/RecommendedActions';
-import { ProfileVisibilityCard } from '@/components/hermes/ProfileVisibilityCard';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChevronRight, Rocket, Wallet, Star, Globe, User } from 'lucide-react';
 import { lucie } from '@/core/Lucie';
+import { hermes } from '@/core/Hermes';
 import { oxum } from '@/core/Oxum';
+import { uberWallet } from '@/core/UberWallet';
+import { logInteraction } from '@/utils/uberCore';
 import { UberPersona } from '@/types/shared';
+import { AppRoutes } from '@/utils/navigation';
 
-const HomePage = () => {
-  const navigate = useNavigate();
-  const { trackEvent, getJourneyInsights } = useHermesFlow();
+/**
+ * UberEscorts Homepage - Central entry point for the ecosystem
+ */
+const HomePage: React.FC = () => {
   const [searchLocation, setSearchLocation] = useState('');
-  const [featuredProfiles, setFeaturedProfiles] = useState<UberPersona[]>([]);
-  const [systemStatus, setSystemStatus] = useState({ operational: true, latency: 120 });
-  
-  // Load featured profiles using Lucie
-  React.useEffect(() => {
-    const loadFeaturedProfiles = async () => {
-      const profiles = await lucie.loadFeaturedPersonas();
-      setFeaturedProfiles(profiles);
+  const [featuredUsers, setFeaturedUsers] = useState<UberPersona[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [boostStats, setBoostStats] = useState({ activeBoosts: 0, topScore: 0 });
+  const [systemStatus, setSystemStatus] = useState({ operational: true });
+  const [recommendedAction, setRecommendedAction] = useState('explore');
+
+  // Load featured users through Lucie AI
+  useEffect(() => {
+    const loadFeatured = async () => {
+      try {
+        const users = await lucie.loadFeaturedUsers(8);
+        setFeaturedUsers(users);
+      } catch (error) {
+        console.error('Error loading featured personas:', error);
+      } finally {
+        setLoading(false);
+      }
     };
+
+    loadFeatured();
     
-    loadFeaturedProfiles();
+    // Log interaction through Hermes
+    logInteraction('HomePage', 'page-view', { timestamp: new Date().toISOString() });
+    
+    // Get recommended next action
+    const nextAction = hermes.recommendNextAction();
+    setRecommendedAction(nextAction);
+    
+    // Mock boost stats
+    setBoostStats({
+      activeBoosts: 12,
+      topScore: 87
+    });
   }, []);
-  
-  const handleNavigation = (path: string, label: string) => {
-    trackEvent('homepage_navigation', { destination: path, label });
-    navigate(path);
+
+  // Calculate user visibility score for UI display
+  const calculateVisibility = () => {
+    try {
+      return hermes.calculateVisibilityScore('current-user');
+    } catch (error) {
+      console.error('Error calculating visibility score:', error);
+      return 50; // Default fallback
+    }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    trackEvent('search_initiated', { location: searchLocation });
-    navigate('/search', { state: { location: searchLocation } });
-  };
+  const visibilityScore = calculateVisibility();
 
   return (
-    <MainLayout 
-      title="UberEscorts Ecosystem"
-      description="Real • Virtual • Intelligent — Your Ultimate Connection"
-      hideNavbar={false}
-    >
-      <div className="space-y-8">
-        {/* Hero section */}
-        <section className="bg-gradient-to-r from-primary/20 via-primary/10 to-background rounded-lg p-8 md:p-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Your Ultimate Connection
+    <div className="container mx-auto p-4">
+      {/* Hero Banner */}
+      <section className="relative w-full bg-gradient-to-r from-purple-900 to-blue-900 text-white rounded-xl p-8 mb-8 shadow-lg">
+        <div className="max-w-2xl">
+          <h1 className="text-4xl font-bold mb-2">
+            Real • Virtual • Intelligent
           </h1>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Browse through our selection of high-quality escorts, AI companions, and immersive metaverse experiences.
-          </p>
-          
-          <form onSubmit={handleSearch} className="max-w-md mx-auto mb-8">
-            <div className="flex gap-2">
-              <Input
+          <p className="text-xl mb-6">Your Ultimate Connection</p>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <input
                 type="text"
-                placeholder="Enter location..."
+                placeholder="Enter your location"
+                className="w-full p-3 rounded-lg text-gray-800"
                 value={searchLocation}
                 onChange={(e) => setSearchLocation(e.target.value)}
-                className="bg-background/70 backdrop-blur"
               />
-              <Button type="submit">
-                <Search className="mr-2 h-4 w-4" />
-                Search
-              </Button>
             </div>
-          </form>
-          
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button size="lg" onClick={() => handleNavigation('/escorts', 'Browse Escorts')}>
-              Browse Escorts
-            </Button>
-            <Button size="lg" variant="outline" onClick={() => handleNavigation('/pulse-boost', 'Boost Visibility')}>
-              <Zap className="mr-2 h-4 w-4" />
-              Boost Visibility
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
+              onClick={() => {
+                logInteraction('HomePage', 'search-button', { location: searchLocation });
+              }}
+            >
+              Find Connection
             </Button>
           </div>
-        </section>
+        </div>
 
-        {/* Quick access cards */}
-        <section>
-          <h2 className="text-2xl font-bold mb-4">Quick Access</h2>
+        <div className="absolute right-8 bottom-8 hidden lg:block">
+          <div className="bg-black bg-opacity-30 rounded-lg p-4 backdrop-blur-sm">
+            <p className="text-sm">Your Profile Visibility</p>
+            <div className="text-2xl font-bold">{visibilityScore}%</div>
+            <Link 
+              to={AppRoutes.PULSE_BOOST}
+              className="text-xs text-pink-300 flex items-center"
+              onClick={() => logInteraction('HomePage', 'boost-cta-click')}
+            >
+              Boost Now <ChevronRight className="h-3 w-3" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Boost CTA */}
+      <section className="mb-8">
+        <div className="bg-gradient-to-r from-pink-500 to-purple-500 rounded-lg p-6 shadow-lg">
+          <div className="flex flex-col md:flex-row items-center justify-between">
+            <div className="mb-4 md:mb-0">
+              <h2 className="text-2xl font-bold text-white">Pulse Boost</h2>
+              <p className="text-white text-opacity-90">
+                Get 5x more visibility with our intelligent boosting system.
+              </p>
+            </div>
+            <Link to={AppRoutes.PULSE_BOOST}>
+              <Button 
+                variant="secondary" 
+                size="lg" 
+                className="whitespace-nowrap"
+                onClick={() => logInteraction('HomePage', 'boost-button-click')}
+              >
+                <Rocket className="h-4 w-4 mr-2" />
+                Boost Profile
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Profiles */}
+      <section className="mb-12">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">Featured Profiles</h2>
+          <Link 
+            to={AppRoutes.ESCORTS} 
+            className="text-sm text-blue-500 flex items-center"
+            onClick={() => logInteraction('HomePage', 'view-all-escorts')}
+          >
+            View All <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="cursor-pointer hover:bg-accent/10 transition-colors" onClick={() => handleNavigation('/search', 'Search')}>
-              <CardContent className="flex flex-col items-center justify-center p-6">
-                <Search className="h-10 w-10 text-primary mb-2" />
-                <span className="font-medium">Search</span>
-              </CardContent>
-            </Card>
-            
-            <Card className="cursor-pointer hover:bg-accent/10 transition-colors" onClick={() => handleNavigation('/messages', 'Messages')}>
-              <CardContent className="flex flex-col items-center justify-center p-6">
-                <MessageSquare className="h-10 w-10 text-primary mb-2" />
-                <span className="font-medium">Messages</span>
-              </CardContent>
-            </Card>
-            
-            <Card className="cursor-pointer hover:bg-accent/10 transition-colors" onClick={() => handleNavigation('/wallet', 'Wallet')}>
-              <CardContent className="flex flex-col items-center justify-center p-6">
-                <Wallet className="h-10 w-10 text-primary mb-2" />
-                <span className="font-medium">Wallet</span>
-              </CardContent>
-            </Card>
-            
-            <Card className="cursor-pointer hover:bg-accent/10 transition-colors" onClick={() => handleNavigation('/metaverse', 'Metaverse')}>
-              <CardContent className="flex flex-col items-center justify-center p-6">
-                <Globe className="h-10 w-10 text-primary mb-2" />
-                <span className="font-medium">Metaverse</span>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-        
-        {/* Featured profiles */}
-        <section>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">Featured Profiles</h2>
-            <Button variant="ghost" onClick={() => handleNavigation('/escorts', 'View All')}>
-              View All
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {featuredProfiles.map(profile => (
-              <Card key={profile.id} className="overflow-hidden">
-                <div className="aspect-[3/4] relative">
-                  {profile.avatarUrl && (
-                    <img 
-                      src={profile.avatarUrl} 
-                      alt={profile.name} 
-                      className="object-cover w-full h-full"
-                    />
-                  )}
-                  {profile.isVerified && (
-                    <Badge className="absolute top-2 right-2 bg-primary">Verified</Badge>
-                  )}
-                </div>
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-bold">{profile.displayName || profile.name}</h3>
-                    {profile.isOnline && (
-                      <span className="inline-flex h-2 w-2 bg-green-500 rounded-full"></span>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{profile.location}</p>
-                </CardContent>
-                <CardFooter className="pt-0 pb-4 px-4">
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => handleNavigation(`/persona/${profile.id}`, 'View Profile')}
-                  >
-                    View Profile
-                  </Button>
-                </CardFooter>
-              </Card>
+            {Array(8).fill(0).map((_, i) => (
+              <div key={i} className="bg-gray-100 dark:bg-gray-800 rounded-lg h-64 animate-pulse"></div>
             ))}
           </div>
-        </section>
-        
-        {/* Main features and recommendations */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <section className="md:col-span-2 space-y-6">
-            <h2 className="text-2xl font-bold">Platform Features</h2>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <Shield className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-medium">Safety First</h3>
-                </div>
-                <p className="text-muted-foreground">
-                  Our verification process ensures all users are real and trustworthy. 
-                  Your safety and privacy are our top priorities.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <HeartPulse className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-medium">AI Companions</h3>
-                </div>
-                <p className="text-muted-foreground mb-4">
-                  Explore our selection of AI-powered companions for conversation and entertainment.
-                </p>
-                <Button variant="outline" onClick={() => handleNavigation('/ai-companions', 'AI Companions')}>
-                  Explore AI Companions
-                </Button>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <Globe className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-medium">Metaverse Experience</h3>
-                </div>
-                <p className="text-muted-foreground mb-4">
-                  Enter our immersive virtual environment and connect with companions in a whole new way.
-                </p>
-                <Button variant="outline" onClick={() => handleNavigation('/metaverse', 'Metaverse')}>
-                  Enter Metaverse
-                </Button>
-              </CardContent>
-            </Card>
-            
-            {/* Live Boost Monitor */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5" />
-                  Live Boost Monitor
-                </CardTitle>
-                <CardDescription>
-                  Real-time visibility boosting across the platform
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Active boosts</span>
-                    <span className="font-medium">{Math.floor(Math.random() * 100) + 50}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Top boost score</span>
-                    <span className="font-medium">{Math.floor(Math.random() * 30) + 70}/100</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Peak hours</span>
-                    <span className="font-medium">8PM - 11PM</span>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  className="w-full" 
-                  variant="outline"
-                  onClick={() => handleNavigation('/pulse-boost', 'Boost Monitor')}
-                >
-                  View Detailed Stats
-                </Button>
-              </CardFooter>
-            </Card>
-          </section>
-          
-          <aside className="space-y-6">
-            {/* Personalized recommendations based on Hermes flow analytics */}
-            <RecommendedActions 
-              className="sticky top-6" 
-              onActionSelected={(action) => trackEvent('recommendation_clicked', { action })}
-            />
-            
-            {/* Profile Visibility Card */}
-            <ProfileVisibilityCard profileId="current-user" />
-            
-            {/* System Status */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <div 
-                    className={`h-2 w-2 rounded-full ${systemStatus.operational ? 'bg-green-500' : 'bg-red-500'}`}
-                  ></div>
-                  System Status
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-xs text-muted-foreground pb-2">
-                <div className="grid grid-cols-2 gap-1">
-                  <span>Operational</span>
-                  <span className="font-medium text-right">{systemStatus.operational ? 'Yes' : 'No'}</span>
-                  <span>Latency</span>
-                  <span className="font-medium text-right">{systemStatus.latency}ms</span>
-                  <span>AI Models</span>
-                  <span className="font-medium text-right">Active</span>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Journey Insights */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-medium">Your Journey Insights</CardTitle>
-              </CardHeader>
-              <CardContent className="pb-2">
-                <div className="space-y-2 text-sm">
-                  {getJourneyInsights().suggestions.map((suggestion, i) => (
-                    <div key={i} className="flex gap-2 items-center">
-                      <Star className="h-3 w-3 text-yellow-500 flex-shrink-0" />
-                      <span className="text-muted-foreground">{suggestion}</span>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {featuredUsers.map((user) => (
+              <Link 
+                key={user.id} 
+                to={`/persona/${user.id}`}
+                onClick={() => logInteraction('HomePage', 'featured-profile-click', { profileId: user.id })}
+              >
+                <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                  <div className="aspect-[3/4] relative bg-gray-200 dark:bg-gray-700">
+                    <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                      <User className="h-12 w-12" />
                     </div>
-                  ))}
+                    {user.avatarUrl && (
+                      <img 
+                        src={user.avatarUrl} 
+                        alt={user.name}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                    {user.isOnline && (
+                      <div className="absolute top-2 right-2">
+                        <div className="bg-green-500 rounded-full h-3 w-3"></div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-semibold">{user.displayName || user.name}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{user.location}</p>
+                    {user.isVerified && (
+                      <div className="flex items-center mt-1 text-blue-500 text-xs">
+                        <Star className="h-3 w-3 mr-1" />
+                        Verified
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </aside>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Action Cards */}
+      <section className="mb-12 grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Metaverse Card */}
+        <Card className="bg-gradient-to-br from-indigo-900 to-purple-900 text-white">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5" /> Metaverse Gateway
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Explore immersive 3D environments and connect with others in virtual spaces.</p>
+          </CardContent>
+          <CardFooter>
+            <Link 
+              to={AppRoutes.METAVERSE} 
+              className="w-full"
+              onClick={() => {
+                hermes.enterSpatialFlow('anonymous', 'homepage-entry');
+                logInteraction('HomePage', 'metaverse-card-click');
+              }}
+            >
+              <Button variant="secondary" className="w-full">Enter Metaverse</Button>
+            </Link>
+          </CardFooter>
+        </Card>
+
+        {/* Wallet Card */}
+        <Card className="bg-gradient-to-br from-emerald-900 to-teal-900 text-white">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wallet className="h-5 w-5" /> UBX Wallet
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Manage your UBX tokens, track transactions, and fund your activities.</p>
+          </CardContent>
+          <CardFooter>
+            <Link 
+              to={AppRoutes.WALLET} 
+              className="w-full"
+              onClick={() => logInteraction('HomePage', 'wallet-card-click')}
+            >
+              <Button variant="secondary" className="w-full">Open Wallet</Button>
+            </Link>
+          </CardFooter>
+        </Card>
+
+        {/* AI Companions Card */}
+        <Card className="bg-gradient-to-br from-pink-900 to-red-900 text-white">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5" /> AI Companions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Connect with emotionally intelligent AI companions for conversation and companionship.</p>
+          </CardContent>
+          <CardFooter>
+            <Link 
+              to={AppRoutes.AI_COMPANION} 
+              className="w-full"
+              onClick={() => logInteraction('HomePage', 'ai-companion-card-click')}
+            >
+              <Button variant="secondary" className="w-full">Meet Companions</Button>
+            </Link>
+          </CardFooter>
+        </Card>
+      </section>
+
+      {/* System HUD */}
+      <section className="mb-8">
+        <div className="bg-black bg-opacity-10 rounded-lg p-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-xs text-gray-500">System Status</p>
+              <p className="font-medium flex items-center">
+                <span className="inline-block h-2 w-2 rounded-full bg-green-500 mr-2"></span>
+                {systemStatus.operational ? 'Operational' : 'Degraded'}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Active Boosts</p>
+              <p className="font-medium">{boostStats.activeBoosts}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Top Boost Score</p>
+              <p className="font-medium">{boostStats.topScore}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Recommended</p>
+              <p className="font-medium capitalize">{recommendedAction}</p>
+            </div>
+          </div>
         </div>
-      </div>
-    </MainLayout>
+      </section>
+    </div>
   );
 };
 

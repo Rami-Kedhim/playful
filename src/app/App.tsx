@@ -6,6 +6,10 @@ import UberContextsProvider from '@/contexts/UberContexts';
 import AppRoutes from './AppRoutes';
 import { checkSystemStatus } from '@/utils/core';
 import { uberCore } from '@/core/UberCore';
+import { lucie } from '@/core/Lucie';
+import { hermes } from '@/core/Hermes';
+import { oxum } from '@/core/Oxum';
+import { orus } from '@/core/Orus';
 
 /**
  * Main application component
@@ -31,8 +35,27 @@ const App = () => {
     
     checkStatus();
     
-    // Initialize UberCore
-    uberCore.initialize();
+    // Initialize all UberCore modules
+    const initCore = async () => {
+      console.log('Initializing UberCore modules...');
+      
+      await Promise.all([
+        lucie.initialize(),
+        hermes.initialize(), 
+        uberCore.initialize(),
+        // oxum and orus are initialized in their constructors
+      ]);
+      
+      // Verify system integrity
+      const integrityResult = orus.checkIntegrity();
+      if (!integrityResult.isValid) {
+        console.error('System integrity check failed:', integrityResult.message);
+      } else {
+        console.log('System integrity verified:', integrityResult.message);
+      }
+    };
+    
+    initCore();
     
     return () => {
       // Shutdown UberCore when app unmounts

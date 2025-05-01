@@ -3,7 +3,6 @@
 
 // Re-export core types with proper type annotations
 export type { ID, PersonaType, UberPersona } from './uberPersona';
-export type { PulseBoost, BoostPackage, UserRole } from './pulse-boost';
 
 // Core UberSystem types
 export interface SystemStatus {
@@ -22,6 +21,9 @@ export interface SystemStatus {
   };
 }
 
+// User role types
+export type UserRole = 'USER' | 'ADMIN' | 'MODERATOR' | 'ESCORT' | 'CLIENT';
+
 // Boost system types
 export interface BoostStats {
   activeBoosts: number;
@@ -29,6 +31,44 @@ export interface BoostStats {
   averageVisibility: number;
   peakHours: string[];
   recentChanges: number[];
+}
+
+// Define the PulseBoost type
+export interface PulseBoost {
+  id: string;
+  name: string;
+  description: string;
+  duration: string;
+  durationMinutes?: number;
+  price: number;
+  price_ubx?: number;
+  visibility?: string;
+  visibility_increase?: number;
+  features?: string[];
+  color?: string;
+  badgeColor?: string;
+  boost_power?: number;
+  boostMultiplier?: number;
+  isMostPopular?: boolean;
+}
+
+// Define types for the Boost Package and related operations
+export interface BoostPackage {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  price_ubx?: number;
+  duration: string;
+  durationMinutes?: number;
+  features?: string[];
+  visibility?: string;
+  visibility_increase?: number;
+  boost_power?: number;
+  color?: string;
+  badgeColor?: string;
+  boostMultiplier?: number;
+  isMostPopular?: boolean;
 }
 
 export interface BoostStatus {
@@ -52,6 +92,19 @@ export interface BoostEligibility {
   nextEligibleTime?: string;
   remainingBoosts?: number;
   maxBoostsPerDay?: number;
+}
+
+export interface BoostPurchaseRequest {
+  profileId: string;
+  packageId: string;
+}
+
+export interface BoostPurchaseResult {
+  success: boolean;
+  boostId?: string;
+  error?: string | null;
+  message?: string;
+  transactionId?: string;
 }
 
 // Analytics data for profiles, escorts, users
@@ -143,3 +196,6 @@ export interface MetaverseAvatar {
   isPremium: boolean;
   price?: number;
 }
+
+// Re-export boost-related types to maintain compatibility
+export type { BoostAnalytics, BoostHistory, EnhancedBoostStatus } from './pulse-boost';
