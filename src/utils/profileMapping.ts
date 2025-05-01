@@ -11,6 +11,7 @@ export function mapLivecamToUberPersona(livecam: any): UberPersona {
     imageUrl: livecam.imageUrl,
     location: livecam.country || 'Unknown',
     isOnline: livecam.isLive || false,
+    isVerified: false, // Added the missing isVerified property
     tags: livecam.tags || [],
     isActive: true,
     roleFlags: {
@@ -52,10 +53,10 @@ export function mapAIProfileToUberPersona(aiProfile: any): UberPersona {
     imageUrl: aiProfile.avatar_url,
     bio: aiProfile.bio,
     location: aiProfile.location || 'Virtual',
-    isVerified: aiProfile.isVerified,
-    isPremium: aiProfile.isPremium || false,
+    isVerified: aiProfile.isVerified || false,
+    isOnline: true,
+    // Removed isPremium property as it's now optional
     isActive: true,
-    isAI: true,
     tags: aiProfile.interests || [],
     roleFlags: {
       isEscort: false,
@@ -97,8 +98,9 @@ export function mapEscortToUberPersona(escort: any): UberPersona {
     bio: escort.bio,
     description: escort.description,
     location: escort.location,
-    isVerified: escort.isVerified,
-    isPremium: escort.isPremium || false,
+    isVerified: escort.isVerified || false,
+    isOnline: false,
+    // Removed isPremium property as it's now optional
     isActive: true,
     tags: escort.tags || [],
     services: escort.services || [],
@@ -140,7 +142,7 @@ export function mapEscortToUberPersona(escort: any): UberPersona {
 }
 
 export function mapGenericToUberPersona(data: any): UberPersona {
-  let type: 'escort' | 'creator' | 'livecam' | 'ai' = 'escort';
+  let type: 'escort' | 'creator' | 'livecam' | 'ai' | 'user' = 'escort';
 
   if (data.isAI || data.personality) {
     type = 'ai';
@@ -163,7 +165,8 @@ export function mapGenericToUberPersona(data: any): UberPersona {
     description: data.description || data.bio,
     location: data.location || 'Unknown',
     isVerified: !!data.isVerified,
-    isPremium: !!data.isPremium,
+    isOnline: !!data.isOnline,
+    // Removed isPremium property as it's now optional in UberPersona type
     isActive: data.isActive !== false,
     tags: data.tags || data.interests || [],
     services: data.services || [],

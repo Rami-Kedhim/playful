@@ -9,6 +9,7 @@ export interface UberPersona {
   location?: string;
   isVerified: boolean;
   isOnline: boolean;
+  isPremium?: boolean; // Added this property
   tags?: string[];
   stats?: {
     likes?: number;

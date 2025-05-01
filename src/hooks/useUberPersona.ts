@@ -26,6 +26,7 @@ export const useUberPersona = (personaId?: string) => {
           bio: 'This is a test persona.',
           description: 'A longer description of the persona.',
           isActive: true,
+          isOnline: true, // Added the missing isOnline property
           isVerified: true,
           rating: 4.5,
           profileImageUrl: `https://picsum.photos/id/${parseInt(personaId.slice(0, 5), 16) % 100}/200/300`,
@@ -56,7 +57,7 @@ export const useUberPersona = (personaId?: string) => {
             rating: 4.5,
             reviewCount: 120,
             responseTime: 30,
-            views: 12000, // Changed from viewCount to views to match type
+            views: 12000,
             bookingCount: 45
           },
           availability: {

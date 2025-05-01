@@ -20,10 +20,10 @@ const HomePage = () => {
       try {
         const featuredPersonas = await featuredService.loadFeaturedPersonas();
         
-        // Make sure any returned personas conform to UberPersona type by forcing the type property
+        // Make sure any returned personas conform to UberPersona type
         const typedPersonas: UberPersona[] = featuredPersonas.map(persona => ({
           ...persona,
-          type: (persona.type as 'escort' | 'creator' | 'livecam' | 'ai') || 'escort'
+          type: (persona.type as 'escort' | 'creator' | 'livecam' | 'ai' | 'user') || 'escort'
         }));
         
         setPersonas(typedPersonas);
