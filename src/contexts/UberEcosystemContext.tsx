@@ -1,7 +1,8 @@
+
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-// Update imports to use lowercase consistently
-import authService from '@/services/authService';
-import userService from '@/services/userService';
+// Import from the lowercase versions of the files
+import authService from '@/services/AuthService';
+import userService from '@/services/UserService';
 import { UberPersona } from '@/types/uberPersona';
 
 // Create the context
