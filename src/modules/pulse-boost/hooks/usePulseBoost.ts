@@ -18,14 +18,7 @@ export function usePulseBoost(profileId?: string) {
   const [activeBoost, setActiveBoost] = useState<EnhancedBoostStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState<BoostHistory>({
-    id: '',
-    userId: '',
-    startTime: new Date(),
-    endTime: new Date(),
-    boostType: '',
-    boostMultiplier: 1,
-    price: 0,
-    status: 'active'
+    items: []
   });
   const [analytics, setAnalytics] = useState<BoostAnalytics | null>(null);
   
@@ -64,7 +57,6 @@ export function usePulseBoost(profileId?: string) {
           setActiveBoost({
             isActive: true,
             packageId: randomPackage.id,
-            packageName: randomPackage.name,
             startedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
             expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000),
             boostMultiplier: randomPackage.boostMultiplier || 1.5,
@@ -78,20 +70,7 @@ export function usePulseBoost(profileId?: string) {
         }
         
         // Simulate history
-        const mockHistory = {
-          id: 'mock-history',
-          userId: user?.id || 'unknown',
-          startTime: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-          endTime: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
-          boostType: 'standard',
-          boostMultiplier: 1.5,
-          price: 50,
-          status: 'completed' as const
-        };
-
-        // Add items property separately to avoid type errors
         setHistory({
-          ...mockHistory,
           items: [
             {
               id: 'hist-1',
@@ -117,6 +96,9 @@ export function usePulseBoost(profileId?: string) {
           totalBoosts: 8,
           activeBoosts: activeBoost?.isActive ? 1 : 0,
           averageBoostScore: 78,
+          boostHistory: [
+            { date: new Date(), score: 85 }
+          ],
           additionalViews: 523,
           engagementIncrease: 42,
           rankingPosition: 3

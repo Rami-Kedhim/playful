@@ -1,11 +1,12 @@
 
 import { useContext } from "react";
 import { BoostContext } from "@/contexts/BoostContext";
-import { BoostStatus, BoostEligibility, BoostPackage } from "@/types/boost";
+import { BoostStatus, BoostEligibility, BoostPackage, HermesStatus } from "@/types/boost";
 
 export type BoostContextType = {
   boostStatus: BoostStatus;
   eligibility: BoostEligibility;
+  hermesStatus: HermesStatus;
   packages: BoostPackage[];
   boostPackages?: BoostPackage[];
   loading: boolean;

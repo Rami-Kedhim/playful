@@ -7,7 +7,7 @@ export interface PersonaSearchParams {
   verified?: boolean;
   limit?: number;
   offset?: number;
-  page?: number; // Add this missing property
+  page?: number;
   sort?: string;
   location?: string;
   gender?: string;

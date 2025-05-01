@@ -31,7 +31,6 @@ export const useBoostOperations = ({ profileId }: UseBoostOperationsProps) => {
           startedAt: new Date(Date.now() - 8 * 60 * 60 * 1000), // 8 hours ago
           expiresAt: new Date(Date.now() + 16 * 60 * 60 * 1000), // 16 hours from now
           packageName: 'Premium Boost',
-          boostMultiplier: 2,
           progress: 33,
           remainingTime: '16:00:00',
           startTime: new Date(Date.now() - 8 * 60 * 60 * 1000),
@@ -63,6 +62,12 @@ export const useBoostOperations = ({ profileId }: UseBoostOperationsProps) => {
         engagementIncrease: 32,
         rankingPosition: 8,
         views: 300,
+        totalBoosts: 5,
+        activeBoosts: 1,
+        averageBoostScore: 85,
+        boostHistory: [
+          { date: new Date(), score: 85 }
+        ],
         impressions: {
           today: 180,
           yesterday: 150,
@@ -124,7 +129,6 @@ export const useBoostOperations = ({ profileId }: UseBoostOperationsProps) => {
         startedAt: new Date(),
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
         packageName: 'Premium Boost',
-        boostMultiplier: 2,
         progress: 0,
         remainingTime: '24:00:00',
         startTime: new Date(),
@@ -160,6 +164,10 @@ export const useBoostOperations = ({ profileId }: UseBoostOperationsProps) => {
         engagementIncrease: 0,
         rankingPosition: 0,
         views: 0,
+        totalBoosts: 0,
+        activeBoosts: 0,
+        averageBoostScore: 0,
+        boostHistory: [],
         impressions: {
           today: 0,
           yesterday: 0,
@@ -207,3 +215,5 @@ export const useBoostOperations = ({ profileId }: UseBoostOperationsProps) => {
     fetchAnalytics
   };
 };
+
+export default useBoostOperations;

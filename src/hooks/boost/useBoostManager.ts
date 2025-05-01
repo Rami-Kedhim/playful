@@ -17,7 +17,7 @@ export const useBoostManager = (profileId?: string) => {
     effectivenessScore: 0,
   });
   const [eligibility, setEligibility] = useState<BoostEligibility>({
-    eligible: true,
+    isEligible: true,
   });
   const [packages, setPackages] = useState<BoostPackage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +62,7 @@ export const useBoostManager = (profileId?: string) => {
         });
         
         setEligibility({
-          eligible: true
+          isEligible: true
         });
         
         setHermesStatus({
@@ -96,7 +96,6 @@ export const useBoostManager = (profileId?: string) => {
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
         remainingTime: '24:00:00',
         packageName: '24 Hour Boost',
-        boostMultiplier: 2,
         progress: 0,
         activeBoostId: 'active-boost-1'
       });

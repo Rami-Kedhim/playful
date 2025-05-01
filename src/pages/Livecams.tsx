@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useBoostDialog } from '@/hooks/useBoostDialog';
+import { useBoostDialog } from '@/hooks/boost/useBoostDialog';
 import { Zap } from 'lucide-react';
 import LivecamGrid from '@/components/livecams/LivecamGrid';
 import LivecamFeatured from '@/components/livecams/LivecamFeatured';
@@ -18,10 +18,19 @@ const useLivecams = (options: any) => {
     {
       id: 'live-1',
       name: 'Featured Model',
+      displayName: 'Featured Model',
       thumbnailUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop',
+      username: 'featured_model',
       isLive: true,
       viewerCount: 254,
-      categories: ['Featured', 'Popular']
+      categories: ['Featured', 'Popular'],
+      country: 'US',
+      language: 'English',
+      rating: 4.8,
+      region: 'North America',
+      tags: ['trending', 'popular'],
+      imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop',
+      isStreaming: true
     }
   ];
   
@@ -30,25 +39,43 @@ const useLivecams = (options: any) => {
     {
       id: 'live-2',
       name: 'Model 2',
+      displayName: 'Model 2',
       thumbnailUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1000&auto=format&fit=crop',
+      username: 'model_2',
       isLive: true,
       viewerCount: 154,
-      categories: ['Popular']
+      categories: ['Popular'],
+      country: 'UK',
+      language: 'English',
+      rating: 4.5,
+      region: 'Europe',
+      tags: ['new'],
+      imageUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1000&auto=format&fit=crop',
+      isStreaming: true
     },
     {
       id: 'live-3',
       name: 'Model 3',
+      displayName: 'Model 3',
       thumbnailUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop',
+      username: 'model_3',
       isLive: false,
       viewerCount: 0,
-      categories: ['New']
+      categories: ['New'],
+      country: 'CA',
+      language: 'English',
+      rating: 4.2,
+      region: 'North America',
+      tags: ['featured'],
+      imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop',
+      isStreaming: false
     }
   ];
   
   return {
     livecams,
     featured: featuredLivecams,
-    isLoading: false
+    loading: false
   };
 };
 
@@ -56,13 +83,15 @@ const Livecams = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('all');
   const [selectedFilters, setSelectedFilters] = useState({
+    status: "all" as "all" | "live" | "offline",
     categories: [],
-    tags: [],
-    priceRange: [0, 500],
-    onlineOnly: true
+    gender: "",
+    region: "",
+    minViewers: 0,
+    sortBy: "popular"
   });
   
-  const { livecams, featured, isLoading } = useLivecams({
+  const { livecams, featured, loading } = useLivecams({
     filters: {
       ...selectedFilters,
       category: activeTab === 'all' ? undefined : activeTab
@@ -177,8 +206,8 @@ const Livecams = () => {
           </Tabs>
           
           <LivecamGrid 
-            livecams={livecams} 
-            loading={isLoading}
+            models={livecams} 
+            loading={loading}
             onItemClick={(id) => console.log(`Clicked livecam ${id}`)}
           />
         </div>

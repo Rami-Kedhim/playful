@@ -16,7 +16,6 @@ export class BoostService {
         endTime: new Date(Date.now() + 16 * 60 * 60 * 1000),
         remainingTime: '16:00:00',
         packageName: '24 Hour Boost',
-        boostMultiplier: 2,
         progress: 33, // 33% complete
         activeBoostId: `boost-${profileId}-${Date.now()}`
       };
@@ -38,25 +37,19 @@ export class BoostService {
         today: 180,
         yesterday: 150,
         weeklyAverage: 145,
-        withBoost: 180,
-        withoutBoost: 120,
-        increase: 50
+        withBoost: 180
       },
       interactions: {
         today: 45,
         yesterday: 32,
         weeklyAverage: 30,
-        withBoost: 45,
-        withoutBoost: 25,
-        increase: 80
+        withBoost: 45
       },
       clicks: {
         today: 68,
         yesterday: 52,
         weeklyAverage: 55,
-        withBoost: 68,
-        withoutBoost: 42,
-        increase: 62
+        withBoost: 68
       },
       rank: {
         current: 8,
@@ -68,18 +61,16 @@ export class BoostService {
 
   async getBoostEligibility(profileId: string): Promise<BoostEligibility> {
     // Mock data - simulate 80% chance of being eligible
-    const eligible = Math.random() < 0.8;
+    const isEligible = Math.random() < 0.8;
     
-    if (eligible) {
+    if (isEligible) {
       return {
-        eligible: true,
         isEligible: true,
         remainingBoosts: 3,
         maxBoostsPerDay: 3
       };
     } else {
       return {
-        eligible: false,
         isEligible: false,
         reason: 'You have used all your boosts for today',
         reasons: ['Daily boost limit reached'],
@@ -122,8 +113,7 @@ export class BoostService {
         boost_power: 75,
         color: '#2196F3',
         badgeColor: '#1976D2',
-        durationMinutes: 4320,
-        isRecommended: true
+        durationMinutes: 4320
       },
       {
         id: 'boost-3',
