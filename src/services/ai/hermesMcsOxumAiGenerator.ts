@@ -1,58 +1,46 @@
 
 import { AIProfile } from '@/types/ai-profile';
-import { aiProfileGenerator } from '@/services/aiProfileGenerator';
 
-/**
- * Specialized AI generator using Hermes-MCS-Oxum technology
- * This is a more advanced generator compared to the basic aiProfileGenerator
- */
-export class HermesMcsOxumAiGenerator {
-  private defaultCount = 10;
-  
-  /**
-   * Generate multiple advanced AI profiles
-   * @param count Number of profiles to generate
-   * @returns Array of AI profiles with enhanced characteristics
-   */
-  async generateProfiles(count: number = this.defaultCount): Promise<AIProfile[]> {
-    // In a real implementation, this would use more advanced algorithms
-    // For now, we'll use the existing profile generator but enhance the results
-    const baseProfiles = await aiProfileGenerator.generateMultipleProfiles(count);
+class HermesMcsOxumAiGenerator {
+  async generatePersonas(options: { count: number, gender?: string, traits?: string[] } = { count: 1 }): Promise<AIProfile[]> {
+    const { count } = options;
+    const personas: AIProfile[] = [];
     
-    // Enhance the profiles with Hermes-MCS-Oxum specific attributes
-    return baseProfiles.map(profile => this.enhanceProfile(profile));
+    for (let i = 0; i < count; i++) {
+      personas.push(await this.generatePersona(options));
+    }
+    
+    return personas;
   }
   
-  /**
-   * Generate a single advanced AI profile
-   * @returns An enhanced AI profile
-   */
-  async generateProfile(): Promise<AIProfile> {
-    const profile = await aiProfileGenerator.generateRandomProfile();
-    return this.enhanceProfile(profile);
-  }
-  
-  /**
-   * Enhance an existing profile with advanced characteristics
-   * @param profile The base profile to enhance
-   * @returns Enhanced profile
-   */
-  private enhanceProfile(profile: AIProfile): AIProfile {
-    // Add or modify attributes to make the profile more sophisticated
+  async generatePersona(options: { gender?: string, traits?: string[] } = {}): Promise<AIProfile> {
+    // Mock implementation
+    const id = Math.random().toString(36).substring(2);
+    
     return {
-      ...profile,
-      personality: typeof profile.personality === 'object' && !Array.isArray(profile.personality) 
-        ? {
-            type: profile.personality.type,
-            traits: [...(profile.personality.traits || []), 'empathic', 'intelligent']
-          }
-        : { type: 'advanced', traits: ['empathic', 'intelligent'] },
-      description: `Advanced ${profile.name} - ${profile.description}`,
-      tags: [...(profile.tags || []), 'hermes-enhanced', 'oxum-powered']
+      id,
+      name: `Generated AI ${id.substring(0, 4)}`,
+      avatarUrl: `https://i.pravatar.cc/300?u=${id}`,
+      description: "A generated AI persona with unique traits and capabilities.",
+      traits: options.traits || ["friendly", "intelligent", "creative"],
+      gender: options.gender || (Math.random() > 0.5 ? "female" : "male"),
+      age: Math.floor(Math.random() * 20) + 25,
+      languages: ["English", "Spanish"],
+    };
+  }
+  
+  // Method to adapt from schema.AIProfile to ai-profile.AIProfile
+  adaptProfile(profile: any): AIProfile {
+    return {
+      id: profile.id,
+      name: profile.name,
+      avatarUrl: profile.avatar || `https://i.pravatar.cc/300?u=${profile.id}`,
+      description: profile.description || "",
+      // Add any other required fields
+      traits: profile.personalityTraits || [],
+      languages: profile.languages || [],
     };
   }
 }
 
 export const hermesMcsOxumAiGenerator = new HermesMcsOxumAiGenerator();
-
-export default hermesMcsOxumAiGenerator;

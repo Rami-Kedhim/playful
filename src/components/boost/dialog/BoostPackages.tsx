@@ -1,97 +1,84 @@
 
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Check, Zap } from "lucide-react";
-import { BoostPackage } from "@/types/boost";
+import { Card, CardContent } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Badge } from '@/components/ui/badge';
+import { Zap, Clock } from 'lucide-react';
+import { BoostPackage } from '@/types/boost';
 
 interface BoostPackagesProps {
   packages: BoostPackage[];
-  selectedId: string | null;
+  selectedId: string;
   onSelect: (id: string) => void;
   formatDuration?: (duration: string) => string;
+  dailyUsage: number;
+  dailyLimit: number;
   disabled?: boolean;
-  dailyUsage?: number;
-  dailyLimit?: number;
-  getBoostPrice?: (pkg?: BoostPackage) => number;
 }
 
-const BoostPackages = ({ 
-  packages, 
-  selectedId, 
+const BoostPackages: React.FC<BoostPackagesProps> = ({
+  packages,
+  selectedId,
   onSelect,
-  formatDuration = (duration) => duration,
-  disabled = false,
-  dailyUsage = 0,
-  dailyLimit = 5,
-  getBoostPrice = (pkg) => pkg?.price || 0
-}: BoostPackagesProps) => {
-  if (!packages || packages.length === 0) {
-    return <div className="text-center py-6">No boost packages available</div>;
-  }
-
+  formatDuration = (d) => d,
+  dailyUsage,
+  dailyLimit,
+  disabled = false
+}) => {
   return (
     <div className="space-y-4">
-      {dailyLimit > 0 && (
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-muted-foreground">Daily boost usage:</span>
-          <span className="font-medium">{dailyUsage} / {dailyLimit}</span>
-        </div>
-      )}
-      
-      <RadioGroup value={selectedId || undefined} onValueChange={onSelect}>
-        <div className="space-y-3">
-          {packages.map((pkg) => (
-            <div key={pkg.id} className="relative">
-              <RadioGroupItem
-                id={pkg.id}
-                value={pkg.id}
-                className="sr-only"
-                disabled={disabled}
-              />
-              <Label
-                htmlFor={pkg.id}
-                className={`
-                  flex cursor-pointer rounded-lg border border-muted p-4
-                  ${selectedId === pkg.id ? "bg-primary/5 border-primary" : "hover:bg-accent"}
-                  ${disabled ? "opacity-50 cursor-not-allowed" : ""}
-                `}
-              >
-                <div className="flex flex-1 items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="font-medium">{pkg.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {formatDuration(pkg.duration)}
+      <div className="flex items-center justify-between">
+        <Badge variant="outline" className="font-normal">
+          Daily Usage: {dailyUsage}/{dailyLimit}
+        </Badge>
+      </div>
+
+      <RadioGroup value={selectedId} onValueChange={onSelect}>
+        {packages.map((pkg) => (
+          <Card key={pkg.id} className={`mb-3 overflow-hidden ${pkg.isMostPopular ? 'border-primary' : ''}`}>
+            {pkg.isMostPopular && (
+              <div className="bg-primary text-primary-foreground text-xs px-3 py-1 text-center">
+                Most Popular
+              </div>
+            )}
+            
+            <CardContent className={`p-4 ${disabled ? 'opacity-50' : ''}`}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value={pkg.id} id={pkg.id} disabled={disabled} />
+                <div className="flex-1">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <label htmlFor={pkg.id} className="text-base font-medium block cursor-pointer">
+                        {pkg.name}
+                      </label>
+                      <p className="text-sm text-muted-foreground mt-1">{pkg.description}</p>
                     </div>
-                    {pkg.features && pkg.features.length > 0 && (
-                      <ul className="text-xs space-y-1 mt-1">
-                        {pkg.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-center gap-1">
-                            <Check className="h-3 w-3 text-green-500" />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                    <span className="text-lg font-bold">{pkg.price_ubx} UBX</span>
                   </div>
                   
-                  <div className="flex flex-col items-end">
-                    <Badge className="bg-primary mb-2">
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {formatDuration(pkg.duration)}
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
                       <Zap className="h-3 w-3 mr-1" />
-                      {pkg.boost_power ? `+${pkg.boost_power}%` : 'Boost'}
-                    </Badge>
-                    
-                    <div className="text-sm font-medium">
-                      {getBoostPrice(pkg)} UBX
+                      {pkg.boost_power}% Boost Power
                     </div>
                   </div>
+                  
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {pkg.features?.map((feature, i) => (
+                      <Badge key={i} variant="outline" className="text-xs py-0">
+                        {feature}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-              </Label>
-            </div>
-          ))}
-        </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </RadioGroup>
     </div>
   );

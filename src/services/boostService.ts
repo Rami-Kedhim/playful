@@ -45,12 +45,6 @@ export class BoostService {
         weeklyAverage: 30,
         withBoost: 45
       },
-      clicks: {
-        today: 68,
-        yesterday: 52,
-        weeklyAverage: 55,
-        withBoost: 68
-      },
       rank: {
         current: 8,
         previous: 24,
@@ -98,7 +92,8 @@ export class BoostService {
         boost_power: 50,
         color: '#4CAF50',
         badgeColor: '#388E3C',
-        durationMinutes: 1440
+        durationMinutes: 1440,
+        isRecommended: false
       },
       {
         id: 'boost-2',
@@ -113,7 +108,8 @@ export class BoostService {
         boost_power: 75,
         color: '#2196F3',
         badgeColor: '#1976D2',
-        durationMinutes: 4320
+        durationMinutes: 4320,
+        isRecommended: true
       },
       {
         id: 'boost-3',
@@ -128,7 +124,8 @@ export class BoostService {
         boost_power: 100,
         color: '#9C27B0',
         badgeColor: '#7B1FA2',
-        durationMinutes: 10080
+        durationMinutes: 10080,
+        isRecommended: false
       }
     ];
   }

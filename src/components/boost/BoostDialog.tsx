@@ -1,76 +1,72 @@
 
-import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Zap } from "lucide-react";
+import React from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Zap } from 'lucide-react';
+import { useBoostDialog } from '@/hooks/boost/useBoostDialog';
+import BoostDialogTabs from './dialog/BoostDialogTabs';
 
 interface BoostDialogProps {
+  profileId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  profileId: string;
-  onSuccess?: () => void;
-  onCancel?: () => Promise<boolean>;
 }
 
 const BoostDialog: React.FC<BoostDialogProps> = ({
+  profileId,
   open,
   onOpenChange,
-  profileId,
-  onSuccess,
-  onCancel
 }) => {
-  const handleBoostClick = () => {
-    if (onSuccess) {
-      onSuccess();
-    }
-  };
-
-  const handleCancelClick = async () => {
-    if (onCancel) {
-      await onCancel();
-    }
-    onOpenChange(false);
-  };
+  const {
+    activeTab,
+    setActiveTab,
+    selectedPackage,
+    setSelectedPackage,
+    handleBoost,
+    handleCancelBoost,
+    boostStatus,
+    eligibility,
+    packages,
+    loading,
+    dailyBoostUsage,
+    dailyBoostLimit,
+    getBoostPrice,
+    hermesStatus,
+    formatBoostDuration = (d) => d,
+  } = useBoostDialog(profileId);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-amber-500" />
-            <span>Boost Your Profile</span>
+          <DialogTitle className="flex items-center">
+            <Zap className="h-5 w-5 mr-2 text-primary" />
+            Boost Profile
           </DialogTitle>
         </DialogHeader>
-        
-        <div className="grid gap-4 py-4">
-          <p>
-            Boosting your profile increases your visibility and helps you attract more viewers.
-          </p>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="border rounded-md p-4">
-              <h3 className="font-medium mb-2">Basic Boost</h3>
-              <p className="text-sm text-muted-foreground mb-4">4x visibility for 1 hour</p>
-              <Button onClick={handleBoostClick} className="w-full">
-                Boost for 500 UBX
-              </Button>
-            </div>
-            
-            <div className="border rounded-md p-4">
-              <h3 className="font-medium mb-2">Premium Boost</h3>
-              <p className="text-sm text-muted-foreground mb-4">10x visibility for 2 hours</p>
-              <Button onClick={handleBoostClick} className="w-full">
-                Boost for 1000 UBX
-              </Button>
-            </div>
-          </div>
-          
-          <div className="flex justify-end">
-            <Button variant="outline" onClick={handleCancelClick}>
-              Cancel
-            </Button>
-          </div>
-        </div>
+
+        <BoostDialogTabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          boostStatus={boostStatus}
+          eligibility={eligibility}
+          boostPackages={packages}
+          selectedPackage={selectedPackage}
+          setSelectedPackage={setSelectedPackage}
+          handleBoost={handleBoost}
+          handleCancel={handleCancelBoost}
+          loading={loading}
+          dailyBoostUsage={dailyBoostUsage}
+          dailyBoostLimit={dailyBoostLimit}
+          handleDialogClose={() => onOpenChange(false)}
+          getBoostPrice={getBoostPrice}
+          hermesStatus={hermesStatus}
+          formatBoostDuration={formatBoostDuration}
+        />
       </DialogContent>
     </Dialog>
   );

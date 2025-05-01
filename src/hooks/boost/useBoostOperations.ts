@@ -62,9 +62,6 @@ export const useBoostOperations = ({ profileId }: UseBoostOperationsProps) => {
         engagementIncrease: 32,
         rankingPosition: 8,
         views: 300,
-        totalBoosts: 5,
-        activeBoosts: 1,
-        averageBoostScore: 85,
         boostHistory: [
           { date: new Date(), score: 85 }
         ],
@@ -164,9 +161,6 @@ export const useBoostOperations = ({ profileId }: UseBoostOperationsProps) => {
         engagementIncrease: 0,
         rankingPosition: 0,
         views: 0,
-        totalBoosts: 0,
-        activeBoosts: 0,
-        averageBoostScore: 0,
         boostHistory: [],
         impressions: {
           today: 0,

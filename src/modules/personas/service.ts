@@ -1,7 +1,11 @@
 
-import { config } from '@/config';
 import { PersonaSearchParams } from '@/types/persona';
-import { UberPersona } from '@/types';
+import { UberPersona } from '@/types/uberPersona';
+
+// Placeholder for config (to be created if needed)
+const config = {
+  API_URL: process.env.API_URL || 'https://api.example.com'
+};
 
 export class PersonaService {
   private baseUrl = `${config.API_URL}/personas`;
@@ -12,7 +16,7 @@ export class PersonaService {
       id,
       name: `Persona ${id}`,
       type: 'escort',
-      avatar: 'https://i.imgur.com/0y0tGXn.png',
+      avatarUrl: 'https://i.imgur.com/0y0tGXn.png',
       images: [],
       description: 'A mock persona',
       location: 'New York',
@@ -35,7 +39,7 @@ export class PersonaService {
       id: `persona-${index}`,
       name: `Persona ${index}`,
       type: 'escort',
-      avatar: 'https://i.imgur.com/0y0tGXn.png',
+      avatarUrl: 'https://i.imgur.com/0y0tGXn.png',
       images: [],
       description: 'A mock persona',
       location: 'New York',

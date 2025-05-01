@@ -1,208 +1,146 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { toast } from '@/hooks/use-toast';
-import { pulseBoostService } from '../service';
-import type { 
-  BoostPackage, 
-  BoostPurchaseRequest, 
-  BoostPurchaseResult, 
-  BoostAnalytics,
-  BoostHistory,
-  EnhancedBoostStatus
-} from '@/types/pulse-boost';
+import { EnhancedBoostStatus, BoostAnalytics } from '@/types/ai-profile';
+import { BoostPackage } from '@/types/boost';
+import { PulseBoost } from '@/types/pulse-boost';
 
-export function usePulseBoost(profileId?: string) {
-  const { user } = useAuth();
-  const [packages, setPackages] = useState<BoostPackage[]>([]);
-  const [activeBoost, setActiveBoost] = useState<EnhancedBoostStatus | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [history, setHistory] = useState<BoostHistory>({
-    items: []
+export const usePulseBoost = (profileId?: string) => {
+  const [pulseBoostPackages, setPulseBoostPackages] = useState<PulseBoost[]>([]);
+  const [activeBoosts, setActiveBoosts] = useState<PulseBoost[]>([]);
+  const [boostStatus, setBoostStatus] = useState<EnhancedBoostStatus>({
+    isActive: false
   });
-  const [analytics, setAnalytics] = useState<BoostAnalytics | null>(null);
+  const [boostAnalytics, setBoostAnalytics] = useState<BoostAnalytics>({
+    boostHistory: []
+  });
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [userEconomy, setUserEconomy] = useState<{ubxBalance: number}>({ ubxBalance: 0 });
   
   useEffect(() => {
-    if (!profileId) return;
+    const fetchPulseBoosts = async () => {
+      if (!profileId) return;
+      
+      setIsLoading(true);
+      try {
+        // Mock data
+        setPulseBoostPackages([
+          {
+            id: 'pulse-1',
+            name: 'Pulse Boost Basic',
+            description: 'Boost your visibility for 24 hours',
+            price: 29.99,
+            price_ubx: 300,
+            duration: '24:00:00',
+            durationMinutes: 1440,
+            visibility: '300%',
+            visibility_increase: 200,
+            color: '#3b82f6',
+            badgeColor: '#3b82f6',
+            features: ['3x visibility', '24-hour duration', 'Top placement']
+          },
+          {
+            id: 'pulse-2',
+            name: 'Pulse Boost Premium',
+            description: 'Premium visibility boost for 48 hours',
+            price: 49.99,
+            price_ubx: 500,
+            duration: '48:00:00',
+            durationMinutes: 2880,
+            visibility: '500%',
+            visibility_increase: 400,
+            color: '#7c3aed',
+            badgeColor: '#7c3aed',
+            features: ['5x visibility', '48-hour duration', 'Top placement', 'Homepage feature']
+          }
+        ]);
+        
+        // Set mock active boost status
+        setBoostStatus({
+          isActive: false
+        });
+        
+        setUserEconomy({ ubxBalance: 1250 });
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch Pulse Boost data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    fetchBoostData();
+    fetchPulseBoosts();
   }, [profileId]);
   
-  const fetchBoostData = async () => {
-    setLoading(true);
-    
+  const purchaseBoost = async (boostPackage: BoostPackage): Promise<boolean> => {
     try {
-      // Ensure the return type matches what we expect
-      const boostPackages = pulseBoostService.getBoostPackages();
-      setPackages(boostPackages.map(pkg => ({
-        ...pkg,
-        // Convert duration from number to string if needed
-        duration: typeof pkg.duration === 'number' ? String(pkg.duration) : pkg.duration,
-        // Ensure boostMultiplier exists
-        boostMultiplier: pkg.boostMultiplier || 1.5
-      })));
+      console.log(`Purchasing ${boostPackage.name} boost for profile ${profileId}`);
+      // This would be a real API call
       
-      // Fetch active boost (mock)
-      setTimeout(() => {
-        // Simulate active boost (50% chance)
-        if (Math.random() > 0.5) {
-          const randomIndex = Math.floor(Math.random() * packages.length);
-          const randomPackage = packages.length > 0 ? packages[randomIndex] : {
-            id: 'default-package',
-            name: 'Basic Boost',
-            duration: '24:00:00',
-            boostMultiplier: 1.5
-          };
-          
-          setActiveBoost({
-            isActive: true,
-            packageId: randomPackage.id,
-            startedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
-            expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000),
-            boostMultiplier: randomPackage.boostMultiplier || 1.5,
-            remainingTime: '12:00:00',
-            progress: 50
-          });
-        } else {
-          setActiveBoost({
-            isActive: false
-          });
-        }
-        
-        // Simulate history
-        setHistory({
-          items: [
-            {
-              id: 'hist-1',
-              packageId: 'basic',
-              startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-              endDate: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
-              price: 50,
-              status: 'completed'
-            },
-            {
-              id: 'hist-2',
-              packageId: 'premium',
-              startDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
-              endDate: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000),
-              price: 125,
-              status: 'completed'
-            }
-          ]
-        });
-        
-        // Simulate analytics
-        setAnalytics({
-          totalBoosts: 8,
-          activeBoosts: activeBoost?.isActive ? 1 : 0,
-          averageBoostScore: 78,
-          boostHistory: [
-            { date: new Date(), score: 85 }
-          ],
-          additionalViews: 523,
-          engagementIncrease: 42,
-          rankingPosition: 3
-        });
-        
-        setLoading(false);
-      }, 1000);
+      // Update boost status
+      setBoostStatus({
+        isActive: true,
+        packageId: boostPackage.id,
+        packageName: boostPackage.name,
+        startedAt: new Date(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+        timeRemaining: '24:00:00',
+        progress: 0,
+        boostPackage
+      });
       
+      return true;
     } catch (error) {
-      console.error('Error fetching boost data', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch boost data',
-        variant: 'destructive'
-      });
-      setLoading(false);
-    }
-  };
-  
-  const purchaseBoost = async (packageId: string): Promise<boolean> => {
-    if (!profileId || !user?.id) {
-      toast({
-        title: 'Error',
-        description: 'You must be logged in to purchase a boost',
-        variant: 'destructive'
-      });
+      console.error('Failed to purchase boost', error);
       return false;
-    }
-    
-    setLoading(true);
-    
-    try {
-      const result = await pulseBoostService.purchaseBoost(profileId, packageId, user.id);
-      
-      if (result.success) {
-        toast({
-          title: 'Boost Purchased',
-          description: result.message || 'Your profile has been boosted!',
-        });
-        
-        // Refresh boost data
-        fetchBoostData();
-        return true;
-      } else {
-        toast({
-          title: 'Purchase Failed',
-          description: result.message || 'Failed to purchase boost',
-          variant: 'destructive'
-        });
-        return false;
-      }
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'An error occurred while purchasing boost',
-        variant: 'destructive'
-      });
-      return false;
-    } finally {
-      setLoading(false);
     }
   };
   
   const cancelBoost = async (): Promise<boolean> => {
-    if (!profileId || !user?.id || !activeBoost?.isActive) return false;
-    
-    setLoading(true);
-    
     try {
-      // Mock success
-      await new Promise(resolve => setTimeout(resolve, 800));
+      console.log('Cancelling active pulse boost');
+      // This would be a real API call
       
-      toast({
-        title: 'Boost Cancelled',
-        description: 'Your boost has been cancelled successfully'
-      });
-      
-      setActiveBoost({
+      // Reset boost status
+      setBoostStatus({
         isActive: false
       });
       
       return true;
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to cancel boost',
-        variant: 'destructive'
-      });
+    } catch (error) {
+      console.error('Failed to cancel boost', error);
       return false;
-    } finally {
-      setLoading(false);
     }
   };
   
+  const getAnalytics = async () => {
+    // Mock analytics data
+    setBoostAnalytics({
+      additionalViews: 145,
+      engagementIncrease: 32,
+      rankingPosition: 8,
+      boostHistory: [
+        { date: new Date(), score: 90 }
+      ],
+    });
+  };
+  
+  useEffect(() => {
+    if (profileId && boostStatus.isActive) {
+      getAnalytics();
+    }
+  }, [profileId, boostStatus.isActive]);
+  
   return {
-    packages,
-    activeBoost,
-    loading,
-    history,
-    analytics,
+    pulseBoostPackages,
+    activeBoosts,
+    boostStatus,
+    isLoading,
+    error,
+    userEconomy,
     purchaseBoost,
     cancelBoost,
-    refreshData: fetchBoostData
+    boostAnalytics
   };
-}
+};
 
 export default usePulseBoost;

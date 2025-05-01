@@ -86,6 +86,9 @@ export interface AIProfile {
     expiresAt?: string;
     boost_level?: number;
   };
+  languages?: string[];
+  avatar?: string; // Added for backward compatibility
+  languageSkills?: string[]; // Added for compatibility with aiProfileGenerator
 }
 
 // Add AIMessage type that was missing
@@ -101,3 +104,34 @@ export interface AIMessage {
     url: string;
   }>;
 }
+
+// Add Livecam interface for consistency
+export interface Livecam {
+  id: string;
+  name: string;
+  displayName: string;
+  thumbnailUrl: string;
+  username?: string;
+  isLive: boolean;
+  viewerCount: number;
+  categories: string[];
+  country?: string;
+  language?: string;
+  gender?: string;
+  rating?: number;
+  price?: number;
+  isStreaming?: boolean;
+  region?: string; // Added to support Livecams component
+}
+
+export interface EnhancedBoostStatus {
+  isActive: boolean;
+  packageId?: string;
+  expiresAt?: Date;
+  timeRemaining?: string;
+  boostPackage?: BoostPackage;
+  progress?: number;
+  packageName?: string; // Added to fix PulseBoostManager
+  startedAt?: Date; // Added to fix usePulseBoost
+}
+

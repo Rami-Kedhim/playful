@@ -1,4 +1,3 @@
-
 // Basic boost types
 export interface BoostPackage {
   id: string;
@@ -16,6 +15,7 @@ export interface BoostPackage {
   badgeColor?: string;
   boostMultiplier?: number;
   isMostPopular?: boolean;
+  isRecommended?: boolean;
 }
 
 export interface BoostStatus {
@@ -33,6 +33,7 @@ export interface BoostStatus {
   visibilityScore?: number;
   progress?: number;
   startedAt?: Date;
+  boostMultiplier?: number;
 }
 
 export interface BoostEligibility {
@@ -41,6 +42,8 @@ export interface BoostEligibility {
   restrictions?: string[];
   reasons?: string[];
   nextEligibleTime?: string;
+  remainingBoosts?: number;
+  maxBoostsPerDay?: number;
 }
 
 export interface HermesStatus {
@@ -62,6 +65,13 @@ export interface HermesBoostStatus {
 }
 
 export interface BoostAnalytics {
+  totalBoosts?: number;
+  activeBoosts?: number;
+  averageBoostScore?: number;
+  boostHistory?: Array<{
+    date: Date;
+    score: number;
+  }>;
   views?: number;
   impressions?: {
     today: number;

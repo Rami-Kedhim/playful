@@ -17,11 +17,11 @@ const AIProfileGenerator = ({ onSelectProfile }: AIProfileGeneratorProps) => {
   const [generated, setGenerated] = useState<AIProfile[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     setIsGenerating(true);
     // Add a small delay to simulate processing
-    setTimeout(() => {
-      const profiles = aiProfileGenerator.generateMultipleProfiles(count);
+    setTimeout(async () => {
+      const profiles = await aiProfileGenerator.generateMultipleProfiles(count);
       setGenerated(profiles);
       setIsGenerating(false);
     }, 1000);
