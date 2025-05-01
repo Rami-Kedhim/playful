@@ -9,7 +9,7 @@ class FeaturedService {
         id: 'persona1',
         name: 'Sophie',
         displayName: 'Sophie Dreams',
-        type: 'escort', // UberPersona type requires this to be one of the specific values
+        type: 'escort' as const, // Using 'as const' to ensure proper type narrowing
         avatarUrl: 'https://picsum.photos/seed/sophie/400/600',
         location: 'New York',
         isVerified: true,
@@ -20,7 +20,7 @@ class FeaturedService {
         id: 'persona2',
         name: 'Luna',
         displayName: 'Luna Eclipse',
-        type: 'creator',
+        type: 'creator' as const, // Using 'as const' for proper typing
         avatarUrl: 'https://picsum.photos/seed/luna/400/600',
         location: 'Miami',
         isVerified: true,
@@ -31,7 +31,7 @@ class FeaturedService {
         id: 'persona3',
         name: 'TiffanyLive',
         displayName: 'Tiffany Stars',
-        type: 'livecam',
+        type: 'livecam' as const, // Using 'as const' for proper typing
         avatarUrl: 'https://picsum.photos/seed/tiffany/400/600',
         location: 'Los Angeles',
         isVerified: true,
@@ -42,7 +42,7 @@ class FeaturedService {
         id: 'persona4',
         name: 'Aria',
         displayName: 'Aria Intelligence',
-        type: 'ai',
+        type: 'ai' as const, // Using 'as const' for proper typing
         avatarUrl: 'https://picsum.photos/seed/aria/400/600',
         location: 'Metaverse',
         isVerified: true,
