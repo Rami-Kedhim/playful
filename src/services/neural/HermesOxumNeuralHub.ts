@@ -1,4 +1,3 @@
-
 import { ModelParameters, INeuralHub, BrainHubRequest, BrainHubResponse, SystemHealthMetrics, TrainingProgress, NeuralModel, NeuralService } from './types/neuralHub';
 
 /**
@@ -49,7 +48,7 @@ class NeuralHub implements INeuralHub {
     return { ...this.modelParameters };
   }
 
-  // Modified to correctly return a Promise<BrainHubResponse>
+  // Properly implementing the interface with async/Promise
   async processRequest(request: BrainHubRequest): Promise<BrainHubResponse> {
     if (!this.initialized) {
       return Promise.resolve({ success: false, error: 'Neural Hub not initialized' });
