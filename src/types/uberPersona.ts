@@ -18,11 +18,12 @@ export interface UberPersona {
   location?: string;
   isVerified?: boolean;
   isOnline?: boolean;
+  isActive?: boolean; // Added for compatibility
   tags?: string[];
   rating?: number;
   reviewCount?: number;
   isPremium?: boolean;
-  availability?: Array<{ start: Date; end: Date; schedule?: any }> | { nextAvailable: Date; };
+  availability?: Array<{ start: Date; end: Date; }> | { nextAvailable: Date; };
   boostScore?: number;
   systemMetadata?: {
     boostScore?: number;
@@ -67,6 +68,8 @@ export interface UberPersona {
     acceptsUbx?: boolean;
     minRate?: number;
     maxRate?: number;
+    meetingPrice?: number; // Added for compatibility
+    acceptsLucoin?: boolean; // Added for compatibility
   };
   roleFlags?: {
     isEscort?: boolean;

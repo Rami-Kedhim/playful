@@ -38,13 +38,17 @@ const AIProfileGrid: React.FC<AIProfileGridProps> = ({
   const filteredProfiles = profiles.filter(profile => {
     const matchesSearch = 
       !searchQuery || 
-      profile.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      profile.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      profile.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      profile.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (profile.displayName && typeof profile.displayName === 'string' && 
+       profile.displayName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (profile.description && typeof profile.description === 'string' && 
+       profile.description.toLowerCase().includes(searchQuery.toLowerCase()));
       
     const matchesType = 
       selectedType === 'all' || 
-      (profile.type?.toLowerCase() === selectedType.toLowerCase());
+      (typeof profile.type === 'string' ? 
+        profile.type.toLowerCase() === selectedType.toLowerCase() : 
+        Array.isArray(profile.type) && profile.type.some(t => t.toLowerCase() === selectedType.toLowerCase()));
       
     return matchesSearch && matchesType;
   });

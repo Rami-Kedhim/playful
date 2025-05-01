@@ -25,7 +25,7 @@ export interface AIModelGenerationParams {
   presets?: string[];
   gender?: string;
   age?: number;
-  personality?: string[];
+  personality?: string[] | { type: string; traits: string[] }; // Updated to ensure traits is required when object
   interests?: string[];
   description?: string;
 }
@@ -51,7 +51,7 @@ export interface AIProfile {
   displayName?: string;
   description?: string;
   bio?: string;
-  personality?: string[] | { type: string; traits: string[] };
+  personality?: string[] | { type: string; traits: string[] }; // Updated to ensure traits is required
   traits?: string[];
   interests?: string[];
   tags?: string[];

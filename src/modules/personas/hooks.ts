@@ -28,7 +28,11 @@ export const usePersonaSearch = (initialParams: PersonaSearchParams = {}) => {
       setResults(response.data);
       
       if (response.meta) {
-        setMeta(response.meta);
+        setMeta({
+          total: response.meta.pagination.total,
+          limit: response.meta.pagination.pageSize,
+          offset: (response.meta.pagination.page - 1) * response.meta.pagination.pageSize
+        });
       }
       
       return response;
@@ -113,10 +117,7 @@ export const usePersona = (personaId?: string) => {
       setLoading(true);
       setError(null);
       
-      const updatedPersona = await personaService.updatePersona({
-        ...persona,
-        ...updates
-      });
+      const updatedPersona = await personaService.updatePersona(persona.id, updates);
       
       setPersona(updatedPersona);
       return updatedPersona;

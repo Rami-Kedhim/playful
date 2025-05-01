@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { BoostPackage } from '@/types/boost';
@@ -56,8 +57,8 @@ const Livecams: React.FC = () => {
     setActiveTab,
     selectedPackage,
     setSelectedPackage,
-    loading,
-    error,
+    isLoading,
+    error: boostError,
     boostStatus,
     eligibility,
     boostPackages,
@@ -65,10 +66,10 @@ const Livecams: React.FC = () => {
     dailyBoostLimit,
     hermesStatus,
     handleBoost,
-    cancelBoost,
+    handleCancel,
     formatBoostDuration,
     getBoostPrice
-  } = useBoostDialog(profileId);
+  } = useBoostDialog(() => Promise.resolve(true));
 
   const [isBoosted, setIsBoosted] = useState(false);
 

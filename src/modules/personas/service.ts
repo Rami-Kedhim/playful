@@ -26,6 +26,20 @@ export class PersonaService {
     };
   }
   
+  async getPersonaById(id: string): Promise<UberPersona> {
+    // Mock implementation
+    return {
+      id,
+      name: 'Persona Name',
+      type: 'escort'
+    };
+  }
+  
+  async getPersonas(filters?: Record<string, any>): Promise<UberPersona[]> {
+    // Mock implementation
+    return [];
+  }
+  
   async updatePersona(id: string, data: Partial<UberPersona>): Promise<UberPersona> {
     // Mock implementation
     return {

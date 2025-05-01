@@ -1,95 +1,62 @@
 
-// Define missing methods for the auth service
+import { UserRoleEnum, UserRole } from '@/types/pulse-boost';
 
-import { UserRole, UserRoleEnum } from '@/types/pulse-boost';
+export interface User {
+  id: string;
+  email: string;
+  username: string;
+  role: UserRole;
+  ubxBalance: number;
+  isVerified: boolean;
+}
 
-export const authService = {
-  getUserRole: async (userId: string): Promise<UserRole> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    return {
-      id: 'role-123',
-      userId,
-      role: UserRoleEnum.USER,
-      createdAt: new Date()
-    };
-  },
-
-  validateToken: async (token: string): Promise<boolean> => {
-    // Simulate token validation
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    // Simple validation: token must be 10+ characters
-    return token && token.length >= 10;
-  },
-
-  // Add missing methods that UberEcosystemContext expects
-  getCurrentUser: async (): Promise<any> => {
-    const token = localStorage.getItem('ubx_auth_token');
-    
-    if (!token) return null;
-    
-    const isValid = await authService.validateToken(token);
-    if (!isValid) return null;
-    
-    // Return mock user data
-    return { 
-      id: 'current-user', 
+class AuthService {
+  private currentUser: User | null = null;
+  
+  constructor() {
+    // Mock initialization
+    this.currentUser = {
+      id: 'user-123',
       email: 'user@example.com',
-      createdAt: new Date()
-    };
-  },
-  
-  login: async (email: string, password: string): Promise<any> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // Simple validation
-    if (!email || !password || password.length < 6) {
-      return { success: false, message: 'Invalid credentials' };
-    }
-    
-    // Return success response
-    return {
-      success: true,
-      user: { 
-        id: 'user-123', 
-        email,
-        createdAt: new Date()
-      },
-      message: 'Login successful'
-    };
-  },
-  
-  logout: async (): Promise<void> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
-    // Clear token from storage
-    localStorage.removeItem('ubx_auth_token');
-  },
-  
-  register: async (userData: any): Promise<any> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Validate email and password
-    if (!userData.email || !userData.password || userData.password.length < 6) {
-      return { success: false, message: 'Invalid registration data' };
-    }
-    
-    // Return success response
-    return {
-      success: true,
-      user: { 
-        id: `user-${Date.now()}`,
-        ...userData,
-        createdAt: new Date()
-      },
-      message: 'Registration successful'
+      username: 'exampleUser',
+      role: UserRoleEnum.USER,
+      ubxBalance: 1000,
+      isVerified: true
     };
   }
-};
+  
+  async login(email: string, password: string): Promise<User> {
+    // Mock implementation
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    if (email && password) {
+      this.currentUser = {
+        id: 'user-123',
+        email,
+        username: email.split('@')[0],
+        role: UserRoleEnum.USER,
+        ubxBalance: 1000,
+        isVerified: true
+      };
+      
+      return this.currentUser;
+    }
+    
+    throw new Error('Invalid credentials');
+  }
+  
+  async logout(): Promise<void> {
+    // Mock implementation
+    this.currentUser = null;
+  }
+  
+  async getCurrentUser(): Promise<User | null> {
+    return this.currentUser;
+  }
+  
+  isAuthenticated(): boolean {
+    return !!this.currentUser;
+  }
+}
 
-export default authService;
+export const authService = new AuthService();

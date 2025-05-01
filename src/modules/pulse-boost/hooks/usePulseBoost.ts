@@ -39,15 +39,24 @@ export function usePulseBoost(profileId?: string) {
     setLoading(true);
     
     try {
-      // Fetch packages
+      // Ensure the return type matches what we expect
       const boostPackages = pulseBoostService.getBoostPackages();
-      setPackages(boostPackages);
+      setPackages(boostPackages.map(pkg => ({
+        ...pkg,
+        // Convert duration from number to string if needed
+        duration: typeof pkg.duration === 'number' ? String(pkg.duration) : pkg.duration
+      })));
       
       // Fetch active boost (mock)
       setTimeout(() => {
         // Simulate active boost (50% chance)
         if (Math.random() > 0.5) {
-          const randomPackage = boostPackages[Math.floor(Math.random() * boostPackages.length)];
+          const randomIndex = Math.floor(Math.random() * packages.length);
+          const randomPackage = packages.length > 0 ? packages[randomIndex] : {
+            id: 'default-package',
+            name: 'Basic Boost',
+            duration: '24:00:00'
+          };
           
           setActiveBoost({
             isActive: true,
@@ -55,7 +64,7 @@ export function usePulseBoost(profileId?: string) {
             packageName: randomPackage.name,
             startedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
             expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000),
-            boostMultiplier: randomPackage.boostLevel,
+            boostMultiplier: randomPackage.boostMultiplier ?? 1.5,
             remainingTime: '12:00:00',
             progress: 50
           });
@@ -67,6 +76,14 @@ export function usePulseBoost(profileId?: string) {
         
         // Simulate history
         const mockHistory = {
+          id: 'mock-history',
+          userId: user?.id || 'unknown',
+          startTime: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+          endTime: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+          boostType: 'standard',
+          boostMultiplier: 1.5,
+          price: 50,
+          status: 'completed' as const,
           items: [
             {
               id: 'hist-1',
@@ -87,8 +104,7 @@ export function usePulseBoost(profileId?: string) {
           ]
         };
         
-        // Use type assertion to match BoostHistory
-        setHistory(mockHistory as unknown as BoostHistory);
+        setHistory(mockHistory);
         
         // Simulate analytics
         setAnalytics({

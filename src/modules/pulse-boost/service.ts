@@ -1,122 +1,79 @@
 
-import { UberPersona } from '@/types/uberPersona';
-import { oxum } from '@/core/Oxum';
-import { uberWallet } from '@/core/UberWallet';
+import { BoostPackage, BoostPurchaseResult } from '@/types/pulse-boost';
 
-export interface BoostPackage {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  duration: number; // hours
-  boostLevel: number;
-  features: string[];
-}
-
-export class PulseBoostService {
-  /**
-   * Get available boost packages
-   */
+// Mock implementation of the Pulse Boost Service
+class PulseBoostService {
   getBoostPackages(): BoostPackage[] {
     return [
       {
         id: 'basic',
         name: 'Basic Boost',
-        description: 'Increase your profile visibility for 24 hours',
-        price: 50,
-        duration: 24,
-        boostLevel: 1,
-        features: ['Increased visibility', 'Higher search ranking', '24-hour duration']
+        description: 'Enhance your visibility for 24 hours',
+        duration: '24:00:00',
+        price: 29.99,
+        price_ubx: 300,
+        features: ['Top search positions', 'Featured section placement', 'Increased visibility'],
+        visibility_increase: 50,
+        durationMinutes: 1440,
+        visibility: '50%',
+        color: '#4CAF50',
+        badgeColor: '#4CAF50',
+        boostMultiplier: 1.5
       },
       {
         id: 'premium',
         name: 'Premium Boost',
-        description: 'Significant boost with featured placement for 72 hours',
-        price: 125,
-        duration: 72,
-        boostLevel: 2,
-        features: ['Featured section placement', 'Highlighted profile', 'Analytics dashboard', '72-hour duration']
-      },
-      {
-        id: 'ultra',
-        name: 'Ultra Boost',
-        description: 'Maximum visibility across all platform sections for 1 week',
-        price: 250,
-        duration: 168,
-        boostLevel: 3,
-        features: ['Top position guarantee', 'Featured in all sections', 'Custom profile badge', 'Priority customer support', '7-day duration']
+        description: 'Maximum visibility for 3 days',
+        duration: '72:00:00',
+        price: 69.99,
+        price_ubx: 700,
+        features: ['Top search positions', 'Featured section placement', 'Highlighted profile', 'Premium badge'],
+        visibility_increase: 100,
+        durationMinutes: 4320,
+        visibility: '100%',
+        color: '#2196F3',
+        badgeColor: '#2196F3',
+        boostMultiplier: 2
       }
     ];
   }
   
-  /**
-   * Purchase a boost for a persona
-   */
-  async purchaseBoost(personaId: string, packageId: string, userId: string): Promise<{
-    success: boolean;
-    message: string;
-    transactionId?: string;
-  }> {
-    try {
-      // Find the requested package
-      const packages = this.getBoostPackages();
-      const boostPackage = packages.find(pkg => pkg.id === packageId);
-      
-      if (!boostPackage) {
-        return {
-          success: false,
-          message: 'Invalid boost package selected'
-        };
-      }
-      
-      // Process payment via UberWallet
-      const paymentResult = await uberWallet.spendUbx(
-        userId,
-        boostPackage.price,
-        `Pulse Boost: ${boostPackage.name}`
-      );
-      
-      if (!paymentResult.success) {
-        return {
-          success: false,
-          message: paymentResult.message || 'Payment failed'
-        };
-      }
-      
-      // Apply boost via Oxum
-      const boostResult = await oxum.applyBoost(personaId, boostPackage.boostLevel);
-      
-      return {
-        success: true,
-        message: `Successfully applied ${boostPackage.name} to your profile`,
-        transactionId: paymentResult.transactionId
-      };
-    } catch (error) {
-      console.error('Error purchasing boost:', error);
-      return {
-        success: false,
-        message: 'An unexpected error occurred while processing your boost purchase'
-      };
-    }
+  async purchaseBoost(
+    profileId: string,
+    packageId: string,
+    userId: string
+  ): Promise<BoostPurchaseResult> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    return {
+      success: true,
+      message: 'Boost purchase successful',
+      boostId: 'boost-' + Date.now(),
+      transactionId: 'tx-' + Date.now()
+    };
   }
   
-  /**
-   * Calculate recommended boost level for a persona
-   */
-  calculateRecommendedBoost(persona: UberPersona): string {
-    // Calculate boost score via Oxum
-    const boostScore = oxum.calculateBoostScore(persona.id);
+  async cancelBoost(boostId: string): Promise<boolean> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
     
-    // Recommend package based on score
-    if (boostScore > 75) {
-      return 'basic';
-    } else if (boostScore > 50) {
-      return 'premium';
-    } else {
-      return 'ultra';
-    }
+    return true;
+  }
+  
+  async getBoostAnalytics(profileId: string): Promise<any> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
+    return {
+      totalBoosts: 8,
+      activeBoosts: 1,
+      averageBoostScore: 78,
+      additionalViews: 523,
+      engagementIncrease: 42,
+      rankingPosition: 3
+    };
   }
 }
 
 export const pulseBoostService = new PulseBoostService();
-export default pulseBoostService;

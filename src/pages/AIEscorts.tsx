@@ -70,10 +70,10 @@ const AIEscorts = () => {
                     <div>
                       <h3 className="font-semibold">{profile.name}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {Array.isArray(profile.personality) 
-                          ? profile.personality[0] 
-                          : typeof profile.personality === 'object' 
-                            ? profile.personality.type 
+                        {Array.isArray(profile.personality) && profile.personality.length > 0
+                          ? profile.personality[0]
+                          : typeof profile.personality === 'object' && profile.personality
+                            ? profile.personality.type
                             : ''}
                       </p>
                       <div className="flex items-center mt-1">

@@ -1,95 +1,73 @@
 
 import { useState, useEffect } from 'react';
-import type { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/uberPersona';
 
-export const useUberPersona = (personaId?: string) => {
+export const useUberPersona = (id?: string) => {
   const [persona, setPersona] = useState<UberPersona | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!personaId) return;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
 
     const fetchPersona = async () => {
-      setLoading(true);
       try {
-        // Mock API call
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Generate mock data with proper types
+        setLoading(true);
+        // Mock data for demo purposes
         const mockPersona: UberPersona = {
-          id: personaId,
+          id: id,
+          name: `Persona ${id}`,
           type: 'escort',
-          name: `Persona ${personaId.slice(0, 5)}`,
-          displayName: `Persona ${personaId.slice(0, 5)}`,
-          username: `persona_${personaId.slice(0, 5)}`,
-          bio: 'This is a test persona.',
-          description: 'A longer description of the persona.',
-          isActive: true,
-          isOnline: true,
+          avatarUrl: 'https://example.com/avatar.jpg',
+          location: 'New York, US',
           isVerified: true,
-          rating: 4.5,
-          profileImageUrl: `https://picsum.photos/id/${parseInt(personaId.slice(0, 5), 16) % 100}/200/300`,
-          avatarUrl: `https://picsum.photos/id/${parseInt(personaId.slice(0, 5), 16) % 100}/200/300`,
-          galleryImages: [
-            `https://picsum.photos/id/${(parseInt(personaId.slice(0, 5), 16) + 1) % 100}/200/300`,
-            `https://picsum.photos/id/${(parseInt(personaId.slice(0, 5), 16) + 2) % 100}/200/300`,
-            `https://picsum.photos/id/${(parseInt(personaId.slice(0, 5), 16) + 3) % 100}/200/300`,
-          ],
+          isActive: true,
+          tags: ['VIP', 'Premium'],
+          services: ['Companion', 'Event Escort'],
+          rating: 4.8,
+          reviewCount: 52,
+          isPremium: true,
           systemMetadata: {
-            source: 'manual', // Now defined in type
-            tagsGeneratedByAI: false,
-            hilbertSpaceVector: [],
-            statusFlags: {
-              isVerified: true, 
-              isActive: true,
-              isFreemium: false,
-              isSubscriber: true
-            }
+            boostScore: 85,
+            lastActive: new Date(),
+            createdAt: new Date(),
+            profileViews: 1240,
+            lastSynced: new Date(),
+            source: 'API', // This is now valid because we added it to the type
+            tagsGeneratedByAI: false
           },
-          age: 25,
-          location: 'New York, USA', 
-          languages: ['English', 'Spanish'],
-          traits: ['Friendly', 'Outgoing', 'Creative'],
-          stats: {
-            rating: 4.5, // Now defined in type
-            reviewCount: 120,
-            responseTime: 30,
-            views: 12000,
-            bookings: 45
-          },
-          availability: {
-            nextAvailable: new Date('2023-10-15T14:00:00Z'), // Fixed to use Date object instead of string
-            schedule: {
-              monday: { available: true },
-              tuesday: { available: true },
-              wednesday: { available: true },
-              thursday: { available: true },
-              friday: { available: true },
-              saturday: { available: false },
-              sunday: { available: false }
-            }
-          },
-          // Add the necessary roleFlags and capabilities properties
           roleFlags: {
             isEscort: true,
             isCreator: false,
             isLivecam: false,
             isAI: false,
-            isVerified: true,
-            isFeatured: false
+            isVerified: true
           },
-          capabilities: {
-            hasPhotos: true,
-            hasVideos: false,
-            hasStories: false,
-            hasChat: true,
-            hasBooking: true,
-            hasLiveStream: false,
-            hasExclusiveContent: false,
-            hasContent: true,
-            hasRealMeets: true,
-            hasVirtualMeets: false
+          stats: {
+            views: 2450,
+            likes: 380,
+            bookings: 24,
+            completion: 98,
+            responseRate: 95,
+            responseTime: 15,
+            rating: 4.8 // This is now valid because we added it to the type
+          },
+          bio: 'Professional escort with 5+ years of experience...',
+          availability: [
+            {
+              start: new Date(),
+              end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            }
+          ],
+          monetization: {
+            hourlyRate: 300,
+            minRate: 250,
+            maxRate: 500,
+            acceptsUbx: true,
+            meetingPrice: 300 // This is now valid because we added it to the type
           }
         };
         
@@ -97,21 +75,14 @@ export const useUberPersona = (personaId?: string) => {
         setError(null);
       } catch (err: any) {
         console.error('Failed to fetch persona:', err);
-        setError(err.message || 'Failed to fetch persona');
-        setPersona(null);
+        setError(err.message || 'An error occurred');
       } finally {
         setLoading(false);
       }
     };
 
     fetchPersona();
-  }, [personaId]);
+  }, [id]);
 
-  return {
-    persona,
-    loading,
-    error
-  };
+  return { persona, loading, error };
 };
-
-export default useUberPersona;

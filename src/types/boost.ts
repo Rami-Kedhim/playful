@@ -1,5 +1,5 @@
 
-import { PulseBoost, BoostPackage as PulseBoostPackage } from './pulse-boost';
+import { PulseBoost } from './pulse-boost';
 
 // Re-export the BoostPackage to fix errors across the codebase
 export type { BoostPackage } from './pulse-boost';
@@ -21,6 +21,7 @@ export interface BoostStatus {
   progress?: number;
   boost_level?: number;
   visibilityScore?: number;
+  boostType?: string; // Added for compatibility
 }
 
 export interface HermesStatus {
@@ -38,7 +39,7 @@ export interface HermesStatus {
 }
 
 // Renamed HermesBoostStatus to just re-use HermesStatus
-export { HermesStatus as HermesBoostStatus };
+export type HermesBoostStatus = HermesStatus;
 
 export interface BoostEligibility {
   eligible: boolean;

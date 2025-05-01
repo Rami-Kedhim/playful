@@ -1,84 +1,61 @@
 
-import { AIProfile, ProcessingStatus } from '@/types/ai-profile';
+import { AIModelGenerationParams, AIModelGenerationResult, ProcessingStatus } from '@/types/ai-profile';
 
-export interface AIModelGeneratorOptions {
-  name: string;
-  personality: { type: string; traits?: string[] };
-  appearance: string;
-  voice: string;
-}
-
-export interface AIModelGeneratorState {
-  isGenerating: boolean;
-  progress: number;
-  currentStage: string;
-  processingStatus: {
-    status: ProcessingStatus;
-    message?: string;
-    completedCount: number;
-    totalCount: number;
-  };
-  error: Error | null;
-  generatedModel: AIProfile | null;
-}
-
-export const aiModelGeneratorService = {
-  async generateModel(
-    options: AIModelGeneratorOptions,
-    onProgress: (
-      progress: number,
-      stage: string,
-      completed: number,
-      total: number
-    ) => void
-  ): Promise<AIProfile> {
-    return new Promise((resolve, reject) => {
-      const totalSteps = 100;
-      let completedSteps = 0;
-
-      const updateProgress = (stage: string, steps: number) => {
-        completedSteps += steps;
-        const progress = (completedSteps / totalSteps) * 100;
-        onProgress(progress, stage, completedSteps, totalSteps);
-      };
-
-      try {
-        updateProgress('Initializing', 5);
-        setTimeout(() => {
-          updateProgress('Configuring Personality', 15);
-          setTimeout(() => {
-            updateProgress('Designing Appearance', 25);
-            setTimeout(() => {
-              updateProgress('Synthesizing Voice', 35);
-              setTimeout(() => {
-                updateProgress('Finalizing Model', 20);
-                setTimeout(() => {
-                  const generatedModel: AIProfile = {
-                    id: 'ai-model-' + Date.now(),
-                    name: options.name,
-                    bio: '',
-                    personality: options.personality,
-                    avatar_url: '/images/ai-avatar.png',
-                    location: 'Virtual',
-                    interests: ['chatting', 'learning', 'fun'],
-                    isVerified: true,
-                    created_at: new Date().toISOString(),
-                    rating: 4.5,
-                    reviewCount: 100,
-                    isPremium: false,
-                    availability_status: 'available',
-                  };
-                  updateProgress('Model Ready', 0);
-                  resolve(generatedModel);
-                }, 500);
-              }, 500);
-            }, 500);
-          }, 500);
-        }, 500);
-      } catch (error: any) {
-        console.error('Model generation failed:', error);
-        reject(error);
-      }
-    });
+export class AIModelGeneratorService {
+  async generateAIModel(params: AIModelGenerationParams): Promise<AIModelGenerationResult> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const id = `model-${Date.now()}`;
+    
+    return {
+      id,
+      name: params.name || 'New AI Model',
+      status: ProcessingStatus.PROCESSING,
+      progress: 0,
+      createdAt: new Date().toISOString()
+    };
   }
-};
+  
+  async getModelStatus(modelId: string): Promise<AIModelGenerationResult> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const progress = Math.floor(Math.random() * 100);
+    let status = ProcessingStatus.PROCESSING;
+    
+    if (progress === 100) {
+      status = ProcessingStatus.COMPLETED;
+    }
+    
+    return {
+      id: modelId,
+      name: 'AI Model',
+      status,
+      progress,
+      createdAt: new Date(Date.now() - 3600000).toISOString(),
+      completedAt: status === ProcessingStatus.COMPLETED ? new Date().toISOString() : undefined,
+      avatarUrl: status === ProcessingStatus.COMPLETED ? '/assets/ai-models/generated.jpg' : undefined
+    };
+  }
+  
+  async updateModelPreferences(modelId: string, params: Partial<AIModelGenerationParams>): Promise<boolean> {
+    // Ensure personality follows the required format if provided
+    if (params.personality && typeof params.personality === 'object' && !Array.isArray(params.personality)) {
+      // Make sure traits is required when type is provided
+      if (!params.personality.traits) {
+        params.personality = {
+          ...params.personality,
+          traits: ['default']
+        };
+      }
+    }
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 700));
+    
+    return true;
+  }
+}
+
+export const aiModelGeneratorService = new AIModelGeneratorService();

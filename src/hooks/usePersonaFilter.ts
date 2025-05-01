@@ -1,95 +1,72 @@
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { UberPersona } from '@/types/uberPersona';
-import { getPersonaType } from '@/utils/personaHelpers';
 
-export interface FilterOptions {
-  searchTerm: string;
-  location: string;
-  roleFilters: Record<string, boolean>;
-  capabilityFilters: Record<string, boolean>;
-}
-
-const filterByTypeFlag = (personas: UberPersona[], typeFlag: string) => {
-  if (!personas) return [];
-  
-  return personas.filter(persona => {
-    // Check if roleFlags exists and if the specific typeFlag is true
-    if (persona.roleFlags && persona.roleFlags[typeFlag as keyof typeof persona.roleFlags]) {
-      return true;
-    }
-    return false;
+export const usePersonaFilter = (personas: UberPersona[] = []) => {
+  const [filters, setFilters] = useState({
+    searchQuery: '',
+    types: [] as string[],
+    tags: [] as string[],
+    verifiedOnly: false,
+    onlineOnly: false,
+    premiumOnly: false
   });
-};
 
-const filterByCapabilityFlag = (personas: UberPersona[], capabilityFlag: string) => {
-  if (!personas) return [];
-  
-  return personas.filter(persona => {
-    // Check if capabilities exists and if the specific capabilityFlag is true
-    if (persona.capabilities && persona.capabilities[capabilityFlag as keyof typeof persona.capabilities]) {
-      return true;
+  const filteredPersonas = personas.filter(persona => {
+    // Filter by type
+    if (filters.types.length > 0) {
+      if (!filters.types.includes(persona.type)) {
+        return false;
+      }
     }
-    return false;
+    
+    // Filter by roleFlags
+    if (filters.verifiedOnly && (!persona.roleFlags || !persona.roleFlags.isVerified)) {
+      return false;
+    }
+    
+    // Filter by capabilities
+    if (filters.onlineOnly && (!persona.isOnline)) {
+      return false;
+    }
+    
+    // Filter by premium status
+    if (filters.premiumOnly && !persona.isPremium) {
+      return false;
+    }
+    
+    // Filter by search query
+    if (filters.searchQuery) {
+      const query = filters.searchQuery.toLowerCase();
+      const matchesName = persona.name.toLowerCase().includes(query);
+      const matchesDisplayName = persona.displayName ? persona.displayName.toLowerCase().includes(query) : false;
+      const matchesLocation = persona.location ? persona.location.toLowerCase().includes(query) : false;
+      const matchesTags = persona.tags ? persona.tags.some(tag => tag.toLowerCase().includes(query)) : false;
+      
+      if (!matchesName && !matchesDisplayName && !matchesLocation && !matchesTags) {
+        return false;
+      }
+    }
+    
+    // Filter by tags
+    if (filters.tags.length > 0) {
+      if (!persona.tags || !filters.tags.some(tag => persona.tags!.includes(tag))) {
+        return false;
+      }
+    }
+    
+    return true;
   });
-};
 
-export function usePersonaFilter(personas: UberPersona[]) {
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    searchTerm: '',
-    location: '',
-    roleFilters: {},
-    capabilityFilters: {},
-  });
-  const [filteredPersonas, setFilteredPersonas] = useState<UberPersona[]>(personas);
-
-  useEffect(() => {
-    let results = [...personas];
-
-    const searchTerm = filterOptions.searchTerm.toLowerCase();
-    if (searchTerm) {
-      results = results.filter(persona =>
-        persona.displayName?.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    if (filterOptions.location) {
-      results = results.filter(persona =>
-        persona.location?.toLowerCase().includes(filterOptions.location.toLowerCase())
-      );
-    }
-
-    if (filterOptions.roleFilters) {
-      Object.entries(filterOptions.roleFilters).forEach(([role, active]) => {
-        if (active) {
-          results = filterByTypeFlag(results, role);
-        }
-      });
-    }
-
-    if (filterOptions.capabilityFilters) {
-      Object.entries(filterOptions.capabilityFilters).forEach(([capability, active]) => {
-        if (active) {
-          results = filterByCapabilityFlag(results, capability);
-        }
-      });
-    }
-
-    setFilteredPersonas(results);
-  }, [filterOptions, personas]);
-
-  const updateFilterOptions = (newOptions: Partial<FilterOptions>) => {
-    setFilterOptions(prevOptions => ({
-      ...prevOptions,
-      ...newOptions,
-    }));
-  };
+  const updateFilters = useCallback((newFilters: Partial<typeof filters>) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  }, []);
 
   return {
-    filterOptions,
-    filteredPersonas,
-    updateFilterOptions,
+    filters,
+    updateFilters,
+    filteredPersonas
   };
-}
+};
 
 export default usePersonaFilter;

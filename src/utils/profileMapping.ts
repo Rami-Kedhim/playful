@@ -11,8 +11,9 @@ export function mapLivecamToUberPersona(livecam: any): UberPersona {
     imageUrl: livecam.imageUrl,
     location: livecam.country || 'Unknown',
     isOnline: livecam.isLive || false,
-    isVerified: false, // Added the missing isVerified property
+    isVerified: false,
     tags: livecam.tags || [],
+    // isActive is now valid in UberPersona
     isActive: true,
     roleFlags: {
       isEscort: false,
@@ -55,7 +56,7 @@ export function mapAIProfileToUberPersona(aiProfile: any): UberPersona {
     location: aiProfile.location || 'Virtual',
     isVerified: aiProfile.isVerified || false,
     isOnline: true,
-    // Removed isPremium property as it's now optional
+    // isActive is now valid in UberPersona
     isActive: true,
     tags: aiProfile.interests || [],
     roleFlags: {
@@ -100,7 +101,7 @@ export function mapEscortToUberPersona(escort: any): UberPersona {
     location: escort.location,
     isVerified: escort.isVerified || false,
     isOnline: false,
-    // Removed isPremium property as it's now optional
+    // isActive is now valid in UberPersona
     isActive: true,
     tags: escort.tags || [],
     services: escort.services || [],
@@ -125,12 +126,12 @@ export function mapEscortToUberPersona(escort: any): UberPersona {
       hasVirtualMeets: false,
     },
     monetization: {
-      acceptsLucoin: false,
-      acceptsTips: false,
-      subscriptionPrice: 0,
-      unlockingPrice: 0,
-      boostingActive: false,
-      meetingPrice: escort.rates?.hourly || 0,
+      acceptsUbx: false,
+      minRate: 0,
+      maxRate: 0,
+      hourlyRate: escort.rates?.hourly || 0,
+      meetingPrice: escort.rates?.hourly || 0, // Now valid in UberPersona
+      acceptsLucoin: false // Now valid in UberPersona
     },
     systemMetadata: {
       source: 'manual',
@@ -166,7 +167,7 @@ export function mapGenericToUberPersona(data: any): UberPersona {
     location: data.location || 'Unknown',
     isVerified: !!data.isVerified,
     isOnline: !!data.isOnline,
-    // Removed isPremium property as it's now optional in UberPersona type
+    // isActive is now valid in UberPersona
     isActive: data.isActive !== false,
     tags: data.tags || data.interests || [],
     services: data.services || [],

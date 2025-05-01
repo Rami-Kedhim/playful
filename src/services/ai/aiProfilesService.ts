@@ -1,125 +1,124 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { AIProfile } from "@/types/ai-profile";
+import { AIProfile } from '@/types/ai-profile';
 
-export const getAIProfiles = async (): Promise<AIProfile[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('ai_profiles' as any)
-      .select('*') as any;
+export class AIProfilesService {
+  async getProfiles(): Promise<AIProfile[]> {
+    // Mock implementation
+    return [
+      {
+        id: '1',
+        name: 'Sophia',
+        avatarUrl: '/assets/ai-profiles/sophia.jpg',
+        imageUrl: '/assets/ai-profiles/sophia.jpg',
+        thumbnailUrl: '/assets/ai-profiles/sophia-thumb.jpg',
+        displayName: 'Sophia AI',
+        description: 'Friendly AI companion',
+        bio: 'I love deep conversations about philosophy and art.',
+        personality: ['friendly', 'intellectual', 'creative'],
+        traits: ['curious', 'empathetic', 'thoughtful'],
+        interests: ['philosophy', 'art', 'literature'],
+        gender: 'female',
+        age: 24,
+        rating: 4.8,
+        reviewCount: 56,
+        tags: ['companion', 'intellectual', 'creative'],
+        location: 'Virtual',
+        livecam_enabled: false,
+        gallery_images: [
+          '/assets/ai-profiles/sophia-1.jpg',
+          '/assets/ai-profiles/sophia-2.jpg'
+        ],
+        premium_content_count: 12,
+        subscription_price: 9.99
+      },
+      {
+        id: '2',
+        name: 'Alex',
+        avatarUrl: '/assets/ai-profiles/alex.jpg',
+        imageUrl: '/assets/ai-profiles/alex.jpg',
+        thumbnailUrl: '/assets/ai-profiles/alex-thumb.jpg',
+        displayName: 'Alex AI',
+        description: 'Tech expert and coding partner',
+        bio: 'I can help you with coding projects and technical challenges.',
+        personality: ['logical', 'analytical', 'helpful'],
+        traits: ['precise', 'knowledgeable', 'patient'],
+        interests: ['programming', 'technology', 'science'],
+        gender: 'male',
+        age: 28,
+        rating: 4.9,
+        reviewCount: 87,
+        tags: ['tech', 'coding', 'science'],
+        location: 'Virtual',
+        livecam_enabled: true,
+        gallery_images: [
+          '/assets/ai-profiles/alex-1.jpg',
+          '/assets/ai-profiles/alex-2.jpg'
+        ],
+        premium_content_count: 8,
+        subscription_price: 12.99
+      }
+    ];
+  }
 
-    if (error) {
-      console.error("Error fetching AI profiles:", error);
-      return mockAIProfiles;
+  async getProfileById(profileId: string): Promise<AIProfile | null> {
+    // Mock implementation
+    if (profileId === '1') {
+      return {
+        id: '1',
+        name: 'Sophia',
+        avatarUrl: '/assets/ai-profiles/sophia.jpg',
+        imageUrl: '/assets/ai-profiles/sophia.jpg',
+        thumbnailUrl: '/assets/ai-profiles/sophia-thumb.jpg',
+        displayName: 'Sophia AI',
+        description: 'Friendly AI companion',
+        bio: 'I love deep conversations about philosophy and art.',
+        personality: ['friendly', 'intellectual', 'creative'],
+        traits: ['curious', 'empathetic', 'thoughtful'],
+        interests: ['philosophy', 'art', 'literature'],
+        gender: 'female',
+        age: 24,
+        rating: 4.8,
+        reviewCount: 56,
+        tags: ['companion', 'intellectual', 'creative'],
+        location: 'Virtual',
+        livecam_enabled: false,
+        gallery_images: [
+          '/assets/ai-profiles/sophia-1.jpg',
+          '/assets/ai-profiles/sophia-2.jpg'
+        ],
+        premium_content_count: 12,
+        subscription_price: 9.99
+      };
+    } else if (profileId === '2') {
+      return {
+        id: '2',
+        name: 'Alex',
+        avatarUrl: '/assets/ai-profiles/alex.jpg',
+        imageUrl: '/assets/ai-profiles/alex.jpg',
+        thumbnailUrl: '/assets/ai-profiles/alex-thumb.jpg',
+        displayName: 'Alex AI',
+        description: 'Tech expert and coding partner',
+        bio: 'I can help you with coding projects and technical challenges.',
+        personality: ['logical', 'analytical', 'helpful'],
+        traits: ['precise', 'knowledgeable', 'patient'],
+        interests: ['programming', 'technology', 'science'],
+        gender: 'male',
+        age: 28,
+        rating: 4.9,
+        reviewCount: 87,
+        tags: ['tech', 'coding', 'science'],
+        location: 'Virtual',
+        livecam_enabled: true,
+        gallery_images: [
+          '/assets/ai-profiles/alex-1.jpg',
+          '/assets/ai-profiles/alex-2.jpg'
+        ],
+        premium_content_count: 8,
+        subscription_price: 12.99
+      };
     }
-
-    return data as AIProfile[];
-  } catch (error) {
-    console.error("Error in getAIProfiles:", error);
-    return mockAIProfiles;
+    return null;
   }
-};
+}
 
-export const getAIProfileById = async (profileId: string): Promise<AIProfile | null> => {
-  try {
-    const { data, error } = await supabase
-      .from('ai_profiles' as any)
-      .select('*')
-      .eq('id', profileId)
-      .single() as any;
-
-    if (error) {
-      console.error("Error fetching AI profile by ID:", error);
-      return mockAIProfiles.find(p => p.id === profileId) || null;
-    }
-
-    return {
-      ...data,
-      isVerified: data.is_verified,
-    } as AIProfile;
-  } catch (error) {
-    console.error("Error in getAIProfileById:", error);
-    return mockAIProfiles.find(p => p.id === profileId) || null;
-  }
-};
-
-export const mockAIProfiles: AIProfile[] = [
-  {
-    id: "ai-profile-1",
-    name: "Sophia",
-    age: 25,
-    location: "Los Angeles, CA",
-    bio: "Luxury companion with a taste for adventure. I love intellectual conversations and spontaneous encounters. Let me be your fantasy come true.",
-    avatar_url: "https://source.unsplash.com/random/400x600/?model,woman",
-    gallery_images: [
-      "https://source.unsplash.com/random/800x1000/?model,woman",
-      "https://source.unsplash.com/random/800x1000/?glamour,woman",
-      "https://source.unsplash.com/random/800x1000/?portrait,woman"
-    ],
-    personality: {
-      type: "flirty",
-      traits: ["outgoing", "adventurous", "spontaneous"]
-    },
-    interests: ["travel", "fine dining", "art", "philosophy"],
-    ubx_chat_price: 5,
-    ubx_image_price: 10,
-    created_at: "2023-01-01T00:00:00.000Z",
-    isVerified: true,
-    rating: 4.5,
-    reviewCount: 100,
-    isPremium: false,
-    availability_status: "available",
-  },
-  {
-    id: "ai-profile-2",
-    name: "Mia",
-    age: 22,
-    location: "Miami, FL",
-    bio: "Sweet and shy college student. I might seem reserved at first, but I'll open up once I get comfortable. Let's get to know each other slowly.",
-    avatar_url: "https://source.unsplash.com/random/400x600/?college,woman",
-    gallery_images: [
-      "https://source.unsplash.com/random/800x1000/?college,woman",
-      "https://source.unsplash.com/random/800x1000/?casual,woman",
-      "https://source.unsplash.com/random/800x1000/?cute,woman"
-    ],
-    personality: {
-      type: "shy",
-      traits: ["introverted", "thoughtful", "curious"]
-    },
-    interests: ["books", "coffee shops", "indie music", "photography"],
-    ubx_chat_price: 5,
-    ubx_image_price: 10,
-    created_at: "2023-02-01T00:00:00.000Z",
-    isVerified: false,
-    rating: 4,
-    reviewCount: 50,
-    isPremium: false,
-    availability_status: "available",
-  },
-  {
-    id: "ai-profile-3",
-    name: "Mistress Raven",
-    age: 29,
-    location: "New York, NY",
-    bio: "Experienced dominatrix seeking obedient subjects. I'll take control and push your boundaries. Are you brave enough to submit?",
-    avatar_url: "https://source.unsplash.com/random/400x600/?goth,woman",
-    gallery_images: [
-      "https://source.unsplash.com/random/800x1000/?goth,woman",
-      "https://source.unsplash.com/random/800x1000/?dark,woman",
-      "https://source.unsplash.com/random/800x1000/?leather,woman"
-    ],
-    personality: {
-      type: "dominant",
-      traits: ["assertive", "commanding", "strict"]
-    },
-    interests: ["power dynamics", "psychology", "leather crafting", "gothic art"],
-    ubx_chat_price: 10,
-    ubx_image_price: 20,
-    created_at: "2023-03-01T00:00:00.000Z",
-    isVerified: true,
-    rating: 5,
-    reviewCount: 75,
-    isPremium: false,
-    availability_status: "available",
-  }
-];
+export const aiProfilesService = new AIProfilesService();

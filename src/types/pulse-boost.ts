@@ -76,6 +76,8 @@ export interface BoostPackage {
   boostMultiplier?: number;
   isMostPopular?: boolean;
   boost_power?: number;
+  boostLevel?: number; // Added for compatibility
+  isRecommended?: boolean; // Added for compatibility
 }
 
 export interface BoostPurchaseRequest {
@@ -154,3 +156,15 @@ export interface EnhancedBoostStatus {
   activeBoostId?: string;
   timeRemaining?: string;
 }
+
+// Add user roles for authService
+export enum UserRoleEnum {
+  USER = 'user',
+  ADMIN = 'admin',
+  MODERATOR = 'moderator',
+  ESCORT = 'escort',
+  CREATOR = 'creator',
+  AI = 'ai'
+}
+
+export type UserRole = keyof typeof UserRoleEnum | string;
