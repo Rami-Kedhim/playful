@@ -1,4 +1,3 @@
-
 import { ModelParameters, INeuralHub, BrainHubRequest, BrainHubResponse, SystemHealthMetrics, TrainingProgress, NeuralModel, NeuralService } from './types/neuralHub';
 
 /**
@@ -49,7 +48,7 @@ class NeuralHub implements INeuralHub {
     return { ...this.modelParameters };
   }
 
-  // Modified to properly return a Promise<BrainHubResponse>
+  // Updated to correctly return a Promise<BrainHubResponse>
   async processRequest(request: BrainHubRequest): Promise<BrainHubResponse> {
     if (!this.initialized) {
       return Promise.resolve({ success: false, error: 'Neural Hub not initialized' });
@@ -61,41 +60,41 @@ class NeuralHub implements INeuralHub {
       // Process different request types
       switch (request.type) {
         case 'analysis':
-          return Promise.resolve({ success: true, data: { insights: ['mock insight 1', 'mock insight 2'] } });
+          return { success: true, data: { insights: ['mock insight 1', 'mock insight 2'] } };
         case 'generation':
-          return Promise.resolve({ success: true, data: { content: 'Generated content' } });
+          return { success: true, data: { content: 'Generated content' } };
         case 'moderation':
-          return Promise.resolve({ success: true, data: { approved: true, flags: [] } });
+          return { success: true, data: { approved: true, flags: [] } };
         case 'transformation':
-          return Promise.resolve({ success: true, data: { transformed: true, result: 'Transformed data' } });
+          return { success: true, data: { transformed: true, result: 'Transformed data' } };
         // Adding support for other request types used in the codebase
         case 'register_component':
         case 'unregister_component':
         case 'sync_components':
-          return Promise.resolve({ success: true, data: { message: `Component ${request.type} processed` } });
+          return { success: true, data: { message: `Component ${request.type} processed` } };
         case 'register_capabilities':
         case 'record_interaction':
-          return Promise.resolve({ success: true, data: { registered: true } });
+          return { success: true, data: { registered: true } };
         case 'ai_profile_view':
         case 'ai_subscription':
         case 'ai_welcome_message':
         case 'enhance_ai_message':
         case 'enhance_image_prompt':
-          return Promise.resolve({ success: true, data: { processed: true } });
+          return { success: true, data: { processed: true } };
         case 'content_optimization':
         case 'calculate_renewal_value':
         case 'predict_renewal_time':
         case 'record_content_interaction':
-          return Promise.resolve({ success: true, data: { contentId: 'mock-content-id', status: 'processed' } });
+          return { success: true, data: { contentId: 'mock-content-id', status: 'processed' } };
         case 'log_decision':
         case 'store_in_memory':
-          return Promise.resolve({ success: true, data: { stored: true } });
+          return { success: true, data: { stored: true } };
         default:
-          return Promise.resolve({ success: false, error: 'Unsupported request type' });
+          return { success: false, error: 'Unsupported request type' };
       }
     } catch (error) {
       console.error('Error processing request:', error);
-      return Promise.resolve({ success: false, error: `Error processing request: ${error}` });
+      return { success: false, error: `Error processing request: ${error}` };
     }
   }
 

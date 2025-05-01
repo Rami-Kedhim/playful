@@ -34,7 +34,7 @@ export class BrainHubConnectionService {
     console.log(`Connecting component ${componentId} to Brain Hub`);
     this.connectedComponents.add(componentId);
     
-    // Register component with Brain Hub - now handling as async call
+    // Register component with Brain Hub - handling as async call
     brainHub.processRequest({
       type: "register_component",
       data: { componentId },
@@ -61,7 +61,7 @@ export class BrainHubConnectionService {
     console.log(`Disconnecting component ${componentId} from Brain Hub`);
     this.connectedComponents.delete(componentId);
     
-    // Unregister component with Brain Hub - now handling as async call
+    // Unregister component with Brain Hub - handling as async call
     brainHub.processRequest({
       type: "unregister_component",
       data: { componentId }
@@ -86,7 +86,7 @@ export class BrainHubConnectionService {
     
     console.log(`Synchronizing data from ${sourceComponentId} to ${targetComponentId}`);
     
-    // Process synchronization through Brain Hub - now handling as async call
+    // Process synchronization through Brain Hub - handling as async call
     brainHub.processRequest({
       type: "sync_components",
       data: {

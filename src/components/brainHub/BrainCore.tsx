@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { neuralHub, brainHub } from '@/services/neural/HermesOxumNeuralHub';
 import { lucie } from '@/core/Lucie';
@@ -30,7 +29,7 @@ const BrainCore: React.FC<BrainCoreProps> = ({
       };
 
       try {
-        // Now properly awaiting the Promise returned by processRequest
+        // Properly awaiting the Promise returned by processRequest
         const result = await brainHub.processRequest(requestData);
         
         if (result.success) {
