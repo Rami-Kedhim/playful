@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle, AlertCircle, Clock, Activity, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Timer, AlertTriangle, StopCircle } from 'lucide-react';
 import { TrainingProgress } from '@/services/neural/types/neuralHub';
 
 interface TrainingProgressDetailsProps {
@@ -12,128 +12,81 @@ interface TrainingProgressDetailsProps {
 }
 
 const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({ progress, onCancel }) => {
-  // Format remaining time
-  const formatTimeRemaining = (seconds: number) => {
-    if (seconds < 60) {
-      return `${seconds} seconds`;
-    } else if (seconds < 3600) {
-      return `${Math.floor(seconds / 60)} minutes`;
-    } else {
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      return `${hours} hours ${minutes} minutes`;
-    }
+  const formatTimeRemaining = (seconds: number): string => {
+    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    return `${hours}h ${mins}m`;
   };
-  
-  // Determine status badge
-  const getStatusBadge = () => {
-    switch (progress.status) {
+
+  const getStatusColor = (status: string): string => {
+    switch (status) {
       case 'training':
-        return (
-          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-            <Activity className="h-3 w-3 mr-1" />
-            Training
-          </Badge>
-        );
+        return 'text-blue-500';
       case 'completed':
-        return (
-          <Badge className="bg-green-100 text-green-800 border-green-200">
-            <CheckCircle className="h-3 w-3 mr-1" />
-            Completed
-          </Badge>
-        );
+        return 'text-green-500';
       case 'failed':
-        return (
-          <Badge className="bg-red-100 text-red-800 border-red-200">
-            <AlertCircle className="h-3 w-3 mr-1" />
-            Failed
-          </Badge>
-        );
-      case 'queued':
-        return (
-          <Badge className="bg-amber-100 text-amber-800 border-amber-200">
-            <Clock className="h-3 w-3 mr-1" />
-            Queued
-          </Badge>
-        );
+        return 'text-red-500';
+      case 'paused':
+        return 'text-yellow-500';
       default:
-        return (
-          <Badge className="bg-gray-100 text-gray-800 border-gray-200">
-            <Info className="h-3 w-3 mr-1" />
-            {progress.status}
-          </Badge>
-        );
+        return 'text-gray-500';
     }
   };
-  
+
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-lg">{progress.type} Training</CardTitle>
-          {getStatusBadge()}
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Model ID: <span className="font-mono text-xs">{progress.modelId}</span>
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-1">
-          <div className="flex justify-between text-sm">
-            <span>Progress</span>
-            <span>{Math.round(progress.progress)}%</span>
-          </div>
-          <Progress value={progress.progress} className="h-2" />
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
+    <Card className="overflow-hidden border">
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start mb-2">
           <div>
-            <p className="text-xs text-muted-foreground">Current Epoch</p>
-            <p className="font-medium">
-              {progress.currentEpoch}/{progress.totalEpochs}
+            <h4 className="text-sm font-medium flex items-center">
+              {progress.type} Training
+              <span className={`ml-2 ${getStatusColor(progress.status)}`}>
+                ({progress.status})
+              </span>
+            </h4>
+            <p className="text-xs text-muted-foreground">
+              Model ID: {progress.modelId}
             </p>
           </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Time Remaining</p>
-            <p className="font-medium">{formatTimeRemaining(progress.timeRemaining)}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Accuracy</p>
-            <p className="font-medium">{(progress.accuracy * 100).toFixed(2)}%</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Target Accuracy</p>
-            <p className="font-medium">{progress.targetAccuracy}%</p>
-          </div>
+          
+          {onCancel && progress.status === 'training' && (
+            <Button size="sm" variant="ghost" onClick={onCancel} className="h-8 px-2">
+              <StopCircle className="h-4 w-4 mr-1" />
+              Stop
+            </Button>
+          )}
         </div>
         
-        {/* Status message display */}
-        {progress.message && (
-          <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-800">
-            <p className="font-medium">Status Message:</p>
-            <p>{progress.message}</p>
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs">
+            <span>Progress ({progress.currentEpoch}/{progress.totalEpochs} epochs)</span>
+            <span>{progress.progress.toFixed(1)}%</span>
           </div>
-        )}
-        
-        {/* Error message display */}
-        {progress.error && (
-          <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
-            <p className="font-medium">Error:</p>
-            <p>{progress.error}</p>
+          
+          <Progress value={progress.progress} className="h-1.5" />
+          
+          <div className="flex justify-between text-xs mt-1">
+            <div className="flex items-center">
+              <Timer className="h-3 w-3 mr-1" />
+              <span>
+                Remaining: {formatTimeRemaining(progress.timeRemaining)}
+              </span>
+            </div>
+            
+            <div>
+              Accuracy: {(progress.accuracy * 100).toFixed(1)}%
+            </div>
           </div>
-        )}
-        
-        {/* Actions */}
-        {progress.status === 'training' && onCancel && (
-          <div className="flex justify-end">
-            <button
-              onClick={onCancel}
-              className="text-sm text-red-600 hover:text-red-800 transition-colors"
-            >
-              Cancel Training
-            </button>
-          </div>
-        )}
+          
+          {progress.error && (
+            <div className="flex items-center mt-1 text-xs text-red-500">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              <span>{progress.error}</span>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

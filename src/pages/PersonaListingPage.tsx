@@ -1,96 +1,64 @@
 
-import React, { useState, useEffect } from 'react';
-import { usePersona } from '@/modules/personas/hooks/usePersona';
-import { UberPersona } from '@/types/uberPersona';
-import { Card, CardContent } from '@/components/ui/card';
-import MainLayout from '@/components/layout/MainLayout';
-import { hermes } from '@/core/Hermes';
-import { uberCore } from '@/core/UberCore';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Users, Filter, Layers } from 'lucide-react';
 
 const PersonaListingPage: React.FC = () => {
-  const [personas, setPersonas] = useState<UberPersona[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { searchPersonas } = usePersona();
-  
-  useEffect(() => {
-    // Log page view with Hermes
-    hermes.connect({
-      system: 'PersonaListingPage',
-      connectionId: `personas-${Date.now()}`,
-      metadata: {
-        page: 'persona-listing',
-        timestamp: new Date().toISOString()
-      }
-    });
-    
-    // Verify system integrity
-    uberCore.checkSystemIntegrity();
-    
-    const fetchPersonas = async () => {
-      try {
-        setLoading(true);
-        const result = await searchPersonas({ limit: 20 });
-        setPersonas(result.data);
-      } catch (error) {
-        console.error('Error fetching personas:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchPersonas();
-  }, []);
-  
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Persona Listing</h1>
-      
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">UberPersonas</h1>
+          <p className="text-muted-foreground">Browse and manage all available personas</p>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {personas.map((persona) => (
-            <Card key={persona.id} className="overflow-hidden">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  {persona.avatarUrl && (
-                    <img 
-                      src={persona.avatarUrl} 
-                      alt={persona.name || 'Persona'} 
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                  )}
-                  <div>
-                    <h3 className="font-semibold text-lg">{persona.name || 'Unknown Name'}</h3>
-                    <p className="text-muted-foreground text-sm">{persona.type || 'No type specified'}</p>
-                    {persona.location && (
-                      <p className="text-sm mt-1">{persona.location}</p>
-                    )}
-                  </div>
-                </div>
-                {persona.description && (
-                  <p className="mt-4 text-sm">{persona.description}</p>
-                )}
-                <div className="mt-4 flex justify-between items-center">
-                  {persona.isVerified && (
-                    <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                      Verified
-                    </span>
-                  )}
-                  <a 
-                    href={`/persona/${persona.id}`}
-                    className="text-primary hover:underline text-sm"
-                  >
-                    View Profile →
-                  </a>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        
+        <div className="flex gap-2">
+          <Button variant="outline" className="flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            Filter
+          </Button>
+          <Button className="flex items-center gap-2">
+            <Layers className="h-4 w-4" />
+            Create Persona
+          </Button>
         </div>
-      )}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Sample Persona Cards */}
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Card key={i} className="overflow-hidden">
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-start">
+                <CardTitle className="text-xl">Persona {i + 1}</CardTitle>
+                <Badge variant={i % 2 === 0 ? "default" : "secondary"}>
+                  {i % 2 === 0 ? 'Active' : 'Draft'}
+                </Badge>
+              </div>
+              <CardDescription>AI-Generated Character</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center">
+                  <Users className="h-8 w-8 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm">Personality Type: <span className="font-medium">Dynamic</span></p>
+                  <p className="text-sm">Engagement: <span className="font-medium">High</span></p>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                This is a sample persona with unique personality traits and interaction patterns.
+              </p>
+              <div className="mt-4 flex justify-end">
+                <Button variant="ghost" size="sm">View Details</Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };

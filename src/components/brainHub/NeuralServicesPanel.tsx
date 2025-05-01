@@ -20,9 +20,9 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ systemId }) =
   const [activeJobs, setActiveJobs] = useState<TrainingProgress[]>([]);
   
   useEffect(() => {
-    const fetchJobs = async () => {
+    const fetchJobs = () => {
       try {
-        const jobs = await neuralHub.getActiveTrainingJobs();
+        const jobs = neuralHub.getActiveTrainingJobs();
         setActiveJobs(jobs);
       } catch (err) {
         console.error('Failed to fetch training jobs:', err);

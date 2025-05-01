@@ -36,11 +36,11 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ systemId }) => 
       setIsLoading(true);
       setError(null);
       
-      // Fetch active training jobs
+      // Fetch active training jobs - synchronously now
       const activeJobs = neuralHub.getActiveTrainingJobs();
       setTrainingJobs(activeJobs);
       
-      // Fetch available models
+      // Fetch available models - synchronously now
       const availableModels = neuralHub.getModels();
       setModels(availableModels);
       

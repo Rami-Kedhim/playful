@@ -1,177 +1,196 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { usePersona } from '@/modules/personas/hooks/usePersona';
-import { UberPersona } from '@/types/uberPersona';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import MainLayout from '@/components/layout/MainLayout';
-import { hermes } from '@/core/Hermes';
-import { uberCore } from '@/core/UberCore';
-import { lucie } from '@/core/Lucie';
+import { ArrowLeft, Heart, Share2, Settings, MessageSquare, Activity, User } from 'lucide-react';
 
 const PersonaDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [persona, setPersona] = useState<UberPersona | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  useEffect(() => {
-    if (!id) return;
-    
-    // Log page view with Hermes
-    hermes.connect({
-      system: 'PersonaDetailPage',
-      connectionId: `persona-detail-${Date.now()}`,
-      metadata: {
-        personaId: id,
-        timestamp: new Date().toISOString()
-      }
-    });
-    
-    // Moderate content access through Lucie
-    lucie.moderateContent(`Accessing persona detail for ID: ${id}`);
-    
-    // Verify system integrity
-    uberCore.checkSystemIntegrity();
-    
-    const fetchPersonaDetails = async () => {
-      try {
-        setLoading(true);
-        
-        // This is a mock implementation - in a real app we would use the personaService
-        const mockPersona: UberPersona = {
-          id,
-          name: `Persona ${id}`,
-          type: 'escort',
-          avatarUrl: 'https://example.com/avatar.jpg',
-          description: 'This is a detailed description of the persona that would typically include their background, interests, and other relevant information.',
-          location: 'New York, NY',
-          services: ['Companionship', 'Event Escort', 'Dinner Date'],
-          languages: ['English', 'Spanish'],
-          isVerified: true,
-          rating: 4.8,
-          reviews: [],
-          isOnline: true,
-          isPremium: true,
-          isFeatured: true
-        };
-        
-        setPersona(mockPersona);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching persona details:', err);
-        setError('Failed to load persona details. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchPersonaDetails();
-  }, [id]);
-  
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-  
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Card className="border-red-300">
-          <CardContent className="pt-6">
-            <div className="text-center text-red-500">
-              <p>{error}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-  
-  if (!persona) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p>Persona not found</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-  
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Card>
-        <CardHeader className="pb-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between">
-            <div className="flex items-center gap-4">
-              {persona.avatarUrl && (
-                <img 
-                  src={persona.avatarUrl} 
-                  alt={persona.name || 'Persona'} 
-                  className="w-24 h-24 rounded-full object-cover"
-                />
-              )}
-              <div>
-                <h1 className="text-3xl font-bold">{persona.name}</h1>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-muted-foreground">{persona.type}</span>
-                  {persona.isVerified && (
-                    <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
-                      Verified
-                    </Badge>
-                  )}
-                  {persona.isPremium && (
-                    <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">
-                      Premium
-                    </Badge>
-                  )}
+    <div className="space-y-6">
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="sm" className="flex items-center gap-1">
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+        <span className="text-muted-foreground">|</span>
+        <h4 className="text-sm font-medium">Persona Details</h4>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex justify-between">
+                <CardTitle>Persona #{id?.slice(0, 8) || '12345'}</CardTitle>
+                <Badge variant="outline">AI Character</Badge>
+              </div>
+              <CardDescription>Created with UberCore AI</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center space-y-4">
+                <div className="bg-primary/10 w-32 h-32 rounded-full flex items-center justify-center">
+                  <User className="h-16 w-16 text-primary" />
                 </div>
-                {persona.location && (
-                  <p className="text-sm text-muted-foreground mt-1">{persona.location}</p>
-                )}
+                <h2 className="text-2xl font-bold">Emma Watson</h2>
+                <div className="flex gap-2">
+                  <Badge variant="secondary">Friendly</Badge>
+                  <Badge variant="secondary">Intelligent</Badge>
+                  <Badge variant="secondary">Creative</Badge>
+                </div>
+                <div className="w-full flex gap-2 mt-4">
+                  <Button className="flex-1" size="sm">
+                    <MessageSquare className="h-4 w-4 mr-2" /> Chat
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Heart className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {persona.description && (
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">About</h2>
-              <p>{persona.description}</p>
-            </div>
-          )}
-          
-          {persona.services && persona.services.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">Services</h2>
-              <div className="flex flex-wrap gap-2">
-                {persona.services.map((service, index) => (
-                  <Badge key={index} variant="secondary">{service}</Badge>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {persona.languages && persona.languages.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">Languages</h2>
-              <div className="flex flex-wrap gap-2">
-                {persona.languages.map((language, index) => (
-                  <Badge key={index} variant="outline">{language}</Badge>
-                ))}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="lg:col-span-2">
+          <Tabs defaultValue="profile">
+            <TabsList className="grid grid-cols-3 mb-4">
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="stats">Stats</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
+            <TabsContent value="profile">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Persona Profile</CardTitle>
+                  <CardDescription>Comprehensive details about this persona</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-lg font-medium">Biography</h3>
+                      <p className="text-muted-foreground mt-1">
+                        This is an AI-generated persona that embodies specific personality traits
+                        and interaction patterns. The character was designed to provide engaging
+                        conversations and realistic responses in various scenarios.
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-lg font-medium">Personality Traits</h3>
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm">Extroversion</span>
+                          <span className="text-sm font-medium">75%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Creativity</span>
+                          <span className="text-sm font-medium">88%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Analytical</span>
+                          <span className="text-sm font-medium">62%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Empathy</span>
+                          <span className="text-sm font-medium">91%</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-lg font-medium">Response Patterns</h3>
+                      <div className="mt-2 space-y-2">
+                        <p className="text-sm">
+                          <span className="font-medium">Communication Style:</span> Warm and friendly
+                        </p>
+                        <p className="text-sm">
+                          <span className="font-medium">Knowledge Areas:</span> Science, Arts, Literature
+                        </p>
+                        <p className="text-sm">
+                          <span className="font-medium">Response Time:</span> Quick, spontaneous
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="stats">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Usage Statistics</CardTitle>
+                  <CardDescription>Performance metrics for this persona</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">User Engagement</h4>
+                        <p className="text-sm text-muted-foreground">Overall user satisfaction</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-green-500" />
+                        <span className="font-bold text-xl">94%</span>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm font-medium">Total Interactions</p>
+                          <p className="text-2xl font-bold">2,487</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Active Users</p>
+                          <p className="text-2xl font-bold">346</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Avg. Session Length</p>
+                          <p className="text-2xl font-bold">12m 24s</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Response Rate</p>
+                          <p className="text-2xl font-bold">99.8%</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="settings">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Persona Settings</CardTitle>
+                  <CardDescription>Configure this persona's behavior and parameters</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <Button variant="outline" className="w-full flex items-center justify-center gap-2">
+                      <Settings className="h-4 w-4" />
+                      Persona Configuration
+                    </Button>
+                    <p className="text-sm text-muted-foreground">
+                      Advanced settings for persona configuration are available to administrators.
+                      These settings control response patterns, knowledge base access, and
+                      personality traits.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
     </div>
   );
 };

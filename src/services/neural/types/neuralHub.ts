@@ -10,9 +10,8 @@ export interface ModelParameters {
   growthFactor: number;
   cyclePeriod: number;
   harmonicCount: number;
-  // Added missing properties from errors
-  learningRate?: number;
-  batchSize?: number;
+  learningRate: number;
+  batchSize: number;
 }
 
 export interface NeuralModel {
@@ -85,7 +84,7 @@ export interface INeuralHub {
   getModelParameters(): ModelParameters;
   processRequest(request: BrainHubRequest): Promise<BrainHubResponse>;
   
-  // Add missing methods that are used in the codebase
+  // Make these return sync arrays instead of Promises
   getHealthMetrics(): SystemHealthMetrics;
   getActiveTrainingJobs(): TrainingProgress[];
   getModels(): NeuralModel[];
