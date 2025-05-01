@@ -1,6 +1,7 @@
 
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { BoostStatus, BoostPackage, AnalyticsData, BoostEligibility, HermesStatus, BoostContextType } from '@/types/boost';
+import { BoostStatus, BoostPackage, BoostEligibility, HermesStatus, BoostContextType } from '@/types/boost';
+import { AnalyticsData } from '@/types/boost';
 
 export const BoostContext = createContext<BoostContextType | null>(null);
 
@@ -19,11 +20,12 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
     estimatedVisibility: 0,
     lastUpdateTime: new Date().toISOString(),
     boostScore: 0,
-    effectivenessScore: 0
+    effectivenessScore: 0,
+    isActive: false
   });
   
   const [eligibility, setEligibility] = useState<BoostEligibility>({
-    eligible: true,
+    isEligible: true,
   });
   
   const [packages, setPackages] = useState<BoostPackage[]>([]);
@@ -72,11 +74,12 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
           estimatedVisibility: 65,
           lastUpdateTime: new Date().toISOString(),
           boostScore: 0,
-          effectivenessScore: 0
+          effectivenessScore: 0,
+          isActive: false
         });
         
         setEligibility({
-          eligible: true
+          isEligible: true
         });
       } catch (err: any) {
         setError(err.message || 'Failed to load boost data');
@@ -110,7 +113,6 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
         remainingTime: '24:00:00',
         packageName: selectedPackage.name,
-        boostMultiplier: selectedPackage.boostMultiplier,
         boostPackage: selectedPackage,
         progress: 0
       });

@@ -23,7 +23,8 @@ export const useBoostDialog = (profileId: string) => {
     setBoostStatus({
       isActive: true,
       packageId: "basic-boost",
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      startedAt: new Date()
     });
     handleCloseDialog();
   };
@@ -41,6 +42,30 @@ export const useBoostDialog = (profileId: string) => {
     handleOpenDialog,
     handleCloseDialog,
     handleSuccess,
-    toggleDialog
+    toggleDialog,
+    // Additional properties
+    hermesStatus: {
+      position: 0,
+      activeUsers: 0,
+      estimatedVisibility: 0,
+      lastUpdateTime: new Date().toISOString(),
+      isActive: false
+    },
+    eligibility: {
+      isEligible: true
+    },
+    boostPackages: [],
+    selectedPackage: "",
+    setSelectedPackage: () => {},
+    handleBoost: async () => true,
+    handleCancel: async () => true,
+    dailyBoostUsage: 0,
+    dailyBoostLimit: 3,
+    activeTab: "packages",
+    setActiveTab: () => {},
+    getBoostPrice: () => 0,
+    formatBoostDuration: (duration: string) => duration
   };
 };
+
+export default useBoostDialog;

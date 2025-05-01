@@ -3,8 +3,8 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { PulseBoost } from "@/types/pulse-boost";
 import { Zap } from "lucide-react";
+import { PulseBoost } from "@/types/pulse-boost";
 
 interface PulseBoostCardProps {
   boost: PulseBoost;

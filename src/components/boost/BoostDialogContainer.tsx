@@ -108,7 +108,6 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
 
   // Provide all required properties for HermesStatus
   const hermesStatusData: HermesStatus = {
-    isActive: false,
     position: 0,
     activeUsers: 0,
     estimatedVisibility: 0,
@@ -134,7 +133,7 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
           setActiveTab={setActiveTab}
           loading={isLoading}
           boostStatus={boostStatus || { isActive: false }}
-          eligibility={{ eligible: true }}
+          eligibility={{ isEligible: true }}
           boostPackages={boostPackages || []}
           selectedPackage={selectedPackage}
           setSelectedPackage={setSelectedPackage}

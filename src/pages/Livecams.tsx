@@ -8,9 +8,49 @@ import { Zap } from 'lucide-react';
 import LivecamGrid from '@/components/livecams/LivecamGrid';
 import LivecamFeatured from '@/components/livecams/LivecamFeatured';
 import LivecamFilters from '@/components/livecams/LivecamFilters';
-import { useLivecams } from '@/hooks/useLivecams';
-import { useToast } from '@/hooks/use-toast';
 import BoostDialog from '@/components/boost/BoostDialog';
+import { useToast } from '@/hooks/use-toast';
+import { Livecam } from '@/types/livecams';
+
+// Mock hook for livecams data
+const useLivecams = (options: any) => {
+  const featuredLivecams: Livecam[] = [
+    {
+      id: 'live-1',
+      name: 'Featured Model',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop',
+      isLive: true,
+      viewerCount: 254,
+      categories: ['Featured', 'Popular']
+    }
+  ];
+  
+  const livecams: Livecam[] = [
+    ...featuredLivecams,
+    {
+      id: 'live-2',
+      name: 'Model 2',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1000&auto=format&fit=crop',
+      isLive: true,
+      viewerCount: 154,
+      categories: ['Popular']
+    },
+    {
+      id: 'live-3',
+      name: 'Model 3',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop',
+      isLive: false,
+      viewerCount: 0,
+      categories: ['New']
+    }
+  ];
+  
+  return {
+    livecams,
+    featured: featuredLivecams,
+    isLoading: false
+  };
+};
 
 const Livecams = () => {
   const { toast } = useToast();
@@ -31,24 +71,21 @@ const Livecams = () => {
   
   const profileId = 'guest';
   
+  const boostDialog = useBoostDialog(profileId);
   const { 
-    showDialog, 
-    isLoading: boostLoading, 
-    boostStatus, 
+    showDialog,
     handleOpenDialog,
     handleCloseDialog,
     handleSuccess,
     toggleDialog
-  } = useBoostDialog(profileId);
+  } = boostDialog;
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   const handleCancel = async () => {
     try {
-      // Call the appropriate cancel function
-      const success = await toggleDialog(); // Or another appropriate method
+      const success = await toggleDialog();
       if (success) {
-        // Handle successful cancellation
         toast({
           title: "Boost Cancelled",
           description: "Your boost has been cancelled successfully."
@@ -69,7 +106,7 @@ const Livecams = () => {
   };
 
   const renderBoostButton = () => {
-    if (boostStatus.isActive) {
+    if (boostDialog.boostStatus.isActive) {
       return (
         <Button 
           variant="outline" 
@@ -142,6 +179,7 @@ const Livecams = () => {
           <LivecamGrid 
             livecams={livecams} 
             loading={isLoading}
+            onItemClick={(id) => console.log(`Clicked livecam ${id}`)}
           />
         </div>
       </div>

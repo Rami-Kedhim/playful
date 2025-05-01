@@ -1,199 +1,252 @@
-import React, { useEffect, useState } from 'react';
-import { UberPersona } from '@/types/uberPersona';
-import UberPersonaGrid from '@/components/personas/UberPersonaGrid';
-import { mapEscortToUberPersona } from '@/utils/profileMapping';
-import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
-import EnhancedAppLayout from '@/components/layout/EnhancedAppLayout';
-import usePersonaFilter from '@/hooks/usePersonaFilter';
+
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { usePersonaFilters } from '@/hooks/usePersonaFilters';
+import { usePersonas } from '@/modules/personas/hooks';
+import { Search, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Card } from '@/components/ui/card';
-import FilterBadge from '@/components/escorts/FilterBadge';
 
-const Personas: React.FC = () => {
-  const [loading, setLoading] = useState(true);
-  const [allPersonas, setAllPersonas] = useState<UberPersona[]>([]);
-  const { loadEscorts, state } = useEscortContext();
-
-  const { filters, updateFilters, filteredPersonas, loading, error } = usePersonaFilter(allPersonas);
-
+const Personas = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const loadingState = false; // Establish loading state here
+  const errorState = null; // Establish error state here
+  
+  const { filters, updateFilters, filteredPersonas } = usePersonaFilters();
+  
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        if (state.escorts.length === 0) {
-          await loadEscorts(true);
-        }
-
-        const mappedPersonas = state.escorts.map(escort => {
-          const mapped = mapEscortToUberPersona(escort);
-          return {
-            ...mapped,
-            type: mapped.type as 'escort' | 'creator' | 'livecam' | 'ai'
-          };
+    // Initial fetch
+    updateFilters({ searchQuery: '' });
+  }, [updateFilters]);
+  
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateFilters({ searchQuery: searchQuery });
+  };
+  
+  // Define filters
+  const locationFilters = [
+    { key: 'new-york', label: 'New York' },
+    { key: 'los-angeles', label: 'Los Angeles' },
+    { key: 'chicago', label: 'Chicago' }
+  ];
+  
+  const roleFilters = [
+    { key: 'escort', label: 'Escort' },
+    { key: 'sugarbaby', label: 'Sugar Baby' },
+    { key: 'companion', label: 'Companion' }
+  ];
+  
+  const capabilityFilters = [
+    { key: 'video', label: 'Video' },
+    { key: 'audio', label: 'Audio' },
+    { key: 'chat', label: 'Chat' }
+  ];
+  
+  const handleFilterClick = (filter: string, value: string) => {
+    switch (filter) {
+      case 'location':
+        updateFilters({ 
+          location: filters.location === value ? '' : value 
         });
-        setAllPersonas(mappedPersonas);
-
+        break;
+      case 'role':
         updateFilters({
-          searchTerm: '',
-          location: '',
-          roleFilters: {},
-          capabilityFilters: {}
+          types: filters.types.includes(value) 
+            ? filters.types.filter(r => r !== value) 
+            : [...filters.types, value]
         });
-      } catch (error) {
-        console.error('Error loading personas:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [state.escorts.length, loadEscorts, updateFilters]);
-
-  const getActiveFilters = () => {
-    const filters: Array<{ key: string; label: string }> = [];
-
-    if (filters.location) {
-      filters.push({ key: 'location', label: `Location: ${filters.location}` });
-    }
-
-    if (filters.roleFilters) {
-      Object.entries(filters.roleFilters).forEach(([role, active]) => {
-        if (active) filters.push({ key: role, label: role.replace(/^is/, '') });
-      });
-    }
-
-    if (filters.capabilityFilters) {
-      Object.entries(filters.capabilityFilters).forEach(([capability, active]) => {
-        if (active) filters.push({ key: capability, label: capability.replace(/^has/, '') });
-      });
-    }
-
-    return filters;
-  };
-
-  const handleRemoveFilter = (key: string) => {
-    if (key === 'location') {
-      updateFilters({ location: '' });
-    } else if (filters.roleFilters && key in filters.roleFilters) {
-      updateFilters({ roleFilters: { ...filters.roleFilters, [key]: false } });
-    } else if (filters.capabilityFilters && key in filters.capabilityFilters) {
-      updateFilters({ capabilityFilters: { ...filters.capabilityFilters, [key]: false } });
+        break;
+      case 'capability':
+        updateFilters({
+          tags: filters.tags.includes(value) 
+            ? filters.tags.filter(c => c !== value) 
+            : [...filters.tags, value]
+        });
+        break;
+      default:
+        break;
     }
   };
-
-  const clearAllFilters = () => {
-    updateFilters({
-      searchTerm: '',
-      location: '',
-      roleFilters: {},
-      capabilityFilters: {},
-    });
+  
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    updateFilters({ searchQuery: '' });
   };
-
+  
+  const renderFilterBadge = (label: string, isActive: boolean, onClick: () => void) => {
+    return (
+      <Badge 
+        variant={isActive ? "default" : "outline"} 
+        className="cursor-pointer mr-2 mb-2"
+        onClick={onClick}
+      >
+        {label}
+      </Badge>
+    );
+  };
+  
   return (
-    <EnhancedAppLayout>
-      <div className="container mx-auto py-8">
-        <h1 className="text-3xl font-bold mb-8">Personas</h1>
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="p-4 lg:col-span-1">
-            <div className="space-y-6">
-              <div>
-                <Label htmlFor="search">Search</Label>
-                <Input
-                  id="search"
+    <div className="container mx-auto py-8 px-4">
+      <h1 className="text-3xl font-bold mb-8">Discover Personas</h1>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-1">
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">Search</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSearchSubmit} className="relative">
+                <Input 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search personas..."
-                  value={filters.searchTerm || ''}
-                  onChange={(e) => updateFilters({ searchTerm: e.target.value })}
-                  className="mt-1"
+                  className="pr-8"
                 />
-              </div>
-
-              <div>
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  placeholder="Filter by location..."
-                  value={filters.location || ''}
-                  onChange={(e) => updateFilters({ location: e.target.value })}
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label className="mb-2 block">Role Types</Label>
-                <div className="space-y-2">
-                  {filters.roleFilters && Object.entries(filters.roleFilters).map(([role, active]) => (
-                    <div key={role} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`role-${role}`}
-                        checked={active as boolean}
-                        onCheckedChange={() => {
-                          const newFilters = {
-                            ...filters.roleFilters,
-                            [role]: !active,
-                          };
-                          updateFilters({ roleFilters: newFilters });
-                        }}
-                      />
-                      <Label htmlFor={`role-${role}`} className="capitalize">
-                        {role.replace(/^is/, '')}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <Label className="mb-2 block">Capabilities</Label>
-                <div className="space-y-2">
-                  {filters.capabilityFilters && Object.entries(filters.capabilityFilters).map(([capability, active]) => (
-                    <div key={capability} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`capability-${capability}`}
-                        checked={active as boolean}
-                        onCheckedChange={() => {
-                          const newCaps = {
-                            ...filters.capabilityFilters,
-                            [capability]: !active,
-                          };
-                          updateFilters({ capabilityFilters: newCaps });
-                        }}
-                      />
-                      <Label htmlFor={`capability-${capability}`} className="capitalize">
-                        {capability.replace(/^has/, '')}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+                {searchQuery && (
+                  <button 
+                    type="button" 
+                    onClick={handleClearSearch}
+                    className="absolute right-10 top-1/2 -translate-y-1/2"
+                  >
+                    <X className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                )}
+                <Button 
+                  type="submit" 
+                  size="icon" 
+                  className="absolute right-0 top-0 h-full"
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+              </form>
+            </CardContent>
           </Card>
-
-          <div className="lg:col-span-3">
-            <div className="flex flex-wrap gap-2 mb-4">
-              {getActiveFilters().map((filter) => (
-                <FilterBadge key={filter.key} label={filter.label} onRemove={() => handleRemoveFilter(filter.key)} />
+          
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">Location</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap">
+                {locationFilters.map((loc) => (
+                  renderFilterBadge(
+                    loc.label,
+                    filters.location === loc.key,
+                    () => handleFilterClick('location', loc.key)
+                  )
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">Type</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {roleFilters.map((role) => (
+                <div key={role.key} className="flex items-center space-x-2">
+                  <Checkbox 
+                    id={`role-${role.key}`}
+                    checked={filters.types.includes(role.key)}
+                    onCheckedChange={() => handleFilterClick('role', role.key)}
+                  />
+                  <label 
+                    htmlFor={`role-${role.key}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {role.label}
+                  </label>
+                </div>
               ))}
-
-              {getActiveFilters().length > 0 && (
-                <button onClick={clearAllFilters} className="text-sm text-blue-500 hover:underline">
-                  Clear all filters
-                </button>
-              )}
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Capabilities</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {capabilityFilters.map((cap) => (
+                <div key={cap.key} className="flex items-center space-x-2">
+                  <Checkbox 
+                    id={`cap-${cap.key}`}
+                    checked={filters.tags.includes(cap.key)}
+                    onCheckedChange={() => handleFilterClick('capability', cap.key)}
+                  />
+                  <label 
+                    htmlFor={`cap-${cap.key}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {cap.label}
+                  </label>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="lg:col-span-3">
+          <Tabs defaultValue="all" className="mb-6">
+            <TabsList>
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="verified">Verified</TabsTrigger>
+              <TabsTrigger value="online">Online</TabsTrigger>
+              <TabsTrigger value="premium">Premium</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          {loadingState ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array(6).fill(0).map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <div className="h-48 bg-muted"></div>
+                  <CardContent className="p-4">
+                    <div className="h-4 bg-muted mb-2 w-3/4"></div>
+                    <div className="h-4 bg-muted w-1/2"></div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-
-            <UberPersonaGrid
-              personas={filteredPersonas || []}
-              loading={loading}
-              emptyMessage="No personas found. Please try adjusting your filters."
-            />
-          </div>
+          ) : errorState ? (
+            <div className="p-6 text-center">
+              <p className="text-red-500">Error loading personas: {errorState}</p>
+            </div>
+          ) : filteredPersonas.length === 0 ? (
+            <div className="p-6 text-center">
+              <p className="text-muted-foreground">No personas found matching your criteria</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredPersonas.map((persona) => (
+                <Card key={persona.id} className="overflow-hidden">
+                  <div className="h-48 bg-muted relative">
+                    {/* Persona image would go here */}
+                    {persona.online && (
+                      <div className="absolute top-2 right-2 bg-green-500 h-3 w-3 rounded-full"></div>
+                    )}
+                    {persona.verified && (
+                      <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                        Verified
+                      </div>
+                    )}
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-medium">{persona.name}</h3>
+                    <p className="text-sm text-muted-foreground">{persona.type}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-    </EnhancedAppLayout>
+    </div>
   );
 };
 

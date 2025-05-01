@@ -1,105 +1,103 @@
 
-import { UberPersona } from "@/types/uberPersona";
-import { PersonaSearchParams } from "@/types/persona";
+import { Persona } from "@/types/persona";
 
-export class PersonaService {
-  private mockPersonas: UberPersona[] = [];
+// Define the PersonaSearchParams interface here as well to avoid import issues
+export interface PersonaSearchParams {
+  query?: string;
+  type?: string;
+  status?: string;
+  tags?: string[];
+  verified?: boolean;
+  limit?: number;
+  offset?: number;
+  page?: number;
+  sort?: string;
+  location?: string;
+  gender?: string;
+  minRating?: number;
+  services?: string[];
+  features?: string[];
+}
+
+class PersonaService {
+  private baseUrl: string;
+  private mockData: Persona[];
   
   constructor() {
-    // Generate some mock personas for testing
-    this.mockPersonas = Array(20).fill(0).map((_, i) => ({
-      id: `persona-${i}`,
-      name: `Persona ${i}`,
-      type: ['escort', 'creator', 'companion'][i % 3] as any,
-      avatarUrl: `https://picsum.photos/seed/persona${i}/200/200`,
-      imageUrl: `https://picsum.photos/seed/persona${i}/800/600`,
-      location: ['New York, US', 'Los Angeles, US', 'Miami, US', 'London, UK'][i % 4],
-      isVerified: i % 3 === 0,
-      isPremium: i % 5 === 0,
-      description: `This is the description for Persona ${i}`,
-      tags: [
-        ['luxury', 'premium', 'elite'][i % 3],
-        ['experienced', 'gentle', 'passionate'][i % 3]
-      ],
-      monetization: {
-        hourlyRate: 200 + (i * 50),
-        minRate: 150 + (i * 25),
-        maxRate: 350 + (i * 75),
-        acceptsUbx: i % 2 === 0
-      },
-      availability: {
-        isOnline: i % 2 === 0,
-        nextAvailable: new Date(Date.now() + (i * 8600000))
-      }
-    }));
+    this.baseUrl = "https://api.example.com/personas";
+    this.mockData = [];
+    
+    // Initialize with some mock data
+    for (let i = 0; i < 20; i++) {
+      this.mockData.push({
+        id: `persona-${i}`,
+        name: `Persona ${i}`,
+        bio: `Bio for persona ${i}`,
+        type: i % 2 === 0 ? "ESCORT" : "CLIENT",
+        status: "ACTIVE",
+        rating: 4 + Math.random(),
+        verified: i % 3 === 0,
+        online: i % 2 === 0,
+        premium: i % 5 === 0,
+      });
+    }
   }
   
-  /**
-   * Search for personas based on the provided params
-   */
-  async searchPersonas(params: PersonaSearchParams): Promise<{ data: UberPersona[], meta: { total: number, limit: number, offset: number, page: number } }> {
-    // Default values
-    const limit = params.limit || 10;
-    const offset = params.offset || 0;
+  async getPersonas(params: PersonaSearchParams): Promise<{ data: Persona[], pagination: { total: number, page: number, pageSize: number } }> {
+    // Mock implementation
     const page = params.page || 1;
+    const limit = params.limit || 10;
+    const offset = ((page - 1) * limit);
     
-    // Apply filters
-    let filtered = [...this.mockPersonas];
-    
+    // Filter based on params
+    let filtered = [...this.mockData];
     if (params.query) {
-      const query = params.query.toLowerCase();
-      filtered = filtered.filter(p => 
-        p.name.toLowerCase().includes(query) || 
-        (p.description && p.description.toLowerCase().includes(query))
-      );
+      filtered = filtered.filter(p => p.name.toLowerCase().includes(params.query!.toLowerCase()));
     }
-    
     if (params.type) {
       filtered = filtered.filter(p => p.type === params.type);
     }
-    
     if (params.verified) {
-      filtered = filtered.filter(p => p.isVerified);
+      filtered = filtered.filter(p => p.verified);
     }
     
-    if (params.tags && params.tags.length > 0) {
-      filtered = filtered.filter(p => 
-        p.tags && params.tags?.some(tag => p.tags.includes(tag))
-      );
-    }
-    
-    // Apply pagination
-    const paginatedResults = filtered.slice(offset, offset + limit);
+    const total = filtered.length;
+    const paginatedData = filtered.slice(offset, offset + limit);
     
     return {
-      data: paginatedResults,
-      meta: {
-        total: filtered.length,
-        limit,
-        offset,
-        page
-      }
+      data: paginatedData,
+      pagination: { total, page, pageSize: limit }
     };
   }
 
-  /**
-   * Get a persona by ID
-   */
-  async getPersonaById(id: string): Promise<UberPersona | null> {
-    const persona = this.mockPersonas.find(p => p.id === id);
+  async getPersonaById(id: string): Promise<Persona | null> {
+    const persona = this.mockData.find(p => p.id === id);
     return persona || null;
   }
 
-  /**
-   * Get multiple personas
-   */
-  async getPersonas(options: { ids?: string[], limit?: number } = {}): Promise<UberPersona[]> {
-    if (options.ids) {
-      return this.mockPersonas.filter(p => options.ids?.includes(p.id));
+  async updatePersona(id: string, data: Partial<Persona>): Promise<Persona> {
+    const index = this.mockData.findIndex(p => p.id === id);
+    if (index === -1) {
+      throw new Error("Persona not found");
     }
     
-    const limit = options.limit || 10;
-    return this.mockPersonas.slice(0, limit);
+    this.mockData[index] = { ...this.mockData[index], ...data };
+    return this.mockData[index];
+  }
+
+  async getUserFavorites(userId: string): Promise<Persona[]> {
+    // Mock implementation
+    return this.mockData.slice(0, 5);
+  }
+
+  async addToFavorites(userId: string, personaId: string): Promise<boolean> {
+    // Mock implementation
+    return true;
+  }
+
+  async removeFromFavorites(userId: string, personaId: string): Promise<boolean> {
+    // Mock implementation
+    return true;
   }
 }
 

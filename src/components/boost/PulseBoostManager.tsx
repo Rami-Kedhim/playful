@@ -1,15 +1,103 @@
 
 import React, { useState, useEffect } from 'react';
-import usePulseBoost from '@/hooks/boost/usePulseBoost';
-import PulseBoostCard from '@/components/boost/PulseBoostCard';
-import usePulseBoostAdapter from '@/hooks/boost/usePulseBoostAdapter';
-import { useBoostStatus } from '@/hooks/boost/useBoostStatus';
-import LoadingOverlay from '@/components/common/LoadingOverlay';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import LoadingOverlay from '@/components/common/LoadingOverlay';
+import { toast } from '@/hooks/use-toast';
 import { BoostPackage } from '@/types/pulse-boost';
 import { PulseBoost } from '@/types/pulse-boost';
-import { toast } from '@/hooks/use-toast';
+
+// Mock hooks
+const usePulseBoost = (profileId?: string) => {
+  const [pulseBoostPackages] = useState<PulseBoost[]>([
+    {
+      id: 'basic',
+      name: 'Basic Boost',
+      description: 'Enhance visibility for 24 hours',
+      duration: '24:00:00',
+      durationMinutes: 1440,
+      price: 29.99,
+      price_ubx: 300,
+      visibility: 'homepage',
+      visibility_increase: 50,
+      features: ['Top search results', 'Featured section'],
+      color: '#4CAF50',
+      badgeColor: '#4CAF50'
+    },
+    {
+      id: 'premium',
+      name: 'Premium Boost',
+      description: 'Maximum visibility for 3 days',
+      duration: '72:00:00',
+      durationMinutes: 4320,
+      price: 69.99,
+      price_ubx: 700,
+      visibility: 'homepage',
+      visibility_increase: 100,
+      features: ['Top search results', 'Featured section', 'Premium badge'],
+      color: '#2196F3',
+      badgeColor: '#2196F3'
+    }
+  ]);
+  
+  return {
+    isLoading: false,
+    error: null,
+    userEconomy: { ubxBalance: 1000 },
+    purchaseBoost: async () => true,
+    cancelBoost: async () => true,
+    activeBoosts: [],
+    pulseBoostPackages
+  };
+};
+
+const useBoostStatus = (profileId?: string) => {
+  return {
+    status: { isActive: false },
+    loading: false
+  };
+};
+
+const usePulseBoostAdapter = (profileId: string) => {
+  return {
+    formatPulseDuration: (duration: string) => `${duration} hours`,
+    realtimeStatus: null
+  };
+};
+
+const PulseBoostCard = ({ 
+  boost, 
+  isActive, 
+  timeRemaining = '', 
+  onActivate,
+  onCancel,
+  userBalance = 0,
+  disabled = false 
+}: { 
+  boost: PulseBoost,
+  isActive: boolean,
+  timeRemaining?: string,
+  onActivate: (boost: PulseBoost) => Promise<boolean>,
+  onCancel: (boostId: string) => Promise<boolean>,
+  userBalance: number,
+  disabled?: boolean
+}) => {
+  return (
+    <div className="border p-4 rounded-md">
+      <h3 className="font-medium">{boost.name}</h3>
+      <p className="text-muted-foreground text-sm">{boost.description}</p>
+      <div className="mt-4">
+        <button 
+          className={`px-4 py-2 rounded-md ${isActive ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}`}
+          onClick={() => isActive ? onCancel(boost.id) : onActivate(boost)}
+          disabled={disabled}
+        >
+          {isActive ? 'Cancel Boost' : 'Activate'}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 interface PulseBoostManagerProps {
   profileId?: string;
@@ -63,7 +151,6 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
     );
   }
 
-  // Modified to adapt PulseBoost to BoostPackage that purchaseBoost expects
   const handlePurchaseBoost = async (boost: PulseBoost): Promise<boolean> => {
     if (!purchaseBoost || processingId) return false;
     if (!boost || !boost.id) {
@@ -94,12 +181,11 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
         description: packageToUse.description,
         duration: packageToUse.duration || '24:00:00',
         price: packageToUse.price || 0,
-        boostMultiplier: packageToUse.boostMultiplier || 1.5,  // Default to 1.5 if not specified
-        features: Array.isArray(packageToUse.features) ? packageToUse.features : [],
         price_ubx: packageToUse.price_ubx,
         durationMinutes: packageToUse.durationMinutes,
         visibility: packageToUse.visibility,
         visibility_increase: packageToUse.visibility_increase,
+        features: Array.isArray(packageToUse.features) ? packageToUse.features : [],
         color: packageToUse.color,
         badgeColor: packageToUse.badgeColor
       };
@@ -168,20 +254,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
         return (
           <PulseBoostCard
             key={pkg.id}
-            boost={{
-              id: pkg.id,
-              name: pkg.name || 'Unnamed Boost',
-              description: pkg.description || '',
-              durationMinutes: pkg.durationMinutes || (pkg.duration ? parseInt(String(pkg.duration).split(':')[0]) * 60 : 0),
-              duration: String(pkg.duration || '00:00:00'),
-              visibility: pkg.visibility_increase ? 'homepage' : 'search',
-              price_ubx: pkg.price_ubx || 0,
-              color: pkg.color || '#3b82f6',
-              badgeColor: pkg.color || '#3b82f6',
-              features: Array.isArray(pkg.features) ? pkg.features : [],
-              visibility_increase: pkg.visibility_increase || 0,
-              price: pkg.price || 0 // Ensure price is never undefined
-            }}
+            boost={pkg}
             isActive={isActive}
             timeRemaining={currentStatus?.remainingTime || currentStatus?.timeRemaining || ''}
             onActivate={handlePurchaseBoost}

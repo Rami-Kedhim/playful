@@ -13,10 +13,7 @@ const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({
   eligibility,
   onClose
 }) => {
-  // Handle both eligible and isEligible
-  const isEligible = eligibility.eligible || eligibility.isEligible;
-  
-  if (isEligible) {
+  if (eligibility.isEligible) {
     return null;
   }
 

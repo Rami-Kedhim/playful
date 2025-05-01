@@ -14,6 +14,8 @@ export interface BoostPackage {
   boost_power?: number;
   color?: string;
   badgeColor?: string;
+  boostMultiplier?: number;
+  isMostPopular?: boolean;
 }
 
 export interface BoostStatus {
@@ -30,6 +32,7 @@ export interface BoostStatus {
   expiresAt?: Date;
   visibilityScore?: number;
   progress?: number;
+  startedAt?: Date;
 }
 
 export interface BoostEligibility {
@@ -37,6 +40,7 @@ export interface BoostEligibility {
   reason?: string;
   restrictions?: string[];
   reasons?: string[];
+  nextEligibleTime?: string;
 }
 
 export interface HermesStatus {
@@ -44,8 +48,9 @@ export interface HermesStatus {
   activeUsers: number;
   estimatedVisibility: number;
   lastUpdateTime: string;
-  boostScore: number;
-  effectivenessScore: number;
+  boostScore?: number;
+  effectivenessScore?: number;
+  isActive?: boolean;
 }
 
 export interface HermesBoostStatus {
@@ -115,3 +120,45 @@ export interface BoostDialogTabsProps {
   hermesStatus: HermesStatus;
   formatBoostDuration?: (duration: string) => string;
 }
+
+export type AnalyticsData = {
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  views?: number;
+  impressions?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+  };
+  interactions?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+  };
+  rank?: {
+    current: number;
+    previous: number;
+    change: number;
+  };
+};
+
+export type BoostContextType = {
+  boostStatus: BoostStatus;
+  hermesStatus: HermesStatus;
+  eligibility: BoostEligibility;
+  packages: BoostPackage[];
+  boostPackages?: BoostPackage[];
+  loading: boolean;
+  error: string | null;
+  boostProfile: (profileId: string, packageId: string) => Promise<boolean>;
+  cancelBoost: () => Promise<boolean>;
+  getBoostAnalytics: () => Promise<AnalyticsData>;
+  fetchBoostPackages: () => Promise<BoostPackage[]>;
+  dailyBoostUsage?: number;
+  dailyBoostLimit?: number;
+  formatBoostDuration?: (duration: string) => string;
+  adaptGetBoostPrice?: (fn?: (pkg: BoostPackage) => number) => number;
+};

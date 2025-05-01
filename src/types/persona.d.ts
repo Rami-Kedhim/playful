@@ -14,4 +14,9 @@ export interface PersonaSearchParams {
   minRating?: number;
   services?: string[];
   features?: string[];
+  pagination?: {
+    total: number;
+    page: number;
+    pageSize: number;
+  };
 }

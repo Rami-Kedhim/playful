@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { BoostStatus } from "@/types/boost";
 import { Clock, Zap } from "lucide-react";
@@ -24,13 +25,13 @@ const BoostActivePackage = ({
 
   // Calculate progress as a percentage
   const calculateProgress = (): number => {
-    if (!boostStatus.startedAt && !boostStatus.startTime) return 0;
+    if (!boostStatus.startTime && !boostStatus.startedAt) return 0;
     if (!boostStatus.expiresAt && !boostStatus.endTime) return 0;
     
     // Use either startedAt/expiresAt or startTime/endTime
-    const start = boostStatus.startedAt ? 
-      new Date(boostStatus.startedAt).getTime() : 
-      new Date(boostStatus.startTime as string).getTime();
+    const start = boostStatus.startTime ? 
+      new Date(boostStatus.startTime as string).getTime() : 
+      new Date((boostStatus.startedAt as Date)).getTime();
       
     const end = boostStatus.expiresAt ? 
       new Date(boostStatus.expiresAt).getTime() : 
@@ -72,13 +73,13 @@ const BoostActivePackage = ({
         </div>
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>
-            Started: {(boostStatus.startedAt || boostStatus.startTime) ? 
-              new Date(boostStatus.startedAt || boostStatus.startTime as string).toLocaleString() : 
+            Started: {(boostStatus.startTime || boostStatus.startedAt) ? 
+              new Date(boostStatus.startTime as string || (boostStatus.startedAt as Date)).toLocaleString() : 
               "Unknown"}
           </span>
           <span>
             Expires: {(boostStatus.expiresAt || boostStatus.endTime) ? 
-              new Date(boostStatus.expiresAt || boostStatus.endTime as string).toLocaleString() : 
+              new Date(boostStatus.expiresAt as Date || boostStatus.endTime as string).toLocaleString() : 
               "Unknown"}
           </span>
         </div>
