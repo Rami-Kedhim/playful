@@ -96,10 +96,10 @@ export class HermesOxumNeuralHub {
       requestsPerMinute: Math.floor(Math.random() * 1000),
       uptime: Math.floor(Math.random() * 10000),
       lastUpdated: new Date(),
-      // Add the required properties that were missing
+      // Add properties required by components using this method
+      cpuUsage: Math.random() * 80,
       load: Math.random() * 0.8,
       userEngagement: Math.random() * 0.9,
-      cpuUsage: Math.random() * 80,
       requestsPerSecond: Math.floor(Math.random() * 80)
     };
   }
@@ -192,7 +192,9 @@ export class HermesOxumNeuralHub {
       metrics: {
         accuracy: 0.91,
         latency: 45
-      }
+      },
+      moduleId: serviceId,
+      moduleType: 'text-analysis'
     };
   }
   

@@ -1,5 +1,5 @@
 
-import { ModelParameters } from '@/types/neural/types/neuralHub';
+import { ModelParameters } from '../types/neuralHub';
 import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
 
 /**
