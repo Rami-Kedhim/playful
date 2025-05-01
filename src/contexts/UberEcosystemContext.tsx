@@ -1,8 +1,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-// Fix imports to use proper casing and consistent naming
-import authService from '@/services/authService';
-import userService from '@/services/userService';
+// Fix imports to use consistent casing with the actual files
+import { authService } from '@/services/authService';
+import { userService } from '@/services/userService';
 
 // Define the context type
 interface UberEcosystemContextType {
@@ -44,13 +44,16 @@ export const UberEcosystemProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         setLoading(true);
         
-        // Check for an existing user token instead of using getCurrentUser
+        // Check for an existing user token
         const token = localStorage.getItem('ubx_auth_token'); 
         
         if (token && await authService.validateToken(token)) {
-          // Mock user data since getCurrentUser doesn't exist
-          setUser({ id: 'current-user', email: 'user@example.com' });
-          setIsAuthenticated(true);
+          // Get current user data
+          const currentUser = await authService.getCurrentUser();
+          if (currentUser) {
+            setUser(currentUser);
+            setIsAuthenticated(true);
+          }
         }
         
         setIsInitialized(true);
@@ -72,20 +75,20 @@ export const UberEcosystemProvider: React.FC<{ children: React.ReactNode }> = ({
       setLoading(true);
       setError(null);
       
-      // Implement mock login using the auth validation
-      const token = `mock_token_${Date.now()}`;
-      const isValid = await authService.validateToken(token);
+      // Call the auth service login
+      const result = await authService.login(email, password);
       
-      if (isValid) {
-        localStorage.setItem('ubx_auth_token', token);
-        setUser({ id: 'user-123', email });
+      if (result.success) {
+        // Store the token
+        localStorage.setItem('ubx_auth_token', 'mock_token_' + Date.now());
+        setUser(result.user);
         setIsAuthenticated(true);
         return true;
       } else {
-        setError('Invalid credentials');
+        setError(result.message || 'Invalid credentials');
         return false;
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Login error:', err);
       setError('An unexpected error occurred during login');
       return false;
@@ -98,7 +101,8 @@ export const UberEcosystemProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = async (): Promise<void> => {
     try {
       setLoading(true);
-      // Mock logout
+      // Call auth service logout
+      await authService.logout();
       localStorage.removeItem('ubx_auth_token');
       setUser(null);
       setIsAuthenticated(false);
@@ -117,13 +121,19 @@ export const UberEcosystemProvider: React.FC<{ children: React.ReactNode }> = ({
       setLoading(true);
       setError(null);
       
-      // Mock registration
-      const token = `mock_token_${Date.now()}`;
-      localStorage.setItem('ubx_auth_token', token);
+      // Call auth service register
+      const result = await authService.register(userData);
       
-      setUser({ id: `user-${Date.now()}`, ...userData });
-      setIsAuthenticated(true);
-      return true;
+      if (result.success) {
+        // Store token
+        localStorage.setItem('ubx_auth_token', 'mock_token_' + Date.now());
+        setUser(result.user);
+        setIsAuthenticated(true);
+        return true;
+      } else {
+        setError(result.message || 'Failed to register');
+        return false;
+      }
     } catch (err) {
       console.error('Registration error:', err);
       setError('An unexpected error occurred during registration');
@@ -144,10 +154,10 @@ export const UberEcosystemProvider: React.FC<{ children: React.ReactNode }> = ({
         return false;
       }
       
-      // Use updateUserProfile instead of updateUser
-      const result = await userService.updateUserProfile(user.id, userData);
+      // Call user service updateUser
+      const result = await userService.updateUser(user.id, userData);
       
-      if (result) {
+      if (result.success) {
         setUser({ ...user, ...userData });
         return true;
       } else {
