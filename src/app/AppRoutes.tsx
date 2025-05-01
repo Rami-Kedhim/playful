@@ -10,11 +10,32 @@ import { AppRoutes as AppRoutePaths } from '@/utils/navigation';
 import MetaversePage from '@/pages/MetaversePage';
 import WalletPage from '@/pages/WalletPage';
 import AICompanionsPage from '@/pages/AICompanionsPage';
+import PulseBoostPage from '@/pages/PulseBoostPage';
+import MessagesPage from '@/pages/MessagesPage';
+import { logInteraction } from '@/utils/uberCore';
 
 /**
  * Main application routes component
  */
 const AppRoutes = () => {
+  // Log route changes with Hermes for flow analysis
+  const logRouteChange = (path: string) => {
+    logInteraction('Router', 'route-change', { path });
+  };
+
+  React.useEffect(() => {
+    // Log initial route
+    logRouteChange(window.location.pathname);
+    
+    // Set up listener for route changes
+    const handleRouteChange = () => {
+      logRouteChange(window.location.pathname);
+    };
+    
+    window.addEventListener('popstate', handleRouteChange);
+    return () => window.removeEventListener('popstate', handleRouteChange);
+  }, []);
+
   return (
     <ReactRoutes>
       <Route path="/" element={
@@ -36,13 +57,21 @@ const AppRoutes = () => {
           <WalletPage />
         </MainLayout>
       } />
-      <Route path="/pulse-boost" element={<div>Pulse Boost Page (Coming Soon)</div>} />
+      <Route path="/pulse-boost" element={
+        <MainLayout>
+          <PulseBoostPage />
+        </MainLayout>
+      } />
       <Route path="/ai-companions" element={
         <MainLayout>
           <AICompanionsPage />
         </MainLayout>
       } />
-      <Route path="/messages" element={<div>Messages Page (Coming Soon)</div>} />
+      <Route path="/messages" element={
+        <MainLayout>
+          <MessagesPage />
+        </MainLayout>
+      } />
       <Route path="/search" element={<div>Search Page (Coming Soon)</div>} />
       <Route path="/escorts" element={<div>Escorts Page (Coming Soon)</div>} />
       
