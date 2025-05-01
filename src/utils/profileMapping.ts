@@ -1,4 +1,5 @@
-import { UberPersona } from '@/types/UberPersona';
+
+import { UberPersona } from '@/types/uberPersona';
 
 export function mapLivecamToUberPersona(livecam: any): UberPersona {
   return {

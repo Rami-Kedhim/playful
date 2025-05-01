@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -140,7 +139,7 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
       <Card>
         <CardContent className="p-4">
           <h3 className="text-lg font-medium mb-2 flex items-center">
-            <Clock className="w-4 h-4 mr-1 text-muted-foreground" />
+            <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
             Availability
           </h3>
           <p className="text-muted-foreground">
