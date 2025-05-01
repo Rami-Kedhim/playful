@@ -9,7 +9,7 @@ import { useVerificationStatus } from './hooks/useVerificationStatus';
 import { VerificationLevel, VerificationStatus as VerificationStatusEnum } from '@/types/verification';
 
 const VerificationStatus: React.FC = () => {
-  const { status, loading, error, verificationRequest } = useVerificationStatus();
+  const { status: verificationStatus, loading, error, verificationRequest } = useVerificationStatus();
   
   if (loading) {
     return (
@@ -30,7 +30,7 @@ const VerificationStatus: React.FC = () => {
   }
   
   const getStatusBadge = () => {
-    switch (status.status) {
+    switch (verificationStatus) {
       case VerificationStatusEnum.APPROVED:
         return <Badge className="bg-green-500">Verified</Badge>;
       case VerificationStatusEnum.PENDING:
@@ -83,7 +83,7 @@ const VerificationStatus: React.FC = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {status.status === VerificationStatusEnum.PENDING && (
+          {verificationStatus === VerificationStatusEnum.PENDING && (
             <Alert>
               <Clock className="h-4 w-4" />
               <AlertTitle>Pending Review</AlertTitle>
@@ -93,7 +93,7 @@ const VerificationStatus: React.FC = () => {
             </Alert>
           )}
           
-          {status.status === VerificationStatusEnum.APPROVED && (
+          {verificationStatus === VerificationStatusEnum.APPROVED && (
             <Alert className="bg-green-50 border-green-200">
               <CheckCircle className="h-4 w-4 text-green-500" />
               <AlertTitle className="text-green-700">Verification Approved</AlertTitle>
@@ -103,12 +103,12 @@ const VerificationStatus: React.FC = () => {
             </Alert>
           )}
           
-          {status.status === VerificationStatusEnum.REJECTED && (
+          {verificationStatus === VerificationStatusEnum.REJECTED && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Verification Rejected</AlertTitle>
               <AlertDescription>
-                {status.reason || "Your verification was rejected. Please submit clearer documents."}
+                {verificationRequest.rejectionReason || "Your verification was rejected. Please submit clearer documents."}
               </AlertDescription>
             </Alert>
           )}
@@ -127,13 +127,13 @@ const VerificationStatus: React.FC = () => {
             </div>
           )}
           
-          {status.status === VerificationStatusEnum.REJECTED && (
+          {verificationStatus === VerificationStatusEnum.REJECTED && (
             <Button className="w-full mt-4">Submit New Verification</Button>
           )}
           
-          {status.lastSubmitted && (
+          {verificationRequest.submittedAt && (
             <p className="text-xs text-muted-foreground mt-4">
-              Submitted on: {new Date(status.lastSubmitted).toLocaleDateString()}
+              Submitted on: {new Date(verificationRequest.submittedAt).toLocaleDateString()}
             </p>
           )}
         </div>
