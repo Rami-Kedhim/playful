@@ -46,6 +46,19 @@ export interface UberPersona {
   };
 }
 
+export interface PersonaSearchParams {
+  query?: string;
+  types?: string[];
+  tags?: string[];
+  isVerified?: boolean;
+  isOnline?: boolean;
+  isPremium?: boolean;
+  page?: number;
+  limit?: number;
+  location?: string;
+  offset?: number;
+}
+
 export const normalizeUberPersonaFeatures = (features: UberPersonaFeatures | string[]): UberPersonaFeatures => {
   if (Array.isArray(features)) {
     return {

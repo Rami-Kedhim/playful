@@ -1,5 +1,6 @@
+
 import { UberPersona } from '@/types/uberPersona';
-import { PersonaSearchParams } from '@/types/persona.d';
+import { PersonaSearchParams } from '@/types/persona';
 
 export class PersonaService {
   private baseUrl = `${process.env.API_URL || ''}/personas`;
