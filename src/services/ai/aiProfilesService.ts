@@ -1,124 +1,88 @@
 
 import { AIProfile } from '@/types/ai-profile';
+import { aiProfileGenerator } from '../aiProfileGenerator';
 
-export class AIProfilesService {
-  async getProfiles(): Promise<AIProfile[]> {
-    // Mock implementation
-    return [
-      {
-        id: '1',
-        name: 'Sophia',
-        avatarUrl: '/assets/ai-profiles/sophia.jpg',
-        imageUrl: '/assets/ai-profiles/sophia.jpg',
-        thumbnailUrl: '/assets/ai-profiles/sophia-thumb.jpg',
-        displayName: 'Sophia AI',
-        description: 'Friendly AI companion',
-        bio: 'I love deep conversations about philosophy and art.',
-        personality: ['friendly', 'intellectual', 'creative'],
-        traits: ['curious', 'empathetic', 'thoughtful'],
-        interests: ['philosophy', 'art', 'literature'],
-        gender: 'female',
-        age: 24,
-        rating: 4.8,
-        reviewCount: 56,
-        tags: ['companion', 'intellectual', 'creative'],
-        location: 'Virtual',
-        livecam_enabled: false,
-        gallery_images: [
-          '/assets/ai-profiles/sophia-1.jpg',
-          '/assets/ai-profiles/sophia-2.jpg'
-        ],
-        premium_content_count: 12,
-        subscription_price: 9.99
-      },
-      {
-        id: '2',
-        name: 'Alex',
-        avatarUrl: '/assets/ai-profiles/alex.jpg',
-        imageUrl: '/assets/ai-profiles/alex.jpg',
-        thumbnailUrl: '/assets/ai-profiles/alex-thumb.jpg',
-        displayName: 'Alex AI',
-        description: 'Tech expert and coding partner',
-        bio: 'I can help you with coding projects and technical challenges.',
-        personality: ['logical', 'analytical', 'helpful'],
-        traits: ['precise', 'knowledgeable', 'patient'],
-        interests: ['programming', 'technology', 'science'],
-        gender: 'male',
-        age: 28,
-        rating: 4.9,
-        reviewCount: 87,
-        tags: ['tech', 'coding', 'science'],
-        location: 'Virtual',
-        livecam_enabled: true,
-        gallery_images: [
-          '/assets/ai-profiles/alex-1.jpg',
-          '/assets/ai-profiles/alex-2.jpg'
-        ],
-        premium_content_count: 8,
-        subscription_price: 12.99
-      }
-    ];
+// Number of AI profiles to generate by default
+const DEFAULT_PROFILE_COUNT = 20;
+
+// Cache for AI profiles to avoid generating new ones on every call
+let cachedProfiles: AIProfile[] | null = null;
+
+/**
+ * Gets a list of AI profiles
+ * @param count Optional number of profiles to return
+ * @returns Array of AI profiles
+ */
+export const getAIProfiles = async (count: number = DEFAULT_PROFILE_COUNT): Promise<AIProfile[]> => {
+  if (!cachedProfiles) {
+    cachedProfiles = aiProfileGenerator.generateMultipleProfiles(DEFAULT_PROFILE_COUNT);
   }
-
-  async getProfileById(profileId: string): Promise<AIProfile | null> {
-    // Mock implementation
-    if (profileId === '1') {
-      return {
-        id: '1',
-        name: 'Sophia',
-        avatarUrl: '/assets/ai-profiles/sophia.jpg',
-        imageUrl: '/assets/ai-profiles/sophia.jpg',
-        thumbnailUrl: '/assets/ai-profiles/sophia-thumb.jpg',
-        displayName: 'Sophia AI',
-        description: 'Friendly AI companion',
-        bio: 'I love deep conversations about philosophy and art.',
-        personality: ['friendly', 'intellectual', 'creative'],
-        traits: ['curious', 'empathetic', 'thoughtful'],
-        interests: ['philosophy', 'art', 'literature'],
-        gender: 'female',
-        age: 24,
-        rating: 4.8,
-        reviewCount: 56,
-        tags: ['companion', 'intellectual', 'creative'],
-        location: 'Virtual',
-        livecam_enabled: false,
-        gallery_images: [
-          '/assets/ai-profiles/sophia-1.jpg',
-          '/assets/ai-profiles/sophia-2.jpg'
-        ],
-        premium_content_count: 12,
-        subscription_price: 9.99
-      };
-    } else if (profileId === '2') {
-      return {
-        id: '2',
-        name: 'Alex',
-        avatarUrl: '/assets/ai-profiles/alex.jpg',
-        imageUrl: '/assets/ai-profiles/alex.jpg',
-        thumbnailUrl: '/assets/ai-profiles/alex-thumb.jpg',
-        displayName: 'Alex AI',
-        description: 'Tech expert and coding partner',
-        bio: 'I can help you with coding projects and technical challenges.',
-        personality: ['logical', 'analytical', 'helpful'],
-        traits: ['precise', 'knowledgeable', 'patient'],
-        interests: ['programming', 'technology', 'science'],
-        gender: 'male',
-        age: 28,
-        rating: 4.9,
-        reviewCount: 87,
-        tags: ['tech', 'coding', 'science'],
-        location: 'Virtual',
-        livecam_enabled: true,
-        gallery_images: [
-          '/assets/ai-profiles/alex-1.jpg',
-          '/assets/ai-profiles/alex-2.jpg'
-        ],
-        premium_content_count: 8,
-        subscription_price: 12.99
-      };
-    }
-    return null;
+  
+  // If requesting more than we have cached, generate more
+  if (count > cachedProfiles.length) {
+    const additionalProfiles = aiProfileGenerator.generateMultipleProfiles(count - cachedProfiles.length);
+    cachedProfiles = [...cachedProfiles, ...additionalProfiles];
   }
-}
+  
+  // Return the requested number of profiles
+  return cachedProfiles.slice(0, count);
+};
 
-export const aiProfilesService = new AIProfilesService();
+/**
+ * Gets a specific AI profile by ID
+ * @param id The ID of the profile to retrieve
+ * @returns The AI profile or null if not found
+ */
+export const getAIProfileById = async (id: string): Promise<AIProfile | null> => {
+  // Ensure we have some cached profiles
+  if (!cachedProfiles) {
+    cachedProfiles = aiProfileGenerator.generateMultipleProfiles(DEFAULT_PROFILE_COUNT);
+  }
+  
+  // Look for the profile with the given ID
+  const profile = cachedProfiles.find(p => p.id === id);
+  
+  // If not found, generate a new profile with the ID
+  if (!profile) {
+    const generator = new AIProfileGenerator();
+    const newProfile = await generator.generateRandomProfile();
+    newProfile.id = id;
+    cachedProfiles.push(newProfile);
+    return newProfile;
+  }
+  
+  return profile;
+};
+
+/**
+ * Creates a new AI profile with the given parameters
+ * @param profileData Partial AI profile data
+ * @returns The created AI profile
+ */
+export const createAIProfile = async (profileData: Partial<AIProfile>): Promise<AIProfile> => {
+  const generator = new AIProfileGenerator();
+  const baseProfile = await generator.generateRandomProfile();
+  
+  // Merge the provided data with the base profile
+  const newProfile: AIProfile = {
+    ...baseProfile,
+    ...profileData,
+    // Ensure id is unique if not provided
+    id: profileData.id || `ai-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+  };
+  
+  // Add to cache
+  if (cachedProfiles) {
+    cachedProfiles.push(newProfile);
+  } else {
+    cachedProfiles = [newProfile];
+  }
+  
+  return newProfile;
+};
+
+export default {
+  getAIProfiles,
+  getAIProfileById,
+  createAIProfile
+};

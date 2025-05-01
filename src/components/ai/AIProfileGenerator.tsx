@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { generateMultipleProfiles } from '@/services/aiProfileGenerator';
+import { aiProfileGenerator } from '@/services/aiProfileGenerator';
 import { AIProfile } from '@/types/ai-profile';
 import AIProfileCard from '@/components/ai/AIProfileCard';
 
@@ -21,7 +21,7 @@ const AIProfileGenerator = ({ onSelectProfile }: AIProfileGeneratorProps) => {
     setIsGenerating(true);
     // Add a small delay to simulate processing
     setTimeout(() => {
-      const profiles = generateMultipleProfiles(count);
+      const profiles = aiProfileGenerator.generateMultipleProfiles(count);
       setGenerated(profiles);
       setIsGenerating(false);
     }, 1000);

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AIProfile } from '@/types/ai-profile';
@@ -46,6 +45,54 @@ const AIEscorts = () => {
 
   const profiles = sortProfiles(mockAIProfiles);
 
+  const renderProfileCard = (profile: AIProfile) => {
+    const personality = profile.personality;
+    const personalityType = typeof personality === 'object' && !Array.isArray(personality) 
+      ? personality.type 
+      : undefined;
+      
+    return (
+      <Card key={profile.id}>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-muted overflow-hidden">
+              {profile.imageUrl && (
+                <img 
+                  src={profile.imageUrl} 
+                  alt={profile.name} 
+                  className="w-full h-full object-cover" 
+                />
+              )}
+            </div>
+            <div>
+              <h3 className="font-semibold">{profile.name}</h3>
+              <p className="text-sm text-muted-foreground">
+                {Array.isArray(personality) && personality.length > 0
+                  ? personality[0]
+                  : personalityType}
+              </p>
+              <div className="flex items-center mt-1">
+                {profile.boost_status?.isActive && (
+                  <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full mr-2">
+                    Boosted
+                  </span>
+                )}
+                <span className="text-xs text-muted-foreground">
+                  {profile.location}
+                </span>
+              </div>
+              {profile.age && (
+                <span className="text-xs text-muted-foreground">
+                  Age: {profile.age}
+                </span>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="container mx-auto py-10">
       <Card>
@@ -55,46 +102,7 @@ const AIEscorts = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {profiles.map(profile => (
-              <Card key={profile.id}>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-muted overflow-hidden">
-                      {profile.imageUrl && (
-                        <img 
-                          src={profile.imageUrl} 
-                          alt={profile.name} 
-                          className="w-full h-full object-cover" 
-                        />
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{profile.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {Array.isArray(profile.personality) && profile.personality.length > 0
-                          ? profile.personality[0]
-                          : typeof profile.personality === 'object' && profile.personality
-                            ? profile.personality.type
-                            : ''}
-                      </p>
-                      <div className="flex items-center mt-1">
-                        {profile.boost_status?.isActive && (
-                          <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full mr-2">
-                            Boosted
-                          </span>
-                        )}
-                        <span className="text-xs text-muted-foreground">
-                          {profile.location}
-                        </span>
-                      </div>
-                      {profile.age && (
-                        <span className="text-xs text-muted-foreground">
-                          Age: {profile.age}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              renderProfileCard(profile)
             ))}
           </div>
         </CardContent>

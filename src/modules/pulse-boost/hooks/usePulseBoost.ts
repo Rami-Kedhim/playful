@@ -44,7 +44,9 @@ export function usePulseBoost(profileId?: string) {
       setPackages(boostPackages.map(pkg => ({
         ...pkg,
         // Convert duration from number to string if needed
-        duration: typeof pkg.duration === 'number' ? String(pkg.duration) : pkg.duration
+        duration: typeof pkg.duration === 'number' ? String(pkg.duration) : pkg.duration,
+        // Ensure boostMultiplier exists
+        boostMultiplier: pkg.boostMultiplier || 1.5
       })));
       
       // Fetch active boost (mock)
@@ -55,7 +57,8 @@ export function usePulseBoost(profileId?: string) {
           const randomPackage = packages.length > 0 ? packages[randomIndex] : {
             id: 'default-package',
             name: 'Basic Boost',
-            duration: '24:00:00'
+            duration: '24:00:00',
+            boostMultiplier: 1.5
           };
           
           setActiveBoost({
@@ -64,7 +67,7 @@ export function usePulseBoost(profileId?: string) {
             packageName: randomPackage.name,
             startedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
             expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000),
-            boostMultiplier: randomPackage.boostMultiplier ?? 1.5,
+            boostMultiplier: randomPackage.boostMultiplier || 1.5,
             remainingTime: '12:00:00',
             progress: 50
           });
@@ -83,7 +86,12 @@ export function usePulseBoost(profileId?: string) {
           boostType: 'standard',
           boostMultiplier: 1.5,
           price: 50,
-          status: 'completed' as const,
+          status: 'completed' as const
+        };
+
+        // Add items property separately to avoid type errors
+        setHistory({
+          ...mockHistory,
           items: [
             {
               id: 'hist-1',
@@ -102,9 +110,7 @@ export function usePulseBoost(profileId?: string) {
               status: 'completed'
             }
           ]
-        };
-        
-        setHistory(mockHistory);
+        });
         
         // Simulate analytics
         setAnalytics({

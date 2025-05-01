@@ -1,198 +1,166 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { BoostPackage } from '@/types/boost';
-import { useBoostDialog } from '@/hooks/boost/useBoostDialog';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { Slider } from "@/components/ui/slider"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
-import { cn } from "@/lib/utils"
-import { Link } from 'react-router-dom';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useBoostDialog } from '@/hooks/useBoostDialog';
+import { useAuth } from '@/hooks/auth';
+import { Zap } from 'lucide-react';
+import LivecamGrid from '@/components/livecams/LivecamGrid';
+import LivecamFeatured from '@/components/livecams/LivecamFeatured';
+import LivecamFilters from '@/components/livecams/LivecamFilters';
+import { useLivecams } from '@/hooks/useLivecams';
+import { Livecam } from '@/types/livecam';
+import { useToast } from '@/hooks/use-toast';
+import BoostDialog from '@/components/boost/BoostDialog';
 
-const Livecams: React.FC = () => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const profileId = 'some-profile-id'; // Replace with actual profile ID
-  const {
-    activeTab,
-    setActiveTab,
-    selectedPackage,
-    setSelectedPackage,
-    isLoading,
-    error: boostError,
-    boostStatus,
-    eligibility,
-    boostPackages,
-    dailyBoostUsage,
-    dailyBoostLimit,
-    hermesStatus,
-    handleBoost,
-    handleCancel,
-    formatBoostDuration,
-    getBoostPrice
-  } = useBoostDialog(() => Promise.resolve(true));
+const Livecams = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState('all');
+  const [selectedFilters, setSelectedFilters] = useState({
+    categories: [],
+    tags: [],
+    priceRange: [0, 500],
+    onlineOnly: true
+  });
+  
+  const { livecams, featured, isLoading: livecamsLoading } = useLivecams({
+    filters: selectedFilters,
+    category: activeTab === 'all' ? undefined : activeTab
+  });
+  
+  const profileId = user?.id || 'guest';
+  
+  const { 
+    showDialog, 
+    isLoading, 
+    boostStatus, 
+    handleOpenDialog,
+    handleCloseDialog,
+    handleSuccess,
+    toggleDialog
+  } = useBoostDialog(profileId);
 
-  const [isBoosted, setIsBoosted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  const handleCancel = async () => {
+    try {
+      // Call the appropriate cancel function
+      const success = await toggleDialog(); // Or another appropriate method
+      if (success) {
+        // Handle successful cancellation
+        toast({
+          title: "Boost Cancelled",
+          description: "Your boost has been cancelled successfully."
+        });
+      }
+      return success;
+    } catch (err) {
+      setErrorMessage('Failed to cancel boost');
+      return false;
+    }
+  };
 
-  const toggleBoost = () => {
-    setIsBoosted(!isBoosted);
+  const handleFilterChange = (newFilters: any) => {
+    setSelectedFilters(prev => ({
+      ...prev,
+      ...newFilters
+    }));
+  };
+
+  const renderBoostButton = () => {
+    if (!user) return null;
+    
+    if (boostStatus.isActive) {
+      return (
+        <Button 
+          variant="outline" 
+          className="flex items-center gap-2"
+          onClick={handleOpenDialog}
+        >
+          <Zap className="h-4 w-4 text-amber-500" />
+          <span>Boosted</span>
+        </Button>
+      );
+    }
+    
+    return (
+      <Button 
+        variant="outline" 
+        className="flex items-center gap-2"
+        onClick={handleOpenDialog}
+      >
+        <Zap className="h-4 w-4" />
+        <span>Boost Visibility</span>
+      </Button>
+    );
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-4">LiveCam Dashboard</h1>
-
-      <div className="mb-4">
-        <Button onClick={() => setIsDrawerOpen(true)}>Open Settings</Button>
+    <div className="container mx-auto py-8 px-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Live Cams</h1>
+          <p className="text-muted-foreground">
+            Connect with live performers in real-time
+          </p>
+        </div>
+        
+        {renderBoostButton()}
       </div>
-
-      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DrawerTrigger asChild>
-          <Button>Open</Button>
-        </DrawerTrigger>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Are you absolutely sure?</DrawerTitle>
-            <DrawerDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove your data from our servers.
-            </DrawerDescription>
-          </DrawerHeader>
-          <DrawerFooter>
-            <DrawerClose>Cancel</DrawerClose>
-            <Button variant="destructive">Delete</Button>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="item-1">
-          <AccordionTrigger>Is it accessible?</AccordionTrigger>
-          <AccordionContent>
-            Yes. It adheres to the WAI-ARIA design pattern.
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-
-      <Tabs defaultValue="account" className="w-[400px]">
-        <TabsList>
-          <TabsTrigger value="account">Account</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="display">Display</TabsTrigger>
-        </TabsList>
-        <TabsContent value="account">Make changes to your account here.</TabsContent>
-        <TabsContent value="appearance">Customize your appearance here.</TabsContent>
-        <TabsContent value="notifications">Manage your notifications here.</TabsContent>
-        <TabsContent value="display">Set your display preferences here.</TabsContent>
-      </Tabs>
-
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button variant="outline">Edit Profile</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
-            <DialogDescription>
-              Make changes to your profile here. Click save when you're done.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Name
-              </Label>
-              <Input id="name" value="Pedro Duarte" className="col-span-3" />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="username" className="text-right">
-                Username
-              </Label>
-              <Input id="username" value="@peduarte" className="col-span-3" />
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Select>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Theme" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="light">Light</SelectItem>
-          <SelectItem value="dark">Dark</SelectItem>
-          <SelectItem value="system">System</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <Textarea placeholder="Type your message here." />
-
-      <Input type="email" placeholder="shadcn@example.com" />
-
-      <Slider defaultValue={[33]} max={100} step={1} />
-
-      <Avatar>
-        <AvatarImage src="https://github.com/shadcn.png" />
-        <AvatarFallback>CN</AvatarFallback>
-      </Avatar>
-
-      <Card>
-        <CardContent>
-          <p>LiveCam Content Here</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent>
-          <Button onClick={toggleBoost}>
-            {isBoosted ? 'Cancel Boost' : 'Boost LiveCam'}
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Link to="/livecam/123" className="text-blue-500 hover:underline">
-        Go to Livecam Detail
-      </Link>
+      
+      {featured && featured.length > 0 && (
+        <div className="mb-8">
+          <LivecamFeatured livecams={featured} />
+        </div>
+      )}
+      
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle>Filters</CardTitle>
+              <CardDescription>Refine your search</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <LivecamFilters 
+                filters={selectedFilters}
+                onChange={handleFilterChange}
+              />
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="lg:col-span-3">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+            <TabsList className="grid grid-cols-4">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="female">Female</TabsTrigger>
+              <TabsTrigger value="male">Male</TabsTrigger>
+              <TabsTrigger value="couple">Couples</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          <LivecamGrid 
+            livecams={livecams} 
+            loading={livecamsLoading}
+          />
+        </div>
+      </div>
+      
+      <BoostDialog 
+        open={showDialog}
+        onOpenChange={handleCloseDialog}
+        profileId={profileId}
+        onSuccess={handleSuccess}
+        onCancel={handleCancel}
+      />
+      
+      {errorMessage && (
+        <div className="mt-4 p-4 bg-destructive/10 text-destructive rounded-md">
+          {errorMessage}
+        </div>
+      )}
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import { UberPersona } from '@/types/uberPersona';
 
 interface User {
@@ -7,6 +6,12 @@ interface User {
   email: string;
   avatarUrl: string;
   ubxBalance: number;
+}
+
+interface UpdateResult {
+  success: boolean;
+  user?: User;
+  message?: string;
 }
 
 export class UserService {
@@ -60,6 +65,30 @@ export class UserService {
         isPremium: true
       }
     ];
+  }
+
+  async updateUser(userId: string, userData: Partial<User>): Promise<UpdateResult> {
+    // Mock implementation
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      return {
+        success: true,
+        user: {
+          id: userId,
+          username: userData.username || 'exampleUser',
+          email: userData.email || 'user@example.com',
+          avatarUrl: userData.avatarUrl || '/assets/default-avatar.jpg',
+          ubxBalance: userData.ubxBalance || 1000
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to update user'
+      };
+    }
   }
 }
 

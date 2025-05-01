@@ -1,7 +1,7 @@
 
 import { PulseBoost } from './pulse-boost';
 
-// Re-export the BoostPackage to fix errors across the codebase
+// Export the BoostPackage type properly
 export type { BoostPackage } from './pulse-boost';
 
 export interface BoostStatus {
@@ -12,7 +12,7 @@ export interface BoostStatus {
   remainingTime?: string;
   timeRemaining?: string;
   packageId?: string;
-  activeBoostId?: string; // Added this field
+  activeBoostId?: string;
   startedAt?: Date;
   expiresAt?: Date | string;
   packageName?: string;
@@ -21,7 +21,7 @@ export interface BoostStatus {
   progress?: number;
   boost_level?: number;
   visibilityScore?: number;
-  boostType?: string; // Added for compatibility
+  boostType?: string;
 }
 
 export interface HermesStatus {
@@ -38,18 +38,18 @@ export interface HermesStatus {
   expiresAt?: Date | string;
 }
 
-// Renamed HermesBoostStatus to just re-use HermesStatus
+// Use HermesStatus instead of creating a new type
 export type HermesBoostStatus = HermesStatus;
 
 export interface BoostEligibility {
   eligible: boolean;
-  isEligible?: boolean;  // Add both variants
+  isEligible?: boolean;
   reason?: string;
-  reasons?: string[];    // Added to fix errors
+  reasons?: string[];
   nextEligibleTime?: string;
   remainingBoosts?: number;
   maxBoostsPerDay?: number;
-  restrictions?: string[];  // Added to fix errors
+  restrictions?: string[];
 }
 
 export interface AnalyticsData {
@@ -62,23 +62,10 @@ export interface AnalyticsData {
     yesterday: number;
     weeklyAverage: number;
     withBoost: number;
-    withoutBoost?: number;  // Added to fix errors
-    increase?: number;      // Added to fix errors
+    withoutBoost?: number;
+    increase?: number;
   };
   interactions?: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost?: number;  // Added to fix errors
-    increase?: number;      // Added to fix errors
-  };
-  rank?: {
-    current: number;
-    previous: number;
-    change: number;
-  };
-  clicks?: {              // Added to fix errors
     today: number;
     yesterday: number;
     weeklyAverage: number;
@@ -86,17 +73,29 @@ export interface AnalyticsData {
     withoutBoost?: number;
     increase?: number;
   };
-  conversions?: number;    // Added to fix errors
-  timeActive?: number;     // Added to fix errors
-  boostEfficiency?: number; // Added to fix errors
-  trending?: boolean;      // Added to fix errors
-  roi?: number;            // Added to fix errors
+  rank?: {
+    current: number;
+    previous: number;
+    change: number;
+  };
+  clicks?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  conversions?: number;
+  timeActive?: number;
+  boostEfficiency?: number;
+  trending?: boolean;
+  roi?: number;
 }
 
-// BoostAnalytics is the same as AnalyticsData but with slightly different structure
+// Define BoostAnalytics properly
 export interface BoostAnalytics extends AnalyticsData {
-  // All needed fields are already in AnalyticsData
-  // Just making sure the interface exists
+  // All fields are already in AnalyticsData
 }
 
 export interface BoostContextType {
@@ -117,7 +116,7 @@ export interface BoostContextType {
   adaptGetBoostPrice: () => number;
 }
 
-// Add BoostDialogTabsProps that's referenced elsewhere
+// Define BoostDialogTabsProps properly
 export interface BoostDialogTabsProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;

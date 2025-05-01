@@ -1,5 +1,5 @@
 
-import { UserRoleEnum, UserRole } from '@/types/pulse-boost';
+import { UserRole } from '@/types/pulse-boost';
 
 export interface User {
   id: string;
@@ -8,6 +8,12 @@ export interface User {
   role: UserRole;
   ubxBalance: number;
   isVerified: boolean;
+}
+
+export interface AuthResult {
+  success: boolean;
+  user?: User;
+  message?: string;
 }
 
 class AuthService {
@@ -19,13 +25,13 @@ class AuthService {
       id: 'user-123',
       email: 'user@example.com',
       username: 'exampleUser',
-      role: UserRoleEnum.USER,
+      role: 'USER',
       ubxBalance: 1000,
       isVerified: true
     };
   }
   
-  async login(email: string, password: string): Promise<User> {
+  async login(email: string, password: string): Promise<AuthResult> {
     // Mock implementation
     await new Promise(resolve => setTimeout(resolve, 800));
     
@@ -34,15 +40,21 @@ class AuthService {
         id: 'user-123',
         email,
         username: email.split('@')[0],
-        role: UserRoleEnum.USER,
+        role: 'USER',
         ubxBalance: 1000,
         isVerified: true
       };
       
-      return this.currentUser;
+      return {
+        success: true,
+        user: this.currentUser
+      };
     }
     
-    throw new Error('Invalid credentials');
+    return {
+      success: false,
+      message: 'Invalid credentials'
+    };
   }
   
   async logout(): Promise<void> {
@@ -56,6 +68,37 @@ class AuthService {
   
   isAuthenticated(): boolean {
     return !!this.currentUser;
+  }
+
+  async validateToken(token: string): Promise<boolean> {
+    // Mock implementation
+    return token.startsWith('mock_token_');
+  }
+
+  async register(userData: Partial<User>): Promise<AuthResult> {
+    // Mock implementation
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    if (userData.email) {
+      this.currentUser = {
+        id: 'user-' + Date.now(),
+        email: userData.email,
+        username: userData.username || userData.email.split('@')[0],
+        role: 'USER',
+        ubxBalance: 0,
+        isVerified: false
+      };
+      
+      return {
+        success: true,
+        user: this.currentUser
+      };
+    }
+    
+    return {
+      success: false,
+      message: 'Invalid user data'
+    };
   }
 }
 

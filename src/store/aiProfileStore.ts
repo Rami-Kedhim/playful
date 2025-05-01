@@ -1,7 +1,7 @@
 
 import { create } from 'zustand';
 import { AIProfile } from '@/types/ai-profile';
-import { generateMultipleProfiles } from '@/services/aiProfileGenerator';
+import { aiProfileGenerator } from '@/services/aiProfileGenerator';
 
 interface AIConversation {
   id: string;
@@ -63,7 +63,7 @@ const useAIProfileStore = create<AIProfileStore>((set, get) => ({
   
   loadProfiles: async () => {
     // In a real app, this would be an API call
-    const generatedProfiles = generateMultipleProfiles(INITIAL_PROFILE_COUNT);
+    const generatedProfiles = aiProfileGenerator.generateMultipleProfiles(INITIAL_PROFILE_COUNT);
     
     set({ 
       profiles: generatedProfiles,
