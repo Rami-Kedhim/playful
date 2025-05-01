@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getDocumentTypeLabel, documentTypeOptions } from '../utils/documentTypeHelper';
+import { getDocumentTypeLabel } from '@/utils/verification';
+import { documentTypeOptions } from '../utils/documentTypeHelper';
 
 interface DocumentTypeSelectProps {
   form: any;
@@ -13,13 +14,14 @@ const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form }) => {
     <FormField
       control={form.control}
       name="documentType"
-      rules={{ required: "Document type is required" }}
+      rules={{ required: "Please select a document type" }}
       render={({ field }) => (
         <FormItem>
           <FormLabel>Document Type</FormLabel>
-          <Select 
-            onValueChange={field.onChange} 
+          <Select
+            onValueChange={field.onChange}
             defaultValue={field.value}
+            value={field.value}
           >
             <FormControl>
               <SelectTrigger>
@@ -28,15 +30,12 @@ const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form }) => {
             </FormControl>
             <SelectContent>
               {documentTypeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+                <SelectItem key={option} value={option}>
+                  {getDocumentTypeLabel(option)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <FormDescription>
-            Choose the type of identification document you wish to submit
-          </FormDescription>
           <FormMessage />
         </FormItem>
       )}

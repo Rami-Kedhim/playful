@@ -1,21 +1,24 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle } from 'lucide-react';
 
 const SuccessCard: React.FC = () => {
   return (
     <Card>
-      <CardHeader className="text-center">
-        <CheckCircle className="mx-auto h-10 w-10 text-primary mb-2" />
-        <CardTitle>Verification Submitted</CardTitle>
+      <CardHeader>
+        <div className="flex justify-center mb-2">
+          <CheckCircle className="h-16 w-16 text-primary" />
+        </div>
+        <CardTitle className="text-center">Verification Submitted</CardTitle>
+        <CardDescription className="text-center">
+          Your verification documents have been submitted successfully.
+        </CardDescription>
       </CardHeader>
       <CardContent className="text-center">
-        <p className="mb-4">
-          Your verification documents have been submitted successfully. Our team will review your submission and update your verification status.
-        </p>
-        <p className="text-sm text-muted-foreground">
-          The verification process typically takes 1-2 business days. You will receive a notification once the review is complete.
+        <p className="text-muted-foreground">
+          Our team will review your documents and update your verification status.
+          You can check the status of your verification in the Status tab.
         </p>
       </CardContent>
     </Card>

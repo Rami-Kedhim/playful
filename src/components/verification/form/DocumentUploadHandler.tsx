@@ -1,7 +1,7 @@
 
-import React, { useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { UploadCloud } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Upload } from 'lucide-react';
 
 interface DocumentUploadHandlerProps {
   label: string;
@@ -9,39 +9,46 @@ interface DocumentUploadHandlerProps {
   error?: string;
 }
 
-const DocumentUploadHandler = ({ label, onFileSelect, error }: DocumentUploadHandlerProps) => {
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      onFileSelect(acceptedFiles[0]);
-    }
-  }, [onFileSelect]);
+const DocumentUploadHandler: React.FC<DocumentUploadHandlerProps> = ({ 
+  label, 
+  onFileSelect,
+  error
+}) => {
+  const [fileName, setFileName] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/*': ['.jpeg', '.jpg', '.png'],
-      'application/pdf': ['.pdf']
-    },
-    maxFiles: 1,
-  });
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFileName(file.name);
+      onFileSelect(file);
+    }
+  };
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-foreground">{label}</label>
-      <div
-        {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer
-          ${isDragActive ? 'border-primary bg-primary/10' : 'border-muted hover:border-primary'}
-          ${error ? 'border-destructive' : ''}`}
-      >
-        <input {...getInputProps()} />
-        <UploadCloud className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-        <p className="text-sm text-muted-foreground">
-          {isDragActive ? 'Drop file here' : 'Drag & drop a file here, or click to select'}
-        </p>
-        <p className="text-xs text-muted-foreground mt-1">
-          Supported formats: JPG, PNG, PDF
-        </p>
+      <div className="font-medium">{label}</div>
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleButtonClick}
+          className="flex items-center gap-2"
+        >
+          <Upload className="h-4 w-4" />
+          {fileName || 'Choose file'}
+        </Button>
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className="hidden"
+          accept="image/*"
+        />
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
