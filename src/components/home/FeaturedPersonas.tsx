@@ -1,7 +1,7 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-// Update the import to use lowercase
 import { UberPersona } from '@/types/uberPersona';
 
 interface FeaturedPersonasProps {
