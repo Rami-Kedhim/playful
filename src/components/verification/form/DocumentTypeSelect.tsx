@@ -1,36 +1,48 @@
 
 import React from 'react';
-import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FormField, FormItem, FormLabel, FormDescription, FormMessage } from '@/components/ui/form';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { getDocumentTypeLabel } from '@/utils/verification/index';
 
 interface DocumentTypeSelectProps {
   form: any;
 }
 
 const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form }) => {
+  // Document types available for verification
+  const documentTypes = [
+    'id_card',
+    'passport',
+    'drivers_license',
+    'residence_permit'
+  ];
+
   return (
     <FormField
       control={form.control}
       name="documentType"
-      rules={{ required: "Please select a document type" }}
+      rules={{ required: "Document type is required" }}
       render={({ field }) => (
         <FormItem>
           <FormLabel>Document Type</FormLabel>
-          <FormControl>
-            <Select onValueChange={field.onChange} value={field.value}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select document type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="id_card">ID Card</SelectItem>
-                <SelectItem value="passport">Passport</SelectItem>
-                <SelectItem value="drivers_license">Driver's License</SelectItem>
-                <SelectItem value="residence_permit">Residence Permit</SelectItem>
-              </SelectContent>
-            </Select>
-          </FormControl>
+          <Select
+            onValueChange={field.onChange}
+            defaultValue={field.value}
+            value={field.value}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select document type" />
+            </SelectTrigger>
+            <SelectContent>
+              {documentTypes.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {getDocumentTypeLabel(type)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <FormDescription>
-            Choose the type of identification document you wish to submit
+            Select the type of identification document you will upload
           </FormDescription>
           <FormMessage />
         </FormItem>

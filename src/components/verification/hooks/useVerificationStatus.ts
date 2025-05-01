@@ -1,61 +1,60 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth';
+import { VerificationStatus as VerificationStatusEnum, VerificationRequest } from '@/types/verification';
 import { supabase } from '@/lib/supabase';
-import { VerificationRequest, VerificationStatus, VerificationLevel } from '@/types/verification';
 
-export function useVerificationStatus() {
+interface UseVerificationStatusResult {
+  status: VerificationStatusEnum;
+  loading: boolean;
+  error: string | null;
+  verificationRequest: VerificationRequest | null;
+}
+
+export const useVerificationStatus = (): UseVerificationStatusResult => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<VerificationStatusEnum>(VerificationStatusEnum.NONE);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [verificationRequest, setVerificationRequest] = useState<VerificationRequest | null>(null);
-  const [status, setStatus] = useState<VerificationStatus>(VerificationStatus.NONE);
 
   useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+    const fetchVerificationStatus = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
-    async function fetchVerificationStatus() {
       try {
         setLoading(true);
-        setError(null);
 
-        // In a real application, this would be an API call to your backend
-        // For now, we'll simulate getting the verification status from user metadata
-        const { data: { user: userData }, error: userError } = await supabase.auth.getUser();
+        // Get verification request from user metadata or from database in real implementation
+        const verificationData = user.user_metadata?.verification_request;
+        
+        if (verificationData) {
+          setVerificationRequest(verificationData as VerificationRequest);
+          setStatus((verificationData.status as VerificationStatusEnum) || VerificationStatusEnum.NONE);
+        } else {
+          // In a real implementation, we would fetch this from the database
+          // For now, use a simulated API call
+          const { data, error } = await supabase
+            .from('verification_requests')
+            .select('*')
+            .eq('profile_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
 
-        if (userError) {
-          throw userError;
-        }
+          if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+            throw error;
+          }
 
-        if (!userData) {
-          setLoading(false);
-          return;
-        }
-
-        // Check if verification data exists in the user metadata
-        if (userData.user_metadata?.verification_request) {
-          const verificationData = userData.user_metadata.verification_request;
-          
-          setVerificationRequest({
-            id: verificationData.id,
-            profile_id: verificationData.profile_id || userData.id,
-            requested_level: verificationData.requested_level || VerificationLevel.BASIC,
-            status: verificationData.status || VerificationStatus.PENDING,
-            documents: verificationData.documents || [],
-            created_at: verificationData.created_at,
-            submittedAt: verificationData.submittedAt,
-            reviewedAt: verificationData.reviewedAt,
-            reviewer_notes: verificationData.reviewer_notes,
-            rejectionReason: verificationData.rejectionReason,
-          });
-          
-          setStatus(verificationData.status);
-        } else if (userData.user_metadata?.verification_status) {
-          // If only a status exists without a full request record
-          setStatus(userData.user_metadata.verification_status as VerificationStatus);
+          if (data) {
+            setVerificationRequest(data as VerificationRequest);
+            setStatus((data.status as VerificationStatusEnum) || VerificationStatusEnum.NONE);
+          } else {
+            setStatus(VerificationStatusEnum.NONE);
+          }
         }
       } catch (err: any) {
         console.error('Error fetching verification status:', err);
@@ -63,17 +62,17 @@ export function useVerificationStatus() {
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchVerificationStatus();
   }, [user]);
 
   return {
+    status,
     loading,
     error,
-    status,
-    verificationRequest,
+    verificationRequest
   };
-}
+};
 
 export default useVerificationStatus;
