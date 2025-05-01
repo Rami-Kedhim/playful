@@ -1,8 +1,6 @@
-
 import { useState, useEffect } from 'react';
-import { EnhancedBoostStatus } from '@/types/ai-profile';
-import { BoostPackage } from '@/types/boost';
-import { PulseBoost } from '@/types/pulse-boost';
+import { EnhancedBoostStatus } from '@/types/pulse-boost';
+import { BoostPackage, PulseBoost } from '@/types/pulse-boost';
 
 // Define BoostAnalytics interface here since it's missing from ai-profile
 interface BoostAnalytics {
@@ -94,8 +92,6 @@ export const usePulseBoost = (profileId?: string) => {
       const updatedStatus: EnhancedBoostStatus = {
         isActive: true,
         packageId: boostPackage.id,
-        packageName: boostPackage.name,
-        startedAt: new Date(),
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
         timeRemaining: '24:00:00',
         progress: 0,

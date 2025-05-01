@@ -1,10 +1,8 @@
-
 import { UberPersona } from '@/types/uberPersona';
-import { PersonaSearchParams } from '@/types/persona';
-import { config } from '@/config';
+import { PersonaSearchParams } from '@/types/persona.d';
 
 export class PersonaService {
-  private baseUrl = `${config.API_URL}/personas`;
+  private baseUrl = `${process.env.API_URL || ''}/personas`;
 
   async fetchPersonaById(id: string): Promise<UberPersona> {
     // Mock implementation
@@ -17,7 +15,6 @@ export class PersonaService {
       location: 'New York',
       services: [],
       languages: ['English'],
-      available: true,
       isVerified: true,
       rating: 4.8,
       reviews: [],

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { personaService } from '../service';
 import { UberPersona } from '@/types/uberPersona';
-import { PersonaSearchParams } from '@/types/persona';
+import { PersonaSearchParams } from '@/types/persona.d';
 
 export const usePersona = (personaId?: string) => {
   const [persona, setPersona] = useState<UberPersona | null>(null);
