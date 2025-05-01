@@ -1,130 +1,303 @@
+
+import { 
+  BrainHubRequest, 
+  BrainHubResponse, 
+  INeuralHub, 
+  ModelParameters, 
+  NeuralModel, 
+  NeuralService, 
+  SystemHealthMetrics, 
+  TrainingProgress 
+} from './types/neuralHub';
+
 /**
- * This file serves as a compatibility layer for services expecting the brainHub export.
- * It re-exports the neuralHub as brainHub to maintain compatibility.
+ * HermesOxum Neural Hub
+ * Centralized neural processing system combining Hermes and Oxum capabilities
  */
-import { neuralHub } from './HermesOxumNeuralHub';
-import { BrainHubConfig } from '@/types/brainHub';
-import { BrainHubRequest, BrainHubResponse } from './types/neuralHub';
+class NeuralHub implements INeuralHub {
+  private modelParameters: ModelParameters;
+  private initialized: boolean = false;
+  private services: Map<string, NeuralService> = new Map();
+  private trainingJobs: TrainingProgress[] = [];
+  private models: NeuralModel[] = [];
+  private systemHealth: SystemHealthMetrics;
 
-// Default configuration for brainHub
-const defaultConfig: BrainHubConfig = {
-  aiModelParameters: {
-    learningRate: 0.001,
-    batchSize: 32,
-    epochs: 10,
-    optimizerType: 'adam'
-  },
-  systemSettings: {
-    resourceAllocationMode: 'balanced',
-    autoOptimize: true,
-    debugMode: false,
-    loggingLevel: 'info'
-  },
-  neuralSettings: {
-    activationThreshold: 0.7,
-    neuralDensity: 0.5,
-    layerConfiguration: 'standard'
-  },
-  psychology: {
-    enabled: true,
-    confidenceThreshold: 0.65
-  },
-  physics: {
-    enabled: false,
-    simulationPrecision: 0.85
-  },
-  economics: {
-    enabled: true,
-    marketModelVersion: '2.3'
-  },
-  robotics: {
-    enabled: false,
-    motorPrecision: 0.92
-  },
-  geoLegalFilteringEnabled: true,
-  neuroEmotionEnabled: true,
-  predictiveModulationEnabled: false
-};
-
-// Current configuration state
-let currentConfig = { ...defaultConfig };
-
-// Export neuralHub as brainHub for legacy compatibility
-export const brainHub = {
-  ...neuralHub,
-  
-  // Add any specific brainHub methods that might be expected by other services
-  getSystemStatus() {
-    return {
-      ...neuralHub.getSystemStatus(),
-      cpuUtilization: Math.random() * 100,
-      memoryUtilization: Math.random() * 100,
-      operationsPerSecond: Math.random() * 5000,
-      neuralAccuracy: 0.92,
-      neuralEfficiency: 0.87,
-      neuralLatency: 125,
-      errorRate: Math.random() * 2, // Add error rate for health checks
-      responseTime: Math.floor(Math.random() * 200 + 50), // Add response time
-      stability: Math.random() * 100 // Add stability metric
+  constructor() {
+    // Initialize with default parameters
+    this.modelParameters = {
+      temperature: 0.7,
+      frequencyPenalty: 0.0,
+      presencePenalty: 0.0,
+      maxTokens: 2048,
+      stopSequences: [],
+      modelName: 'hermes-default',
+      decayConstant: 0.85,
+      growthFactor: 1.05,
+      cyclePeriod: 24,
+      harmonicCount: 3,
+      learningRate: 0.001,
+      batchSize: 32
     };
-  },
 
-  // Add config management methods
-  getConfig(): BrainHubConfig {
-    return { ...currentConfig };
-  },
+    this.systemHealth = {
+      cpuUsage: 0,
+      memoryUsage: 0,
+      requestsPerMinute: 0,
+      errorRate: 0,
+      lastUpdated: Date.now(),
+      systemLoad: 0,
+      userEngagement: 0
+    };
 
-  updateConfig(config: Partial<BrainHubConfig>): boolean {
-    try {
-      currentConfig = { ...currentConfig, ...config };
-      return true;
-    } catch (error) {
-      console.error("Error updating Brain Hub configuration:", error);
+    // Initialize some mock models
+    this.models = [
+      {
+        id: 'model-001',
+        name: 'Text Analyzer',
+        type: 'analysis',
+        version: '1.0.0',
+        status: 'active',
+        performance: { accuracy: 0.92, latency: 120 }
+      },
+      {
+        id: 'model-002',
+        name: 'Image Generator',
+        type: 'generation',
+        version: '1.5.2',
+        status: 'active',
+        performance: { accuracy: 0.89, latency: 450 }
+      }
+    ];
+
+    // Initialize mock training jobs
+    this.trainingJobs = [
+      {
+        id: 'job-001',
+        modelId: 'model-003',
+        status: 'training',
+        startTime: new Date(),
+        currentEpoch: 5,
+        totalEpochs: 20,
+        progress: 25,
+        accuracy: 0.78,
+        targetAccuracy: 0.90,
+        estimatedCompletionTime: new Date(Date.now() + 3600000),
+        timeRemaining: 3600,
+        message: 'Training in progress',
+        type: 'reinforcement'
+      }
+    ];
+  }
+
+  initialize(): void {
+    if (this.initialized) {
+      console.log('Neural Hub already initialized');
+      return;
+    }
+
+    console.log('Initializing HermesOxum Neural Hub');
+    // In a real implementation, this would connect to services, load models, etc.
+
+    this.initialized = true;
+    console.log('Neural Hub initialized successfully');
+  }
+
+  updateModelParameters(parameters: Partial<ModelParameters>): void {
+    this.modelParameters = { ...this.modelParameters, ...parameters };
+    console.log('Model parameters updated:', this.modelParameters);
+  }
+
+  getModelParameters(): ModelParameters {
+    return { ...this.modelParameters };
+  }
+
+  // Fix: Modified to return BrainHubResponse synchronously instead of Promise
+  processRequest(request: BrainHubRequest): BrainHubResponse {
+    if (!this.initialized) {
+      return { success: false, error: 'Neural Hub not initialized' };
+    }
+
+    console.log(`Processing ${request.type} request`);
+
+    // Mock response based on request type
+    switch (request.type) {
+      case 'analysis':
+        return { success: true, data: { sentiment: 'positive', confidence: 0.87 } };
+      case 'generation':
+        return { success: true, data: { text: 'Generated content based on request' } };
+      case 'moderation':
+        return { success: true, data: { approved: true, flags: [] } };
+      case 'transformation':
+        return { success: true, data: { transformed: true, result: 'Transformed data' } };
+      // Handle component registration and sync types
+      case 'register_component':
+      case 'unregister_component':
+      case 'sync_components':
+        return { success: true, data: { registered: true, componentId: request.data?.componentId } };
+      // Handle AI capability types
+      case 'register_capabilities':
+      case 'record_interaction':
+        return { success: true, data: { registered: true } };
+      // Handle AI profile types
+      case 'ai_profile_view':
+      case 'ai_subscription':
+        return { success: true, data: { profile: { name: 'AI Assistant', id: 'ai-001' } } };
+      // Handle AI messaging types
+      case 'ai_welcome_message':
+      case 'enhance_ai_message':
+      case 'enhance_image_prompt':
+        return { success: true, data: { text: 'Enhanced content', emotion: 'friendly' } };
+      // Handle Content types
+      case 'content_optimization':
+        return { success: true, data: { optimized: true, suggestions: ['Add more keywords', 'Improve image quality'] } };
+      case 'calculate_renewal_value':
+        return { success: true, data: { value: 15.99 } };
+      case 'predict_renewal_time':
+        return { success: true, data: { renewalTime: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) } };
+      case 'record_content_interaction':
+        return { success: true, data: { recorded: true } };
+      // Handle DevOps types
+      case 'log_decision':
+      case 'store_in_memory':
+        return { success: true, data: { stored: true, id: `log-${Date.now()}` } };
+      default:
+        return { success: false, error: `Unsupported request type: ${request.type}` };
+    }
+  }
+
+  // Return sync array instead of Promise
+  getActiveTrainingJobs(): TrainingProgress[] {
+    return [...this.trainingJobs];
+  }
+
+  // Return sync array instead of Promise
+  getModels(): NeuralModel[] {
+    return [...this.models];
+  }
+
+  async stopTraining(jobId: string): Promise<boolean> {
+    const jobIndex = this.trainingJobs.findIndex(job => job.id === jobId);
+    if (jobIndex === -1) {
       return false;
     }
-  },
 
-  // Add processRequest method that was missing but is used by many components
-  // Fixed to immediately return BrainHubResponse instead of Promise<BrainHubResponse>
-  processRequest(request: BrainHubRequest): BrainHubResponse {
-    console.log(`Brain Hub processing ${request.type} request`, request);
-    
+    // Update job status
+    this.trainingJobs[jobIndex].status = 'stopped';
+    console.log(`Training job ${jobId} stopped`);
+
+    return true;
+  }
+
+  async startTraining(type: string, options: any): Promise<TrainingProgress> {
+    const newJob: TrainingProgress = {
+      id: `job-${Date.now()}`,
+      modelId: options.modelId || `model-${Date.now()}`,
+      status: 'training',
+      startTime: new Date(),
+      currentEpoch: 0,
+      totalEpochs: options.epochs || 100,
+      progress: 0,
+      accuracy: 0.5,
+      targetAccuracy: options.targetAccuracy || 0.9,
+      estimatedCompletionTime: new Date(Date.now() + 7200000), // 2 hours from now
+      timeRemaining: 7200,
+      message: 'Training started',
+      type: type
+    };
+
+    this.trainingJobs.push(newJob);
+    console.log(`Training job ${newJob.id} started for ${type}`);
+
+    return newJob;
+  }
+
+  getService(serviceId: string): NeuralService | undefined {
+    return this.services.get(serviceId);
+  }
+
+  getSystemStatus(): any {
+    return {
+      initialized: this.initialized,
+      activeModels: this.models.filter(m => m.status === 'active').length,
+      activeTrainingJobs: this.trainingJobs.filter(j => j.status === 'training').length,
+      systemHealth: this.getHealthMetrics()
+    };
+  }
+
+  getHealthMetrics(): SystemHealthMetrics {
+    // In a real implementation, this would gather real metrics
+    this.systemHealth = {
+      cpuUsage: Math.random() * 100,
+      memoryUsage: Math.random() * 100,
+      requestsPerMinute: Math.floor(Math.random() * 1000),
+      errorRate: Math.random() * 5,
+      lastUpdated: Date.now(),
+      systemLoad: Math.random() * 100,
+      userEngagement: Math.random() * 100
+    };
+
+    return { ...this.systemHealth };
+  }
+  
+  // Add methods that are being used in the codebase but were missing
+  getConfig() {
+    return {
+      aiModelParameters: {
+        learningRate: this.modelParameters.learningRate,
+        batchSize: this.modelParameters.batchSize,
+        epochs: 10,
+        optimizerType: 'adam'
+      },
+      systemSettings: {
+        resourceAllocationMode: 'balanced',
+        autoOptimize: true,
+        debugMode: false,
+        loggingLevel: 'info'
+      },
+      neuralSettings: {
+        activationThreshold: 0.7,
+        neuralDensity: 0.5,
+        layerConfiguration: 'standard'
+      },
+      psychology: {
+        enabled: true,
+        confidenceThreshold: 0.65
+      },
+      physics: {
+        enabled: false,
+        simulationPrecision: 0.85
+      },
+      economics: {
+        enabled: true,
+        marketModelVersion: '2.3'
+      },
+      robotics: {
+        enabled: false,
+        motorPrecision: 0.92
+      },
+      geoLegalFilteringEnabled: true,
+      neuroEmotionEnabled: true,
+      predictiveModulationEnabled: false
+    };
+  }
+  
+  updateConfig(config: any): boolean {
     try {
-      // If neuralHub has processRequest, use it but handle the promise immediately
-      if (typeof neuralHub.processRequest === 'function') {
-        // Create a synchronous response instead of returning the Promise directly
-        return {
-          success: true,
-          data: { 
-            processed: true, 
-            requestType: request.type,
-            timestamp: new Date().toISOString() 
-          }
-        };
-      }
-      
-      // Otherwise provide a fallback implementation
-      return {
-        success: true,
-        data: { processed: true, timestamp: new Date().toISOString() }
-      };
-    } catch (error: any) {
-      console.error("Error in Brain Hub request processing:", error);
-      return {
-        success: false,
-        error: error.message || "Unknown error processing request"
-      };
+      console.log('Updating Neural Hub configuration:', config);
+      // In a real implementation, this would update the actual configuration
+      return true;
+    } catch (error) {
+      console.error('Error updating Neural Hub configuration:', error);
+      return false;
     }
-  },
-
-  // Add decision log retrieval method
+  }
+  
   getDecisionLogs(limit: number = 10): Array<{
     timestamp: string;
     decision: string;
     confidence: number;
     context: string;
   }> {
-    // Mock implementation
     const logs = [];
     const now = Date.now();
     
@@ -139,6 +312,12 @@ export const brainHub = {
     
     return logs;
   }
-};
+}
 
-export default brainHub;
+// Export singleton instance
+export const neuralHub = new NeuralHub();
+
+// Also export as brainHub for compatibility with other components
+export const brainHub = neuralHub;
+
+export default neuralHub;
