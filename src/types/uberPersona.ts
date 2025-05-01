@@ -23,6 +23,9 @@ export interface UberPersona {
   rating?: number;
   reviewCount?: number;
   isPremium?: boolean;
+  isFeatured?: boolean; // Add this property
+  isAI?: boolean; // Add this property
+  reviews?: any[]; // Add the reviews property
   availability?: Array<{ start: Date; end: Date; }> | { nextAvailable: Date; };
   boostScore?: number;
   systemMetadata?: {

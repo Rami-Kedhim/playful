@@ -18,7 +18,7 @@ export class PersonaService {
       languages: ['English'],
       isVerified: true,
       rating: 4.8,
-      reviews: [],
+      reviews: [], // This is now explicitly defined in the type
       isOnline: true,
       isPremium: true,
       isFeatured: false,
