@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HeroSection from '@/components/home/HeroSection';
 import FeaturesSection from '@/components/home/FeaturesSection';
@@ -7,19 +7,26 @@ import CtaSection from '@/components/home/CtaSection';
 import { featuredService } from '@/core/services/featuredService';
 import FeaturedPersonas from '@/components/home/FeaturedPersonas';
 import { Container } from '@/components/ui/container';
-import { Button } from '@/components/ui/button';
 import { ScrollRevealGroup } from '@/components/ui/scroll-reveal-group';
+import { UberPersona } from '@/types/uberPersona';
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [searchLocation, setSearchLocation] = useState('');
-  const [personas, setPersonas] = React.useState([]);
+  const [personas, setPersonas] = useState<UberPersona[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const loadFeaturedPersonas = async () => {
       try {
         const featuredPersonas = await featuredService.loadFeaturedPersonas();
-        setPersonas(featuredPersonas);
+        
+        // Make sure any returned personas conform to UberPersona type by forcing the type property
+        const typedPersonas: UberPersona[] = featuredPersonas.map(persona => ({
+          ...persona,
+          type: (persona.type as 'escort' | 'creator' | 'livecam' | 'ai') || 'escort'
+        }));
+        
+        setPersonas(typedPersonas);
       } catch (error) {
         console.error('Error loading featured personas:', error);
       }

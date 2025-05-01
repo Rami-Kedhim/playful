@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -143,7 +144,9 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
             Availability
           </h3>
           <p className="text-muted-foreground">
-            {persona.availability?.nextAvailable || 'Available now'}
+            {typeof persona.availability === 'object' && persona.availability && 'nextAvailable' in persona.availability 
+              ? persona.availability.nextAvailable
+              : 'Available now'}
           </p>
 
           <Button className="mt-4 w-full">

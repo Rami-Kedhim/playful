@@ -10,7 +10,7 @@ export const userService = {
       id: userId,
       name: 'Demo User',
       displayName: 'Demo User',
-      type: 'user', // This is now valid with updated UberPersonaType
+      type: 'escort', // Changed from 'user' to 'escort' to match allowed types
       tags: ['new'],
       isVerified: false,
       isOnline: true,
@@ -39,7 +39,7 @@ export const userService = {
         lastSynced: new Date(),
         tagsGeneratedByAI: false,
         hilbertSpaceVector: [],
-        statusFlags: {} // Will now match the StatusFlags interface with string indexing
+        statusFlags: {} 
       },
       monetization: {
         meetingPrice: 50

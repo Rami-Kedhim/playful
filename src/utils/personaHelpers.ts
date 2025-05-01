@@ -39,15 +39,24 @@ function getPersonaPrice(persona: UberPersona): number {
 }
 
 function hasRealMeets(persona: UberPersona): boolean {
-  return !!(persona as any)?.capabilities?.hasRealMeets;
+  if (typeof persona.capabilities === 'object' && persona.capabilities && 'hasRealMeets' in persona.capabilities) {
+    return !!persona.capabilities.hasRealMeets;
+  }
+  return false;
 }
 
 function hasVirtualMeets(persona: UberPersona): boolean {
-  return !!(persona as any)?.capabilities?.hasVirtualMeets;
+  if (typeof persona.capabilities === 'object' && persona.capabilities && 'hasVirtualMeets' in persona.capabilities) {
+    return !!persona.capabilities.hasVirtualMeets;
+  }
+  return false;
 }
 
 function hasContent(persona: UberPersona): boolean {
-  return !!(persona as any)?.capabilities?.hasContent;
+  if (typeof persona.capabilities === 'object' && persona.capabilities && 'hasContent' in persona.capabilities) {
+    return !!persona.capabilities.hasContent;
+  }
+  return false;
 }
 
 export {

@@ -3,7 +3,7 @@ export interface UberPersona {
   id: string;
   name: string;
   displayName?: string;
-  type: 'escort' | 'creator' | 'livecam' | 'ai';
+  type: 'escort' | 'creator' | 'livecam' | 'ai' | 'user';
   avatarUrl?: string;
   imageUrl?: string;
   location?: string;
@@ -13,6 +13,7 @@ export interface UberPersona {
   stats?: {
     likes?: number;
     views?: number;
+    viewCount?: number;
     bookings?: number;
     responseTime?: number;
     rating?: number;
@@ -28,12 +29,56 @@ export interface UberPersona {
   services?: string[];
   languages?: string[];
   traits?: string[];
-  availability?: string[];
+  availability?: string[] | {
+    nextAvailable?: string;
+    schedule?: {
+      monday?: { available: boolean };
+      tuesday?: { available: boolean };
+      wednesday?: { available: boolean };
+      thursday?: { available: boolean };
+      friday?: { available: boolean };
+      saturday?: { available: boolean };
+      sunday?: { available: boolean };
+    };
+  };
   monetization?: {
     hourlyRate?: number;
     minimumBooking?: number;
+    meetingPrice?: number;
+    acceptsLucoin?: boolean;
+    acceptsTips?: boolean;
+    subscriptionPrice?: number;
+    unlockingPrice?: number;
+    boostingActive?: boolean;
   };
-  roleFlags?: string[];
-  capabilities?: string[];
+  roleFlags?: string[] | {
+    isEscort?: boolean;
+    isCreator?: boolean;
+    isLivecam?: boolean;
+    isAI?: boolean;
+    isVerified?: boolean;
+    isFeatured?: boolean;
+  };
+  capabilities?: string[] | {
+    hasPhotos?: boolean;
+    hasVideos?: boolean;
+    hasStories?: boolean;
+    hasChat?: boolean;
+    hasBooking?: boolean;
+    hasLiveStream?: boolean;
+    hasExclusiveContent?: boolean;
+    hasContent?: boolean;
+    hasRealMeets?: boolean;
+    hasVirtualMeets?: boolean;
+  };
   systemMetadata?: any;
+  username?: string;
+  isActive?: boolean;
+  rating?: number;
+  profileImageUrl?: string;
+  galleryImages?: string[];
+  createdAt?: Date;
+  updatedAt?: Date;
+  status?: string;
+  age?: number;
 }
