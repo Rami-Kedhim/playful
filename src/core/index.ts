@@ -14,12 +14,15 @@ import {
 } from './Oxum';
 export { 
   oxum, 
-  OxumSystemIntegrityResult, 
-  OxumSessionValidationResult 
+  type OxumSystemIntegrityResult, 
+  type OxumSessionValidationResult 
 };
 
 export * from './Orus';           // Security, Session Validation
-export * from './UberWallet';     // UBX Token Economy, Transactions
+
+// Export UberWallet without re-exporting the types that are already exported
+import { uberWallet, UberWallet } from './UberWallet';
+export { uberWallet, UberWallet };
 
 // Core System
 export * from './UberCore';       // Base System Integration
