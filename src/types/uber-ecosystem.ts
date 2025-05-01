@@ -1,5 +1,5 @@
 
-import { UberPersona } from './UberPersona';
+import { UberPersona } from './uberPersona';
 
 export interface UberCoreSettings {
   boostingEnabled: boolean;

@@ -5,7 +5,7 @@
  */
 
 // Re-export existing types for backward compatibility but avoid duplicates
-export * from '../UberPersona';
+export * from '../uberPersona';
 // Import but don't re-export to avoid conflicts
 import '../shared';
 
