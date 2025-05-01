@@ -1,81 +1,63 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
-import { SystemStatusDisplay } from '@/types/home';
+import { Progress } from '@/components/ui/progress';
 
-interface SystemStatusPanelProps {
-  status: SystemStatusDisplay;
+interface SystemStatusProps {
+  status: {
+    status: string;
+    uptime: number;
+    components?: Array<{
+      name: string;
+      status: string;
+      health: number;
+    }>;
+  };
 }
 
-const SystemStatusPanel: React.FC<SystemStatusPanelProps> = ({ status }) => {
-  const getStatusIcon = (status: string) => {
-    switch (status) {
+const SystemStatusPanel: React.FC<SystemStatusProps> = ({ status }) => {
+  const getStatusColor = (statusValue: string): string => {
+    switch (statusValue.toLowerCase()) {
       case 'operational':
-      case 'online':
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+        return 'text-green-500';
       case 'degraded':
-        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+        return 'text-yellow-500';
       case 'offline':
-      case 'unavailable':
-        return <XCircle className="h-4 w-4 text-red-500" />;
+        return 'text-red-500';
       default:
-        return <AlertCircle className="h-4 w-4 text-gray-400" />;
+        return 'text-blue-500';
     }
   };
-
+  
+  const getHealthColor = (health: number): string => {
+    if (health >= 90) return 'bg-green-500';
+    if (health >= 70) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
+  
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <div className={`h-3 w-3 rounded-full ${status.operational ? 'bg-green-500' : 'bg-red-500'}`} />
-          System Status
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl flex items-center justify-between">
+          <span>System Status</span>
+          <span className={getStatusColor(status.status)}>● {status.status}</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">Lucie</div>
-              <div className="flex items-center gap-2">
-                {getStatusIcon(status.components.lucie)}
-                <span className="font-medium capitalize">{status.components.lucie}</span>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">Hermes</div>
-              <div className="flex items-center gap-2">
-                {getStatusIcon(status.components.hermes)}
-                <span className="font-medium capitalize">{status.components.hermes}</span>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">Oxum</div>
-              <div className="flex items-center gap-2">
-                {getStatusIcon(status.components.oxum)}
-                <span className="font-medium capitalize">{status.components.oxum}</span>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">Orus</div>
-              <div className="flex items-center gap-2">
-                {getStatusIcon(status.components.orus)}
-                <span className="font-medium capitalize">{status.components.orus}</span>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">UberWallet</div>
-              <div className="flex items-center gap-2">
-                {getStatusIcon(status.components.wallet)}
-                <span className="font-medium capitalize">{status.components.wallet}</span>
-              </div>
-            </div>
-          </div>
+        <div className="flex justify-between items-center mb-4">
+          <span className="text-sm text-muted-foreground">System Uptime</span>
+          <span className="font-medium">{status.uptime.toFixed(1)}%</span>
         </div>
+        
+        {status.components && status.components.map((component, index) => (
+          <div key={index} className="mb-2">
+            <div className="flex justify-between text-sm mb-1">
+              <span>{component.name}</span>
+              <span className={getStatusColor(component.status)}>{component.status}</span>
+            </div>
+            <Progress value={component.health} className={getHealthColor(component.health)} />
+          </div>
+        ))}
       </CardContent>
     </Card>
   );

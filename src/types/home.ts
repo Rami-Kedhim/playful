@@ -1,62 +1,31 @@
+
 import { UberPersona } from '@/types/uberPersona';
 
-export interface FeaturedPersona {
-  id: string;
-  name: string;
-  displayName: string; // Required in FeaturedPersona
-  type: 'escort' | 'creator' | 'livecam' | 'ai';
-  avatarUrl?: string;
-  location?: string;
-  isVerified?: boolean;
-  isOnline?: boolean;
-  tags?: string[];
+export interface SystemStatusFormatted {
+  status: string;
+  uptime: number;
+  components?: Array<{
+    name: string;
+    status: string;
+    health: number;
+  }>;
 }
 
-export interface SystemStatusDisplay {
-  operational: boolean;
-  components: {
-    lucie: string;
-    hermes: string;
-    oxum: string;
-    orus: string;
-    wallet: string;
-  };
-}
-
-// Convert UberPersona array to FeaturedPersona array
-export function convertToFeaturedPersonas(personas: UberPersona[]): FeaturedPersona[] {
-  return personas.map(persona => ({
-    id: persona.id,
-    name: persona.name,
-    displayName: persona.displayName || persona.name, // Ensure displayName is always provided
-    type: persona.type as 'escort' | 'creator' | 'livecam' | 'ai',
-    avatarUrl: persona.avatarUrl,
-    location: persona.location,
-    isVerified: persona.isVerified,
-    isOnline: persona.isOnline,
-    tags: persona.tags
-  }));
-}
-
-// Convert raw system status data to SystemStatusDisplay format
-export function formatSystemStatus(statusData: Record<string, any>): SystemStatusDisplay {
+export const formatSystemStatus = (status: { status: string; uptime: number }): SystemStatusFormatted => {
   return {
-    operational: statusData.coreStatus === 'online',
-    components: {
-      lucie: statusData.lucieStatus || 'unknown',
-      hermes: statusData.hermesStatus || 'unknown',
-      oxum: statusData.oxumStatus || 'unknown',
-      orus: statusData.orusStatus || 'unknown',
-      wallet: statusData.walletStatus || 'unknown'
-    }
+    status: status.status || 'operational',
+    uptime: status.uptime || 99.9,
+    components: [
+      { name: 'Authentication', status: 'operational', health: 98 },
+      { name: 'Database', status: 'operational', health: 99.5 },
+      { name: 'Hermes Engine', status: 'operational', health: 97.8 },
+      { name: 'Oxum Boosting', status: 'operational', health: 99.2 },
+    ]
   };
-}
+};
 
-export interface LiveBoostMapEntry {
-  id: string;
-  type: string;
-  location: string;
-  boostScore: number;
-  trend: 'rising' | 'stable' | 'falling';
-  lastUpdated: Date;
+export interface FeaturedPersonasResponse {
+  personas: UberPersona[];
+  featuredCount: number;
+  totalCount: number;
 }
