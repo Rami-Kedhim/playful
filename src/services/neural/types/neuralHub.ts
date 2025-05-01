@@ -90,6 +90,8 @@ export type RequestType =
 export interface BrainHubRequest {
   type: RequestType;
   data?: any;
+  filters?: Record<string, any>;
+  options?: Record<string, any>;
 }
 
 export interface BrainHubResponse {
