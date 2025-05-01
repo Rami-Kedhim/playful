@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Routes as ReactRoutes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
 import SignupPage from '@/pages/SignupPage';
@@ -14,37 +14,68 @@ import PulseBoostPage from '@/pages/PulseBoostPage';
 import MessagesPage from '@/pages/MessagesPage';
 import SearchPage from '@/pages/SearchPage';
 import EscortsPage from '@/pages/EscortsPage';
+import ProfilePage from '@/pages/ProfilePage';
 import { logInteraction } from '@/utils/uberCore';
 
+// UberCore initialization
+import { lucie } from '@/core/Lucie';
+import { hermes } from '@/core/Hermes';
+import { oxum } from '@/core/Oxum';
+import { orus } from '@/core/Orus';
+import { uberCore } from '@/core/UberCore';
+
 /**
- * Main application routes component
+ * Main application routes component with UberCore integration
  */
 const AppRoutes = () => {
-  // Log route changes with Hermes for flow analysis
-  const logRouteChange = (path: string) => {
-    logInteraction('Router', 'route-change', { path });
-  };
-
-  React.useEffect(() => {
-    // Log initial route
-    logRouteChange(window.location.pathname);
-    
-    // Set up listener for route changes
-    const handleRouteChange = () => {
-      logRouteChange(window.location.pathname);
+  const location = useLocation();
+  
+  // Initialize UberCore modules
+  useEffect(() => {
+    const initCore = async () => {
+      console.log('Initializing UberCore modules...');
+      
+      // Initialize core modules
+      await Promise.all([
+        lucie.initialize(),
+        hermes.initialize(), 
+        uberCore.initialize()
+      ]);
+      
+      // Check system integrity
+      const integrityResult = orus.checkIntegrity();
+      
+      if (!integrityResult.isValid) {
+        console.error('System integrity check failed:', integrityResult.message);
+      } else {
+        console.log('System integrity verified:', integrityResult.message);
+      }
     };
     
-    window.addEventListener('popstate', handleRouteChange);
-    return () => window.removeEventListener('popstate', handleRouteChange);
+    initCore();
   }, []);
 
+  // Log route changes with Hermes for flow analysis
+  useEffect(() => {
+    const currentPath = location.pathname;
+    
+    // Connect to Hermes
+    hermes.connect({
+      system: 'Router',
+      connectionId: `route-${Date.now()}`,
+      metadata: {
+        path: currentPath,
+        timestamp: new Date().toISOString()
+      }
+    });
+    
+    // Also log through uberCore utils
+    logInteraction('Router', 'route-change', { path: currentPath });
+  }, [location.pathname]);
+
   return (
-    <ReactRoutes>
-      <Route path="/" element={
-        <MainLayout hideNavbar hideFooter>
-          <HomePage />
-        </MainLayout>
-      } />
+    <Routes>
+      <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       
@@ -74,8 +105,6 @@ const AppRoutes = () => {
           <MessagesPage />
         </MainLayout>
       } />
-      
-      {/* Previously placeholder routes, now implemented */}
       <Route path="/search" element={
         <MainLayout>
           <SearchPage />
@@ -86,10 +115,20 @@ const AppRoutes = () => {
           <EscortsPage />
         </MainLayout>
       } />
+      <Route path="/profile" element={
+        <MainLayout>
+          <ProfilePage />
+        </MainLayout>
+      } />
+      <Route path="/persona/:id" element={
+        <MainLayout>
+          <ProfilePage />
+        </MainLayout>
+      } />
       
       {/* 404 - Not Found */}
       <Route path="*" element={<NotFoundPage />} />
-    </ReactRoutes>
+    </Routes>
   );
 };
 

@@ -1,9 +1,9 @@
 
-// Consolidated core utilities
+// Consolidated core utilities for UberEscorts ecosystem
 
-import { SystemStatus, AnalyticsData } from '@/types/shared';
+import { SystemStatus, AnalyticsData, UberPersona } from '@/types/shared';
 
-// System status check utility
+// Core system status check utility
 export const checkSystemStatus = async (): Promise<SystemStatus> => {
   // This would actually connect to backend services in a real implementation
   return {
@@ -84,6 +84,74 @@ export const aggregateAnalytics = (data: Array<AnalyticsData>): AnalyticsData =>
   }, result);
 };
 
+// Profile visibility utility
+export const calculateProfileVisibility = (
+  profileId: string,
+  boostScore: number,
+  engagementRate: number
+): number => {
+  // In a real app, this would use complex algorithms
+  // For now, provide a realistic calculation
+  const baseVisibility = 40;
+  const boostFactor = boostScore * 0.4;
+  const engagementFactor = engagementRate * 0.2;
+  
+  return Math.min(Math.round(baseVisibility + boostFactor + engagementFactor), 100);
+};
+
+// Escort verification status checker
+export const checkVerificationStatus = (persona: UberPersona): {
+  isVerified: boolean;
+  level: 'none' | 'basic' | 'enhanced' | 'premium';
+  badges: string[];
+} => {
+  // Real implementation would check against verification database
+  const isVerified = persona.isVerified || false;
+  let level = 'none' as 'none' | 'basic' | 'enhanced' | 'premium';
+  const badges: string[] = [];
+  
+  if (isVerified) {
+    level = 'basic';
+    badges.push('verified');
+    
+    // Additional badges based on profile data
+    if (persona.tags && persona.tags.includes('premium')) {
+      level = 'premium';
+      badges.push('premium');
+    } else if (persona.tags && persona.tags.includes('enhanced')) {
+      level = 'enhanced';
+      badges.push('enhanced');
+    }
+  }
+  
+  return {
+    isVerified,
+    level,
+    badges
+  };
+};
+
+// UBX token utility functions
+export const formatUbxAmount = (amount: number): string => {
+  return amount.toLocaleString(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  }) + ' UBX';
+};
+
+export const calculateUbxExchangeRate = (amount: number, currency: string = 'USD'): number => {
+  // Mock exchange rate - in real app would get from API
+  const rates: Record<string, number> = {
+    USD: 0.1,
+    EUR: 0.092,
+    GBP: 0.078,
+    JPY: 14.5
+  };
+  
+  return amount * (rates[currency] || rates.USD);
+};
+
 // Re-export any existing utilities that are still relevant
 export * from '../navigation';
-export * from '../boost';
+export * from '../hermes';
+export * from '../oxum';

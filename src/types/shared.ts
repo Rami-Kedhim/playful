@@ -1,27 +1,11 @@
 
 // Consolidated type definitions for UberEscorts ecosystem
-import { ID, PersonaType, UberPersona } from './uberPersona';
-import { PulseBoost, BoostPackage, UserRole } from './pulse-boost';
 
 // Re-export core types with proper type annotations
-export type { ID, PersonaType, UberPersona, PulseBoost, BoostPackage, UserRole };
+export type { ID, PersonaType, UberPersona } from './uberPersona';
+export type { PulseBoost, BoostPackage, UserRole } from './pulse-boost';
 
-// Homepage component prop types
-export interface HeroProps {
-  searchLocation: string;
-  setSearchLocation: (location: string) => void;
-}
-
-export interface ProfileProps {
-  id: string;
-  name: string;
-  imageUrl?: string;
-  location?: string;
-  rating?: number;
-  price?: number;
-  isPremium?: boolean;
-}
-
+// Core UberSystem types
 export interface SystemStatus {
   operational: boolean;
   latency: number;
@@ -38,6 +22,7 @@ export interface SystemStatus {
   };
 }
 
+// Boost system types
 export interface BoostStats {
   activeBoosts: number;
   topBoostScore: number;
@@ -46,7 +31,6 @@ export interface BoostStats {
   recentChanges: number[];
 }
 
-// Add types for the Boost system
 export interface BoostStatus {
   isActive: boolean;
   packageId?: string;
@@ -70,6 +54,7 @@ export interface BoostEligibility {
   maxBoostsPerDay?: number;
 }
 
+// Analytics data for profiles, escorts, users
 export interface AnalyticsData {
   additionalViews?: number;
   engagementIncrease?: number;
@@ -94,6 +79,7 @@ export interface AnalyticsData {
   };
 }
 
+// Hermes flow system types
 export interface HermesStatus {
   position: number;
   activeUsers: number;
@@ -102,4 +88,58 @@ export interface HermesStatus {
   boostScore: number;
   effectivenessScore: number;
   isActive?: boolean;
+}
+
+// Homepage component prop types
+export interface HeroProps {
+  searchLocation: string;
+  setSearchLocation: (location: string) => void;
+}
+
+export interface ProfileProps {
+  id: string;
+  name: string;
+  imageUrl?: string;
+  location?: string;
+  rating?: number;
+  price?: number;
+  isPremium?: boolean;
+}
+
+// UBX Wallet types
+export interface UbxBalance {
+  available: number;
+  pending: number;
+  reserved: number;
+  total: number;
+}
+
+export interface UbxTransaction {
+  id: string;
+  type: 'purchase' | 'spend' | 'earn' | 'refund';
+  amount: number;
+  description: string;
+  timestamp: Date;
+  metadata?: Record<string, any>;
+}
+
+// Metaverse types
+export interface MetaverseRoom {
+  id: string;
+  name: string;
+  description?: string;
+  capacity: number;
+  currentUsers: number;
+  isPrivate: boolean;
+  thumbnailUrl?: string;
+  creatorId?: string;
+}
+
+export interface MetaverseAvatar {
+  id: string;
+  name: string;
+  modelUrl: string;
+  thumbnailUrl: string;
+  isPremium: boolean;
+  price?: number;
 }

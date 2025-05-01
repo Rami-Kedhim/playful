@@ -1,17 +1,13 @@
 
-/**
- * Hermes - Flow routing, user journey management, and behavioral prediction
- * Core module that handles flow state, visibility, and user behavior analysis
- */
+// Hermes - Flow Dynamics and User Routing
+// Central component for user journeys, behavioral routing, and prediction
 
-import { lucie } from './Lucie';
-import { oxum } from './Oxum';
+import { UberPersona } from '@/types/shared';
 
-export interface ConnectionResult {
-  success: boolean;
-  connectionId?: string;
-  timestamp: string;
-  flowId?: string;
+export interface RouteFlowParams {
+  source: string;
+  destination: string;
+  params?: Record<string, any>;
 }
 
 export interface ConnectionParams {
@@ -21,292 +17,158 @@ export interface ConnectionParams {
   userId?: string;
 }
 
-export interface FlowRoute {
-  source: string;
-  destination: string;
-  params?: Record<string, any>;
-  flowId?: string;
-  priority?: number;
-  timestamp?: string;
-}
-
-export interface FlowPathData {
-  path: string[];
-  conversions: number;
-  averageDuration: number;
-  bounceRate: number;
-}
-
-export interface JourneyMap {
-  userId: string;
-  paths: FlowRoute[];
-  lastActive: Date;
-  predictedNextPath?: string;
-  conversionScore?: number;
-}
-
-class Hermes {
-  private readonly systemName: string = 'Hermes';
-  private isInitialized: boolean = false;
-  private activeSystems: Map<string, ConnectionParams> = new Map();
-  private activeFlows: Map<string, FlowRoute[]> = new Map();
-  private userJourneys: Map<string, JourneyMap> = new Map();
-  private pathData: Map<string, FlowPathData> = new Map();
-
-  constructor() {
-    this.initialize();
+export class Hermes {
+  private initialized = false;
+  private connectionPool = new Map<string, ConnectionParams>();
+  private userFlows = new Map<string, string[]>();
+  private recommendationCache = new Map<string, string>();
+  
+  /**
+   * Initialize Hermes system
+   */
+  public async initialize(): Promise<boolean> {
+    console.log('Initializing Hermes Flow Dynamics System');
+    this.initialized = true;
+    return true;
   }
 
   /**
-   * Initialize the Hermes system
+   * Connect a system or component to Hermes
    */
-  public initialize(): void {
-    if (this.isInitialized) return;
-    console.log(`${this.systemName} system initializing...`);
-    this.isInitialized = true;
-  }
-
-  /**
-   * Connect a system to Hermes for tracking
-   */
-  public connect(params: ConnectionParams): ConnectionResult {
-    const timestamp = new Date().toISOString();
-    const flowId = `flow-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-
-    // Register the connection
-    this.activeSystems.set(params.connectionId, {
-      ...params,
-      metadata: {
-        ...(params.metadata || {}),
-        timestamp,
-        flowId
-      }
-    });
-
-    // Initialize a new flow if needed
-    if (!this.activeFlows.has(params.system)) {
-      this.activeFlows.set(params.system, []);
+  public connect(params: ConnectionParams): { success: boolean } {
+    try {
+      this.connectionPool.set(params.connectionId, {
+        ...params,
+        userId: params.userId || 'anonymous'
+      });
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error connecting to Hermes:', error);
+      return { success: false };
     }
-
-    console.log(`[Hermes] System connected: ${params.system} (${params.connectionId})`);
+  }
+  
+  /**
+   * Route user flow from one page to another
+   */
+  public routeFlow(params: RouteFlowParams): void {
+    const userId = params.params?.userId || 'anonymous';
+    const path = `${params.source}→${params.destination}`;
     
-    return {
-      success: true,
-      connectionId: params.connectionId,
-      timestamp,
-      flowId
-    };
-  }
-
-  /**
-   * Record a route between two systems or pages
-   */
-  public routeFlow(route: FlowRoute): void {
-    const timestamp = new Date().toISOString();
-    const enhancedRoute: FlowRoute = {
-      ...route,
-      timestamp,
-      flowId: route.flowId || `flow-${Date.now()}`
-    };
-
-    // Add to active flows
-    const sourceFlows = this.activeFlows.get(route.source) || [];
-    sourceFlows.push(enhancedRoute);
-    this.activeFlows.set(route.source, sourceFlows);
-
-    // Update user journey if userId is available
-    if (route.params?.userId) {
-      this.updateUserJourney(route.params.userId, enhancedRoute);
-    }
-
-    // Update path analytics
-    this.updatePathAnalytics(`${route.source}|${route.destination}`);
-
-    console.log(`[Hermes] Flow routed: ${route.source} → ${route.destination}`);
-  }
-
-  /**
-   * Update a user's journey map
-   */
-  private updateUserJourney(userId: string, route: FlowRoute): void {
-    const existingJourney = this.userJourneys.get(userId) || {
-      userId,
-      paths: [],
-      lastActive: new Date()
-    };
-
-    existingJourney.paths.push(route);
-    existingJourney.lastActive = new Date();
-
-    // Calculate predicted next path if enough history
-    if (existingJourney.paths.length >= 3) {
-      existingJourney.predictedNextPath = this.predictNextPath(userId);
-      existingJourney.conversionScore = this.calculateConversionScore(existingJourney);
-    }
-
-    this.userJourneys.set(userId, existingJourney);
-  }
-
-  /**
-   * Update analytics for a specific path
-   */
-  private updatePathAnalytics(pathKey: string): void {
-    const existingData = this.pathData.get(pathKey) || {
-      path: pathKey.split('|'),
-      conversions: 0,
-      averageDuration: 0,
-      bounceRate: 0
-    };
-
-    // For now, just increment a counter. In production this would be more sophisticated
-    this.pathData.set(pathKey, existingData);
-  }
-
-  /**
-   * Get optimal routing path for a user based on behavior patterns
-   */
-  public getOptimalPath(userId: string, currentPage: string): string[] {
-    // This would involve complex behavioral analysis in production
-    // For now, return a simplified path
-    return ['home', 'search', 'profile', 'messages'];
-  }
-
-  /**
-   * Predict the next most likely path for a user
-   */
-  private predictNextPath(userId: string): string {
-    const userJourney = this.userJourneys.get(userId);
-    if (!userJourney || userJourney.paths.length < 2) return 'home';
-    
-    // In production, this would use more sophisticated ML
-    // For now return last visited destination as prediction
-    const lastPath = userJourney.paths[userJourney.paths.length - 1];
-    return lastPath.destination;
-  }
-
-  /**
-   * Calculate conversion score based on journey patterns
-   */
-  private calculateConversionScore(journey: JourneyMap): number {
-    // Simplified scoring algorithm - would be ML-based in production
-    const hasSearched = journey.paths.some(p => p.destination === 'search');
-    const hasViewedProfile = journey.paths.some(p => p.destination.includes('profile'));
-    const hasMessaged = journey.paths.some(p => p.destination === 'messages');
-    
-    let score = 0.1; // Base score
-    if (hasSearched) score += 0.2;
-    if (hasViewedProfile) score += 0.3;
-    if (hasMessaged) score += 0.4;
-    
-    return Math.min(1, score);
-  }
-
-  /**
-   * Check if a user is likely to convert based on session data
-   */
-  public predictConversion(userId: string): number {
-    const journey = this.userJourneys.get(userId);
-    if (journey?.conversionScore !== undefined) {
-      return journey.conversionScore;
+    // Initialize user flow if not exists
+    if (!this.userFlows.has(userId)) {
+      this.userFlows.set(userId, []);
     }
     
-    // Fallback to random score if no journey data
-    return Math.random();
-  }
-
-  /**
-   * Enter a spatial flow (for Metaverse integration)
-   */
-  public enterSpatialFlow(userId: string, roomId: string): ConnectionResult {
-    const connectionId = `spatial-${roomId}-${Date.now()}`;
+    // Add path to user flow
+    this.userFlows.get(userId)?.push(path);
     
-    // Register the spatial flow
+    // Limit size of flows
+    const flows = this.userFlows.get(userId) || [];
+    if (flows.length > 50) {
+      this.userFlows.set(userId, flows.slice(flows.length - 50));
+    }
+    
+    console.log(`[Hermes] Flow routed: ${path}`);
+  }
+  
+  /**
+   * Get recommended next action based on user behavior
+   */
+  public recommendNextAction(userId: string = 'anonymous'): string {
+    // Check cache first
+    if (this.recommendationCache.has(userId)) {
+      return this.recommendationCache.get(userId) || 'explore';
+    }
+
+    const flows = this.userFlows.get(userId) || [];
+    
+    if (flows.length === 0) {
+      return 'explore'; // Default action if no history
+    }
+    
+    // Analyze recent paths for basic pattern recognition
+    const lastPath = flows[flows.length - 1];
+    
+    let recommendedAction = 'explore';
+    
+    // Simple recommender logic
+    if (lastPath.includes('search')) {
+      recommendedAction = 'escorts';
+    } else if (lastPath.includes('profile') || lastPath.includes('escorts')) {
+      recommendedAction = 'messages';
+    } else if (lastPath.includes('messages')) {
+      recommendedAction = 'metaverse';
+    } else if (flows.length > 5 && !flows.some(f => f.includes('pulse-boost'))) {
+      recommendedAction = 'pulse-boost';
+    } else {
+      recommendedAction = ['search', 'escorts', 'messages', 'metaverse', 'pulse-boost'][Math.floor(Math.random() * 5)];
+    }
+    
+    // Cache the recommendation for 5 minutes
+    this.recommendationCache.set(userId, recommendedAction);
+    setTimeout(() => {
+      this.recommendationCache.delete(userId);
+    }, 5 * 60 * 1000);
+    
+    return recommendedAction;
+  }
+  
+  /**
+   * Enter a spatial flow in the Metaverse
+   */
+  public enterSpatialFlow(userId: string, roomId: string): void {
     this.connect({
       system: 'MetaverseGateway',
-      connectionId,
+      connectionId: `spatial-${userId}-${Date.now()}`,
+      userId,
       metadata: {
         roomId,
-        spatialMode: true
-      },
-      userId
+        entryPoint: 'standard',
+        timestamp: new Date().toISOString()
+      }
     });
-
-    console.log(`[Hermes] User ${userId} entered spatial flow: ${roomId}`);
     
-    return {
-      success: true,
-      connectionId,
-      timestamp: new Date().toISOString()
-    };
+    console.log(`[Hermes] User ${userId} entered spatial flow in room ${roomId}`);
   }
-
+  
   /**
-   * Calculate the visibility score for a profile based on hermes flows
+   * Calculate visibility score for a profile
    */
   public calculateVisibilityScore(profileId: string): number {
-    // In production, this would analyze traffic patterns through the profile
-    // For now, generate a score between 50-100
-    const baseScore = 50 + Math.floor(Math.random() * 50);
+    // In a production environment, this would integrate with complex
+    // visibility algorithms and machine learning models
     
-    // Apply boost from Oxum if available
-    try {
-      const boostScore = oxum.calculateBoostScore(profileId);
-      return Math.min(100, baseScore + (boostScore / 10));
-    } catch (error) {
-      console.error('[Hermes] Error getting boost score:', error);
-      return baseScore;
-    }
+    // For now, generate a realistic score between 50-95
+    const baseScore = 50 + Math.floor(Math.random() * 46);
+    
+    return baseScore;
   }
-
+  
   /**
-   * Get analytics about a specific flow
+   * Get journey insights for a user
    */
-  public getFlowAnalytics(flowName: string): any {
-    // This would query analytics data in production
-    // Return mock data for now
+  public getUserJourneyInsights(userId: string): {
+    patterns: Array<{name: string, confidence: number}>,
+    suggestions: string[]
+  } {
+    // Simulate journey analysis
     return {
-      name: flowName,
-      completionRate: Math.random() * 100,
-      averageDuration: Math.floor(Math.random() * 300) + 30, // seconds
-      dropOffPoints: [
-        { point: 'search', rate: Math.random() * 0.3 },
-        { point: 'profile', rate: Math.random() * 0.2 },
-        { point: 'messages', rate: Math.random() * 0.1 }
+      patterns: [
+        {name: 'Browse-Contact-Meet', confidence: 0.87},
+        {name: 'Search-Filter-Connect', confidence: 0.76},
+        {name: 'Direct-Message', confidence: 0.65}
+      ],
+      suggestions: [
+        'Complete your profile to increase matches',
+        'Consider boosting your visibility',
+        'Explore the metaverse feature'
       ]
     };
   }
-
-  /**
-   * Get user journey insights
-   */
-  public getUserJourneyInsights(userId: string): JourneyMap | null {
-    return this.userJourneys.get(userId) || null;
-  }
-
-  /**
-   * Recommend the next best action for a user
-   */
-  public recommendNextAction(userId: string): string {
-    const journey = this.userJourneys.get(userId);
-    
-    if (!journey) return 'explore';
-    
-    // Analyze journey to make a recommendation
-    const paths = journey.paths.map(p => p.destination);
-    
-    if (!paths.includes('search')) {
-      return 'search';
-    } else if (!paths.includes('escorts')) {
-      return 'escorts';
-    } else if (!paths.includes('messages')) {
-      return 'messages';
-    } else if (!paths.includes('metaverse')) {
-      return 'metaverse';
-    }
-    
-    return 'pulse-boost';
-  }
 }
 
+// Export singleton instance
 export const hermes = new Hermes();
 export default hermes;

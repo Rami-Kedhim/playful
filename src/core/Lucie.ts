@@ -1,3 +1,4 @@
+
 // Lucie - AI Orchestration and Generation System
 // Central component for AI generation, personality, and ethical governance
 
@@ -59,10 +60,57 @@ export class Lucie {
         isVerified: true,
         isOnline: false,
         tags: ['new', 'trending']
+      },
+      {
+        id: '3',
+        name: 'Featured Persona 3',
+        type: 'escort',
+        displayName: 'Olivia',
+        avatarUrl: 'https://example.com/avatar3.jpg',
+        location: 'Miami',
+        isVerified: true,
+        isOnline: true,
+        tags: ['premium']
+      },
+      {
+        id: '4',
+        name: 'Featured Persona 4',
+        type: 'aicompanion',
+        displayName: 'Luna',
+        avatarUrl: 'https://example.com/avatar4.jpg',
+        location: 'Virtual',
+        isVerified: true,
+        isOnline: true,
+        tags: ['ai', 'companion']
       }
     ];
   }
 
+  /**
+   * Generate NSFW image with ethical constraints
+   */
+  public async generateNsfwImage(
+    prompt: string, 
+    options: { 
+      model?: string;
+      safetyLevel?: number;
+      applyWatermark?: boolean;
+    } = {}
+  ): Promise<{ success: boolean; url?: string; error?: string }> {
+    // This would connect to actual AI image generation in production
+    const model = options.model || 'civitai-xl';
+    const safetyLevel = options.safetyLevel !== undefined ? options.safetyLevel : 0.7;
+    
+    console.log(`Generating NSFW image with ${model} model, safety level ${safetyLevel}`);
+    console.log(`Prompt: ${prompt}`);
+    
+    // Mock success response
+    return {
+      success: true,
+      url: 'https://example.com/generated-image.jpg'
+    };
+  }
+  
   /**
    * Get assistance from Lucie
    */
@@ -93,6 +141,25 @@ export class Lucie {
       safe: concerns.length === 0,
       concerns,
       score
+    };
+  }
+
+  /**
+   * Orchestrate voice generation
+   */
+  public async orchestrateVoice(
+    text: string, 
+    options: { 
+      voiceId?: string; 
+      emotionLevel?: number;
+    } = {}
+  ): Promise<{ audioUrl: string; durationMs: number }> {
+    console.log(`Generating voice: ${text.substring(0, 20)}...`);
+    
+    // Mock implementation
+    return {
+      audioUrl: 'https://example.com/audio.mp3',
+      durationMs: text.length * 100 // Approximation
     };
   }
 }
