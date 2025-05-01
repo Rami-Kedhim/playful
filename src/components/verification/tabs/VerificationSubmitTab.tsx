@@ -26,10 +26,10 @@ const VerificationSubmitTab: React.FC<VerificationSubmitTabProps> = ({
 
   return (
     <VerificationForm 
-      onSubmit={handleSubmit} 
-      loading={loading}
+      onSubmissionComplete={onComplete}
       serviceType="escort"
-      onSubmissionComplete={onComplete} 
+      loading={loading}
+      onSubmit={handleSubmit}
     />
   )
 }

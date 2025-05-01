@@ -1,67 +1,61 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth';
-import { supabase } from '@/lib/supabase';
-import { VerificationStatus, VerificationRequest } from '@/types/verification';
+import { checkVerificationStatus } from '@/utils/verification/statusCheck';
+import { VerificationRequest, VerificationStatus } from '@/types/verification';
 
 export const useVerificationStatus = () => {
   const { user } = useAuth();
-  const [status, setStatus] = useState<VerificationStatus>(VerificationStatus.NONE);
+  const [status, setStatus] = useState<VerificationStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [verificationRequest, setVerificationRequest] = useState<VerificationRequest | null>(null);
 
   useEffect(() => {
-    if (!user?.id) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchVerificationStatus = async () => {
-      setLoading(true);
-      setError(null);
+    const loadStatus = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
       try {
-        // Check in user metadata first for verification status
-        if (user.user_metadata?.verification_status) {
-          setStatus(user.user_metadata.verification_status as VerificationStatus);
-        }
-
-        // Then fetch the most recent verification request
-        const { data, error: fetchError } = await supabase
-          .from('verification_requests')
-          .select('*')
-          .eq('profile_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1);
-
-        if (fetchError) {
-          throw new Error(fetchError.message);
-        }
-
-        if (data && data.length > 0) {
-          const request = data[0] as VerificationRequest;
-          setVerificationRequest(request);
-          setStatus(request.status as VerificationStatus);
-        } else {
-          setStatus(VerificationStatus.NONE);
-        }
+        setLoading(true);
+        const result = await checkVerificationStatus(user.id);
+        setStatus(result.status as VerificationStatus);
+        setVerificationRequest(result.lastRequest || null);
       } catch (err: any) {
-        console.error('Error fetching verification status:', err);
-        setError(err.message || 'Failed to fetch verification status');
+        console.error('Error checking verification status:', err);
+        setError(err.message || 'Failed to load verification status');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchVerificationStatus();
+    loadStatus();
   }, [user]);
 
   return {
     status,
     loading,
     error,
-    verificationRequest
+    verificationRequest,
+    isVerified: status === VerificationStatus.APPROVED,
+    refetch: () => {
+      if (user) {
+        setLoading(true);
+        checkVerificationStatus(user.id)
+          .then(result => {
+            setStatus(result.status as VerificationStatus);
+            setVerificationRequest(result.lastRequest || null);
+          })
+          .catch(err => {
+            setError(err.message || 'Failed to reload verification status');
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }
+    }
   };
 };
 

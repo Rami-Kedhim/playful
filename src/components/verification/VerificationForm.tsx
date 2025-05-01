@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
@@ -18,15 +17,15 @@ import { toast } from '@/components/ui/use-toast';
 interface VerificationFormProps {
   onSubmissionComplete?: () => void;
   serviceType?: 'escort' | 'client' | 'general';
-  onSubmit?: (data: any) => void;
   loading?: boolean;
+  onSubmit?: (data: any) => Promise<boolean> | void;
 }
 
 const VerificationForm: React.FC<VerificationFormProps> = ({
   onSubmissionComplete,
   serviceType = 'general',
-  onSubmit,
-  loading: externalLoading
+  loading: externalLoading = false,
+  onSubmit
 }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -53,6 +52,19 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
     setSubmissionError(null);
 
     try {
+      // If an external onSubmit handler is provided, use it
+      if (onSubmit) {
+        const result = await onSubmit(data);
+        if (result === false) {
+          throw new Error('Submission failed');
+        }
+        
+        setSubmitted(true);
+        if (onSubmissionComplete) onSubmissionComplete();
+        return;
+      }
+      
+      // Otherwise, use the default submission logic
       // Validate files first
       const frontValidation = validateFile(data.frontFile);
       if (!frontValidation.valid) {
@@ -103,7 +115,6 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
       
       setSubmitted(true);
       if (onSubmissionComplete) onSubmissionComplete();
-      if (onSubmit) onSubmit(data);
     } catch (error: any) {
       console.error('Verification submission error:', error);
       setSubmissionError(error.message || 'An unexpected error occurred');

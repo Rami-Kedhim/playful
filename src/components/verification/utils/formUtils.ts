@@ -1,20 +1,44 @@
 
-import { z } from 'zod';
-import { documentTypeOptions } from './documentTypeHelper';
+import { needsBackDocument } from './documentTypeHelper';
 
-export const verificationFormSchema = z.object({
-  documentType: z.string().min(1, 'Please select an ID type'),
-  documentFile: z.instanceof(File, { message: 'Please upload your ID document' }),
-  selfieFile: z.instanceof(File, { message: 'Please upload your selfie' }),
-  backFile: z.instanceof(File).optional(),
-  privacyConsent: z.boolean().refine(val => val === true, { message: 'You must agree to the privacy policy' }),
-});
+export const validateVerificationForm = (data: any) => {
+  const errors: Record<string, string> = {};
 
-export type VerificationFormValues = z.infer<typeof verificationFormSchema>;
+  if (!data.documentType) {
+    errors.documentType = 'Please select a document type';
+  }
 
-export const getInitialValues = (): Partial<VerificationFormValues> => {
+  if (!data.frontFile) {
+    errors.frontFile = 'Front side of the document is required';
+  }
+
+  if (data.documentType && needsBackDocument(data.documentType) && !data.backFile) {
+    errors.backFile = 'Back side of the document is required';
+  }
+
+  if (!data.selfieFile) {
+    errors.selfieFile = 'A selfie with your document is required';
+  }
+
+  if (!data.acceptTerms) {
+    errors.acceptTerms = 'You must accept the terms and privacy policy';
+  }
+
   return {
-    documentType: documentTypeOptions[0].value,
-    privacyConsent: false
+    isValid: Object.keys(errors).length === 0,
+    errors
   };
+};
+
+export const formatVerificationDate = (date: Date | string | null): string => {
+  if (!date) return 'N/A';
+  
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return dateObj.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 };
