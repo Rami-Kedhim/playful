@@ -1,93 +1,102 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface ScrollRevealProps {
   children: React.ReactNode;
   className?: string;
-  threshold?: number;
   animation?: 'fade-up' | 'fade-in' | 'slide-in' | 'scale-in';
+  threshold?: number;
   delay?: number;
   duration?: number;
-  once?: boolean;
-  offset?: number;
 }
 
-export function ScrollReveal({
+export const ScrollReveal: React.FC<ScrollRevealProps> = ({
   children,
   className,
-  threshold = 0.1,
   animation = 'fade-up',
+  threshold = 0.1,
   delay = 0,
-  duration = 0.5,
-  once = true,
-  offset = 0
-}: ScrollRevealProps) {
+  duration = 0.6,
+}) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const current = ref.current;
+    if (!current) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          if (once && ref.current) {
-            observer.unobserve(ref.current);
-          }
-        } else if (!once) {
-          setIsVisible(false);
+          observer.unobserve(entry.target);
         }
       },
       {
         threshold,
-        rootMargin: `0px 0px ${offset}px 0px`,
       }
     );
 
-    const currentRef = ref.current;
-    if (currentRef) {
-      observer.observe(currentRef);
-    }
+    observer.observe(current);
 
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
+      if (current) {
+        observer.unobserve(current);
       }
     };
-  }, [threshold, once, offset]);
+  }, [threshold]);
 
-  const variants = {
-    'fade-up': {
-      hidden: { opacity: 0, y: 20 },
-      visible: { opacity: 1, y: 0 }
-    },
-    'fade-in': {
-      hidden: { opacity: 0 },
-      visible: { opacity: 1 }
-    },
-    'slide-in': {
-      hidden: { opacity: 0, x: -20 },
-      visible: { opacity: 1, x: 0 }
-    },
-    'scale-in': {
-      hidden: { opacity: 0, scale: 0.95 },
-      visible: { opacity: 1, scale: 1 }
+  const getAnimationClass = () => {
+    switch (animation) {
+      case 'fade-up':
+        return 'opacity-0 translate-y-8 transition-all duration-700';
+      case 'fade-in':
+        return 'opacity-0 transition-opacity duration-700';
+      case 'slide-in':
+        return 'opacity-0 -translate-x-8 transition-all duration-700';
+      case 'scale-in':
+        return 'opacity-0 scale-95 transition-all duration-700';
+      default:
+        return 'opacity-0 translate-y-8 transition-all duration-700';
     }
   };
 
+  const getVisibleClass = () => {
+    switch (animation) {
+      case 'fade-up':
+        return 'opacity-100 translate-y-0';
+      case 'fade-in':
+        return 'opacity-100';
+      case 'slide-in':
+        return 'opacity-100 translate-x-0';
+      case 'scale-in':
+        return 'opacity-100 scale-100';
+      default:
+        return 'opacity-100 translate-y-0';
+    }
+  };
+
+  const style = isVisible
+    ? { 
+        transitionDelay: `${delay}s`, 
+        transitionDuration: `${duration}s` 
+      }
+    : {};
+
   return (
-    <motion.div
+    <div
       ref={ref}
-      initial="hidden"
-      animate={isVisible ? "visible" : "hidden"}
-      variants={variants[animation]}
-      transition={{ duration, delay, ease: "easeOut" }}
-      className={cn(className)}
+      className={cn(
+        getAnimationClass(),
+        isVisible && getVisibleClass(),
+        className
+      )}
+      style={style}
     >
       {children}
-    </motion.div>
+    </div>
   );
-}
+};
 
 export default ScrollReveal;
