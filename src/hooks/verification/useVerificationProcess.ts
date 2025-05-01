@@ -1,20 +1,39 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/hooks/auth';
+import { submitVerificationRequest, uploadDocumentFile, validateFile } from '@/utils/verification';
 import { toast } from '@/components/ui/use-toast';
-import { supabase } from '@/lib/supabase';
-import { VerificationStatus } from '@/types/verification';
+
+interface VerificationData {
+  documentType: string;
+  frontFile: File;
+  backFile?: File | null;
+  selfieFile: File;
+  acceptTerms: boolean;
+}
 
 export const useVerificationProcess = () => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<VerificationStatus>(VerificationStatus.NONE);
+  const [success, setSuccess] = useState(false);
 
-  const submitVerification = async (formData: any) => {
-    if (!user) {
+  const submitVerification = async (data: VerificationData): Promise<boolean> => {
+    if (!user?.id) {
+      setError('You must be logged in to submit verification');
       toast({
-        title: "Authentication required",
-        description: "You must be logged in to submit verification",
+        title: "Authentication Error",
+        description: "You must be logged in to submit verification documents.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (!data.acceptTerms) {
+      setError('You must accept the terms and privacy policy');
+      toast({
+        title: "Submission Error",
+        description: "You must accept the terms and privacy policy to proceed.",
         variant: "destructive",
       });
       return false;
@@ -22,88 +41,55 @@ export const useVerificationProcess = () => {
 
     setLoading(true);
     setError(null);
+    setSuccess(false);
 
     try {
-      // Upload document files to Supabase Storage
-      const documentFile = formData.documentFile;
-      const selfieFile = formData.selfieImage?.file;
-
-      if (!documentFile || !selfieFile) {
-        throw new Error("Missing required document files");
+      // Validate files
+      const frontValidation = validateFile(data.frontFile);
+      if (!frontValidation.valid) {
+        throw new Error(frontValidation.error || 'Invalid front document');
       }
 
-      // Get Supabase URL from environment
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      if (!supabaseUrl) {
-        throw new Error("Missing Supabase configuration");
-      }
-
-      // Get auth token from localStorage or current session
-      const authData = localStorage.getItem('sb-haffqtqpbnaviefewfmn-auth-token');
-      let accessToken = '';
-      
-      if (authData) {
-        try {
-          const parsed = JSON.parse(authData);
-          accessToken = parsed.access_token || '';
-        } catch (e) {
-          console.error("Error parsing auth token", e);
+      if (data.backFile) {
+        const backValidation = validateFile(data.backFile);
+        if (!backValidation.valid) {
+          throw new Error(backValidation.error || 'Invalid back document');
         }
       }
 
-      if (!accessToken) {
-        throw new Error("No authentication token found");
+      const selfieValidation = validateFile(data.selfieFile);
+      if (!selfieValidation.valid) {
+        throw new Error(selfieValidation.error || 'Invalid selfie');
       }
 
-      // Create FormData for the API request
-      const apiFormData = new FormData();
-      apiFormData.append('documentType', formData.documentType);
-      apiFormData.append('frontImage', documentFile);
-      apiFormData.append('selfieImage', selfieFile);
+      // Submit verification request
+      const result = await submitVerificationRequest(
+        user.id,
+        data.documentType,
+        data.frontFile,
+        data.backFile || null,
+        data.selfieFile
+      );
 
-      // Call the process-verification edge function
-      const response = await fetch(`${supabaseUrl}/functions/v1/process-verification`, {
-        method: 'POST',
-        body: apiFormData,
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to submit verification request');
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to submit verification');
       }
-
-      const result = await response.json();
-
-      // Update user metadata to indicate verification has been submitted
-      await supabase.auth.updateUser({
-        data: { 
-          verification_submitted: true,
-          verification_documents: {
-            submittedAt: new Date().toISOString()
-          }
-        }
-      });
 
       toast({
-        title: "Verification submitted",
-        description: "Your verification request has been submitted successfully.",
+        title: "Verification Submitted",
+        description: "Your verification documents have been submitted successfully and are pending review.",
       });
-
-      setStatus(VerificationStatus.PENDING);
+      
+      setSuccess(true);
       return true;
-    } catch (error: any) {
-      console.error("Verification submission error:", error);
-      setError(error.message || "An error occurred during submission");
-      
+    } catch (err: any) {
+      console.error('Verification submission error:', err);
+      setError(err.message || 'An unexpected error occurred');
       toast({
-        title: "Submission failed",
-        description: error.message || "Failed to submit verification request",
+        title: "Verification Failed",
+        description: err.message || "There was an error submitting your verification documents.",
         variant: "destructive",
       });
-      
       return false;
     } finally {
       setLoading(false);
@@ -111,10 +97,10 @@ export const useVerificationProcess = () => {
   };
 
   return {
+    submitVerification,
     loading,
     error,
-    status,
-    submitVerification
+    success
   };
 };
 

@@ -1,93 +1,167 @@
 
-import React from 'react';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { getRequiredFiles } from '../utils/documentTypeHelper';
-import { Upload, FileCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { FormField, FormItem, FormLabel, FormDescription, FormMessage } from '@/components/ui/form';
+import DocumentUploadHandler from './DocumentUploadHandler';
 
 interface DocumentUploadSectionProps {
   form: any;
-  documentType: string;
 }
 
-const DocumentUploadSection: React.FC<DocumentUploadSectionProps> = ({ form, documentType }) => {
-  const requiredFiles = documentType ? getRequiredFiles(documentType) : [];
+const DocumentUploadSection: React.FC<DocumentUploadSectionProps> = ({ form }) => {
+  const documentType = form.watch('documentType');
+  const [frontPreview, setFrontPreview] = useState<string | null>(null);
+  const [backPreview, setBackPreview] = useState<string | null>(null);
+  const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
 
-  const renderFileUpload = (fieldName: string, label: string, accept = "image/*,application/pdf") => (
-    <FormField
-      key={fieldName}
-      control={form.control}
-      name={fieldName}
-      render={({ field: { onChange, value, ...fieldProps } }) => {
-        // Check if we have a file selected
-        const hasFile = form.getValues(fieldName) instanceof File;
+  const handleFrontFileChange = (file: File) => {
+    form.setValue('frontFile', file);
+    form.trigger('frontFile');
+    
+    // Create preview URL
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setFrontPreview(url);
+    }
+  };
 
-        return (
-          <FormItem>
-            <FormLabel>{label}</FormLabel>
-            <FormControl>
-              <Card className={`relative ${hasFile ? 'border-green-500 bg-green-50' : ''}`}>
-                <CardContent className="p-2 flex items-center justify-center">
-                  <div className="w-full h-32 flex flex-col items-center justify-center cursor-pointer relative">
-                    {hasFile ? (
-                      <>
-                        <FileCheck className="h-10 w-10 text-green-500 mb-2" />
-                        <p className="text-sm text-green-700">File selected</p>
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-                        <p className="text-sm text-muted-foreground">
-                          Upload {label}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          JPEG, PNG or PDF (max 5MB)
-                        </p>
-                      </>
-                    )}
-                    <Input
-                      type="file"
-                      accept={accept}
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] || null;
-                        onChange(file);
-                      }}
-                      {...fieldProps}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        );
-      }}
-    />
-  );
+  const handleBackFileChange = (file: File) => {
+    form.setValue('backFile', file);
+    form.trigger('backFile');
+    
+    // Create preview URL
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setBackPreview(url);
+    }
+  };
 
-  if (!documentType || requiredFiles.length === 0) {
-    return <p className="text-sm text-muted-foreground">Please select a document type first</p>;
-  }
+  const handleSelfieFileChange = (file: File) => {
+    form.setValue('selfieFile', file);
+    form.trigger('selfieFile');
+    
+    // Create preview URL
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setSelfiePreview(url);
+    }
+  };
+
+  // Clean up preview URLs when component unmounts
+  React.useEffect(() => {
+    return () => {
+      if (frontPreview) URL.revokeObjectURL(frontPreview);
+      if (backPreview) URL.revokeObjectURL(backPreview);
+      if (selfiePreview) URL.revokeObjectURL(selfiePreview);
+    };
+  }, [frontPreview, backPreview, selfiePreview]);
+
+  const needsBackSide = documentType && documentType !== 'passport';
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-medium">Required Documents</h3>
-      
-      <div className="grid gap-4 md:grid-cols-2">
-        {requiredFiles.includes('front') && 
-          renderFileUpload('documentFile', 'Front of Document')}
-          
-        {requiredFiles.includes('back') && 
-          renderFileUpload('backFile', 'Back of Document')}
-          
-        {requiredFiles.includes('data_page') && 
-          renderFileUpload('documentFile', 'Passport Data Page')}
-          
-        {requiredFiles.includes('selfie') && 
-          renderFileUpload('selfieFile', 'Selfie with Document')}
-      </div>
+    <div className="space-y-6">
+      <FormField
+        name="frontFile"
+        control={form.control}
+        rules={{ required: "Front side of document is required" }}
+        render={({ field }) => (
+          <FormItem>
+            <div className="space-y-2">
+              <DocumentUploadHandler
+                label="Front side of document"
+                onFileSelect={handleFrontFileChange}
+                error={form.formState.errors.frontFile?.message}
+              />
+              
+              {frontPreview && (
+                <div className="mt-2">
+                  <div className="relative aspect-video w-full max-w-sm overflow-hidden rounded-md border">
+                    <img
+                      src={frontPreview}
+                      alt="Front document preview"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+              
+              <FormDescription>
+                Upload a clear photo or scan of the front side of your document
+              </FormDescription>
+              <FormMessage />
+            </div>
+          </FormItem>
+        )}
+      />
+
+      {needsBackSide && (
+        <FormField
+          name="backFile"
+          control={form.control}
+          rules={{ required: "Back side of document is required" }}
+          render={({ field }) => (
+            <FormItem>
+              <div className="space-y-2">
+                <DocumentUploadHandler
+                  label="Back side of document"
+                  onFileSelect={handleBackFileChange}
+                  error={form.formState.errors.backFile?.message}
+                />
+                
+                {backPreview && (
+                  <div className="mt-2">
+                    <div className="relative aspect-video w-full max-w-sm overflow-hidden rounded-md border">
+                      <img
+                        src={backPreview}
+                        alt="Back document preview"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
+                
+                <FormDescription>
+                  Upload a clear photo or scan of the back side of your document
+                </FormDescription>
+                <FormMessage />
+              </div>
+            </FormItem>
+          )}
+        />
+      )}
+
+      <FormField
+        name="selfieFile"
+        control={form.control}
+        rules={{ required: "Selfie with document is required" }}
+        render={({ field }) => (
+          <FormItem>
+            <div className="space-y-2">
+              <DocumentUploadHandler
+                label="Selfie with document"
+                onFileSelect={handleSelfieFileChange}
+                error={form.formState.errors.selfieFile?.message}
+              />
+              
+              {selfiePreview && (
+                <div className="mt-2">
+                  <div className="relative aspect-video w-full max-w-sm overflow-hidden rounded-md border">
+                    <img
+                      src={selfiePreview}
+                      alt="Selfie preview"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+              
+              <FormDescription>
+                Upload a selfie of yourself holding your ID document
+              </FormDescription>
+              <FormMessage />
+            </div>
+          </FormItem>
+        )}
+      />
     </div>
   );
 };

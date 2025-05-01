@@ -1,42 +1,41 @@
 
 import React from 'react';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { documentTypeOptions } from '../utils/documentTypeHelper';
+import { getDocumentTypeLabel } from '@/utils/verification';
 
 interface DocumentTypeSelectProps {
   form: any;
-  onTypeChange: (value: string) => void;
 }
 
-const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form, onTypeChange }) => {
+const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form }) => {
   return (
     <FormField
       control={form.control}
       name="documentType"
+      rules={{ required: "Document type is required" }}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>ID Document Type</FormLabel>
-          <FormControl>
-            <Select
-              onValueChange={(value) => {
-                field.onChange(value);
-                onTypeChange(value);
-              }}
-              value={field.value}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select ID document type" />
+          <FormLabel>Document Type</FormLabel>
+          <Select 
+            onValueChange={field.onChange} 
+            defaultValue={field.value}
+          >
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select document type" />
               </SelectTrigger>
-              <SelectContent>
-                {documentTypeOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormControl>
+            </FormControl>
+            <SelectContent>
+              <SelectItem value="id_card">{getDocumentTypeLabel('id_card')}</SelectItem>
+              <SelectItem value="passport">{getDocumentTypeLabel('passport')}</SelectItem>
+              <SelectItem value="drivers_license">{getDocumentTypeLabel('drivers_license')}</SelectItem>
+              <SelectItem value="residence_permit">{getDocumentTypeLabel('residence_permit')}</SelectItem>
+            </SelectContent>
+          </Select>
+          <FormDescription>
+            Choose the type of identification document you wish to submit
+          </FormDescription>
           <FormMessage />
         </FormItem>
       )}
