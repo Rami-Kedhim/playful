@@ -18,11 +18,15 @@ import { toast } from '@/components/ui/use-toast';
 interface VerificationFormProps {
   onSubmissionComplete?: () => void;
   serviceType?: 'escort' | 'client' | 'general';
+  onSubmit?: (data: any) => void;
+  loading?: boolean;
 }
 
 const VerificationForm: React.FC<VerificationFormProps> = ({
   onSubmissionComplete,
-  serviceType = 'general'
+  serviceType = 'general',
+  onSubmit,
+  loading: externalLoading
 }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -99,6 +103,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
       
       setSubmitted(true);
       if (onSubmissionComplete) onSubmissionComplete();
+      if (onSubmit) onSubmit(data);
     } catch (error: any) {
       console.error('Verification submission error:', error);
       setSubmissionError(error.message || 'An unexpected error occurred');
@@ -139,7 +144,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
             
             <div className="pt-4">
               <SubmitButton 
-                loading={loading}
+                loading={loading || externalLoading}
                 disabled={!form.formState.isValid}
                 text="Submit Verification"
               />

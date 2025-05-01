@@ -3,6 +3,14 @@ import { getDocumentTypeLabel } from '@/utils/verification';
 
 export { getDocumentTypeLabel };
 
+// Add documentTypeOptions array
+export const documentTypeOptions = [
+  { value: 'id_card', label: 'ID Card' },
+  { value: 'passport', label: 'Passport' },
+  { value: 'drivers_license', label: "Driver's License" },
+  { value: 'residence_permit', label: 'Residence Permit' },
+];
+
 export const getVerificationLevelLabel = (level: string): string => {
   switch (level) {
     case 'basic': return 'Basic';
