@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-// Import from a consistent casing that matches the actual file names
+// Fix imports to use lowercase consistently, matching the actual implementation files
 import authService from '@/services/authService';
 import userService from '@/services/userService';
 import { UberPersona } from '@/types/uberPersona';
