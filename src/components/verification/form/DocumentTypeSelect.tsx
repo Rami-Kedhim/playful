@@ -2,7 +2,7 @@
 import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getDocumentTypeLabel } from '@/utils/verification';
+import { getDocumentTypeLabel, documentTypeOptions } from '../utils/documentTypeHelper';
 
 interface DocumentTypeSelectProps {
   form: any;
@@ -27,10 +27,11 @@ const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form }) => {
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="id_card">{getDocumentTypeLabel('id_card')}</SelectItem>
-              <SelectItem value="passport">{getDocumentTypeLabel('passport')}</SelectItem>
-              <SelectItem value="drivers_license">{getDocumentTypeLabel('drivers_license')}</SelectItem>
-              <SelectItem value="residence_permit">{getDocumentTypeLabel('residence_permit')}</SelectItem>
+              {documentTypeOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <FormDescription>

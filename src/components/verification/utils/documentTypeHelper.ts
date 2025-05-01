@@ -1,5 +1,6 @@
 
-import { getDocumentTypeLabel } from '@/utils/verification';
+// Import the getDocumentTypeLabel function directly from the index file
+import { getDocumentTypeLabel } from '@/utils/verification/index';
 
 export { getDocumentTypeLabel };
 

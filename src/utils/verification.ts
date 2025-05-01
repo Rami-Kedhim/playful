@@ -10,3 +10,6 @@ export const submitVerificationRequest = submitVerificationReq;
 export * from './verification/statusCheck';
 export * from './verification/requestSubmission';
 export * from './verification/documentUpload';
+
+// Explicitly export the getDocumentTypeLabel function
+export { getDocumentTypeLabel } from './verification/index';
