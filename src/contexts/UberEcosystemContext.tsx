@@ -1,98 +1,175 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+// Update these imports to use lowercase paths
+import AuthService from '@/services/authService';
+import UserService from '@/services/userService';
 
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
-// Import directly from the lowercase versions of the files 
-import authService from '@/services/authService';
-import userService from '@/services/userService';
-import { UberPersona } from '@/types/uberPersona';
-
-// Create the context
-export interface UberEcosystemContextValue {
-  currentUser: any;
+// Define the context type
+interface UberEcosystemContextType {
+  isInitialized: boolean;
   isAuthenticated: boolean;
-  selectedPersona: UberPersona | null;
-  setSelectedPersona: (persona: UberPersona | null) => void;
-  validateToken: (token: string) => Promise<boolean>;
+  user: any | null;
   loading: boolean;
   error: string | null;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
+  register: (userData: any) => Promise<boolean>;
+  updateUser: (userData: any) => Promise<boolean>;
 }
 
-const UberEcosystemContext = createContext<UberEcosystemContextValue | undefined>(undefined);
+// Create the context with default values
+const UberEcosystemContext = createContext<UberEcosystemContextType>({
+  isInitialized: false,
+  isAuthenticated: false,
+  user: null,
+  loading: true,
+  error: null,
+  login: async () => false,
+  logout: async () => {},
+  register: async () => false,
+  updateUser: async () => false,
+});
 
 // Provider component
-interface UberEcosystemProviderProps {
-  children: ReactNode;
-}
-
-export const UberEcosystemProvider: React.FC<UberEcosystemProviderProps> = ({ 
-  children 
-}) => {
-  const [currentUser, setCurrentUser] = useState<any>(null);
+export const UberEcosystemProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isInitialized, setIsInitialized] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [selectedPersona, setSelectedPersona] = useState<UberPersona | null>(null);
+  const [user, setUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
+  // Initialize the ecosystem
   useEffect(() => {
-    const initializeAuth = async () => {
+    const initializeEcosystem = async () => {
       try {
         setLoading(true);
         
-        // Check for an existing token
-        const token = localStorage.getItem('auth_token');
+        // Check if user is already authenticated
+        const currentUser = await AuthService.getCurrentUser();
         
-        if (token) {
-          const isValid = await validateToken(token);
-          if (isValid) {
-            // If token is valid, get the user data
-            const userData = { id: 'user-123', name: 'Test User' }; // Mock user data
-            setCurrentUser(userData);
-            setIsAuthenticated(true);
-          } else {
-            // If token is not valid, clear it
-            localStorage.removeItem('auth_token');
-            setCurrentUser(null);
-            setIsAuthenticated(false);
-          }
-        } else {
-          // No token found
-          setCurrentUser(null);
-          setIsAuthenticated(false);
+        if (currentUser) {
+          setUser(currentUser);
+          setIsAuthenticated(true);
         }
+        
+        setIsInitialized(true);
         setError(null);
-      } catch (err: any) {
-        console.error('Auth initialization error:', err);
-        setError(err.message || 'Failed to initialize authentication');
-        setCurrentUser(null);
-        setIsAuthenticated(false);
+      } catch (err) {
+        console.error('Failed to initialize UberEcosystem:', err);
+        setError('Failed to initialize the application');
       } finally {
         setLoading(false);
       }
     };
     
-    initializeAuth();
+    initializeEcosystem();
   }, []);
-  
-  // Validate JWT token - Fixed the return type to boolean
-  const validateToken = async (token: string): Promise<boolean> => {
+
+  // Login function
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // Use authService to validate token and return a boolean result
-      const response = await authService.validateToken(token);
-      // Return true if we get a valid response
-      return !!response;
-    } catch (error) {
-      console.error('Token validation error:', error);
+      setLoading(true);
+      setError(null);
+      
+      const result = await AuthService.login(email, password);
+      
+      if (result.success) {
+        setUser(result.user);
+        setIsAuthenticated(true);
+        return true;
+      } else {
+        setError(result.message || 'Login failed');
+        return false;
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('An unexpected error occurred during login');
       return false;
+    } finally {
+      setLoading(false);
     }
   };
-  
+
+  // Logout function
+  const logout = async (): Promise<void> => {
+    try {
+      setLoading(true);
+      await AuthService.logout();
+      setUser(null);
+      setIsAuthenticated(false);
+      setError(null);
+    } catch (err) {
+      console.error('Logout error:', err);
+      setError('An error occurred during logout');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Register function
+  const register = async (userData: any): Promise<boolean> => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const result = await AuthService.register(userData);
+      
+      if (result.success) {
+        setUser(result.user);
+        setIsAuthenticated(true);
+        return true;
+      } else {
+        setError(result.message || 'Registration failed');
+        return false;
+      }
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError('An unexpected error occurred during registration');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update user function
+  const updateUser = async (userData: any): Promise<boolean> => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      if (!user || !user.id) {
+        setError('No user is currently authenticated');
+        return false;
+      }
+      
+      const result = await UserService.updateUser(user.id, userData);
+      
+      if (result.success) {
+        setUser({ ...user, ...userData });
+        return true;
+      } else {
+        setError(result.message || 'Failed to update user');
+        return false;
+      }
+    } catch (err) {
+      console.error('Update user error:', err);
+      setError('An unexpected error occurred while updating user');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Context value
   const value = {
-    currentUser,
+    isInitialized,
     isAuthenticated,
-    selectedPersona,
-    setSelectedPersona,
-    validateToken,
+    user,
     loading,
-    error
+    error,
+    login,
+    logout,
+    register,
+    updateUser,
   };
 
   return (
@@ -101,5 +178,8 @@ export const UberEcosystemProvider: React.FC<UberEcosystemProviderProps> = ({
     </UberEcosystemContext.Provider>
   );
 };
+
+// Custom hook to use the context
+export const useUberEcosystem = () => useContext(UberEcosystemContext);
 
 export default UberEcosystemContext;

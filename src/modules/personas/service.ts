@@ -1,165 +1,75 @@
+
 import { UberPersona } from '@/types/uberPersona';
-import { hermes } from '@/core/Hermes';
+import { uberCoreInstance } from '@/core/UberCore';
+import { lucie } from '@/core/Lucie';
+import { oxum } from '@/core/Oxum';
 
 export class PersonaService {
   /**
-   * Get persona data for viewing
+   * Get all personas with optional filters
    */
-  public getPersonaViewData(personaId: string): Promise<UberPersona | null> {
-    // Mock implementation
-    return Promise.resolve({
-      id: personaId,
-      name: 'Sample Persona',
-      type: 'escort',
-      tags: ['premium', 'verified'],
-      isVerified: true,
-      isOnline: true
-    } as UberPersona);
-  }
-  
-  /**
-   * Search personas based on criteria
-   */
-  public searchPersonas(criteria: Record<string, any>): Promise<UberPersona[]> {
-    // Mock implementation
-    return Promise.resolve([
-      {
-        id: 'result-1',
-        name: 'Search Result 1',
-        type: 'escort',
-        tags: ['premium']
-      },
-      {
-        id: 'result-2',
-        name: 'Search Result 2',
-        type: 'creator',
-        tags: ['verified']
-      }
-    ] as UberPersona[]);
-  }
-  
-  /**
-   * Update a persona
-   */
-  public updatePersona(personaId: string, data: Partial<UberPersona>): Promise<boolean> {
-    // Mock implementation
-    console.log(`Updating persona ${personaId} with data:`, data);
-    return Promise.resolve(true);
-  }
-  
-  /**
-   * Calculate optimal flow dynamics for a persona
-   */
-  public calculateFlowDynamics(persona: UberPersona): {
-    flowScore: number;
-    recommendations: string[];
-  } {
-    // Use the Hermes subsystem to calculate flow dynamics
-    const result = hermes.resolveFlowDynamics({
-      systemLoad: 0.5,  // Default system load
-      activityLevel: persona.isOnline ? 0.8 : 0.4,  // Higher if online
-      personaType: persona.type  // Pass the persona type correctly
-    });
-    
-    return {
-      flowScore: result.flowScore,
-      recommendations: result.recommendedActions || []
-    };
-  }
-  
-  /**
-   * Get recommended personas based on similarity
-   */
-  public getRecommendedPersonas(
-    personaId: string,
-    count: number = 3
-  ): Promise<UberPersona[]> {
-    // This is a mock implementation
-    // In a real system, this would use a recommendation engine
-    
-    return Promise.resolve([
-      {
-        id: 'rec-1',
-        name: 'Recommended 1',
-        type: 'escort',
-        tags: ['premium', 'vip']
-      },
-      {
-        id: 'rec-2',
-        name: 'Recommended 2',
-        type: 'creator',
-        tags: ['video', 'photos']
-      },
-      {
-        id: 'rec-3',
-        name: 'Recommended 3',
-        type: 'livecam',
-        tags: ['interactive', 'shows']
-      }
-    ] as UberPersona[]);
-  }
-  
-  /**
-   * Check if two personas are compatible
-   */
-  public checkCompatibility(
-    persona1: UberPersona,
-    persona2: UberPersona
-  ): {
-    score: number;
-    reasons: string[];
-  } {
-    // Mock implementation
-    const score = Math.random() * 100;
-    
-    const reasons = [];
-    if (score > 80) {
-      reasons.push('Highly compatible personalities');
-      reasons.push('Matching interests and preferences');
-    } else if (score > 50) {
-      reasons.push('Somewhat compatible');
-      reasons.push('Some shared interests');
-    } else {
-      reasons.push('Low compatibility');
-      reasons.push('Few shared interests');
+  async getPersonas(filters?: Record<string, any>): Promise<UberPersona[]> {
+    try {
+      // In a real implementation, this would use UberCore to fetch from a backend
+      const featuredPersonas = await lucie.loadFeaturedPersonas();
+      return featuredPersonas;
+    } catch (error) {
+      console.error('Error fetching personas:', error);
+      return [];
     }
-    
-    return {
-      score,
-      reasons
-    };
   }
-}
-
-export function getPersonaOptimalVisibilityTime(personaId: string): { 
-  time: Date;
-  score: number;
-  recommendations: string[]; 
-} {
-  try {
-    // Use Hermes to determine optimal visibility time
-    const flowDynamics = hermes.resolveFlowDynamics({
-      systemLoad: 0.6,
-      activityLevel: 0.75,
-      personaType: 'premium' // Add the personaType property
-    });
-    
-    // Fixed property name to match FlowDynamicsResult interface
-    return {
-      time: flowDynamics.optimalTime || new Date(),
-      score: flowDynamics.flowScore,
-      recommendations: flowDynamics.recommendation ? [flowDynamics.recommendation] : []
-    };
-  } catch (error) {
-    console.error("Error getting persona optimal visibility time:", error);
-    return {
-      time: new Date(),
-      score: 0,
-      recommendations: ["Error occurred, using default values"]
-    };
+  
+  /**
+   * Get a single persona by ID
+   */
+  async getPersonaById(id: string): Promise<UberPersona | null> {
+    try {
+      // This would be a real API call in production
+      return {
+        id,
+        name: 'Sample Persona',
+        type: 'escort',
+        displayName: 'Sample Display Name',
+        avatarUrl: 'https://picsum.photos/seed/sample/400/600',
+        location: 'Sample Location',
+        isVerified: true,
+        isOnline: true,
+        tags: ['sample', 'persona']
+      };
+    } catch (error) {
+      console.error(`Error fetching persona ${id}:`, error);
+      return null;
+    }
+  }
+  
+  /**
+   * Boost a persona's visibility using Oxum
+   */
+  async boostPersona(personaId: string, boostLevel: number): Promise<boolean> {
+    try {
+      // Use Oxum for boosting
+      const result = await oxum.applyBoost(personaId, boostLevel);
+      return result.success;
+    } catch (error) {
+      console.error(`Error boosting persona ${personaId}:`, error);
+      return false;
+    }
+  }
+  
+  /**
+   * Get similar personas based on the current one
+   */
+  async getSimilarPersonas(personaId: string, limit = 4): Promise<UberPersona[]> {
+    try {
+      // This would use a real recommendation algorithm in production
+      const featuredPersonas = await lucie.loadFeaturedPersonas();
+      return featuredPersonas.slice(0, limit);
+    } catch (error) {
+      console.error(`Error fetching similar personas for ${personaId}:`, error);
+      return [];
+    }
   }
 }
 
 export const personaService = new PersonaService();
-
 export default personaService;

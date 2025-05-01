@@ -2,11 +2,8 @@
 // Consolidated shared types for the UberConcepts ecosystem
 
 // Re-export existing types for backward compatibility
-export * from './UberPersona';
-export * from './user';
-// Import but don't re-export conflicting types
-import './ubercore';
-import './uber-ecosystem';
+export * from './uberPersona';
+export * from './home';
 
 // Basic ID type used throughout the application
 export type ID = string;
@@ -53,4 +50,54 @@ export interface AnalyticsData {
     start: Date;
     end: Date;
   };
+}
+
+// UBX Token types
+export interface UbxBalance {
+  available: number;
+  pending: number;
+  reserved: number;
+  total: number;
+}
+
+export interface UbxTransaction {
+  id: string;
+  type: 'purchase' | 'spend' | 'earn' | 'refund';
+  amount: number;
+  description: string;
+  timestamp: Date;
+  metadata?: Record<string, any>;
+}
+
+// Brain Hub types
+export interface BrainHubConfig {
+  aiModelParameters: {
+    learningRate: number;
+    batchSize: number;
+    epochs: number;
+    optimizerType: string;
+  };
+  systemSettings: {
+    resourceAllocationMode: string;
+    autoOptimize: boolean;
+    debugMode: boolean;
+    loggingLevel: string;
+  };
+  neuralSettings: {
+    activationThreshold: number;
+    neuralDensity: number;
+    layerConfiguration: string;
+  };
+  [key: string]: any;
+}
+
+export interface BrainHubRequest {
+  type: string;
+  data?: any;
+}
+
+export interface BrainHubResponse {
+  success: boolean;
+  data: any | null;
+  error?: string;
 }
