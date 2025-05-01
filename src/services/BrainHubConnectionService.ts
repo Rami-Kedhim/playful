@@ -1,5 +1,5 @@
 
-import { brainHub } from "./neural/HermesOxumBrainHub";
+import { brainHub } from "./neural/HermesOxumNeuralHub";
 
 /**
  * Brain Hub Connection Service - A central utility to connect components 
