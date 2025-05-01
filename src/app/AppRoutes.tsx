@@ -12,6 +12,8 @@ import WalletPage from '@/pages/WalletPage';
 import AICompanionsPage from '@/pages/AICompanionsPage';
 import PulseBoostPage from '@/pages/PulseBoostPage';
 import MessagesPage from '@/pages/MessagesPage';
+import SearchPage from '@/pages/SearchPage';
+import EscortsPage from '@/pages/EscortsPage';
 import { logInteraction } from '@/utils/uberCore';
 
 /**
@@ -72,8 +74,18 @@ const AppRoutes = () => {
           <MessagesPage />
         </MainLayout>
       } />
-      <Route path="/search" element={<div>Search Page (Coming Soon)</div>} />
-      <Route path="/escorts" element={<div>Escorts Page (Coming Soon)</div>} />
+      
+      {/* Previously placeholder routes, now implemented */}
+      <Route path="/search" element={
+        <MainLayout>
+          <SearchPage />
+        </MainLayout>
+      } />
+      <Route path="/escorts" element={
+        <MainLayout>
+          <EscortsPage />
+        </MainLayout>
+      } />
       
       {/* 404 - Not Found */}
       <Route path="*" element={<NotFoundPage />} />
