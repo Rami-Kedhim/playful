@@ -1,7 +1,3 @@
-
-// Fix normalizeDocument keys: allow reviewedAt to be string or Date
-// Fix imports to avoid importing non-existing types from requestSubmission
-
 import { VerificationLevel, VerificationStatus, VerificationDocument } from '@/types/verification';
 
 export const canSubmitVerification = async (userId: string): Promise<{ canSubmit: boolean; reason?: string; cooldownRemaining?: number }> => {
@@ -71,4 +67,3 @@ export const normalizeDocument = (doc: any): VerificationDocument => {
     reviewedAt: doc.reviewedAt ? (typeof doc.reviewedAt === 'string' ? doc.reviewedAt : new Date(doc.reviewedAt).toISOString()) : undefined,
   };
 };
-

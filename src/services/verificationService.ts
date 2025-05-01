@@ -1,4 +1,3 @@
-
 import { VerificationDocument, VerificationRequest, VerificationStatus, VerificationLevel } from '@/types/verification';
 
 // Mock verification requests data
@@ -6,6 +5,7 @@ const mockVerificationRequests: VerificationRequest[] = [
   {
     id: '1',
     profile_id: 'prof-123',
+    userId: 'prof-123',
     status: VerificationStatus.PENDING,
     requested_level: VerificationLevel.BASIC,
     created_at: new Date().toISOString(),
@@ -29,6 +29,7 @@ const mockVerificationRequests: VerificationRequest[] = [
   {
     id: '2',
     profile_id: 'prof-456',
+    userId: 'prof-456',
     status: VerificationStatus.PENDING,
     requested_level: VerificationLevel.ENHANCED,
     created_at: new Date(Date.now() - 86400000).toISOString(),
@@ -73,8 +74,9 @@ export const approveVerificationRequest = async (id: string): Promise<boolean> =
   mockVerificationRequests[index] = {
     ...mockVerificationRequests[index],
     status: VerificationStatus.APPROVED,
+    reviewed_at: new Date().toISOString(),
     reviewedAt: new Date().toISOString(),
-    reviewedBy: 'admin-user-id'
+    reviewed_by: 'admin-user-id'
   };
 
   if (mockVerificationRequests[index].documents) {
@@ -99,9 +101,11 @@ export const rejectVerificationRequest = async (id: string, reason: string): Pro
   mockVerificationRequests[index] = {
     ...mockVerificationRequests[index],
     status: VerificationStatus.REJECTED,
+    reviewed_at: new Date().toISOString(),
     reviewedAt: new Date().toISOString(),
-    reviewedBy: 'admin-user-id',
-    reviewer_notes: reason
+    reviewed_by: 'admin-user-id',
+    reviewer_notes: reason,
+    rejectionReason: reason
   };
 
   return true;

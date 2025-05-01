@@ -1,6 +1,4 @@
 
-// Only fixing the user_id to userId property access
-
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,7 +45,7 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
       <CardContent className="space-y-4">
         <div className="flex items-center space-x-2">
           <User className="h-4 w-4" />
-          <span>User ID: {request.userId || request.profile_id || request.profile_id}</span>
+          <span>User ID: {request.userId || request.profile_id || ''}</span>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -94,12 +92,12 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
         {request.status === VerificationStatus.APPROVED ? (
           <Badge variant="outline" className="bg-green-100 text-green-500 border-green-200">
             <CheckCircle className="h-4 w-4 mr-2" />
-            Approved on {request.reviewedAt ? format(new Date(request.reviewedAt), 'MMM dd, yyyy') : 'Unknown'}
+            Approved on {request.reviewedAt || request.reviewed_at ? format(new Date(request.reviewedAt || request.reviewed_at), 'MMM dd, yyyy') : 'Unknown'}
           </Badge>
         ) : request.status === VerificationStatus.REJECTED ? (
           <Badge variant="outline" className="bg-red-100 text-red-500 border-red-200">
             <AlertCircle className="h-4 w-4 mr-2" />
-            Rejected on {request.reviewedAt ? format(new Date(request.reviewedAt), 'MMM dd, yyyy') : 'Unknown'}
+            Rejected on {request.reviewedAt || request.reviewed_at ? format(new Date(request.reviewedAt || request.reviewed_at), 'MMM dd, yyyy') : 'Unknown'}
           </Badge>
         ) : (
           <div className="flex space-x-2">
