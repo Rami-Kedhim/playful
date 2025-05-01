@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Shield, Wallet, UserCheck } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 interface VerificationLevelTypeProps {
   selectedType: 'personal' | 'business' | 'premium' | null;
@@ -13,84 +13,85 @@ const VerificationLevelType: React.FC<VerificationLevelTypeProps> = ({
   selectedType,
   onSelectType
 }) => {
+  const verificationTypes = [
+    {
+      id: 'personal',
+      title: 'Personal Verification',
+      description: 'For individual users',
+      features: [
+        'Basic account verification',
+        'Access to standard features',
+        'Increased trust score'
+      ]
+    },
+    {
+      id: 'business',
+      title: 'Business Verification',
+      description: 'For businesses and organizations',
+      features: [
+        'All personal verification features',
+        'Business profile badge',
+        'Access to specialized tools'
+      ]
+    },
+    {
+      id: 'premium',
+      title: 'Premium Verification',
+      description: 'For advanced users and celebrities',
+      features: [
+        'All business verification features',
+        'Priority customer support',
+        'Enhanced privacy options',
+        'Premium profile badge'
+      ]
+    }
+  ];
+
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Verification Types</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className={`cursor-pointer ${selectedType === 'personal' ? 'border-primary' : ''}`} 
-          onClick={() => onSelectType('personal')}>
-          <CardHeader>
-            <Shield className="h-8 w-8 mb-2 text-blue-500" />
-            <CardTitle>Personal</CardTitle>
-            <CardDescription>Basic identity verification</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm">
-              <li>• Identity document verification</li>
-              <li>• Basic profile verification</li>
-              <li>• Standard user features</li>
-            </ul>
-          </CardContent>
-          <CardFooter>
-            <Button 
-              variant={selectedType === 'personal' ? 'default' : 'outline'} 
-              className="w-full"
-              onClick={() => onSelectType('personal')}
-            >
-              {selectedType === 'personal' ? 'Selected' : 'Select'}
-            </Button>
-          </CardFooter>
-        </Card>
+      <div>
+        <h3 className="text-xl font-semibold mb-2">Select Verification Type</h3>
+        <p className="text-muted-foreground">
+          Choose the verification type that best fits your needs
+        </p>
+      </div>
 
-        <Card className={`cursor-pointer ${selectedType === 'business' ? 'border-primary' : ''}`}
-          onClick={() => onSelectType('business')}>
-          <CardHeader>
-            <Wallet className="h-8 w-8 mb-2 text-green-500" />
-            <CardTitle>Business</CardTitle>
-            <CardDescription>For professional service providers</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm">
-              <li>• Enhanced identity verification</li>
-              <li>• Business information verification</li>
-              <li>• Access to business features</li>
-            </ul>
-          </CardContent>
-          <CardFooter>
-            <Button 
-              variant={selectedType === 'business' ? 'default' : 'outline'} 
-              className="w-full"
-              onClick={() => onSelectType('business')}
-            >
-              {selectedType === 'business' ? 'Selected' : 'Select'}
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <Card className={`cursor-pointer ${selectedType === 'premium' ? 'border-primary' : ''}`}
-          onClick={() => onSelectType('premium')}>
-          <CardHeader>
-            <UserCheck className="h-8 w-8 mb-2 text-purple-500" />
-            <CardTitle>Premium</CardTitle>
-            <CardDescription>Advanced verification for VIP users</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm">
-              <li>• Comprehensive identity verification</li>
-              <li>• Background verification</li>
-              <li>• Premium features access</li>
-            </ul>
-          </CardContent>
-          <CardFooter>
-            <Button 
-              variant={selectedType === 'premium' ? 'default' : 'outline'} 
-              className="w-full"
-              onClick={() => onSelectType('premium')}
-            >
-              {selectedType === 'premium' ? 'Selected' : 'Select'}
-            </Button>
-          </CardFooter>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-3">
+        {verificationTypes.map((type) => (
+          <Card 
+            key={type.id} 
+            className={`cursor-pointer transition-all ${
+              selectedType === type.id ? 'border-primary' : ''
+            }`}
+            onClick={() => onSelectType(type.id as 'personal' | 'business' | 'premium')}
+          >
+            <CardHeader>
+              <CardTitle>{type.title}</CardTitle>
+              <CardDescription>{type.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                {type.features.map((feature, i) => (
+                  <li key={i} className="flex items-start">
+                    <Check className="h-4 w-4 mr-2 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              
+              <Button 
+                variant={selectedType === type.id ? "default" : "outline"}
+                className="w-full mt-4"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelectType(type.id as 'personal' | 'business' | 'premium');
+                }}
+              >
+                {selectedType === type.id ? 'Selected' : 'Select'}
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );

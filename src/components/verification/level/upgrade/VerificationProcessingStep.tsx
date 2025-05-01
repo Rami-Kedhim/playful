@@ -1,35 +1,52 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { ShieldCheck } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle } from 'lucide-react';
+import { VerificationLevel } from '@/types/verification';
 
-interface ProcessingStepProps {
-  currentLevel: string;
-  targetLevel: string;
+interface VerificationProcessingStepProps {
+  currentLevel: VerificationLevel;
+  targetLevel: VerificationLevel;
 }
 
-const VerificationProcessingStep = ({ currentLevel, targetLevel }: ProcessingStepProps) => {
+const VerificationProcessingStep: React.FC<VerificationProcessingStepProps> = ({
+  currentLevel,
+  targetLevel
+}) => {
   return (
-    <Card className="flex flex-col items-center p-6 text-center">
-      <ShieldCheck className="h-16 w-16 text-primary mb-4" />
-      <h2 className="text-2xl font-semibold mb-2">Verification Upgrade In Progress</h2>
-      <p className="text-muted-foreground mb-6">
-        Your verification upgrade request is being processed. We'll notify you once it's complete.
-      </p>
-      <div className="w-full max-w-md bg-muted/40 p-4 rounded-md text-sm text-left">
-        <div className="flex justify-between mb-2">
-          <span className="font-medium">Current level:</span>
-          <span>{currentLevel}</span>
+    <Card>
+      <CardHeader className="text-center">
+        <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+          <CheckCircle className="h-6 w-6 text-primary" />
         </div>
-        <div className="flex justify-between mb-2">
-          <span className="font-medium">Target level:</span>
-          <span>{targetLevel}</span>
+        <CardTitle>Upgrade Request Submitted</CardTitle>
+        <CardDescription>
+          Your verification upgrade from {currentLevel} to {targetLevel} is being processed
+        </CardDescription>
+      </CardHeader>
+      
+      <CardContent className="text-center">
+        <div className="space-y-4">
+          <p className="text-muted-foreground">
+            We're processing your upgrade request. This typically takes 1-3 business days, but may take longer during peak times.
+          </p>
+          
+          <div className="space-y-2 mt-4">
+            <h4 className="font-medium">What's next?</h4>
+            <ul className="text-sm text-muted-foreground space-y-1">
+              <li>Our team will review your verification documents</li>
+              <li>You may be contacted for additional information if needed</li>
+              <li>You'll receive a notification when your upgrade is complete</li>
+            </ul>
+          </div>
+          
+          <div className="bg-muted p-4 rounded-md text-sm mt-4">
+            <p>
+              Your current verification level ({currentLevel}) will remain active during this process.
+            </p>
+          </div>
         </div>
-        <div className="flex justify-between">
-          <span className="font-medium">Status:</span>
-          <span>Processing</span>
-        </div>
-      </div>
+      </CardContent>
     </Card>
   );
 };

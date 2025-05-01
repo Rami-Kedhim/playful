@@ -1,98 +1,101 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Loader2 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { getVerificationRequirements } from '@/utils/verification/statusCheck';
+import { VerificationLevel } from '@/types/verification';
+import { ArrowLeft, CreditCard, Check, Loader } from 'lucide-react';
 
-interface PaymentStepProps {
-  targetLevel: string;
+interface VerificationPaymentStepProps {
+  targetLevel: VerificationLevel;
   loading: boolean;
   onBack: () => void;
   onComplete: () => void;
 }
 
-const VerificationPaymentStep = ({ targetLevel, loading, onBack, onComplete }: PaymentStepProps) => {
+const VerificationPaymentStep: React.FC<VerificationPaymentStepProps> = ({
+  targetLevel,
+  loading,
+  onBack,
+  onComplete
+}) => {
+  const requirements = getVerificationRequirements(targetLevel);
+  const fee = requirements.fee || 0;
+  
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Complete Your Upgrade</h2>
-      
       <Card>
         <CardHeader>
-          <CardTitle>Payment Details</CardTitle>
-          <CardDescription>
-            Your card will only be charged after your verification is approved
-          </CardDescription>
+          <CardTitle>Complete Your Upgrade</CardTitle>
+          <CardDescription>Please complete payment to proceed with your verification upgrade</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="bg-muted p-4 rounded-md">
-              <div className="flex justify-between mb-2">
-                <span>Upgrade to {targetLevel} verification</span>
-                <span>
-                  {targetLevel === 'enhanced' ? '$9.99' : targetLevel === 'premium' ? '$29.99' : '$0'}
-                </span>
-              </div>
-              
-              <Separator className="my-2" />
-              
-              <div className="flex justify-between font-medium">
-                <span>Total</span>
-                <span>{targetLevel === 'enhanced' ? '$9.99' : targetLevel === 'premium' ? '$29.99' : '$0'}</span>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Card Number</label>
-                <input 
-                  type="text" 
-                  placeholder="1234 5678 9012 3456" 
-                  className="w-full p-2 border rounded-md"
-                  disabled={loading}
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Expiration</label>
-                  <input 
-                    type="text" 
-                    placeholder="MM/YY" 
-                    className="w-full p-2 border rounded-md"
-                    disabled={loading}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">CVC</label>
-                  <input 
-                    type="text" 
-                    placeholder="123" 
-                    className="w-full p-2 border rounded-md"
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={onBack} disabled={loading}>
-          Back
-        </Button>
         
-        <Button onClick={onComplete} disabled={loading}>
-          {loading ? (
+        <CardContent className="space-y-6">
+          {fee > 0 ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...
+              <div className="border-b pb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span>{targetLevel} Verification Fee</span>
+                  <span className="font-medium">${fee.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm text-muted-foreground">
+                  <span>Processing Fee</span>
+                  <span>$0.00</span>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center font-semibold">
+                <span>Total</span>
+                <span>${fee.toFixed(2)}</span>
+              </div>
+              
+              <div className="border rounded-md p-4 mt-4 space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    <span>Credit or Debit Card</span>
+                  </div>
+                  <Check className="h-4 w-4 text-primary" />
+                </div>
+                
+                <div className="grid gap-2">
+                  <div className="text-sm text-muted-foreground">
+                    For demo purposes, no actual payment will be processed
+                  </div>
+                </div>
+              </div>
             </>
           ) : (
-            'Complete Purchase'
+            <div className="flex items-start gap-3 bg-muted p-4 rounded-md">
+              <Check className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <h4 className="font-medium">{targetLevel} Verification is Free</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  There is no fee for upgrading to this verification level. 
+                  You can proceed with your upgrade immediately.
+                </p>
+              </div>
+            </div>
           )}
-        </Button>
-      </div>
+        </CardContent>
+        
+        <CardFooter className="flex justify-between">
+          <Button variant="outline" onClick={onBack} disabled={loading}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <Button onClick={onComplete} disabled={loading}>
+            {loading ? (
+              <>
+                <Loader className="h-4 w-4 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              'Complete Upgrade'
+            )}
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 };

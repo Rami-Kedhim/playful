@@ -1,100 +1,75 @@
 
-import { supabase } from '@/lib/supabase';
-import { VerificationStatus } from '@/types/verification';
-import { User } from '@/types/user';
+import { VerificationLevel, VerificationStatus } from '@/types/verification';
 
 /**
- * Check verification status for a user
- * @param userId The user ID to check
- * @returns The verification status and last request if any
+ * Get the current verification status for a user
+ * @param userId User ID to check
+ * @returns Promise with verification status details
  */
-export const checkVerificationStatus = async (userId: string): Promise<{ 
+export const checkVerificationStatus = async (userId: string): Promise<{
   status: VerificationStatus;
-  lastRequest?: any;
+  level: VerificationLevel | null;
+  lastSubmitted: Date | null;
+  reason?: string;
 }> => {
-  if (!userId) {
-    return { status: VerificationStatus.NONE };
-  }
-
   try {
-    // First check if user has already been verified through metadata
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // In a real app, this would be an API call to check the status
+    // For now, mock implementation
+    await new Promise(resolve => setTimeout(resolve, 500));
     
-    if (userError || !user) {
-      console.error('Error getting user:', userError);
-      return { status: VerificationStatus.NONE };
-    }
-    
-    // If user is already verified through metadata
-    if (user.user_metadata?.verification_status === 'approved') {
-      return { status: VerificationStatus.APPROVED };
-    }
-    
-    // Check for pending verification requests
-    const { data, error } = await supabase
-      .from('verification_requests')
-      .select('*')
-      .eq('profile_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error) {
-      console.log('No verification requests found or error:', error);
-      return { status: VerificationStatus.NONE };
-    }
-
-    if (data) {
-      return { 
-        status: data.status as VerificationStatus,
-        lastRequest: data
-      };
-    }
-
-    return { status: VerificationStatus.NONE };
+    // This is where you would typically make an API call to get the status
+    // For demonstration, we'll return mock data
+    return {
+      status: VerificationStatus.NONE,
+      level: null,
+      lastSubmitted: null
+    };
   } catch (error) {
     console.error('Error checking verification status:', error);
-    return { status: VerificationStatus.NONE };
+    return {
+      status: VerificationStatus.NONE,
+      level: null,
+      lastSubmitted: null,
+      reason: 'Failed to check verification status'
+    };
   }
 };
 
 /**
- * Check verification documents for a user
+ * Get verification level requirements
+ * @param targetLevel Target verification level
+ * @returns Object with requirements for the level
  */
-export const getVerificationDocuments = async (userId: string) => {
-  if (!userId) return [];
-
-  try {
-    const { data, error } = await supabase
-      .from('verification_requests')
-      .select('documents')
-      .eq('profile_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error || !data) {
-      return [];
-    }
-
-    return data.documents || [];
-  } catch (error) {
-    console.error('Error getting verification documents:', error);
-    return [];
+export const getVerificationRequirements = (targetLevel: VerificationLevel) => {
+  switch (targetLevel) {
+    case VerificationLevel.BASIC:
+      return {
+        documents: ['id_card', 'passport', 'drivers_license'],
+        needsSelfie: true,
+        needsAddress: false,
+        fee: 0
+      };
+    case VerificationLevel.ENHANCED:
+      return {
+        documents: ['id_card', 'passport', 'drivers_license'],
+        needsSelfie: true,
+        needsAddress: true,
+        fee: 5
+      };
+    case VerificationLevel.PREMIUM:
+      return {
+        documents: ['passport', 'drivers_license'],
+        needsSelfie: true,
+        needsAddress: true,
+        needsVideoCall: true,
+        fee: 15
+      };
+    default:
+      return {
+        documents: [],
+        needsSelfie: false,
+        needsAddress: false,
+        fee: 0
+      };
   }
-};
-
-/**
- * Enhance the user object with verification status
- */
-export const enhanceUserWithVerificationStatus = (user: User | null): User | null => {
-  if (!user) return null;
-  
-  // Check if user is verified through metadata
-  const isVerified = user.user_metadata?.verification_status === 'approved';
-  
-  return {
-    ...user,
-    isVerified
-  };
 };

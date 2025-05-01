@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, AlertCircle, Shield, ArrowRight } from 'lucide-react';
+import { Check, AlertTriangle, FileText, Lock } from 'lucide-react';
+import { getVerificationRequirements } from '@/utils/verification/statusCheck';
 import { VerificationLevel } from '@/types/verification';
 
 interface VerificationLevelRequirementsProps {
@@ -16,108 +17,86 @@ const VerificationLevelRequirements: React.FC<VerificationLevelRequirementsProps
   targetLevel,
   onComplete
 }) => {
-  const getRequirements = () => {
-    // Basic verification requirements
-    const basicRequirements = [
-      { id: 'government_id', label: 'Valid government-issued photo ID', required: true },
-      { id: 'selfie', label: 'Selfie with ID', required: true },
-      { id: 'address', label: 'Proof of address', required: false },
-    ];
-    
-    // Enhanced verification adds these requirements
-    const enhancedRequirements = [
-      ...basicRequirements,
-      { id: 'address', label: 'Proof of address', required: true },
-      { id: 'phone', label: 'Phone number verification', required: true },
-    ];
-    
-    // Premium verification adds these requirements
-    const premiumRequirements = [
-      ...enhancedRequirements,
-      { id: 'business_doc', label: 'Business documentation', required: true },
-      { id: 'payment_method', label: 'Verified payment method', required: true },
-    ];
-    
-    switch (targetLevel) {
-      case VerificationLevel.BASIC:
-        return basicRequirements;
-      case VerificationLevel.ENHANCED:
-        return enhancedRequirements;
-      case VerificationLevel.PREMIUM:
-        return premiumRequirements;
-      default:
-        return [];
-    }
-  };
+  const requirements = getVerificationRequirements(targetLevel);
   
-  const requirements = getRequirements();
-  
-  const getVerificationLevelName = (level: VerificationLevel): string => {
-    switch (level) {
-      case VerificationLevel.BASIC:
-        return 'Basic';
-      case VerificationLevel.ENHANCED:
-        return 'Enhanced';
-      case VerificationLevel.PREMIUM:
-        return 'Premium';
-      default:
-        return 'None';
-    }
-  };
+  // Check if the current level is sufficient for upgrade
+  const canUpgrade = VerificationLevel[currentLevel] < VerificationLevel[targetLevel];
   
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>
-          {currentLevel === VerificationLevel.NONE 
-            ? `Requirements for ${getVerificationLevelName(targetLevel)} Verification` 
-            : `Upgrade to ${getVerificationLevelName(targetLevel)} Verification`}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="text-sm text-muted-foreground">
-          Complete these requirements to {currentLevel === VerificationLevel.NONE ? 'get verified' : 'upgrade your verification level'}:
-        </div>
-        
-        <ul className="space-y-3">
-          {requirements.map((req) => (
-            <li key={req.id} className="flex items-start">
-              {req.required ? (
-                <CheckCircle2 className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
-              ) : (
-                <AlertCircle className="h-5 w-5 mr-2 text-amber-500 flex-shrink-0 mt-0.5" />
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <h2 className="text-2xl font-semibold">Requirements for {targetLevel} Verification</h2>
+        <p className="text-muted-foreground">
+          Please review the requirements before proceeding with your verification upgrade.
+        </p>
+      </div>
+      
+      <Card>
+        <CardContent className="pt-6 space-y-4">
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Document Requirements</h3>
+            
+            <div className="grid gap-2">
+              {requirements.documents.map((doc, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span>Valid {doc.replace('_', ' ')}</span>
+                </div>
+              ))}
+              
+              {requirements.needsSelfie && (
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span>Selfie with your document</span>
+                </div>
               )}
+              
+              {requirements.needsAddress && (
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span>Proof of address (utility bill, bank statement)</span>
+                </div>
+              )}
+              
+              {requirements.needsVideoCall && (
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  <span>Brief video call verification</span>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {requirements.fee > 0 && (
+            <div className="space-y-2">
+              <h3 className="text-lg font-medium">Verification Fee</h3>
+              <p className="font-semibold">${requirements.fee.toFixed(2)}</p>
+              <p className="text-sm text-muted-foreground">
+                This one-time fee covers the cost of processing your verification.
+              </p>
+            </div>
+          )}
+          
+          {!canUpgrade && (
+            <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md p-4 flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
               <div>
-                <div className="font-medium">{req.label}</div>
-                {req.required ? (
-                  <div className="text-xs text-muted-foreground">Required</div>
-                ) : (
-                  <div className="text-xs text-amber-500">Optional but recommended</div>
-                )}
+                <h4 className="font-medium text-yellow-800 dark:text-yellow-300">Already Verified</h4>
+                <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
+                  You already have the {currentLevel} verification level, which is equivalent or higher than the requested level.
+                </p>
               </div>
-            </li>
-          ))}
-        </ul>
-        
-        <div className="bg-muted rounded-md p-4 text-sm">
-          <p className="font-medium flex items-center">
-            <Shield className="h-4 w-4 mr-2" />
-            Security & Privacy
-          </p>
-          <p className="mt-2">
-            Your verification documents are encrypted and securely stored. We follow strict privacy guidelines
-            and only use your information for verification purposes.
-          </p>
-        </div>
-        
-        <Button 
-          onClick={onComplete}
-          className="w-full mt-4"
-        >
-          Continue <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </CardContent>
-    </Card>
+            </div>
+          )}
+          
+          <div className="flex justify-end mt-4">
+            <Button onClick={onComplete} disabled={!canUpgrade}>
+              {!canUpgrade ? 'Already Verified' : 'Continue to Payment'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
