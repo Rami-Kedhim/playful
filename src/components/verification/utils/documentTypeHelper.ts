@@ -1,5 +1,5 @@
 
-import { getDocumentTypeLabel } from '@/utils/verification';
+import { getDocumentTypeLabel } from '@/utils/verification/index';
 
 export const documentTypeOptions = [
   { value: 'id_card', label: 'ID Card' },
