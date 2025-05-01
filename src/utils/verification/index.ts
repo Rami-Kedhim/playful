@@ -1,15 +1,15 @@
 
 // Fix imports for verification
-import { canSubmitVerification as canSubmit, submitVerificationRequest as submitVerificationReq } from './verification/requestSubmission';
+import { canSubmitVerification as canSubmit, submitVerificationRequest as submitVerificationReq } from './requestSubmission';
 
 // Re-export them with proper names
 export const canSubmitVerification = canSubmit;
 export const submitVerificationRequest = submitVerificationReq;
 
 // Export verification helpers
-export * from './verification/statusCheck';
-export * from './verification/requestSubmission';
-export * from './verification/documentUpload';
+export * from './statusCheck';
+export * from './requestSubmission';
+export * from './documentUpload';
 
 // Add the missing getDocumentTypeLabel function
 export const getDocumentTypeLabel = (docType: string): string => {
