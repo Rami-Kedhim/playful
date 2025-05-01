@@ -9,7 +9,7 @@ class FeaturedService {
         id: 'persona1',
         name: 'Sophie',
         displayName: 'Sophie Dreams',
-        type: 'escort' as const,
+        type: 'escort' as const,  // Using 'as const' to ensure proper type narrowing
         avatarUrl: 'https://picsum.photos/seed/sophie/400/600',
         location: 'New York',
         isVerified: true,
