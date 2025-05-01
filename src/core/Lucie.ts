@@ -1,7 +1,7 @@
 // Lucie - AI Orchestration and Generation System
 // Central component for AI generation, personality, and ethical governance
 
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/shared';
 
 export class Lucie {
   private initialized = false;

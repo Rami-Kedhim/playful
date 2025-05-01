@@ -1,5 +1,7 @@
 
-import { UberPersona } from '@/types/uberPersona';
+// Implement mock user service with proper method names
+
+import { UberPersona } from '@/types/shared';
 
 export const userService = {
   getUserProfile: async (userId: string): Promise<UberPersona> => {
@@ -54,6 +56,15 @@ export const userService = {
     return {
       theme: 'dark',
       notifications: true
+    };
+  },
+  
+  // Add missing methods needed by UberEcosystemContext
+  updateUser: async (userId: string, userData: any): Promise<any> => {
+    console.log('Updating user:', userData);
+    return {
+      success: true,
+      message: 'User updated successfully'
     };
   }
 };
