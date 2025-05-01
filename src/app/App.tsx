@@ -4,12 +4,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import UberContextsProvider from '@/contexts/UberContexts';
 import AppRoutes from './AppRoutes';
+import { initializeSystem, shutdownSystem } from '@/core/engine';
 import { checkSystemStatus } from '@/utils/core';
-import { uberCore } from '@/core/UberCore';
-import { lucie } from '@/core/Lucie';
-import { hermes } from '@/core/Hermes';
-import { oxum } from '@/core/Oxum';
-import { orus } from '@/core/Orus';
 
 /**
  * Main application component
@@ -17,41 +13,29 @@ import { orus } from '@/core/Orus';
  */
 const App = () => {
   useEffect(() => {
-    // Initial system status check
-    const checkStatus = async () => {
-      try {
-        const status = await checkSystemStatus();
-        console.info('UberEscorts system status:', status.operational ? 'Operational' : 'Degraded');
-        console.info('System latency:', status.latency, 'ms');
-        console.info('AI Models:', 
-          Object.entries(status.aiModels)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join(', ')
-        );
-      } catch (error) {
-        console.error('Failed to check system status:', error);
-      }
-    };
-    
-    checkStatus();
-    
-    // Initialize all UberCore modules
+    // Initialize UberCore system
     const initCore = async () => {
-      console.log('Initializing UberCore modules...');
-      
-      await Promise.all([
-        lucie.initialize(),
-        hermes.initialize(), 
-        uberCore.initialize(),
-        // oxum and orus are initialized in their constructors
-      ]);
-      
-      // Verify system integrity
-      const integrityResult = orus.checkIntegrity();
-      if (!integrityResult.isValid) {
-        console.error('System integrity check failed:', integrityResult.message);
-      } else {
-        console.log('System integrity verified:', integrityResult.message);
+      try {
+        console.log('Initializing UberCore system...');
+        const initialized = await initializeSystem();
+        
+        if (initialized) {
+          console.info('UberCore system initialized successfully');
+          
+          // Check system status
+          const status = await checkSystemStatus();
+          console.info('UberEscorts system status:', status.operational ? 'Operational' : 'Degraded');
+          console.info('System latency:', status.latency, 'ms');
+          console.info('AI Models:', 
+            Object.entries(status.aiModels)
+              .map(([key, value]) => `${key}: ${value}`)
+              .join(', ')
+          );
+        } else {
+          console.error('Failed to initialize UberCore system');
+        }
+      } catch (error) {
+        console.error('Error during system initialization:', error);
       }
     };
     
@@ -59,7 +43,7 @@ const App = () => {
     
     return () => {
       // Shutdown UberCore when app unmounts
-      uberCore.shutdown();
+      shutdownSystem();
     };
   }, []);
   

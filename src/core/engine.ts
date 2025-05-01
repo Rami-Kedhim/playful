@@ -1,22 +1,41 @@
 
-// Core UberEscorts engine entrypoint connecting Hermes, Oxum, Orus AI layers
+// Core UberEscorts engine entrypoint connecting all UberCore layers
 
-// Fix import of hermes from HermesOxumNeuralHub
-import { neuralHub as hermes } from '@/services/neural/HermesOxumNeuralHub';
-import { uberCoreInstance } from '@/core/UberCore'; // fixed import path to '@/core/UberCore'
-import securityEngine from '@/services/neural/BrainHubSecurityEngine';
+import { hermes } from '@/core/Hermes';
+import { uberCore } from '@/core/UberCore';
+import { orus } from '@/core/Orus';
+import { oxum } from '@/core/Oxum';
+import { lucie } from '@/core/Lucie';
 
 export const initializeSystem = async () => {
-  await uberCoreInstance.initialize();
+  // Initialize all core modules
+  await uberCore.initialize();
   await hermes.initialize();
-  securityEngine.startMonitoring();
-
+  await lucie.initialize();
+  
+  // Oxum and Orus are initialized in their constructors
+  
+  // Validate system integrity
+  const integrityResult = orus.checkIntegrity();
+  if (!integrityResult.isValid) {
+    console.error('System integrity check failed:', integrityResult.message);
+    return false;
+  }
+  
   console.info('UberEscorts core engine initialized');
+  return true;
 };
 
 export const shutdownSystem = async () => {
-  await uberCoreInstance.shutdown();
-  securityEngine.stopMonitoring();
-
+  await uberCore.shutdown();
   console.info('UberEscorts core engine shut down');
+};
+
+export const getSystemStatus = () => {
+  return {
+    core: uberCore.getSystemStatus(),
+    security: orus.checkIntegrity(),
+    ai: lucie.getSystemStatus(),
+    boostSystem: oxum.checkSystemStatus()
+  };
 };

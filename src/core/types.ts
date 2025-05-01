@@ -1,66 +1,68 @@
 
-// Core types for UberCore system
+/**
+ * Core type definitions for UberCore systems
+ */
 
-export interface SystemResponse {
-  success: boolean;
-  message: string;
-  timestamp: string;
-  data?: any;
+// Re-export shared types to avoid duplicating definitions
+export * from '@/types/shared';
+
+// Core-specific types that shouldn't be exposed outside the core system
+export interface CoreModuleConfig {
+  enabled: boolean;
+  debugMode: boolean;
+  autoInitialize: boolean;
 }
 
-export interface CoreConfig {
-  debug: boolean;
-  environment: 'development' | 'staging' | 'production';
-  version: string;
-  features: {
-    boostingEnabled: boolean;
-    aiCompanions: boolean;
-    metaverseGateway: boolean;
-    tokenTransactions: boolean;
-  };
+export interface ModuleConnectionInfo {
+  moduleId: string;
+  connectionTime: Date;
+  status: 'connected' | 'disconnected' | 'error';
+  errorDetails?: string;
 }
 
-export interface CoreStatus {
-  operational: boolean;
-  activeSubsystems: string[];
-  version: string;
-  uptime: number;
-  lastRestart: Date;
-  memoryUsage: number;
-  errorRate: number;
+export interface CoreEvent {
+  eventType: string;
+  timestamp: Date;
+  source: string;
+  data: Record<string, any>;
 }
 
-export interface VisibilityScoreParams {
-  profileId: string;
-  boostFactor: number;
-  completeness: number;
-  activityLevel: number;
-  reviewScore: number;
-  verificationLevel: number;
-  contentQuality: number;
+export interface CoreEventListener {
+  (event: CoreEvent): void;
 }
 
-export interface FlowDynamicsRequest {
+export interface CoreEventEmitter {
+  emit(eventType: string, data: Record<string, any>): void;
+  on(eventType: string, listener: CoreEventListener): void;
+  off(eventType: string, listener: CoreEventListener): void;
+}
+
+// UbxTransaction from UberWallet
+export interface UbxTransactionDetail extends Record<string, any> {
+  id: string;
   userId: string;
-  targetProfileId: string;
-  sourceType: string;
-  actionType: string;
+  amount: number;
+  type: 'purchase' | 'spend' | 'earn' | 'refund';
+  status: 'pending' | 'completed' | 'failed';
   metadata?: Record<string, any>;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export interface FlowDynamicsResponse {
-  recommended: boolean;
-  score: number;
-  factors: Record<string, number>;
-  recommendations: string[];
-}
-
-export interface SessionData {
+// Lucie content types
+export interface ContentGenerationRequest {
+  prompt: string;
+  type: 'text' | 'image' | 'voice';
+  nsfw: boolean;
   userId: string;
-  sessionId: string;
-  roles: string[];
-  permissions: string[];
-  expiresAt: Date;
-  fingerprint: string;
-  deviceId: string;
+  strength?: number;
+  style?: string;
+  additionalParams?: Record<string, any>;
+}
+
+export interface ContentModerationRequest {
+  content: string;
+  type: 'text' | 'image';
+  userId: string;
+  context?: string;
 }
