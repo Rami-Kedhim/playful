@@ -30,11 +30,28 @@ export interface FlowRoute {
   timestamp?: string;
 }
 
+export interface FlowPathData {
+  path: string[];
+  conversions: number;
+  averageDuration: number;
+  bounceRate: number;
+}
+
+export interface JourneyMap {
+  userId: string;
+  paths: FlowRoute[];
+  lastActive: Date;
+  predictedNextPath?: string;
+  conversionScore?: number;
+}
+
 class Hermes {
   private readonly systemName: string = 'Hermes';
   private isInitialized: boolean = false;
   private activeSystems: Map<string, ConnectionParams> = new Map();
   private activeFlows: Map<string, FlowRoute[]> = new Map();
+  private userJourneys: Map<string, JourneyMap> = new Map();
+  private pathData: Map<string, FlowPathData> = new Map();
 
   constructor() {
     this.initialize();
@@ -97,7 +114,52 @@ class Hermes {
     sourceFlows.push(enhancedRoute);
     this.activeFlows.set(route.source, sourceFlows);
 
+    // Update user journey if userId is available
+    if (route.params?.userId) {
+      this.updateUserJourney(route.params.userId, enhancedRoute);
+    }
+
+    // Update path analytics
+    this.updatePathAnalytics(`${route.source}|${route.destination}`);
+
     console.log(`[Hermes] Flow routed: ${route.source} → ${route.destination}`);
+  }
+
+  /**
+   * Update a user's journey map
+   */
+  private updateUserJourney(userId: string, route: FlowRoute): void {
+    const existingJourney = this.userJourneys.get(userId) || {
+      userId,
+      paths: [],
+      lastActive: new Date()
+    };
+
+    existingJourney.paths.push(route);
+    existingJourney.lastActive = new Date();
+
+    // Calculate predicted next path if enough history
+    if (existingJourney.paths.length >= 3) {
+      existingJourney.predictedNextPath = this.predictNextPath(userId);
+      existingJourney.conversionScore = this.calculateConversionScore(existingJourney);
+    }
+
+    this.userJourneys.set(userId, existingJourney);
+  }
+
+  /**
+   * Update analytics for a specific path
+   */
+  private updatePathAnalytics(pathKey: string): void {
+    const existingData = this.pathData.get(pathKey) || {
+      path: pathKey.split('|'),
+      conversions: 0,
+      averageDuration: 0,
+      bounceRate: 0
+    };
+
+    // For now, just increment a counter. In production this would be more sophisticated
+    this.pathData.set(pathKey, existingData);
   }
 
   /**
@@ -110,11 +172,45 @@ class Hermes {
   }
 
   /**
+   * Predict the next most likely path for a user
+   */
+  private predictNextPath(userId: string): string {
+    const userJourney = this.userJourneys.get(userId);
+    if (!userJourney || userJourney.paths.length < 2) return 'home';
+    
+    // In production, this would use more sophisticated ML
+    // For now return last visited destination as prediction
+    const lastPath = userJourney.paths[userJourney.paths.length - 1];
+    return lastPath.destination;
+  }
+
+  /**
+   * Calculate conversion score based on journey patterns
+   */
+  private calculateConversionScore(journey: JourneyMap): number {
+    // Simplified scoring algorithm - would be ML-based in production
+    const hasSearched = journey.paths.some(p => p.destination === 'search');
+    const hasViewedProfile = journey.paths.some(p => p.destination.includes('profile'));
+    const hasMessaged = journey.paths.some(p => p.destination === 'messages');
+    
+    let score = 0.1; // Base score
+    if (hasSearched) score += 0.2;
+    if (hasViewedProfile) score += 0.3;
+    if (hasMessaged) score += 0.4;
+    
+    return Math.min(1, score);
+  }
+
+  /**
    * Check if a user is likely to convert based on session data
    */
   public predictConversion(userId: string): number {
-    // This would use ML models in production
-    // For now, return a random score between 0-1
+    const journey = this.userJourneys.get(userId);
+    if (journey?.conversionScore !== undefined) {
+      return journey.conversionScore;
+    }
+    
+    // Fallback to random score if no journey data
     return Math.random();
   }
 
@@ -178,6 +274,37 @@ class Hermes {
         { point: 'messages', rate: Math.random() * 0.1 }
       ]
     };
+  }
+
+  /**
+   * Get user journey insights
+   */
+  public getUserJourneyInsights(userId: string): JourneyMap | null {
+    return this.userJourneys.get(userId) || null;
+  }
+
+  /**
+   * Recommend the next best action for a user
+   */
+  public recommendNextAction(userId: string): string {
+    const journey = this.userJourneys.get(userId);
+    
+    if (!journey) return 'explore';
+    
+    // Analyze journey to make a recommendation
+    const paths = journey.paths.map(p => p.destination);
+    
+    if (!paths.includes('search')) {
+      return 'search';
+    } else if (!paths.includes('escorts')) {
+      return 'escorts';
+    } else if (!paths.includes('messages')) {
+      return 'messages';
+    } else if (!paths.includes('metaverse')) {
+      return 'metaverse';
+    }
+    
+    return 'pulse-boost';
   }
 }
 
