@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import usePulseBoost from '@/hooks/boost/usePulseBoost';
 import PulseBoostCard from '@/components/boost/PulseBoostCard';
@@ -62,7 +63,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
     );
   }
 
-  // Modified to accept PulseBoost and map it to the BoostPackage that purchaseBoost expects
+  // Modified to adapt PulseBoost to BoostPackage that purchaseBoost expects
   const handlePurchaseBoost = async (boost: PulseBoost): Promise<boolean> => {
     if (!purchaseBoost || processingId) return false;
     if (!boost || !boost.id) {
@@ -86,7 +87,24 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
         return false;
       }
       
-      const result = await purchaseBoost(packageToUse);
+      // Convert PulseBoost to BoostPackage
+      const boostPackage: BoostPackage = {
+        id: packageToUse.id,
+        name: packageToUse.name,
+        description: packageToUse.description,
+        duration: packageToUse.duration || '24:00:00',
+        price: packageToUse.price || 0,
+        boostMultiplier: packageToUse.boostMultiplier || 1.5,  // Default to 1.5 if not specified
+        features: Array.isArray(packageToUse.features) ? packageToUse.features : [],
+        price_ubx: packageToUse.price_ubx,
+        durationMinutes: packageToUse.durationMinutes,
+        visibility: packageToUse.visibility,
+        visibility_increase: packageToUse.visibility_increase,
+        color: packageToUse.color,
+        badgeColor: packageToUse.badgeColor
+      };
+      
+      const result = await purchaseBoost(boostPackage);
       if (result) {
         toast({
           title: "Boost Activated",

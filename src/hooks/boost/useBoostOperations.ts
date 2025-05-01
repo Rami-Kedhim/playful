@@ -1,85 +1,150 @@
 
-import { useState, useEffect } from 'react';
-import { BoostAnalytics } from './useBoostAnalytics';
+import { useState } from 'react';
+import { AnalyticsData } from '@/types/boost';
+import { useToast } from '@/hooks/use-toast';
 
-export const useBoostOperations = (profileId: string) => {
+interface BoostOperationsProps {
+  profileId?: string;
+}
+
+export const useBoostOperations = ({ profileId }: BoostOperationsProps) => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [analytics, setAnalytics] = useState<BoostAnalytics | null>(null);
+  const { toast } = useToast();
   
-  useEffect(() => {
-    const fetchAnalytics = async () => {
-      if (!profileId) return;
-      setLoading(true);
+  const purchaseBoost = async (packageId: string): Promise<boolean> => {
+    if (!profileId) {
+      toast({
+        title: "Error",
+        description: "Profile ID is required to purchase a boost",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    setLoading(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(r => setTimeout(r, 1200));
       
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Mock data
-        const mockAnalytics: BoostAnalytics = {
-          impressions: {
-            today: 324,
-            yesterday: 217,
-            weeklyAverage: 245,
-            withBoost: 324,
-            withoutBoost: 120,
-            increase: 170
-          },
-          interactions: {
-            today: 87,
-            yesterday: 42,
-            weeklyAverage: 53,
-            withBoost: 87,
-            withoutBoost: 29,
-            increase: 200
-          },
-          rank: {
-            current: 14,
-            previous: 73,
-            change: 59
-          },
-          trending: true,
-          additionalViews: 204,
-          engagementIncrease: 107,
-          rankingPosition: 14,
-          clicks: {
-            today: 42,
-            yesterday: 21,
-            weeklyAverage: 25,
-            withBoost: 42,
-            withoutBoost: 15,
-            increase: 180
-          }
-        };
-        
-        setAnalytics(mockAnalytics);
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch analytics');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchAnalytics();
-  }, [profileId]);
+      toast({
+        title: "Boost Activated",
+        description: "Your profile boost has been successfully activated!",
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error purchasing boost:', error);
+      
+      toast({
+        title: "Error",
+        description: "Failed to purchase boost. Please try again.",
+        variant: "destructive"
+      });
+      
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
   
-  const calculateBoostROI = () => {
-    if (!analytics) return 0;
+  const cancelBoost = async (): Promise<boolean> => {
+    if (!profileId) {
+      toast({
+        title: "Error",
+        description: "Profile ID is required to cancel a boost",
+        variant: "destructive"
+      });
+      return false;
+    }
     
-    // Calculate ROI based on boost price and additional impressions
-    const boostCost = 20; // Example cost
-    const additionalImpressions = analytics.impressions.withBoost - analytics.impressions.withoutBoost;
-    const impressionValue = 0.05; // Example value per impression
+    setLoading(true);
     
-    return (additionalImpressions * impressionValue) / boostCost;
+    try {
+      // Simulate API call
+      await new Promise(r => setTimeout(r, 1000));
+      
+      toast({
+        title: "Boost Cancelled",
+        description: "Your profile boost has been cancelled.",
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error cancelling boost:', error);
+      
+      toast({
+        title: "Error",
+        description: "Failed to cancel boost. Please try again.",
+        variant: "destructive"
+      });
+      
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const fetchAnalytics = async (): Promise<AnalyticsData> => {
+    setLoading(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(r => setTimeout(r, 1000));
+      
+      // Return mock analytics data
+      return {
+        views: 1250,
+        impressions: {
+          today: 350,
+          yesterday: 320,
+          weeklyAverage: 300,
+          withBoost: 350,
+          withoutBoost: 220,
+          increase: 59
+        },
+        interactions: {
+          today: 45,
+          yesterday: 38,
+          weeklyAverage: 30,
+          withBoost: 45,
+          withoutBoost: 25,
+          increase: 80
+        },
+        rank: {
+          current: 8,
+          previous: 24,
+          change: 16
+        },
+        clicks: {
+          today: 120,
+          yesterday: 105,
+          weeklyAverage: 90,
+          withBoost: 120,
+          withoutBoost: 80,
+          increase: 50
+        },
+        additionalViews: 130,
+        engagementIncrease: 60,
+        rankingPosition: 8,
+        conversions: 15,
+        roi: 320,
+        timeActive: 24,
+        boostEfficiency: 85
+      };
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
   
   return {
-    loading,
-    error,
-    analytics,
-    calculateBoostROI
+    purchaseBoost,
+    cancelBoost,
+    fetchAnalytics,
+    loading
   };
 };
 

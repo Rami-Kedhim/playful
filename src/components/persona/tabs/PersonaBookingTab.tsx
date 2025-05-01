@@ -1,106 +1,110 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, DollarSign } from 'lucide-react';
 import { UberPersona } from '@/types/uberPersona';
+import { useToast } from '@/hooks/use-toast';
+import { Calendar, Clock, DollarSign } from 'lucide-react';
 
 interface PersonaBookingTabProps {
   persona: UberPersona;
 }
 
 const PersonaBookingTab: React.FC<PersonaBookingTabProps> = ({ persona }) => {
-  const [selectedDate, setSelectedDate] = useState<string>('');
-  const [selectedTime, setSelectedTime] = useState<string>('');
-
-  const getMeetingPrice = () => {
-    if (persona.monetization && typeof persona.monetization === 'object') {
-      return persona.monetization.meetingPrice ?? 0;
-    }
-    return 0;
+  const { toast } = useToast();
+  
+  // Check if monetization data exists
+  const hasMonetization = persona.monetization !== undefined;
+  const hasMonetizationPackages = hasMonetization && persona.monetization?.packages && persona.monetization.packages.length > 0;
+  
+  const handleBooking = (packageId?: string) => {
+    toast({
+      title: 'Booking Started',
+      description: packageId 
+        ? `You've selected the ${persona.monetization?.packages?.find(p => p.id === packageId)?.name} package` 
+        : 'Starting standard booking process',
+    });
   };
 
-  const meetingPrice = getMeetingPrice();
-
-  const availableDates = [
-    '2023-08-01', '2023-08-02', '2023-08-03',
-    '2023-08-04', '2023-08-05', '2023-08-06'
-  ];
-
-  const availableTimes = [
-    '10:00 AM', '11:00 AM', '1:00 PM',
-    '2:00 PM', '4:00 PM', '7:00 PM'
-  ];
+  if (!hasMonetization) {
+    return (
+      <Card className="mt-4">
+        <CardContent className="pt-6">
+          <div className="text-center py-8">
+            <h3 className="text-lg font-medium mb-2">No Booking Information</h3>
+            <p className="text-muted-foreground">
+              This profile doesn't have any booking information available.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium">Book an Appointment</h3>
-            <div className="flex items-center">
-              <DollarSign className="h-4 w-4 text-green-500" />
-              <span className="font-medium">
-                ${meetingPrice} / hour
+      {/* Standard Rate Card */}
+      {persona.monetization?.hourlyRate && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Standard Session</h3>
+              <span className="text-2xl font-bold">
+                ${persona.monetization.hourlyRate}/hr
               </span>
             </div>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                <Calendar className="h-4 w-4 inline mr-2" />
-                Select Date
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {availableDates.map((date) => (
-                  <Button
-                    key={date}
-                    variant={selectedDate === date ? "default" : "outline"}
-                    onClick={() => setSelectedDate(date)}
-                    size="sm"
-                    className="w-full"
-                  >
-                    {new Date(date).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </Button>
-                ))}
-              </div>
+            <div className="flex items-center text-sm text-muted-foreground mb-4">
+              <Clock className="h-4 w-4 mr-2" />
+              <span>60 minutes</span>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                <Clock className="h-4 w-4 inline mr-2" />
-                Select Time
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {availableTimes.map((time) => (
-                  <Button
-                    key={time}
-                    variant={selectedTime === time ? "default" : "outline"}
-                    onClick={() => setSelectedTime(time)}
-                    size="sm"
-                    className="w-full"
-                  >
-                    {time}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <Button
-              className="w-full mt-6"
-              disabled={!selectedDate || !selectedTime}
-            >
+            <Button className="w-full" onClick={() => handleBooking()}>
               Book Now
             </Button>
+          </CardContent>
+        </Card>
+      )}
 
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              You won't be charged until your booking is confirmed
-            </p>
+      {/* Packages */}
+      {hasMonetizationPackages && (
+        <>
+          <h3 className="text-xl font-medium mt-6">Available Packages</h3>
+          <div className="grid gap-4 md:grid-cols-2">
+            {persona.monetization?.packages?.map((pkg) => (
+              <Card key={pkg.id}>
+                <CardContent className="pt-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-medium">{pkg.name}</h3>
+                    <span className="text-2xl font-bold">${pkg.price}</span>
+                  </div>
+                  <div className="flex items-center text-sm text-muted-foreground mb-2">
+                    <Clock className="h-4 w-4 mr-2" />
+                    <span>{pkg.duration}</span>
+                  </div>
+                  {pkg.description && (
+                    <p className="text-sm text-muted-foreground mb-4">{pkg.description}</p>
+                  )}
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => handleBooking(pkg.id)}
+                  >
+                    Select Package
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
+        </>
+      )}
+
+      {/* Availability Card */}
+      <Card className="mt-4">
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-medium mb-4">Check Availability</h3>
+          <Button className="w-full" variant="secondary">
+            <Calendar className="h-4 w-4 mr-2" />
+            View Calendar
+          </Button>
         </CardContent>
       </Card>
     </div>

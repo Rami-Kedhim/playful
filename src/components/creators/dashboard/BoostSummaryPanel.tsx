@@ -1,190 +1,175 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Doughnut } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Rocket, TrendingUp, ChevronRight, Zap } from 'lucide-react';
-import { useBoostManager } from '@/hooks/boost';
-import { BoostStatus } from '@/types/boost';
-import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
-import UBXPriceDisplay from '@/components/oxum/UBXPriceDisplay';
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Zap, Clock, XCircle } from 'lucide-react';
+import { useBoostManager } from '@/hooks/boost';
+import { formatDistanceToNow } from 'date-fns';
+import { useBoostContext } from '@/hooks/boost/useBoostContext';
 
 interface BoostSummaryPanelProps {
   profileId: string;
-  onShowDetails: () => void;
+  onBoost?: () => void;
+  onCancel?: () => void;
 }
 
-const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({ 
-  profileId,
-  onShowDetails
-}) => {
-  const { boostStatus, fetchBoostPackages, getBoostAnalytics } = useBoostManager(profileId);
-  const [analyticsData, setAnalyticsData] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-
+const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({ profileId, onBoost, onCancel }) => {
+  const {
+    boostStatus,
+    hermesStatus,
+    loading
+  } = useBoostManager(profileId);
+  
+  // Get the boost context for accessing packages
+  const boostContext = useBoostContext();
+  
+  const [remainingTime, setRemainingTime] = useState<string>('');
+  
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      await fetchBoostPackages();
+    if (boostStatus.isActive && boostStatus.expiresAt) {
+      const expiresAt = new Date(boostStatus.expiresAt);
       
-      if (boostStatus.isActive) {
-        const analytics = await getBoostAnalytics();
-        setAnalyticsData(analytics);
-      }
+      const updateRemainingTime = () => {
+        const now = new Date();
+        if (expiresAt > now) {
+          setRemainingTime(formatDistanceToNow(expiresAt, { addSuffix: true }));
+        } else {
+          setRemainingTime('Expired');
+        }
+      };
       
-      setLoading(false);
-    };
-    
-    loadData();
-  }, [profileId, boostStatus.isActive, fetchBoostPackages, getBoostAnalytics]);
-
-  const boostProgressValue = (boostStatus as any).progress;
-  const boostProgress = boostProgressValue !== undefined ? boostProgressValue : 0;
-
-  const chartData = {
-    labels: ['Boosted Views', 'Organic Views'],
-    datasets: [
-      {
-        data: analyticsData ? [
-          analyticsData.views.withBoost - analyticsData.views.withoutBoost,
-          analyticsData.views.withoutBoost
-        ] : [25, 75],
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.8)',
-          'rgba(54, 162, 235, 0.8)',
-        ],
-        borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
-
+      updateRemainingTime();
+      const interval = setInterval(updateRemainingTime, 60000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [boostStatus.isActive, boostStatus.expiresAt]);
+  
   if (loading) {
     return (
-      <Card className="overflow-hidden">
-        <CardHeader className="bg-muted/40 pb-2">
-          <CardTitle className="text-lg flex items-center">
-            <Rocket className="mr-2 h-5 w-5" />
-            Boost Performance
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-4">
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-muted rounded w-3/4"></div>
-            <div className="h-32 bg-muted rounded"></div>
-            <div className="h-4 bg-muted rounded w-1/2"></div>
+      <Card>
+        <CardContent className="p-6">
+          <div className="animate-pulse space-y-2">
+            <div className="h-5 bg-muted-foreground/20 rounded w-1/3"></div>
+            <div className="h-4 bg-muted-foreground/20 rounded w-2/3"></div>
+            <div className="h-8 bg-muted-foreground/20 rounded w-full mt-4"></div>
           </div>
         </CardContent>
       </Card>
     );
   }
-
-  return (
-    <Card className="overflow-hidden">
-      <CardHeader className={`${boostStatus.isActive ? 'bg-primary/10' : 'bg-muted/40'} pb-2`}>
-        <CardTitle className="text-lg flex items-center">
-          {boostStatus.isActive ? (
-            <>
-              <Zap className="mr-2 h-5 w-5 text-primary" />
-              Active Boost
-            </>
-          ) : (
-            <>
-              <Rocket className="mr-2 h-5 w-5" />
-              Boost Performance
-            </>
-          )}
-        </CardTitle>
-        <CardDescription>
-          {boostStatus.isActive 
-            ? `Boost active • ${boostStatus.timeRemaining} remaining • `
-            : 'No active boost • Visibility at normal levels'}
-          {boostStatus.isActive && <UBXPriceDisplay amount={GLOBAL_UBX_RATE} isGlobalPrice={true} size="sm" />}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="p-4">
-        {boostStatus.isActive && analyticsData ? (
+  
+  if (boostStatus.isActive) {
+    return (
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="flex items-center">
+                <Zap className="h-5 w-5 text-amber-500 mr-2" />
+                Active Boost
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {boostStatus.packageName || 'Profile Boost'}
+              </p>
+            </div>
+            <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
+              Active
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
           <div className="space-y-4">
-            <div className="flex">
-              <div className="w-1/2">
-                <div className="h-[140px] flex items-center justify-center">
-                  <Doughnut 
-                    data={chartData} 
-                    options={{ 
-                      plugins: { 
-                        legend: { display: false },
-                      },
-                      cutout: '70%',
-                    }} 
-                  />
-                </div>
+            {/* Progress bar */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Progress</span>
+                <span>{boostStatus.progress || 0}%</span>
               </div>
-              <div className="w-1/2 pl-2 flex flex-col justify-center">
-                <div className="space-y-2">
-                  <div>
-                    <div className="text-xs text-muted-foreground">Visibility Increase</div>
-                    <div className="text-lg font-medium">
-                      +{analyticsData.views.increase}%
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Ranking Position</div>
-                    <div className="text-lg font-medium">
-                      #{analyticsData.searchRanking.withBoost} 
-                      <span className="text-xs text-green-500 ml-1">
-                        (↑{analyticsData.searchRanking.improvement})
-                      </span>
-                    </div>
-                  </div>
-                </div>
+              <Progress value={boostStatus.progress || 0} className="h-2" />
+            </div>
+            
+            {/* Time remaining */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center text-sm">
+                <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                <span className="text-muted-foreground">Time Remaining:</span>
+              </div>
+              <span className="font-medium">
+                {boostStatus.remainingTime || remainingTime}
+              </span>
+            </div>
+            
+            {/* Visibility stats */}
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <div className="bg-secondary/20 p-3 rounded-md text-center">
+                <div className="text-sm text-muted-foreground">Position</div>
+                <div className="text-xl font-semibold">#{hermesStatus.position}</div>
+              </div>
+              <div className="bg-secondary/20 p-3 rounded-md text-center">
+                <div className="text-sm text-muted-foreground">Visibility</div>
+                <div className="text-xl font-semibold">{hermesStatus.estimatedVisibility}%</div>
               </div>
             </div>
             
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-xs">Boost Progress</span>
-                <span className="text-xs">{Math.round(boostProgress)}%</span>
-              </div>
-              <Progress value={boostProgress} className="h-1" />
+            {/* Cancel button */}
+            <Button variant="outline" className="w-full" onClick={onCancel}>
+              <XCircle className="mr-2 h-4 w-4" />
+              Cancel Boost
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  // Get available packages
+  const packages = boostContext.packages || [];
+  
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle>Profile Visibility</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Boost your visibility in search results
+        </p>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div className="text-sm">
+              <div className="font-medium">Current Position</div>
+              <div className="text-muted-foreground">Based on organic ranking</div>
+            </div>
+            <Badge variant="outline" className="text-lg font-bold px-3">
+              #{hermesStatus.position || '—'}
+            </Badge>
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <div className="text-sm">
+              <div className="font-medium">Visibility Score</div>
+              <div className="text-muted-foreground">Current search visibility</div>
+            </div>
+            <div className="text-lg font-bold">
+              {hermesStatus.estimatedVisibility || 0}%
             </div>
           </div>
-        ) : (
-          <div className="py-4 text-center">
-            <div className="rounded-full bg-muted inline-flex p-3 mx-auto mb-3">
-              <TrendingUp className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground mb-2">
-              Boost your profile to increase visibility and engagement
-            </p>
-            <div className="bg-muted p-3 rounded-md mt-4">
-              <div className="text-xs font-medium mb-1">Benefits of boosting:</div>
-              <ul className="text-xs text-muted-foreground list-disc pl-5 space-y-1">
-                <li>Higher ranking in search results</li>
-                <li>Featured in "Boosted" sections</li>
-                <li>Priority in matching algorithms</li>
-                <li>Detailed performance analytics</li>
-              </ul>
-            </div>
-          </div>
-        )}
+          
+          <Button className="w-full" onClick={onBoost}>
+            <Zap className="mr-2 h-4 w-4" />
+            Boost Now
+          </Button>
+          
+          <p className="text-xs text-center text-muted-foreground">
+            {packages.length > 0 ? 
+              `${packages.length} boost packages available` : 
+              'Boost packages will increase your visibility'}
+          </p>
+        </div>
       </CardContent>
-      <CardFooter className="bg-muted/20 pt-3 pb-3">
-        <Button variant="ghost" size="sm" className="w-full text-xs" onClick={onShowDetails}>
-          {boostStatus.isActive ? (
-            <>View Full Analytics <ChevronRight className="h-3 w-3 ml-1" /></>
-          ) : (
-            <>
-              Boost Now <UBXPriceDisplay amount={GLOBAL_UBX_RATE} isGlobalPrice={true} size="sm" /> <ChevronRight className="h-3 w-3 ml-1" />
-            </>
-          )}
-        </Button>
-      </CardFooter>
     </Card>
   );
 };

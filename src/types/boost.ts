@@ -18,6 +18,8 @@ export interface BoostStatus {
   progress?: number;
   timeRemaining?: string;
   activeBoostId?: string;
+  boost_level?: number;
+  visibilityScore?: number;
 }
 
 export interface BoostEligibility {
@@ -30,20 +32,44 @@ export interface BoostEligibility {
 }
 
 export interface BoostAnalytics {
-  impressions: number;
-  profileViews: number;
-  messages: number;
-  bookings: number;
-  conversion: {
-    viewToMessage: number;
-    messageToBooking: number;
+  impressions?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
   };
-  comparisonToAverage: {
-    impressions: number;
-    profileViews: number;
-    messages: number;
-    bookings: number;
+  interactions?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
   };
+  rank?: {
+    current: number;
+    previous: number;
+    change: number;
+  };
+  clicks?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  views?: number;
+  trending?: boolean;
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  conversions?: number;
+  roi?: number;
+  timeActive?: number;
+  boostEfficiency?: number;
 }
 
 export interface BoostPackage {
@@ -72,6 +98,7 @@ export interface HermesStatus {
   lastUpdateTime: string;
   boostScore?: number;
   effectivenessScore?: number;
+  isActive?: boolean;
 }
 
 export interface HermesBoostStatus {
@@ -99,4 +126,63 @@ export interface BoostDialogTabsProps {
   getBoostPrice?: () => number;
   hermesStatus: HermesStatus;
   formatBoostDuration?: (duration: string) => string;
+}
+
+export type AnalyticsData = {
+  views?: number;
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  impressions?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  interactions?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  rank?: {
+    current: number;
+    previous: number;
+    change: number;
+  };
+  clicks?: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  conversions?: number;
+  timeActive?: number;
+  boostEfficiency?: number;
+  roi?: number;
+};
+
+export interface BoostContextType {
+  boostStatus: BoostStatus;
+  hermesStatus: HermesStatus;
+  eligibility: BoostEligibility;
+  packages: BoostPackage[];
+  boostPackages?: BoostPackage[];
+  loading: boolean;
+  error?: string | null;
+  boostProfile: (profileId: string, packageId: string) => Promise<boolean>;
+  purchaseBoost?: (boostPackage: BoostPackage) => Promise<boolean>;
+  cancelBoost: () => Promise<boolean>;
+  getBoostAnalytics: () => Promise<AnalyticsData>;
+  fetchBoostPackages?: () => Promise<BoostPackage[]>;
+  dailyBoostUsage?: number;
+  dailyBoostLimit?: number;
+  formatBoostDuration?: (duration: string) => string;
+  adaptGetBoostPrice?: () => number;
 }

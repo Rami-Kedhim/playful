@@ -1,68 +1,98 @@
 
-import { useState } from 'react';
-import { useBoostManager } from './useBoostManager';
-import { BoostPackage } from '@/types/boost';
-import { useBoostContext } from './useBoostContext';
+import { useState } from "react";
+import { useBoostContext } from "@/hooks/boost/useBoostContext";
+import { BoostPackage } from "@/types/boost";
 
-export const useBoostDialog = (profileId: string) => {
-  const [activeTab, setActiveTab] = useState('packages');
+export const useBoostDialog = (onSuccess?: () => void) => {
+  const [showDialog, setShowDialog] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<string>('packages');
   
-  const boostContext = useBoostContext();
+  const context = useBoostContext();
   
   const {
+    boostStatus,
+    hermesStatus,
+    eligibility,
+    packages,
     loading,
     error,
-    boostStatus,
-    eligibility,
-    boostPackages,
-    dailyBoostUsage,
-    dailyBoostLimit,
-    purchaseBoost,
+    boostPackages = packages,
+    dailyBoostUsage = 0,
+    dailyBoostLimit = 3,
+    boostProfile,
     cancelBoost,
-    formatBoostDuration,
-    adaptGetBoostPrice
-  } = useBoostManager(profileId);
-
-  const hermesStatus = {
-    position: 3,
-    activeUsers: 120,
-    estimatedVisibility: boostStatus?.isActive ? 75 : 25,
-    lastUpdateTime: new Date().toISOString(),
-    boostScore: boostStatus?.isActive ? 8.5 : 0,
-    effectivenessScore: boostStatus?.isActive ? 7.2 : 0
+    formatBoostDuration = (d) => d,
+    adaptGetBoostPrice = () => 0
+  } = context;
+  
+  const handleOpenDialog = () => {
+    setShowDialog(true);
   };
-
-  const getBoostPrice = (pkg: BoostPackage) => {
+  
+  const handleCloseDialog = () => {
+    setShowDialog(false);
+  };
+  
+  const toggleDialog = () => {
+    setShowDialog(prevState => !prevState);
+  };
+  
+  const handleBoost = async (): Promise<boolean> => {
+    if (!selectedPackage) return false;
+    
+    try {
+      const result = await boostProfile(selectedPackage, selectedPackage);
+      if (result) {
+        handleCloseDialog();
+        if (onSuccess) onSuccess();
+      }
+      return result;
+    } catch (error) {
+      console.error('Boost error:', error);
+      return false;
+    }
+  };
+  
+  const handleCancel = async (): Promise<boolean> => {
+    try {
+      const result = await cancelBoost();
+      if (result && onSuccess) onSuccess();
+      return result;
+    } catch (error) {
+      console.error('Cancel error:', error);
+      return false;
+    }
+  };
+  
+  const getBoostPrice = () => {
+    if (!selectedPackage) return 0;
+    
+    const pkg = boostPackages.find(p => p.id === selectedPackage);
     return pkg?.price_ubx || pkg?.price || 0;
   };
 
-  const handleBoost = async () => {
-    if (!selectedPackage) return false;
-    
-    const packageToBoost = boostPackages.find(pkg => pkg.id === selectedPackage);
-    if (!packageToBoost) return false;
-    
-    return await purchaseBoost(packageToBoost);
-  };
-
   return {
-    activeTab,
-    setActiveTab,
-    selectedPackage,
-    setSelectedPackage,
-    loading,
-    error,
+    showDialog,
+    isLoading: loading,
     boostStatus,
+    handleOpenDialog,
+    handleCloseDialog,
+    handleSuccess: onSuccess,
+    toggleDialog,
+    hermesStatus,
     eligibility,
     boostPackages,
+    selectedPackage,
+    setSelectedPackage,
+    handleBoost,
+    handleCancel,
     dailyBoostUsage,
     dailyBoostLimit,
-    hermesStatus,
-    handleBoost,
-    cancelBoost,
-    formatBoostDuration,
-    getBoostPrice
+    activeTab,
+    setActiveTab,
+    getBoostPrice,
+    formatBoostDuration
   };
 };
 

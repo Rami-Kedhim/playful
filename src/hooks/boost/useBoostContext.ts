@@ -1,21 +1,16 @@
 
 import { useContext } from 'react';
-import { 
-  BoostContext, 
-  BoostContextType 
-} from '@/contexts/BoostContext';
+import { BoostContext } from '@/contexts/BoostContext';
+import { BoostContextType } from '@/types/boost';
 
-/**
- * Hook to access the boost context
- */
-export const useBoostContext = (): BoostContextType => {
+export const useBoostContext = () => {
   const context = useContext(BoostContext);
   
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useBoostContext must be used within a BoostProvider');
   }
   
-  return context;
+  return context as BoostContextType;
 };
 
 export default useBoostContext;

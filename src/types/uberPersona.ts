@@ -27,7 +27,32 @@ export interface UberPersona {
     lastActive?: Date;
     createdAt?: Date;
     profileViews?: number;
+    lastSynced?: Date;
   };
   services?: string[];
   bio?: string;
+  description?: string;
+  languages?: string[];
+  traits?: string[];
+  stats?: {
+    views?: number;
+    likes?: number;
+    bookings?: number;
+    completion?: number;
+    responseRate?: number;
+    responseTime?: number;
+  };
+  monetization?: {
+    hourlyRate?: number;
+    packages?: Array<{
+      id: string;
+      name: string;
+      price: number;
+      duration: string;
+      description?: string;
+    }>;
+    acceptsUbx?: boolean;
+    minRate?: number;
+    maxRate?: number;
+  };
 }

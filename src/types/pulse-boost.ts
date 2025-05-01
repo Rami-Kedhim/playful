@@ -48,4 +48,5 @@ export interface PulseBoost {
   visibility_increase?: number;
   color?: string;
   badgeColor?: string;
+  boostMultiplier?: number; // Added to make compatible with BoostPackage
 }
