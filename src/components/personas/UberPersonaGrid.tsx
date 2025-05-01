@@ -1,58 +1,69 @@
+
 import React from 'react';
 import { UberPersona } from '@/types/uberPersona';
 import UberPersonaCard from './UberPersonaCard';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface UberPersonaGridProps {
   personas: UberPersona[];
   loading?: boolean;
   emptyMessage?: string;
-  className?: string;
+  columns?: number;
+  size?: 'sm' | 'md' | 'lg';
+  showDetails?: boolean;
 }
 
 const UberPersonaGrid: React.FC<UberPersonaGridProps> = ({
-  personas,
+  personas = [],
   loading = false,
-  emptyMessage = "No profiles found",
-  className,
+  emptyMessage = "No personas found",
+  columns = 4,
+  size = 'md',
+  showDetails = true
 }) => {
-  const loadingSkeletons = Array(12).fill(null);
+  // Generate placeholder array for loading state
+  const placeholders = Array(columns).fill(null);
+  
+  // Determine grid columns based on the columns prop
+  const gridClass = {
+    1: 'grid-cols-1',
+    2: 'grid-cols-1 md:grid-cols-2',
+    3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+    4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
+    5: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5',
+    6: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6',
+  }[columns] || 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {loadingSkeletons.map((_, index) => (
-          <div key={index} className="overflow-hidden rounded-md border bg-card">
-            <Skeleton className="aspect-[3/4] w-full" />
-            <div className="p-4 space-y-2">
-              <Skeleton className="h-4 w-2/3" />
-              <Skeleton className="h-3 w-1/2" />
-              <div className="flex gap-1 pt-1">
-                <Skeleton className="h-5 w-12 rounded-full" />
-                <Skeleton className="h-5 w-12 rounded-full" />
-              </div>
-            </div>
-          </div>
+      <div className={`grid ${gridClass} gap-4`}>
+        {placeholders.map((_, index) => (
+          <div 
+            key={`placeholder-${index}`} 
+            className="bg-gray-800/20 animate-pulse rounded-lg"
+            style={{ height: size === 'sm' ? '240px' : size === 'md' ? '320px' : '400px' }}
+          />
         ))}
       </div>
     );
   }
-
+  
   if (personas.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12 px-4 text-center">
-        <div>
-          <h3 className="text-xl font-medium mb-2">No Results Found</h3>
-          <p className="text-muted-foreground">{emptyMessage}</p>
-        </div>
+      <div className="py-12 text-center">
+        <p className="text-muted-foreground">{emptyMessage}</p>
       </div>
     );
   }
-
+  
   return (
-    <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 ${className}`}>
+    <div className={`grid ${gridClass} gap-4`}>
       {personas.map((persona) => (
-        <UberPersonaCard key={persona.id} persona={persona} />
+        <UberPersonaCard 
+          key={persona.id} 
+          persona={persona} 
+          size={size}
+          showDetails={showDetails}
+        />
       ))}
     </div>
   );

@@ -1,89 +1,63 @@
 
+/**
+ * AI Profile Types
+ */
+
 export interface AIProfile {
   id: string;
   name: string;
-  avatar_url?: string;
-  avatarUrl?: string;
-  personality?: {
-    type: 'flirty' | 'shy' | 'dominant' | 'playful' | string;
-    traits?: string[];
+  age: number;
+  location: string;
+  bio: string;
+  avatar_url: string;
+  gallery_images: string[];
+  personality: {
+    type: string;
+    traits: string[];
   };
-  location?: string;
-  ubx_chat_price?: number;
-  ubx_image_price?: number;
-  interests?: string[];
-  availability_status?: string;
-  boost_status?: {
-    isActive: boolean;
-    expiresAt?: string;
-    boost_level?: number;
-    is_boosted?: boolean;
-  };
-  isVerified?: boolean;
-  
-  // Additional properties needed by components
-  displayName?: string;
-  thumbnailUrl?: string;
-  imageUrl?: string;
-  isPremium?: boolean;
+  interests: string[];
+  ubx_chat_price: number;
+  ubx_image_price: number;
+  created_at: string;
+  isVerified: boolean;
   rating?: number;
-  description?: string;
-  bio?: string;
-  tags?: string[];
-  gallery_images?: string[];
-  premium_content_count?: number;
-  subscription_price?: number;
   reviewCount?: number;
-  type?: string;
-  livecam_enabled?: boolean;
-  created_at?: string | Date;
-  age?: number;
+  isPremium?: boolean;
+  availability_status: 'available' | 'away' | 'offline';
+}
+
+export interface AIChat {
+  id: string;
+  profile_id: string;
+  user_id: string;
+  messages: AIMessage[];
+  created_at: string;
+  updated_at: string;
 }
 
 export interface AIMessage {
   id: string;
-  role: 'user' | 'assistant' | 'system';
+  chat_id: string;
+  sender: 'ai' | 'user';
   content: string;
-  timestamp: Date;
-  is_ai?: boolean;
-  created_at?: string | Date;
-  requires_payment?: boolean;
-  payment_status?: 'pending' | 'completed' | 'failed';
-  price?: number;
-  has_read?: boolean;
-  senderId?: string;
-  receiverId?: string;
-  isAI?: boolean;
-  sender?: string;
-  conversation_id?: string;
-  status?: string;
-  profileId?: string;
-  messages?: AIMessage[];
+  created_at: string;
   metadata?: {
-    requires_payment?: boolean;
-    payment_status?: string;
-    price?: number;
+    emotion?: string;
+    attachment?: {
+      type: 'image' | 'audio';
+      url: string;
+    };
   };
-  attachments?: Array<{
-    url: string;
-    type: string;
-  }>;
 }
 
-// Add ProcessingStatus and ProcessingStatusDetails types
-export enum ProcessingStatus {
-  PENDING = 'pending',
-  PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  IDLE = 'idle'
-}
-
-export interface ProcessingStatusDetails {
-  status: ProcessingStatus;
-  progress: number;
-  message: string;
-  error?: string;
-  completedCount?: number;
-  totalCount?: number;
+export interface AISubscription {
+  id: string;
+  user_id: string;
+  profile_id: string;
+  level: 'basic' | 'premium' | 'vip';
+  started_at: string;
+  expires_at: string;
+  benefits: string[];
+  auto_renew: boolean;
+  price_paid: number;
 }

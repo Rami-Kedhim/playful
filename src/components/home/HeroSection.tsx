@@ -1,122 +1,76 @@
 
-import { useState } from "react";
-import { Search, Shield, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Search, MapPin, Star, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { HeroProps } from '@/types/home';
 
-interface HeroSectionProps {
-  searchLocation: string;
-  setSearchLocation: (location: string) => void;
-}
+const HeroSection = ({ searchLocation, setSearchLocation }: HeroProps) => {
+  const navigate = useNavigate();
 
-const HeroSection = ({ searchLocation, setSearchLocation }: HeroSectionProps) => {
-  const [showLucie, setShowLucie] = useState(false);
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate(`/search?location=${encodeURIComponent(searchLocation)}`);
+  };
 
   return (
-    <section className="relative min-h-[85vh] flex items-center py-20 overflow-hidden">
-      {/* Background with gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black opacity-90"></div>
-      <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background"></div>
+    <section className="relative min-h-[80vh] flex flex-col justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-purple-900/90 to-gray-900">
+      <div className="absolute inset-0 bg-[url('https://source.unsplash.com/random/1920x1080/?cityscape,night')] opacity-20 bg-cover bg-center"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/95 to-background/70"></div>
       
-      {/* Animated background elements */}
-      <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-purple-600/10 rounded-full filter blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-1/4 right-1/3 w-80 h-80 bg-pink-600/10 rounded-full filter blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-      
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="flex flex-col lg:flex-row items-center gap-12">
-          <div className="w-full lg:w-1/2 space-y-6">
-            <Badge variant="outline" className="mb-4 py-1.5 backdrop-blur-md bg-white/5 border-white/10">
-              <Shield className="h-3.5 w-3.5 mr-1" />
-              Real • Virtual • Intelligent
-            </Badge>
-            
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                Explore UberPersona
-              </span>
-              <br />
-              <span className="text-white">Multiverse</span>
-            </h1>
-            
-            <p className="text-xl text-gray-300 max-w-xl">
-              UberEscorts unifies verification, secure payments with UBX tokens, live content, and GPS safety in one powerful ecosystem.
-            </p>
-            
-            <div className="relative mt-8">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="Enter your location"
-                    className="pl-10 h-12 bg-white/5 backdrop-blur-md border-white/10"
-                    value={searchLocation}
-                    onChange={(e) => setSearchLocation(e.target.value)}
-                  />
-                </div>
-                <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 border-none hover:opacity-90" asChild>
-                  <Link to="/personas">
-                    Browse UberPersonas <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-6 mt-8">
-              <div className="flex -space-x-4">
-                {[1, 2, 3, 4].map((num) => (
-                  <div key={num} className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-white/10 flex items-center justify-center">
-                    <span className="text-xs">{num}K+</span>
-                  </div>
-                ))}
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Joined our verified network this month</p>
-              </div>
-            </div>
+      <div className="container mx-auto px-4 py-12 relative z-10">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-block px-3 py-1 mb-6 rounded-full bg-purple-500/10 text-purple-300 text-sm font-medium">
+            Secure • Verified • Private
           </div>
           
-          <div className="w-full lg:w-1/2 relative">
-            <div className="absolute -top-20 -left-20 w-64 h-64 bg-purple-500/10 rounded-full filter blur-3xl"></div>
-            <div className="absolute -bottom-8 -right-8 w-80 h-80 bg-pink-500/10 rounded-full filter blur-3xl"></div>
-            
-            <div className="relative backdrop-blur-lg bg-white/5 p-6 rounded-xl border border-white/10 shadow-xl">
-              <div className="absolute -top-3 -right-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs px-3 py-1 rounded-full">
-                AI Assistant
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
+            The Next Generation <span className="text-purple-300">Escort & Companion</span> Platform
+          </h1>
+          
+          <p className="text-lg md:text-xl text-gray-300 mb-8">
+            Connecting you with verified escorts, creators, and AI companions in a secure and private environment.
+            Powered by the revolutionary UBX token economy.
+          </p>
+          
+          <form onSubmit={handleSearch} className="mx-auto flex flex-col md:flex-row gap-4 max-w-2xl mb-10">
+            <div className="relative flex-grow">
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Enter your location..."
+                className="pl-10 py-6 bg-background/80 backdrop-blur-sm border-gray-700"
+                value={searchLocation}
+                onChange={(e) => setSearchLocation(e.target.value)}
+              />
+            </div>
+            <Button type="submit" size="lg" className="bg-purple-600 hover:bg-purple-700">
+              <Search className="mr-2 h-5 w-5" /> Find Companions
+            </Button>
+          </form>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 py-8">
+            <div className="flex flex-col items-center">
+              <div className="bg-purple-500/10 p-3 rounded-full mb-3">
+                <Shield className="h-7 w-7 text-purple-400" />
               </div>
-              
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500/30 to-pink-500/30 flex items-center justify-center">
-                  <span className="text-xl">L</span>
-                </div>
-                <div>
-                  <h3 className="font-medium">Lucie</h3>
-                  <p className="text-xs text-gray-400">Your personal guide</p>
-                </div>
+              <h3 className="text-lg font-medium text-white">Verified Profiles</h3>
+              <p className="text-gray-400">All profiles undergo rigorous verification</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="bg-purple-500/10 p-3 rounded-full mb-3">
+                <Star className="h-7 w-7 text-purple-400" />
               </div>
-              
-              <p className="text-gray-300 mb-4">
-                Hello, I'm Lucie! I can help you navigate UberEscorts safely and efficiently. Would you like me to assist you today?
-              </p>
-              
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline" className="bg-white/5 border-white/10 hover:bg-white/10" onClick={() => setShowLucie(true)}>
-                  Chat with Lucie
-                </Button>
-                <Button size="sm" variant="secondary" className="bg-white/10 hover:bg-white/20">
-                  Learn about UBX Token
-                </Button>
+              <h3 className="text-lg font-medium text-white">Premium Experience</h3>
+              <p className="text-gray-400">Curated selection of elite companions</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="bg-purple-500/10 p-3 rounded-full mb-3">
+                <div className="h-7 w-7 text-purple-400 font-bold flex items-center justify-center">UBX</div>
               </div>
-              
-              {showLucie && (
-                <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/10">
-                  <p className="text-sm text-gray-300">
-                    I can help you verify your profile, show you how to use UBX tokens, or explain our security features. What would you like to know?
-                  </p>
-                </div>
-              )}
+              <h3 className="text-lg font-medium text-white">Token Economy</h3>
+              <p className="text-gray-400">Secure payments with UBX blockchain</p>
             </div>
           </div>
         </div>

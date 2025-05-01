@@ -1,241 +1,154 @@
 
-import React, { useState } from 'react';
-import { 
-  Accordion, 
-  AccordionContent, 
-  AccordionItem, 
-  AccordionTrigger 
-} from '@/components/ui/accordion';
-import { Checkbox } from '@/components/ui/checkbox';
+import React from 'react';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Search, Filter, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { Search, X } from 'lucide-react';
 
-interface UberPersonaFiltersProps {
-  onFilterChange?: (filters: FilterState) => void;
-  className?: string;
+interface FiltersProps {
+  filters: {
+    query?: string;
+    location?: string;
+    types?: string[];
+    isVerified?: boolean;
+    isOnline?: boolean;
+    tags?: string[];
+  };
+  onFilterChange: (filters: any) => void;
+  onReset: () => void;
 }
 
-interface FilterState {
-  types: Record<string, boolean>;
-  features: Record<string, boolean>;
-  availability: 'all' | 'online' | 'offline';
-  verification: boolean;
-  searchQuery: string;
-}
-
-const UberPersonaFilters: React.FC<UberPersonaFiltersProps> = ({ 
+const UberPersonaFilters: React.FC<FiltersProps> = ({
+  filters,
   onFilterChange,
-  className 
+  onReset
 }) => {
-  const [filters, setFilters] = useState<FilterState>({
-    types: {
-      escort: false,
-      creator: false,
-      livecam: false,
-      ai: false
-    },
-    features: {
-      hasBooking: false,
-      hasChat: false,
-      hasPhotos: false,
-      hasVideos: false,
-      hasLiveStream: false
-    },
-    availability: 'all',
-    verification: false,
-    searchQuery: ''
-  });
-  
-  const handleTypeChange = (type: string, checked: boolean) => {
-    setFilters(prev => {
-      const newFilters = {
-        ...prev,
-        types: {
-          ...prev.types,
-          [type]: checked
-        }
-      };
-      
-      onFilterChange?.(newFilters);
-      return newFilters;
-    });
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    onFilterChange({ ...filters, [name]: value });
   };
-  
-  const handleFeatureChange = (feature: string, checked: boolean) => {
-    setFilters(prev => {
-      const newFilters = {
-        ...prev,
-        features: {
-          ...prev.features,
-          [feature]: checked
-        }
-      };
-      
-      onFilterChange?.(newFilters);
-      return newFilters;
-    });
+
+  const handleCheckboxChange = (name: string) => (checked: boolean) => {
+    onFilterChange({ ...filters, [name]: checked });
   };
-  
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilters(prev => {
-      const newFilters = {
-        ...prev,
-        searchQuery: e.target.value
-      };
-      
-      onFilterChange?.(newFilters);
-      return newFilters;
-    });
-  };
-  
-  const handleVerificationChange = (checked: boolean) => {
-    setFilters(prev => {
-      const newFilters = {
-        ...prev,
-        verification: checked
-      };
-      
-      onFilterChange?.(newFilters);
-      return newFilters;
-    });
-  };
-  
-  const handleReset = () => {
-    const resetFilters: FilterState = {
-      types: {
-        escort: false,
-        creator: false,
-        livecam: false,
-        ai: false
-      },
-      features: {
-        hasBooking: false,
-        hasChat: false,
-        hasPhotos: false,
-        hasVideos: false,
-        hasLiveStream: false
-      },
-      availability: 'all',
-      verification: false,
-      searchQuery: ''
-    };
+
+  const handleTypeChange = (type: string) => (checked: boolean) => {
+    const currentTypes = filters.types || [];
+    const newTypes = checked 
+      ? [...currentTypes, type] 
+      : currentTypes.filter(t => t !== type);
     
-    setFilters(resetFilters);
-    onFilterChange?.(resetFilters);
+    onFilterChange({ ...filters, types: newTypes });
   };
-  
-  // Count active filters for badge display
-  const activeFilterCount = 
-    Object.values(filters.types).filter(Boolean).length +
-    Object.values(filters.features).filter(Boolean).length +
-    (filters.verification ? 1 : 0) +
-    (filters.availability !== 'all' ? 1 : 0);
-  
+
   return (
-    <div className={`${className} space-y-4`}>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-        <Input
-          placeholder="Search by name or location..."
-          value={filters.searchQuery}
-          onChange={handleSearchChange}
-          className="pl-10"
-        />
-      </div>
-      
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4" />
-          <span className="text-sm font-medium">Filters</span>
-          {activeFilterCount > 0 && (
-            <Badge variant="secondary" className="ml-1">
-              {activeFilterCount}
-            </Badge>
-          )}
+    <div className="space-y-6 p-4 bg-gray-900/30 rounded-lg border border-gray-800/50">
+      <div className="space-y-4">
+        <h3 className="font-medium">Search & Filter</h3>
+        
+        <div>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              name="query"
+              placeholder="Search..."
+              className="pl-9"
+              value={filters.query || ''}
+              onChange={handleInputChange}
+            />
+          </div>
         </div>
         
-        {activeFilterCount > 0 && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-8 text-xs flex items-center gap-1 px-2"
-            onClick={handleReset}
-          >
-            <X className="h-3 w-3" />
-            Reset
-          </Button>
-        )}
-      </div>
-      
-      <Accordion type="multiple" className="space-y-2">
-        <AccordionItem value="type">
-          <AccordionTrigger className="text-sm py-2">Persona Type</AccordionTrigger>
-          <AccordionContent className="space-y-2 pt-2">
-            {Object.entries({
-              escort: "Escorts",
-              creator: "Content Creators",
-              livecam: "Live Performers",
-              ai: "AI Companions"
-            }).map(([key, label]) => (
-              <div key={key} className="flex items-center space-x-2">
-                <Checkbox 
-                  id={`type-${key}`} 
-                  checked={filters.types[key]}
-                  onCheckedChange={(checked) => 
-                    handleTypeChange(key, checked === true)
-                  }
-                />
-                <Label htmlFor={`type-${key}`} className="text-sm">{label}</Label>
-              </div>
-            ))}
-          </AccordionContent>
-        </AccordionItem>
+        <div>
+          <Label htmlFor="location" className="text-sm">Location</Label>
+          <Input
+            type="text"
+            id="location"
+            name="location"
+            placeholder="Any location"
+            value={filters.location || ''}
+            onChange={handleInputChange}
+          />
+        </div>
         
-        <AccordionItem value="features">
-          <AccordionTrigger className="text-sm py-2">Features</AccordionTrigger>
-          <AccordionContent className="space-y-2 pt-2">
-            {Object.entries({
-              hasBooking: "Booking Available",
-              hasChat: "Chat Enabled",
-              hasPhotos: "Photo Gallery",
-              hasVideos: "Video Content",
-              hasLiveStream: "Live Streaming"
-            }).map(([key, label]) => (
-              <div key={key} className="flex items-center space-x-2">
-                <Checkbox 
-                  id={`feature-${key}`} 
-                  checked={filters.features[key]}
-                  onCheckedChange={(checked) => 
-                    handleFeatureChange(key, checked === true)
-                  }
-                />
-                <Label htmlFor={`feature-${key}`} className="text-sm">{label}</Label>
-              </div>
-            ))}
-          </AccordionContent>
-        </AccordionItem>
+        <div className="space-y-2">
+          <Label className="text-sm">Type</Label>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="type-escort"
+                checked={filters.types?.includes('escort') || false}
+                onCheckedChange={handleTypeChange('escort')}
+              />
+              <Label htmlFor="type-escort" className="text-sm font-normal">Escort</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="type-creator"
+                checked={filters.types?.includes('creator') || false}
+                onCheckedChange={handleTypeChange('creator')}
+              />
+              <Label htmlFor="type-creator" className="text-sm font-normal">Creator</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="type-livecam"
+                checked={filters.types?.includes('livecam') || false}
+                onCheckedChange={handleTypeChange('livecam')}
+              />
+              <Label htmlFor="type-livecam" className="text-sm font-normal">LiveCam</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="type-ai"
+                checked={filters.types?.includes('ai') || false}
+                onCheckedChange={handleTypeChange('ai')}
+              />
+              <Label htmlFor="type-ai" className="text-sm font-normal">AI</Label>
+            </div>
+          </div>
+        </div>
         
-        <AccordionItem value="verification">
-          <AccordionTrigger className="text-sm py-2">Verification</AccordionTrigger>
-          <AccordionContent className="pt-2">
+        <div className="space-y-2">
+          <Label className="text-sm">Options</Label>
+          <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <Checkbox 
-                id="verification" 
-                checked={filters.verification}
-                onCheckedChange={(checked) => 
-                  handleVerificationChange(checked === true)
-                }
+                id="verified"
+                checked={filters.isVerified || false}
+                onCheckedChange={handleCheckboxChange('isVerified')}
               />
-              <Label htmlFor="verification" className="text-sm">
-                Verified Profiles Only
-              </Label>
+              <Label htmlFor="verified" className="text-sm font-normal">Verified only</Label>
             </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="online"
+                checked={filters.isOnline || false}
+                onCheckedChange={handleCheckboxChange('isOnline')}
+              />
+              <Label htmlFor="online" className="text-sm font-normal">Online now</Label>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="flex items-center justify-between pt-2">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onReset}
+          className="text-muted-foreground"
+        >
+          <X className="h-4 w-4 mr-1" />
+          Reset
+        </Button>
+        <Button size="sm">
+          <Search className="h-4 w-4 mr-1" />
+          Apply
+        </Button>
+      </div>
     </div>
   );
 };

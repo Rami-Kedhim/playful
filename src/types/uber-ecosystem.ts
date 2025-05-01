@@ -1,58 +1,61 @@
 
+/**
+ * UberEcosystem Types - Shared types for the broader ecosystem
+ */
+
 import { UberPersona } from './uberPersona';
 
-export interface UberCoreSettings {
-  boostingEnabled: boolean;
-  boostingAlgorithm: string;
-  orderByBoost: boolean;
-  autonomyLevel: number;
-  resourceAllocation: number;
-  hilbertDimension: number;
-  aiEnhancementLevel: number;
-}
-
-export interface UberSearchFilters {
-  type?: string[];
-  location?: string;
-  minRating?: number;
-  maxPrice?: number;
-  isVerified?: boolean;
-  tags?: string[];
-  languages?: string[];
+export interface UberBoostSettings {
+  enabled: boolean;
+  multiplier: number;
+  duration: number;
+  startTime?: Date;
+  endTime?: Date;
+  autoRenew?: boolean;
 }
 
 export interface PersonaMatch {
   persona: UberPersona;
   score: number;
+  matchBasis: string[];
+  similarTo?: string[];
 }
 
-export interface PersonaGroup {
+export interface UberSearchFilters {
+  location?: string;
+  type?: string[];
+  services?: string[];
+  availability?: 'now' | 'today' | 'week';
+  price?: {
+    min?: number;
+    max?: number;
+  };
+  verified?: boolean;
+  rating?: number;
+  tags?: string[];
+}
+
+export interface UberNotification {
   id: string;
-  name: string;
-  personas: UberPersona[];
-  description?: string;
-}
-
-export interface UberBoostSettings {
-  active: boolean;
-  level: number;
-  duration: number;
-  startTime: string;
-  endTime: string;
-}
-
-export interface UberInteraction {
   userId: string;
-  personaId: string;
-  interactionType: string;
-  timestamp: string;
-  metadata: Record<string, any>;
+  title: string;
+  message: string;
+  type: 'system' | 'chat' | 'booking' | 'payment';
+  read: boolean;
+  createdAt: Date;
+  link?: string;
+  entityId?: string;
+  entityType?: string;
 }
 
-export interface UberMetrics {
-  viewCount: number;
-  interactionRate: number;
-  conversionRate: number;
-  engagementScore: number;
-  boostEffectiveness: number;
+export interface UberBooking {
+  id: string;
+  clientId: string;
+  providerId: string;
+  startTime: Date;
+  endTime: Date;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  price: number;
+  location?: string;
+  paymentStatus: 'pending' | 'paid' | 'refunded';
 }

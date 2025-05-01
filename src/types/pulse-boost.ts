@@ -1,89 +1,36 @@
 
-export interface BoostPackage {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  price_ubx: number;
-  duration: string;
-  durationMinutes: number;
-  features: string[];
-  visibility: string;
-  visibility_increase: number;
-  color?: string;
-  badgeColor?: string;
-}
+/**
+ * Pulse Boost System Types
+ */
 
-export interface BoostPurchaseRequest {
-  profileId: string;
-  packageId: string;
-}
-
-export interface BoostPurchaseResult {
-  success: boolean;
-  boostId?: string;
-  error?: string | null;
-}
-
-export interface BoostAnalytics {
-  totalBoosts: number;
-  activeBoosts: number;
-  averageBoostScore: number;
-  boostHistory: Array<{
-    date: Date;
-    score: number;
-  }>;
+export interface BoostSettings {
+  boostMultiplier: number;
+  boostDuration: number;
+  boostPrice: number;
+  boostType: 'standard' | 'premium' | 'vip';
 }
 
 export interface BoostHistory {
-  items: Array<{
-    id: string;
-    packageId: string;
-    startDate: Date;
-    endDate: Date;
-    price: number;
-    status: string;
-  }>;
-}
-
-// Add UserRole and UserRoleEnum types for authService
-export enum UserRoleEnum {
-  ADMIN = 'admin',
-  MODERATOR = 'moderator',
-  USER = 'user',
-  GUEST = 'guest',
-}
-
-export interface UserRole {
   id: string;
   userId: string;
-  role: UserRoleEnum;
-  createdAt: Date;
-}
-
-export interface EnhancedBoostStatus {
-  isActive: boolean;
-  packageId?: string;
-  activeBoostId?: string;
-  startTime?: Date;
-  endTime?: Date;
-  remainingTime?: string;
-  visibilityScore?: number;
-}
-
-export interface PulseBoost {
-  id: string;
-  name: string;
-  description: string;
+  startTime: Date;
+  endTime: Date;
+  boostType: string;
+  boostMultiplier: number;
   price: number;
-  price_ubx: number;
-  duration: string;
-  durationMinutes: number;
-  features: string[];
-  visibility: string;
-  visibility_increase: number;
-  color?: string;
-  badgeColor?: string;
-  // Add the missing costUBX property
-  costUBX?: number;
+  status: 'active' | 'completed' | 'cancelled';
+}
+
+export interface BoostStats {
+  totalViews: number;
+  viewsIncrease: number;
+  engagementRate: number;
+  conversionRate: number;
+}
+
+export interface BoostRecommendation {
+  recommendedBoost: BoostSettings;
+  estimatedViews: number;
+  estimatedConversions: number;
+  reason: string;
 }

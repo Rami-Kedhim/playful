@@ -1,58 +1,98 @@
 
 import { UberPersona } from '@/types/uberPersona';
+import { lucie } from '@/core/Lucie';
 
-class FeaturedService {
-  public async loadFeaturedPersonas(count: number = 4): Promise<UberPersona[]> {
-    // In a real implementation, this would load from API or database
-    const mockPersonas: UberPersona[] = [
+/**
+ * Service for fetching featured personas based on various criteria
+ */
+export class FeaturedService {
+  /**
+   * Load featured personas - uses Lucie's AI recommendations
+   */
+  public async loadFeaturedPersonas(): Promise<UberPersona[]> {
+    try {
+      // Use the lucie system to get featured persona recommendations
+      const featuredPersonas = await lucie.loadFeaturedPersonas();
+      return featuredPersonas;
+    } catch (error) {
+      console.error('Error loading featured personas:', error);
+      
+      // Fallback to default personas if Lucie is unavailable
+      return this.getFallbackFeaturedPersonas();
+    }
+  }
+
+  /**
+   * Fallback method when Lucie is unavailable
+   */
+  private getFallbackFeaturedPersonas(): UberPersona[] {
+    return [
       {
-        id: 'persona1',
-        name: 'Sophie',
-        displayName: 'Sophie Dreams',
-        type: 'escort' as const, // Using 'as const' to ensure proper type narrowing
-        avatarUrl: 'https://picsum.photos/seed/sophie/400/600',
+        id: 'feature-1',
+        name: 'Sophia',
+        type: 'escort',
+        displayName: 'Sophia Rose',
+        avatarUrl: 'https://source.unsplash.com/random/300x400/?portrait,woman',
         location: 'New York',
         isVerified: true,
         isOnline: true,
-        tags: ['luxury', 'gfe', 'travel']
+        tags: ['premium', 'vip', 'elite']
       },
       {
-        id: 'persona2',
-        name: 'Luna',
-        displayName: 'Luna Eclipse',
-        type: 'creator' as const, // Using 'as const' for proper typing
-        avatarUrl: 'https://picsum.photos/seed/luna/400/600',
-        location: 'Miami',
-        isVerified: true,
-        isOnline: false,
-        tags: ['photos', 'videos', 'exclusive']
-      },
-      {
-        id: 'persona3',
-        name: 'TiffanyLive',
-        displayName: 'Tiffany Stars',
-        type: 'livecam' as const, // Using 'as const' for proper typing
-        avatarUrl: 'https://picsum.photos/seed/tiffany/400/600',
+        id: 'feature-2',
+        name: 'Emma',
+        type: 'creator',
+        displayName: 'Emma Sterling',
+        avatarUrl: 'https://source.unsplash.com/random/300x400/?portrait,model',
         location: 'Los Angeles',
         isVerified: true,
-        isOnline: true,
-        tags: ['interactive', 'shows', 'private']
+        isOnline: false,
+        tags: ['content', 'videos', 'photos']
       },
       {
-        id: 'persona4',
-        name: 'Aria',
-        displayName: 'Aria Intelligence',
-        type: 'ai' as const, // Using 'as const' for proper typing
-        avatarUrl: 'https://picsum.photos/seed/aria/400/600',
-        location: 'Metaverse',
+        id: 'feature-3',
+        name: 'Leia',
+        type: 'ai',
+        displayName: 'Leia AI',
+        avatarUrl: 'https://source.unsplash.com/random/300x400/?ai,digital',
+        location: 'Virtual',
         isVerified: true,
         isOnline: true,
-        tags: ['adaptive', 'personalized', 'learning']
+        tags: ['ai', 'companion', 'chat']
+      },
+      {
+        id: 'feature-4',
+        name: 'Jasmine',
+        type: 'livecam',
+        displayName: 'Jasmine Star',
+        avatarUrl: 'https://source.unsplash.com/random/300x400/?portrait,studio',
+        location: 'Miami',
+        isVerified: true,
+        isOnline: true,
+        tags: ['livecam', 'interactive', 'shows']
       }
     ];
-    
-    return mockPersonas.slice(0, count);
+  }
+
+  /**
+   * Get persona recommendations matching user preferences
+   */
+  public async getPersonaRecommendations(userId: string): Promise<UberPersona[]> {
+    console.log(`Fetching persona recommendations for user ${userId}`);
+    // In a real implementation, this would use machine learning to get personalized recommendations
+    return this.getFallbackFeaturedPersonas();
+  }
+
+  /**
+   * Get trending personas
+   */
+  public async getTrendingPersonas(): Promise<UberPersona[]> {
+    console.log('Fetching trending personas');
+    // In a real implementation, this would fetch personas with rapidly increasing popularity
+    return this.getFallbackFeaturedPersonas();
   }
 }
 
+// Export a singleton instance
 export const featuredService = new FeaturedService();
+export default featuredService;

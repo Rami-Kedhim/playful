@@ -1,86 +1,103 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import VerificationBadge from '@/components/verification/VerificationBadge';
-import type { VerificationLevel as VerificationLevelType } from '@/types/verification';
-
-import { hasRealMeets, hasVirtualMeets, hasContent } from '@/utils/personaHelpers';
+import { UberPersona } from '@/types/uberPersona';
+import { Link } from 'react-router-dom';
 
 interface UberPersonaCardProps {
-  persona: any;
-  onClick?: () => void;
-  className?: string;
+  persona: UberPersona;
+  size?: 'sm' | 'md' | 'lg';
+  showDetails?: boolean;
 }
 
-const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
-  persona,
-  onClick,
-  className = ''
+const UberPersonaCard: React.FC<UberPersonaCardProps> = ({ 
+  persona, 
+  size = 'md', 
+  showDetails = true 
 }) => {
-  const handleClick = () => {
-    if (onClick) {
-      onClick();
+  if (!persona) return null;
+  
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'escort':
+        return 'Escort';
+      case 'creator':
+        return 'Content Creator';
+      case 'livecam':
+        return 'Live Cam';
+      case 'ai':
+        return 'AI Companion';
+      default:
+        return type?.charAt(0).toUpperCase() + type?.slice(1) || 'Unknown';
     }
   };
 
-  const displayName = persona.displayName || persona.name || "Unnamed";
-
-  const imageSrc = persona.avatarUrl || persona.imageUrl || '';
-
-  const isFeatured = persona.roleFlags?.isFeatured ?? false;
-
-  const verified = persona.roleFlags?.isVerified ?? false;
-
-  const verificationLevelSafe: VerificationLevelType | undefined = 
-    persona.verificationLevel && typeof persona.verificationLevel === 'string' 
-      ? (persona.verificationLevel as VerificationLevelType) 
-      : undefined;
-
-  const price = persona.monetization?.meetingPrice ?? 0;
-
+  // Set height based on card size
+  const imageHeight = size === 'sm' ? 'h-48' : size === 'md' ? 'h-60' : 'h-72';
+  
   return (
-    <Card
-      className={`overflow-hidden transition-transform hover:scale-[1.01] cursor-pointer ${className}`}
-      onClick={handleClick}
-    >
-      <div className="aspect-[3/4] relative">
-        <img
-          src={imageSrc}
-          alt={displayName}
-          className="object-cover w-full h-full"
-        />
-        <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
-          {isFeatured && (
-            <Badge className="bg-ubx">Featured</Badge>
-          )}
-          {verified && verificationLevelSafe && (
-            <VerificationBadge level={verificationLevelSafe as any} />
-          )}
-        </div>
-      </div>
-      <CardContent className="p-4">
-        <h3 className="font-semibold text-lg mb-1">{displayName}</h3>
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-muted-foreground">
-            {persona.location || 'Location not specified'}
+    <Card className="overflow-hidden hover:shadow-md transition-shadow bg-background/80 backdrop-blur-sm border-gray-800/50">
+      <Link to={`/personas/${persona.id}`}>
+        <div className={`relative ${imageHeight} overflow-hidden`}>
+          <img 
+            src={persona.avatarUrl || `https://source.unsplash.com/random/300x400/?portrait,${persona.type}`} 
+            alt={persona.name} 
+            className="object-cover w-full h-full"
+          />
+          <div className="absolute top-3 right-3">
+            <Badge variant="secondary" className="bg-black/70 hover:bg-black/80 text-white">
+              {getTypeLabel(persona.type)}
+            </Badge>
           </div>
-          <div className="text-sm font-medium">
-            ${price}/hr
+          {persona.isVerified && (
+            <div className="absolute bottom-3 left-3">
+              <Badge variant="secondary" className="bg-white/90 text-black">
+                Verified
+              </Badge>
+            </div>
+          )}
+          {persona.isOnline && (
+            <div className="absolute top-3 left-3">
+              <div className="flex items-center">
+                <span className="h-2 w-2 rounded-full bg-green-500 mr-1.5"></span>
+                <span className="text-xs bg-black/70 text-white px-1.5 py-0.5 rounded">Online</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </Link>
+      
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-lg font-medium">
+              {persona.displayName || persona.name}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {persona.location || 'Location not specified'}
+            </p>
           </div>
-        </div>
-        <div className="flex justify-between items-center mt-2">
-          {hasRealMeets(persona) && (
-            <Badge variant="outline" className="mr-1">Real Meets</Badge>
-          )}
-          {hasVirtualMeets(persona) && (
-            <Badge variant="outline" className="mr-1">Virtual</Badge>
-          )}
-          {hasContent(persona) && (
-            <Badge variant="outline">Content</Badge>
+          {persona.rating && (
+            <div className="flex items-center bg-gray-800/30 px-2 py-1 rounded">
+              <span className="text-yellow-500 mr-1">★</span>
+              <span className="text-sm">{persona.rating}</span>
+            </div>
           )}
         </div>
-      </CardContent>
+      </CardHeader>
+      
+      {showDetails && (
+        <CardContent>
+          <div className="flex flex-wrap gap-1.5">
+            {persona.tags?.slice(0, 4).map((tag, index) => (
+              <Badge key={index} variant="outline" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        </CardContent>
+      )}
     </Card>
   );
 };

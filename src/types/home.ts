@@ -1,31 +1,26 @@
 
-import { UberPersona } from '@/types/uberPersona';
+/**
+ * Home page related types
+ */
 
-export interface SystemStatusFormatted {
-  status: string;
-  uptime: number;
-  components?: Array<{
-    name: string;
-    status: string;
-    health: number;
+export interface HeroProps {
+  searchLocation: string;
+  setSearchLocation: (value: string) => void;
+}
+
+export interface FeaturesProps {
+  title?: string;
+  description?: string;
+  features?: Array<{
+    title: string;
+    description: string;
+    icon?: React.ReactNode;
   }>;
 }
 
-export const formatSystemStatus = (status: { status: string; uptime: number }): SystemStatusFormatted => {
-  return {
-    status: status.status || 'operational',
-    uptime: status.uptime || 99.9,
-    components: [
-      { name: 'Authentication', status: 'operational', health: 98 },
-      { name: 'Database', status: 'operational', health: 99.5 },
-      { name: 'Hermes Engine', status: 'operational', health: 97.8 },
-      { name: 'Oxum Boosting', status: 'operational', health: 99.2 },
-    ]
-  };
-};
-
-export interface FeaturedPersonasResponse {
-  personas: UberPersona[];
-  featuredCount: number;
-  totalCount: number;
+export interface TestimonialProps {
+  avatar?: string;
+  name: string;
+  role?: string;
+  content: string;
 }
