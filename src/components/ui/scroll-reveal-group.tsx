@@ -1,77 +1,107 @@
+import React, { createContext, useContext, useRef } from 'react';
+import { ScrollReveal } from '@/components/ui/scroll-reveal';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { cn } from '@/lib/utils';
+// Type for the animation options
+export type AnimationType = 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'fade-in' | 'scale-in' | 'zoom-in';
 
-interface ScrollRevealGroupProps extends React.HTMLAttributes<HTMLDivElement> {
-  animation?: 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom-in';
+// Context to share group configuration with child ScrollReveal components
+interface ScrollRevealContextType {
+  animation: AnimationType;
+  baseDelay: number;
+  staggerDelay: number;
+  threshold: number;
+  duration: number;
+  childCounter: React.MutableRefObject<number>;
+}
+
+const ScrollRevealContext = createContext<ScrollRevealContextType | null>(null);
+
+export const useScrollRevealContext = () => {
+  const context = useContext(ScrollRevealContext);
+  if (!context) {
+    throw new Error('useScrollRevealContext must be used within a ScrollRevealGroup');
+  }
+  return context;
+};
+
+interface ScrollRevealGroupProps {
+  children: React.ReactNode;
+  animation?: AnimationType;
+  baseDelay?: number;
   staggerDelay?: number;
   threshold?: number;
+  duration?: number;
   containerClassName?: string;
 }
 
-export const ScrollRevealGroup = ({
+export const ScrollRevealGroup: React.FC<ScrollRevealGroupProps> = ({
   children,
   animation = 'fade-up',
+  baseDelay = 0,
   staggerDelay = 0.1,
   threshold = 0.1,
-  containerClassName,
-  ...props
-}: ScrollRevealGroupProps) => {
-  const [isIntersecting, setIsIntersecting] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsIntersecting(entry.isIntersecting);
-      },
-      { threshold }
-    );
-
-    const currentElement = ref.current;
-    if (currentElement) {
-      observer.observe(currentElement);
-    }
-
-    return () => {
-      if (currentElement) {
-        observer.unobserve(currentElement);
-      }
-    };
-  }, [ref, threshold]);
-
-  // Define animation classes
-  const getAnimationClass = (index: number) => {
-    const baseClasses = {
-      'fade-up': 'opacity-0 translate-y-10',
-      'fade-down': 'opacity-0 -translate-y-10',
-      'fade-left': 'opacity-0 translate-x-10',
-      'fade-right': 'opacity-0 -translate-x-10',
-      'zoom-in': 'opacity-0 scale-95',
-    };
-    
-    return isIntersecting
-      ? `transition-all duration-700 ease-out opacity-100 translate-y-0 translate-x-0 scale-100 delay-[${index * staggerDelay * 1000}ms]`
-      : `transition-all duration-500 ease-out ${baseClasses[animation]}`;
-  };
-
-  const childrenArray = React.Children.toArray(children);
+  duration = 0.6,
+  containerClassName = '',
+}) => {
+  // Counter to keep track of child index for staggered animations
+  const childCounter = useRef(0);
 
   return (
-    <div ref={ref} {...props} className={cn(containerClassName)}>
-      {childrenArray.map((child, index) => {
-        if (!React.isValidElement(child)) return child;
-        
-        return React.cloneElement(child, {
-          ...child.props,
-          className: cn(
-            child.props.className,
-            getAnimationClass(index)
-          ),
-          key: `scroll-reveal-${index}`
-        });
-      })}
-    </div>
+    <ScrollRevealContext.Provider
+      value={{
+        animation,
+        baseDelay,
+        staggerDelay,
+        threshold,
+        duration,
+        childCounter,
+      }}
+    >
+      <div className={containerClassName}>{children}</div>
+    </ScrollRevealContext.Provider>
+  );
+};
+
+interface RevealChildProps {
+  children: React.ReactNode;
+  animation?: AnimationType;
+  delay?: number;
+  duration?: number;
+  threshold?: number;
+  className?: string;
+}
+
+export const RevealChild: React.FC<RevealChildProps> = ({
+  children,
+  animation: propAnimation,
+  delay: propDelay,
+  duration: propDuration,
+  threshold: propThreshold,
+  className,
+}) => {
+  const context = useScrollRevealContext();
+  const childIndex = context.childCounter.current++;
+
+  // Use props or fall back to context values
+  const animation = propAnimation || context.animation;
+  const threshold = propThreshold !== undefined ? propThreshold : context.threshold;
+  const duration = propDuration !== undefined ? propDuration : context.duration;
+  
+  // Calculate delay based on child index
+  const delay = propDelay !== undefined 
+    ? propDelay 
+    : context.baseDelay + childIndex * context.staggerDelay;
+
+  return (
+    <ScrollReveal
+      animation={animation}
+      threshold={threshold}
+      delay={delay}
+      duration={duration}
+      className={className}
+    >
+      {children}
+    </ScrollReveal>
   );
 };
 

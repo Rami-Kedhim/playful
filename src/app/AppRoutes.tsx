@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Routes as RouterRoutes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
 import SignupPage from '@/pages/SignupPage';
@@ -13,7 +13,7 @@ import { AppRoutes as AppRoutePaths } from '@/utils/navigation';
  */
 const AppRoutes = () => {
   return (
-    <RouterRoutes>
+    <Routes>
       <Route path="/" element={
         <MainLayout hideNavbar hideFooter>
           <HomePage />
@@ -33,7 +33,7 @@ const AppRoutes = () => {
       
       {/* 404 - Not Found */}
       <Route path="*" element={<NotFoundPage />} />
-    </RouterRoutes>
+    </Routes>
   );
 };
 

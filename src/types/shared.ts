@@ -3,7 +3,7 @@
 import { ID, PersonaType, UberPersona } from './uberPersona';
 import { PulseBoost, BoostPackage, UserRole } from './pulse-boost';
 
-// Re-export core types
+// Re-export core types with proper type annotations
 export type { ID, PersonaType, UberPersona, PulseBoost, BoostPackage, UserRole };
 
 // Homepage component prop types
@@ -36,7 +36,6 @@ export interface SystemStatus {
     activeSessions?: number;
     processingLoad?: number;
   };
-  components?: Record<string, { status: string }>;
 }
 
 export interface BoostStats {
@@ -93,9 +92,6 @@ export interface AnalyticsData {
     previous: number;
     change: number;
   };
-  conversions?: number;
-  boostEffectiveness?: number;
-  engagementRate?: number;
 }
 
 export interface HermesStatus {
@@ -105,4 +101,5 @@ export interface HermesStatus {
   lastUpdateTime: string;
   boostScore: number;
   effectivenessScore: number;
+  isActive?: boolean;
 }

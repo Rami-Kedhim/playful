@@ -1,76 +1,50 @@
 
-import React from 'react';
-import { ScrollReveal } from './scroll-reveal';
-import { ScrollRevealGroup } from './scroll-reveal-group';
-import { Card } from './card';
+import React, { useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
+import ScrollReveal from './scroll-reveal';
 
-export function RevealExample() {
+interface RevealExampleProps {
+  className?: string;
+}
+
+const RevealExample: React.FC<RevealExampleProps> = ({ className }) => {
   return (
-    <div className="space-y-16 py-12">
-      <section>
-        <ScrollReveal>
-          <h2 className="text-3xl font-bold mb-6">Fade Up Animation</h2>
+    <div className={cn("space-y-8 py-12", className)}>
+      <h2 className="text-3xl font-bold text-center">Scroll Reveal Examples</h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+        <ScrollReveal animation="fade-up" className="bg-card p-6 rounded-lg">
+          <h3 className="text-xl font-semibold mb-2">Fade Up Animation</h3>
+          <p className="text-muted-foreground">This card animates with a fade-up effect as you scroll.</p>
         </ScrollReveal>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          <ScrollRevealGroup animation="fade-up" staggerDelay={0.1}>
-            <Card className="p-6">
-              <h3 className="text-xl font-semibold mb-2">Card One</h3>
-              <p className="text-muted-foreground">
-                This card appears with a fade up animation.
-              </p>
-            </Card>
-            
-            <Card className="p-6">
-              <h3 className="text-xl font-semibold mb-2">Card Two</h3>
-              <p className="text-muted-foreground">
-                This card appears shortly after the first one.
-              </p>
-            </Card>
-            
-            <Card className="p-6">
-              <h3 className="text-xl font-semibold mb-2">Card Three</h3>
-              <p className="text-muted-foreground">
-                This card appears last in the sequence.
-              </p>
-            </Card>
-          </ScrollRevealGroup>
-        </div>
-      </section>
-      
-      <section>
-        <ScrollReveal animation="slide-in">
-          <h2 className="text-3xl font-bold mb-6">Slide In Animation</h2>
+        <ScrollReveal animation="fade-down" delay={0.2} className="bg-card p-6 rounded-lg">
+          <h3 className="text-xl font-semibold mb-2">Fade Down Animation</h3>
+          <p className="text-muted-foreground">This card animates with a fade-down effect as you scroll.</p>
         </ScrollReveal>
         
-        <div className="mt-8">
-          <ScrollRevealGroup 
-            animation="slide-in" 
-            staggerDelay={0.15} 
-            containerClassName="space-y-4"
-          >
-            <Card className="p-6">
-              <h3 className="text-xl font-semibold">Feature One</h3>
-              <p className="text-muted-foreground">Slides in from the left.</p>
-            </Card>
-            
-            <Card className="p-6">
-              <h3 className="text-xl font-semibold">Feature Two</h3>
-              <p className="text-muted-foreground">Also slides in, but with a delay.</p>
-            </Card>
-          </ScrollRevealGroup>
-        </div>
-      </section>
-      
-      <section>
-        <ScrollReveal animation="scale-in">
-          <h2 className="text-3xl font-bold mb-6">Scale In Animation</h2>
-          <p className="text-muted-foreground max-w-2xl">
-            This entire section scales in when scrolled into view. This effect works well
-            for important callouts or featured content.
-          </p>
+        <ScrollReveal animation="fade-in" delay={0.4} className="bg-card p-6 rounded-lg">
+          <h3 className="text-xl font-semibold mb-2">Fade In Animation</h3>
+          <p className="text-muted-foreground">This card simply fades in as you scroll.</p>
         </ScrollReveal>
-      </section>
+        
+        <ScrollReveal animation="fade-left" delay={0.6} className="bg-card p-6 rounded-lg">
+          <h3 className="text-xl font-semibold mb-2">Fade Left Animation</h3>
+          <p className="text-muted-foreground">This card animates from the left as you scroll.</p>
+        </ScrollReveal>
+        
+        <ScrollReveal animation="fade-right" delay={0.8} className="bg-card p-6 rounded-lg">
+          <h3 className="text-xl font-semibold mb-2">Fade Right Animation</h3>
+          <p className="text-muted-foreground">This card animates from the right as you scroll.</p>
+        </ScrollReveal>
+        
+        <ScrollReveal animation="zoom-in" delay={1.0} className="bg-card p-6 rounded-lg">
+          <h3 className="text-xl font-semibold mb-2">Zoom In Animation</h3>
+          <p className="text-muted-foreground">This card zooms in as you scroll.</p>
+        </ScrollReveal>
+      </div>
     </div>
   );
-}
+};
+
+export default RevealExample;
