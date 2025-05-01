@@ -1,8 +1,8 @@
 
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-// Import from the lowercase versions of the files
-import authService from '@/services/AuthService';
-import userService from '@/services/UserService';
+// Import directly from the lowercase versions of the files 
+import authService from '@/services/authService';
+import userService from '@/services/userService';
 import { UberPersona } from '@/types/uberPersona';
 
 // Create the context
