@@ -3,16 +3,14 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AIProfile } from '@/types/ai-profile';
 
-// Mock data for the component
+// Mock data for the component with correct type structure
 const mockAIProfiles: AIProfile[] = [
   {
     id: '1',
     name: 'Sophia',
+    avatarUrl: '/assets/ai-profiles/sophia.jpg',
     imageUrl: '/assets/ai-profiles/sophia.jpg',
-    personality: { 
-      type: 'flirty',
-      traits: ['charming', 'witty']
-    },
+    personality: ['flirty', 'charming', 'witty'],
     location: 'Virtual',
     created_at: new Date().toISOString(),
     age: 24,
@@ -25,11 +23,9 @@ const mockAIProfiles: AIProfile[] = [
   {
     id: '2',
     name: 'Alex',
+    avatarUrl: '/assets/ai-profiles/alex.jpg',
     imageUrl: '/assets/ai-profiles/alex.jpg',
-    personality: { 
-      type: 'dominant',
-      traits: ['confident', 'assertive']
-    },
+    personality: ['dominant', 'confident', 'assertive'],
     location: 'Virtual',
     created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     age: 28
@@ -74,7 +70,11 @@ const AIEscorts = () => {
                     <div>
                       <h3 className="font-semibold">{profile.name}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {profile.personality?.type}
+                        {Array.isArray(profile.personality) 
+                          ? profile.personality[0] 
+                          : typeof profile.personality === 'object' 
+                            ? profile.personality.type 
+                            : ''}
                       </p>
                       <div className="flex items-center mt-1">
                         {profile.boost_status?.isActive && (

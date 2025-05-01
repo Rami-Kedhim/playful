@@ -24,12 +24,12 @@ export const useLivecams = (): LivecamContextType => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Mock response
+      // Mock response with correctly typed AIProfile objects
       const mockStreams: AIProfile[] = [
         {
           id: '1',
           name: 'Sophia',
-          livecam_enabled: true,
+          livecam_enabled: true, // This is now defined in the AIProfile type
           avatarUrl: '/avatars/sophia.jpg',
           displayName: 'Sophia',
           thumbnailUrl: '/thumbnails/sophia-stream.jpg',
@@ -38,7 +38,7 @@ export const useLivecams = (): LivecamContextType => {
         {
           id: '2',
           name: 'Emma',
-          livecam_enabled: true,
+          livecam_enabled: true, // This is now defined in the AIProfile type
           avatarUrl: '/avatars/emma.jpg',
           displayName: 'Emma',
           thumbnailUrl: '/thumbnails/emma-stream.jpg',

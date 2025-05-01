@@ -19,6 +19,14 @@ export interface BoostHistory {
   boostMultiplier: number;
   price: number;
   status: 'active' | 'completed' | 'cancelled';
+  items?: { 
+    id: string; 
+    packageId: string; 
+    startDate: Date; 
+    endDate: Date; 
+    price: number; 
+    status: string;
+  }[];
 }
 
 export interface BoostStats {
@@ -48,5 +56,62 @@ export interface PulseBoost {
   visibility_increase?: number;
   color?: string;
   badgeColor?: string;
-  boostMultiplier?: number; // Added to make compatible with BoostPackage
+  boostMultiplier?: number;
+}
+
+// Add missing type exports for pulse-boost
+export interface BoostPackage {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  price_ubx?: number;
+  duration: string;
+  durationMinutes?: number;
+  features?: string[];
+  visibility?: string;
+  visibility_increase?: number;
+  color?: string;
+  badgeColor?: string;
+  boostMultiplier?: number;
+  isMostPopular?: boolean;
+}
+
+export interface BoostPurchaseRequest {
+  profileId: string;
+  packageId: string;
+}
+
+export interface BoostPurchaseResult {
+  success: boolean;
+  message?: string;
+  boostId?: string;
+  error?: string | null;
+  transactionId?: string;
+}
+
+export interface BoostAnalytics {
+  totalBoosts: number;
+  activeBoosts: number;
+  averageBoostScore: number;
+  boostHistory?: Array<{
+    date: Date;
+    score: number;
+  }>;
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  views?: number;
+}
+
+export interface EnhancedBoostStatus {
+  isActive: boolean;
+  packageId?: string;
+  startedAt?: Date;
+  expiresAt?: Date;
+  remainingTime?: string;
+  packageName?: string;
+  boostMultiplier?: number;
+  boostPackage?: BoostPackage;
+  progress?: number;
 }

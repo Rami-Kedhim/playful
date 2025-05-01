@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { UberPersona } from '@/types/uberPersona';
 import { getPersonaType } from '@/utils/personaHelpers';
@@ -13,6 +14,7 @@ const filterByTypeFlag = (personas: UberPersona[], typeFlag: string) => {
   if (!personas) return [];
   
   return personas.filter(persona => {
+    // Check if roleFlags exists and if the specific typeFlag is true
     if (persona.roleFlags && persona.roleFlags[typeFlag as keyof typeof persona.roleFlags]) {
       return true;
     }
@@ -24,6 +26,7 @@ const filterByCapabilityFlag = (personas: UberPersona[], capabilityFlag: string)
   if (!personas) return [];
   
   return personas.filter(persona => {
+    // Check if capabilities exists and if the specific capabilityFlag is true
     if (persona.capabilities && persona.capabilities[capabilityFlag as keyof typeof persona.capabilities]) {
       return true;
     }

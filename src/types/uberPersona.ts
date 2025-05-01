@@ -13,6 +13,8 @@ export interface UberPersona {
   type: PersonaType;
   displayName?: string;
   avatarUrl?: string;
+  imageUrl?: string;
+  profileImageUrl?: string; // Added for compatibility
   location?: string;
   isVerified?: boolean;
   isOnline?: boolean;
@@ -28,6 +30,15 @@ export interface UberPersona {
     createdAt?: Date;
     profileViews?: number;
     lastSynced?: Date;
+    source?: string; // Added for compatibility
+    tagsGeneratedByAI?: boolean;
+    hilbertSpaceVector?: any[];
+    statusFlags?: {
+      isVerified?: boolean;
+      isActive?: boolean;
+      isFreemium?: boolean;
+      isSubscriber?: boolean;
+    }
   };
   services?: string[];
   bio?: string;
@@ -41,6 +52,8 @@ export interface UberPersona {
     completion?: number;
     responseRate?: number;
     responseTime?: number;
+    rating?: number; // Added for compatibility
+    reviewCount?: number;
   };
   monetization?: {
     hourlyRate?: number;
@@ -54,5 +67,25 @@ export interface UberPersona {
     acceptsUbx?: boolean;
     minRate?: number;
     maxRate?: number;
+  };
+  roleFlags?: {
+    isEscort?: boolean;
+    isCreator?: boolean;
+    isLivecam?: boolean;
+    isAI?: boolean;
+    isVerified?: boolean;
+    isFeatured?: boolean;
+  };
+  capabilities?: {
+    hasPhotos?: boolean;
+    hasVideos?: boolean;
+    hasStories?: boolean;
+    hasChat?: boolean;
+    hasBooking?: boolean;
+    hasLiveStream?: boolean;
+    hasExclusiveContent?: boolean;
+    hasContent?: boolean;
+    hasRealMeets?: boolean;
+    hasVirtualMeets?: boolean;
   };
 }

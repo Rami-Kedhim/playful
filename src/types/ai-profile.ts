@@ -46,11 +46,17 @@ export interface AIProfile {
   id: string;
   name: string;
   avatarUrl: string;
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  displayName?: string;
   description?: string;
-  personality?: string[];
+  bio?: string;
+  personality?: string[] | { type: string; traits: string[] };
   traits?: string[];
   interests?: string[];
+  tags?: string[];
   type?: string;
+  isPremium?: boolean;
   gender?: string;
   age?: number;
   created_at?: Date | string;
@@ -66,4 +72,33 @@ export interface AIProfile {
     pitch?: number;
     rate?: number;
   };
+  rating?: number;
+  reviewCount?: number;
+  isVerified?: boolean;
+  location?: string;
+  livecam_enabled?: boolean;
+  gallery_images?: string[];
+  premium_content_count?: number;
+  subscription_price?: number;
+  ubx_image_price?: number;
+  boost_status?: {
+    isActive: boolean;
+    expiresAt?: string;
+    boost_level?: number;
+  };
 }
+
+// Add AIMessage type that was missing
+export interface AIMessage {
+  id: string;
+  content: string;
+  isAI: boolean;
+  timestamp: string | Date;
+  status?: 'sent' | 'delivered' | 'read' | 'failed';
+  metadata?: Record<string, any>;
+  attachments?: Array<{
+    type: string;
+    url: string;
+  }>;
+}
+

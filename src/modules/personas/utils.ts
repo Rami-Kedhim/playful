@@ -1,67 +1,36 @@
 
 import { UberPersona } from '@/types/uberPersona';
 
-/**
- * Format a persona's display name according to UberCore standards
- */
-export const formatPersonaName = (persona: UberPersona): string => {
-  if (persona.displayName) return persona.displayName;
-  return persona.name;
-};
+export function getDisplayImage(persona: UberPersona): string {
+  // Use avatarUrl, imageUrl, profileImageUrl in that order of preference
+  return persona.avatarUrl || persona.imageUrl || persona.profileImageUrl || '/placeholder-avatar.png';
+}
 
-/**
- * Get a persona's primary type as string
- */
-export const getPersonaType = (persona: UberPersona): string => {
-  if (typeof persona.type === 'string') return persona.type;
-  return 'escort';
-};
+export function getDisplayName(persona: UberPersona): string {
+  return persona.displayName || persona.name || 'Anonymous';
+}
 
-/**
- * Check if a persona is available now based on their availability settings
- */
-export const isPersonaAvailableNow = (persona: UberPersona): boolean => {
-  if (!persona.availability) return false;
+export function getPersonaTypeLabel(persona: UberPersona): string {
+  if (!persona.type) return 'Unknown';
   
-  if (Array.isArray(persona.availability)) {
-    // If availability is an array of time slots, check if current time is in any of them
-    return persona.availability.length > 0;
-  }
+  // Capitalize first letter
+  return persona.type.charAt(0).toUpperCase() + persona.type.slice(1);
+}
+
+export function formatLastActive(lastActive: Date | string | undefined): string {
+  if (!lastActive) return 'Never';
   
-  if (typeof persona.availability === 'object' && persona.availability.nextAvailable) {
-    // Check if nextAvailable timestamp is in the past
-    const nextAvailable = new Date(persona.availability.nextAvailable);
-    return nextAvailable <= new Date();
-  }
+  const date = typeof lastActive === 'string' ? new Date(lastActive) : lastActive;
+  const now = new Date();
+  const diffSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
   
-  return false;
-};
+  if (diffSeconds < 60) return 'Just now';
+  if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m ago`;
+  if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)}h ago`;
+  
+  return date.toLocaleDateString();
+}
 
-/**
- * Get persona's primary location for display
- */
-export const getPersonaLocation = (persona: UberPersona): string => {
-  return persona.location || 'Location not specified';
-};
-
-/**
- * Get persona avatar with fallback to default
- */
-export const getPersonaAvatar = (persona: UberPersona): string => {
-  return (
-    persona.avatarUrl || 
-    persona.profileImageUrl || 
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(persona.name)}&background=random`
-  );
-};
-
-/**
- * Sort personas by boost score (if available)
- */
-export const sortPersonasByBoost = (personas: UberPersona[]): UberPersona[] => {
-  return [...personas].sort((a, b) => {
-    const aBoost = a.systemMetadata?.boostScore || 0;
-    const bBoost = b.systemMetadata?.boostScore || 0;
-    return bBoost - aBoost;
-  });
-};
+export function isVerifiedPersona(persona: UberPersona): boolean {
+  return !!persona.isVerified;
+}

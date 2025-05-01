@@ -8,27 +8,23 @@ interface ExtendedAIProfile extends AIProfile {
   bio?: string;
 }
 
-// Mock data for the component
+// Mock data for the component with correct type structure
 const mockAIProfiles: ExtendedAIProfile[] = [
   {
     id: '1',
     name: 'Sophia',
+    avatarUrl: '/assets/ai-profiles/sophia.jpg',
     imageUrl: '/assets/ai-profiles/sophia.jpg',
     bio: 'An AI companion who loves deep conversations and philosophy.',
-    personality: { 
-      type: 'flirty',
-      traits: ['charming', 'witty']
-    }
+    personality: ['flirty', 'charming', 'witty']
   },
   {
     id: '2',
     name: 'Alex',
+    avatarUrl: '/assets/ai-profiles/alex.jpg',
     imageUrl: '/assets/ai-profiles/alex.jpg',
     bio: 'Tech enthusiast and coding partner for your programming projects.',
-    personality: { 
-      type: 'playful',
-      traits: ['geeky', 'helpful']
-    }
+    personality: ['geeky', 'helpful', 'playful']
   }
 ];
 
@@ -57,7 +53,11 @@ const AIProfiles = () => {
                     <div>
                       <h3 className="font-semibold">{profile.name}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {profile.personality?.type}
+                        {Array.isArray(profile.personality) 
+                          ? profile.personality[0] 
+                          : typeof profile.personality === 'object' 
+                            ? profile.personality.type 
+                            : ''}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {profile.bio}

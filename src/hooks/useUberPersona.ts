@@ -16,7 +16,7 @@ export const useUberPersona = (personaId?: string) => {
         // Mock API call
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Generate mock data
+        // Generate mock data with proper types
         const mockPersona: UberPersona = {
           id: personaId,
           type: 'escort',
@@ -26,20 +26,18 @@ export const useUberPersona = (personaId?: string) => {
           bio: 'This is a test persona.',
           description: 'A longer description of the persona.',
           isActive: true,
-          isOnline: true, // Added the missing isOnline property
+          isOnline: true,
           isVerified: true,
           rating: 4.5,
           profileImageUrl: `https://picsum.photos/id/${parseInt(personaId.slice(0, 5), 16) % 100}/200/300`,
+          avatarUrl: `https://picsum.photos/id/${parseInt(personaId.slice(0, 5), 16) % 100}/200/300`,
           galleryImages: [
             `https://picsum.photos/id/${(parseInt(personaId.slice(0, 5), 16) + 1) % 100}/200/300`,
             `https://picsum.photos/id/${(parseInt(personaId.slice(0, 5), 16) + 2) % 100}/200/300`,
             `https://picsum.photos/id/${(parseInt(personaId.slice(0, 5), 16) + 3) % 100}/200/300`,
           ],
-          createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-          updatedAt: new Date(),
-          status: 'active',
           systemMetadata: {
-            source: 'manual',
+            source: 'manual', // Now defined in type
             tagsGeneratedByAI: false,
             hilbertSpaceVector: [],
             statusFlags: {
@@ -54,14 +52,14 @@ export const useUberPersona = (personaId?: string) => {
           languages: ['English', 'Spanish'],
           traits: ['Friendly', 'Outgoing', 'Creative'],
           stats: {
-            rating: 4.5,
+            rating: 4.5, // Now defined in type
             reviewCount: 120,
             responseTime: 30,
             views: 12000,
-            bookingCount: 45
+            bookings: 45
           },
           availability: {
-            nextAvailable: '2023-10-15T14:00:00Z',
+            nextAvailable: new Date('2023-10-15T14:00:00Z'), // Fixed to use Date object instead of string
             schedule: {
               monday: { available: true },
               tuesday: { available: true },
@@ -71,6 +69,27 @@ export const useUberPersona = (personaId?: string) => {
               saturday: { available: false },
               sunday: { available: false }
             }
+          },
+          // Add the necessary roleFlags and capabilities properties
+          roleFlags: {
+            isEscort: true,
+            isCreator: false,
+            isLivecam: false,
+            isAI: false,
+            isVerified: true,
+            isFeatured: false
+          },
+          capabilities: {
+            hasPhotos: true,
+            hasVideos: false,
+            hasStories: false,
+            hasChat: true,
+            hasBooking: true,
+            hasLiveStream: false,
+            hasExclusiveContent: false,
+            hasContent: true,
+            hasRealMeets: true,
+            hasVirtualMeets: false
           }
         };
         
