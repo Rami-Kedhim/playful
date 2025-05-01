@@ -36,7 +36,6 @@ export class PersonaService {
       location: 'New York',
       services: [],
       languages: ['English'],
-      available: true,
       isVerified: index % 3 === 0,
       rating: 4.0 + Math.random(),
       reviews: [],

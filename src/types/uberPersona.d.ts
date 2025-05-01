@@ -15,9 +15,7 @@ export interface UberPersona {
   location?: string;
   services?: string[];
   languages?: string[];
-  available?: boolean;
   isVerified?: boolean;
-  verified?: boolean;
   reviews?: any[];
   isOnline?: boolean;
   isPremium?: boolean;

@@ -26,6 +26,7 @@ export interface PulseBoost {
   badgeColor?: string;
   boost_power?: number;
   boostMultiplier?: number;
+  isMostPopular?: boolean;
 }
 
 // Define types for the Boost Package and related operations

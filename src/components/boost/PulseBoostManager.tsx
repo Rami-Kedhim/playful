@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Zap, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
 import { usePulseBoost } from '@/modules/pulse-boost/hooks/usePulseBoost';
-import { formatBoostDuration } from '@/utils/boost/boostCalculator';
+import { formatBoostDuration, calculateRemainingTime } from '@/utils/boost/boostCalculator';
 import { BoostPackage } from '@/types/pulse-boost';
 import { useToast } from '@/hooks/use-toast';
 
@@ -145,7 +144,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
             <CardTitle className="text-xl flex items-center">
               <Zap className="text-primary mr-2" /> Active Boost
             </CardTitle>
-            <Badge variant="outline" className="bg-primary/10">
+            <Badge className="text-xs py-1" variant="secondary">
               {packageName}
             </Badge>
           </div>
@@ -222,9 +221,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
               >
                 <div className="flex justify-between items-center mb-2">
                   <h3 className="font-medium">{pkg.name}</h3>
-                  {pkg.isMostPopular && (
-                    <Badge size="sm" variant="secondary">Popular</Badge>
-                  )}
+                  {pkg.isMostPopular && <Badge className="text-xs py-1" variant="secondary">Most Popular</Badge>}
                 </div>
                 
                 <p className="text-sm text-muted-foreground mb-2">{pkg.description}</p>
