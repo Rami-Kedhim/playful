@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { BrainHubHealth } from '@/types/brainHubHealth';
 
 const BrainHubHealthStatus: React.FC = () => {
   const [health, setHealth] = useState<BrainHubHealth>({
-    status: 'loading',
+    status: 'unknown', // Changed from 'loading' to 'unknown' which is in the allowed types
     metrics: {
       cpuUsage: 0,
       memoryUsage: 0,
