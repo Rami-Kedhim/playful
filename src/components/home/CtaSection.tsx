@@ -1,31 +1,38 @@
 
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Shield } from "lucide-react";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const CtaSection = () => {
   return (
-    <section className="py-20 container mx-auto px-4">
-      <div className="bg-gradient-to-r from-primary/20 via-accent/20 to-lucoin/20 rounded-xl p-10 border border-white/5 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-6">
-          Join the Web3 Revolution in Adult Connections
-        </h2>
-        <p className="text-gray-300 max-w-2xl mx-auto mb-8">
-          UberEscorts brings together verified escorts, clients, and content creators on the most secure and sophisticated adult platform ever created.
-        </p>
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <Button size="lg" className="gap-2" asChild>
-            <Link to="/auth">
-              <Shield className="h-5 w-5" />
-              Create Verified Account
-            </Link>
-          </Button>
-          <Button size="lg" variant="outline" className="gap-2" asChild>
-            <Link to="/escorts">
-              Browse Escorts
-              <ArrowRight className="h-5 w-5" />
-            </Link>
-          </Button>
+    <section className="py-16 bg-gradient-to-br from-purple-900/90 to-black rounded-lg">
+      <div className="container px-4 md:px-6">
+        <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
+          <div className="space-y-4">
+            <div className="inline-block rounded-lg bg-purple-500/10 px-3 py-1 text-sm text-purple-300 mb-2">
+              UBX Token Economy
+            </div>
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-white">
+              Boost Your Visibility with UBX Tokens
+            </h2>
+            <p className="text-gray-300 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              Take advantage of our Pulse Boosting System powered by Oxum to increase your profile visibility, 
+              gain more clients, and maximize your earnings.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center lg:justify-end">
+            <Button asChild size="lg" className="bg-purple-600 hover:bg-purple-700 text-white">
+              <Link to="/wallet">
+                Get UBX Tokens <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="border-purple-500/30 text-purple-300 hover:bg-purple-500/10">
+              <Link to="/pulse-boost">
+                Learn About Boosting
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
     </section>

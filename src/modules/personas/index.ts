@@ -1,10 +1,15 @@
 
-import { UberPersona } from '@/types/uberPersona';
-import { PersonaService } from './service';
+// Main entry point for the Personas module
+import { personaService } from './service';
 
-// Export the types and service
-export type { UberPersona };
-export { PersonaService };
+export { personaService };
+export * from './types';
+export * from './hooks';
+export * from './utils';
 
-// Export default service instance
-export default new PersonaService();
+// Re-export common components
+export { default as UberPersonaGrid } from '@/components/personas/UberPersonaGrid';
+export { default as UberPersonaCard } from '@/components/personas/UberPersonaCard';
+export { default as UberPersonaFilters } from '@/components/personas/UberPersonaFilters';
+
+console.info('Personas module initialized');

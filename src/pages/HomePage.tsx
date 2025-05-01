@@ -18,6 +18,8 @@ const HomePage = () => {
   useEffect(() => {
     const loadFeaturedPersonas = async () => {
       try {
+        // Since featuredService.loadFeaturedPersonas returns a properly typed UberPersona[]
+        // we can directly set it to the state without type issues
         const featuredPersonas = await featuredService.loadFeaturedPersonas();
         setPersonas(featuredPersonas);
       } catch (error) {

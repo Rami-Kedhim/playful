@@ -1,21 +1,21 @@
 
-// Export all core subsystems
-export * from './Hermes';
-export * from './Lucie';
+// Export all core subsystems with proper annotations
+// This file serves as the main entry point for UberCore
 
-// Create stub exports for NeuralBrain
-export * from './NeuralBrain';
+// Core AI Systems
+export * from './Lucie';          // AI Generation, Content Moderation
+export * from './Hermes';         // Flow Dynamics, User Routing
+export * from './Oxum';           // Boost System, Visibility Engine
+export * from './Orus';           // Security, Session Validation
+export * from './UberWallet';     // UBX Token Economy, Transactions
 
-// Export oxum and its types with proper type annotations
-export { 
-  oxum, 
-  // Export SystemIntegrityResult and SessionValidationResult from Oxum explicitly
-  // to avoid ambiguity errors with isolatedModules
-  // Use 'export type' for type-only exports
-  type SystemIntegrityResult, 
-  type SessionValidationResult 
-} from './Oxum';
+// Core System
+export * from './UberCore';       // Base System Integration
 
-// Create stub exports for Cognito and Pulse
-export * from './Cognito';
-export * from './Pulse';
+// Type exports
+export * from './types';          // Type definitions for UberCore
+
+// Utility exports for UberCore systems
+export * from './utils';          // Shared utilities
+
+console.info('UberCore modules loaded and initialized');

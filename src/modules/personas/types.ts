@@ -1,34 +1,25 @@
 
-import { UberPersona } from '@/types/uberPersona';
+// Re-export common types from the main types folder
+export * from '@/types/uberPersona';
 
-export const PERSONA_TYPES = ['escort', 'creator', 'livecam', 'ai'] as const;
-export type PersonaType = typeof PERSONA_TYPES[number];
-
-export interface PersonaFilter {
-  type?: PersonaType[];
-  gender?: string[];
-  age?: [number, number];
-  languages?: string[];
+export interface PersonaSearchParams {
+  query?: string;
   location?: string;
-  rating?: number;
-  verified?: boolean;
-  price?: [number, number];
-  availability?: string[];
-  services?: string[];
-}
-
-export interface PersonaListParams {
-  page?: number;
+  type?: string[];
+  tags?: string[];
+  isVerified?: boolean;
+  isOnline?: boolean;
+  isPremium?: boolean;
   limit?: number;
-  filter?: PersonaFilter;
-  sort?: string;
-  search?: string;
+  offset?: number;
 }
 
-export interface PersonaListResult {
-  items: UberPersona[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+export interface PersonaServiceResponse<T> {
+  data: T;
+  meta?: {
+    total?: number;
+    limit?: number;
+    offset?: number;
+  };
+  error?: string;
 }

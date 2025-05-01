@@ -1,73 +1,67 @@
 
-import { 
-  ShieldCheck, 
-  MapPin, 
-  Wallet, 
-  Video, 
-  MessageSquare,
-  Lock
-} from "lucide-react";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Shield, Users, Fingerprint, Zap } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+// Features to display on the homepage
+const features = [
+  {
+    icon: Shield,
+    title: 'Secure & Verified',
+    description: 'All profiles are verified with our advanced Orus Security System for your safety and peace of mind.',
+    color: 'text-blue-500',
+    bgColor: 'bg-blue-500/10'
+  },
+  {
+    icon: Users,
+    title: 'Unified Personas',
+    description: 'Access real escorts, content creators, live cam performers, and AI companions all in one platform.',
+    color: 'text-purple-500',
+    bgColor: 'bg-purple-500/10'
+  },
+  {
+    icon: Fingerprint,
+    title: 'Privacy Protected',
+    description: 'Your identity and activity are fully protected with our advanced encryption and privacy controls.',
+    color: 'text-green-500',
+    bgColor: 'bg-green-500/10'
+  },
+  {
+    icon: Zap,
+    title: 'UBX Token Economy',
+    description: 'Use UBX tokens for secure payments, boosts, and exclusive access throughout the ecosystem.',
+    color: 'text-amber-500',
+    bgColor: 'bg-amber-500/10'
+  }
+];
 
 const FeaturesSection = () => {
-  const features = [
-    {
-      icon: <ShieldCheck className="h-6 w-6 text-primary" />,
-      title: "Verified Users Only",
-      description: "Every escort and client is verified through our secure ID and selfie verification process."
-    },
-    {
-      icon: <MapPin className="h-6 w-6 text-accent" />,
-      title: "Privacy-First GPS",
-      description: "E2E encrypted route sharing between verified users for maximum safety and discretion."
-    },
-    {
-      icon: <Wallet className="h-6 w-6 text-lucoin" />,
-      title: "Lucoin Economy",
-      description: "Our native token system enables frictionless payments, tipping, and content access."
-    },
-    {
-      icon: <Video className="h-6 w-6 text-primary" />,
-      title: "Creator Platform",
-      description: "Monetize with premium content, livestreams, and secure pay-per-view experiences."
-    },
-    {
-      icon: <MessageSquare className="h-6 w-6 text-accent" />,
-      title: "Lucie AI Assistant",
-      description: "Our elegant, intelligent AI persona to guide and enhance your UberEscorts experience."
-    },
-    {
-      icon: <Lock className="h-6 w-6 text-lucoin" />,
-      title: "Zero Trust Security",
-      description: "Industry-leading encryption, privacy, and content moderation to protect all users."
-    }
-  ];
-
   return (
-    <section className="py-20 container mx-auto px-4">
-      <div className="text-center mb-16">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          The Complete Web3 Adult Ecosystem
-        </h2>
-        <p className="text-gray-400 max-w-2xl mx-auto">
-          UberEscorts unifies verification, secure payments, content creation, and privacy in one powerful platform.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {features.map((feature, index) => (
-          <div 
-            key={index} 
-            className="p-6 glass-card rounded-xl border border-white/10 hover:border-primary/30 transition-all duration-300"
-          >
-            <div className="h-12 w-12 rounded-full bg-white/5 flex items-center justify-center mb-4">
-              {feature.icon}
-            </div>
-            <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-            <p className="text-gray-400">
-              {feature.description}
-            </p>
-          </div>
-        ))}
+    <section className="py-16">
+      <div className="container">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-3xl font-bold mb-4">The UberPersona Multiverse</h2>
+          <p className="text-xl text-muted-foreground">
+            Experience our revolutionary platform unifying human escorts, creators, AI companions, and live performers.
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature, index) => (
+            <Card key={index} className="border-none shadow-md">
+              <CardHeader className="pb-2">
+                <div className={cn('w-12 h-12 rounded-lg flex items-center justify-center mb-4', feature.bgColor)}>
+                  <feature.icon className={cn('h-6 w-6', feature.color)} />
+                </div>
+                <CardTitle>{feature.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">{feature.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </section>
   );
