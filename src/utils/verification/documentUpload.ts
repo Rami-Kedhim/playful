@@ -1,75 +1,57 @@
 
-import { supabase } from '@/lib/supabase';
-
 /**
- * Upload a verification document to Supabase storage
- * @param userId User ID
- * @param file Document file to upload
- * @param documentType Type of document (id_card, passport, etc.)
- * @param category Category of upload (front, back, selfie)
- * @returns URL of the uploaded file
+ * Upload document files to the server
  */
-export const uploadVerificationDocument = async (
-  userId: string, 
+export const uploadDocumentFile = async (
   file: File, 
-  documentType: string,
-  category: string
-): Promise<string> => {
+  userId: string, 
+  docType: string
+): Promise<{fileUrl: string; success: boolean; error?: string}> => {
+  // This is a mock implementation, in a real app this would upload to Supabase Storage
   try {
-    // Create a unique file name
-    const timestamp = new Date().getTime();
-    const fileExtension = file.name.split('.').pop() || 'jpg';
-    const filePath = `${userId}/${documentType}_${category}_${timestamp}.${fileExtension}`;
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Upload to verification-documents bucket
-    const { data: uploadData, error: uploadError } = await supabase
-      .storage
-      .from('verification-documents')
-      .upload(filePath, file, {
-        contentType: file.type,
-        upsert: true
-      });
-      
-    if (uploadError) {
-      console.error(`Error uploading ${category} document:`, uploadError);
-      throw new Error(`Failed to upload ${category} document: ${uploadError.message}`);
-    }
+    // Generate a mock file URL (in a real app this would be the uploaded file URL)
+    const mockFileUrl = `https://picsum.photos/id/${Math.floor(Math.random() * 100)}/800/600`;
     
-    // Get public URL
-    const { data: publicUrlData } = supabase
-      .storage
-      .from('verification-documents')
-      .getPublicUrl(filePath);
-      
-    return publicUrlData.publicUrl;
+    return {
+      success: true,
+      fileUrl: mockFileUrl
+    };
   } catch (error) {
-    console.error(`Error processing ${category} document:`, error);
-    throw error;
+    console.error('Error uploading document:', error);
+    return {
+      success: false,
+      fileUrl: '',
+      error: 'Failed to upload document file'
+    };
   }
 };
 
 /**
- * Check if there are pending document uploads
- * @param userId User ID
- * @returns Boolean indicating pending uploads
+ * Validate file size and type
  */
-export const hasPendingUploads = async (userId: string): Promise<boolean> => {
-  try {
-    const { data, error } = await supabase
-      .from('verification_documents')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('status', 'pending')
-      .limit(1);
-      
-    if (error) {
-      console.error('Error checking for pending uploads:', error);
-      return false;
-    }
-    
-    return data && data.length > 0;
-  } catch (error) {
-    console.error('Error checking for pending uploads:', error);
-    return false;
+export const validateFile = (file: File): { valid: boolean; error?: string } => {
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  const validTypes = [
+    'image/jpeg', 
+    'image/png', 
+    'image/webp', 
+    'application/pdf'
+  ];
+  
+  if (!file) {
+    return { valid: false, error: 'No file selected' };
   }
+  
+  if (file.size > maxSize) {
+    return { valid: false, error: 'File size exceeds 5MB limit' };
+  }
+  
+  if (!validTypes.includes(file.type)) {
+    return { valid: false, error: 'Invalid file type. Please upload a JPEG, PNG, WebP or PDF file' };
+  }
+  
+  return { valid: true };
 };

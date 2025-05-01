@@ -1,120 +1,93 @@
 
-import React, { useState } from 'react';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { UseFormReturn } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import { DocumentTypeSelect } from '.';
-import { Upload, UploadCloud } from 'lucide-react';
-import DocumentPreview from './DocumentPreview';
+import React from 'react';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { getRequiredFiles } from '../utils/documentTypeHelper';
+import { Upload, FileCheck } from 'lucide-react';
 
 interface DocumentUploadSectionProps {
-  form: UseFormReturn<any>;
+  form: any;
   documentType: string;
 }
 
-const DocumentUploadSection: React.FC<DocumentUploadSectionProps> = ({
-  form,
-  documentType
-}) => {
-  const [frontPreview, setFrontPreview] = useState<string | null>(null);
-  const [backPreview, setBackPreview] = useState<string | null>(null);
-  const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
+const DocumentUploadSection: React.FC<DocumentUploadSectionProps> = ({ form, documentType }) => {
+  const requiredFiles = documentType ? getRequiredFiles(documentType) : [];
 
-  const handleFileChange = (field: any, event: React.ChangeEvent<HTMLInputElement>, setPreview: (url: string | null) => void) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      field.onChange(file);
-      
-      // Create URL for preview
-      const previewUrl = URL.createObjectURL(file);
-      setPreview(previewUrl);
-    }
-  };
+  const renderFileUpload = (fieldName: string, label: string, accept = "image/*,application/pdf") => (
+    <FormField
+      key={fieldName}
+      control={form.control}
+      name={fieldName}
+      render={({ field: { onChange, value, ...fieldProps } }) => {
+        // Check if we have a file selected
+        const hasFile = form.getValues(fieldName) instanceof File;
 
-  const clearFile = (field: any, setPreview: (url: string | null) => void) => {
-    field.onChange(undefined);
-    setPreview(null);
-  };
+        return (
+          <FormItem>
+            <FormLabel>{label}</FormLabel>
+            <FormControl>
+              <Card className={`relative ${hasFile ? 'border-green-500 bg-green-50' : ''}`}>
+                <CardContent className="p-2 flex items-center justify-center">
+                  <div className="w-full h-32 flex flex-col items-center justify-center cursor-pointer relative">
+                    {hasFile ? (
+                      <>
+                        <FileCheck className="h-10 w-10 text-green-500 mb-2" />
+                        <p className="text-sm text-green-700">File selected</p>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-10 w-10 text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">
+                          Upload {label}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          JPEG, PNG or PDF (max 5MB)
+                        </p>
+                      </>
+                    )}
+                    <Input
+                      type="file"
+                      accept={accept}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        onChange(file);
+                      }}
+                      {...fieldProps}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
+    />
+  );
+
+  if (!documentType || requiredFiles.length === 0) {
+    return <p className="text-sm text-muted-foreground">Please select a document type first</p>;
+  }
 
   return (
-    <div className="space-y-6">
-      <h3 className="text-lg font-medium">Document Upload</h3>
+    <div className="space-y-4">
+      <h3 className="text-sm font-medium">Required Documents</h3>
       
-      <FormField
-        control={form.control}
-        name="documentFile"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Document Front</FormLabel>
-            <FormControl>
-              <div>
-                {!frontPreview ? (
-                  <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-md p-6 transition-colors hover:border-primary/50 cursor-pointer">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      id="documentFile"
-                      className="hidden"
-                      onChange={(e) => handleFileChange(field, e, setFrontPreview)}
-                    />
-                    <label htmlFor="documentFile" className="cursor-pointer w-full h-full flex flex-col items-center">
-                      <UploadCloud className="h-10 w-10 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground mb-1">Click to upload document front</p>
-                      <p className="text-xs text-muted-foreground">JPG, PNG or PDF (max. 10MB)</p>
-                    </label>
-                  </div>
-                ) : (
-                  <DocumentPreview
-                    file={field.value}
-                    previewUrl={frontPreview}
-                    onRemove={() => clearFile(field, setFrontPreview)}
-                    label="Document Front"
-                  />
-                )}
-              </div>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="selfieFile"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Selfie with ID</FormLabel>
-            <FormControl>
-              <div>
-                {!selfiePreview ? (
-                  <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-md p-6 transition-colors hover:border-primary/50 cursor-pointer">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      id="selfieFile"
-                      className="hidden"
-                      onChange={(e) => handleFileChange(field, e, setSelfiePreview)}
-                    />
-                    <label htmlFor="selfieFile" className="cursor-pointer w-full h-full flex flex-col items-center">
-                      <UploadCloud className="h-10 w-10 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground mb-1">Click to upload selfie with ID</p>
-                      <p className="text-xs text-muted-foreground">Hold your ID next to your face</p>
-                    </label>
-                  </div>
-                ) : (
-                  <DocumentPreview
-                    file={field.value}
-                    previewUrl={selfiePreview}
-                    onRemove={() => clearFile(field, setSelfiePreview)}
-                    label="Selfie with ID"
-                  />
-                )}
-              </div>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="grid gap-4 md:grid-cols-2">
+        {requiredFiles.includes('front') && 
+          renderFileUpload('documentFile', 'Front of Document')}
+          
+        {requiredFiles.includes('back') && 
+          renderFileUpload('backFile', 'Back of Document')}
+          
+        {requiredFiles.includes('data_page') && 
+          renderFileUpload('documentFile', 'Passport Data Page')}
+          
+        {requiredFiles.includes('selfie') && 
+          renderFileUpload('selfieFile', 'Selfie with Document')}
+      </div>
     </div>
   );
 };

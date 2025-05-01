@@ -2,12 +2,11 @@
 import React from 'react';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { UseFormReturn } from 'react-hook-form';
 import { documentTypeOptions } from '../utils/documentTypeHelper';
 
 interface DocumentTypeSelectProps {
-  form: UseFormReturn<any>;
-  onTypeChange?: (value: string) => void;
+  form: any;
+  onTypeChange: (value: string) => void;
 }
 
 const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form, onTypeChange }) => {
@@ -22,12 +21,12 @@ const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form, onTypeCha
             <Select
               onValueChange={(value) => {
                 field.onChange(value);
-                onTypeChange && onTypeChange(value);
+                onTypeChange(value);
               }}
-              defaultValue={field.value}
+              value={field.value}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select your ID type" />
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select ID document type" />
               </SelectTrigger>
               <SelectContent>
                 {documentTypeOptions.map((option) => (

@@ -5,25 +5,23 @@ import { Loader2 } from 'lucide-react';
 
 interface SubmitButtonProps {
   loading: boolean;
-  disabled?: boolean;
+  disabled: boolean;
   text: string;
 }
 
-const SubmitButton = ({ loading, disabled, text }: SubmitButtonProps) => {
+const SubmitButton: React.FC<SubmitButtonProps> = ({ loading, disabled, text }) => {
   return (
-    <Button 
-      type="submit" 
-      disabled={loading || disabled}
-      className="w-full"
-    >
+    <Button type="submit" disabled={loading || disabled}>
       {loading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Processing
+          Processing...
         </>
-      ) : text}
+      ) : (
+        text
+      )}
     </Button>
   );
-}
+};
 
 export default SubmitButton;
