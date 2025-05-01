@@ -1,7 +1,7 @@
 
 // Implement mock user service with proper method names
 
-import { UberPersona } from '@/types/shared';
+import { UberPersona } from '@/types/uberPersona';
 
 export const userService = {
   getUserProfile: async (userId: string): Promise<UberPersona> => {

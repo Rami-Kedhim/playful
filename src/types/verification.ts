@@ -1,11 +1,3 @@
-export enum VerificationStatus {
-  NONE = 'none',
-  PENDING = 'pending',
-  IN_REVIEW = 'in_review',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-  EXPIRED = 'expired'
-}
 
 export enum VerificationLevel {
   NONE = 'none',
@@ -14,34 +6,26 @@ export enum VerificationLevel {
   PREMIUM = 'premium'
 }
 
-export type DocumentType = 'id_card' | 'passport' | 'drivers_license' | 'selfie' | string;
-
-export interface VerificationDocument {
-  id: string;
-  documentType: DocumentType;
-  fileUrl: string;
-  uploadedAt: string;
-  status: VerificationStatus;
-  rejectionReason?: string;
-  reviewedBy?: string;
-  reviewedAt?: Date;
+export enum VerificationStatus {
+  PENDING = 'pending',
+  IN_REVIEW = 'in_review',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  EXPIRED = 'expired'
 }
 
 export interface VerificationRequest {
   id: string;
-  userId?: string;
-  profile_id?: string; // legacy compat
-  status: VerificationStatus;
-  verificationLevel?: VerificationLevel;
-  requested_level?: VerificationLevel; // legacy compat
-  documents: VerificationDocument[];
-  submittedAt?: string;
-  created_at?: string; // legacy compat
-  updatedAt?: string;
-  updated_at?: string; // legacy compat
-  rejectionReason?: string;
-  reviewer_notes?: string;
-  reviewedBy?: string;
+  profile_id?: string;
+  requested_level: VerificationLevel;
+  status: VerificationStatus | string;
+  documents?: any[];
+  created_at: string | Date;
+  updated_at?: string | Date;
   reviewed_at?: string | Date;
-  reviewedAt?: string | Date;
+  reviewed_by?: string;
+  reviewer_notes?: string;
+  expires_at?: string | Date;
+  submittedAt?: string | Date;
+  verificationLevel?: VerificationLevel;
 }
