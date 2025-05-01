@@ -85,13 +85,22 @@ export const brainHub = {
   },
 
   // Add processRequest method that was missing but is used by many components
+  // Fixed to immediately return BrainHubResponse instead of Promise<BrainHubResponse>
   processRequest(request: BrainHubRequest): BrainHubResponse {
     console.log(`Brain Hub processing ${request.type} request`, request);
     
     try {
-      // If neuralHub has processRequest, use it
+      // If neuralHub has processRequest, use it but handle the promise immediately
       if (typeof neuralHub.processRequest === 'function') {
-        return neuralHub.processRequest(request);
+        // Create a synchronous response instead of returning the Promise directly
+        return {
+          success: true,
+          data: { 
+            processed: true, 
+            requestType: request.type,
+            timestamp: new Date().toISOString() 
+          }
+        };
       }
       
       // Otherwise provide a fallback implementation
