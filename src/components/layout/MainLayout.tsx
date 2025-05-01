@@ -5,6 +5,8 @@ import Navbar from '@/components/navigation/Navbar';
 import Footer from '@/components/navigation/Footer';
 import { useAuth } from '@/hooks/auth';
 import { cn } from '@/lib/utils';
+import { hermes } from '@/core/Hermes';
+import { uberCore } from '@/core/UberCore';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -34,8 +36,32 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const location = useLocation();
 
   React.useEffect(() => {
+    // Log page view with Hermes
+    hermes.connect({
+      system: 'Layout',
+      connectionId: `layout-${Date.now()}`,
+      metadata: {
+        path: location.pathname,
+        component: 'MainLayout',
+        hasAuth: requireAuth,
+        timestamp: new Date().toISOString()
+      }
+    });
+
+    // Verify system integrity on layout mount
+    const checkSystemIntegrity = async () => {
+      const result = uberCore.checkSystemIntegrity();
+      if (!result.isValid) {
+        console.warn('System integrity check warning:', result.message);
+      }
+    };
+    
+    checkSystemIntegrity();
+  }, [location.pathname]);
+
+  React.useEffect(() => {
     if (requireAuth && !isLoading && !isAuthenticated) {
-      navigate('/auth', {
+      navigate('/login', {
         state: { from: location.pathname },
         replace: true
       });

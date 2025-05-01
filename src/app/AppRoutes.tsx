@@ -16,6 +16,17 @@ import SearchPage from '@/pages/SearchPage';
 import EscortsPage from '@/pages/EscortsPage';
 import ProfilePage from '@/pages/ProfilePage';
 import { logInteraction } from '@/utils/uberCore';
+import BrainHubPage from '@/pages/BrainHubPage';
+import LuciePage from '@/pages/LuciePage';
+import OxumPage from '@/pages/OxumPage';
+import HermesPage from '@/pages/HermesPage';
+import OrusPage from '@/pages/OrusPage';
+import PersonaListingPage from '@/pages/PersonaListingPage';
+import PersonaDetailPage from '@/pages/PersonaDetailPage';
+import AdminPage from '@/pages/AdminPage';
+import ModerationPage from '@/pages/ModerationPage';
+import VerificationPage from '@/pages/VerificationPage';
+import UnauthorizedPage from '@/pages/UnauthorizedPage';
 
 // UberCore initialization
 import { lucie } from '@/core/Lucie';
@@ -122,9 +133,59 @@ const AppRoutes = () => {
       } />
       <Route path="/persona/:id" element={
         <MainLayout>
-          <ProfilePage />
+          <PersonaDetailPage />
         </MainLayout>
       } />
+      <Route path="/personas" element={
+        <MainLayout>
+          <PersonaListingPage />
+        </MainLayout>
+      } />
+      
+      {/* UberCore system pages */}
+      <Route path="/brain-hub" element={
+        <MainLayout>
+          <BrainHubPage />
+        </MainLayout>
+      } />
+      <Route path="/lucie" element={
+        <MainLayout>
+          <LuciePage />
+        </MainLayout>
+      } />
+      <Route path="/oxum" element={
+        <MainLayout>
+          <OxumPage />
+        </MainLayout>
+      } />
+      <Route path="/hermes" element={
+        <MainLayout>
+          <HermesPage />
+        </MainLayout>
+      } />
+      <Route path="/orus" element={
+        <MainLayout>
+          <OrusPage />
+        </MainLayout>
+      } />
+      
+      {/* Admin routes */}
+      <Route path="/admin" element={
+        <MainLayout requireAuth>
+          <AdminPage />
+        </MainLayout>
+      } />
+      <Route path="/moderation" element={
+        <MainLayout requireAuth>
+          <ModerationPage />
+        </MainLayout>
+      } />
+      <Route path="/verification" element={
+        <MainLayout>
+          <VerificationPage />
+        </MainLayout>
+      } />
+      <Route path="/unauthorized" element={<UnauthorizedPage />} />
       
       {/* 404 - Not Found */}
       <Route path="*" element={<NotFoundPage />} />

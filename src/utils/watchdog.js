@@ -35,7 +35,9 @@ const DEFAULT_RULES = {
         'Oxum.ts',
         'Lucie.ts',
         'Orus.ts',
-        'HermesOxumNeuralHub.ts'
+        'HermesOxumNeuralHub.ts',
+        'HermesOrusOxum.ts',
+        'neuralHub.ts'
       ]
     }
   ],

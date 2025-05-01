@@ -15,10 +15,19 @@
     "wallet.tsx",
     "search.tsx",
     "escorts.tsx",
-    "wallet.tsx",
     "verification.tsx",
     "moderation.tsx",
-    "admin.tsx"
+    "admin.tsx",
+    "metaverse.tsx",
+    "ai-companions.tsx",
+    "messages.tsx",
+    "pulse-boost.tsx",
+    "settings.tsx",
+    "personas.tsx",
+    "lucie.tsx",
+    "oxum.tsx",
+    "hermes.tsx",
+    "orus.tsx"
   ],
   "rules": [
     {
@@ -31,7 +40,8 @@
         "Orus.ts",
         "HermesOxumNeuralHub.ts",
         "uberCore.ts",
-        "neuralHub"
+        "neuralHub.ts",
+        "HermesOrusOxum.ts"
       ]
     }
   ],
