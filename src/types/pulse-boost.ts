@@ -91,4 +91,7 @@ export interface EnhancedBoostStatus {
   timeRemaining?: string;
   boostPackage?: BoostPackage;
   progress?: number;
+  // Add the missing properties
+  packageName?: string;
+  startedAt?: Date;
 }

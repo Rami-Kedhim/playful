@@ -1,265 +1,285 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Progress } from '@/components/ui/progress';
-import { formatDistanceToNow } from 'date-fns';
-import { Zap, Clock, Check, XCircle } from 'lucide-react';
-import { usePulseBoost } from '@/modules/pulse-boost/hooks/usePulseBoost';
-import { PulseBoost } from '@/types/pulse-boost';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import LoadingOverlay from '@/components/ui/loading-overlay';
+import { Progress } from '@/components/ui/progress';
+import { Zap, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
+import { usePulseBoost } from '@/modules/pulse-boost/hooks/usePulseBoost';
+import { formatBoostDuration } from '@/utils/boost/boostCalculator';
+import { BoostPackage } from '@/types/pulse-boost';
+import { useToast } from '@/hooks/use-toast';
 
 interface PulseBoostManagerProps {
   profileId: string;
-  onBoostActivated?: () => void;
-  onBoostCancelled?: () => void;
 }
 
-const formatDuration = (duration: string): string => {
-  if (!duration.includes(':')) return duration;
-  const [hours, minutes] = duration.split(':');
-  return `${hours}h ${minutes || '00'}m`;
-};
-
-const calculateTimeRemaining = (expiresAt?: Date): string => {
-  if (!expiresAt) return '00:00:00';
-  const now = new Date();
-  const diff = Math.max(0, expiresAt.getTime() - now.getTime());
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff / (1000 * 60)) % 60);
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
-};
-
-const PulseBoostCard = ({ boost, onSelect, isActive }: { 
-  boost: PulseBoost; 
-  onSelect: () => void;
-  isActive?: boolean;
-}) => {
-  const handleClick = () => {
-    if (!isActive) {
-      onSelect();
-    }
-  };
-
-  return (
-    <Card 
-      className={`cursor-pointer ${isActive ? 'border-primary' : 'border-border'} hover:border-primary transition-all`}
-      onClick={handleClick}
-    >
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-medium">{boost.name}</h3>
-            <p className="text-sm text-muted-foreground mt-1">{boost.description}</p>
-            
-            <div className="flex flex-wrap gap-1 mt-2">
-              {boost.features?.map((feature, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {feature}
-                </Badge>
-              ))}
-            </div>
-            
-            <div className="flex items-center mt-3">
-              <Clock className="h-4 w-4 text-muted-foreground mr-1" />
-              <span className="text-sm">{formatDuration(boost.duration)}</span>
-            </div>
-          </div>
-          
-          <div className="text-right">
-            <div className="text-lg font-bold">{boost.price_ubx} UBX</div>
-            {isActive && (
-              <Badge variant="default" className="mt-1">
-                <Check className="h-3 w-3 mr-1" />
-                Selected
-              </Badge>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ 
-  profileId,
-  onBoostActivated,
-  onBoostCancelled
-}) => {
-  const { 
-    pulseBoostPackages, 
-    boostStatus, 
-    isLoading, 
+const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
+  const [selectedBoostPackage, setSelectedBoostPackage] = useState<string>('');
+  const { toast } = useToast();
+  const {
+    pulseBoostPackages,
+    boostStatus,
+    isLoading,
+    error,
     userEconomy,
     purchaseBoost,
     cancelBoost,
     boostAnalytics
   } = usePulseBoost(profileId);
-  
-  const [selectedBoost, setSelectedBoost] = useState<string | null>(null);
-  const [isPurchasing, setIsPurchasing] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
-  const [remainingTime, setRemainingTime] = useState<string>('');
-  
-  // Update progress and remaining time for active boosts
+
   useEffect(() => {
-    if (!boostStatus.isActive || !boostStatus.expiresAt) return;
-    
-    const calculateProgress = () => {
-      const now = new Date();
-      if (!boostStatus.startedAt || !boostStatus.expiresAt) return 0;
-      
-      const start = boostStatus.startedAt.getTime();
-      const end = boostStatus.expiresAt.getTime();
-      const current = now.getTime();
-      
-      const totalDuration = end - start;
-      const elapsed = current - start;
-      
-      return Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
-    };
-    
-    const updateStatus = () => {
-      const progressValue = calculateProgress();
-      setProgress(progressValue);
-      setRemainingTime(calculateTimeRemaining(boostStatus.expiresAt));
-    };
-    
-    updateStatus();
-    const interval = setInterval(updateStatus, 60000); // Update every minute
-    
-    return () => clearInterval(interval);
-  }, [boostStatus]);
-  
-  const handleSelectBoost = (id: string) => {
-    setSelectedBoost(id);
-  };
-  
-  const handlePurchaseBoost = async () => {
-    if (!selectedBoost) return;
-    
-    const boostPackage = pulseBoostPackages.find(p => p.id === selectedBoost);
-    if (!boostPackage) return;
-    
-    setIsPurchasing(true);
-    try {
-      const success = await purchaseBoost(boostPackage);
-      if (success && onBoostActivated) {
-        onBoostActivated();
-      }
-    } finally {
-      setIsPurchasing(false);
+    // If there are packages and none selected, select the first one
+    if (pulseBoostPackages.length > 0 && !selectedBoostPackage) {
+      setSelectedBoostPackage(pulseBoostPackages[0].id);
+    }
+  }, [pulseBoostPackages, selectedBoostPackage]);
+
+  const handleBoostActivation = async () => {
+    if (!selectedBoostPackage) {
+      toast({
+        title: "Error",
+        description: "Please select a boost package first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const boostPackage = pulseBoostPackages.find(pkg => pkg.id === selectedBoostPackage);
+    if (!boostPackage) {
+      toast({
+        title: "Error",
+        description: "Selected package not found",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const success = await purchaseBoost(boostPackage);
+    if (success) {
+      toast({
+        title: "Boost Activated",
+        description: `Your profile has been boosted with the ${boostPackage.name} package`,
+        variant: "default",
+      });
+    } else {
+      toast({
+        title: "Activation Failed",
+        description: "There was an error activating your boost",
+        variant: "destructive",
+      });
     }
   };
-  
+
   const handleCancelBoost = async () => {
-    setIsPurchasing(true);
-    try {
-      const success = await cancelBoost();
-      if (success && onBoostCancelled) {
-        onBoostCancelled();
-      }
-    } finally {
-      setIsPurchasing(false);
+    const success = await cancelBoost();
+    
+    if (success) {
+      toast({
+        title: "Boost Cancelled",
+        description: "Your profile boost has been cancelled",
+        variant: "default",
+      });
+    } else {
+      toast({
+        title: "Cancellation Failed",
+        description: "There was an error cancelling your boost",
+        variant: "destructive",
+      });
     }
   };
-  
+
+  const calculateTimeRemaining = () => {
+    if (!boostStatus.expiresAt) return '0%';
+    
+    const now = new Date();
+    const expiryDate = new Date(boostStatus.expiresAt);
+    const startDate = boostStatus.startedAt ? new Date(boostStatus.startedAt) : new Date(now.getTime() - 24 * 60 * 60 * 1000); // Default to 24 hours ago
+    
+    const totalDuration = expiryDate.getTime() - startDate.getTime();
+    const elapsed = now.getTime() - startDate.getTime();
+    const percentComplete = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+    
+    return `${Math.round(percentComplete)}%`;
+  };
+
+  const getSelectedPackage = (): BoostPackage | undefined => {
+    return pulseBoostPackages.find(pkg => pkg.id === selectedBoostPackage);
+  };
+
   if (isLoading) {
-    return <LoadingOverlay text="Loading boost options..." />;
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
-  
-  return (
-    <div className="space-y-6">
-      {boostStatus.isActive ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Zap className="h-5 w-5 mr-2 text-yellow-500" />
-              Active Boost
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-center text-destructive">
+            <AlertTriangle className="mr-2" />
+            <span>There was an error loading boost information</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show active boost
+  if (boostStatus.isActive) {
+    const timeRemaining = calculateTimeRemaining();
+    const selectedPackage = boostStatus.boostPackage;
+    const packageName = boostStatus.packageName || selectedPackage?.name || 'Active Boost';
+    
+    return (
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl flex items-center">
+              <Zap className="text-primary mr-2" /> Active Boost
             </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">{boostStatus.packageName}</h3>
-                <p className="text-sm text-muted-foreground">
-                  Expires {boostStatus.expiresAt && formatDistanceToNow(boostStatus.expiresAt, { addSuffix: true })}
+            <Badge variant="outline" className="bg-primary/10">
+              {packageName}
+            </Badge>
+          </div>
+        </CardHeader>
+        
+        <CardContent>
+          <div className="space-y-4">
+            {/* Remaining time */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="flex items-center">
+                  <Clock className="h-4 w-4 mr-1" /> Time Remaining
+                </span>
+                <span className="font-medium">{boostStatus.timeRemaining || '00:00:00'}</span>
+              </div>
+              <Progress 
+                value={boostStatus.progress || parseInt(timeRemaining)} 
+                className="h-2"
+              />
+            </div>
+            
+            {/* Boost effects */}
+            {selectedPackage && (
+              <div className="rounded-lg bg-muted p-3">
+                <p className="text-sm flex items-center mb-2">
+                  <TrendingUp className="h-4 w-4 mr-2 text-green-500" /> 
+                  <span>Visibility increased by {selectedPackage.visibility || '300%'}</span>
                 </p>
-              </div>
-              <Badge variant="outline" className="flex items-center">
-                <Clock className="h-3 w-3 mr-1" />
-                {remainingTime} remaining
-              </Badge>
-            </div>
-            
-            <div className="space-y-1">
-              <div className="flex justify-between text-xs">
-                <span>Progress</span>
-                <span>{Math.round(progress)}%</span>
-              </div>
-              <Progress value={progress} />
-            </div>
-            
-            {boostAnalytics && (
-              <div className="pt-2 space-y-3">
-                <Separator />
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Additional Views</p>
-                    <p className="font-medium">+{boostAnalytics.additionalViews || 0}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Engagement Increase</p>
-                    <p className="font-medium">+{boostAnalytics.engagementIncrease || 0}%</p>
-                  </div>
-                </div>
+                
+                {boostAnalytics?.additionalViews && (
+                  <p className="text-sm">
+                    +{boostAnalytics.additionalViews} additional profile views
+                  </p>
+                )}
               </div>
             )}
             
+            {/* Cancel button */}
             <Button 
               variant="outline" 
               className="w-full" 
               onClick={handleCancelBoost}
-              disabled={isPurchasing}
             >
-              <XCircle className="h-4 w-4 mr-2" />
               Cancel Boost
             </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Boost Options</h2>
-            <Badge variant="outline">
-              Balance: {userEconomy.ubxBalance} UBX
-            </Badge>
           </div>
-          
-          <div className="grid gap-4">
-            {pulseBoostPackages.map(boost => (
-              <PulseBoostCard
-                key={boost.id}
-                boost={boost}
-                onSelect={() => handleSelectBoost(boost.id)}
-                isActive={selectedBoost === boost.id}
-              />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show boost packages
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl flex items-center">
+          <Zap className="text-primary mr-2" /> Boost Your Profile
+        </CardTitle>
+      </CardHeader>
+      
+      <CardContent>
+        <div className="space-y-4">
+          {/* Package selection */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {pulseBoostPackages.map((pkg) => (
+              <div
+                key={pkg.id}
+                className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                  selectedBoostPackage === pkg.id 
+                    ? 'border-primary bg-primary/10' 
+                    : 'border-border hover:border-primary/50'
+                }`}
+                onClick={() => setSelectedBoostPackage(pkg.id)}
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="font-medium">{pkg.name}</h3>
+                  {pkg.isMostPopular && (
+                    <Badge size="sm" variant="secondary">Popular</Badge>
+                  )}
+                </div>
+                
+                <p className="text-sm text-muted-foreground mb-2">{pkg.description}</p>
+                
+                <div className="flex justify-between">
+                  <span className="text-sm">
+                    Duration: {formatBoostDuration(pkg.duration)}
+                  </span>
+                  <span className="font-medium">
+                    {pkg.price_ubx} UBX
+                  </span>
+                </div>
+              </div>
             ))}
           </div>
           
+          {/* Features of selected package */}
+          {getSelectedPackage() && (
+            <div className="rounded-lg bg-muted p-3">
+              <h4 className="font-medium mb-2">Package Features:</h4>
+              <ul className="text-sm space-y-1">
+                {getSelectedPackage()?.features?.map((feature, index) => (
+                  <li key={index} className="flex items-center">
+                    <Zap className="h-3 w-3 mr-2 text-primary" /> {feature}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          {/* UBX balance */}
+          <div className="flex justify-between items-center text-sm">
+            <span>Your UBX Balance:</span>
+            <span className="font-medium">{userEconomy.ubxBalance} UBX</span>
+          </div>
+          
+          {/* Boost button */}
           <Button 
             className="w-full" 
-            disabled={!selectedBoost || isPurchasing}
-            onClick={handlePurchaseBoost}
+            onClick={handleBoostActivation}
+            disabled={!selectedBoostPackage || (getSelectedPackage()?.price_ubx || 0) > userEconomy.ubxBalance}
           >
-            <Zap className="h-4 w-4 mr-2" />
-            {isPurchasing ? 'Processing...' : 'Activate Boost'}
+            Activate Boost
           </Button>
-        </>
-      )}
-    </div>
+          
+          {/* Insufficient balance warning */}
+          {selectedBoostPackage && 
+            (getSelectedPackage()?.price_ubx || 0) > userEconomy.ubxBalance && (
+            <p className="text-xs text-center text-destructive">
+              Insufficient UBX balance. Please top up your account.
+            </p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
