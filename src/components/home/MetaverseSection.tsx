@@ -1,42 +1,53 @@
 
-import { Globe, Box } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, Blocks } from 'lucide-react';
 
-const MetaverseSection = () => {
+const MetaverseSection: React.FC = () => {
   return (
-    <section className="py-16 container mx-auto px-4">
-      <div className="text-center mb-12">
-        <Badge variant="outline" className="mb-4">COMING SOON</Badge>
-        <h2 className="text-3xl font-bold mb-4">
-          <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Premium VR Experiences
-          </span>
-        </h2>
-        <p className="text-gray-300 max-w-3xl mx-auto">
-          The future of UberEscorts extends to our private metaverse. Connect with escorts and creators in breathtaking virtual environments with lifelike avatars.
-        </p>
-      </div>
-      
-      <div className="relative h-[400px] rounded-xl overflow-hidden group">
-        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10"></div>
-        <div className="absolute inset-0 bg-[url('/images/metaverse-preview.jpg')] bg-cover bg-center opacity-40 group-hover:scale-105 transition-transform duration-700"></div>
-        
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 p-6">
-          <Box className="h-16 w-16 text-primary mb-6 animate-float" />
-          
-          <div className="max-w-xl text-center mb-8">
-            <h3 className="text-2xl font-bold mb-3">Virtual Escort Experiences</h3>
-            <p className="text-gray-300">
-              From private virtual meetings to exclusive content rooms, our metaverse 
-              brings new dimensions to adult entertainment with next-level privacy.
+    <section className="py-16 bg-gradient-to-br from-indigo-900/90 to-purple-900/90">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <div className="inline-block px-4 py-1 rounded-full bg-purple-500/20 text-purple-300 text-sm font-medium mb-2">
+              <Blocks className="h-4 w-4 inline mr-2" />
+              Immersive Experiences
+            </div>
+            
+            <h2 className="text-4xl font-bold text-white">Step Into Our Metaverse</h2>
+            <p className="text-gray-300 text-lg">
+              Explore virtual worlds with interactive AI companions and escorts. 
+              Meet in fully immersive 3D environments that take your experience to the next level.
             </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button asChild size="lg" className="bg-purple-600 hover:bg-purple-700">
+                <Link to="/metaverse">
+                  Enter Metaverse <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="border-purple-500/30 text-purple-300 hover:bg-purple-500/10">
+                <Link to="/metaverse/learn">
+                  Learn More
+                </Link>
+              </Button>
+            </div>
           </div>
           
-          <Button size="lg" className="gap-2">
-            <Globe className="h-5 w-5" />
-            Join the Waitlist
-          </Button>
+          <div className="relative aspect-video rounded-xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/40 z-10" />
+            <img 
+              src="https://source.unsplash.com/random/800x450/?virtual,world,metaverse" 
+              alt="Metaverse Preview" 
+              className="object-cover w-full h-full"
+            />
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
+              <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center hover:bg-white cursor-pointer">
+                <div className="w-0 h-0 border-y-8 border-y-transparent border-l-12 border-l-purple-600 ml-1" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

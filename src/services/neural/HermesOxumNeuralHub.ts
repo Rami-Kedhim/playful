@@ -1,189 +1,202 @@
 
-import { ModelParameters, BrainHubRequest, BrainHubResponse, NeuralModel, TrainingProgress, SystemHealthMetrics, NeuralService, INeuralHub } from './types/neuralHub';
-// Fix the import - the registerNeuralService function may not exist
-// import { registerNeuralService } from './registry/NeuralServiceRegistry';
+import { INeuralHub, NeuralRequest, NeuralResponse, NeuralSystemStatus } from './types/neuralHub';
 
-class NeuralHubImpl implements INeuralHub {
-  private isInitialized = false;
-  private modelParameters: ModelParameters = {
-    temperature: 0.7,
-    frequencyPenalty: 0.0,
-    presencePenalty: 0.0,
-    maxTokens: 1024,
-    stopSequences: [],
-    modelName: 'hermes-oxum-v2',
-    decayConstant: 0.95,
-    growthFactor: 1.05,
-    cyclePeriod: 24,
-    harmonicCount: 3,
-    learningRate: 0.001,
-    batchSize: 32
-  };
-
+class NeuralHub implements INeuralHub {
+  private modules: Record<string, any> = {};
+  private startTime: number;
+  private processingQueue: NeuralRequest[] = [];
+  
   constructor() {
-    console.log('NeuralHub initialized');
+    this.startTime = Date.now();
+    console.info('Neural hub initialized with default parameters');
   }
-
-  public initialize(): void {
-    if (this.isInitialized) {
-      return;
-    }
-    
-    console.log('Initializing NeuralHub...');
-    this.isInitialized = true;
-  }
-
-  public updateModelParameters(parameters: Partial<ModelParameters>): void {
-    this.modelParameters = {
-      ...this.modelParameters,
-      ...parameters
-    };
-    console.log('Model parameters updated:', this.modelParameters);
-  }
-
-  public getModelParameters(): ModelParameters {
-    return { ...this.modelParameters };
-  }
-
-  public async processRequest(request: BrainHubRequest): Promise<BrainHubResponse> {
-    // Check initialization
-    if (!this.isInitialized) {
-      this.initialize();
-    }
-
-    console.log(`Processing request: ${request.type}`, request);
-
+  
+  public async processRequest(request: NeuralRequest): Promise<NeuralResponse> {
     try {
-      // Mock implementation - in a real application, this would call advanced neural processing
-      // For now just return a success response for any request
-      return {
-        success: true,
-        data: {
-          result: `Processed ${request.type} request successfully`,
-          timestamp: new Date().toISOString()
-        }
-      };
+      // Add request to queue
+      this.processingQueue.push(request);
+      
+      // Simple request handler based on type
+      switch (request.type) {
+        case 'content_optimization':
+          return this.handleContentOptimization(request);
+          
+        case 'analysis':
+          return this.handleAnalysis(request);
+          
+        case 'interaction_log':
+          return this.handleInteractionLog(request);
+        
+        case 'content_batch_process':
+          return this.handleContentBatchProcess(request);
+          
+        default:
+          // Try to find a module that can handle this request type
+          const moduleTypes = Object.keys(this.modules);
+          for (const moduleType of moduleTypes) {
+            const module = this.modules[moduleType];
+            if (module && typeof module.handleRequest === 'function') {
+              const result = await module.handleRequest(request);
+              if (result) {
+                return result;
+              }
+            }
+          }
+          
+          // If no module handled it, return an error
+          return {
+            success: false,
+            error: `Unknown request type: ${request.type}`
+          };
+      }
     } catch (error) {
-      console.error('Error processing request:', error);
+      console.error('Error processing neural request:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error'
       };
+    } finally {
+      // Remove request from queue
+      this.processingQueue = this.processingQueue.filter(r => r !== request);
     }
   }
-
-  public getHealthMetrics(): SystemHealthMetrics {
+  
+  public registerModule(moduleType: string, module: any): void {
+    this.modules[moduleType] = module;
+    console.info(`Neural module registered: ${moduleType}`);
+  }
+  
+  public getModule(moduleType: string): any {
+    return this.modules[moduleType] || null;
+  }
+  
+  public getSystemStatus(): NeuralSystemStatus {
     return {
-      cpuUsage: Math.random() * 100,
-      memoryUsage: Math.random() * 80,
-      requestsPerMinute: Math.floor(Math.random() * 1000),
-      errorRate: Math.random() * 5,
-      lastUpdated: Date.now(),
-      systemLoad: Math.random() * 80,
-      userEngagement: Math.random() * 100
-    };
-  }
-
-  public getActiveTrainingJobs(): TrainingProgress[] {
-    // Mock implementation
-    return [];
-  }
-
-  public getModels(): NeuralModel[] {
-    // Mock implementation
-    return [{
-      id: 'hermes-oxum-v2',
-      name: 'Hermes Oxum v2',
-      type: 'transformer',
-      version: '2.0.0',
-      status: 'operational',
-      performance: {
-        accuracy: 0.92,
-        latency: 120
-      }
-    }];
-  }
-
-  public async stopTraining(jobId: string): Promise<boolean> {
-    console.log(`Stopping training job: ${jobId}`);
-    return true;
-  }
-
-  public async startTraining(type: string, options: any): Promise<TrainingProgress> {
-    console.log(`Starting training job: ${type}`, options);
-    return {
-      id: `training-${Date.now()}`,
-      modelId: 'hermes-oxum-v2',
-      status: 'in_progress',
-      startTime: new Date(),
-      currentEpoch: 1,
-      totalEpochs: 100,
-      progress: 0.01,
-      accuracy: 0.5,
-      targetAccuracy: 0.95,
-      estimatedCompletionTime: new Date(Date.now() + 3600000),
-      timeRemaining: 3600000,
-      message: 'Training started',
-      type
-    };
-  }
-
-  public getService(serviceId: string): NeuralService | undefined {
-    return undefined;
-  }
-
-  public getSystemStatus(): any {
-    return {
-      status: 'operational',
-      uptime: Math.floor(Math.random() * 1000000),
-      servicesRunning: 4,
-      lastRestart: new Date(Date.now() - 86400000),
-      version: '2.0.0'
+      operational: true,
+      uptime: Math.floor((Date.now() - this.startTime) / 1000),
+      activeModules: Object.keys(this.modules),
+      processingQueue: this.processingQueue.length,
+      latency: Math.floor(Math.random() * 50) + 10 // Mock latency between 10-60ms
     };
   }
   
-  public getConfig(): any {
+  // Handler methods
+  private async handleContentOptimization(request: NeuralRequest): Promise<NeuralResponse> {
+    const { content, options } = request.data || {};
+    
+    if (!content) {
+      return { 
+        success: false, 
+        error: 'Content is required for optimization'
+      };
+    }
+    
+    // Mock optimization functionality
+    const optimized = typeof content === 'string'
+      ? content.trim().replace(/\s+/g, ' ')
+      : content;
+    
     return {
-      apiVersion: '2.0.0',
-      features: {
-        analytics: true,
-        advancedPrediction: true,
-        contentOptimization: true,
-        economyManagement: true
-      },
-      endpoints: {
-        main: '/api/neural',
-        streaming: '/api/neural/stream',
-        health: '/api/neural/health'
-      },
-      limits: {
-        requestsPerMinute: 100,
-        tokensPerRequest: 4096,
-        maxConcurrentTraining: 2
-      }
+      success: true,
+      data: { optimized, options }
     };
   }
-
-  public async updateConfig(config: any): Promise<boolean> {
-    console.log('Updating NeuralHub config:', config);
-    return true;
+  
+  private async handleAnalysis(request: NeuralRequest): Promise<NeuralResponse> {
+    const { content, analysisType } = request.data || {};
+    
+    if (!content) {
+      return { 
+        success: false, 
+        error: 'Content is required for analysis'
+      };
+    }
+    
+    switch (analysisType) {
+      case 'engagement':
+        // Mock engagement score between 0-100
+        const score = Math.floor(Math.random() * 100);
+        const feedback = score > 80 
+          ? 'Excellent content with high engagement potential'
+          : score > 60
+          ? 'Good content, could use minor improvements'
+          : score > 40
+          ? 'Average content, consider revisions for better engagement'
+          : 'Content needs significant improvement for better engagement';
+        
+        return {
+          success: true,
+          data: { score, feedback }
+        };
+        
+      case 'improvements':
+        // Mock improvement suggestions
+        return {
+          success: true,
+          data: {
+            suggestions: [
+              'Consider adding more descriptive language',
+              'Include relevant keywords for better discoverability',
+              'Add a clear call to action',
+              'Optimize image resolution and quality'
+            ]
+          }
+        };
+        
+      default:
+        return {
+          success: false,
+          error: `Unknown analysis type: ${analysisType}`
+        };
+    }
   }
-
-  public getDecisionLogs(): any[] {
-    return [{
-      timestamp: new Date().toISOString(),
-      decision: 'content_optimization',
-      factors: ['engagement', 'quality', 'relevance'],
-      score: 0.87
-    }];
+  
+  private async handleInteractionLog(request: NeuralRequest): Promise<NeuralResponse> {
+    const { contentId, interactionType, timestamp } = request.data || {};
+    
+    if (!contentId || !interactionType) {
+      return { 
+        success: false, 
+        error: 'ContentId and interactionType are required for logging'
+      };
+    }
+    
+    // Simply log the interaction (would connect to analytics in a real app)
+    console.log(`[NeuralHub] Interaction logged: ${interactionType} on ${contentId} at ${timestamp}`);
+    
+    return { success: true };
+  }
+  
+  private async handleContentBatchProcess(request: NeuralRequest): Promise<NeuralResponse> {
+    const { content } = request.data || {};
+    
+    if (!Array.isArray(content)) {
+      return { 
+        success: false, 
+        error: 'Content must be an array for batch processing'
+      };
+    }
+    
+    // Process each content item with mock enhanced data
+    const processed = content.map(item => ({
+      ...item,
+      enhancedScore: Math.floor(Math.random() * 100),
+      recommendedActions: item.status === 'expired' 
+        ? ['renew', 'update'] 
+        : item.status === 'expiring' 
+        ? ['prepare_renewal'] 
+        : ['optimize']
+    }));
+    
+    return {
+      success: true,
+      data: { processed }
+    };
   }
 }
 
-// Export a singleton instance
-export const neuralHub = new NeuralHubImpl();
+// Export singleton instance
+export const neuralHub = new NeuralHub();
 
-// BrainHub is now an alias for NeuralHub for backward compatibility
-export const brainHub = neuralHub;
-
-// Also export the class itself for typing
-export type { NeuralHubImpl as NeuralHub };
+// Re-export for backward compatibility
+export { neuralHub as brainHub };

@@ -1,10 +1,13 @@
 
 import React from 'react';
-import HeroSection from '@/components/home/HeroSection';
 import { useState } from 'react';
+import HeroSection from '@/components/home/HeroSection';
 import ActionGrid from '@/components/home/ActionGrid';
 import FeaturedContentSection from '@/components/home/FeaturedContentSection';
 import MetaverseSection from '@/components/home/MetaverseSection';
+import TrustSection from '@/components/home/TrustSection';
+import FeaturesSection from '@/components/home/FeaturesSection';
+import CtaSection from '@/components/home/CtaSection';
 
 const profilesData = [
   {
@@ -77,9 +80,11 @@ const HomePage: React.FC = () => {
             viewMoreLink="/creators"
           />
         </div>
+        
+        <FeaturesSection />
+        <CtaSection />
+        <TrustSection />
       </div>
-      
-      <MetaverseSection />
     </div>
   );
 };

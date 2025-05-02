@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
-import { calculateExpiryDate, calculateDaysRemaining, determineContentStatus, calculateRenewalCost } from '@/utils/dateUtils';
 import ContentSearch from './ContentSearch';
 import ContentFilters from './ContentFilters';
 import ContentGrid from './ContentGrid';
 import { useContentBrainHub } from '@/hooks/useContentBrainHub';
+import { calculateExpiryDate, calculateDaysRemaining, determineContentStatus } from '@/utils/dateUtils';
 
 // Mock content data, in a real app this would come from an API
 const mockContent = [
@@ -58,7 +58,7 @@ const ContentGallery: React.FC = () => {
   const [content, setContent] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const { toast } = useToast();
-  const { recordInteraction, getIntelligentRenewalCost, processContent } = useContentBrainHub();
+  const { getIntelligentRenewalCost, recordInteraction, processContent } = useContentBrainHub();
 
   useEffect(() => {
     // Process mock content to calculate real status based on dates
@@ -66,7 +66,7 @@ const ContentGallery: React.FC = () => {
       const processedContent = mockContent.map(item => {
         const expiryDate = calculateExpiryDate(item.createdAt);
         const daysRemaining = calculateDaysRemaining(expiryDate);
-        const status = item.status === 'draft' ? 'draft' : determineContentStatus(item.createdAt);
+        const status = item.status === 'draft' ? 'draft' : determineContentStatus(expiryDate);
         
         return {
           ...item,
@@ -110,7 +110,7 @@ const ContentGallery: React.FC = () => {
           const newCreatedAt = new Date();
           const expiryDate = calculateExpiryDate(newCreatedAt);
           const daysRemaining = calculateDaysRemaining(expiryDate);
-          const status = determineContentStatus(newCreatedAt);
+          const status = determineContentStatus(expiryDate);
           
           return {
             ...item,

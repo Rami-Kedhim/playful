@@ -1,19 +1,21 @@
 
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
 
-interface ContentBrainHubService {
+export interface ContentBrainHubService {
   getIntelligentRenewalCost: (status: string, contentType: string) => number;
   optimizeContent: (content: string, options?: any) => Promise<string>;
   predictEngagement: (content: string) => Promise<{ score: number; feedback: string }>;
   suggestContentImprovements: (content: string) => Promise<string[]>;
+  recordInteraction: (contentId: string, interactionType: string) => void;
+  processContent: (content: any[]) => Promise<any[]>;
 }
 
 export const useContentBrainHub = (): ContentBrainHubService => {
   // Calculate renewal cost based on content status and type
   const getIntelligentRenewalCost = useCallback((status: string, contentType: string): number => {
     // Base costs by content type
-    const baseCosts = {
+    const baseCosts: Record<string, number> = {
       text: 5,
       image: 10,
       video: 15,
@@ -22,7 +24,7 @@ export const useContentBrainHub = (): ContentBrainHubService => {
     };
 
     // Status modifiers
-    const statusModifiers = {
+    const statusModifiers: Record<string, number> = {
       active: 1.0,
       expiring: 1.2,  // 20% premium for expiring content
       expired: 1.5,   // 50% premium for expired content
@@ -30,10 +32,10 @@ export const useContentBrainHub = (): ContentBrainHubService => {
     };
 
     // Get base cost or default to 10
-    const baseCost = baseCosts[contentType as keyof typeof baseCosts] || 10;
+    const baseCost = baseCosts[contentType] || 10;
     
     // Apply status modifier or default to 1.0
-    const modifier = statusModifiers[status as keyof typeof statusModifiers] || 1.0;
+    const modifier = statusModifiers[status] || 1.0;
 
     return Math.round(baseCost * modifier);
   }, []);
@@ -97,11 +99,45 @@ export const useContentBrainHub = (): ContentBrainHubService => {
     }
   }, []);
 
+  // Record interaction with Brain Hub
+  const recordInteraction = useCallback((contentId: string, interactionType: string) => {
+    try {
+      neuralHub.processRequest({
+        type: 'interaction_log',
+        data: { contentId, interactionType, timestamp: new Date().toISOString() }
+      });
+      console.log(`Interaction recorded: ${interactionType} on content ${contentId}`);
+    } catch (error) {
+      console.error("Failed to record interaction:", error);
+    }
+  }, []);
+
+  // Process content through Brain Hub
+  const processContent = useCallback(async (content: any[]): Promise<any[]> => {
+    try {
+      const response = await neuralHub.processRequest({
+        type: 'content_batch_process',
+        data: { content }
+      });
+
+      if (response.success && Array.isArray(response.data?.processed)) {
+        return response.data.processed;
+      }
+      
+      return content; // Return original if processing fails
+    } catch (error) {
+      console.error("Error processing content batch:", error);
+      return content;
+    }
+  }, []);
+
   return {
     getIntelligentRenewalCost,
     optimizeContent,
     predictEngagement,
-    suggestContentImprovements
+    suggestContentImprovements,
+    recordInteraction,
+    processContent
   };
 };
 
