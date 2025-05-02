@@ -26,6 +26,7 @@ export default function checkBrainHubHealth(): BrainHubHealth {
     else status = 'healthy';
     
     // Map metrics to ensure compatibility with required fields
+    // Use existing values or provide sensible defaults for required fields
     const mappedMetrics = {
       ...metrics,
       // Ensure required properties exist by providing defaults or mapping to existing values

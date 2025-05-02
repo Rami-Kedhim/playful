@@ -86,7 +86,7 @@ export class BaseBrainService implements BaseNeuralServiceType {
     return {
       operationsCount: 0,
       errorCount: 0,
-      latency: 0,
+      latency: 0, // Make sure latency is included in the base implementation
       responseTime: 0,
       errorRate: 0,
       status: this.status
