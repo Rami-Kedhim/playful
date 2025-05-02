@@ -1,6 +1,6 @@
 
 // Fix import of neuralHub
-import { getDefaultModelParameters } from "../models/modelParameters";
+import { defaultModelParameters } from "../models/modelParameters";
 import { neuralHub } from '../HermesOxumNeuralHub';
 
 export function checkServiceHealth(serviceId: string): { healthy: boolean; issues: string[] } {
@@ -39,7 +39,7 @@ export function optimizeServiceParameters(serviceId: string): boolean {
   }
   
   // Apply optimized parameters based on service type
-  const params = getDefaultModelParameters();
+  const params = { ...defaultModelParameters };
   
   // Adjust parameters based on service type
   switch (service.moduleType) {

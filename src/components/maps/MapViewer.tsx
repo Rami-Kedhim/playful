@@ -19,7 +19,10 @@ interface MapViewerProps {
   onMarkerClick?: (markerId: string) => void;
   height?: string;
   width?: string;
-  apiKey?: string; // Added missing apiKey prop
+  apiKey?: string; 
+  latitude?: number; // Add missing property
+  longitude?: number; // Add missing property
+  markerLabel?: string; // Add missing property
 }
 
 const MapViewer: React.FC<MapViewerProps> = ({
@@ -29,8 +32,16 @@ const MapViewer: React.FC<MapViewerProps> = ({
   onMarkerClick,
   height = '400px',
   width = '100%',
-  apiKey // Use the provided API key
+  apiKey,
+  latitude,
+  longitude,
+  markerLabel
 }) => {
+  // If latitude and longitude are provided, use them to create a center object
+  const mapCenter = latitude && longitude 
+    ? { lat: latitude, lng: longitude } 
+    : center;
+
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: apiKey || process.env.GOOGLE_MAPS_API_KEY || ''
@@ -47,10 +58,20 @@ const MapViewer: React.FC<MapViewerProps> = ({
     }
   };
 
+  // Create marker from latitude, longitude if provided
+  const allMarkers = [...markers];
+  if (latitude && longitude && !markers.some(m => m.position.lat === latitude && m.position.lng === longitude)) {
+    allMarkers.push({
+      id: 'main-marker',
+      position: { lat: latitude, lng: longitude },
+      title: markerLabel || 'Location'
+    });
+  }
+
   return isLoaded ? (
     <GoogleMap
       mapContainerStyle={mapContainerStyle}
-      center={center}
+      center={mapCenter}
       zoom={zoom}
       options={{
         disableDefaultUI: false,
@@ -59,7 +80,7 @@ const MapViewer: React.FC<MapViewerProps> = ({
         fullscreenControl: true
       }}
     >
-      {markers.map(marker => (
+      {allMarkers.map(marker => (
         <Marker
           key={marker.id}
           position={marker.position}

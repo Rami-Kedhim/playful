@@ -1,208 +1,147 @@
 
 import React, { useState, useEffect } from 'react';
-import { TabsContent } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+import ContentCard from '@/components/home/ContentCard';
 import { useToast } from '@/components/ui/use-toast';
-import ContentSearch from './ContentSearch';
-import ContentFilters from './ContentFilters';
-import ContentGrid from './ContentGrid';
-import { useContentBrainHub } from '@/hooks/useContentBrainHub';
-import { calculateExpiryDate, calculateDaysRemaining, determineContentStatus } from '@/utils/dateUtils';
+import useContentBrainHub from '@/hooks/useContentBrainHub';
 
-// Mock content data, in a real app this would come from an API
-const mockContent = [
-  {
-    id: '1',
-    title: 'Profile Image 1',
-    type: 'image',
-    createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-    url: 'https://picsum.photos/seed/image1/300/200',
-    status: 'active'
-  },
-  {
-    id: '2',
-    title: 'Introduction Video',
-    type: 'video',
-    createdAt: new Date(Date.now() - 160 * 24 * 60 * 60 * 1000), // 160 days ago (expiring soon)
-    url: 'https://picsum.photos/seed/video1/300/200',
-    status: 'expiring'
-  },
-  {
-    id: '3',
-    title: 'Bio Information',
-    type: 'text',
-    createdAt: new Date(Date.now() - 190 * 24 * 60 * 60 * 1000), // 190 days ago (expired)
-    content: 'This is a sample biography text content.',
-    status: 'expired'
-  },
-  {
-    id: '4',
-    title: 'Summer Photoshoot',
-    type: 'image',
-    createdAt: new Date(Date.now() - 175 * 24 * 60 * 60 * 1000), // 175 days ago (expiring soon)
-    url: 'https://picsum.photos/seed/image2/300/200',
-    status: 'expiring'
-  },
-  {
-    id: '5',
-    title: 'New Profile Draft',
-    type: 'image',
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-    url: 'https://picsum.photos/seed/image3/300/200',
-    status: 'draft'
-  }
-];
+interface Content {
+  id: string;
+  title: string;
+  description: string;
+  image?: string;
+  category?: string;
+  date?: string;
+  author?: {
+    name: string;
+    avatar?: string;
+  };
+}
 
-const ContentGallery: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [content, setContent] = useState<any[]>([]);
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [processingContent, setProcessingContent] = useState<boolean>(false);
+interface ContentGalleryProps {
+  title?: string;
+  initialContent?: Content[];
+  isLoading?: boolean;
+}
+
+const ContentGallery: React.FC<ContentGalleryProps> = ({
+  title = 'Content Gallery',
+  initialContent = [],
+  isLoading: externalLoading = false,
+}) => {
+  const [content, setContent] = useState<Content[]>(initialContent);
+  const [isLoading, setIsLoading] = useState<boolean>(externalLoading);
+  const [enhancing, setEnhancing] = useState<boolean>(false);
   const { toast } = useToast();
-  const { getIntelligentRenewalCost, recordInteraction, processContent } = useContentBrainHub();
+  const { processContent } = useContentBrainHub();
 
   useEffect(() => {
-    // Process mock content to calculate real status based on dates
-    const fetchAndProcessContent = async () => {
-      setProcessingContent(true);
+    setContent(initialContent);
+  }, [initialContent]);
+
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setContent([...initialContent]);
+      setIsLoading(false);
+      toast({
+        title: "Content refreshed",
+        description: "Content gallery has been updated",
+      });
+    }, 1500);
+  };
+
+  const handleEnhanceContent = async (contentId: string) => {
+    setEnhancing(true);
+    
+    try {
+      const selectedContent = content.find(item => item.id === contentId);
       
-      try {
-        // Process the basic content first
-        const processedContent = mockContent.map(item => {
-          const expiryDate = calculateExpiryDate(item.createdAt);
-          const daysRemaining = calculateDaysRemaining(expiryDate);
-          const status = item.status === 'draft' ? 'draft' : determineContentStatus(expiryDate);
-          
-          return {
-            ...item,
-            status,
-            daysRemaining
-          };
-        });
-        
-        // Process content through Brain Hub for additional intelligence
-        try {
-          const brainHubEnhancedContent = await processContent(processedContent);
-          setContent(brainHubEnhancedContent);
-        } catch (error) {
-          console.error("Failed to process content with Brain Hub, using standard content:", error);
-          setContent(processedContent);
-          
-          toast({
-            title: "Limited Content Processing",
-            description: "Some advanced content features are unavailable. Using basic content processing.",
-            variant: "default"
-          });
-        }
-      } catch (error) {
-        console.error("Error processing content:", error);
-        setContent([]); // Set to empty array on error
-        
-        toast({
-          title: "Content Processing Error",
-          description: "Failed to process your content. Please try again later.",
-          variant: "destructive"
-        });
-      } finally {
-        setProcessingContent(false);
+      if (!selectedContent) {
+        throw new Error('Content not found');
       }
-    };
-    
-    fetchAndProcessContent();
-  }, [processContent, toast]);
-
-  const filteredContent = content.filter(item => {
-    // First apply search filter if any
-    const matchesSearch = !searchTerm || 
-      item.title.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Then apply tab filter (content type)
-    const matchesTab = activeTab === 'all' || item.type === activeTab;
-    
-    // Then apply status filter if not "all"
-    const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
-    
-    return matchesSearch && matchesTab && matchesStatus;
-  });
-
-  const handleRenewContent = (contentId: string) => {
-    setContent(prevContent => 
-      prevContent.map(item => {
+      
+      // Process the content through Brain Hub
+      const result = await processContent(selectedContent.description, 'text');
+      
+      // Update the content with enhanced version
+      const updatedContent = content.map(item => {
         if (item.id === contentId) {
-          // Reset expiry by setting createdAt to now
-          const newCreatedAt = new Date();
-          const expiryDate = calculateExpiryDate(newCreatedAt);
-          const daysRemaining = calculateDaysRemaining(expiryDate);
-          const status = determineContentStatus(expiryDate);
-          
           return {
             ...item,
-            createdAt: newCreatedAt,
-            status,
-            daysRemaining
+            description: result.enhancedContent,
           };
         }
         return item;
-      })
-    );
-    
-    // Find the content item
-    const contentItem = content.find(item => item.id === contentId);
-    
-    // Use Brain Hub for intelligent renewal cost calculation
-    const renewalCost = contentItem ? 
-      getIntelligentRenewalCost(contentItem.status, contentItem.type) : 
-      1;
-    
-    // Record interaction with Brain Hub
-    recordInteraction(contentId, 'renew');
-    
-    toast({
-      title: "Content Renewed",
-      description: `Your content has been renewed for 180 days for ${renewalCost} UBX`,
-    });
-  };
-
-  // Count content by status
-  const statusCounts = {
-    all: content.length,
-    active: content.filter(item => item.status === 'active').length,
-    expiring: content.filter(item => item.status === 'expiring').length,
-    expired: content.filter(item => item.status === 'expired').length,
-    draft: content.filter(item => item.status === 'draft').length,
+      });
+      
+      setContent(updatedContent);
+      
+      toast({
+        title: "Content enhanced",
+        description: `Enhanced content with ${result.recommendations.length} recommendations`,
+      });
+    } catch (error) {
+      toast({
+        title: "Enhancement failed",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setEnhancing(false);
+    }
   };
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Your Content</h2>
-        <ContentSearch 
-          searchTerm={searchTerm} 
-          onSearchChange={setSearchTerm} 
-        />
+        <h2 className="text-2xl font-bold">{title}</h2>
+        <Button 
+          onClick={handleRefresh} 
+          variant="outline" 
+          size="sm"
+          disabled={isLoading}
+        >
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Refresh
+        </Button>
       </div>
       
-      <ContentFilters 
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        statusCounts={statusCounts}
-      />
-      
-      <TabsContent value={activeTab} className="mt-4">
-        {processingContent ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <span className="ml-3 text-muted-foreground">Processing content...</span>
-          </div>
-        ) : (
-          <ContentGrid 
-            content={filteredContent}
-            onRenew={handleRenewContent}
-          />
-        )}
-      </TabsContent>
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="overflow-hidden">
+              <div className="h-48 bg-gray-200 animate-pulse" />
+              <CardContent className="p-4 space-y-2">
+                <div className="h-4 w-3/4 bg-gray-200 animate-pulse rounded" />
+                <div className="h-3 w-full bg-gray-200 animate-pulse rounded" />
+                <div className="h-3 w-full bg-gray-200 animate-pulse rounded" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : content.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {content.map((item) => (
+            <ContentCard 
+              key={item.id} 
+              content={item} 
+              onEnhance={() => handleEnhanceContent(item.id)}
+              isEnhancing={enhancing}
+            />
+          ))}
+        </div>
+      ) : (
+        <Card className="p-8 flex flex-col items-center justify-center text-center">
+          <p className="text-lg text-muted-foreground mb-4">No content available</p>
+          <Button onClick={handleRefresh}>
+            Load Content
+          </Button>
+        </Card>
+      )}
     </div>
   );
 };

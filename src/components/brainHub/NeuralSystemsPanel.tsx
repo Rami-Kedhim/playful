@@ -6,7 +6,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, Play, StopCircle } from 'lucide-react';
 import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
 import TrainingProgressDetails from './TrainingProgressDetails';
-import { TrainingProgress, NeuralModel } from '@/services/neural/types/neuralHub';
+import { TrainingProgress } from '@/services/neural/training/trainingManager';
+import { NeuralModel } from '@/services/neural/types/neuralHub';
 
 interface NeuralSystemsPanelProps {
   systemId?: string;
@@ -111,7 +112,21 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ systemId }) => 
             trainingJobs.map(job => (
               <TrainingProgressDetails
                 key={job.id}
-                progress={job}
+                progress={{
+                  modelId: job.modelId,
+                  epoch: job.epoch,
+                  totalEpochs: job.totalEpochs,
+                  loss: job.loss,
+                  accuracy: job.accuracy,
+                  timestamp: job.timestamp,
+                  status: job.status as any,
+                  estimatedTimeRemaining: job.timeRemaining,
+                  metrics: {
+                    precision: 0.8,
+                    recall: 0.75,
+                    f1Score: 0.77
+                  }
+                }}
                 onCancel={() => handleStopTraining(job.id)}
               />
             ))

@@ -10,6 +10,9 @@ export interface ModelParameters {
   maxTokens: number;
   modelName: string; // Added the missing modelName property
   stopSequences?: string[];
+  // Add additional properties that components are trying to use
+  learningRate?: number;
+  batchSize?: number;
 }
 
 /**
@@ -31,7 +34,7 @@ export const defaultModelParameters: ModelParameters = {
 export const creativeModelParameters: ModelParameters = {
   temperature: 0.9,
   topP: 1.0,
-  frequencyPenalty: 0.2,
+  frequencyRate: 0.2,
   presencePenalty: 0.1,
   maxTokens: 1500,
   modelName: 'gpt-4',
@@ -49,4 +52,28 @@ export const preciseModelParameters: ModelParameters = {
   maxTokens: 800,
   modelName: 'gpt-3.5-turbo-16k',
   stopSequences: []
+};
+
+// Add the missing functions that are being imported
+export const initializeDefaultParameters = (): ModelParameters => {
+  return { ...defaultModelParameters };
+};
+
+export const calculateSystemEfficiency = (params: ModelParameters): number => {
+  // Mock implementation
+  return 0.85; // Return a value between 0 and 1
+};
+
+export const validateModelParameters = (params: ModelParameters): boolean => {
+  // Basic validation
+  return (
+    params.temperature >= 0 && 
+    params.temperature <= 1 && 
+    params.maxTokens > 0
+  );
+};
+
+// Function being referenced in neuralHubUtils.ts
+export const getDefaultModelParameters = (): ModelParameters => {
+  return { ...defaultModelParameters };
 };

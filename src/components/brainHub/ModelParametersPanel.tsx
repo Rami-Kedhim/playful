@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { useNeuralHub } from '@/hooks/useNeuralHub';
-import { ModelParameters } from '@/services/neural/types/neuralHub';
+import { ModelParameters } from '@/services/neural/models/modelParameters';
 
 /**
  * Component for adjusting Neural Hub model parameters
