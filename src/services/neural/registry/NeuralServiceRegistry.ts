@@ -1,63 +1,59 @@
 
-// Fix import by changing NeuralServiceRegistry to NeuralRegistry
-import { BaseNeuralService, NeuralServiceRegistry } from '../types/NeuralService';
-
-class NeuralServiceRegistryImplementation implements NeuralServiceRegistry {
-  services: Map<string, BaseNeuralService> = new Map();
-
-  constructor() {
-    // Initialize with some mock services
-    this.initMockServices();
-  }
-
-  private initMockServices() {
-    // Will be populated by services registering themselves
-    this.services = new Map();
-  }
-
-  async initialize(): Promise<void> {
-    console.log("Initializing Neural Service Registry");
-    return Promise.resolve();
-  }
-
-  registerService(service: BaseNeuralService): boolean {
-    if (this.services.has(service.id)) {
-      console.warn(`Service with ID ${service.id} already exists`);
-      return false;
-    }
-    
-    this.services.set(service.id, service);
-    console.log(`Service ${service.id} registered successfully`);
+/**
+ * Mock neural service registry for the Brain Hub system
+ */
+const neuralServiceRegistry = {
+  /**
+   * Get all registered neural services
+   */
+  getAllServices: () => {
+    return [
+      {
+        moduleId: 'neural-core-1',
+        name: 'Neural Core Processor',
+        moduleType: 'core',
+        config: {
+          enabled: true,
+          priority: 'high',
+          resources: {
+            cpu: 2,
+            memory: 4096
+          }
+        },
+        getMetrics: () => ({
+          operationsCount: 45672,
+          errorCount: 182,
+          responseTime: 124.6
+        })
+      },
+      {
+        moduleId: 'data-transformer-1',
+        name: 'Data Transformer',
+        moduleType: 'transformer',
+        config: {
+          enabled: true,
+          priority: 'medium',
+          resources: {
+            cpu: 1,
+            memory: 2048
+          }
+        },
+        getMetrics: () => ({
+          operationsCount: 32790,
+          errorCount: 59,
+          responseTime: 87.3
+        })
+      }
+    ];
+  },
+  
+  /**
+   * Register a new neural service
+   */
+  registerService: (service: any) => {
+    console.log('Registering new service:', service);
     return true;
   }
-  
-  getServicesByModule(moduleType: string): BaseNeuralService[] {
-    const result: BaseNeuralService[] = [];
-    this.services.forEach(service => {
-      if (service.moduleType === moduleType) {
-        result.push(service);
-      }
-    });
-    return result;
-  }
+};
 
-  optimizeResourceAllocation(): void {
-    console.log("Optimizing resource allocation for neural services");
-    // Mock implementation
-  }
-
-  getAllServices(): BaseNeuralService[] {
-    return Array.from(this.services.values());
-  }
-
-  getService(id: string): BaseNeuralService | undefined {
-    return this.services.get(id);
-  }
-  
-  unregisterService(id: string): boolean {
-    return this.services.delete(id);
-  }
-}
-
-const neuralServiceRegistry = new NeuralServiceRegistryImplementation();
 export default neuralServiceRegistry;

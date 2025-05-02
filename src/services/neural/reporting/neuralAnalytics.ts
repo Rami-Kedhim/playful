@@ -1,227 +1,260 @@
 
-import { faker } from '@faker-js/faker';
+import { NeuralAnalyticsReport } from "@/services/neural/types/neuralAnalytics";
 
-// Define types for neural analytics data
-interface NeuralAnalyticsData {
-  systemMetrics: {
-    responseTimeMs: number;
-    throughput: number;
-    errorRate: number;
-    cpuUtilization: number;
-    memoryUtilization: number;
-    nodeCount: number;
-  };
-  modelPerformance: {
-    accuracy: number;
-    precision: number;
-    recall: number;
-    f1Score: number;
-    latency: number;
-    inferenceTimeMs: number;
-  };
-  operationalMetrics: {
-    totalOperations: number;
-    successes: number;
-    failures: number;
-    responseTimeChange: number;
-    errorRateChange: number;
-    accuracyChange: number;
-    operationsChange: number;
-  };
-  performanceForecast: Array<{
-    date: string;
-    metrics: {
-      predictedResponseTime: number;
-      predictedErrorRate: number;
-      expectedLoad: number;
-    }
-  }>;
-  anomalies: Array<{
-    id: string;
-    type: string;
-    severity: 'low' | 'medium' | 'high';
-    description: string;
-    timestamp: string;
-    relatedComponentId: string;
-  }>;
-}
-
-interface DetailedPerformanceMetrics {
-  responseTime: {
-    current: number;
-    historical: Array<{ timestamp: string; value: number }>;
-    anomalies: Array<{ timestamp: string; value: number; expected: number }>;
-    percentile95: number;
-    percentile99: number;
-  };
-  errorRate: {
-    current: number;
-    historical: Array<{ timestamp: string; value: number }>;
-    byType: Record<string, number>;
-    mostFrequent: string;
-  };
-  resourceUsage: {
-    cpu: Array<{ timestamp: string; value: number }>;
-    memory: Array<{ timestamp: string; value: number }>;
-    network: Array<{ timestamp: string; value: number }>;
-    storage: Array<{ timestamp: string; value: number }>;
-  };
-}
-
-// Generate random analytics data
-export function generateMockNeuralAnalytics(): NeuralAnalyticsData {
-  // Generate performance forecast data for the last 14 days
-  const performanceForecast = Array.from({ length: 14 }).map((_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - 13 + i);
+/**
+ * Generate mock neural analytics data for development and testing
+ */
+export function generateMockNeuralAnalytics(): NeuralAnalyticsReport {
+  const now = new Date();
+  
+  // Generate performance forecast data
+  const performanceForecast = Array.from({ length: 24 }, (_, i) => {
+    const date = new Date(now);
+    date.setHours(date.getHours() + i);
     
-    // Base values with some randomness
-    const baseResponseTime = 120 + Math.sin(i * 0.5) * 30;
-    const baseErrorRate = 0.02 + Math.sin(i * 0.7) * 0.015;
-    const baseLoad = 350 + Math.sin(i * 0.3) * 100;
-    
-    // Add random noise
-    const responseTime = baseResponseTime + faker.number.float({ min: -15, max: 15 });
-    const errorRate = Math.max(0.001, baseErrorRate + faker.number.float({ min: -0.01, max: 0.01 }));
-    const load = baseLoad + faker.number.int({ min: -30, max: 30 });
+    // Add some variability to make the chart interesting
+    const baseResponseTime = 150 + Math.sin(i / 4) * 50;
+    const baseErrorRate = 0.02 + (Math.cos(i / 6) * 0.015);
+    const baseLoad = 250 + (Math.sin(i / 3) * 100) + (i % 8 === 0 ? 150 : 0);
     
     return {
-      date: date.toISOString().split('T')[0],
+      date: date.toISOString(),
       metrics: {
-        predictedResponseTime: responseTime,
-        predictedErrorRate: errorRate,
-        expectedLoad: load,
+        expectedLoad: Math.max(50, Math.round(baseLoad + (Math.random() * 25 - 12.5))),
+        predictedResponseTime: parseFloat((baseResponseTime + (Math.random() * 20 - 10)).toFixed(1)),
+        predictedErrorRate: parseFloat((baseErrorRate + (Math.random() * 0.005)).toFixed(4)),
+        confidenceScore: 0.8 + (Math.random() * 0.15)
       }
     };
   });
-
-  // Generate anomalies (sometimes empty)
-  let anomalies = [];
-  if (faker.number.int({ min: 1, max: 10 }) > 7) {
-    anomalies = Array.from({ length: faker.number.int({ min: 1, max: 3 }) }).map(() => ({
-      id: faker.string.uuid(),
-      type: faker.helpers.arrayElement([
-        'Response Time Spike', 
-        'Error Rate Anomaly', 
-        'Resource Utilization Peak',
-        'Model Accuracy Drop',
-        'Network Latency Spike'
-      ]),
-      severity: faker.helpers.arrayElement(['low', 'medium', 'high'] as const),
-      description: faker.helpers.arrayElement([
-        'Sudden spike in neural processing time detected',
-        'Unexpected increase in error rate above threshold',
-        'Model accuracy decreased significantly',
-        'Resource utilization reached critical levels',
-        'Network latency affecting neural operations performance'
-      ]),
-      timestamp: new Date(Date.now() - faker.number.int({ min: 1, max: 24 }) * 3600000).toISOString(),
-      relatedComponentId: faker.string.uuid()
-    }));
-  }
-
-  // Base metrics
-  const responseTimeMs = faker.number.int({ min: 80, max: 150 });
-  const errorRate = faker.number.float({ min: 0.5, max: 3 });
-  const accuracy = faker.number.float({ min: 0.92, max: 0.99 });
-  const operations = faker.number.int({ min: 5000, max: 20000 });
-
-  // Changes (positive or negative)
-  const responseTimeChange = faker.number.float({ min: -15, max: 10 });
-  const errorRateChange = faker.number.float({ min: -20, max: 15 });
-  const accuracyChange = faker.number.float({ min: -5, max: 8 });
-  const operationsChange = faker.number.float({ min: -10, max: 25 });
+  
+  // Generate some anomalies with random data
+  const anomalies = Math.random() > 0.7 ? [] : Array.from(
+    { length: Math.floor(Math.random() * 4) + 1 }, 
+    (_, i) => {
+      const severityOptions = ['low', 'medium', 'high'];
+      const typeOptions = [
+        'Memory Spike', 
+        'Latency Anomaly', 
+        'Error Rate Spike',
+        'Neural Network Degradation'
+      ];
+      
+      const aDate = new Date();
+      aDate.setMinutes(aDate.getMinutes() - Math.floor(Math.random() * 120));
+      
+      return {
+        id: `anomaly-${Date.now()}-${i}`,
+        type: typeOptions[Math.floor(Math.random() * typeOptions.length)],
+        severity: severityOptions[Math.floor(Math.random() * severityOptions.length)],
+        description: `Detected unusual pattern in system behavior requiring investigation`,
+        timestamp: aDate.toISOString(),
+        relatedComponentId: `component-${Math.floor(Math.random() * 1000)}`
+      };
+    }
+  );
 
   return {
+    timestamp: now.toISOString(),
+    serviceMetrics: [
+      {
+        id: "neural-core-1",
+        name: "Neural Core Processor",
+        type: "core",
+        status: "active",
+        metrics: {
+          utilization: 68.5,
+          errorRate: 0.42,
+          responseTime: 124.6
+        },
+        enabled: true,
+        lastActivity: now.toISOString()
+      },
+      {
+        id: "data-transformer-1",
+        name: "Data Transformer",
+        type: "transformer",
+        status: "active",
+        metrics: {
+          utilization: 45.2,
+          errorRate: 0.18,
+          responseTime: 87.3
+        },
+        enabled: true,
+        lastActivity: new Date(now.getTime() - 320000).toISOString()
+      }
+    ],
     systemMetrics: {
-      responseTimeMs,
-      throughput: faker.number.int({ min: 500, max: 2000 }),
-      errorRate,
-      cpuUtilization: faker.number.float({ min: 20, max: 85 }),
-      memoryUtilization: faker.number.float({ min: 30, max: 80 }),
-      nodeCount: faker.number.int({ min: 3, max: 12 }),
+      cpuUtilization: 62.5,
+      memoryUtilization: 75.8,
+      requestsPerSecond: 342.7,
+      responseTimeMs: 165.2,
+      errorRate: 1.8
     },
+    anomalies,
+    trends: {
+      requestVolume: "increasing",
+      errorRate: "stable",
+      responseTime: "decreasing"
+    },
+    recommendations: [
+      "Consider scaling neural processing capacity to handle increased load",
+      "Optimize memory allocation for improved performance",
+      "Review neural network models for potential optimization"
+    ],
     modelPerformance: {
-      accuracy,
-      precision: faker.number.float({ min: 0.9, max: 0.98 }),
-      recall: faker.number.float({ min: 0.85, max: 0.97 }),
-      f1Score: faker.number.float({ min: 0.87, max: 0.98 }),
-      latency: faker.number.int({ min: 50, max: 200 }),
-      inferenceTimeMs: faker.number.int({ min: 20, max: 100 }),
+      accuracy: 0.967,
+      precision: 0.948,
+      recall: 0.972,
+      f1Score: 0.96,
+      latency: 142.8,
+      throughput: 486.2,
+      mapData: [
+        { key: "accuracy", value: 0.967 },
+        { key: "precision", value: 0.948 },
+        { key: "recall", value: 0.972 },
+        { key: "f1Score", value: 0.96 }
+      ]
     },
     operationalMetrics: {
-      totalOperations: operations,
-      successes: operations * (1 - errorRate / 100),
-      failures: operations * (errorRate / 100),
-      responseTimeChange,
-      errorRateChange,
-      accuracyChange,
-      operationsChange,
+      totalRequests: 24785,
+      successfulRequests: 24331,
+      failedRequests: 454,
+      averageResponseTime: 165.2,
+      p95ResponseTime: 312.8,
+      p99ResponseTime: 487.3,
+      requestsPerMinute: 412.3,
+      errorRate: 1.8,
+      activeConnections: 182,
+      totalOperations: 78462,
+      operationsChange: 7.2,
+      averageAccuracy: 96.7,
+      accuracyChange: 1.2,
+      responseTimeChange: -5.7,
+      errorRateChange: -0.3
     },
-    performanceForecast,
-    anomalies,
+    usageMetrics: {
+      dailyActiveUsers: 2485,
+      monthlyActiveUsers: 16842,
+      totalUsers: 32750,
+      sessionsPerUser: 3.7,
+      averageSessionDuration: 428,
+      retentionRate: 78.2,
+      serviceTypeDistribution: [
+        { name: "Core Services", value: 62.3 },
+        { name: "Advanced Features", value: 24.7 },
+        { name: "Experimental", value: 13.0 }
+      ],
+      resourceAllocation: [
+        { name: "CPU", value: 62.5 },
+        { name: "Memory", value: 75.8 },
+        { name: "Network", value: 48.2 }
+      ],
+      dailyUsageTrend: Array.from({ length: 14 }, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (13 - i));
+        return {
+          date: d.toISOString().split('T')[0],
+          value: 2000 + Math.floor(Math.random() * 1000)
+        };
+      })
+    },
+    advancedMetrics: {
+      resourceUtilization: 68.3,
+      efficientUseScore: 84.6,
+      loadBalancingEfficiency: 92.1,
+      cachingEffectiveness: 76.8,
+      algorithmicEfficiency: 87.5,
+      mapData: [
+        { key: "resourceUtilization", value: 68.3 },
+        { key: "efficientUseScore", value: 84.6 },
+        { key: "loadBalancingEfficiency", value: 92.1 },
+        { key: "cachingEffectiveness", value: 76.8 },
+        { key: "algorithmicEfficiency", value: 87.5 }
+      ]
+    },
+    correlationMatrix: {
+      labels: ["CPU", "Memory", "Requests", "Errors"],
+      values: [
+        [1.0, 0.72, 0.84, 0.31],
+        [0.72, 1.0, 0.65, 0.28],
+        [0.84, 0.65, 1.0, 0.58],
+        [0.31, 0.28, 0.58, 1.0]
+      ],
+      maxCorrelation: 0.84,
+      minCorrelation: 0.28,
+      averageCorrelation: 0.56,
+      metricsList: [
+        { name: "CPU-Requests", value: 0.84 },
+        { name: "CPU-Memory", value: 0.72 },
+        { name: "Requests-Errors", value: 0.58 }
+      ]
+    },
+    performanceForecast
   };
 }
 
-// Generate detailed performance metrics
-export function generateDetailedPerformanceMetrics(): DetailedPerformanceMetrics {
-  // Generate historical data points (past 24 hours)
-  const hoursData = Array.from({ length: 24 }).map((_, i) => {
-    const hourAgo = 24 - i;
-    return {
-      timestamp: new Date(Date.now() - hourAgo * 3600000).toISOString(),
-      responseTime: 100 + Math.sin(i * 0.5) * 30 + faker.number.float({ min: -10, max: 10 }),
-      errorRate: Math.max(0.001, 0.02 + Math.sin(i * 0.7) * 0.015 + faker.number.float({ min: -0.005, max: 0.005 })),
-      cpuUsage: 50 + Math.sin(i * 0.3) * 20 + faker.number.float({ min: -5, max: 5 }),
-      memoryUsage: 60 + Math.sin(i * 0.2) * 15 + faker.number.float({ min: -5, max: 5 }),
-      networkUsage: 35 + Math.sin(i * 0.4) * 10 + faker.number.float({ min: -3, max: 3 }),
-      storageUsage: 45 + i * 0.5 + faker.number.float({ min: -2, max: 2 })
-    };
-  });
-
-  // Identify a few anomalies in response time
-  const responseTimeAnomalies = hoursData
-    .filter(() => faker.number.int({ min: 1, max: 10 }) > 8) // 20% chance for an anomaly
-    .map(hour => ({
-      timestamp: hour.timestamp,
-      value: hour.responseTime * (1 + faker.number.float({ min: 0.3, max: 1 })),
-      expected: hour.responseTime
-    }));
-
-  // Create error distribution by type
-  const errorTypes = {
-    'Network Timeout': faker.number.float({ min: 0.2, max: 0.4 }),
-    'Model Overload': faker.number.float({ min: 0.1, max: 0.3 }),
-    'Invalid Input': faker.number.float({ min: 0.1, max: 0.2 }),
-    'Resource Exhaustion': faker.number.float({ min: 0.05, max: 0.15 }),
-    'Unknown': faker.number.float({ min: 0.05, max: 0.1 }),
-  };
+/**
+ * Generate detailed performance metrics for specific components
+ */
+export function generateDetailedPerformanceMetrics() {
+  const now = new Date();
   
-  // Find most frequent error type
-  const mostFrequent = Object.entries(errorTypes).reduce(
-    (max, [type, value]) => value > (typeof max === 'string' ? 0 : max[1]) ? [type, value] : max,
-    ['', 0]
-  )[0];
-
   return {
-    responseTime: {
-      current: hoursData[hoursData.length - 1].responseTime,
-      historical: hoursData.map(h => ({ timestamp: h.timestamp, value: h.responseTime })),
-      anomalies: responseTimeAnomalies,
-      percentile95: faker.number.float({ min: 150, max: 250 }),
-      percentile99: faker.number.float({ min: 200, max: 350 }),
+    components: [
+      {
+        id: "neural-core-1",
+        name: "Neural Core Processor",
+        metrics: {
+          processingCapacity: 92.6,
+          responseTime: 124.6,
+          errorRate: 0.42,
+          utilizationRate: 68.5,
+          sessionHandlingScore: 94.2,
+          lastOptimized: new Date(now.getTime() - 86400000).toISOString()
+        }
+      },
+      {
+        id: "data-transformer-1",
+        name: "Data Transformer",
+        metrics: {
+          processingCapacity: 87.3,
+          responseTime: 87.3,
+          errorRate: 0.18,
+          utilizationRate: 45.2,
+          dataIntegrityScore: 99.8,
+          lastOptimized: new Date(now.getTime() - 43200000).toISOString()
+        }
+      }
+    ],
+    systemHealth: {
+      overallScore: 92.4,
+      critical: false,
+      components: {
+        core: 94.8,
+        memory: 88.3,
+        network: 96.5,
+        storage: 90.2
+      },
+      recommendations: [
+        "Memory optimization recommended",
+        "Consider network capacity expansion for future growth"
+      ]
     },
-    errorRate: {
-      current: hoursData[hoursData.length - 1].errorRate,
-      historical: hoursData.map(h => ({ timestamp: h.timestamp, value: h.errorRate })),
-      byType: errorTypes,
-      mostFrequent,
-    },
-    resourceUsage: {
-      cpu: hoursData.map(h => ({ timestamp: h.timestamp, value: h.cpuUsage })),
-      memory: hoursData.map(h => ({ timestamp: h.timestamp, value: h.memoryUsage })),
-      network: hoursData.map(h => ({ timestamp: h.timestamp, value: h.networkUsage })),
-      storage: hoursData.map(h => ({ timestamp: h.timestamp, value: h.storageUsage })),
-    }
+    historicalPerformance: Array.from({ length: 30 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (29 - i));
+      
+      // Generate some patterns in the data
+      const baseScore = 90 + Math.sin(i / 5) * 5;
+      const baseUtilization = 60 + Math.sin(i / 7) * 15;
+      
+      return {
+        date: d.toISOString().split('T')[0],
+        score: parseFloat((baseScore + (Math.random() * 2 - 1)).toFixed(1)),
+        utilization: parseFloat((baseUtilization + (Math.random() * 5)).toFixed(1)),
+        errors: Math.floor(Math.random() * 5) + (i % 10 === 0 ? 8 : 0)
+      };
+    })
   };
 }
