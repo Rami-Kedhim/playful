@@ -21,7 +21,7 @@ class NeuralMetricsService {
       // Ensure metrics has required fields for ServiceMetrics
       const normalizedMetrics: ServiceMetrics = {
         ...metrics,
-        latency: metrics.latency || metrics.responseTime || null,
+        latency: metrics.latency !== undefined ? metrics.latency : (metrics.responseTime || null),
         operationsCount: metrics.operationsCount || 0,
         errorCount: metrics.errorCount || 0
       };
