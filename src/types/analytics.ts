@@ -4,6 +4,7 @@ export interface MetricCardProps {
   value: number;
   change: number;
   unit: string;
+  onClick?: () => void;
 }
 
 export interface PerformanceChartProps {

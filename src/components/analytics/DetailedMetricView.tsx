@@ -5,18 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PerformanceChart from '@/components/neural/PerformanceChart';
 import { MetricDetail } from '@/hooks/useNeuralAnalyticsDashboard';
-
-export interface DetailedMetricViewProps {
-  title?: string;
-  description?: string;
-  value?: number;
-  unit?: string;
-  change?: number;
-  trendData?: Array<{date: string, value: number}>;
-  onBack: () => void;
-  metric?: MetricDetail;
-  data?: Array<{date: string, value: number}>;
-}
+import { DetailedMetricViewProps } from '@/types/analytics';
 
 const DetailedMetricView: React.FC<DetailedMetricViewProps> = ({
   title,

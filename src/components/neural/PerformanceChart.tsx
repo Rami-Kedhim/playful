@@ -49,7 +49,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
           <XAxis
             dataKey="date"
             tick={{ fontSize: 12 }}
-            tickFormatter={(value) => new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+            tickFormatter={(value) => value}
           />
           <YAxis
             tickFormatter={(value) => {
@@ -74,11 +74,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
                     ? 'Expected Load'
                     : 'Value'
             ]}
-            labelFormatter={(label) => new Date(label).toLocaleDateString(undefined, {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric'
-            })}
+            labelFormatter={(label) => label}
           />
           <Legend />
           <Line
