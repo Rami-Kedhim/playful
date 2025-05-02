@@ -23,4 +23,5 @@ export interface Anomaly {
   description?: string;
   timestamp?: string;
   relatedComponentId?: string;
+  message?: string; // Added message property to match AnomalyDetails requirements
 }
