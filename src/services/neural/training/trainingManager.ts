@@ -5,7 +5,7 @@
 export interface TrainingProgress {
   id: string;
   modelId: string;
-  status: string;
+  status: 'training' | 'completed' | 'failed' | 'stopped' | 'waiting';
   startTime: Date;
   currentEpoch: number;
   epoch: number;
@@ -17,7 +17,7 @@ export interface TrainingProgress {
   targetAccuracy: number;
   estimatedCompletionTime: Date;
   timeRemaining: number;
-  message: string;
+  message?: string;
   type: string;
 }
 

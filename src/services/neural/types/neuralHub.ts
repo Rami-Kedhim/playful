@@ -74,7 +74,7 @@ export interface TrainingProgress {
   modelId: string;
   type: string;
   progress: number;
-  status: 'training' | 'completed' | 'failed' | 'stopped';
+  status: 'training' | 'completed' | 'failed' | 'stopped' | 'waiting';
   startTime: Date;
   estimatedCompletionTime?: Date;
   currentEpoch?: number;
@@ -89,6 +89,9 @@ export interface TrainingProgress {
   metrics?: {
     loss?: number;
     accuracy?: number;
+    precision?: number;
+    recall?: number;
+    f1Score?: number;
   };
 }
 

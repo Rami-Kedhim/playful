@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { determineContentStatus, formatDateRelative, calculateDaysRemaining } from '@/utils/dateUtils';
 import ContentExpiryInfo from './ContentExpiryInfo';
-import { useContentBrainHub } from '@/hooks/useContentBrainHub';
+import useContentBrainHub from '@/hooks/useContentBrainHub';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, FileText, Image, Video } from 'lucide-react';

@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, Clock } from 'lucide-react';
 import { format } from 'date-fns';
-import { useContentBrainHub } from '@/hooks/useContentBrainHub';
+import useContentBrainHub from '@/hooks/useContentBrainHub';
 
 interface ContentExpiryInfoProps {
   createdAt: Date;

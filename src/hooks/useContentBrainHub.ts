@@ -5,7 +5,7 @@ import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
 /**
  * Custom hook for working with content-related neural hub functionality
  */
-const useContentBrainHub = () => {
+export const useContentBrainHub = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -75,12 +75,23 @@ const useContentBrainHub = () => {
     return Math.round(basePrice * statusFactor * 100) / 100;
   }, []);
 
+  /**
+   * Record content interaction for analysis
+   */
+  const recordInteraction = useCallback((contentId: string, interactionType: string) => {
+    // In a real implementation, this would send interaction data to the neural hub
+    console.log(`Recorded ${interactionType} interaction for content ${contentId}`);
+    return true;
+  }, []);
+
   return {
     processContent,
     getIntelligentRenewalCost,
+    recordInteraction,
     isProcessing,
     error
   };
 };
 
+// Default export for backward compatibility
 export default useContentBrainHub;
