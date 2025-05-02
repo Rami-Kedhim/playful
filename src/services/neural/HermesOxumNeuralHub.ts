@@ -1,324 +1,373 @@
-// Neural Hub implementation using the UberCore Hermes-Oxum integration
-import { 
-  INeuralHub, 
-  ModelParameters, 
-  BrainHubRequest, 
-  BrainHubResponse,
-  NeuralModel,
-  NeuralService,
-  TrainingProgress,
-  SystemHealthMetrics
-} from './types/neuralHub';
 
-// Initial model parameters
-const defaultModelParameters: ModelParameters = {
-  temperature: 0.7,
-  frequencyPenalty: 0.2,
-  presencePenalty: 0.5,
-  maxTokens: 500,
-  stopSequences: [],
-  modelName: 'UberCore-Hermes-v2.1',
-  decayConstant: 0.05,
-  growthFactor: 1.5,
-  cyclePeriod: 24,
-  harmonicCount: 3,
-  learningRate: 0.001,
-  batchSize: 32
-};
+import { INeuralHub, ModelParameters, BrainHubRequest, BrainHubResponse, SystemHealthMetrics, TrainingProgress, NeuralModel, NeuralService } from './types/neuralHub';
 
-// Mock implementation of the Neural Hub
+/**
+ * Neural Hub implementation that connects to various AI services
+ * across UberEscorts ecosystem
+ */
 class NeuralHub implements INeuralHub {
   private initialized: boolean = false;
-  private modelParameters: ModelParameters;
-  private healthMetrics: SystemHealthMetrics;
-  private trainingJobs: TrainingProgress[] = [];
-  private models: NeuralModel[] = [];
+  private modelParameters: ModelParameters = {
+    temperature: 0.7,
+    frequencyPenalty: 0.5,
+    presencePenalty: 0.5,
+    maxTokens: 1024,
+    stopSequences: [],
+    modelName: 'hermes-oxum-v2',
+    decayConstant: 0.85,
+    growthFactor: 1.2,
+    cyclePeriod: 24,
+    harmonicCount: 3,
+    learningRate: 0.001,
+    batchSize: 32
+  };
+  
   private services: Map<string, NeuralService> = new Map();
-  private config: any = {};
-  private decisionLogs: any[] = [];
-
-  constructor() {
-    // Initialize with default parameters
-    this.modelParameters = { ...defaultModelParameters };
-
-    // Initialize with default health metrics
-    this.healthMetrics = {
-      cpuUsage: 15,
-      memoryUsage: 25,
-      requestsPerMinute: 0,
-      errorRate: 0,
-      lastUpdated: Date.now(),
-      systemLoad: 18,
-      userEngagement: 0
-    };
-    
-    // Initialize mock models
-    this.initializeModels();
-  }
-
+  
+  /**
+   * Initialize the Neural Hub
+   */
   public initialize(): void {
-    if (this.initialized) {
-      console.log('Neural Hub already initialized');
-      return;
-    }
-
-    console.log('Initializing Neural Hub with Hermes-Oxum integration...');
-    // Simulate initialization steps
-    this.registerServices();
+    if (this.initialized) return;
+    
+    console.log('Initializing HermesOxum Neural Hub');
+    // Any initialization logic would go here
     this.initialized = true;
-    console.log('Neural Hub initialization complete');
   }
   
-  public async processRequest(request: BrainHubRequest): Promise<BrainHubResponse> {
-    if (!this.initialized) {
-      this.initialize();
-    }
-    
-    // Update request metrics
-    this.healthMetrics.requestsPerMinute += 1;
-    this.healthMetrics.lastUpdated = Date.now();
-    
-    try {
-      // Log the decision
-      this.logDecision('processRequest', request);
-      
-      // Process different request types
-      switch (request.type) {
-        case 'analysis':
-          return this.processAnalysisRequest(request);
-        case 'generation':
-          return this.processGenerationRequest(request);
-        case 'moderation':
-          return this.processModerationRequest(request);
-        default:
-          // All other request types get generic handling for now
-          return this.processGenericRequest(request);
-      }
-    } catch (error: any) {
-      // Update error metrics
-      this.healthMetrics.errorRate = Math.min(
-        (this.healthMetrics.errorRate + 1) / 2, 
-        100
-      );
-      
-      return {
-        success: false,
-        error: error.message || 'Unknown error processing request'
-      };
-    }
-  }
-  
+  /**
+   * Update model parameters
+   */
   public updateModelParameters(parameters: Partial<ModelParameters>): void {
     this.modelParameters = { ...this.modelParameters, ...parameters };
-    console.log('Model parameters updated:', this.modelParameters);
   }
   
+  /**
+   * Get current model parameters
+   */
   public getModelParameters(): ModelParameters {
     return { ...this.modelParameters };
   }
   
-  public getHealthMetrics(): SystemHealthMetrics {
-    // Update the lastUpdated time
-    this.healthMetrics.lastUpdated = Date.now();
-    return { ...this.healthMetrics };
-  }
-  
-  public getActiveTrainingJobs(): TrainingProgress[] {
-    return [...this.trainingJobs];
-  }
-  
-  public getModels(): NeuralModel[] {
-    return [...this.models];
-  }
-  
-  public async stopTraining(jobId: string): Promise<boolean> {
-    const jobIndex = this.trainingJobs.findIndex(job => job.id === jobId);
-    if (jobIndex >= 0) {
-      this.trainingJobs[jobIndex].status = 'stopped';
-      return true;
+  /**
+   * Process a request through the Neural Hub
+   */
+  public async processRequest(request: BrainHubRequest): Promise<BrainHubResponse> {
+    // Check if initialized, initialize if not
+    if (!this.initialized) {
+      this.initialize();
     }
-    return false;
-  }
-  
-  public async startTraining(type: string, options: any): Promise<TrainingProgress> {
-    const newJob: TrainingProgress = {
-      id: `job-${Date.now()}`,
-      modelId: options.modelId || 'default-model',
-      status: 'running',
-      startTime: new Date(),
-      currentEpoch: 0,
-      totalEpochs: options.epochs || 10,
-      progress: 0,
-      accuracy: 0.5,
-      targetAccuracy: options.targetAccuracy || 0.95,
-      estimatedCompletionTime: new Date(Date.now() + 1000 * 60 * 60), // 1 hour from now
-      timeRemaining: 60 * 60, // 1 hour in seconds
-      message: 'Training started',
-      type
-    };
     
-    this.trainingJobs.push(newJob);
-    return newJob;
+    try {
+      console.log(`Processing ${request.type} request`, request);
+      
+      // Mock response - in a real implementation this would call APIs, ML models, etc.
+      const mockResponse: BrainHubResponse = this.generateMockResponse(request);
+      
+      // Simulate some processing time
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      return mockResponse;
+    } catch (error) {
+      console.error('Error processing request:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
   }
   
-  public getService(serviceId: string): NeuralService | undefined {
-    return this.services.get(serviceId);
+  /**
+   * Get system health metrics
+   */
+  public getHealthMetrics(): SystemHealthMetrics {
+    return {
+      cpuUsage: Math.floor(Math.random() * 30) + 10, // 10-40%
+      memoryUsage: Math.floor(Math.random() * 40) + 20, // 20-60%
+      requestsPerMinute: Math.floor(Math.random() * 100),
+      errorRate: Math.random() * 2, // 0-2%
+      lastUpdated: Date.now()
+    };
   }
   
+  /**
+   * Get system status
+   */
   public getSystemStatus(): any {
     return {
-      initialized: this.initialized,
-      uptime: 3600, // Mock uptime in seconds
-      activeModels: this.models.length,
-      activeServices: this.services.size,
-      healthStatus: this.healthMetrics.errorRate < 10 ? 'healthy' : 'degraded',
-      lastRestart: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 24 hours ago
-      version: '1.5.2',
-      apiCalls: 1250,
-      averageResponseTime: 120, // in ms
-    };
-  }
-
-  // Required method for getConfig from INeuralHub
-  public getConfig(): any {
-    return this.config;
-  }
-  
-  // Required method for updateConfig from INeuralHub  
-  public async updateConfig(config: any): Promise<boolean> {
-    try {
-      this.config = { ...this.config, ...config };
-      return true;
-    } catch (error) {
-      console.error('Error updating config:', error);
-      return false;
-    }
-  }
-  
-  // Required method for getDecisionLogs from INeuralHub
-  public getDecisionLogs(): any[] {
-    return [...this.decisionLogs];
-  }
-
-  // Private helper methods
-  private processAnalysisRequest(request: BrainHubRequest): BrainHubResponse {
-    // Simulate analysis processing
-    return {
-      success: true,
-      data: {
-        sentiment: Math.random() > 0.5 ? 'positive' : 'negative',
-        confidence: Math.random() * 100,
-        entities: ['sample_entity_1', 'sample_entity_2'],
-        categories: ['category_1', 'category_2'],
-        summary: 'This is a mock analysis summary'
-      }
+      isActive: true,
+      cpuUtilization: Math.floor(Math.random() * 30) + 10,
+      memoryUtilization: Math.floor(Math.random() * 40) + 20,
+      operationsPerSecond: Math.floor(Math.random() * 50) + 5,
+      errorRate: Math.random() * 2,
+      responseTime: Math.floor(Math.random() * 100) + 50,
+      uptime: Math.floor(Math.random() * 1000) + 100,
+      activeConnections: Math.floor(Math.random() * 20) + 5,
+      neuralAccuracy: 92 + (Math.random() * 5),
+      neuralEfficiency: 85 + (Math.random() * 10),
+      neuralLatency: Math.floor(Math.random() * 50) + 10,
+      stability: 90 + (Math.random() * 8)
     };
   }
   
-  private processGenerationRequest(request: BrainHubRequest): BrainHubResponse {
-    // Simulate text generation
-    let generatedText = "This is a mock response from the Neural Hub. ";
-    
-    if (request.data?.prompt) {
-      generatedText += `You asked: "${request.data.prompt.substring(0, 50)}..." `;
-    }
-    
-    generatedText += "The system has processed your request successfully.";
-    
-    return {
-      success: true,
-      data: {
-        text: generatedText,
-        tokensUsed: generatedText.split(' ').length,
-        finishReason: 'completed'
-      }
-    };
+  /**
+   * Get current active training jobs
+   */
+  public getActiveTrainingJobs(): TrainingProgress[] {
+    // Mock implementation returning empty array
+    return [];
   }
   
-  private processModerationRequest(request: BrainHubRequest): BrainHubResponse {
-    // Simulate content moderation
-    const hasProhibitedContent = request.data?.content?.toLowerCase().includes('prohibited');
-    
-    return {
-      success: true,
-      data: {
-        isAppropriate: !hasProhibitedContent,
-        categories: hasProhibitedContent ? ['prohibited_content'] : [],
-        confidence: 0.95,
-        action: hasProhibitedContent ? 'block' : 'allow'
-      }
-    };
-  }
-  
-  private processGenericRequest(request: BrainHubRequest): BrainHubResponse {
-    // Generic handler for other request types
-    return {
-      success: true,
-      data: {
-        message: `Processed request of type: ${request.type}`,
-        timestamp: new Date().toISOString()
-      }
-    };
-  }
-  
-  private registerServices(): void {
-    // Register mock services
-    this.services.set('content-analysis', {
-      moduleId: 'content-analysis',
-      name: 'Content Analysis Service',
-      moduleType: 'analysis',
-      config: { enabled: true, priority: 1 },
-      getMetrics: () => ({ requests: 425, avgProcessingTime: 75 }),
-      updateConfig: (config) => { console.log('Updating content analysis config', config); }
-    });
-    
-    this.services.set('text-generation', {
-      moduleId: 'text-generation',
-      name: 'Text Generation Service',
-      moduleType: 'generation',
-      config: { enabled: true, priority: 2 },
-      getMetrics: () => ({ requests: 850, avgProcessingTime: 120 }),
-      updateConfig: (config) => { console.log('Updating text generation config', config); }
-    });
-  }
-  
-  private initializeModels(): void {
-    // Initialize mock models
-    this.models = [
+  /**
+   * Get available models
+   */
+  public getModels(): NeuralModel[] {
+    // Mock implementation
+    return [
       {
-        id: 'model-1',
-        name: 'UberCore-Base',
-        type: 'text-generation',
-        version: '1.0.0',
+        id: 'hermes-oxum-v2',
+        name: 'Hermes Oxum v2',
+        type: 'transformer',
+        version: '2.0.1',
         status: 'active',
-        performance: { accuracy: 0.89, latency: 85 }
-      },
-      {
-        id: 'model-2',
-        name: 'UberCore-Analysis',
-        type: 'content-analysis',
-        version: '1.1.2',
-        status: 'active',
-        performance: { accuracy: 0.92, latency: 65 }
+        performance: {
+          accuracy: 0.92,
+          latency: 50
+        }
       }
     ];
   }
   
-  private logDecision(action: string, data: any): void {
-    // Store decision logs
-    this.decisionLogs.push({
-      timestamp: new Date().toISOString(),
-      action,
-      data: JSON.parse(JSON.stringify(data)),
-      result: 'processed'
-    });
+  /**
+   * Stop a training job
+   */
+  public async stopTraining(jobId: string): Promise<boolean> {
+    // Mock implementation
+    return true;
+  }
+  
+  /**
+   * Start a training job
+   */
+  public async startTraining(type: string, options: any): Promise<TrainingProgress> {
+    // Mock implementation
+    return {
+      id: `train-${Date.now()}`,
+      modelId: 'hermes-oxum-v2',
+      status: 'starting',
+      startTime: new Date(),
+      currentEpoch: 0,
+      totalEpochs: 10,
+      progress: 0,
+      accuracy: 0,
+      targetAccuracy: 0.95,
+      estimatedCompletionTime: new Date(Date.now() + 3600000),
+      timeRemaining: 3600,
+      message: 'Preparing training environment',
+      type
+    };
+  }
+  
+  /**
+   * Get a specific service by ID
+   */
+  public getService(serviceId: string): NeuralService | undefined {
+    return this.services.get(serviceId);
+  }
+  
+  /**
+   * Get configuration
+   */
+  public getConfig(): any {
+    return {
+      aiModelParameters: {
+        learningRate: this.modelParameters.learningRate,
+        batchSize: this.modelParameters.batchSize,
+        epochs: 10,
+        optimizerType: 'adam'
+      },
+      systemSettings: {
+        resourceAllocationMode: 'adaptive',
+        autoOptimize: true,
+        debugMode: false,
+        loggingLevel: 'info'
+      },
+      neuralSettings: {
+        activationThreshold: 0.7,
+        neuralDensity: 0.85,
+        layerConfiguration: 'deep'
+      },
+      psychology: {
+        enabled: true,
+        confidenceThreshold: 0.75,
+      },
+      physics: {
+        enabled: true,
+        simulationPrecision: 0.9,
+      },
+      economics: {
+        enabled: true,
+        marketModelVersion: '1.2.3',
+      },
+      robotics: {
+        enabled: false,
+        motorPrecision: 0.95,
+      },
+      geoLegalFilteringEnabled: true,
+      neuroEmotionEnabled: true,
+      predictiveModulationEnabled: true
+    };
+  }
+  
+  /**
+   * Update configuration
+   */
+  public async updateConfig(config: any): Promise<boolean> {
+    console.log('Updating config:', config);
+    // In a real implementation, this would update the configuration
+    return true;
+  }
+  
+  /**
+   * Get decision logs
+   */
+  public getDecisionLogs(): any[] {
+    // Generate some mock decision logs
+    const logs = [];
+    const types = ['content_filter', 'region_compliance', 'sentiment_analysis', 'user_recommendation'];
     
-    // Keep log size manageable
-    if (this.decisionLogs.length > 1000) {
-      this.decisionLogs = this.decisionLogs.slice(-1000);
+    for (let i = 0; i < 10; i++) {
+      const timestamp = Date.now() - (i * 60000);
+      logs.push({
+        id: `log-${i}`,
+        timestamp,
+        type: types[i % types.length],
+        decision: Math.random() > 0.7 ? 'denied' : 'allowed',
+        confidence: 0.7 + (Math.random() * 0.25),
+        reason: `Mock decision log entry ${i}`,
+        metadata: {
+          processingTime: Math.floor(Math.random() * 100) + 20,
+          modelVersion: '2.0.1'
+        }
+      });
+    }
+    
+    return logs;
+  }
+  
+  /**
+   * Generate a mock response for a request (for development use)
+   */
+  private generateMockResponse(request: BrainHubRequest): BrainHubResponse {
+    // Common mock data
+    const mockSuccess = Math.random() > 0.1; // 90% success rate
+    
+    if (!mockSuccess) {
+      return {
+        success: false,
+        error: `Mock error processing ${request.type} request`
+      };
+    }
+    
+    // Generate response based on request type
+    switch (request.type) {
+      case 'analysis':
+        return {
+          success: true,
+          data: {
+            score: Math.random() * 100,
+            strengths: ['Good grammar', 'Clear message', 'Engaging tone'],
+            weaknesses: ['Could be more concise', 'Some repetition'],
+            suggestions: ['Consider shortening introduction', 'Add more examples']
+          }
+        };
+        
+      case 'generation':
+        return {
+          success: true,
+          data: {
+            text: `This is a mock generated text for prompt: ${request.data?.prompt || 'Unknown'}`
+          }
+        };
+        
+      case 'moderation':
+        return {
+          success: true,
+          data: {
+            isAppropriate: Math.random() > 0.2,
+            categories: {
+              sexual: Math.random(),
+              violent: Math.random(),
+              harmful: Math.random()
+            }
+          }
+        };
+        
+      case 'content_optimization':
+        return {
+          success: true,
+          data: {
+            optimizedContent: `Optimized version of: ${request.data?.content || 'Unknown content'}`
+          }
+        };
+        
+      case 'calculate_renewal_value':
+        return {
+          success: true,
+          data: {
+            value: Math.floor(Math.random() * 1000) + 100
+          }
+        };
+        
+      case 'predict_renewal_time':
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + Math.floor(Math.random() * 30) + 1);
+        return {
+          success: true,
+          data: {
+            timestamp: futureDate.toISOString()
+          }
+        };
+      
+      case 'register_component':
+      case 'unregister_component':
+      case 'sync_components':
+        return {
+          success: true,
+          data: {
+            componentId: request.data?.componentId,
+            status: 'registered',
+            timestamp: new Date().toISOString()
+          }
+        };
+        
+      case 'register_capabilities':
+      case 'record_interaction':
+        return {
+          success: true,
+          data: {
+            status: 'success',
+            timestamp: new Date().toISOString()
+          }
+        };
+        
+      default:
+        return {
+          success: true,
+          data: {
+            message: `Processed ${request.type} request successfully`,
+            timestamp: new Date().toISOString()
+          }
+        };
     }
   }
 }
 
 // Export the singleton instance
 export const neuralHub = new NeuralHub();
+
+// Export the brainHub as an alias to neuralHub for backward compatibility
+export const brainHub = neuralHub;
+
+// Export the NeuralHub class for testing purposes
+export { NeuralHub };

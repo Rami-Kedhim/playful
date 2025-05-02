@@ -10,5 +10,5 @@ export * from './registry/NeuralServiceRegistry';
 export type { BaseNeuralService, NeuralServiceConfig, ModuleType } from './types/NeuralService';
 export * from './HermesOxumNeuralHub';
 
-// Export the neuralHub directly from the HermesOxumNeuralHub file
+// Export the neuralHub and brainHub directly 
 export { neuralHub, brainHub } from './HermesOxumNeuralHub';
