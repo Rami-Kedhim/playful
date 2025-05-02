@@ -124,4 +124,9 @@ export interface INeuralHub {
   startTraining(type: string, options: any): Promise<TrainingProgress>;
   getService(serviceId: string): NeuralService | undefined;
   getSystemStatus(): any;
+  
+  // Add the missing methods to resolve the errors
+  getConfig?(): any;
+  updateConfig?(config: any): Promise<boolean>;
+  getDecisionLogs?(): any[];
 }

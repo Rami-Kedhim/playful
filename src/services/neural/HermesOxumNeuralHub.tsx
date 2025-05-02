@@ -21,6 +21,20 @@ class NeuralHub implements INeuralHub {
     learningRate: 0.01,
     batchSize: 32,
   };
+  
+  // Configuration for brain hub modules
+  private config = {
+    enableLogging: true,
+    enableTelemetry: true,
+    enableOptimization: true,
+    optimizationInterval: 3600,
+    maxConcurrentRequests: 100,
+    logRetention: 7, // days
+    maxDecisionLogSize: 1000
+  };
+  
+  // Decision logs for monitoring
+  private decisionLogs: any[] = [];
 
   constructor() {
     // Initialize the hub
@@ -49,6 +63,32 @@ class NeuralHub implements INeuralHub {
     return { ...this.modelParameters };
   }
 
+  // Implementation of missing method #1: getConfig
+  getConfig(): any {
+    return { ...this.config };
+  }
+
+  // Implementation of missing method #2: updateConfig
+  async updateConfig(config: any): Promise<boolean> {
+    try {
+      this.config = {
+        ...this.config,
+        ...config
+      };
+      console.log("Updated brain hub config:", this.config);
+      return true;
+    } catch (error) {
+      console.error("Error updating brain hub config:", error);
+      return false;
+    }
+  }
+
+  // Implementation of missing method #3: getDecisionLogs
+  getDecisionLogs(): any[] {
+    // Return a copy of the logs to prevent modification
+    return [...this.decisionLogs];
+  }
+
   // Modified to be async and return a Promise
   async processRequest(request: BrainHubRequest): Promise<BrainHubResponse> {
     if (!this.initialized) {
@@ -58,6 +98,20 @@ class NeuralHub implements INeuralHub {
     console.log(`Processing request: ${request.type}`, request);
 
     try {
+      // Record decision log for monitoring purposes if logging is enabled
+      if (this.config.enableLogging && request.type === 'log_decision') {
+        this.decisionLogs.unshift({
+          timestamp: new Date(),
+          decision: request.data,
+          context: request.options?.context
+        });
+        
+        // Maintain max size
+        if (this.decisionLogs.length > this.config.maxDecisionLogSize) {
+          this.decisionLogs = this.decisionLogs.slice(0, this.config.maxDecisionLogSize);
+        }
+      }
+
       // Process different request types
       switch (request.type) {
         case 'analysis':

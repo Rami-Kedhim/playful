@@ -59,12 +59,30 @@ export function useNeuralHub() {
     return neuralHub.getSystemStatus();
   }, []);
 
+  // Get hub configuration
+  const getConfig = useCallback(() => {
+    if (typeof neuralHub.getConfig === 'function') {
+      return neuralHub.getConfig();
+    }
+    return {};
+  }, []);
+
+  // Update hub configuration
+  const updateConfig = useCallback(async (config: any): Promise<boolean> => {
+    if (typeof neuralHub.updateConfig === 'function') {
+      return await neuralHub.updateConfig(config);
+    }
+    return false;
+  }, []);
+
   return {
     sendRequest,
     updateParameters,
     getParameters,
     getHealthMetrics,
     getSystemStatus,
+    getConfig,
+    updateConfig,
     isLoading,
     error,
     lastResponse
