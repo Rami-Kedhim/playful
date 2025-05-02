@@ -1,4 +1,3 @@
-
 export interface HealthMetrics {
   cpuUtilization: number;
   memoryUtilization: number;
