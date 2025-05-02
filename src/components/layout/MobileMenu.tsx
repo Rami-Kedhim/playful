@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Link } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import { Menu, Brain } from 'lucide-react';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { cn } from '@/lib/utils';
 import { AppRoutes } from '@/utils/navigation';
@@ -36,6 +36,10 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ className }) => {
           </Link>
           <Link to={AppRoutes.LIVECAMS} onClick={() => setOpen(false)} className="px-2 py-1 hover:underline">
             Live Cams
+          </Link>
+          <Link to="/neural/monitor" onClick={() => setOpen(false)} className="px-2 py-1 hover:underline flex items-center gap-2">
+            <Brain className="h-4 w-4" />
+            Neural Monitor
           </Link>
           {isAuthenticated ? (
             <>

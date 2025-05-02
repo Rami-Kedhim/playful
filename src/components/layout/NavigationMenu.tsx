@@ -13,7 +13,8 @@ import {
   X,
   Users,
   Home,
-  Image
+  Image,
+  Brain
 } from 'lucide-react';
 
 export function NavigationMenu() {
@@ -59,6 +60,7 @@ export function NavigationMenu() {
         <NavItem to="/" icon={<Home size={18} />} label="Home" />
         <NavItem to="/escorts" icon={<Users size={18} />} label="Escorts" />
         <NavItem to="/search" icon={<Search size={18} />} label="Search" />
+        <NavItem to="/neural/monitor" icon={<Brain size={18} />} label="Neural Monitor" />
         
         {user && (
           <>
@@ -77,6 +79,7 @@ export function NavigationMenu() {
             <NavItem to="/" icon={<Home size={18} />} label="Home" />
             <NavItem to="/escorts" icon={<Users size={18} />} label="Escorts" />
             <NavItem to="/search" icon={<Search size={18} />} label="Search" />
+            <NavItem to="/neural/monitor" icon={<Brain size={18} />} label="Neural Monitor" />
             
             {user && (
               <>

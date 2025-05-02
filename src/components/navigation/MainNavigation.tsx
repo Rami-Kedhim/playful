@@ -8,7 +8,8 @@ import {
   MessageSquare, 
   User, 
   Compass,
-  Bell
+  Bell,
+  Brain
 } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 
@@ -45,6 +46,10 @@ const MainNavigation: React.FC<MainNavigationProps> = ({ showFullMenu = true }) 
             <NavLink to="/metaverse" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
               <Compass className="w-4 h-4" />
               <span>Metaverse</span>
+            </NavLink>
+            <NavLink to="/neural/monitor" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+              <Brain className="w-4 h-4" />
+              <span>Neural Monitor</span>
             </NavLink>
           </nav>
         )}

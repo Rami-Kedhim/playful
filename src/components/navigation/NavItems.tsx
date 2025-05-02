@@ -38,6 +38,11 @@ const NavItems = () => {
         Profile
       </Link>
 
+      <Link to="/neural/monitor" className={cn("text-sm font-medium transition-colors hover:text-primary flex items-center")}>
+        <Brain className="h-4 w-4 mr-1" />
+        Neural Monitor
+      </Link>
+
       <Link to={AppRoutes.WALLET} className={cn("text-sm font-medium transition-colors hover:text-primary flex items-center")}>
         <Wallet className="h-4 w-4 mr-1" />
         Wallet

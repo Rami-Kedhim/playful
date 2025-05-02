@@ -18,6 +18,8 @@ export const AppRoutes = {
   LIVECAMS: '/livecams',
   LIVECAM_DETAIL: '/livecams/:id',
   BRAIN_HUB: '/brain-hub',
+  NEURAL_MONITOR: '/neural/monitor',
+  NEURAL_ANALYTICS: '/neural/analytics',
   AUTH: '/auth',
   WALLET: '/wallet',
   VERIFICATION: '/verification',
