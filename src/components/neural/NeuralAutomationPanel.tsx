@@ -1,526 +1,277 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
+import { Clock, Calendar, Settings, CheckCircle2, AlertCircle, PlayCircle, PauseCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  Cog, 
-  Calendar, 
-  Clock, 
-  Zap, 
-  Brain, 
-  RefreshCw, 
-  Cpu, 
-  BarChart4,
-  ArrowUpCircle,
-  Scale,
-  History,
-  Wand2,
-  AlertCircle
-} from 'lucide-react';
 
-const NeuralAutomationPanel = () => {
-  const [scheduledTasks, setScheduledTasks] = useState([
-    {
-      id: 1,
-      name: 'System Health Check',
-      schedule: 'Every 15 minutes',
-      lastRun: '2025-05-02 09:45',
-      status: 'active',
-      type: 'health'
-    },
-    {
-      id: 2,
-      name: 'Performance Optimization',
-      schedule: 'Daily at 02:00',
-      lastRun: '2025-05-01 02:00',
-      status: 'active',
-      type: 'optimization'
-    },
-    {
-      id: 3,
-      name: 'Neural Model Update',
-      schedule: 'Weekly on Saturday',
-      lastRun: '2025-04-27 03:00',
-      status: 'active',
-      type: 'model'
-    },
-    {
-      id: 4,
-      name: 'Resource Scaling',
-      schedule: 'On demand',
-      lastRun: '2025-05-01 14:22',
-      status: 'active',
-      type: 'scaling'
-    }
-  ]);
-
-  const [automationSettings, setAutomationSettings] = useState({
-    resourceOptimization: true,
-    performanceMonitoring: true,
-    learningCycle: true,
-    anomalyDetection: true,
-    maintenanceWindow: 'sunday-03:00',
-    thresholdSensitivity: 75,
-    autoScalingEnabled: true,
-    scalingAggressiveness: 60,
-    modelUpdateApproval: false,
-    backupFrequency: 'daily',
-  });
-
-  const [newTask, setNewTask] = useState({
-    name: '',
-    schedule: 'hourly',
-    type: 'health'
-  });
-
-  const handleSettingChange = (settingName, value) => {
-    setAutomationSettings(prev => ({
-      ...prev,
-      [settingName]: value
-    }));
-  };
-
-  const handleTaskToggle = (taskId) => {
-    setScheduledTasks(prev => prev.map(task => {
-      if (task.id === taskId) {
-        return {
-          ...task,
-          status: task.status === 'active' ? 'paused' : 'active'
-        };
-      }
-      return task;
-    }));
-  };
-
-  const handleAddTask = (e) => {
-    e.preventDefault();
-    if (!newTask.name.trim()) return;
-    
-    setScheduledTasks(prev => [...prev, {
-      id: Math.max(0, ...prev.map(t => t.id)) + 1,
-      name: newTask.name,
-      schedule: newTask.schedule,
-      lastRun: 'Never',
-      status: 'active',
-      type: newTask.type
-    }]);
-    
-    setNewTask({
-      name: '',
-      schedule: 'hourly',
-      type: 'health'
-    });
-  };
-
-  const getTaskIcon = (type) => {
-    switch (type) {
-      case 'health': return <AlertCircle className="h-4 w-4 text-blue-500" />;
-      case 'optimization': return <Wand2 className="h-4 w-4 text-purple-500" />;
-      case 'model': return <Brain className="h-4 w-4 text-green-500" />;
-      case 'scaling': return <Scale className="h-4 w-4 text-amber-500" />;
-      default: return <Cog className="h-4 w-4 text-gray-500" />;
-    }
-  };
-
+const NeuralAutomationPanel: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('scheduled');
+  const [isAutomationEnabled, setIsAutomationEnabled] = useState(true);
+  
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="tasks" className="w-full">
-        <TabsList className="grid grid-cols-3 mb-4">
-          <TabsTrigger value="tasks" className="flex items-center gap-1.5">
-            <Calendar className="h-4 w-4" />
-            <span>Scheduled Tasks</span>
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-1.5">
-            <Cog className="h-4 w-4" />
-            <span>Settings</span>
-          </TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center gap-1.5">
-            <History className="h-4 w-4" />
-            <span>History</span>
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="tasks" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Automation Tasks</CardTitle>
-              <CardDescription>
-                Configure scheduled tasks for neural system management
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="border rounded-md divide-y">
-                  {scheduledTasks.map(task => (
-                    <div key={task.id} className="p-4 flex items-center justify-between">
-                      <div className="flex items-start gap-3">
-                        {getTaskIcon(task.type)}
-                        <div>
-                          <h4 className="font-medium">{task.name}</h4>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            <span>{task.schedule}</span>
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            Last run: {task.lastRun}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          variant={task.status === 'active' ? 'outline' : 'default'} 
-                          size="sm"
-                          onClick={() => handleTaskToggle(task.id)}
-                        >
-                          {task.status === 'active' ? 'Pause' : 'Resume'}
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          className="text-destructive"
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base">Add New Task</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleAddTask} className="space-y-3">
-                      <div className="grid gap-2">
-                        <Label htmlFor="task-name">Task Name</Label>
-                        <Input 
-                          id="task-name" 
-                          placeholder="Enter task name"
-                          value={newTask.name}
-                          onChange={e => setNewTask({...newTask, name: e.target.value})}
-                        />
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor="task-schedule">Schedule</Label>
-                          <Select 
-                            value={newTask.schedule}
-                            onValueChange={value => setNewTask({...newTask, schedule: value})}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select schedule" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="hourly">Hourly</SelectItem>
-                              <SelectItem value="daily">Daily</SelectItem>
-                              <SelectItem value="weekly">Weekly</SelectItem>
-                              <SelectItem value="monthly">Monthly</SelectItem>
-                              <SelectItem value="custom">Custom</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        <div className="grid gap-2">
-                          <Label htmlFor="task-type">Task Type</Label>
-                          <Select 
-                            value={newTask.type}
-                            onValueChange={value => setNewTask({...newTask, type: value})}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="health">Health Check</SelectItem>
-                              <SelectItem value="optimization">Optimization</SelectItem>
-                              <SelectItem value="model">Model Update</SelectItem>
-                              <SelectItem value="scaling">Resource Scaling</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      
-                      <Button type="submit" className="w-full">Add Task</Button>
-                    </form>
-                  </CardContent>
-                </Card>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="settings" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Automation Settings</CardTitle>
-              <CardDescription>
-                Configure how the neural system autonomously operates
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex justify-between items-center">
+            <CardTitle>Neural System Automation</CardTitle>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="automation-toggle" className="text-sm">Automation</Label>
+              <Switch 
+                id="automation-toggle" 
+                checked={isAutomationEnabled} 
+                onCheckedChange={setIsAutomationEnabled} 
+              />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="scheduled">
+                <Clock className="mr-2 h-4 w-4" />
+                Scheduled
+              </TabsTrigger>
+              <TabsTrigger value="history">
+                <Calendar className="mr-2 h-4 w-4" />
+                History
+              </TabsTrigger>
+              <TabsTrigger value="settings">
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </TabsTrigger>
+            </TabsList>
+            
+            <div className="mt-4">
+              <TabsContent value="scheduled">
                 <div className="space-y-4">
-                  <h3 className="font-medium flex items-center gap-2">
-                    <Cpu className="h-4 w-4 text-primary" />
-                    Core Features
-                  </h3>
+                  <AutomationTask 
+                    name="Neural Model Optimization" 
+                    schedule="Daily at 03:00" 
+                    status="active" 
+                    lastRun="2025-05-01 03:00"
+                    nextRun="2025-05-02 03:00"
+                  />
                   
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="resource-optimization" className="flex-1">
-                        <div>Resource Optimization</div>
-                        <div className="text-sm text-muted-foreground">
-                          Automatically optimize resource allocation based on workloads
-                        </div>
-                      </Label>
-                      <Switch 
-                        id="resource-optimization"
-                        checked={automationSettings.resourceOptimization} 
-                        onCheckedChange={(checked) => handleSettingChange('resourceOptimization', checked)} 
-                      />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="performance-monitoring" className="flex-1">
-                        <div>Performance Monitoring</div>
-                        <div className="text-sm text-muted-foreground">
-                          Continuous monitoring of system performance metrics
-                        </div>
-                      </Label>
-                      <Switch 
-                        id="performance-monitoring"
-                        checked={automationSettings.performanceMonitoring} 
-                        onCheckedChange={(checked) => handleSettingChange('performanceMonitoring', checked)} 
-                      />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="learning-cycle" className="flex-1">
-                        <div>Continuous Learning</div>
-                        <div className="text-sm text-muted-foreground">
-                          Allow system to learn from new data and improve over time
-                        </div>
-                      </Label>
-                      <Switch 
-                        id="learning-cycle"
-                        checked={automationSettings.learningCycle} 
-                        onCheckedChange={(checked) => handleSettingChange('learningCycle', checked)} 
-                      />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="anomaly-detection" className="flex-1">
-                        <div>Anomaly Detection</div>
-                        <div className="text-sm text-muted-foreground">
-                          Automatically detect and alert on system anomalies
-                        </div>
-                      </Label>
-                      <Switch 
-                        id="anomaly-detection"
-                        checked={automationSettings.anomalyDetection} 
-                        onCheckedChange={(checked) => handleSettingChange('anomalyDetection', checked)} 
-                      />
-                    </div>
-                  </div>
+                  <AutomationTask 
+                    name="System Backup" 
+                    schedule="Weekly on Sunday" 
+                    status="active" 
+                    lastRun="2025-04-28 01:00"
+                    nextRun="2025-05-05 01:00"
+                  />
+                  
+                  <AutomationTask 
+                    name="Performance Analytics" 
+                    schedule="Hourly" 
+                    status="active" 
+                    lastRun="2025-05-01 15:00"
+                    nextRun="2025-05-01 16:00"
+                  />
+                  
+                  <AutomationTask 
+                    name="Anomaly Detection" 
+                    schedule="Every 15 minutes" 
+                    status="active" 
+                    lastRun="2025-05-01 15:45"
+                    nextRun="2025-05-01 16:00"
+                  />
+                  
+                  <Button variant="outline" className="w-full mt-2">
+                    <Clock className="mr-2 h-4 w-4" />
+                    Add New Task
+                  </Button>
                 </div>
-                
-                <div className="pt-2">
-                  <h3 className="font-medium flex items-center gap-2 mb-4">
-                    <Scale className="h-4 w-4 text-primary" />
-                    Auto-Scaling Configuration
-                  </h3>
+              </TabsContent>
+              
+              <TabsContent value="history">
+                <div className="space-y-4">
+                  <HistoryItem 
+                    name="Neural Model Optimization" 
+                    status="completed"
+                    startTime="2025-05-01 03:00:00"
+                    endTime="2025-05-01 03:12:45"
+                    message="All models optimized successfully"
+                  />
                   
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="auto-scaling" className="flex-1">Auto-scaling Enabled</Label>
-                      <Switch 
-                        id="auto-scaling"
-                        checked={automationSettings.autoScalingEnabled} 
-                        onCheckedChange={(checked) => handleSettingChange('autoScalingEnabled', checked)} 
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <Label htmlFor="scaling-aggressiveness">Scaling Aggressiveness</Label>
-                        <span className="text-sm">
-                          {automationSettings.scalingAggressiveness}%
-                        </span>
-                      </div>
-                      <Slider
-                        id="scaling-aggressiveness"
-                        min={0}
-                        max={100}
-                        step={1}
-                        defaultValue={[automationSettings.scalingAggressiveness]}
-                        onValueChange={(value) => handleSettingChange('scalingAggressiveness', value[0])}
-                        disabled={!automationSettings.autoScalingEnabled}
-                      />
-                      <div className="flex justify-between text-xs text-muted-foreground pt-1">
-                        <span>Conservative</span>
-                        <span>Balanced</span>
-                        <span>Aggressive</span>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <Label htmlFor="threshold-sensitivity">Threshold Sensitivity</Label>
-                        <span className="text-sm">
-                          {automationSettings.thresholdSensitivity}%
-                        </span>
-                      </div>
-                      <Slider
-                        id="threshold-sensitivity"
-                        min={0}
-                        max={100}
-                        step={1}
-                        defaultValue={[automationSettings.thresholdSensitivity]}
-                        onValueChange={(value) => handleSettingChange('thresholdSensitivity', value[0])}
-                      />
-                    </div>
-                  </div>
+                  <HistoryItem 
+                    name="Performance Analytics" 
+                    status="completed"
+                    startTime="2025-05-01 14:00:00"
+                    endTime="2025-05-01 14:01:12"
+                    message="Analytics generated and stored"
+                  />
+                  
+                  <HistoryItem 
+                    name="Anomaly Detection" 
+                    status="warning"
+                    startTime="2025-05-01 14:45:00"
+                    endTime="2025-05-01 14:45:32"
+                    message="Detected memory usage anomaly, threshold exceeded"
+                  />
+                  
+                  <HistoryItem 
+                    name="System Resource Check" 
+                    status="error"
+                    startTime="2025-05-01 13:00:00"
+                    endTime="2025-05-01 13:00:21"
+                    message="Failed to check disk space, permission denied"
+                  />
+                  
+                  <Button variant="outline" className="w-full mt-2">
+                    View Full History
+                  </Button>
                 </div>
-                
-                <div className="pt-2">
-                  <h3 className="font-medium flex items-center gap-2 mb-4">
-                    <Wand2 className="h-4 w-4 text-primary" />
-                    Advanced Settings
-                  </h3>
+              </TabsContent>
+              
+              <TabsContent value="settings">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="notification-level">Notification Level</Label>
+                    <Select defaultValue="warnings">
+                      <SelectTrigger id="notification-level">
+                        <SelectValue placeholder="Select notification level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Events</SelectItem>
+                        <SelectItem value="warnings">Warnings & Errors</SelectItem>
+                        <SelectItem value="errors">Errors Only</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   
-                  <div className="space-y-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="maintenance-window">Maintenance Window</Label>
-                      <Select
-                        value={automationSettings.maintenanceWindow}
-                        onValueChange={(value) => handleSettingChange('maintenanceWindow', value)}
-                      >
-                        <SelectTrigger id="maintenance-window">
-                          <SelectValue placeholder="Select maintenance window" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="sunday-03:00">Sunday, 03:00</SelectItem>
-                          <SelectItem value="monday-01:00">Monday, 01:00</SelectItem>
-                          <SelectItem value="wednesday-02:00">Wednesday, 02:00</SelectItem>
-                          <SelectItem value="saturday-04:00">Saturday, 04:00</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="grid gap-2">
-                      <Label htmlFor="backup-frequency">Backup Frequency</Label>
-                      <Select
-                        value={automationSettings.backupFrequency}
-                        onValueChange={(value) => handleSettingChange('backupFrequency', value)}
-                      >
-                        <SelectTrigger id="backup-frequency">
-                          <SelectValue placeholder="Select backup frequency" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="hourly">Hourly</SelectItem>
-                          <SelectItem value="daily">Daily</SelectItem>
-                          <SelectItem value="weekly">Weekly</SelectItem>
-                          <SelectItem value="monthly">Monthly</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 pt-2">
-                      <Checkbox 
-                        id="model-approval" 
-                        checked={automationSettings.modelUpdateApproval}
-                        onCheckedChange={(checked) => handleSettingChange('modelUpdateApproval', checked)}
-                      />
-                      <Label htmlFor="model-approval">
-                        Require approval for model updates
+                  <div className="space-y-2">
+                    <Label htmlFor="auto-recovery">Enable Auto-Recovery</Label>
+                    <div className="flex items-center space-x-2">
+                      <Switch id="auto-recovery" defaultChecked />
+                      <Label htmlFor="auto-recovery" className="text-sm text-muted-foreground">
+                        Automatically recover from system failures when possible
                       </Label>
                     </div>
                   </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="resource-optimization">Resource Optimization</Label>
+                    <div className="flex items-center space-x-2">
+                      <Switch id="resource-optimization" defaultChecked />
+                      <Label htmlFor="resource-optimization" className="text-sm text-muted-foreground">
+                        Automatically optimize system resources
+                      </Label>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="maintenance-window">Maintenance Window</Label>
+                    <Select defaultValue="night">
+                      <SelectTrigger id="maintenance-window">
+                        <SelectValue placeholder="Select maintenance window" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="night">Night (1am - 5am)</SelectItem>
+                        <SelectItem value="morning">Morning (5am - 9am)</SelectItem>
+                        <SelectItem value="weekend">Weekends Only</SelectItem>
+                        <SelectItem value="custom">Custom Schedule</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="pt-4 flex justify-end space-x-2">
+                    <Button variant="outline">Reset to Defaults</Button>
+                    <Button>Save Settings</Button>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="history" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Automation History</CardTitle>
-              <CardDescription>
-                Recent automation actions and system operations
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <ActivityItem
-                  icon={<ArrowUpCircle className="h-4 w-4 text-green-500" />}
-                  title="Auto-scaling triggered"
-                  timestamp="Today, 10:42"
-                  description="Memory usage reached 82%, additional resources allocated."
-                />
-                <ActivityItem
-                  icon={<RefreshCw className="h-4 w-4 text-blue-500" />}
-                  title="Resources optimized"
-                  timestamp="Today, 08:15"
-                  description="Idle resources reassigned to high-demand services."
-                />
-                <ActivityItem
-                  icon={<AlertCircle className="h-4 w-4 text-amber-500" />}
-                  title="Anomaly detected"
-                  timestamp="Yesterday, 23:05"
-                  description="Brief latency spike detected and automatically resolved."
-                />
-                <ActivityItem
-                  icon={<BarChart4 className="h-4 w-4 text-purple-500" />}
-                  title="Performance report generated"
-                  timestamp="Yesterday, 15:30"
-                  description="Weekly performance analysis completed."
-                />
-                <ActivityItem
-                  icon={<Brain className="h-4 w-4 text-indigo-500" />}
-                  title="Model optimization completed"
-                  timestamp="May 1, 03:15"
-                  description="Neural model parameters tuned for improved efficiency."
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              </TabsContent>
+            </div>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-interface ActivityItemProps {
-  icon: React.ReactNode;
-  title: string;
-  timestamp: string;
-  description: string;
+interface AutomationTaskProps {
+  name: string;
+  schedule: string;
+  status: 'active' | 'paused' | 'disabled';
+  lastRun: string;
+  nextRun: string;
 }
 
-const ActivityItem: React.FC<ActivityItemProps> = ({
-  icon,
-  title,
-  timestamp,
-  description
-}) => {
+const AutomationTask: React.FC<AutomationTaskProps> = ({ name, schedule, status, lastRun, nextRun }) => {
+  const [taskStatus, setTaskStatus] = useState(status);
+  
   return (
-    <div className="flex gap-3 items-start p-3 border rounded-lg">
-      <div className="mt-0.5">{icon}</div>
-      <div className="space-y-1">
-        <div className="flex justify-between">
-          <h4 className="font-medium">{title}</h4>
-          <span className="text-xs text-muted-foreground">{timestamp}</span>
+    <div className="border rounded-md p-4">
+      <div className="flex justify-between items-center">
+        <div>
+          <h3 className="font-medium">{name}</h3>
+          <p className="text-xs text-muted-foreground">{schedule}</p>
         </div>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => setTaskStatus(taskStatus === 'active' ? 'paused' : 'active')}
+        >
+          {taskStatus === 'active' ? (
+            <PauseCircle className="h-5 w-5 text-muted-foreground" />
+          ) : (
+            <PlayCircle className="h-5 w-5 text-muted-foreground" />
+          )}
+        </Button>
+      </div>
+      <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+        <div>
+          <p className="text-muted-foreground">Last Run</p>
+          <p>{lastRun}</p>
+        </div>
+        <div>
+          <p className="text-muted-foreground">Next Run</p>
+          <p>{nextRun}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface HistoryItemProps {
+  name: string;
+  status: 'completed' | 'warning' | 'error';
+  startTime: string;
+  endTime: string;
+  message: string;
+}
+
+const HistoryItem: React.FC<HistoryItemProps> = ({ name, status, startTime, endTime, message }) => {
+  const statusColors = {
+    completed: "text-green-500",
+    warning: "text-amber-500",
+    error: "text-red-500"
+  };
+  
+  const statusIcons = {
+    completed: <CheckCircle2 className="h-4 w-4" />,
+    warning: <AlertCircle className="h-4 w-4" />,
+    error: <AlertCircle className="h-4 w-4" />
+  };
+  
+  return (
+    <div className="border rounded-md p-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-medium">{name}</h3>
+        <span className={`flex items-center ${statusColors[status]}`}>
+          {statusIcons[status]}
+          <span className="ml-1 text-xs capitalize">{status}</span>
+        </span>
+      </div>
+      <div className="mt-2">
+        <div className="text-xs text-muted-foreground">
+          {startTime} - {endTime}
+        </div>
+        <p className="text-sm mt-1">{message}</p>
       </div>
     </div>
   );
