@@ -1,19 +1,17 @@
 
-import React, { useState, useCallback } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Activity, AlertTriangle, ArrowLeft, LineChart, RefreshCcw } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-
+import { ArrowLeft, RefreshCw } from 'lucide-react';
+import MetricCard from '@/components/analytics/MetricCard';
 import PerformanceChart from '@/components/neural/PerformanceChart';
-import AnomalyDetails from '@/components/analytics/AnomalyDetails';
-import DrillableMetricCard from '@/components/analytics/DrillableMetricCard';
+import DetailedMetricView from '@/components/analytics/DetailedMetricView';
 import AutoRefreshControl from '@/components/analytics/AutoRefreshControl';
+import AnomalyDetails from '@/components/analytics/AnomalyDetails';
 import useNeuralAnalyticsDashboard from '@/hooks/useNeuralAnalyticsDashboard';
-import { Anomaly } from '@/types/analytics';
 import { useToast } from '@/hooks/use-toast';
+import { MetricDetail } from '@/hooks/useNeuralAnalyticsDashboard';
+import { Anomaly } from '@/types/analytics';
 
 interface NeuralAnalyticsProps {
   refreshInterval?: number;
@@ -24,318 +22,194 @@ const NeuralAnalytics: React.FC<NeuralAnalyticsProps> = ({ refreshInterval = 30 
     analyticsData, 
     loading, 
     error, 
-    refreshAnalytics, 
-    isAutoRefreshEnabled, 
-    toggleAutoRefresh,
-    refreshInterval: autoRefreshIntervalSecs,
-    changeRefreshInterval,
+    refreshAnalytics,
     selectedMetric,
     handleDrillDown,
     handleBackToOverview,
     getMetricValue,
-    getTrendDataForMetric
+    getTrendDataForMetric,
+    isAutoRefreshEnabled,
+    toggleAutoRefresh,
+    refreshInterval: autoRefreshIntervalSecs,
+    changeRefreshInterval
   } = useNeuralAnalyticsDashboard();
-
-  const [selectedAnomaly, setSelectedAnomaly] = useState<Anomaly | null>(null);
-  const { toast } = useToast();
   
-  const handleRefresh = useCallback(() => {
+  const { toast } = useToast();
+  const [isPaused, setIsPaused] = useState(false);
+
+  const handleRefresh = () => {
     refreshAnalytics();
     toast({
-      title: "Analytics Refreshed",
-      description: "Neural analytics data has been updated",
-      variant: "success"
+      title: "Analytics refreshed",
+      description: "The latest neural system analytics have been loaded.",
     });
-  }, [refreshAnalytics, toast]);
-  
-  // Go back to main view from anomaly detail
-  const handleBackFromAnomaly = () => {
-    setSelectedAnomaly(null);
   };
-  
-  // Show anomaly details
-  const handleViewAnomaly = (anomaly: Anomaly) => {
-    setSelectedAnomaly(anomaly);
+
+  const metrics: MetricDetail[] = [
+    { 
+      key: 'responseTime', 
+      title: 'Response Time', 
+      description: 'Average time to process neural requests'
+    },
+    { 
+      key: 'accuracy', 
+      title: 'Accuracy Rate', 
+      description: 'Neural network prediction accuracy'
+    },
+    { 
+      key: 'errorRate', 
+      title: 'Error Rate', 
+      description: 'Percentage of failed neural operations'
+    },
+    { 
+      key: 'operations', 
+      title: 'Operations', 
+      description: 'Total neural operations processed'
+    }
+  ];
+
+  // Map anomaly data to the expected format for AnomalyDetails
+  const mapAnomalyData = (anomaly: Anomaly) => {
+    return {
+      id: anomaly.id || '',
+      type: anomaly.type || 'unknown',
+      severity: anomaly.severity || 'medium',
+      message: anomaly.message || anomaly.description || 'Unknown anomaly detected',
+      timestamp: anomaly.timestamp || new Date().toISOString(),
+      metric: undefined,
+      value: undefined,
+      threshold: undefined,
+      suggestedAction: undefined
+    };
   };
-  
-  if (loading && !analyticsData) {
+
+  if (loading) {
     return (
-      <Card className="w-full">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center py-12">
-            <div role="status">
-              <div className="flex items-center space-x-2">
-                <svg className="animate-spin h-6 w-6 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span className="text-lg font-medium">Loading analytics data...</span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="w-full h-64 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading neural analytics...</p>
+        </div>
+      </div>
     );
   }
-  
+
   if (error) {
     return (
-      <Card className="w-full border-red-200">
-        <CardContent className="p-6">
-          <div className="flex items-center text-red-600 mb-4">
-            <AlertTriangle className="h-6 w-6 mr-2" />
-            <h3 className="text-lg font-medium">Error Loading Data</h3>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center">
+            <p className="text-destructive font-medium">Failed to load neural analytics</p>
+            <p className="text-sm text-muted-foreground mt-1 mb-4">{error}</p>
+            <Button onClick={refreshAnalytics} variant="outline" size="sm">
+              <RefreshCw className="h-4 w-4 mr-2" /> Try Again
+            </Button>
           </div>
-          <p className="text-muted-foreground mb-4">{error}</p>
-          <Button variant="outline" onClick={handleRefresh}>
-            <RefreshCcw className="h-4 w-4 mr-2" /> Try Again
-          </Button>
         </CardContent>
       </Card>
     );
   }
-  
-  // Show anomaly detail view
-  if (selectedAnomaly) {
-    return (
-      <div className="space-y-4">
-        <Button variant="ghost" onClick={handleBackFromAnomaly} className="mb-4 -ml-3">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Analytics
-        </Button>
-        <AnomalyDetails anomalies={selectedAnomaly as any} />
-      </div>
-    );
+
+  if (!analyticsData) {
+    return null;
   }
-  
-  // Show detailed metric view
+
+  // If a specific metric is selected, show detailed view
   if (selectedMetric) {
+    const metricData = getMetricValue(selectedMetric.key);
+    const trendData = getTrendDataForMetric(selectedMetric.key);
+    
     return (
-      <div className="space-y-4">
-        <Button variant="ghost" onClick={handleBackToOverview} className="mb-4 -ml-3">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Overview
-        </Button>
-        
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">{selectedMetric.title}</h2>
-          <AutoRefreshControl
-            interval={autoRefreshIntervalSecs * 1000}
-            onIntervalChange={(interval) => changeRefreshInterval(interval / 1000)}
-            isPaused={!isAutoRefreshEnabled}
-            onPauseToggle={toggleAutoRefresh}
-            onRefresh={handleRefresh}
-          />
-        </div>
-        
-        {selectedMetric.description && (
-          <p className="text-muted-foreground">{selectedMetric.description}</p>
-        )}
-        
-        <Card className="w-full">
-          <CardContent className="pt-6">
-            <PerformanceChart
-              data={getTrendDataForMetric(selectedMetric.key)}
-              dataKey="date"
-              lines={[
-                {
-                  dataKey: "value",
-                  name: selectedMetric.title,
-                  color: "#2563eb",
-                  strokeWidth: 3
-                }
-              ]}
-              height={400}
-              title={`${selectedMetric.title} Trend`}
-              onRefresh={handleRefresh}
-            />
-          </CardContent>
-        </Card>
-      </div>
+      <DetailedMetricView 
+        title={selectedMetric.title}
+        description={selectedMetric.description}
+        value={metricData.value}
+        unit={selectedMetric.key === 'accuracy' || selectedMetric.key === 'errorRate' ? '%' : ''}
+        change={metricData.change}
+        trendData={trendData}
+        onBack={handleBackToOverview}
+      />
     );
   }
-  
-  // Main analytics dashboard view
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Neural System Analytics</h2>
-        <div className="flex items-center gap-2">
-          <Badge variant={analyticsData?.systemHealthStatus === 'optimal' ? 'success' : 'warning'} className="px-2 py-0.5">
-            <div className="w-2 h-2 rounded-full bg-current mr-1"></div>
-            {analyticsData?.systemHealthStatus || 'Unknown'} 
-          </Badge>
-          
-          <AutoRefreshControl
-            interval={autoRefreshIntervalSecs * 1000}
-            onIntervalChange={(interval) => changeRefreshInterval(interval / 1000)}
-            isPaused={!isAutoRefreshEnabled}
-            onPauseToggle={toggleAutoRefresh}
-            onRefresh={handleRefresh}
-          />
-        </div>
+        <h2 className="text-2xl font-bold">Neural System Performance</h2>
+        
+        <AutoRefreshControl
+          interval={autoRefreshIntervalSecs * 1000}
+          onIntervalChange={(interval) => changeRefreshInterval(interval / 1000)}
+          onRefresh={handleRefresh}
+          isPaused={!isAutoRefreshEnabled}
+          onPauseToggle={toggleAutoRefresh}
+        />
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <DrillableMetricCard 
-          title="Response Time" 
-          value={getMetricValue('responseTime').value} 
-          unit="ms" 
-          change={getMetricValue('responseTime').change}
-          icon={<Activity className="h-4 w-4 mr-1 text-muted-foreground" />}
-          onClick={() => handleDrillDown({
-            key: 'responseTime', 
-            title: 'Response Time',
-            description: 'Average response time of neural operations in milliseconds'
-          })}
-        />
-        
-        <DrillableMetricCard 
-          title="Accuracy" 
-          value={getMetricValue('accuracy').value} 
-          unit="%" 
-          change={getMetricValue('accuracy').change}
-          onClick={() => handleDrillDown({
-            key: 'accuracy', 
-            title: 'Accuracy',
-            description: 'Neural processing accuracy percentage'
-          })}
-        />
-        
-        <DrillableMetricCard 
-          title="Error Rate" 
-          value={getMetricValue('errorRate').value} 
-          unit="%" 
-          change={getMetricValue('errorRate').change}
-          isNegative={true}
-          onClick={() => handleDrillDown({
-            key: 'errorRate', 
-            title: 'Error Rate',
-            description: 'Percentage of operations resulting in errors'
-          })}
-        />
-        
-        <DrillableMetricCard 
-          title="Operations" 
-          value={getMetricValue('operations').value} 
-          unit="/min" 
-          change={getMetricValue('operations').change}
-          onClick={() => handleDrillDown({
-            key: 'operations', 
-            title: 'Operations',
-            description: 'Number of neural operations per minute'
-          })}
-        />
+        {metrics.map((metric) => {
+          const { value, change } = getMetricValue(metric.key);
+          return (
+            <MetricCard
+              key={metric.key}
+              title={metric.title}
+              value={value}
+              change={change}
+              unit={metric.key === 'accuracy' || metric.key === 'errorRate' ? '%' : ''}
+              onClick={() => handleDrillDown(metric)}
+            />
+          );
+        })}
       </div>
-      
-      <Tabs defaultValue="performance" className="w-full">
-        <TabsList>
-          <TabsTrigger value="performance" className="flex items-center gap-1">
-            <LineChart className="h-4 w-4" />
-            <span>Performance</span>
-          </TabsTrigger>
-          <TabsTrigger value="anomalies">
-            <div className="flex items-center gap-1">
-              <AlertTriangle className="h-4 w-4" />
-              <span>Anomalies</span>
-              {analyticsData?.anomalies && analyticsData.anomalies.length > 0 && (
-                <span className="ml-1.5 text-xs bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
-                  {analyticsData.anomalies.length}
-                </span>
-              )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Performance Trends</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-80">
+            <PerformanceChart
+              data={analyticsData.performanceForecast}
+              dataKey="date"
+              lines={[
+                {
+                  dataKey: "metrics.predictedResponseTime",
+                  name: "Response Time (ms)",
+                  color: "#8b5cf6",
+                  strokeWidth: 2
+                },
+                {
+                  dataKey: "metrics.expectedLoad",
+                  name: "Expected Load",
+                  color: "#3b82f6",
+                  strokeWidth: 2
+                }
+              ]}
+              height={300}
+              title="Neural System Performance"
+              onRefresh={handleRefresh}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {analyticsData.anomalies && analyticsData.anomalies.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>System Anomalies Detected</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {analyticsData.anomalies.slice(0, 3).map((anomaly) => (
+                <AnomalyDetails
+                  key={anomaly.id || Math.random().toString()}
+                  anomalies={mapAnomalyData(anomaly)}
+                />
+              ))}
             </div>
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="performance" className="pt-4">
-          <Card className="w-full">
-            <CardContent className="pt-6">
-              <PerformanceChart
-                data={analyticsData?.performanceTrend || []}
-                dataKey="timestamp"
-                lines={[
-                  {
-                    dataKey: "responseTime",
-                    name: "Response Time (ms)",
-                    color: "#2563eb",
-                    strokeWidth: 2
-                  },
-                  {
-                    dataKey: "accuracy",
-                    name: "Accuracy (%)",
-                    color: "#10b981",
-                    strokeWidth: 2
-                  }
-                ]}
-                height={350}
-                title="System Performance"
-                onRefresh={handleRefresh}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="anomalies" className="pt-4">
-          <Card>
-            <CardContent className="pt-6">
-              {analyticsData?.anomalies && analyticsData.anomalies.length > 0 ? (
-                <div className="space-y-4">
-                  {analyticsData.anomalies.map((anomaly) => (
-                    <div 
-                      key={anomaly.id} 
-                      className="flex items-center justify-between p-3 border rounded-md hover:bg-accent/50 cursor-pointer transition-colors"
-                      onClick={() => handleViewAnomaly(anomaly)}
-                    >
-                      <div className="flex items-center">
-                        <div className={`w-2.5 h-2.5 rounded-full mr-2.5 ${
-                          anomaly.severity === 'high' ? 'bg-red-500' : 
-                          anomaly.severity === 'medium' ? 'bg-amber-500' : 
-                          'bg-blue-400'
-                        }`}></div>
-                        <div>
-                          <div className="font-medium">{anomaly.type}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {anomaly.description || anomaly.message || 'No description available'}
-                          </div>
-                        </div>
-                      </div>
-                      <Badge variant={
-                        anomaly.severity === 'high' ? 'destructive' : 
-                        anomaly.severity === 'medium' ? 'warning' : 
-                        'default'
-                      } className="ml-2">
-                        {anomaly.severity}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="py-8 text-center">
-                  <div className="mb-3 inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-500 dark:bg-green-900/30 dark:text-green-400">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-medium mb-1">All Systems Normal</h3>
-                  <p className="text-muted-foreground">No anomalies detected in the neural system</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-      
-      <Separator />
-      
-      <div className="flex justify-between">
-        <div className="text-xs text-muted-foreground">
-          Last updated: {analyticsData?.lastUpdated ? new Date(analyticsData.lastUpdated).toLocaleString() : 'Unknown'}
-        </div>
-        <Button variant="ghost" size="sm" onClick={handleRefresh} className="h-auto py-0">
-          <RefreshCcw className="h-3.5 w-3.5 mr-1" />
-          <span className="text-xs">Refresh</span>
-        </Button>
-      </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
