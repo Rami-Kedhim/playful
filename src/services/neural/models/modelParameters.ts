@@ -13,6 +13,9 @@ export interface ModelParameters {
   // Add additional properties that components are trying to use
   learningRate?: number;
   batchSize?: number;
+  responseFormat?: string;
+  model?: string;
+  decayConstant?: number;
 }
 
 /**

@@ -15,9 +15,7 @@ export class HermesOxumNeuralHub implements INeuralHub {
     topP: 0.9,
     frequencyPenalty: 0.0,
     presencePenalty: 0.0,
-    responseFormat: 'json',
-    model: 'gpt-3.5-turbo',
-    modelName: 'gpt-3.5-turbo', // Added required modelName property
+    modelName: 'gpt-3.5-turbo', // Updated to use modelName instead of responseFormat & model
     stopSequences: []
   };
   
@@ -152,10 +150,10 @@ export class HermesOxumNeuralHub implements INeuralHub {
         estimatedCompletionTime: new Date(Date.now() + 3600000),
         currentEpoch: 7,
         totalEpochs: 10,
-        epoch: 7,        // Added required property
-        loss: 0.042,     // Added required property
-        accuracy: 92.7,  // Added required property
-        timestamp: new Date().toISOString(), // Added required property
+        epoch: 7,
+        loss: 0.042,
+        accuracy: 92.7,
+        timestamp: new Date().toISOString(),
         timeRemaining: 3600,
         metrics: {
           loss: 0.042,
@@ -165,6 +163,13 @@ export class HermesOxumNeuralHub implements INeuralHub {
     ];
     
     return mockJobs;
+  }
+  
+  public async stopTraining(jobId: string): Promise<boolean> {
+    // Implement the missing stopTraining method
+    console.log(`Stopping training job ${jobId}`);
+    // In a real implementation, this would send a signal to stop the training process
+    return true;
   }
   
   public getConfig(): any {
@@ -211,3 +216,5 @@ export class HermesOxumNeuralHub implements INeuralHub {
 
 // Create singleton instance
 export const neuralHub = new HermesOxumNeuralHub();
+// Export neuralHub as brainHub for backward compatibility
+export const brainHub = neuralHub;

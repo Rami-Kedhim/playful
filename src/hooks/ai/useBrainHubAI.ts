@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { brainHub } from '@/services/neural/HermesOxumNeuralHub';
+import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 
 /**
  * Brain Hub AI integration types

@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { neuralHub, brainHub } from '@/services/neural/HermesOxumNeuralHub';
+import { neuralHub, brainHub } from '@/services/neural/HermesOxumBrainHub';
 import { lucie } from '@/core/Lucie';
 
 interface BrainCoreProps {
