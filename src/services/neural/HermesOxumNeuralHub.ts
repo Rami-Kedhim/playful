@@ -15,7 +15,7 @@ export class HermesOxumNeuralHub implements INeuralHub {
     topP: 0.9,
     frequencyPenalty: 0.0,
     presencePenalty: 0.0,
-    modelName: 'gpt-3.5-turbo', // Updated to use modelName instead of responseFormat & model
+    modelName: 'gpt-3.5-turbo',
     stopSequences: []
   };
   

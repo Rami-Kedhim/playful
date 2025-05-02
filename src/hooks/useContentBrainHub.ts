@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
+import { neuralHub } from '@/services/neural/HermesOxumBrainHub';
 
 /**
  * Custom hook for working with content-related neural hub functionality

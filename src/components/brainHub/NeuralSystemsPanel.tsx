@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Activity, CheckCircle, Settings } from 'lucide-react';
-import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
+import { neuralHub } from '@/services/neural/HermesOxumBrainHub';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -41,7 +41,7 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ systemId }) =
     const fetchJobs = () => {
       try {
         // Get jobs from neural hub but convert them to the correct type
-        const rawJobs = neuralHub.getActiveTrainingJobs();
+        const rawJobs = neuralHub.getActiveTrainingJobs ? neuralHub.getActiveTrainingJobs() : [];
         const convertedJobs: TrainingProgressType[] = rawJobs.map(job => ({
           modelId: job.modelId || 'unknown',
           epoch: job.epoch || 0,
@@ -52,7 +52,7 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ systemId }) =
           // Convert status to the expected union type
           status: (job.status === 'training' ? 'running' : 
                  (job.status === 'completed' || job.status === 'failed' || job.status === 'waiting') ? 
-                  job.status : 'waiting') as 'running' | 'completed' | 'failed' | 'waiting',
+                  job.status as 'completed' | 'failed' | 'waiting' : 'waiting') as 'running' | 'completed' | 'failed' | 'waiting',
           estimatedTimeRemaining: job.timeRemaining,
           metrics: {
             precision: job.metrics?.precision,
