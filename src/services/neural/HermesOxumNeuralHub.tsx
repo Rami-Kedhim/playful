@@ -49,6 +49,7 @@ class NeuralHub implements INeuralHub {
     return { ...this.modelParameters };
   }
 
+  // Modified to be async and return a Promise
   async processRequest(request: BrainHubRequest): Promise<BrainHubResponse> {
     if (!this.initialized) {
       return Promise.resolve({ success: false, error: 'Neural Hub not initialized' });
