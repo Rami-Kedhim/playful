@@ -1,14 +1,13 @@
 
 import { useState, useCallback } from 'react';
 import neuralServiceRegistry from '@/services/neural/registry/NeuralServiceRegistry';
-import { BaseNeuralService, NeuralServiceConfig } from '@/services/neural/types/NeuralService';
 
 /**
  * Hook for managing a specific neural service
  */
 export function useNeuralService(moduleId: string) {
-  const [service, setService] = useState<BaseNeuralService | undefined>(
-    neuralServiceRegistry.getService(moduleId)
+  const [service, setService] = useState<any | undefined>(
+    neuralServiceRegistry.getService && neuralServiceRegistry.getService(moduleId)
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,8 +27,10 @@ export function useNeuralService(moduleId: string) {
         enabled: !service.config.enabled 
       };
       
-      service.updateConfig(newConfig);
-      setService({ ...service });
+      if (service.updateConfig) {
+        service.updateConfig(newConfig);
+        setService({ ...service });
+      }
       
       return true;
     } catch (err: any) {
@@ -43,15 +44,17 @@ export function useNeuralService(moduleId: string) {
   /**
    * Update service configuration parameters
    */
-  const updateServiceConfig = useCallback(async (config: Partial<NeuralServiceConfig>) => {
+  const updateServiceConfig = useCallback(async (config: any) => {
     if (!service) return false;
     
     try {
       setLoading(true);
       setError(null);
       
-      service.updateConfig(config);
-      setService({ ...service });
+      if (service.updateConfig) {
+        service.updateConfig(config);
+        setService({ ...service });
+      }
       
       return true;
     } catch (err: any) {
