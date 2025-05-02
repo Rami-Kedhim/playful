@@ -1,11 +1,12 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, CheckCircle, AlertCircle, BarChart, X } from 'lucide-react';
+import { Activity, AlertCircle, CheckCircle, Clock, Pause } from 'lucide-react';
 
+// Define the progress type based on what we need in this component
 interface TrainingProgress {
   modelId: string;
   epoch: number;
@@ -25,142 +26,117 @@ interface TrainingProgress {
 
 interface TrainingProgressDetailsProps {
   progress: TrainingProgress;
-  onCancel?: () => Promise<boolean>;
+  onCancel?: () => void;
 }
 
-const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({ progress, onCancel }) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'running':
-        return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-      case 'completed':
-        return 'bg-green-500/10 text-green-500 border-green-500/20';
-      case 'failed':
-        return 'bg-red-500/10 text-red-500 border-red-500/20';
-      case 'waiting':
-      default:
-        return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
+const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({ 
+  progress,
+  onCancel
+}) => {
+  // Calculate percentage completion
+  const percentComplete = (progress.epoch / progress.totalEpochs) * 100;
+  
+  // Format time remaining
+  const formatTimeRemaining = (seconds?: number): string => {
+    if (!seconds) return 'Unknown';
+    
+    if (seconds < 60) {
+      return `${Math.floor(seconds)} seconds`;
+    } else if (seconds < 3600) {
+      return `${Math.floor(seconds / 60)} minutes`;
+    } else {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      return `${hours}h ${minutes}m`;
     }
   };
-
+  
+  // Get status color
+  const getStatusColor = (status: string): string => {
+    switch (status) {
+      case 'running': return 'bg-blue-500';
+      case 'completed': return 'bg-green-500';
+      case 'failed': return 'bg-red-500';
+      case 'waiting': return 'bg-amber-500';
+      default: return 'bg-gray-500';
+    }
+  };
+  
+  // Get status icon
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'running':
-        return <Clock className="h-4 w-4" />;
-      case 'completed':
-        return <CheckCircle className="h-4 w-4" />;
-      case 'failed':
-        return <AlertCircle className="h-4 w-4" />;
-      case 'waiting':
-      default:
-        return <Clock className="h-4 w-4" />;
+      case 'running': return <Activity className="h-3 w-3 animate-pulse" />;
+      case 'completed': return <CheckCircle className="h-3 w-3" />;
+      case 'failed': return <AlertCircle className="h-3 w-3" />;
+      case 'waiting': return <Clock className="h-3 w-3" />;
+      default: return null;
     }
   };
-
-  const progressPercentage = (progress.epoch / progress.totalEpochs) * 100;
-
-  const formatTime = (seconds?: number) => {
-    if (!seconds) return 'Unknown';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}m ${secs}s`;
-  };
-
-  const handleCancelClick = async () => {
-    if (onCancel) {
-      await onCancel();
-    }
-  };
-
+  
   return (
-    <Card className="shadow-sm">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg font-medium">
-            Training Progress: Model {progress.modelId}
-          </CardTitle>
-          <div className="flex items-center space-x-2">
-            <Badge className={`${getStatusColor(progress.status)} flex items-center gap-1`}>
+    <Card className="p-3 bg-secondary/20 rounded-md mt-2 overflow-hidden">
+      <div className="flex justify-between items-start">
+        <div>
+          <div className="flex items-center gap-2">
+            <Badge className={`${getStatusColor(progress.status)} border-0 text-white`}>
               {getStatusIcon(progress.status)}
-              <span className="capitalize">{progress.status}</span>
+              <span className="ml-1">{progress.status}</span>
             </Badge>
-            {onCancel && progress.status === 'running' && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-7 w-7 p-0" 
-                onClick={handleCancelClick}
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Cancel</span>
-              </Button>
+            <h4 className="font-medium text-sm">{progress.modelId}</h4>
+          </div>
+          
+          <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+            <div>
+              <span className="text-muted-foreground">Epoch:</span> {progress.epoch}/{progress.totalEpochs}
+            </div>
+            <div>
+              <span className="text-muted-foreground">Loss:</span> {progress.loss.toFixed(4)}
+            </div>
+            <div>
+              <span className="text-muted-foreground">Accuracy:</span> {(progress.accuracy * 100).toFixed(2)}%
+            </div>
+            {progress.metrics.precision !== undefined && (
+              <div>
+                <span className="text-muted-foreground">Precision:</span> {(progress.metrics.precision * 100).toFixed(2)}%
+              </div>
             )}
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between text-xs text-muted-foreground mb-1">
-              <span>Epoch {progress.epoch} of {progress.totalEpochs}</span>
-              <span>{Math.round(progressPercentage)}%</span>
-            </div>
-            <Progress value={progressPercentage} className="h-2" />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <div className="text-xs text-muted-foreground">Loss</div>
-              <div className="font-medium">{progress.loss.toFixed(4)}</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-xs text-muted-foreground">Accuracy</div>
-              <div className="font-medium">{progress.accuracy.toFixed(2)}%</div>
-            </div>
-            
-            {progress.metrics.precision && (
-              <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Precision</div>
-                <div className="font-medium">{progress.metrics.precision.toFixed(4)}</div>
-              </div>
-            )}
-            
-            {progress.metrics.recall && (
-              <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">Recall</div>
-                <div className="font-medium">{progress.metrics.recall.toFixed(4)}</div>
-              </div>
-            )}
-            
-            {progress.metrics.f1Score && (
-              <div className="space-y-1">
-                <div className="text-xs text-muted-foreground">F1 Score</div>
-                <div className="font-medium">{progress.metrics.f1Score.toFixed(4)}</div>
-              </div>
-            )}
-          </div>
-          
-          {progress.estimatedTimeRemaining && progress.status === 'running' && (
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Clock className="h-4 w-4 mr-1" />
-              <span>Estimated time remaining: {formatTime(progress.estimatedTimeRemaining)}</span>
-            </div>
-          )}
-          
-          {progress.error && progress.status === 'failed' && (
-            <div className="p-2 bg-red-50 border border-red-100 rounded-md text-sm text-red-700">
-              <strong>Error:</strong> {progress.error}
-            </div>
-          )}
-          
-          <div className="flex justify-end">
-            <button className="flex items-center text-xs text-blue-500 hover:underline">
-              <BarChart className="h-3 w-3 mr-1" />
-              View detailed metrics
-            </button>
-          </div>
+        
+        {progress.status === 'running' && onCancel && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={onCancel}
+            className="h-7 px-2"
+          >
+            <Pause className="h-3 w-3 mr-1" /> 
+            Stop
+          </Button>
+        )}
+      </div>
+      
+      <div className="mt-3">
+        <div className="flex justify-between text-xs mb-1">
+          <span>Progress</span>
+          <span>{percentComplete.toFixed(1)}%</span>
         </div>
-      </CardContent>
+        <Progress value={percentComplete} className="h-1" />
+      </div>
+      
+      {progress.estimatedTimeRemaining !== undefined && (
+        <div className="mt-2 flex items-center text-xs text-muted-foreground">
+          <Clock className="h-3 w-3 mr-1" />
+          <span>Est. remaining: {formatTimeRemaining(progress.estimatedTimeRemaining)}</span>
+        </div>
+      )}
+      
+      {progress.error && (
+        <div className="mt-2 text-xs text-destructive">
+          <AlertCircle className="h-3 w-3 inline mr-1" />
+          {progress.error}
+        </div>
+      )}
     </Card>
   );
 };

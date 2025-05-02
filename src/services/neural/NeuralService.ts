@@ -1,4 +1,6 @@
-import { BaseNeuralService, NeuralServiceConfig, ModuleType } from './types/NeuralService';
+
+import { BaseBrainService } from './modules/BaseNeuralService';
+import { NeuralServiceConfig, ModuleType } from './types/NeuralService';
 
 interface NeuralModel {
   id: string;
@@ -25,35 +27,25 @@ interface ModelParameters {
   [key: string]: any;
 }
 
-export class NeuralService implements BaseNeuralService {
-  id: string;
-  moduleId: string;
-  name: string;
-  description: string;
-  moduleType: ModuleType;
-  version: string;
-  config: NeuralServiceConfig;
-  status: 'active' | 'inactive' | 'maintenance';
+export class NeuralService extends BaseBrainService {
   private models: NeuralModel[] = [];
 
   constructor(
-    id: string,
     moduleId: string,
     name: string,
     description: string,
     moduleType: ModuleType,
     version: string,
-    config: NeuralServiceConfig,
-    status: 'active' | 'inactive' | 'maintenance' = 'inactive'
+    config?: NeuralServiceConfig
   ) {
-    this.id = id;
-    this.moduleId = moduleId;
-    this.name = name;
-    this.description = description;
-    this.moduleType = moduleType;
-    this.version = version;
-    this.config = config;
-    this.status = status;
+    super({
+      moduleId,
+      name,
+      description,
+      moduleType,
+      version,
+      config
+    });
   }
 
   async initialize(): Promise<boolean> {
@@ -68,47 +60,22 @@ export class NeuralService implements BaseNeuralService {
     }
   }
 
-  updateConfig(config: Partial<NeuralServiceConfig>): void {
-    this.config = { ...this.config, ...config };
-    this.configure();
-  }
-
-  configure(): boolean {
-    if (!this.config.enabled) {
-      this.status = 'inactive';
-      return false;
-    }
-
-    if (!this.config.apiEndpoint) {
-      console.warn(`${this.name}: API Endpoint is missing.`);
-      this.status = 'inactive';
-      return false;
-    }
-
-    this.status = 'active';
-    return true;
-  }
-
-  getStatus(): string {
-    return this.status;
-  }
-
-  getCapabilities(): string[] {
-    return this.models.flatMap(model => model.capabilities);
-  }
-
   getMetrics() {
     return {
+      ...super.getMetrics(),
       operationsCount: Math.floor(Math.random() * 10000),
       errorRate: Math.random() * 0.05,
       latency: Math.floor(Math.random() * 100),
-      status: this.status,
       modelCount: this.models.length,
       ...this.models.reduce((acc, model) => {
         acc[model.name] = model.performance;
         return acc;
       }, {} as Record<string, any>)
     };
+  }
+
+  getCapabilities(): string[] {
+    return [...super.getCapabilities(), ...this.models.flatMap(model => model.capabilities)];
   }
 
   private async loadModels(): Promise<NeuralModel[]> {
