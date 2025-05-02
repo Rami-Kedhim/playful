@@ -1,5 +1,6 @@
 
 export interface HealthMetrics {
+  // Core metrics that are used across the system
   cpuUtilization: number;
   memoryUtilization: number;
   errorRate: number;
@@ -10,11 +11,15 @@ export interface HealthMetrics {
   systemLoad: number;
   userEngagement: number;
   requestsPerMinute: number;
+  
+  // Additional metrics used by different services
   cpuUsage: number;
   memoryUsage: number;
   neuralAccuracy: number;
   neuralEfficiency: number;
   neuralLatency: number;
+  
+  // Required fields that were missing but used in some services
   memoryAllocation: number;
   networkThroughput: number;
   requestRate: number;
@@ -42,7 +47,7 @@ export interface ServiceMetrics {
   operationsCount: number;
   errorCount: number;
   latency: number;
-  responseTime?: number;  // Make responseTime optional
+  responseTime?: number;  // Optional since some implementations use latency instead
   successRate?: number;
   errorRate?: number;
   [key: string]: any;  // Allow additional properties
