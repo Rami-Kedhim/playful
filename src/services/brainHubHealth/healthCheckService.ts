@@ -25,6 +25,16 @@ export default function checkBrainHubHealth(): BrainHubHealth {
     else if (warnings.length > 0) status = 'warning';
     else status = 'healthy';
     
+    // Map metrics to ensure compatibility
+    const mappedMetrics = {
+      ...metrics,
+      // Ensure required properties exist by providing defaults or mapping to existing values
+      memoryAllocation: metrics.memoryAllocation || metrics.memoryUtilization || 0,
+      networkThroughput: metrics.networkThroughput || 0,
+      requestRate: metrics.requestRate || metrics.operationsPerSecond || 0,
+      averageResponseTime: metrics.averageResponseTime || metrics.responseTime || 0
+    };
+    
     // Build health object
     const health: BrainHubHealth = {
       status,
