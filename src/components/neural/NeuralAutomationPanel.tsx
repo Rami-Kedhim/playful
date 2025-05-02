@@ -1,466 +1,583 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Calendar } from '@/components/ui/calendar';
 import {
+  AlertTriangle,
+  Calendar,
+  Check,
   Clock,
-  AlarmClock,
-  Calendar as CalendarIcon,
-  CheckCircle,
-  XCircle,
-  MoreHorizontal,
+  Copy,
+  Edit,
+  Repeat,
+  Trash2,
   PlayCircle,
   PauseCircle,
-  RefreshCcw,
-  PlusCircle,
-  Repeat,
-  AlertTriangle
+  Plus,
+  Sparkles,
+  Clock4,
+  RefreshCw,
+  AlarmClock
 } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { toast } from '@/components/ui/use-toast';
 
-interface Task {
+interface ScheduledTask {
   id: string;
   name: string;
   description: string;
-  schedule: string;
-  type: string;
-  lastRun: string;
+  schedule: {
+    type: 'daily' | 'weekly' | 'monthly' | 'custom';
+    time: string;
+    days?: string[];
+    date?: string;
+    expression?: string; 
+  };
+  enabled: boolean;
+  type: 'maintenance' | 'backup' | 'optimization' | 'report' | 'cleanup';
+  lastRun?: string;
   nextRun: string;
-  status: 'active' | 'paused' | 'failed' | 'completed';
-  outcome?: string;
+  status: 'idle' | 'running' | 'completed' | 'failed';
 }
 
-const NeuralAutomationPanel: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [activeFilter, setActiveFilter] = useState<string>('all');
+const tasks: ScheduledTask[] = [
+  {
+    id: 'task-1',
+    name: 'Neural Cache Optimization',
+    description: 'Cleans and optimizes the neural memory cache',
+    schedule: {
+      type: 'daily',
+      time: '03:00',
+    },
+    enabled: true,
+    type: 'optimization',
+    lastRun: '2023-05-01T03:00:00Z',
+    nextRun: '2023-05-02T03:00:00Z',
+    status: 'completed'
+  },
+  {
+    id: 'task-2',
+    name: 'Model Accuracy Check',
+    description: 'Performs analysis on model accuracy and drift',
+    schedule: {
+      type: 'weekly',
+      time: '04:30',
+      days: ['Monday', 'Thursday'],
+    },
+    enabled: true,
+    type: 'maintenance',
+    lastRun: '2023-04-27T04:30:00Z',
+    nextRun: '2023-05-04T04:30:00Z',
+    status: 'idle'
+  },
+  {
+    id: 'task-3',
+    name: 'System Health Report',
+    description: 'Generates comprehensive system health report',
+    schedule: {
+      type: 'weekly',
+      time: '08:00',
+      days: ['Friday'],
+    },
+    enabled: true,
+    type: 'report',
+    lastRun: '2023-04-28T08:00:00Z',
+    nextRun: '2023-05-05T08:00:00Z',
+    status: 'idle'
+  },
+  {
+    id: 'task-4',
+    name: 'Data Backup',
+    description: 'Creates backup of all neural training data',
+    schedule: {
+      type: 'monthly',
+      time: '01:00',
+      date: '1',
+    },
+    enabled: true,
+    type: 'backup',
+    lastRun: '2023-04-01T01:00:00Z',
+    nextRun: '2023-05-01T01:00:00Z',
+    status: 'idle'
+  },
+  {
+    id: 'task-5',
+    name: 'Log Rotation',
+    description: 'Rotates and archives system logs',
+    schedule: {
+      type: 'custom',
+      time: '00:15',
+      expression: '0 15 0 * * *',
+    },
+    enabled: false,
+    type: 'cleanup',
+    lastRun: '2023-04-30T00:15:00Z',
+    nextRun: '2023-05-01T00:15:00Z',
+    status: 'idle'
+  }
+];
 
-  const mockTasks: Task[] = [
-    {
-      id: 'task-1',
-      name: 'Neural Network Optimization',
-      description: 'Automatically optimize neural network parameters based on system performance metrics',
-      schedule: 'Daily at 2:00 AM',
-      type: 'optimization',
-      lastRun: '2025-05-01 02:00:00',
-      nextRun: '2025-05-02 02:00:00',
-      status: 'active',
-    },
-    {
-      id: 'task-2',
-      name: 'System Backup',
-      description: 'Create a complete backup of all neural system configurations and data',
-      schedule: 'Weekly on Sunday at 1:00 AM',
-      type: 'backup',
-      lastRun: '2025-04-28 01:00:00',
-      nextRun: '2025-05-05 01:00:00',
-      status: 'active',
-    },
-    {
-      id: 'task-3',
-      name: 'Error Log Analysis',
-      description: 'Analyze system error logs and generate report of potential issues',
-      schedule: 'Daily at 6:00 AM',
-      type: 'monitoring',
-      lastRun: '2025-05-01 06:00:00',
-      nextRun: '2025-05-02 06:00:00',
-      status: 'active',
-    },
-    {
-      id: 'task-4',
-      name: 'Security Scan',
-      description: 'Perform comprehensive security scan of all neural modules and APIs',
-      schedule: 'Daily at 12:00 PM',
-      type: 'security',
-      lastRun: '2025-05-01 12:00:00',
-      nextRun: '2025-05-02 12:00:00',
-      status: 'failed',
-      outcome: 'Timeout while scanning external API connections'
-    },
-    {
-      id: 'task-5',
-      name: 'Performance Report Generation',
-      description: 'Generate daily performance report with key metrics and recommendations',
-      schedule: 'Daily at 8:00 AM',
-      type: 'reporting',
-      lastRun: '2025-05-01 08:00:00',
-      nextRun: '2025-05-02 08:00:00',
-      status: 'active',
-    },
-    {
-      id: 'task-6',
-      name: 'Cache Cleanup',
-      description: 'Clean up expired cache entries to optimize system performance',
-      schedule: 'Every 6 hours',
-      type: 'optimization',
-      lastRun: '2025-05-01 18:00:00',
-      nextRun: '2025-05-02 00:00:00',
-      status: 'completed',
-      outcome: 'Freed 2.3GB of memory'
-    },
-  ];
+const NeuralAutomationPanel: React.FC = () => {
+  const [scheduledTasks, setScheduledTasks] = useState<ScheduledTask[]>(tasks);
+  const [activeTab, setActiveTab] = useState('all');
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
+  const [isEditing, setIsEditing] = useState<string | null>(null);
   
+  // Filter tasks based on active tab
   const getFilteredTasks = () => {
-    if (activeFilter === 'all') return mockTasks;
-    return mockTasks.filter(task => task.status === activeFilter);
+    if (activeTab === 'all') return scheduledTasks;
+    return scheduledTasks.filter(task => task.type === activeTab);
   };
   
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-500';
-      case 'paused': return 'bg-amber-500';
-      case 'failed': return 'bg-red-500';
-      case 'completed': return 'bg-blue-500';
-      default: return 'bg-slate-500';
+  // Toggle task enabled state
+  const toggleTaskEnabled = (id: string) => {
+    setScheduledTasks(prevTasks => 
+      prevTasks.map(task => 
+        task.id === id ? { ...task, enabled: !task.enabled } : task
+      )
+    );
+    
+    const task = scheduledTasks.find(t => t.id === id);
+    if (task) {
+      toast({
+        title: task.enabled ? "Task disabled" : "Task enabled",
+        description: `${task.name} has been ${task.enabled ? 'disabled' : 'enabled'}.`,
+      });
     }
   };
   
-  const getStatusText = (status: string) => {
-    return status.charAt(0).toUpperCase() + status.slice(1);
+  // Run task now
+  const runTaskNow = (id: string) => {
+    const task = scheduledTasks.find(t => t.id === id);
+    
+    if (task) {
+      // Update task status to running
+      setScheduledTasks(prevTasks => 
+        prevTasks.map(t => 
+          t.id === id ? { ...t, status: 'running' } : t
+        )
+      );
+      
+      toast({
+        title: "Task started",
+        description: `${task.name} is now running.`,
+      });
+      
+      // Simulate task completion after a delay
+      setTimeout(() => {
+        setScheduledTasks(prevTasks => 
+          prevTasks.map(t => 
+            t.id === id ? { 
+              ...t, 
+              status: 'completed',
+              lastRun: new Date().toISOString() 
+            } : t
+          )
+        );
+        
+        toast({
+          title: "Task completed",
+          description: `${task.name} has completed successfully.`,
+          variant: "default",
+        });
+      }, 3000);
+    }
   };
-
-  const getTypeColor = (type: string) => {
+  
+  // Delete task
+  const deleteTask = (id: string) => {
+    const task = scheduledTasks.find(t => t.id === id);
+    
+    if (task) {
+      setScheduledTasks(prevTasks => prevTasks.filter(t => t.id !== id));
+      
+      toast({
+        title: "Task deleted",
+        description: `${task.name} has been deleted.`,
+      });
+    }
+  };
+  
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (e) {
+      return 'Invalid date';
+    }
+  };
+  
+  // Get status badge color
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'running':
+        return <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">Running</Badge>;
+      case 'completed':
+        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Completed</Badge>;
+      case 'failed':
+        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">Failed</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300">Idle</Badge>;
+    }
+  };
+  
+  // Get task type badge
+  const getTypeBadge = (type: string) => {
     switch (type) {
-      case 'optimization': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
-      case 'backup': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
-      case 'monitoring': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
-      case 'security': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
-      case 'reporting': return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
-      default: return 'bg-slate-100 text-slate-800 dark:bg-slate-800/30 dark:text-slate-300';
+      case 'maintenance':
+        return <Badge variant="outline" className="border-blue-200 text-blue-800 dark:text-blue-300">Maintenance</Badge>;
+      case 'optimization':
+        return <Badge variant="outline" className="border-green-200 text-green-800 dark:text-green-300">Optimization</Badge>;
+      case 'backup':
+        return <Badge variant="outline" className="border-purple-200 text-purple-800 dark:text-purple-300">Backup</Badge>;
+      case 'report':
+        return <Badge variant="outline" className="border-amber-200 text-amber-800 dark:text-amber-300">Report</Badge>;
+      case 'cleanup':
+        return <Badge variant="outline" className="border-gray-200 text-gray-800 dark:text-gray-300">Cleanup</Badge>;
+      default:
+        return <Badge variant="outline">{type}</Badge>;
+    }
+  };
+  
+  // Format schedule for display
+  const formatSchedule = (schedule: ScheduledTask['schedule']) => {
+    switch (schedule.type) {
+      case 'daily':
+        return `Daily at ${schedule.time}`;
+      case 'weekly':
+        return `Weekly on ${schedule.days?.join(', ')} at ${schedule.time}`;
+      case 'monthly':
+        return `Monthly on day ${schedule.date} at ${schedule.time}`;
+      case 'custom':
+        return `Custom (${schedule.expression})`;
+      default:
+        return 'Unknown schedule';
     }
   };
   
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="md:col-span-2">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Scheduled Tasks</CardTitle>
-                <CardDescription>Automated processes and maintenance</CardDescription>
-              </div>
-              <div>
-                <Button variant="default" size="sm" className="flex items-center gap-1">
-                  <PlusCircle className="h-4 w-4 mr-1" />
-                  New Task
-                </Button>
-              </div>
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <CardTitle>Neural System Automation</CardTitle>
+              <CardDescription>Schedule automated tasks for system maintenance and optimization</CardDescription>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between mb-4">
-              <Tabs 
-                defaultValue={activeFilter} 
-                onValueChange={setActiveFilter}
-                className="w-full md:w-auto"
-              >
-                <TabsList className="grid grid-cols-4 w-full md:w-auto">
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="active">Active</TabsTrigger>
-                  <TabsTrigger value="paused">Paused</TabsTrigger>
-                  <TabsTrigger value="failed">Failed</TabsTrigger>
-                </TabsList>
-              </Tabs>
-              <div className="hidden md:flex items-center space-x-2">
-                <Select defaultValue="sort-next">
-                  <SelectTrigger className="w-[180px] h-8 text-xs">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Sort by</SelectLabel>
-                      <SelectItem value="sort-next">Next run time</SelectItem>
-                      <SelectItem value="sort-last">Last run time</SelectItem>
-                      <SelectItem value="sort-name">Task name</SelectItem>
-                      <SelectItem value="sort-type">Task type</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <Button variant="outline" size="sm" className="h-8">
-                  <RefreshCcw className="h-3 w-3 mr-1" />
-                  Refresh
-                </Button>
-              </div>
-            </div>
+            <Button onClick={() => setIsCreatingTask(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              New Task
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="all">All Tasks</TabsTrigger>
+              <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
+              <TabsTrigger value="optimization">Optimization</TabsTrigger>
+              <TabsTrigger value="backup">Backups</TabsTrigger>
+              <TabsTrigger value="report">Reports</TabsTrigger>
+              <TabsTrigger value="cleanup">Cleanup</TabsTrigger>
+            </TabsList>
             
-            <div className="space-y-3">
-              {getFilteredTasks().map((task) => (
-                <Card key={task.id} className="bg-muted/30">
-                  <CardContent className="p-4">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                      <div className="flex flex-col gap-1">
+            <div className="space-y-4">
+              {getFilteredTasks().length > 0 ? (
+                getFilteredTasks().map((task) => (
+                  <Card key={task.id} className={`${!task.enabled ? 'opacity-60' : ''}`}>
+                    <CardHeader className="pb-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <div className={`h-2 w-2 rounded-full ${getStatusColor(task.status)}`}></div>
-                          <h3 className="font-medium">{task.name}</h3>
-                          <Badge variant="outline" className={`text-xs ${getTypeColor(task.type)}`}>
-                            {task.type}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground">{task.description}</p>
-                      </div>
-                      <div className="flex flex-col md:flex-row md:items-center gap-3">
-                        <div className="flex flex-col">
-                          <span className="text-xs text-muted-foreground">Schedule</span>
-                          <div className="flex items-center">
-                            <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
-                            <span className="text-xs">{task.schedule}</span>
-                          </div>
+                          <CardTitle>{task.name}</CardTitle>
+                          {getTypeBadge(task.type)}
+                          {getStatusBadge(task.status)}
                         </div>
                         <div className="flex items-center gap-2">
+                          <Switch 
+                            checked={task.enabled} 
+                            onCheckedChange={() => toggleTaskEnabled(task.id)}
+                            aria-label={`Enable ${task.name}`}
+                          />
                           <Button 
-                            variant={task.status === 'active' ? "ghost" : "outline"} 
-                            size="sm"
-                            className="h-7 w-7 p-0"
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => runTaskNow(task.id)}
+                            disabled={task.status === 'running' || !task.enabled}
                           >
-                            {task.status === 'active' ? (
-                              <PauseCircle className="h-4 w-4" />
+                            {task.status === 'running' ? (
+                              <RefreshCw className="h-4 w-4 animate-spin" />
                             ) : (
                               <PlayCircle className="h-4 w-4" />
                             )}
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="h-7 w-7 p-0"
-                          >
-                            <RefreshCcw className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="h-7 w-7 p-0"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
+                          <Button variant="ghost" size="sm" onClick={() => setIsEditing(task.id)}>
+                            <Edit className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
-                    </div>
-                    
-                    {task.status === 'failed' && task.outcome && (
-                      <div className="mt-2 p-2 bg-red-100/50 dark:bg-red-900/20 rounded-md flex items-start gap-2">
-                        <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5" />
-                        <div className="text-xs text-red-800 dark:text-red-300">
-                          {task.outcome}
+                      <CardDescription>{task.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Repeat className="h-4 w-4 text-muted-foreground" />
+                          <span>{formatSchedule(task.schedule)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span>Last run: {task.lastRun ? formatDate(task.lastRun) : 'Never'}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span>Next run: {formatDate(task.nextRun)}</span>
                         </div>
                       </div>
-                    )}
-                    
-                    {task.status === 'completed' && task.outcome && (
-                      <div className="mt-2 p-2 bg-green-100/50 dark:bg-green-900/20 rounded-md flex items-start gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
-                        <div className="text-xs text-green-800 dark:text-green-300">
-                          {task.outcome}
-                        </div>
-                      </div>
-                    )}
+                    </CardContent>
+                    <CardFooter className="pt-2 flex justify-between">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+                        onClick={() => deleteTask(task.id)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
+                      <Button variant="outline" size="sm" disabled>
+                        <Copy className="h-4 w-4 mr-1" />
+                        Duplicate
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))
+              ) : (
+                <Card className="border-dashed">
+                  <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+                    <AlarmClock className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="font-medium text-lg">No scheduled tasks</h3>
+                    <p className="text-muted-foreground mb-4">
+                      {activeTab === 'all' 
+                        ? "There are no scheduled tasks. Create a new task to get started." 
+                        : `There are no ${activeTab} tasks. Select a different category or create a new task.`}
+                    </p>
+                    <Button onClick={() => setIsCreatingTask(true)}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Task
+                    </Button>
                   </CardContent>
                 </Card>
-              ))}
+              )}
+            </div>
+          </Tabs>
+        </CardContent>
+      </Card>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock4 className="h-5 w-5" />
+              <span>Schedule Templates</span>
+            </CardTitle>
+            <CardDescription>Common automation schedules for neural systems</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center p-3 border rounded-md hover:bg-accent/50 cursor-pointer">
+                <div>
+                  <h4 className="font-medium">Neural Cache Optimization</h4>
+                  <p className="text-sm text-muted-foreground">Daily at 3:00 AM</p>
+                </div>
+                <Button variant="outline" size="sm">
+                  <Plus className="mr-1 h-4 w-4" />
+                  Apply
+                </Button>
+              </div>
+              
+              <div className="flex justify-between items-center p-3 border rounded-md hover:bg-accent/50 cursor-pointer">
+                <div>
+                  <h4 className="font-medium">Weekly Health Report</h4>
+                  <p className="text-sm text-muted-foreground">Fridays at 8:00 AM</p>
+                </div>
+                <Button variant="outline" size="sm">
+                  <Plus className="mr-1 h-4 w-4" />
+                  Apply
+                </Button>
+              </div>
+              
+              <div className="flex justify-between items-center p-3 border rounded-md hover:bg-accent/50 cursor-pointer">
+                <div>
+                  <h4 className="font-medium">Model Performance Analysis</h4>
+                  <p className="text-sm text-muted-foreground">Mondays and Thursdays at 4:30 AM</p>
+                </div>
+                <Button variant="outline" size="sm">
+                  <Plus className="mr-1 h-4 w-4" />
+                  Apply
+                </Button>
+              </div>
+              
+              <div className="flex justify-between items-center p-3 border rounded-md hover:bg-accent/50 cursor-pointer">
+                <div>
+                  <h4 className="font-medium">Full System Backup</h4>
+                  <p className="text-sm text-muted-foreground">1st day of month at 1:00 AM</p>
+                </div>
+                <Button variant="outline" size="sm">
+                  <Plus className="mr-1 h-4 w-4" />
+                  Apply
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle>Schedule</CardTitle>
-            <CardDescription>Task automation calendar</CardDescription>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5" />
+              <span>Automation Statistics</span>
+            </CardTitle>
+            <CardDescription>Performance metrics for automated tasks</CardDescription>
           </CardHeader>
           <CardContent>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              className="rounded-md border w-full"
-            />
-            
-            <div className="mt-4 space-y-3">
-              <h3 className="text-sm font-medium">May 2, 2025</h3>
-              
-              <div className="space-y-2">
-                {mockTasks.slice(0, 3).map((task, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm p-2 bg-muted/30 rounded-md">
-                    <div className="flex items-center gap-2">
-                      <AlarmClock className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-xs">{task.schedule.split(' at ')[1]}</span>
-                    </div>
-                    <span className="text-xs truncate max-w-[150px]">{task.name}</span>
-                  </div>
-                ))}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="p-4 border rounded-md">
+                <div className="text-2xl font-bold">14</div>
+                <div className="text-sm text-muted-foreground">Total Tasks Run</div>
               </div>
               
-              <Button variant="outline" size="sm" className="w-full mt-2">
-                <CalendarIcon className="h-4 w-4 mr-2" />
-                View Full Schedule
-              </Button>
+              <div className="p-4 border rounded-md">
+                <div className="text-2xl font-bold">92%</div>
+                <div className="text-sm text-muted-foreground">Success Rate</div>
+              </div>
+              
+              <div className="p-4 border rounded-md">
+                <div className="text-2xl font-bold">24.3min</div>
+                <div className="text-sm text-muted-foreground">Avg. Duration</div>
+              </div>
+              
+              <div className="p-4 border rounded-md">
+                <div className="text-2xl font-bold">4.2hr</div>
+                <div className="text-sm text-muted-foreground">Time Saved</div>
+              </div>
             </div>
             
-            <div className="mt-6">
-              <h3 className="text-sm font-medium mb-2">Quick Actions</h3>
-              <div className="space-y-2">
-                <Button variant="outline" size="sm" className="w-full justify-start">
-                  <PlayCircle className="h-4 w-4 mr-2" />
-                  Run All Active Tasks
-                </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
-                  <PauseCircle className="h-4 w-4 mr-2" />
-                  Pause All Tasks
-                </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
-                  <Repeat className="h-4 w-4 mr-2" />
-                  Reset Failed Tasks
-                </Button>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-green-500" />
+                <span className="text-sm">Cache optimization reduced response time by 18%</span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-green-500" />
+                <span className="text-sm">Auto-healing resolved 7 potential issues</span>
+              </div>
+              
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                <span className="text-sm">Log rotation task failed on previous run - check permissions</span>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {isCreatingTask && (
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-md">Automation Status</CardTitle>
+          <CardHeader>
+            <CardTitle>Create New Automated Task</CardTitle>
+            <CardDescription>Set up a new scheduled task for the neural system</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">System Automation</span>
-                <Switch defaultChecked />
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="task-name">Task Name</Label>
+                  <Input id="task-name" placeholder="Enter task name" />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="task-description">Description</Label>
+                  <Input id="task-description" placeholder="Enter task description" />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="task-type">Task Type</Label>
+                  <Select>
+                    <SelectTrigger id="task-type">
+                      <SelectValue placeholder="Select task type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="maintenance">Maintenance</SelectItem>
+                      <SelectItem value="optimization">Optimization</SelectItem>
+                      <SelectItem value="backup">Backup</SelectItem>
+                      <SelectItem value="report">Report</SelectItem>
+                      <SelectItem value="cleanup">Cleanup</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Notifications</span>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Auto-Recovery</span>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Auto-Optimization</span>
-                <Switch />
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Schedule Updates</span>
-                <Switch defaultChecked />
+              
+              <Separator />
+              
+              <div className="space-y-4">
+                <h4 className="font-medium">Schedule</h4>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="schedule-type">Frequency</Label>
+                  <Select defaultValue="daily">
+                    <SelectTrigger id="schedule-type">
+                      <SelectValue placeholder="Select frequency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="custom">Custom (CRON)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="schedule-time">Time</Label>
+                  <Input id="schedule-time" type="time" defaultValue="03:00" />
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch id="task-enabled" defaultChecked />
+                  <Label htmlFor="task-enabled">Enable task</Label>
+                </div>
               </div>
             </div>
           </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button variant="outline" onClick={() => setIsCreatingTask(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              setIsCreatingTask(false);
+              toast({
+                title: "Task created",
+                description: "New task has been created and scheduled.",
+              });
+            }}>
+              Create Task
+            </Button>
+          </CardFooter>
         </Card>
-        
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-md">Task Distribution</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm">Optimization</span>
-                <span className="text-xs">2 tasks</span>
-              </div>
-              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-purple-500 w-[33%]"></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm">Backup</span>
-                <span className="text-xs">1 task</span>
-              </div>
-              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-blue-500 w-[17%]"></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm">Monitoring</span>
-                <span className="text-xs">1 task</span>
-              </div>
-              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-green-500 w-[17%]"></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm">Security</span>
-                <span className="text-xs">1 task</span>
-              </div>
-              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-red-500 w-[17%]"></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm">Reporting</span>
-                <span className="text-xs">1 task</span>
-              </div>
-              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500 w-[17%]"></div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-md">Task Statistics</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span className="text-sm">Successful</span>
-                </div>
-                <span>42</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <XCircle className="h-4 w-4 text-red-500" />
-                  <span className="text-sm">Failed</span>
-                </div>
-                <span>3</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-blue-500" />
-                  <span className="text-sm">Total Runtime</span>
-                </div>
-                <span>23.4h</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <RefreshCcw className="h-4 w-4 text-purple-500" />
-                  <span className="text-sm">Average Duration</span>
-                </div>
-                <span>3.2m</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <AlarmClock className="h-4 w-4 text-amber-500" />
-                  <span className="text-sm">Next 24h Tasks</span>
-                </div>
-                <span>8</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      )}
     </div>
   );
 };
