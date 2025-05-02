@@ -124,8 +124,8 @@ export class HermesOxumNeuralHub implements INeuralHub {
       stability: 0.95 + Math.random() * 0.05,
       // Adding the missing properties
       lastUpdated: Date.now(),
-      systemLoad: Math.random() * 100,
-      userEngagement: Math.random() * 100,
+      systemLoad: Math.random(),
+      userEngagement: Math.random(),
       requestsPerMinute: Math.floor(Math.random() * 600),
       cpuUsage: Math.random() * 100,
       memoryUsage: Math.random() * 100,
