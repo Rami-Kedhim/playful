@@ -1,201 +1,115 @@
 
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Brain, Activity, Settings, BarChart4, Zap, Shield, AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Brain, Settings, Activity, Zap, Cpu, Gauge } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import NeuralAnalytics from '@/components/neural/NeuralAnalytics';
 import NeuralSystemControls from '@/components/neural/NeuralSystemControls';
 import NeuralRecommendations from '@/components/neural/NeuralRecommendations';
 import NeuralAutomationPanel from '@/components/neural/NeuralAutomationPanel';
 import NeuralSettingsPanel from '@/components/neural/NeuralSettingsPanel';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import AutoRefreshControl from '@/components/analytics/AutoRefreshControl';
+import { Link } from 'react-router-dom';
 
 const NeuralMonitoringPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [refreshInterval, setRefreshInterval] = useState(30000); // 30 seconds
-  
+  const [activeTab, setActiveTab] = useState<string>("dashboard");
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
+
   return (
     <MainLayout
-      title="Neural Monitoring System"
-      description="Advanced monitoring and control of neural processing systems"
+      title="Neural System Monitoring"
+      description="Advanced neural system monitoring and control dashboard"
     >
-      <div className="px-4 py-6 lg:px-8 space-y-6">
+      <div className="space-y-6 pb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <div className="p-2 rounded-full bg-primary/10">
-              <Brain className="h-6 w-6 text-primary" />
+              <Brain className="h-8 w-8 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Neural Monitoring System</h1>
-              <p className="text-sm text-muted-foreground">Advanced analytics and management for neural processing</p>
+              <h1 className="text-2xl font-bold tracking-tight">Neural System Monitoring</h1>
+              <p className="text-muted-foreground">
+                Advanced monitoring and control for neural systems
+              </p>
             </div>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-              <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1" />
-              System Online
-            </Badge>
-            
-            {activeTab === 'dashboard' && (
-              <AutoRefreshControl 
-                interval={refreshInterval} 
-                onIntervalChange={setRefreshInterval} 
-              />
-            )}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/neural-analytics">
+                <Activity className="h-4 w-4 mr-2" />
+                <span>Analytics</span>
+              </Link>
+            </Button>
+            <Button variant="default" size="sm" className="flex items-center gap-2">
+              <Cpu className="h-4 w-4 mr-1" />
+              <span>System Status: </span>
+              <span className="flex items-center ml-1 text-emerald-500 font-medium">
+                Operational
+              </span>
+            </Button>
           </div>
         </div>
+
+        <Card className="bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-700">
+          <CardContent className="p-4 flex gap-3 items-center">
+            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-500" />
+            <div className="text-sm text-amber-800 dark:text-amber-200">
+              System detected a 23% increase in response time over the last 24 hours. 
+              <Button variant="link" className="p-0 h-auto text-amber-700 dark:text-amber-400 font-medium">
+                View details →
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-5">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="grid grid-cols-5 mb-6">
             <TabsTrigger value="dashboard" className="flex items-center gap-1">
+              <Gauge className="h-4 w-4" />
+              <span>Dashboard</span>
+            </TabsTrigger>
+            <TabsTrigger value="controls" className="flex items-center gap-1">
               <Activity className="h-4 w-4" />
-              <span className="hidden sm:inline">Dashboard</span>
+              <span>System Controls</span>
+            </TabsTrigger>
+            <TabsTrigger value="recommendations" className="flex items-center gap-1">
+              <Zap className="h-4 w-4" />
+              <span>Recommendations</span>
             </TabsTrigger>
             <TabsTrigger value="automation" className="flex items-center gap-1">
-              <Zap className="h-4 w-4" />
-              <span className="hidden sm:inline">Automation</span>
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-1">
-              <BarChart4 className="h-4 w-4" />
-              <span className="hidden sm:inline">Analytics</span>
+              <Cpu className="h-4 w-4" />
+              <span>Automation</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-1">
               <Settings className="h-4 w-4" />
-              <span className="hidden sm:inline">Settings</span>
-            </TabsTrigger>
-            <TabsTrigger value="security" className="hidden lg:flex items-center gap-1">
-              <Shield className="h-4 w-4" />
-              <span className="hidden sm:inline">Security</span>
+              <span>Settings</span>
             </TabsTrigger>
           </TabsList>
           
-          <div className="mt-6">
-            <TabsContent value="dashboard" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="md:col-span-2">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Activity className="h-5 w-5 text-primary" />
-                      System Status
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <NeuralSystemControls />
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Zap className="h-5 w-5 text-primary" />
-                      Recommendations
-                    </CardTitle>
-                    <CardDescription>Smart suggestions for system optimization</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[400px]">
-                      <NeuralRecommendations />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      <BarChart4 className="h-5 w-5 text-primary" />
-                      System Performance
-                    </CardTitle>
-                    <Button variant="outline" size="sm">View Details</Button>
-                  </div>
-                  <CardDescription>Real-time performance metrics</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <NeuralAnalytics refreshInterval={refreshInterval} />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-primary" />
-                    System Alerts
-                  </CardTitle>
-                  <CardDescription>Recent warnings and notifications</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="bg-amber-50 border border-amber-200 rounded-md p-3 flex items-start gap-3">
-                      <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-medium text-amber-800 text-sm">Memory usage above threshold</p>
-                        <p className="text-xs text-amber-700 mt-1">Memory utilization reached 78% at 09:45 AM</p>
-                      </div>
-                    </div>
-                    <div className="bg-blue-50 border border-blue-200 rounded-md p-3 flex items-start gap-3">
-                      <Activity className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-medium text-blue-800 text-sm">System maintenance completed</p>
-                        <p className="text-xs text-blue-700 mt-1">Routine maintenance successfully completed at 03:00 AM</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="automation" className="min-h-[600px]">
-              <NeuralAutomationPanel />
-            </TabsContent>
-            
-            <TabsContent value="analytics">
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-xl">Neural System Analytics</CardTitle>
-                    <CardDescription>Comprehensive analysis of neural processing performance</CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <NeuralAnalytics refreshInterval={refreshInterval} />
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="settings">
-              <NeuralSettingsPanel />
-            </TabsContent>
-            
-            <TabsContent value="security">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-primary" />
-                    Security Dashboard
-                  </CardTitle>
-                  <CardDescription>System security status and controls</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col items-center justify-center py-12">
-                    <Shield className="h-16 w-16 text-muted-foreground mb-4" />
-                    <h3 className="text-xl font-medium mb-2">Security Module</h3>
-                    <p className="text-muted-foreground text-center mb-6">
-                      Enhanced security features are available with the Security Module extension
-                    </p>
-                    <Button>Install Security Module</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </div>
+          <TabsContent value="dashboard" className="space-y-6">
+            <NeuralAnalytics refreshInterval={30} />
+          </TabsContent>
+          
+          <TabsContent value="controls" className="space-y-6">
+            <NeuralSystemControls />
+          </TabsContent>
+          
+          <TabsContent value="recommendations" className="space-y-6">
+            <NeuralRecommendations />
+          </TabsContent>
+          
+          <TabsContent value="automation" className="space-y-6">
+            <NeuralAutomationPanel />
+          </TabsContent>
+          
+          <TabsContent value="settings" className="space-y-6">
+            <NeuralSettingsPanel />
+          </TabsContent>
         </Tabs>
       </div>
     </MainLayout>

@@ -1,28 +1,41 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
-import { ArrowUpRight, Brain, Clock, BarChart2, Activity, AlertTriangle } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
+import { Zap, Clock, AlertTriangle, CheckCircle, Activity, LucideProps, Brain, Cpu, BarChart3, PieChart } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import useNeuralAnalytics from '@/hooks/useNeuralAnalytics';
+import useNeuralAnalyticsDashboard from '@/hooks/useNeuralAnalyticsDashboard';
 import DrillableMetricCard from '@/components/analytics/DrillableMetricCard';
 import AnomalyDetails from '@/components/analytics/AnomalyDetails';
-import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
 
-const NeuralAnalytics: React.FC = () => {
-  const { analyticsData, detailedMetrics, loading, error, refreshAnalytics } = useNeuralAnalytics();
-  const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState<boolean>(false);
-  const [refreshInterval, setRefreshInterval] = useState<number>(30); // in seconds
-  const [selectedMetricTab, setSelectedMetricTab] = useState<string>("system");
-  const [activeAnomalies, setActiveAnomalies] = useState<any[]>([]);
-  
-  // Auto-refresh logic
+interface NeuralAnalyticsProps {
+  refreshInterval?: number;
+}
+
+const NeuralAnalytics: React.FC<NeuralAnalyticsProps> = ({ refreshInterval = 30 }) => {
+  const {
+    analyticsData,
+    loading,
+    error,
+    refreshAnalytics,
+    dateRange,
+    handleDateChange,
+    isAutoRefreshEnabled,
+    toggleAutoRefresh,
+    changeRefreshInterval,
+    selectedMetric,
+    handleDrillDown,
+    handleBackToOverview,
+    getMetricValue,
+    getTrendDataForMetric
+  } = useNeuralAnalyticsDashboard();
+
+  // Set up auto-refresh
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
     
@@ -33,88 +46,61 @@ const NeuralAnalytics: React.FC = () => {
     }
     
     return () => {
-      if (intervalId) clearInterval(intervalId);
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
     };
   }, [isAutoRefreshEnabled, refreshInterval, refreshAnalytics]);
-  
-  // Extract relevant anomalies from the data
-  useEffect(() => {
-    if (detailedMetrics?.anomalies) {
-      setActiveAnomalies(detailedMetrics.anomalies.filter(a => !a.resolved));
-    }
-  }, [detailedMetrics]);
-  
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-  
-  // Handle acknowledging an anomaly
-  const handleAcknowledgeAnomaly = (id: string) => {
-    setActiveAnomalies(prev => prev.filter(a => a.id !== id));
-    toast.success("Anomaly acknowledged and will be resolved");
-  };
 
-  // Handle drill down into metrics
-  const handleDrillDown = (metric: any) => {
-    setSelectedMetricTab("detailed");
-    toast.info(`Showing detailed analysis for ${metric.title}`);
-  };
-
-  // Extract and format metric values properly
-  const getMetricValue = (metricKey: string): number => {
-    if (!analyticsData) return 0;
-    
-    switch(metricKey) {
-      case 'responseTime':
-        return analyticsData.systemMetrics.responseTimeMs;
-      case 'accuracy':
-        return analyticsData.modelPerformance.accuracy * 100;
-      case 'errorRate':
-        return analyticsData.systemMetrics.errorRate;
-      case 'operations':
-        return analyticsData.operationalMetrics.totalOperations;
-      default:
-        return 0;
-    }
-  };
-
-  // Extract and format metric change values
-  const getMetricChange = (metricKey: string): number => {
-    if (!analyticsData) return 0;
-    
-    switch(metricKey) {
-      case 'responseTime':
-        return analyticsData.operationalMetrics.responseTimeChange;
-      case 'accuracy':
-        return analyticsData.operationalMetrics.accuracyChange;
-      case 'errorRate':
-        return analyticsData.operationalMetrics.errorRateChange;
-      case 'operations':
-        return analyticsData.operationalMetrics.operationsChange;
-      default:
-        return 0;
-    }
-  };
-  
-  // Format time series data for charts
-  const formatTimeSeriesData = (data: any[]) => {
-    if (!data || !Array.isArray(data)) return [];
-    return data.map(item => ({
-      time: formatDate(item.timestamp),
-      value: item.metrics.cpuUsage
+  // Format data for charts
+  const formatChartData = useCallback((data: any) => {
+    if (!data) return [];
+    return data.map((item: any) => ({
+      ...item,
+      date: new Date(item.date).toLocaleDateString(),
     }));
+  }, []);
+
+  // Handle date range selection
+  const handleDateRangeChange = useCallback((range: { from: Date; to: Date }) => {
+    if (range.from && range.to) {
+      handleDateChange(range.from, range.to);
+    }
+  }, [handleDateChange]);
+
+  // Helper for metric cards
+  const renderMetricCard = (
+    metricKey: 'responseTime' | 'accuracy' | 'errorRate' | 'operations',
+    title: string,
+    unit: string,
+    icon: React.ReactNode,
+    isNegative: boolean = false
+  ) => {
+    const data = getMetricValue(metricKey);
+    
+    return (
+      <DrillableMetricCard
+        title={title}
+        value={data.value}
+        unit={unit}
+        change={data.change}
+        metricKey={metricKey}
+        onDrillDown={handleDrillDown}
+        icon={icon}
+        isNegative={isNegative}
+      />
+    );
   };
 
-  if (loading) {
+  // Show loading state
+  if (loading && !analyticsData) {
     return (
       <Card className="w-full">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-64">
-            <div className="flex flex-col items-center">
-              <Brain className="h-12 w-12 text-primary animate-pulse" />
-              <p className="mt-4 text-muted-foreground">Loading neural analytics...</p>
+        <CardContent className="pt-6">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-pulse flex flex-col items-center">
+              <Brain className="h-12 w-12 text-primary/30" />
+              <p className="mt-2 text-muted-foreground">Loading neural analytics...</p>
             </div>
           </div>
         </CardContent>
@@ -122,35 +108,134 @@ const NeuralAnalytics: React.FC = () => {
     );
   }
 
+  // Show error state
   if (error) {
     return (
-      <Card className="w-full border-destructive">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-64">
-            <div className="flex flex-col items-center text-center">
-              <AlertTriangle className="h-12 w-12 text-destructive" />
-              <p className="mt-4 text-destructive font-semibold">Error loading neural analytics</p>
-              <p className="text-sm text-muted-foreground mt-2">{error}</p>
-              <Button variant="outline" className="mt-4" onClick={refreshAnalytics}>
-                Retry
-              </Button>
-            </div>
+      <Card className="w-full border-destructive/50">
+        <CardContent className="pt-6">
+          <div className="flex flex-col items-center justify-center h-32 text-center">
+            <AlertTriangle className="h-10 w-10 text-destructive mb-2" />
+            <h3 className="text-lg font-medium">Failed to load neural analytics</h3>
+            <p className="text-sm text-muted-foreground mt-1">{error}</p>
+            <Button onClick={refreshAnalytics} variant="outline" className="mt-4">
+              Try Again
+            </Button>
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  if (!analyticsData) {
+  // If we're showing a specific metric detail
+  if (selectedMetric) {
+    const trendData = getTrendDataForMetric(selectedMetric.key);
+    
     return (
       <Card className="w-full">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-64">
-            <div className="flex flex-col items-center text-center">
-              <p className="text-muted-foreground">No data available</p>
-              <Button variant="outline" className="mt-4" onClick={refreshAnalytics}>
-                Load Data
-              </Button>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleBackToOverview}
+              className="mb-2"
+            >
+              ← Back to Overview
+            </Button>
+            <CardTitle>{selectedMetric.title} Analysis</CardTitle>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={refreshAnalytics}>
+              Refresh
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-lg font-medium mb-2">{selectedMetric.title} Trend</h3>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={trendData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" />
+                        <YAxis />
+                        <Tooltip formatter={(value) => typeof value === 'number' ? value.toFixed(2) : value} />
+                        <Line 
+                          type="monotone" 
+                          dataKey="value" 
+                          stroke="#8884d8" 
+                          name={selectedMetric.title} 
+                          strokeWidth={2}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {selectedMetric.key === 'errorRate' && analyticsData?.anomalies?.length > 0 && (
+              <div>
+                <h3 className="text-lg font-medium mb-2">Detected Anomalies</h3>
+                <div className="grid gap-4">
+                  {analyticsData.anomalies.map((anomaly: any) => (
+                    <AnomalyDetails 
+                      key={anomaly.id} 
+                      anomalies={anomaly} 
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">Summary</h3>
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-sm text-muted-foreground">{selectedMetric.description}</p>
+                  
+                  {selectedMetric.key === 'responseTime' && (
+                    <div className="mt-4 space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex flex-col">
+                          <span className="text-sm text-muted-foreground">Average Response Time</span>
+                          <span className="text-2xl font-bold">
+                            {analyticsData?.systemMetrics?.responseTimeMs}ms
+                          </span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm text-muted-foreground">99th Percentile</span>
+                          <span className="text-2xl font-bold">
+                            {analyticsData?.systemMetrics?.p99ResponseTime}ms
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {selectedMetric.key === 'accuracy' && (
+                    <div className="mt-4 space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex flex-col">
+                          <span className="text-sm text-muted-foreground">Model Accuracy</span>
+                          <span className="text-2xl font-bold">
+                            {(analyticsData?.modelPerformance?.accuracy * 100).toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm text-muted-foreground">Precision</span>
+                          <span className="text-2xl font-bold">
+                            {(analyticsData?.modelPerformance?.precision * 100).toFixed(1)}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </div>
         </CardContent>
@@ -158,401 +243,293 @@ const NeuralAnalytics: React.FC = () => {
     );
   }
 
+  // Main dashboard view
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold">Neural System Analytics</h2>
-          <p className="text-muted-foreground">
-            Last updated: {new Date(analyticsData.timestamp).toLocaleString()}
-          </p>
-        </div>
-        
-        <div className="flex flex-wrap items-center gap-2">
-          <DateRangePicker />
-          
-          <div className="flex items-center gap-2">
-            <div className="flex items-center space-x-2">
-              <Switch 
-                id="auto-refresh" 
-                checked={isAutoRefreshEnabled}
-                onCheckedChange={setIsAutoRefreshEnabled}
-              />
-              <label 
-                htmlFor="auto-refresh" 
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Auto-refresh
-              </label>
+      <Card className="w-full">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle>Neural System Dashboard</CardTitle>
+          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Auto-refresh:</span>
+              <Switch checked={isAutoRefreshEnabled} onCheckedChange={toggleAutoRefresh} />
             </div>
-
-            <Select 
-              value={refreshInterval.toString()} 
-              onValueChange={(value) => setRefreshInterval(parseInt(value))}
-              disabled={!isAutoRefreshEnabled}
-            >
-              <SelectTrigger className="w-[130px]">
-                <SelectValue placeholder="Refresh rate" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10">Every 10s</SelectItem>
-                <SelectItem value="30">Every 30s</SelectItem>
-                <SelectItem value="60">Every 1m</SelectItem>
-                <SelectItem value="300">Every 5m</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <Button variant="outline" size="icon" onClick={refreshAnalytics}>
-            <ArrowUpRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <DrillableMetricCard
-          title="Response Time"
-          value={getMetricValue('responseTime')}
-          unit="ms"
-          change={getMetricChange('responseTime')}
-          metricKey="responseTime"
-          description="Neural system response time metrics and trends"
-          onDrillDown={handleDrillDown}
-          icon={<Clock className="h-4 w-4" />}
-          isNegative={true}
-        />
-        
-        <DrillableMetricCard
-          title="Accuracy"
-          value={getMetricValue('accuracy')}
-          unit="%"
-          change={getMetricChange('accuracy')}
-          metricKey="accuracy"
-          description="Model accuracy performance and trends"
-          onDrillDown={handleDrillDown}
-          icon={<Brain className="h-4 w-4" />}
-        />
-        
-        <DrillableMetricCard
-          title="Error Rate"
-          value={getMetricValue('errorRate')}
-          unit="%"
-          change={getMetricChange('errorRate')}
-          metricKey="errorRate"
-          description="System error rate metrics and anomalies"
-          onDrillDown={handleDrillDown}
-          icon={<AlertTriangle className="h-4 w-4" />}
-          isNegative={true}
-        />
-        
-        <DrillableMetricCard
-          title="Operations"
-          value={getMetricValue('operations')}
-          unit=""
-          change={getMetricChange('operations')}
-          metricKey="operations"
-          description="Total neural processing operations"
-          onDrillDown={handleDrillDown}
-          icon={<Activity className="h-4 w-4" />}
-        />
-      </div>
-
-      <Tabs defaultValue="system" value={selectedMetricTab} onValueChange={setSelectedMetricTab}>
-        <div className="flex justify-between items-center">
-          <TabsList>
-            <TabsTrigger value="system">System Overview</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="anomalies">
-              Anomalies
-              {activeAnomalies.length > 0 && (
-                <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center">
-                  {activeAnomalies.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="detailed">Detailed Metrics</TabsTrigger>
-          </TabsList>
-        </div>
-        
-        <TabsContent value="system" className="mt-6 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>System Health Status</CardTitle>
-            </CardHeader>
-            <CardContent className="px-6">
-              <div className="mb-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Status</p>
-                    <div className="flex items-center">
-                      <span className={`h-2 w-2 rounded-full mr-2 ${analyticsData.systemHealth.status === 'healthy' ? 'bg-green-500' : 'bg-amber-500'}`}></span>
-                      <p className="font-semibold capitalize">{analyticsData.systemHealth.status}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-1 text-right">
-                    <p className="text-sm font-medium">Uptime</p>
-                    <p className="font-semibold">{analyticsData.systemHealth.uptimeHours} hours</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium">System Metrics</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">CPU Usage</p>
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium">{analyticsData.systemMetrics.cpuUsage}%</p>
-                      <div className="w-2/3 bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
-                        <div 
-                          className="bg-primary h-full rounded-full" 
-                          style={{ width: `${analyticsData.systemMetrics.cpuUsage}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Memory Usage</p>
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium">{analyticsData.systemMetrics.memoryUsage}%</p>
-                      <div className="w-2/3 bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
-                        <div 
-                          className="bg-primary h-full rounded-full" 
-                          style={{ width: `${analyticsData.systemMetrics.memoryUsage}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <Separator className="my-6" />
-              
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-medium">Operational Summary</h4>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Successful Operations</p>
-                    <p className="text-xl font-bold">
-                      {analyticsData.operationalMetrics.successfulOperations.toLocaleString()}
-                      <span className="text-sm font-normal text-muted-foreground ml-2">
-                        ({Math.round(analyticsData.operationalMetrics.successfulOperations / analyticsData.operationalMetrics.totalOperations * 100)}%)
-                      </span>
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Failed Operations</p>
-                    <p className="text-xl font-bold">
-                      {analyticsData.operationalMetrics.failedOperations.toLocaleString()}
-                      <span className="text-sm font-normal text-muted-foreground ml-2">
-                        ({Math.round(analyticsData.operationalMetrics.failedOperations / analyticsData.operationalMetrics.totalOperations * 100)}%)
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance Forecast</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={analyticsData.performanceForecast}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="date" 
-                        tick={{ fontSize: 12 }}
-                        tickFormatter={formatDate}
-                      />
-                      <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip 
-                        formatter={(value: any) => [`${typeof value === 'number' ? value.toFixed(2) : value}`, '']}
-                        labelFormatter={(label: string) => formatDate(label)}
-                      />
-                      <Line 
-                        type="monotone" 
-                        name="Expected Load" 
-                        dataKey="metrics.predictedLoad" 
-                        stroke="#8884d8" 
-                        strokeWidth={2}
-                        activeDot={{ r: 8 }}
-                      />
-                      <Line 
-                        type="monotone" 
-                        name="Response Time" 
-                        dataKey="metrics.predictedResponseTime" 
-                        stroke="#82ca9d" 
-                        strokeWidth={2}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
             
-            <Card>
-              <CardHeader>
-                <CardTitle>Model Performance</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Accuracy</p>
-                    <p className="text-2xl font-bold">{(analyticsData.modelPerformance.accuracy * 100).toFixed(1)}%</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Precision</p>
-                    <p className="text-2xl font-bold">{(analyticsData.modelPerformance.precision * 100).toFixed(1)}%</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Recall</p>
-                    <p className="text-2xl font-bold">{(analyticsData.modelPerformance.recall * 100).toFixed(1)}%</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">F1 Score</p>
-                    <p className="text-2xl font-bold">{(analyticsData.modelPerformance.f1Score * 100).toFixed(1)}%</p>
-                  </div>
-                </div>
-                
-                <div className="mt-4">
-                  <p className="text-sm font-medium mb-3">Performance Trend</p>
-                  <div className="flex items-center">
-                    <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                      <div 
-                        className="bg-green-500 h-full rounded-full" 
-                        style={{ width: `${analyticsData.modelPerformance.accuracy * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="flex items-center gap-2">
+              <Select 
+                value={String(refreshInterval)}
+                onValueChange={(val) => changeRefreshInterval(Number(val))}
+              >
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Refresh Rate" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">Every 10s</SelectItem>
+                  <SelectItem value="30">Every 30s</SelectItem>
+                  <SelectItem value="60">Every 1m</SelectItem>
+                  <SelectItem value="300">Every 5m</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Button variant="outline" size="sm" onClick={refreshAnalytics}>
+              Refresh Now
+            </Button>
           </div>
-        </TabsContent>
-        
-        <TabsContent value="performance" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Historical Performance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={detailedMetrics?.timeSeriesData || []}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="timestamp" 
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={formatDate}
-                    />
-                    <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
-                    <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
-                    <Tooltip labelFormatter={(label) => formatDate(label)} />
-                    <Line 
-                      yAxisId="left"
-                      type="monotone" 
-                      dataKey="metrics.cpuUsage" 
-                      name="CPU Usage" 
-                      stroke="#8884d8" 
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                    <Line 
-                      yAxisId="left"
-                      type="monotone" 
-                      dataKey="metrics.memoryUsage" 
-                      name="Memory Usage" 
-                      stroke="#82ca9d" 
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                    <Line 
-                      yAxisId="right"
-                      type="monotone" 
-                      dataKey="metrics.responseTimeMs" 
-                      name="Response Time (ms)" 
-                      stroke="#ff7300" 
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                    <Line 
-                      yAxisId="right"
-                      type="monotone" 
-                      dataKey="metrics.errorRate" 
-                      name="Error Rate (%)" 
-                      stroke="#ff0000" 
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="anomalies" className="mt-6">
-          <AnomalyDetails
-            anomalies={activeAnomalies}
-            onAcknowledge={handleAcknowledgeAnomaly}
-          />
-        </TabsContent>
-        
-        <TabsContent value="detailed" className="mt-6 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Detailed Metrics Analysis</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {detailedMetrics && (
-                <div className="space-y-8">
-                  <div>
-                    <h3 className="font-medium text-lg mb-4">System Recommendations</h3>
-                    <ul className="space-y-2 pl-6 list-disc">
-                      {detailedMetrics.recommendations.map((rec, i) => (
-                        <li key={i} className="text-muted-foreground">{rec}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-medium text-lg mb-4">Trends Analysis</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="p-4 rounded-lg border bg-card">
-                        <p className="text-sm text-muted-foreground">CPU Trend</p>
-                        <p className="font-medium capitalize">{detailedMetrics.trendsAnalysis.cpuTrend}</p>
-                      </div>
-                      <div className="p-4 rounded-lg border bg-card">
-                        <p className="text-sm text-muted-foreground">Memory Trend</p>
-                        <p className="font-medium capitalize">{detailedMetrics.trendsAnalysis.memoryTrend}</p>
-                      </div>
-                      <div className="p-4 rounded-lg border bg-card">
-                        <p className="text-sm text-muted-foreground">Response Trend</p>
-                        <p className="font-medium capitalize">{detailedMetrics.trendsAnalysis.responseTrend}</p>
-                      </div>
-                      <div className="p-4 rounded-lg border bg-card">
-                        <p className="text-sm text-muted-foreground">Error Rate Trend</p>
-                        <p className="font-medium capitalize">{detailedMetrics.trendsAnalysis.errorRateTrend}</p>
-                      </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
+            <div className="flex items-center gap-2">
+              <DatePickerWithRange 
+                onChange={handleDateRangeChange} 
+                className="w-auto" 
+              />
+            </div>
+            
+            <div className="flex items-center text-sm">
+              <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
+              <span className="text-muted-foreground">
+                Last updated: {analyticsData?.lastUpdated ? 
+                  new Date(analyticsData.lastUpdated).toLocaleTimeString() : 'Never'}
+              </span>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {renderMetricCard('responseTime', 'Response Time', 'ms', <Clock className="h-4 w-4" />)}
+            {renderMetricCard('accuracy', 'Accuracy', '%', <CheckCircle className="h-4 w-4" />)}
+            {renderMetricCard('errorRate', 'Error Rate', '%', <AlertTriangle className="h-4 w-4" />, true)}
+            {renderMetricCard('operations', 'Operations', '', <Activity className="h-4 w-4" />)}
+          </div>
+
+          <Tabs defaultValue="performance" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="performance" className="flex items-center gap-1">
+                <Activity className="h-4 w-4" />
+                <span>Performance</span>
+              </TabsTrigger>
+              <TabsTrigger value="utilization" className="flex items-center gap-1">
+                <Cpu className="h-4 w-4" />
+                <span>Utilization</span>
+              </TabsTrigger>
+              <TabsTrigger value="trends" className="flex items-center gap-1">
+                <BarChart3 className="h-4 w-4" />
+                <span>Trends</span>
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="performance">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-md">Response Time Trend</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-80">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={formatChartData(analyticsData?.performanceTrend)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" />
+                          <YAxis />
+                          <Tooltip />
+                          <Line 
+                            type="monotone" 
+                            dataKey="responseTime" 
+                            stroke="#8884d8" 
+                            name="Response Time (ms)" 
+                            strokeWidth={2}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
                     </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-md">Error Rate Trend</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-80">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={formatChartData(analyticsData?.performanceTrend)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" />
+                          <YAxis />
+                          <Tooltip />
+                          <Line 
+                            type="monotone" 
+                            dataKey="errorRate" 
+                            stroke="#ff8042" 
+                            name="Error Rate (%)" 
+                            strokeWidth={2}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="utilization">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-md">CPU & Memory Usage</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-80">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={formatChartData(analyticsData?.utilizationTrend)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" />
+                          <YAxis />
+                          <Tooltip />
+                          <Line 
+                            type="monotone" 
+                            dataKey="cpuUsage" 
+                            stroke="#8884d8" 
+                            name="CPU Usage (%)" 
+                            strokeWidth={2}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="memoryUsage" 
+                            stroke="#82ca9d" 
+                            name="Memory Usage (%)" 
+                            strokeWidth={2}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-md">Request Volume</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-80">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={formatChartData(analyticsData?.utilizationTrend)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar 
+                            dataKey="requestCount" 
+                            fill="#8884d8" 
+                            name="Requests" 
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="trends">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-md">Performance Forecast</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-80">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={formatChartData(analyticsData?.performanceForecast)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" />
+                          <YAxis />
+                          <Tooltip />
+                          <Line 
+                            type="monotone" 
+                            dataKey="metrics.predictedResponseTime" 
+                            stroke="#8884d8" 
+                            name="Predicted Response Time" 
+                            strokeWidth={2}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="metrics.predictedErrorRate" 
+                            stroke="#ff8042" 
+                            name="Predicted Error Rate" 
+                            strokeWidth={2}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-md">Expected Load</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-80">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={formatChartData(analyticsData?.performanceForecast)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar 
+                            dataKey="metrics.expectedLoad" 
+                            fill="#82ca9d" 
+                            name="Expected Load" 
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          </Tabs>
+          
+          {analyticsData?.recommendations?.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-lg font-medium mb-2">Recommendations</h3>
+              <Card>
+                <CardContent className="pt-6">
+                  <ul className="space-y-2">
+                    {analyticsData.recommendations.map((rec: string, i: number) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <Brain className="h-5 w-5 text-primary mt-0.5" />
+                        <span>{rec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+          
+          {analyticsData?.anomalies?.length > 0 && (
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-medium">Detected Anomalies</h3>
+                <Button variant="outline" size="sm">
+                  View All Anomalies
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                {analyticsData.anomalies.slice(0, 2).map((anomaly: any) => (
+                  <AnomalyDetails 
+                    key={anomaly.id}
+                    anomalies={anomaly}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
