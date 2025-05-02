@@ -47,10 +47,10 @@ class NeuralMetricsService {
       overallHealth: Math.round(overallHealth),
       services: serviceMetrics,
       systemMetrics: {
-        cpuUsage: systemHealth.cpuUsage,
-        memoryUsage: systemHealth.memoryUsage,
-        responseTime: 0,
-        operationsPerSecond: systemHealth.requestsPerMinute / 60,
+        cpuUsage: systemHealth.cpuUtilization,
+        memoryUsage: systemHealth.memoryUtilization,
+        responseTime: systemHealth.responseTime,
+        operationsPerSecond: systemHealth.operationsPerSecond,
         errorRate: systemHealth.errorRate
       },
       recommendations
@@ -79,11 +79,11 @@ class NeuralMetricsService {
   generateRecommendations(services: any[], systemHealth: any, overallHealth: number): string[] {
     const recommendations: string[] = [];
 
-    if (systemHealth.cpuUsage > 80) {
+    if (systemHealth.cpuUtilization > 80) {
       recommendations.push('High CPU usage detected. Consider scaling resources or optimizing processing.');
     }
 
-    if (systemHealth.memoryUsage > 85) {
+    if (systemHealth.memoryUtilization > 85) {
       recommendations.push('Memory usage is high. Review memory allocation or check for memory leaks.');
     }
 

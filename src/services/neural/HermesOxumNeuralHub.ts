@@ -122,6 +122,16 @@ export class HermesOxumNeuralHub implements INeuralHub {
       responseTime: Math.random() * 200,
       operationsPerSecond: Math.floor(Math.random() * 1000),
       stability: 0.95 + Math.random() * 0.05,
+      // Adding the missing properties
+      lastUpdated: Date.now(),
+      systemLoad: Math.random() * 100,
+      userEngagement: Math.random() * 100,
+      requestsPerMinute: Math.floor(Math.random() * 600),
+      cpuUsage: Math.random() * 100,
+      memoryUsage: Math.random() * 100,
+      neuralAccuracy: Math.random(),
+      neuralEfficiency: Math.random(),
+      neuralLatency: Math.random() * 100,
     };
   }
 
@@ -158,7 +168,31 @@ export class HermesOxumNeuralHub implements INeuralHub {
         batchSize: 32,
         epochs: 10,
         optimizerType: 'adam'
-      }
+      },
+      neuralSettings: {
+        activationThreshold: 0.5,
+        neuralDensity: 0.8,
+        layerConfiguration: 'standard'
+      },
+      psychology: {
+        enabled: true,
+        confidenceThreshold: 0.7
+      },
+      physics: {
+        enabled: true,
+        simulationPrecision: 0.9
+      },
+      economics: {
+        enabled: true,
+        marketModelVersion: '1.0'
+      },
+      robotics: {
+        enabled: false,
+        motorPrecision: 0.95
+      },
+      geoLegalFilteringEnabled: true,
+      neuroEmotionEnabled: true,
+      predictiveModulationEnabled: false
     };
   }
 
@@ -172,7 +206,7 @@ export class HermesOxumNeuralHub implements INeuralHub {
     return [];
   }
 
-  // Add the missing getService method
+  // Get service by ID
   getService(serviceId: string): any {
     return this.services.get(serviceId);
   }
