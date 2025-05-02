@@ -1,351 +1,199 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import { Settings, Save, RotateCw, PauseCircle, Info } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
-import useNeuralHub from '@/hooks/useNeuralHub';
+import { useToast } from '@/components/ui/use-toast';
+import { NeuralModelParameters } from '@/types/neuralMetrics';
 
 interface NeuralSystemControlsProps {
+  onUpdate?: (parameters: Partial<NeuralModelParameters>) => void;
   className?: string;
 }
 
-const NeuralSystemControls: React.FC<NeuralSystemControlsProps> = ({ className = '' }) => {
-  const { getParameters, updateParameters, getSystemStatus } = useNeuralHub();
-  
-  const [parameters, setParameters] = useState({
-    neuralProcessingPower: 80,
-    responsivenessFactor: 60,
-    errorThreshold: 3.0,
+const NeuralSystemControls: React.FC<NeuralSystemControlsProps> = ({ 
+  onUpdate,
+  className
+}) => {
+  const { toast } = useToast();
+  const [parameters, setParameters] = useState<NeuralModelParameters>({
+    temperature: 0.7,
+    topP: 0.9,
+    frequencyPenalty: 0.0,
+    presencePenalty: 0.0,
+    maxTokens: 1000,
+    modelName: 'neural-advanced',
+    processingPower: 80,
+    responsiveness: 65,
+    errorTolerance: 25,
     adaptiveMode: true,
-    autonomousAdjustment: false,
-    precisionLevel: 75,
-    maxConcurrentOperations: 100,
+    autonomousMode: false,
+    precisionFactor: 70,
+    maxOperations: 5000
   });
-  
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDirty, setIsDirty] = useState(false);
-  
-  useEffect(() => {
-    loadCurrentParameters();
-  }, []);
-  
-  const loadCurrentParameters = async () => {
-    try {
-      setIsLoading(true);
-      const currentParams = getParameters();
-      
-      // Map API parameters to our UI parameters
-      setParameters({
-        neuralProcessingPower: currentParams.processingPower || 80,
-        responsivenessFactor: currentParams.responsiveness || 60,
-        errorThreshold: currentParams.errorTolerance || 3.0,
-        adaptiveMode: currentParams.adaptiveMode || true,
-        autonomousAdjustment: currentParams.autonomousMode || false,
-        precisionLevel: currentParams.precisionFactor || 75,
-        maxConcurrentOperations: currentParams.maxOperations || 100,
-      });
-      
-      setIsDirty(false);
-    } catch (error) {
-      console.error('Error loading neural parameters:', error);
-      toast.error('Failed to load neural system parameters');
-    } finally {
-      setIsLoading(false);
+
+  const handleChange = (key: keyof NeuralModelParameters, value: any) => {
+    setParameters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleToggle = (key: keyof NeuralModelParameters) => {
+    setParameters(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleApply = () => {
+    if (onUpdate) {
+      onUpdate(parameters);
     }
+    toast({
+      title: "System Controls Updated",
+      description: "Neural system parameters have been adjusted."
+    });
   };
-  
-  const handleParameterChange = (param: string, value: number | boolean) => {
-    setParameters(prev => ({
-      ...prev,
-      [param]: value
-    }));
-    setIsDirty(true);
-  };
-  
-  const handleSaveParameters = async () => {
-    try {
-      setIsLoading(true);
-      
-      // Map UI parameters to API parameters
-      await updateParameters({
-        processingPower: parameters.neuralProcessingPower,
-        responsiveness: parameters.responsivenessFactor,
-        errorTolerance: parameters.errorThreshold,
-        adaptiveMode: parameters.adaptiveMode,
-        autonomousMode: parameters.autonomousAdjustment,
-        precisionFactor: parameters.precisionLevel,
-        maxOperations: parameters.maxConcurrentOperations
-      });
-      
-      toast.success('Neural system parameters updated successfully');
-      setIsDirty(false);
-    } catch (error) {
-      console.error('Error updating parameters:', error);
-      toast.error('Failed to update neural system parameters');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
+
   const handleReset = () => {
-    loadCurrentParameters();
-    toast.info('Parameters reset to current values');
-  };
-  
-  const handleEmergencyPause = () => {
-    try {
-      updateParameters({ 
-        processingPower: 10,
-        maxOperations: 10,
-        emergencyMode: true
+    setParameters({
+      temperature: 0.7,
+      topP: 0.9,
+      frequencyPenalty: 0.0,
+      presencePenalty: 0.0,
+      maxTokens: 1000,
+      modelName: 'neural-advanced',
+      processingPower: 80,
+      responsiveness: 65,
+      errorTolerance: 25,
+      adaptiveMode: true,
+      autonomousMode: false,
+      precisionFactor: 70,
+      maxOperations: 5000
+    });
+    
+    if (onUpdate) {
+      onUpdate({
+        temperature: 0.7,
+        topP: 0.9,
+        frequencyPenalty: 0.0,
+        presencePenalty: 0.0,
+        maxTokens: 1000,
+        modelName: 'neural-advanced',
+        processingPower: 80,
+        responsiveness: 65,
+        errorTolerance: 25,
+        adaptiveMode: true,
+        autonomousMode: false,
+        precisionFactor: 70,
+        maxOperations: 5000
       });
-      
-      toast.warning('Neural system emergency pause activated');
-      loadCurrentParameters(); // Reload current state
-      
-    } catch (error) {
-      console.error('Emergency pause failed:', error);
-      toast.error('Failed to activate emergency pause');
     }
+    
+    toast({
+      title: "Controls Reset",
+      description: "Neural system parameters have been reset to defaults."
+    });
   };
-  
+
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle className="flex items-center">
-          <Settings className="mr-2 h-5 w-5" />
-          <span>Neural System Controls</span>
-        </CardTitle>
-        <CardDescription>
-          Adjust neural processing parameters and system behavior
-        </CardDescription>
+        <CardTitle>Neural System Controls</CardTitle>
       </CardHeader>
-      
-      <CardContent>
-        <div className="space-y-6">
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between mb-2">
-                <Label className="flex items-center">
-                  Neural Processing Power
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="h-4 w-4 ml-1 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="w-80">
-                          Controls how much computing resources are allocated to neural processing.
-                          Higher values increase performance but consume more resources.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </Label>
-                <span className="font-medium">{parameters.neuralProcessingPower}%</span>
-              </div>
-              <Slider 
-                value={[parameters.neuralProcessingPower]} 
-                min={10} 
-                max={100} 
-                step={1} 
-                onValueChange={(vals) => handleParameterChange('neuralProcessingPower', vals[0])}
-                disabled={isLoading}
-              />
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
+          {/* Processing Power Control */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="processingPower">Processing Power</Label>
+              <span className="text-sm font-medium">{parameters.processingPower}%</span>
             </div>
-            
-            <div>
-              <div className="flex justify-between mb-2">
-                <Label className="flex items-center">
-                  Responsiveness Factor
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="h-4 w-4 ml-1 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="w-80">
-                          Affects how quickly the system responds to neural inputs.
-                          Higher values increase speed but may reduce accuracy.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </Label>
-                <span className="font-medium">{parameters.responsivenessFactor}%</span>
-              </div>
-              <Slider 
-                value={[parameters.responsivenessFactor]} 
-                min={10} 
-                max={100} 
-                step={1} 
-                onValueChange={(vals) => handleParameterChange('responsivenessFactor', vals[0])}
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div>
-              <div className="flex justify-between mb-2">
-                <Label className="flex items-center">
-                  Error Threshold
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="h-4 w-4 ml-1 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="w-80">
-                          Maximum allowable error rate before the system triggers warnings.
-                          Lower values enforce stricter error handling.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </Label>
-                <span className="font-medium">{parameters.errorThreshold}%</span>
-              </div>
-              <Slider 
-                value={[parameters.errorThreshold]} 
-                min={0.5} 
-                max={10} 
-                step={0.1} 
-                onValueChange={(vals) => handleParameterChange('errorThreshold', vals[0])}
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div>
-              <div className="flex justify-between mb-2">
-                <Label className="flex items-center">
-                  Precision Level
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="h-4 w-4 ml-1 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="w-80">
-                          Controls the precision of neural computations.
-                          Higher values increase accuracy but require more processing time.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </Label>
-                <span className="font-medium">{parameters.precisionLevel}%</span>
-              </div>
-              <Slider 
-                value={[parameters.precisionLevel]} 
-                min={10} 
-                max={100} 
-                step={1} 
-                onValueChange={(vals) => handleParameterChange('precisionLevel', vals[0])}
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div>
-              <div className="flex justify-between mb-2">
-                <Label className="flex items-center">
-                  Max Concurrent Operations
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="h-4 w-4 ml-1 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="w-80">
-                          Maximum number of operations the system can process simultaneously.
-                          Higher values increase throughput but may decrease stability.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </Label>
-                <span className="font-medium">{parameters.maxConcurrentOperations}</span>
-              </div>
-              <Slider 
-                value={[parameters.maxConcurrentOperations]} 
-                min={10} 
-                max={200} 
-                step={5} 
-                onValueChange={(vals) => handleParameterChange('maxConcurrentOperations', vals[0])}
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
-              <div className="space-y-0.5">
-                <Label>Adaptive Mode</Label>
-                <div className="text-sm text-muted-foreground">
-                  Automatically adjusts parameters based on workload
-                </div>
-              </div>
-              <Switch
-                checked={parameters.adaptiveMode}
-                onCheckedChange={(checked) => handleParameterChange('adaptiveMode', checked)}
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
-              <div className="space-y-0.5">
-                <Label>Autonomous Adjustment</Label>
-                <div className="text-sm text-muted-foreground">
-                  Allow system to self-optimize without user intervention
-                </div>
-              </div>
-              <Switch
-                checked={parameters.autonomousAdjustment}
-                onCheckedChange={(checked) => handleParameterChange('autonomousAdjustment', checked)}
-                disabled={isLoading}
-              />
-            </div>
+            <Slider
+              id="processingPower"
+              min={10}
+              max={100}
+              step={1}
+              value={[parameters.processingPower ?? 80]}
+              onValueChange={(values) => handleChange('processingPower', values[0])}
+            />
           </div>
           
-          <div className="flex justify-between pt-2 border-t">
-            <div className="space-x-2">
-              <Button
-                variant="outline" 
-                onClick={handleReset} 
-                disabled={isLoading || !isDirty}
-              >
-                <RotateCw className="mr-2 h-4 w-4" />
-                Reset
-              </Button>
-              
-              <Button
-                variant="destructive"
-                onClick={handleEmergencyPause}
-                disabled={isLoading}
-              >
-                <PauseCircle className="mr-2 h-4 w-4" />
-                Emergency Pause
-              </Button>
+          {/* Responsiveness Control */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="responsiveness">System Responsiveness</Label>
+              <span className="text-sm font-medium">{parameters.responsiveness}%</span>
+            </div>
+            <Slider
+              id="responsiveness"
+              min={10}
+              max={100}
+              step={1}
+              value={[parameters.responsiveness ?? 65]}
+              onValueChange={(values) => handleChange('responsiveness', values[0])}
+            />
+          </div>
+          
+          {/* Error Tolerance Control */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="errorTolerance">Error Tolerance</Label>
+              <span className="text-sm font-medium">{parameters.errorTolerance}%</span>
+            </div>
+            <Slider
+              id="errorTolerance"
+              min={5}
+              max={50}
+              step={1}
+              value={[parameters.errorTolerance ?? 25]}
+              onValueChange={(values) => handleChange('errorTolerance', values[0])}
+            />
+          </div>
+          
+          {/* Precision Factor Control */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="precisionFactor">Precision Factor</Label>
+              <span className="text-sm font-medium">{parameters.precisionFactor}%</span>
+            </div>
+            <Slider
+              id="precisionFactor"
+              min={10}
+              max={100}
+              step={1}
+              value={[parameters.precisionFactor ?? 70]}
+              onValueChange={(values) => handleChange('precisionFactor', values[0])}
+            />
+          </div>
+          
+          {/* Mode Toggles */}
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="adaptiveMode" className="cursor-pointer">Adaptive Mode</Label>
+              <Switch
+                id="adaptiveMode"
+                checked={parameters.adaptiveMode}
+                onCheckedChange={() => handleToggle('adaptiveMode')}
+              />
             </div>
             
-            <Button 
-              onClick={handleSaveParameters} 
-              disabled={isLoading || !isDirty}
-            >
-              {isLoading ? (
-                <>
-                  <RotateCw className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </>
-              )}
-            </Button>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="autonomousMode" className="cursor-pointer">Autonomous Mode</Label>
+              <Switch
+                id="autonomousMode"
+                checked={parameters.autonomousMode}
+                onCheckedChange={() => handleToggle('autonomousMode')}
+              />
+            </div>
           </div>
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="flex space-x-3 pt-2">
+          <Button onClick={handleApply} className="flex-1">
+            Apply Changes
+          </Button>
+          <Button variant="outline" onClick={handleReset}>
+            Reset
+          </Button>
         </div>
       </CardContent>
     </Card>

@@ -41,3 +41,21 @@ export interface ServiceMetrics {
   successRate?: number;
   [key: string]: any;
 }
+
+// Extended ModelParameters interface to include neural system controls
+export interface NeuralModelParameters {
+  temperature: number;
+  topP: number;
+  frequencyPenalty: number;
+  presencePenalty: number;
+  maxTokens: number;
+  modelName: string;
+  processingPower?: number;
+  responsiveness?: number;
+  errorTolerance?: number;
+  adaptiveMode?: boolean;
+  autonomousMode?: boolean;
+  precisionFactor?: number;
+  maxOperations?: number;
+  stopSequences?: string[];
+}

@@ -24,6 +24,27 @@ const NeuralAnalyticsDashboard: React.FC<NeuralAnalyticsDashboardProps> = ({ cla
     'Consider upgrading memory allocation for complex operations',
     'Schedule maintenance during low-traffic periods'
   ];
+
+  // Create proper data format for charts (array of objects with timestamp and value)
+  const processingData = [
+    { timestamp: '6d', value: 65 },
+    { timestamp: '5d', value: 68 },
+    { timestamp: '4d', value: 72 },
+    { timestamp: '3d', value: 73 },
+    { timestamp: '2d', value: 80 },
+    { timestamp: 'Yesterday', value: 85 },
+    { timestamp: 'Today', value: 87 }
+  ];
+
+  const accuracyData = [
+    { timestamp: '6d', value: 89 },
+    { timestamp: '5d', value: 91 },
+    { timestamp: '4d', value: 90 },
+    { timestamp: '3d', value: 92 },
+    { timestamp: '2d', value: 93 },
+    { timestamp: 'Yesterday', value: 92 },
+    { timestamp: 'Today', value: 94 }
+  ];
   
   return (
     <div className={className}>
@@ -36,9 +57,17 @@ const NeuralAnalyticsDashboard: React.FC<NeuralAnalyticsDashboardProps> = ({ cla
           <CardContent>
             <div className="text-2xl font-bold">{metrics.processingEfficiency}%</div>
             <PerformanceChart
-              data={[65, 68, 72, 73, 80, 85, 87]}
-              labels={['6d', '5d', '4d', '3d', '2d', 'Yesterday', 'Today']}
-              color="#8b5cf6"
+              data={processingData}
+              dataKey="timestamp"
+              lines={[
+                {
+                  dataKey: "value",
+                  name: "Efficiency",
+                  color: "#8b5cf6",
+                  strokeWidth: 2
+                }
+              ]}
+              height={100}
             />
           </CardContent>
         </Card>
@@ -50,9 +79,17 @@ const NeuralAnalyticsDashboard: React.FC<NeuralAnalyticsDashboardProps> = ({ cla
           <CardContent>
             <div className="text-2xl font-bold">{metrics.accuracyRate}%</div>
             <PerformanceChart
-              data={[89, 91, 90, 92, 93, 92, 94]}
-              labels={['6d', '5d', '4d', '3d', '2d', 'Yesterday', 'Today']}
-              color="#10b981"
+              data={accuracyData}
+              dataKey="timestamp"
+              lines={[
+                {
+                  dataKey: "value",
+                  name: "Accuracy",
+                  color: "#10b981",
+                  strokeWidth: 2
+                }
+              ]}
+              height={100}
             />
           </CardContent>
         </Card>
