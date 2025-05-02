@@ -29,7 +29,8 @@ export default function checkBrainHubHealth(): BrainHubHealth {
     // Ensure all required properties exist by providing defaults or mapping to existing values
     const mappedMetrics = {
       ...metrics,
-      memoryAllocation: metrics.memoryAllocation || metrics.memoryUtilization || 0,
+      // Ensure all required fields are present and initialized
+      memoryAllocation: metrics.memoryAllocation || metrics.memoryUtilization / 100 || 0,
       networkThroughput: metrics.networkThroughput || 0,
       requestRate: metrics.requestRate || metrics.operationsPerSecond || 0,
       averageResponseTime: metrics.averageResponseTime || metrics.responseTime || 0
@@ -39,9 +40,9 @@ export default function checkBrainHubHealth(): BrainHubHealth {
     const health: BrainHubHealth = {
       status,
       metrics: {
-        cpuUsage: metrics.cpuUtilization,
-        memoryUsage: metrics.memoryUtilization,
-        requestsPerMinute: metrics.operationsPerSecond / 60,
+        cpuUsage: metrics.cpuUtilization || 0,
+        memoryUsage: metrics.memoryUtilization || 0,
+        requestsPerMinute: (metrics.operationsPerSecond || 0) / 60,
         lastOptimized: Date.now() - (1000 * 60 * 60), // 1 hour ago
         neuralMetrics: {
           accuracy: metrics.neuralAccuracy || 0,

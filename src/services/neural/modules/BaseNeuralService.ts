@@ -86,10 +86,10 @@ export class BaseBrainService implements BaseNeuralServiceType {
     return {
       operationsCount: 0,
       errorCount: 0,
-      latency: 0,        // Ensure latency is always provided
-      responseTime: 0,    // Include responseTime for compatibility
+      latency: null,         // Can be null when only responseTime is used
+      responseTime: 0,       // Always provide a responseTime
       errorRate: 0,
-      successRate: 1.0,   // Add successRate with a default value
+      successRate: 1.0,      // Add successRate with a default value
       status: this.status
     };
   }

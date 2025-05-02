@@ -10,7 +10,7 @@ function normalizeMetrics(metrics: any): ServiceMetrics {
   const normalizedMetrics: ServiceMetrics = {
     operationsCount: 0,
     errorCount: 0,
-    latency: 0,
+    latency: null, // Initialize as null since it might not be available
     responseTime: 0,
     errorRate: 0,
     successRate: 1.0
@@ -21,7 +21,7 @@ function normalizeMetrics(metrics: any): ServiceMetrics {
   normalizedMetrics.errorCount = metrics.errorCount || 0;
   
   // Handle latency/responseTime interoperability
-  normalizedMetrics.latency = metrics.latency !== undefined ? metrics.latency : (metrics.responseTime || 0);
+  normalizedMetrics.latency = metrics.latency !== undefined ? metrics.latency : (metrics.responseTime || null);
   normalizedMetrics.responseTime = metrics.responseTime !== undefined ? metrics.responseTime : (metrics.latency || 0);
   
   // Calculate error and success rates if not provided
@@ -62,7 +62,7 @@ export function collectServiceMetrics(services: BaseNeuralService[]): Record<str
       serviceMetrics[service.moduleId] = {
         operationsCount: 0,
         errorCount: 0,
-        latency: 0,
+        latency: null,
         responseTime: 0,
         errorRate: 0,
         successRate: 0,

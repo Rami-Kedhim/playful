@@ -47,9 +47,9 @@ export interface ServiceMetrics {
   operationsCount: number;
   errorCount: number;
   latency: number | null; // Making latency nullable to support cases where only responseTime is available
-  responseTime?: number;  // Optional since some implementations use latency instead
-  successRate?: number;
-  errorRate?: number;
+  responseTime: number;  // Ensure responseTime is always available
+  successRate: number;  // Added as required field
+  errorRate: number;    // Added as required field
   [key: string]: any;  // Allow additional properties
 }
 

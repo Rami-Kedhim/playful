@@ -74,12 +74,18 @@ const neuralHub = {
       errorRate: 1.2 + Math.random() * 0.8,
       responseTime: 165 + Math.random() * 35,
       stability: 92 - Math.random() * 8,
+      // Ensure all required HealthMetrics properties are present
       memoryAllocation: 0.72 + Math.random() * 0.1,
       networkThroughput: 42.5 + Math.random() * 10,
       requestRate: 325 + Math.random() * 50,
       averageResponseTime: 165 + Math.random() * 35,
       cpuUsage: 0.65 + Math.random() * 0.15,
-      memoryUsage: 0.72 + Math.random() * 0.1
+      memoryUsage: 0.72 + Math.random() * 0.1,
+      // Add system metrics
+      systemLoad: 0.65 + Math.random() * 0.15,
+      userEngagement: 0.78 + Math.random() * 0.12,
+      lastUpdated: Date.now(),
+      requestsPerMinute: 7 + Math.random() * 3
     };
   },
   
@@ -188,6 +194,27 @@ const neuralHub = {
   updateConfig: async (config: any) => {
     console.log('Updating configuration:', config);
     return true;
+  },
+  
+  /**
+   * Get a service by ID (stub for NeuralAutomationService)
+   */
+  getService: (serviceId: string) => {
+    // This is a stub to satisfy the import in neuralHubUtils
+    return {
+      moduleId: serviceId,
+      name: `Service ${serviceId}`,
+      config: { enabled: true },
+      getMetrics: () => ({
+        operationsCount: 100,
+        errorCount: 2,
+        latency: 50,
+        responseTime: 50,
+        errorRate: 0.02,
+        successRate: 0.98
+      }),
+      updateConfig: (config: any) => console.log(`Updated config for ${serviceId}:`, config)
+    };
   }
 };
 
