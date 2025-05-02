@@ -1,340 +1,202 @@
 
 import { useState, useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { generateImage } from '@/services/ai/aiImageService';
-import { brainHub } from '@/services/neural/HermesOxumBrainHub';
+import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
+import { BrainHubRequest, BrainHubResponse } from '@/services/neural/types/neuralHub';
 
-// Define the AIMessage type with all required properties
-export interface AIMessage {
+interface AIMessage {
   id: string;
-  role: 'user' | 'assistant' | 'system';
   content: string;
+  role: 'assistant' | 'user';
   timestamp: Date;
-  is_ai?: boolean;
-  created_at?: string | Date;
-  requires_payment?: boolean;
-  payment_status?: 'pending' | 'completed' | 'failed';
-  price?: number;
 }
 
-// Add the AIProfile type
-export interface AIProfile {
-  id: string;
-  name: string;
-  avatar_url?: string;
-  personality?: {
-    type: 'flirty' | 'shy' | 'dominant' | 'playful' | string;
-  };
-  location?: string;
-  lucoin_chat_price?: number;
-  lucoin_image_price?: number;
+interface AIMessagingHook {
+  messages: AIMessage[];
+  isLoading: boolean;
+  error: string | null;
+  sendMessage: (content: string) => Promise<void>;
+  generateResponse: (prompt: string) => Promise<string>;
+  clearMessages: () => void;
+  processContentRequest: (type: string, data: any) => Promise<any>;
 }
 
-// Define the hook interface
-interface UseAIMessagingOptions {
-  profileId?: string;
-  conversationId?: string;
-}
-
-// Brain Hub message processing interface
-interface BrainHubMessageContext {
-  userId?: string;
-  profileId?: string;
-  conversationHistory: Array<{
-    role: string;
-    content: string;
-  }>;
-  userPreferences?: {
-    messaging_style?: string;
-    content_length?: 'short' | 'medium' | 'long';
-    nsfw_allowed?: boolean;
-  };
-}
-
-export function useAIMessaging(options?: UseAIMessagingOptions) {
+export function useAIMessaging(): AIMessagingHook {
   const [messages, setMessages] = useState<AIMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [sendingMessage, setSendingMessage] = useState(false);
-  const [profile, setProfile] = useState<AIProfile | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [paymentRequired, setPaymentRequired] = useState(false);
-  const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
-  const [simulatingTyping, setSimulatingTyping] = useState(false);
-  const [generatingImage, setGeneratingImage] = useState(false);
-  const [brainHubConnected, setBrainHubConnected] = useState<boolean>(false);
-  const { toast } = useToast();
 
-  // Try to connect to Brain Hub
-  const connectToBrainHub = useCallback(() => {
+  // Function to add a new message to the state
+  const addMessage = useCallback((content: string, role: 'assistant' | 'user') => {
+    const newMessage: AIMessage = {
+      id: Date.now().toString(),
+      content,
+      role,
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, newMessage]);
+    return newMessage;
+  }, []);
+
+  // Function to send a message and get a response
+  const sendMessage = useCallback(async (content: string): Promise<void> => {
     try {
-      // Attempt to connect to Brain Hub for messaging intelligence
-      const connected = brainHub.processRequest({
-        type: "register_capabilities",
-        data: {
-          componentId: "ai-messaging",
-          capabilities: [
-            "message_enhancement",
-            "personality_adaptation",
-            "content_moderation"
-          ]
-        }
-      }).success;
+      setIsLoading(true);
+      setError(null);
       
-      setBrainHubConnected(connected);
-      return connected;
-    } catch (err) {
-      console.warn("Could not connect to Brain Hub for message enhancement:", err);
-      setBrainHubConnected(false);
+      // Add the user message
+      addMessage(content, 'user');
+      
+      // Generate a response
+      const response = await generateResponse(content);
+      
+      // Add the assistant message
+      addMessage(response, 'assistant');
+    } catch (err: any) {
+      setError(err.message || 'Error sending message');
+      console.error('Error sending message:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [addMessage]);
+
+  // Function to generate a response from the AI
+  const generateResponse = useCallback(async (prompt: string): Promise<string> => {
+    try {
+      // Create the request for the neural hub
+      const request: BrainHubRequest = {
+        type: 'generation',
+        data: { prompt, max_tokens: 500 }
+      };
+      
+      // Process the request
+      const response = await neuralHub.processRequest(request);
+      
+      // Check if the response was successful
+      if (response.success && response.data) {
+        return response.data.text || 'I processed your request, but no response was generated.';
+      } else {
+        throw new Error(response.error || 'Failed to generate response');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error generating response');
+      return 'I encountered an error while processing your request.';
+    }
+  }, []);
+
+  // Function to process content-related requests
+  const processContentRequest = useCallback(async (type: string, data: any): Promise<any> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Create the request
+      const request: BrainHubRequest = {
+        type,
+        data
+      };
+      
+      // Process the request
+      const response = await neuralHub.processRequest(request);
+      
+      // Check if the response was successful
+      if (response.success && response.data) {
+        return response.data;
+      } else {
+        throw new Error(response.error || `Failed to process ${type} request`);
+      }
+    } catch (err: any) {
+      setError(err.message || `Error processing ${type} request`);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Function to analyze user content
+  const analyzeContent = useCallback(async (content: string): Promise<any> => {
+    try {
+      // Create the request
+      const request: BrainHubRequest = {
+        type: 'analysis',
+        data: { content }
+      };
+      
+      // Process the request
+      const response = await neuralHub.processRequest(request);
+      
+      // Check if the response was successful
+      if (response.success && response.data) {
+        return response.data;
+      } else {
+        throw new Error(response.error || 'Failed to analyze content');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error analyzing content');
+      throw err;
+    }
+  }, []);
+
+  // Function to moderate content
+  const moderateContent = useCallback(async (content: string): Promise<boolean> => {
+    try {
+      // Create the request
+      const request: BrainHubRequest = {
+        type: 'moderation',
+        data: { content }
+      };
+      
+      // Process the request
+      const response = await neuralHub.processRequest(request);
+      
+      // Check if the response was successful
+      if (response.success && response.data) {
+        return response.data.isAppropriate || false;
+      } else {
+        throw new Error(response.error || 'Failed to moderate content');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error moderating content');
       return false;
     }
   }, []);
 
-  // Initialize conversation
-  const initializeConversation = useCallback(async () => {
+  // Function to enhance AI messages with emotional content
+  const enhanceAIMessage = useCallback(async (message: string, context: any = {}): Promise<string> => {
     try {
-      setLoading(true);
-      // Connect to Brain Hub
-      connectToBrainHub();
-      
-      // Simulate API call to get profile
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Set mock profile
-      setProfile({
-        id: options?.profileId || 'default-profile',
-        name: 'AI Assistant',
-        avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
-        personality: {
-          type: 'friendly'
-        },
-        location: 'Virtual',
-        lucoin_chat_price: 5,
-        lucoin_image_price: 10
-      });
-      
-      let welcomeMessage = 'Hello! How can I assist you today?';
-      
-      // Try to enhance welcome message with Brain Hub
-      if (brainHubConnected) {
-        try {
-          const brainHubResponse = brainHub.processRequest({
-            type: "ai_welcome_message",
-            data: {
-              profileId: options?.profileId,
-              personalityType: 'friendly',
-            }
-          });
-          
-          if (brainHubResponse.success && brainHubResponse.data?.message) {
-            welcomeMessage = brainHubResponse.data.message;
-          }
-        } catch (err) {
-          console.warn("Could not enhance welcome message:", err);
-        }
-      }
-      
-      // Set initial welcome message
-      const welcomeMessageObj: AIMessage = {
-        id: `welcome-${Date.now()}`,
-        role: 'assistant',
-        content: welcomeMessage,
-        timestamp: new Date(),
-        is_ai: true,
-        created_at: new Date()
+      // Create the request
+      const request: BrainHubRequest = {
+        type: 'enhance_ai_message',
+        data: { message, context }
       };
       
-      setMessages([welcomeMessageObj]);
-    } catch (err) {
-      setError('Failed to initialize conversation');
-    } finally {
-      setLoading(false);
-    }
-  }, [options?.profileId, connectToBrainHub, brainHubConnected]);
-
-  // Process message through Brain Hub for enhancement
-  const processMessageWithBrainHub = useCallback((content: string, messageContext: BrainHubMessageContext): string => {
-    if (!brainHubConnected) return content;
-    
-    try {
-      const brainHubResponse = brainHub.processRequest({
-        type: "enhance_ai_message",
-        data: messageContext
-      });
+      // Process the request
+      const response = await neuralHub.processRequest(request);
       
-      if (brainHubResponse.success && brainHubResponse.data?.enhancedContent) {
-        return brainHubResponse.data.enhancedContent;
+      // Check if the response was successful
+      if (response.success && response.data) {
+        return response.data.enhancedMessage || message;
+      } else {
+        return message; // Return original message if enhancement fails
       }
-    } catch (err) {
-      console.warn("Failed to enhance message with Brain Hub:", err);
+    } catch (err: any) {
+      console.error('Error enhancing AI message:', err);
+      return message; // Return original message if error occurs
     }
-    
-    return content;
-  }, [brainHubConnected]);
+  }, []);
 
-  // Send a message to the AI
-  const sendMessage = useCallback(async (content: string) => {
-    try {
-      setSendingMessage(true);
-
-      // Add user message to the chat
-      const userMessage: AIMessage = {
-        id: `msg-${Date.now()}-user`,
-        role: 'user',
-        content,
-        timestamp: new Date(),
-        is_ai: false,
-        created_at: new Date()
-      };
-      
-      setMessages(prev => [...prev, userMessage]);
-
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simulate typing
-      setSimulatingTyping(true);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setSimulatingTyping(false);
-
-      // Prepare conversation history for Brain Hub
-      const conversationHistory = messages.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
-      
-      // Add current user message
-      conversationHistory.push({
-        role: 'user',
-        content
-      });
-      
-      // Process response through Brain Hub if possible
-      let responseContent = `This is a response to: ${content}`;
-      
-      if (brainHubConnected) {
-        responseContent = processMessageWithBrainHub(responseContent, {
-          userId: 'current-user',
-          profileId: options?.profileId,
-          conversationHistory,
-          userPreferences: {
-            messaging_style: 'conversational',
-            content_length: 'medium',
-            nsfw_allowed: false
-          }
-        });
-      }
-
-      // Add AI response to the chat
-      const aiMessage: AIMessage = {
-        id: `msg-${Date.now()}-assistant`,
-        role: 'assistant',
-        content: responseContent,
-        timestamp: new Date(),
-        is_ai: true,
-        created_at: new Date()
-      };
-      
-      setMessages(prev => [...prev, aiMessage]);
-      return aiMessage;
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to send message',
-        variant: 'destructive',
-      });
-      return null;
-    } finally {
-      setSendingMessage(false);
-    }
-  }, [messages, toast, options, brainHubConnected, processMessageWithBrainHub]);
-
-  // Generate an image using AI
-  const generateAIImage = useCallback(async (prompt: string) => {
-    try {
-      setGeneratingImage(true);
-      
-      // Process prompt through Brain Hub for enhancement if available
-      let enhancedPrompt = prompt;
-      
-      if (brainHubConnected) {
-        try {
-          const brainHubResponse = brainHub.processRequest({
-            type: "enhance_image_prompt",
-            data: {
-              prompt,
-              style: "realistic"
-            }
-          });
-          
-          if (brainHubResponse.success && brainHubResponse.data?.enhancedPrompt) {
-            enhancedPrompt = brainHubResponse.data.enhancedPrompt;
-          }
-        } catch (err) {
-          console.warn("Failed to enhance image prompt:", err);
-        }
-      }
-      
-      const imageUrl = await generateImage(enhancedPrompt);
-      return imageUrl;
-    } catch (error) {
-      console.error('Error generating image:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to generate image',
-        variant: 'destructive',
-      });
-      return null;
-    } finally {
-      setGeneratingImage(false);
-    }
-  }, [toast, brainHubConnected]);
-
-  // Process payment for premium messages
-  const processPayment = useCallback(async () => {
-    try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setPaymentRequired(false);
-      setPaymentMessage(null);
-      
-      toast({
-        title: 'Payment successful',
-        description: 'Your premium response has been unlocked',
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Payment error:', error);
-      toast({
-        title: 'Payment failed',
-        description: 'Could not process your payment',
-        variant: 'destructive',
-      });
-      return false;
-    }
-  }, [toast]);
+  // Function to clear all messages
+  const clearMessages = useCallback((): void => {
+    setMessages([]);
+  }, []);
 
   return {
     messages,
     isLoading,
-    loading,
-    sendingMessage,
-    profile,
     error,
-    paymentRequired,
-    paymentMessage,
-    simulatingTyping,
-    generatingImage,
-    brainHubConnected,
     sendMessage,
-    generateAIImage,
-    generateImage: generateAIImage, // Alias for backward compatibility
-    initializeConversation,
-    processPayment,
-    connectToBrainHub
+    generateResponse,
+    clearMessages,
+    processContentRequest
   };
 }
 

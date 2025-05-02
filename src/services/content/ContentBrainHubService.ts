@@ -1,232 +1,175 @@
 
-import { brainHubConnection } from "@/services/BrainHubConnectionService";
-import { brainHub } from "@/services/neural/HermesOxumBrainHub";
-import { useHermesInsights } from "@/hooks/useHermesInsights";
-import { calculateExpiryDate, calculateDaysRemaining } from "@/utils/dateUtils";
+import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
+import { BrainHubRequest } from '@/services/neural/types/neuralHub';
 
-// Unique identifier for the content manager in Brain Hub
-const CONTENT_MANAGER_ID = "content-management-system";
+export interface ContentOptimizationParams {
+  content: string;
+  target: 'engagement' | 'conversion' | 'clarity' | 'seo';
+  contentType: 'title' | 'description' | 'body' | 'cta';
+  maxLength?: number;
+}
 
-/**
- * Service to connect content management features to Brain Hub
- */
+export interface ContentAnalysisResult {
+  score: number;
+  strengths: string[];
+  weaknesses: string[];
+  suggestions: string[];
+}
+
+export interface ContentSuggestion {
+  original: string;
+  improved: string;
+  reason: string;
+}
+
 export class ContentBrainHubService {
-  private static instance: ContentBrainHubService;
-  private isConnected: boolean = false;
-  
-  private constructor() {
-    this.connectToBrainHub();
-  }
-  
-  public static getInstance(): ContentBrainHubService {
-    if (!ContentBrainHubService.instance) {
-      ContentBrainHubService.instance = new ContentBrainHubService();
-    }
-    return ContentBrainHubService.instance;
-  }
-  
   /**
-   * Connect the content management system to Brain Hub
+   * Optimizes content for a specific target and content type
    */
-  private connectToBrainHub(): boolean {
-    if (this.isConnected) return true;
-    
+  public static async optimizeContent(params: ContentOptimizationParams): Promise<string> {
     try {
-      console.log("Connecting content management system to Brain Hub...");
-      const connected = brainHubConnection.connectComponent(CONTENT_MANAGER_ID);
-      
-      if (connected) {
-        console.log("Content management successfully connected to Brain Hub");
-        this.isConnected = true;
-        
-        // Register content capabilities with Brain Hub
-        brainHub.processRequest({
-          type: "register_capabilities",
-          data: {
-            componentId: CONTENT_MANAGER_ID,
-            capabilities: [
-              "content_lifecycle_management",
-              "content_expiry_prediction",
-              "content_visibility_optimization"
-            ]
-          },
-          filters: {
-            geoRestrictions: false
-          }
-        });
-        
-        return true;
+      const request: BrainHubRequest = {
+        type: 'content_optimization',
+        data: params
+      };
+
+      const response = await neuralHub.processRequest(request);
+      if (response.success && response.data) {
+        return response.data.optimizedContent || params.content;
       } else {
-        console.warn("Failed to connect content management to Brain Hub");
-        return false;
+        console.warn('Content optimization failed:', response.error);
+        return params.content; // Return original content if optimization fails
       }
     } catch (error) {
-      console.error("Error connecting to Brain Hub:", error);
+      console.error('Error during content optimization:', error);
+      return params.content; // Return original content on error
+    }
+  }
+
+  /**
+   * Analyzes content and provides feedback and improvement suggestions
+   */
+  public static async analyzeContent(content: string, contentType: string): Promise<ContentAnalysisResult> {
+    try {
+      const request: BrainHubRequest = {
+        type: 'analysis',
+        data: { content, contentType }
+      };
+
+      const response = await neuralHub.processRequest(request);
+      if (response.success && response.data) {
+        return {
+          score: response.data.score || 0,
+          strengths: response.data.strengths || [],
+          weaknesses: response.data.weaknesses || [],
+          suggestions: response.data.suggestions || []
+        };
+      } else {
+        throw new Error(response.error || 'Content analysis failed');
+      }
+    } catch (error) {
+      console.error('Error analyzing content:', error);
+      return {
+        score: 0,
+        strengths: [],
+        weaknesses: ['Analysis failed due to a system error'],
+        suggestions: ['Try again later']
+      };
+    }
+  }
+
+  /**
+   * Calculates the expected renewal value based on content performance
+   */
+  public static async calculateRenewalValue(
+    engagementMetrics: any,
+    contentType: string,
+    historicalData: any
+  ): Promise<number> {
+    try {
+      const request: BrainHubRequest = {
+        type: 'calculate_renewal_value',
+        data: {
+          engagementMetrics,
+          contentType,
+          historicalData
+        }
+      };
+
+      const response = await neuralHub.processRequest(request);
+      if (response.success && response.data && response.data.value !== undefined) {
+        return response.data.value;
+      } else {
+        console.warn('Renewal value calculation failed:', response.error);
+        return 0;
+      }
+    } catch (error) {
+      console.error('Error calculating renewal value:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Predicts the optimal renewal time for content
+   */
+  public static async predictRenewalTime(
+    contentId: string,
+    contentType: string,
+    currentEngagement: number
+  ): Promise<Date> {
+    try {
+      const request: BrainHubRequest = {
+        type: 'predict_renewal_time',
+        data: {
+          contentId,
+          contentType,
+          currentEngagement
+        }
+      };
+
+      const response = await neuralHub.processRequest(request);
+      if (response.success && response.data && response.data.timestamp) {
+        return new Date(response.data.timestamp);
+      } else {
+        // Default to 7 days from now if prediction fails
+        const defaultTime = new Date();
+        defaultTime.setDate(defaultTime.getDate() + 7);
+        return defaultTime;
+      }
+    } catch (error) {
+      console.error('Error predicting renewal time:', error);
+      const defaultTime = new Date();
+      defaultTime.setDate(defaultTime.getDate() + 7);
+      return defaultTime;
+    }
+  }
+
+  /**
+   * Records content interaction for better future recommendations
+   */
+  public static async recordContentInteraction(
+    contentId: string,
+    userId: string,
+    interactionType: string,
+    metadata: any
+  ): Promise<boolean> {
+    try {
+      const request: BrainHubRequest = {
+        type: 'record_content_interaction',
+        data: {
+          contentId,
+          userId,
+          interactionType,
+          metadata,
+          timestamp: new Date().toISOString()
+        }
+      };
+
+      const response = await neuralHub.processRequest(request);
+      return response.success;
+    } catch (error) {
+      console.error('Error recording content interaction:', error);
       return false;
     }
   }
-  
-  /**
-   * Process content through Brain Hub for optimization
-   * @param contentItems Array of content items to process
-   * @returns Processed content with enhanced metadata
-   */
-  public processContentItems<T extends {id: string, status: string, createdAt: Date}>(
-    contentItems: T[]
-  ): T[] {
-    if (!this.isConnected) {
-      console.warn("Content Brain Hub service not connected");
-      return contentItems;
-    }
-    
-    try {
-      // Process through Brain Hub for content optimization
-      const response = brainHub.processRequest({
-        type: "content_optimization",
-        data: {
-          content: contentItems.map(item => ({
-            id: item.id,
-            createdAt: item.createdAt,
-            status: item.status
-          }))
-        }
-      });
-      
-      if (response.success && response.data) {
-        // Merge Brain Hub optimization data with original content
-        const optimizedData = response.data.optimizedContent || [];
-        
-        return contentItems.map(item => {
-          const optimized = optimizedData.find((o: any) => o.id === item.id);
-          
-          if (optimized) {
-            return {
-              ...item,
-              brainHubProcessed: true,
-              optimizationScore: optimized.score,
-              recommendedActions: optimized.recommendations
-            };
-          }
-          
-          return item;
-        });
-      }
-    } catch (error) {
-      console.error("Error processing content through Brain Hub:", error);
-    }
-    
-    return contentItems;
-  }
-  
-  /**
-   * Calculate optimal renewal cost using Brain Hub intelligence
-   * @param status Content status
-   * @param type Content type
-   * @returns Calculated renewal cost
-   */
-  public calculateOptimalRenewalCost(status: string, type: string): number {
-    if (!this.isConnected) {
-      // Fallback to standard calculation if not connected
-      return this.getStandardRenewalCost(status, type);
-    }
-    
-    try {
-      // Use Brain Hub for intelligent cost calculation
-      const response = brainHub.processRequest({
-        type: "calculate_renewal_value",
-        data: {
-          contentStatus: status,
-          contentType: type,
-          marketConditions: {
-            supply: "medium",
-            demand: "high"
-          }
-        }
-      });
-      
-      if (response.success && response.data && response.data.cost) {
-        return response.data.cost;
-      }
-    } catch (error) {
-      console.error("Error calculating optimal renewal cost:", error);
-    }
-    
-    // Fallback to standard calculation
-    return this.getStandardRenewalCost(status, type);
-  }
-  
-  /**
-   * Get standard renewal cost without Brain Hub intelligence
-   */
-  private getStandardRenewalCost(status: string, type: string): number {
-    // Base cost determined by status
-    const basePrice = status === 'expired' ? 2 : 1;
-    
-    // Premium content types cost more
-    const typeMultiplier = type === 'video' ? 1.5 : 1;
-    
-    return Math.round(basePrice * typeMultiplier);
-  }
-  
-  /**
-   * Predict optimal content renewal time using Brain Hub
-   * @param contentId Content ID
-   * @param createdAt Creation date
-   * @returns Recommended renewal date
-   */
-  public predictOptimalRenewalTime(contentId: string, createdAt: Date): Date | null {
-    if (!this.isConnected) {
-      return null;
-    }
-    
-    try {
-      const response = brainHub.processRequest({
-        type: "predict_renewal_time",
-        data: {
-          contentId,
-          createdAt
-        }
-      });
-      
-      if (response.success && response.data && response.data.optimalRenewalDate) {
-        return new Date(response.data.optimalRenewalDate);
-      }
-    } catch (error) {
-      console.error("Error predicting optimal renewal time:", error);
-    }
-    
-    return null;
-  }
-  
-  /**
-   * Record content interaction in Brain Hub
-   * @param contentId Content ID
-   * @param interactionType Type of interaction
-   * @param userId User who interacted (optional)
-   */
-  public recordContentInteraction(
-    contentId: string,
-    interactionType: 'view' | 'renew' | 'like' | 'share',
-    userId?: string
-  ): void {
-    if (!this.isConnected) return;
-    
-    try {
-      brainHub.processRequest({
-        type: "record_content_interaction",
-        data: {
-          contentId,
-          interactionType,
-          userId,
-          timestamp: new Date().toISOString()
-        }
-      });
-    } catch (error) {
-      console.error("Error recording content interaction:", error);
-    }
-  }
 }
-
-// Export singleton instance
-export const contentBrainHub = ContentBrainHubService.getInstance();
-export default contentBrainHub;
