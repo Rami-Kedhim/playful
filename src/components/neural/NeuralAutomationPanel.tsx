@@ -1,352 +1,430 @@
 
 import React, { useState } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription 
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
-  Tabs, 
-  TabsList, 
-  TabsTrigger, 
-  TabsContent 
-} from '@/components/ui/tabs';
-import { Calendar, Clock, Play, Pause, Trash2, Plus } from 'lucide-react';
-
-interface Task {
-  id: string;
-  name: string;
-  schedule: string;
-  lastRun?: string;
-  nextRun: string;
-  status: 'active' | 'paused' | 'completed' | 'failed';
-}
+  Zap, 
+  Clock, 
+  Calendar as CalendarIcon, 
+  Plus, 
+  Trash2, 
+  AlertOctagon, 
+  CheckCircle2, 
+  Code,
+  Settings,
+  Save,
+  PlayCircle
+} from 'lucide-react';
+import { format } from 'date-fns';
 
 const NeuralAutomationPanel: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([
+  // Automation tasks
+  const [tasks, setTasks] = useState([
     {
-      id: 'task-1',
-      name: 'Neural Model Optimization',
-      schedule: 'Daily at 2:00 AM',
-      lastRun: '2025-05-01T02:00:00Z',
-      nextRun: '2025-05-02T02:00:00Z',
-      status: 'active'
+      id: '1',
+      name: 'Memory Optimization',
+      schedule: 'Daily at 3:00 AM',
+      lastRun: '2025-05-01T03:00:00',
+      nextRun: '2025-05-02T03:00:00',
+      status: 'active',
+      description: 'Automatically optimize memory usage and clear unused cache'
     },
     {
-      id: 'task-2',
-      name: 'System Health Check',
-      schedule: 'Every 4 hours',
-      lastRun: '2025-05-01T16:00:00Z',
-      nextRun: '2025-05-01T20:00:00Z',
-      status: 'active'
-    },
-    {
-      id: 'task-3',
-      name: 'Data Backup',
+      id: '2',
+      name: 'Performance Analysis',
       schedule: 'Weekly on Sunday',
-      lastRun: '2025-04-28T01:00:00Z',
-      nextRun: '2025-05-05T01:00:00Z',
-      status: 'paused'
+      lastRun: '2025-04-27T09:00:00',
+      nextRun: '2025-05-04T09:00:00',
+      status: 'active',
+      description: 'Run comprehensive performance analysis and generate reports'
+    },
+    {
+      id: '3',
+      name: 'Neural Model Update',
+      schedule: 'Monthly on 1st',
+      lastRun: '2025-04-01T06:00:00',
+      nextRun: '2025-05-01T06:00:00',
+      status: 'disabled',
+      description: 'Check for and apply neural model updates if available'
     }
   ]);
   
-  const [automationSettings, setAutomationSettings] = useState({
-    autoScaling: true,
-    autoRecovery: true,
-    learningEnabled: true,
-    alertsEnabled: true,
-    optimizationLevel: 'balanced' // 'aggressive', 'balanced', 'conservative'
+  // New task form
+  const [showNewTask, setShowNewTask] = useState(false);
+  const [newTask, setNewTask] = useState({
+    name: '',
+    schedule: 'daily',
+    time: '03:00',
+    day: '',
+    description: '',
+    status: 'active'
   });
-
-  const toggleTaskStatus = (taskId: string) => {
-    setTasks(tasks.map(task => {
-      if (task.id === taskId) {
-        const newStatus = task.status === 'active' ? 'paused' : 'active';
-        return { ...task, status: newStatus };
+  
+  // Date for scheduling
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  
+  // Add a new automation task
+  const addNewTask = () => {
+    const nextId = String(tasks.length + 1);
+    let nextRunDate = new Date();
+    
+    // Calculate next run date based on schedule
+    if (newTask.schedule === 'daily') {
+      const [hours, minutes] = newTask.time.split(':').map(Number);
+      nextRunDate.setHours(hours, minutes, 0, 0);
+      if (nextRunDate < new Date()) {
+        nextRunDate.setDate(nextRunDate.getDate() + 1);
       }
-      return task;
-    }));
-  };
-
-  const deleteTask = (taskId: string) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
-  };
-
-  const toggleSetting = (setting: keyof typeof automationSettings) => {
-    if (typeof automationSettings[setting] === 'boolean') {
-      setAutomationSettings({
-        ...automationSettings,
-        [setting]: !automationSettings[setting]
-      });
+    } else if (newTask.schedule === 'weekly' && newTask.day) {
+      const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const targetDay = daysOfWeek.indexOf(newTask.day);
+      const currentDay = nextRunDate.getDay();
+      const daysToAdd = (targetDay + 7 - currentDay) % 7;
+      nextRunDate.setDate(nextRunDate.getDate() + daysToAdd);
+      const [hours, minutes] = newTask.time.split(':').map(Number);
+      nextRunDate.setHours(hours, minutes, 0, 0);
+    } else if (newTask.schedule === 'monthly' && date) {
+      nextRunDate = new Date(date);
+      const [hours, minutes] = newTask.time.split(':').map(Number);
+      nextRunDate.setHours(hours, minutes, 0, 0);
     }
+    
+    const task = {
+      id: nextId,
+      name: newTask.name,
+      schedule: newTask.schedule === 'daily' ? `Daily at ${newTask.time}` :
+                newTask.schedule === 'weekly' ? `Weekly on ${newTask.day}` :
+                `Monthly on ${date?.getDate()}`,
+      lastRun: '-',
+      nextRun: nextRunDate.toISOString(),
+      status: newTask.status,
+      description: newTask.description
+    };
+    
+    setTasks([...tasks, task]);
+    setShowNewTask(false);
+    setNewTask({
+      name: '',
+      schedule: 'daily',
+      time: '03:00',
+      day: '',
+      description: '',
+      status: 'active'
+    });
   };
   
-  const formatDateRelative = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = date.getTime() - now.getTime();
-    const diffMins = Math.round(diffMs / 60000);
-    
-    if (diffMins < 0) return 'Overdue';
-    if (diffMins < 60) return `In ${diffMins} minutes`;
-    if (diffMins < 1440) return `In ${Math.round(diffMins / 60)} hours`;
-    return `In ${Math.round(diffMins / 1440)} days`;
+  // Toggle task status
+  const toggleTaskStatus = (id: string) => {
+    setTasks(tasks.map(task => 
+      task.id === id ? { ...task, status: task.status === 'active' ? 'disabled' : 'active' } : task
+    ));
+  };
+  
+  // Delete task
+  const deleteTask = (id: string) => {
+    setTasks(tasks.filter(task => task.id !== id));
+  };
+  
+  // Run task now
+  const runTaskNow = (id: string) => {
+    setTasks(tasks.map(task => 
+      task.id === id ? { ...task, lastRun: new Date().toISOString() } : task
+    ));
   };
   
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="scheduled">
-        <TabsList>
-          <TabsTrigger value="scheduled">Scheduled Tasks</TabsTrigger>
-          <TabsTrigger value="history">Task History</TabsTrigger>
-          <TabsTrigger value="settings">Automation Settings</TabsTrigger>
-        </TabsList>
+      <div className="flex flex-col md:flex-row justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-semibold flex items-center">
+            <Zap className="mr-2 h-5 w-5 text-primary" />
+            Neural Automation Control
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Configure and schedule automated tasks for neural system maintenance and optimization
+          </p>
+        </div>
         
-        <TabsContent value="scheduled" className="space-y-4 mt-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium">Scheduled Neural Tasks</h3>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-1" />
-              New Task
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            <Settings className="h-4 w-4 mr-2" />
+            Configuration
+          </Button>
+          <Button onClick={() => setShowNewTask(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Task
+          </Button>
+        </div>
+      </div>
+      
+      {showNewTask && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Add New Automation Task</CardTitle>
+            <CardDescription>Configure schedule and parameters for automation</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="task-name">Task Name</Label>
+                  <Input 
+                    id="task-name" 
+                    placeholder="Enter task name" 
+                    value={newTask.name}
+                    onChange={(e) => setNewTask({...newTask, name: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="task-schedule">Schedule</Label>
+                  <Select 
+                    defaultValue={newTask.schedule} 
+                    onValueChange={(value) => setNewTask({...newTask, schedule: value})}
+                  >
+                    <SelectTrigger id="task-schedule">
+                      <SelectValue placeholder="Select schedule" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                {newTask.schedule === 'daily' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="task-time">Time</Label>
+                    <Input 
+                      id="task-time" 
+                      type="time" 
+                      value={newTask.time}
+                      onChange={(e) => setNewTask({...newTask, time: e.target.value})}
+                    />
+                  </div>
+                )}
+                
+                {newTask.schedule === 'weekly' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="task-day">Day</Label>
+                      <Select 
+                        defaultValue={newTask.day} 
+                        onValueChange={(value) => setNewTask({...newTask, day: value})}
+                      >
+                        <SelectTrigger id="task-day">
+                          <SelectValue placeholder="Select day" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="monday">Monday</SelectItem>
+                          <SelectItem value="tuesday">Tuesday</SelectItem>
+                          <SelectItem value="wednesday">Wednesday</SelectItem>
+                          <SelectItem value="thursday">Thursday</SelectItem>
+                          <SelectItem value="friday">Friday</SelectItem>
+                          <SelectItem value="saturday">Saturday</SelectItem>
+                          <SelectItem value="sunday">Sunday</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="task-time">Time</Label>
+                      <Input 
+                        id="task-time" 
+                        type="time" 
+                        value={newTask.time}
+                        onChange={(e) => setNewTask({...newTask, time: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                )}
+                
+                {newTask.schedule === 'monthly' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Day of Month</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className="w-full justify-start text-left font-normal">
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {date ? format(date, 'PPP') : <span>Pick a date</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={setDate}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="task-time">Time</Label>
+                      <Input 
+                        id="task-time" 
+                        type="time" 
+                        value={newTask.time}
+                        onChange={(e) => setNewTask({...newTask, time: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="task-description">Description</Label>
+                <Textarea 
+                  id="task-description" 
+                  placeholder="Enter task description" 
+                  value={newTask.description}
+                  onChange={(e) => setNewTask({...newTask, description: e.target.value})}
+                />
+              </div>
+              
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={() => setShowNewTask(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={addNewTask} disabled={!newTask.name}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Task
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      <div className="grid gap-4">
+        {tasks.length === 0 ? (
+          <div className="bg-muted/30 p-8 rounded-lg text-center">
+            <h3 className="text-lg font-medium mb-2">No automation tasks configured</h3>
+            <p className="text-muted-foreground mb-4">
+              Add your first automation task to optimize system performance
+            </p>
+            <Button onClick={() => setShowNewTask(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Task
             </Button>
           </div>
-          
-          {tasks.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-10">
-                <p className="text-muted-foreground mb-4">No scheduled tasks found</p>
-                <Button>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Create Task
-                </Button>
+        ) : (
+          tasks.map((task) => (
+            <Card key={task.id} className={task.status === 'disabled' ? 'opacity-70' : ''}>
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-lg flex items-center">
+                      {task.name}
+                    </CardTitle>
+                    <CardDescription>
+                      {task.description}
+                    </CardDescription>
+                  </div>
+                  <Badge variant={task.status === 'active' ? 'default' : 'outline'}>
+                    {task.status === 'active' ? 'Active' : 'Disabled'}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Schedule:</span>
+                      <span className="text-sm ml-2">{task.schedule}</span>
+                    </div>
+                    <div className="space-x-2">
+                      <Button size="sm" variant="outline" className="h-8" onClick={() => toggleTaskStatus(task.id)}>
+                        {task.status === 'active' ? 'Disable' : 'Enable'}
+                      </Button>
+                      <Button size="sm" variant="outline" className="h-8" onClick={() => runTaskNow(task.id)}>
+                        <PlayCircle className="h-4 w-4 mr-1" />
+                        Run Now
+                      </Button>
+                      <Button size="sm" variant="outline" className="h-8 text-destructive hover:text-destructive" onClick={() => deleteTask(task.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-2 bg-muted/30 rounded-md">
+                      <div className="flex items-center mb-1">
+                        <CalendarIcon className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Last Run:</span>
+                      </div>
+                      <p className="text-sm">
+                        {task.lastRun === '-' ? 'Never' : new Date(task.lastRun).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="p-2 bg-muted/30 rounded-md">
+                      <div className="flex items-center mb-1">
+                        <CalendarIcon className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Next Run:</span>
+                      </div>
+                      <p className="text-sm">
+                        {task.status === 'active' ? new Date(task.nextRun).toLocaleString() : 'Disabled'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
-          ) : (
-            <div className="space-y-3">
-              {tasks.map((task) => (
-                <Card key={task.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium">{task.name}</h4>
-                          <Badge variant={task.status === 'active' ? 'default' : 'secondary'}>
-                            {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3.5 w-3.5" /> 
-                            {task.schedule}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5" /> 
-                            {formatDateRelative(task.nextRun)}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => toggleTaskStatus(task.id)}
-                          title={task.status === 'active' ? 'Pause task' : 'Resume task'}
-                        >
-                          {task.status === 'active' ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => deleteTask(task.id)}
-                          title="Delete task"
-                          className="text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+          ))
+        )}
+      </div>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center">
+            <Code className="h-5 w-5 mr-2 text-primary" />
+            Custom Automation
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <Alert>
+              <AlertOctagon className="h-4 w-4" />
+              <AlertDescription>
+                Custom automation scripts require administrative approval
+              </AlertDescription>
+            </Alert>
+            
+            <div className="space-y-2">
+              <Label htmlFor="script-editor">Automation Script</Label>
+              <Textarea 
+                id="script-editor"
+                placeholder="// Enter neural automation script"
+                className="font-mono h-32"
+                disabled
+              />
             </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="history" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Task Execution History</CardTitle>
-              <CardDescription>Record of all automated task executions</CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="relative overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                  <thead className="text-xs uppercase bg-muted/50">
-                    <tr>
-                      <th className="px-6 py-3">Task Name</th>
-                      <th className="px-6 py-3">Started</th>
-                      <th className="px-6 py-3">Duration</th>
-                      <th className="px-6 py-3">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b">
-                      <td className="px-6 py-4">Neural Model Optimization</td>
-                      <td className="px-6 py-4">May 1, 2025 2:00 AM</td>
-                      <td className="px-6 py-4">45 minutes</td>
-                      <td className="px-6 py-4">
-                        <Badge variant="success">Completed</Badge>
-                      </td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="px-6 py-4">System Health Check</td>
-                      <td className="px-6 py-4">May 1, 2025 12:00 PM</td>
-                      <td className="px-6 py-4">3 minutes</td>
-                      <td className="px-6 py-4">
-                        <Badge variant="success">Completed</Badge>
-                      </td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="px-6 py-4">System Health Check</td>
-                      <td className="px-6 py-4">May 1, 2025 8:00 AM</td>
-                      <td className="px-6 py-4">2 minutes</td>
-                      <td className="px-6 py-4">
-                        <Badge variant="success">Completed</Badge>
-                      </td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="px-6 py-4">Model Retraining</td>
-                      <td className="px-6 py-4">April 30, 2025 3:15 PM</td>
-                      <td className="px-6 py-4">1 hour 23 minutes</td>
-                      <td className="px-6 py-4">
-                        <Badge variant="destructive">Failed</Badge>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4">Data Backup</td>
-                      <td className="px-6 py-4">April 28, 2025 1:00 AM</td>
-                      <td className="px-6 py-4">37 minutes</td>
-                      <td className="px-6 py-4">
-                        <Badge variant="success">Completed</Badge>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+            
+            <div className="flex justify-between items-center">
+              <div className="text-xs text-muted-foreground">
+                <span className="flex items-center">
+                  <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+                  Advanced feature requiring security clearance
+                </span>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="settings" className="space-y-6 mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>General Automation Settings</CardTitle>
-              <CardDescription>Configure how the neural system automation works</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="auto-scaling">Auto Scaling</Label>
-                    <Switch 
-                      id="auto-scaling" 
-                      checked={automationSettings.autoScaling}
-                      onCheckedChange={() => toggleSetting('autoScaling')}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Automatically scale resources based on system load
-                  </p>
-                </div>
-                
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="auto-recovery">Auto Recovery</Label>
-                    <Switch 
-                      id="auto-recovery" 
-                      checked={automationSettings.autoRecovery}
-                      onCheckedChange={() => toggleSetting('autoRecovery')}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Automatically recover from system failures
-                  </p>
-                </div>
-                
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="continuous-learning">Continuous Learning</Label>
-                    <Switch 
-                      id="continuous-learning" 
-                      checked={automationSettings.learningEnabled}
-                      onCheckedChange={() => toggleSetting('learningEnabled')}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Enable models to learn from new data automatically
-                  </p>
-                </div>
-                
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="auto-alerts">Automated Alerts</Label>
-                    <Switch 
-                      id="auto-alerts" 
-                      checked={automationSettings.alertsEnabled}
-                      onCheckedChange={() => toggleSetting('alertsEnabled')}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Send alerts for critical system events
-                  </p>
-                </div>
-              </div>
-              
-              <div className="space-y-3">
-                <div>
-                  <Label>Optimization Level</Label>
-                  <div className="flex gap-2 mt-2">
-                    <Button 
-                      variant={automationSettings.optimizationLevel === 'conservative' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setAutomationSettings({...automationSettings, optimizationLevel: 'conservative'})}
-                      className="flex-1"
-                    >
-                      Conservative
-                    </Button>
-                    <Button 
-                      variant={automationSettings.optimizationLevel === 'balanced' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setAutomationSettings({...automationSettings, optimizationLevel: 'balanced'})}
-                      className="flex-1"
-                    >
-                      Balanced
-                    </Button>
-                    <Button 
-                      variant={automationSettings.optimizationLevel === 'aggressive' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setAutomationSettings({...automationSettings, optimizationLevel: 'aggressive'})}
-                      className="flex-1"
-                    >
-                      Aggressive
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="pt-2">
-                <Button>Save Settings</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              <Button disabled>Request Access</Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
