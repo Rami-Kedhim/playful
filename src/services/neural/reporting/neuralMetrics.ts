@@ -6,18 +6,43 @@ import { BaseNeuralService } from '@/services/neural/index';
  * Helper function to normalize metric values and handle latency/responseTime interoperability
  */
 function normalizeMetrics(metrics: any): ServiceMetrics {
+  // First, create an object with all required properties initialized
+  const normalizedMetrics: ServiceMetrics = {
+    operationsCount: 0,
+    errorCount: 0,
+    latency: 0,
+    responseTime: 0,
+    errorRate: 0,
+    successRate: 1.0
+  };
+  
+  // Then populate from the source metrics, with appropriate fallbacks
+  normalizedMetrics.operationsCount = metrics.operationsCount || 0;
+  normalizedMetrics.errorCount = metrics.errorCount || 0;
+  
+  // Handle latency/responseTime interoperability
+  normalizedMetrics.latency = metrics.latency !== undefined ? metrics.latency : (metrics.responseTime || 0);
+  normalizedMetrics.responseTime = metrics.responseTime !== undefined ? metrics.responseTime : (metrics.latency || 0);
+  
+  // Calculate error and success rates if not provided
+  if (metrics.errorRate !== undefined) {
+    normalizedMetrics.errorRate = metrics.errorRate;
+  } else if (normalizedMetrics.operationsCount > 0 && metrics.errorCount !== undefined) {
+    normalizedMetrics.errorRate = metrics.errorCount / normalizedMetrics.operationsCount;
+  }
+  
+  if (metrics.successRate !== undefined) {
+    normalizedMetrics.successRate = metrics.successRate;
+  } else if (normalizedMetrics.errorRate !== undefined) {
+    normalizedMetrics.successRate = 1 - normalizedMetrics.errorRate;
+  } else if (normalizedMetrics.operationsCount > 0 && normalizedMetrics.errorCount !== undefined) {
+    normalizedMetrics.successRate = 1 - (normalizedMetrics.errorCount / normalizedMetrics.operationsCount);
+  }
+  
+  // Include any additional properties from the original metrics
   return {
-    operationsCount: metrics.operationsCount || 0,
-    errorCount: metrics.errorCount || 0,
-    latency: metrics.latency !== undefined ? metrics.latency : (metrics.responseTime || 0),
-    responseTime: metrics.responseTime !== undefined ? metrics.responseTime : (metrics.latency || 0),
-    errorRate: metrics.errorRate !== undefined ? metrics.errorRate : 
-      (metrics.operationsCount > 0 && metrics.errorCount !== undefined ? 
-        metrics.errorCount / metrics.operationsCount : 0),
-    successRate: metrics.successRate || 
-      (metrics.errorRate !== undefined ? (1 - metrics.errorRate) : 
-        (metrics.operationsCount > 0 && metrics.errorCount !== undefined ? 
-          1 - (metrics.errorCount / metrics.operationsCount) : 1.0))
+    ...metrics,
+    ...normalizedMetrics
   };
 }
 
