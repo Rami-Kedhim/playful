@@ -42,10 +42,10 @@ export interface ServiceMetrics {
   operationsCount: number;
   errorCount: number;
   latency: number;
-  responseTime?: number;
+  responseTime?: number;  // Make responseTime optional
   successRate?: number;
   errorRate?: number;
-  [key: string]: any;
+  [key: string]: any;  // Allow additional properties
 }
 
 // Extended ModelParameters interface to include neural system controls

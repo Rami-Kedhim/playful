@@ -80,6 +80,7 @@ export class BaseBrainService implements BaseNeuralServiceType {
   
   /**
    * Get performance metrics for this service
+   * Ensures returned metrics match the ServiceMetrics interface
    */
   getMetrics(): any {
     return {
