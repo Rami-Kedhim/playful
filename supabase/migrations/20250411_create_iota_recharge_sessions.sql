@@ -75,11 +75,11 @@ BEGIN
   
   -- Credit the user's UBX balance
   UPDATE public.profiles
-  SET lucoin_balance = lucoin_balance + v_ubx_amount
+  SET ubx_balance = ubx_balance + v_ubx_amount
   WHERE id = v_session.user_id;
   
   -- Record the transaction
-  INSERT INTO public.lucoin_transactions (
+  INSERT INTO public.ubx_transactions (
     user_id,
     amount,
     transaction_type,

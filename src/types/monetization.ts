@@ -1,3 +1,4 @@
+
 import { AIProfile } from "@/types/ai-profile";
 
 // Core interfaces for monetization

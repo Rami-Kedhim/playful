@@ -16,128 +16,123 @@ interface MetaverseSpace {
 interface MetaverseProfile {
   avatarUrl?: string;
   archetype?: ArchetypeTheme;
-  level: number;
-  offerings: number; // Based on the UBX token concept
+  ubxBalance: number;
+  inventory: any[];
 }
 
 interface MetaverseContextType {
-  // Current state
+  spaces: MetaverseSpace[];
   currentSpace: MetaverseSpace | null;
-  userProfile: MetaverseProfile;
-  isConnected: boolean;
-  
-  // Actions
+  userProfile: MetaverseProfile | null;
   enterSpace: (spaceId: string) => Promise<boolean>;
   leaveSpace: () => void;
-  updateProfile: (updates: Partial<MetaverseProfile>) => void;
-  makeOffering: (amount: number) => Promise<boolean>;
+  purchaseItem: (itemId: string, price: number) => Promise<boolean>;
+  sendUBX: (recipientId: string, amount: number) => Promise<boolean>;
 }
 
-// Default user profile
-const defaultProfile: MetaverseProfile = {
-  level: 1,
-  offerings: 0
-};
+const MetaverseContext = createContext<MetaverseContextType | null>(null);
 
-// Create context
-const MetaverseContext = createContext<MetaverseContextType | undefined>(undefined);
-
-/**
- * Provider component for metaverse functionality
- * Inspired by the Sacred Grid concept from the Sacred Engine
- */
-export const MetaverseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const MetaverseProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
+  const [spaces, setSpaces] = useState<MetaverseSpace[]>([]);
   const [currentSpace, setCurrentSpace] = useState<MetaverseSpace | null>(null);
-  const [userProfile, setUserProfile] = useState<MetaverseProfile>(defaultProfile);
-  const [isConnected, setIsConnected] = useState(false);
+  const [userProfile, setUserProfile] = useState<MetaverseProfile | null>({
+    ubxBalance: 100,
+    inventory: []
+  });
 
-  // Enter a metaverse space
-  const enterSpace = useCallback(async (spaceId: string) => {
-    try {
-      // In a real implementation, this would make an API call
-      console.log(`Entering metaverse space: ${spaceId}`);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock space data - in production this would come from the API
-      const spaceData: MetaverseSpace = {
-        id: spaceId,
-        name: `Temple of ${spaceId}`,
-        theme: 'hathor' as ArchetypeTheme,
-        description: 'A sacred virtual space',
-        capacity: 100,
-        currentUsers: 25
-      };
-      
-      setCurrentSpace(spaceData);
-      setIsConnected(true);
-      return true;
-    } catch (error) {
-      console.error('Failed to enter metaverse space:', error);
+  const enterSpace = useCallback(async (spaceId: string): Promise<boolean> => {
+    // Find space by ID
+    const space = spaces.find(s => s.id === spaceId);
+    if (!space) return false;
+    
+    // Check if space has capacity
+    if (space.currentUsers >= space.capacity) {
+      console.error("Space at maximum capacity");
       return false;
     }
-  }, []);
+    
+    // Enter space logic
+    setCurrentSpace(space);
+    return true;
+  }, [spaces]);
 
-  // Leave the current space
   const leaveSpace = useCallback(() => {
     setCurrentSpace(null);
-    setIsConnected(false);
   }, []);
 
-  // Update user profile
-  const updateProfile = useCallback((updates: Partial<MetaverseProfile>) => {
-    setUserProfile(current => ({ ...current, ...updates }));
+  const purchaseItem = useCallback(async (itemId: string, price: number): Promise<boolean> => {
+    if (!userProfile) return false;
+    if (userProfile.ubxBalance < price) return false;
+    
+    // Update user balance
+    setUserProfile({
+      ...userProfile,
+      ubxBalance: userProfile.ubxBalance - price,
+      inventory: [...userProfile.inventory, { id: itemId, purchasedAt: new Date() }]
+    });
+    
+    return true;
+  }, [userProfile]);
+
+  const sendUBX = useCallback(async (recipientId: string, amount: number): Promise<boolean> => {
+    if (!userProfile) return false;
+    if (userProfile.ubxBalance < amount) return false;
+    
+    // Update user balance
+    setUserProfile({
+      ...userProfile,
+      ubxBalance: userProfile.ubxBalance - amount,
+    });
+    
+    // In a real app, we would call an API to update the recipient's balance
+    
+    return true;
+  }, [userProfile]);
+
+  // Initial load of spaces
+  React.useEffect(() => {
+    // In a real app, this would be a call to an API
+    setSpaces([
+      {
+        id: '1',
+        name: 'Isis Temple',
+        theme: 'isis',
+        description: 'A place of wisdom and magic',
+        capacity: 20,
+        currentUsers: 5
+      },
+      {
+        id: '2',
+        name: 'Hathor Lounge',
+        theme: 'hathor',
+        description: 'A space for love and pleasure',
+        capacity: 15,
+        currentUsers: 3
+      }
+    ]);
   }, []);
 
-  // Make an offering (UBX token transfer)
-  const makeOffering = useCallback(async (amount: number) => {
-    try {
-      // In a real implementation, this would make an API call
-      console.log(`Making offering of ${amount} UBX`);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Update local state
-      setUserProfile(current => ({
-        ...current,
-        offerings: current.offerings + amount
-      }));
-      
-      return true;
-    } catch (error) {
-      console.error('Failed to make offering:', error);
-      return false;
-    }
-  }, []);
-
-  const value = {
+  const contextValue = {
+    spaces,
     currentSpace,
     userProfile,
-    isConnected,
     enterSpace,
     leaveSpace,
-    updateProfile,
-    makeOffering
+    purchaseItem,
+    sendUBX
   };
 
   return (
-    <MetaverseContext.Provider value={value}>
+    <MetaverseContext.Provider value={contextValue}>
       {children}
     </MetaverseContext.Provider>
   );
 };
 
-// Hook for using the metaverse context
 export const useMetaverse = () => {
   const context = useContext(MetaverseContext);
-  
-  if (context === undefined) {
-    throw new Error('useMetaverse must be used within a MetaverseProvider');
+  if (!context) {
+    throw new Error("useMetaverse must be used within a MetaverseProvider");
   }
-  
   return context;
 };
-
-export default MetaverseContext;

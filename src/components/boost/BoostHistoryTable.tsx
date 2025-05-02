@@ -12,7 +12,7 @@ interface BoostHistoryItem {
     id: string;
     name: string;
     duration: string;
-    price_lucoin: number;
+    price_ubx: number;
   };
   price: number;
 }
@@ -61,7 +61,7 @@ const BoostHistoryTable = ({ history, loading }: BoostHistoryTableProps) => {
             <TableCell>{formatBoostDuration(item.boostPackage.duration)}</TableCell>
             <TableCell>{format(item.startDate, 'MMM d, yyyy')}</TableCell>
             <TableCell>{format(item.endDate, 'MMM d, yyyy')}</TableCell>
-            <TableCell className="text-right">{item.price} LC</TableCell>
+            <TableCell className="text-right">{item.price} UBX</TableCell>
           </TableRow>
         ))}
       </TableBody>

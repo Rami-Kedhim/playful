@@ -47,7 +47,7 @@ const AIModelPremiumContent: React.FC<AIModelPremiumContentProps> = ({
           user_id: session.user.id,
           content_id: title, // Using title as a placeholder for content_id
           amount: price,
-          payment_method: 'lucoins',
+          payment_method: 'ubx',
           status: 'pending'
         });
 
@@ -83,7 +83,7 @@ const AIModelPremiumContent: React.FC<AIModelPremiumContentProps> = ({
       <CardContent className="pt-6">
         <div className="text-center mb-6">
           <span className="text-3xl font-bold">{price}</span>
-          <span className="text-muted-foreground ml-1">LUC</span>
+          <span className="text-muted-foreground ml-1">UBX</span>
         </div>
 
         <ul className="space-y-2">

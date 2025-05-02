@@ -9,14 +9,14 @@ interface ContentExpiryInfoProps {
   createdAt: Date;
   expiresAt: Date;
   onRenew: () => void;
-  lucoinCost: number;
+  ubxCost: number;
 }
 
 const ContentExpiryInfo: React.FC<ContentExpiryInfoProps> = ({
   createdAt,
   expiresAt,
   onRenew,
-  lucoinCost
+  ubxCost
 }) => {
   const { recordInteraction } = useContentBrainHub();
   
@@ -41,7 +41,7 @@ const ContentExpiryInfo: React.FC<ContentExpiryInfoProps> = ({
       
       <div className="flex items-center justify-between">
         <span className="text-muted-foreground">
-          Renewal cost: <span className="font-medium">{lucoinCost} LC</span>
+          Renewal cost: <span className="font-medium">{ubxCost} UBX</span>
         </span>
         <Button variant="outline" size="sm" onClick={onRenew}>
           Renew Content
