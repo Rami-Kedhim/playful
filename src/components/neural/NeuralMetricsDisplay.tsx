@@ -1,102 +1,145 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { neuralMetrics } from '@/services/neural/reporting/neuralMetrics';
-import { PerformanceReport } from '@/types/neuralMetrics';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { AlertTriangle, Activity, RefreshCw } from 'lucide-react';
+import { 
+  Activity, 
+  AlertCircle, 
+  ArrowDownRight, 
+  ArrowUpRight, 
+  Clock, 
+  Cpu, 
+  MessageSquare, 
+  RefreshCw, 
+  Server 
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { getHealthMetrics } from '@/services/neural/monitoring/NeuralMetricsProvider';
+import { HealthMetrics } from '@/types/neuralMetrics';
 
-interface NeuralMetricsDisplayProps {
-  className?: string;
-  autoRefresh?: boolean;
-  refreshInterval?: number;
+interface MetricCardProps {
+  title: string;
+  value: number | string;
+  change?: number;
+  icon: React.ReactNode;
+  description?: string;
+  format?: 'percentage' | 'number' | 'time' | 'decimal';
+  trendDirection?: 'up' | 'down' | 'neutral';
 }
 
-const NeuralMetricsDisplay: React.FC<NeuralMetricsDisplayProps> = ({
-  className = '',
-  autoRefresh = true,
-  refreshInterval = 30000
+const MetricCard: React.FC<MetricCardProps> = ({ 
+  title, 
+  value, 
+  change, 
+  icon,
+  description,
+  format = 'number',
+  trendDirection
 }) => {
-  const [report, setReport] = useState<PerformanceReport | null>(null);
-  const [historicalReports, setHistoricalReports] = useState<PerformanceReport[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchReport = () => {
-    try {
-      const latestReport = neuralMetrics.getLatestReport();
-      setReport(latestReport);
-      
-      // Get historical reports for the last 24 hours
-      const endTime = new Date();
-      const startTime = new Date();
-      startTime.setHours(startTime.getHours() - 24);
-      
-      const history = neuralMetrics.getHistoricalReports(startTime, endTime);
-      setHistoricalReports(history);
-      
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch neural metrics');
-    } finally {
-      setLoading(false);
+  const formatValue = (val: number | string): string => {
+    if (typeof val === 'string') return val;
+    
+    switch (format) {
+      case 'percentage':
+        return `${Math.round(val)}%`;
+      case 'time':
+        return `${val}ms`;
+      case 'decimal':
+        return val.toFixed(2);
+      default:
+        return val.toString();
     }
   };
 
-  // Fetch initial report
-  useEffect(() => {
-    fetchReport();
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between space-x-4">
+          <div className="flex items-center space-x-4">
+            <div className="p-2 bg-primary/10 rounded-full">
+              {icon}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">{title}</p>
+              <h3 className="text-2xl font-bold tracking-tighter">
+                {formatValue(value)}
+              </h3>
+              {description && (
+                <p className="text-xs text-muted-foreground mt-1">{description}</p>
+              )}
+            </div>
+          </div>
+
+          {change !== undefined && (
+            <div className={`flex items-center space-x-1 text-sm ${
+              trendDirection === 'up' 
+                ? 'text-green-500' 
+                : trendDirection === 'down' 
+                ? 'text-red-500' 
+                : 'text-muted-foreground'
+            }`}>
+              {trendDirection === 'up' ? (
+                <ArrowUpRight className="h-4 w-4" />
+              ) : trendDirection === 'down' ? (
+                <ArrowDownRight className="h-4 w-4" />
+              ) : null}
+              <span>{change > 0 ? '+' : ''}{change}%</span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const NeuralMetricsDisplay: React.FC<{ className?: string }> = ({ className }) => {
+  const [metrics, setMetrics] = React.useState<HealthMetrics | null>(null);
+  const [loading, setLoading] = React.useState<boolean>(true);
+  const [lastUpdated, setLastUpdated] = React.useState<Date>(new Date());
+
+  const refreshMetrics = () => {
+    setLoading(true);
+    // Get fresh metrics from the provider
+    const freshMetrics = getHealthMetrics(true);
+    setMetrics(freshMetrics);
+    setLastUpdated(new Date());
+    setLoading(false);
+  };
+
+  React.useEffect(() => {
+    refreshMetrics();
+    
+    // Set up polling interval
+    const intervalId = setInterval(() => {
+      refreshMetrics();
+    }, 30000); // Update every 30 seconds
+    
+    return () => clearInterval(intervalId);
   }, []);
 
-  // Set up auto-refresh
-  useEffect(() => {
-    if (!autoRefresh) return;
-    
-    const intervalId = setInterval(fetchReport, refreshInterval);
-    return () => clearInterval(intervalId);
-  }, [autoRefresh, refreshInterval]);
-
-  // Prepare chart data
-  const chartData = historicalReports.map(report => ({
-    time: report.timestamp,
-    health: report.overallHealth,
-    cpuUsage: report.systemMetrics.cpuUsage,
-    memoryUsage: report.systemMetrics.memoryUsage,
-    errorRate: report.systemMetrics.errorRate
-  }));
-
-  if (loading) {
+  if (loading && !metrics) {
     return (
       <Card className={className}>
-        <CardContent className="pt-6 flex justify-center">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+        <CardContent className="p-6 flex justify-center items-center h-60">
+          <div className="flex flex-col items-center space-y-4">
+            <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading neural metrics...</p>
+          </div>
         </CardContent>
       </Card>
     );
   }
 
-  if (error) {
+  if (!metrics) {
     return (
       <Card className={className}>
-        <CardContent className="pt-6">
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!report) {
-    return (
-      <Card className={className}>
-        <CardContent className="pt-6">
-          <p className="text-center text-muted-foreground">No metrics data available</p>
+        <CardContent className="p-6 flex justify-center items-center h-60">
+          <div className="flex flex-col items-center space-y-4">
+            <AlertCircle className="h-8 w-8 text-destructive" />
+            <p className="text-muted-foreground">Failed to load neural metrics</p>
+            <Button onClick={refreshMetrics}>Try Again</Button>
+          </div>
         </CardContent>
       </Card>
     );
@@ -104,102 +147,100 @@ const NeuralMetricsDisplay: React.FC<NeuralMetricsDisplayProps> = ({
 
   return (
     <Card className={className}>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-lg font-medium">Neural System Health</CardTitle>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={fetchReport}
-          className="h-8 w-8 p-0"
-        >
-          <RefreshCw className="h-4 w-4" />
-          <span className="sr-only">Refresh</span>
-        </Button>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl font-bold">Neural System Metrics</CardTitle>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={refreshMetrics}
+            className="h-8 px-2 lg:px-3"
+          >
+            <RefreshCw className="h-3.5 w-3.5 mr-1" />
+            <span>Refresh</span>
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          Last updated: {lastUpdated.toLocaleTimeString()}
+        </p>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {/* Overall Health Status */}
+
+      <CardContent className="p-6 pt-0">
+        <div className="space-y-6">
+          {/* System Health Indicators */}
           <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm font-medium">Overall System Health</span>
-              <Badge variant={report.overallHealth > 80 ? "default" : "warning"}>
-                {report.overallHealth}%
-              </Badge>
-            </div>
-            <Progress 
-              value={report.overallHealth} 
-              className="h-2"
-              style={{
-                backgroundColor: 'rgba(0,0,0,0.1)',
-                '--progress-color': report.overallHealth > 80 ? 'var(--primary)' : 'var(--warning)'
-              } as React.CSSProperties}
-            />
-          </div>
-
-          {/* System Metrics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-secondary/20 p-3 rounded-md">
-              <div className="text-xs text-muted-foreground">CPU Usage</div>
-              <div className="text-lg font-bold">{Math.round(report.systemMetrics.cpuUsage)}%</div>
-            </div>
-            <div className="bg-secondary/20 p-3 rounded-md">
-              <div className="text-xs text-muted-foreground">Memory Usage</div>
-              <div className="text-lg font-bold">{Math.round(report.systemMetrics.memoryUsage)}%</div>
-            </div>
-            <div className="bg-secondary/20 p-3 rounded-md">
-              <div className="text-xs text-muted-foreground">Response Time</div>
-              <div className="text-lg font-bold">{Math.round(report.systemMetrics.responseTime)}ms</div>
-            </div>
-            <div className="bg-secondary/20 p-3 rounded-md">
-              <div className="text-xs text-muted-foreground">Error Rate</div>
-              <div className="text-lg font-bold">{report.systemMetrics.errorRate.toFixed(2)}%</div>
+            <h4 className="text-sm font-medium">System Health</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span>CPU Utilization</span>
+                  <span>{typeof metrics.cpuUtilization === 'number' ? metrics.cpuUtilization.toFixed(1) : metrics.cpuUtilization}%</span>
+                </div>
+                <Progress value={Number(metrics.cpuUtilization)} className="h-2" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span>Memory Utilization</span>
+                  <span>{typeof metrics.memoryUtilization === 'number' ? metrics.memoryUtilization.toFixed(1) : metrics.memoryUtilization}%</span>
+                </div>
+                <Progress value={Number(metrics.memoryUtilization)} className="h-2" />
+              </div>
             </div>
           </div>
 
-          {/* Historical Chart */}
-          {chartData.length > 1 && (
-            <div className="h-64 mt-4">
-              <h3 className="text-sm font-medium mb-2">Performance Trends</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="time" 
-                    tickFormatter={(time) => new Date(time).toLocaleTimeString()} 
-                  />
-                  <YAxis />
-                  <Tooltip 
-                    labelFormatter={(label) => new Date(label).toLocaleString()}
-                    formatter={(value, name) => {
-                      if (name === 'errorRate') return [`${value.toFixed(2)}%`, 'Error Rate'];
-                      return [`${Math.round(Number(value))}${name === 'health' ? '%' : ''}`, 
-                        name === 'health' ? 'System Health' : 
-                        name === 'cpuUsage' ? 'CPU Usage' : 
-                        name === 'memoryUsage' ? 'Memory Usage' : name];
-                    }}
-                  />
-                  <Line type="monotone" dataKey="health" stroke="#8884d8" />
-                  <Line type="monotone" dataKey="cpuUsage" stroke="#82ca9d" />
-                  <Line type="monotone" dataKey="memoryUsage" stroke="#ffc658" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          )}
+          <Separator />
 
-          {/* Recommendations */}
-          {report.recommendations.length > 0 && (
-            <div className="mt-4">
-              <h3 className="text-sm font-medium mb-2">System Recommendations</h3>
-              <ul className="space-y-2">
-                {report.recommendations.map((recommendation, index) => (
-                  <li key={index} className="flex items-start">
-                    <Activity className="h-4 w-4 mr-2 mt-0.5 text-primary" />
-                    <span className="text-sm">{recommendation}</span>
-                  </li>
-                ))}
-              </ul>
+          {/* Performance Metrics */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium">Performance Metrics</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <MetricCard
+                title="Response Time"
+                value={metrics.responseTime}
+                icon={<Clock className="h-4 w-4 text-primary" />}
+                format="time"
+              />
+              <MetricCard
+                title="Operations/Sec"
+                value={metrics.operationsPerSecond}
+                icon={<Activity className="h-4 w-4 text-primary" />}
+              />
+              <MetricCard
+                title="Error Rate"
+                value={metrics.errorRate}
+                icon={<AlertCircle className="h-4 w-4 text-primary" />}
+                format="percentage"
+                trendDirection={metrics.errorRate > 3 ? 'up' : 'down'}
+              />
             </div>
-          )}
+          </div>
+
+          <Separator />
+
+          {/* Neural Network Metrics */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium">Neural Network</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <MetricCard
+                title="Neural Accuracy"
+                value={metrics.neuralAccuracy * 100} // Convert from decimal to percentage
+                icon={<Server className="h-4 w-4 text-primary" />}
+                format="percentage"
+              />
+              <MetricCard
+                title="Neural Efficiency"
+                value={metrics.neuralEfficiency * 100} // Convert from decimal to percentage
+                icon={<Cpu className="h-4 w-4 text-primary" />}
+                format="percentage"
+              />
+              <MetricCard
+                title="Neural Latency"
+                value={metrics.neuralLatency}
+                icon={<MessageSquare className="h-4 w-4 text-primary" />}
+                format="time"
+              />
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
