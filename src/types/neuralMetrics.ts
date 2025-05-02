@@ -22,7 +22,7 @@ export interface PerformanceReport {
   overallHealth: number;
   services: Record<string, {
     status: string;
-    metrics: any;
+    metrics: ServiceMetrics;
   }>;
   systemMetrics: {
     cpuUsage: number;

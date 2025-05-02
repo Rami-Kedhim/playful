@@ -1,5 +1,5 @@
-
 import { INeuralHub, NeuralRequest, NeuralResponse, NeuralSystemStatus, TrainingProgress, ModelParameters, NeuralModel } from './types/neuralHub';
+import { neuralMetricsProvider } from './monitoring/NeuralMetricsProvider';
 
 export class HermesOxumNeuralHub implements INeuralHub {
   private modules: Map<string, any> = new Map();
@@ -114,25 +114,9 @@ export class HermesOxumNeuralHub implements INeuralHub {
     return newJob;
   }
 
+  // Use our dedicated metrics provider instead of generating random metrics directly
   getHealthMetrics() {
-    return {
-      cpuUtilization: Math.random() * 100,
-      memoryUtilization: Math.random() * 100,
-      errorRate: Math.random() * 5,
-      responseTime: Math.random() * 200,
-      operationsPerSecond: Math.floor(Math.random() * 1000),
-      stability: 0.95 + Math.random() * 0.05,
-      // Adding the missing properties
-      lastUpdated: Date.now(),
-      systemLoad: Math.random(),
-      userEngagement: Math.random(),
-      requestsPerMinute: Math.floor(Math.random() * 600),
-      cpuUsage: Math.random() * 100,
-      memoryUsage: Math.random() * 100,
-      neuralAccuracy: Math.random(),
-      neuralEfficiency: Math.random(),
-      neuralLatency: Math.random() * 100,
-    };
+    return neuralMetricsProvider.getHealthMetrics();
   }
 
   getModelParameters(): ModelParameters {

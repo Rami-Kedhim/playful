@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { Brain, RefreshCw, Activity } from 'lucide-react';
 import { SeoOptimizationResult } from '@/services/seo/HermesSeoService';
 import { neuralHub } from '@/services/neural';
+import { HealthMetrics } from '@/types/neuralMetrics';
 
 interface HermesSeoConnectorProps {
   userId?: string;
@@ -18,7 +19,7 @@ interface HermesSeoConnectorProps {
 const HermesSeoConnector: React.FC<HermesSeoConnectorProps> = ({ userId }) => {
   const { insights, loading, error, refreshInsights } = useHermesInsights();
   // Use neuralHub.getHealthMetrics() to get system health metrics
-  const [systemHealthMetrics, setSystemHealthMetrics] = useState(neuralHub.getHealthMetrics());
+  const [systemHealthMetrics, setSystemHealthMetrics] = useState<HealthMetrics>(neuralHub.getHealthMetrics());
 
   const [lastOptimizedContent, setLastOptimizedContent] = useState<SeoOptimizationResult | null>(null);
 

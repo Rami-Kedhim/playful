@@ -1,11 +1,13 @@
+
 import neuralServiceRegistry from '../registry/NeuralServiceRegistry';
 import { neuralHub } from '../HermesOxumNeuralHub';
+import { PerformanceReport, ServiceMetrics } from '@/types/neuralMetrics';
 
 class NeuralMetricsService {
-  private reports: any[] = [];
+  private reports: PerformanceReport[] = [];
   private lastReportTime: Date = new Date();
 
-  generatePerformanceReport() {
+  generatePerformanceReport(): PerformanceReport {
     const services = neuralServiceRegistry.getAllServices();
     const systemHealth = neuralHub.getHealthMetrics();
 
@@ -39,13 +41,13 @@ class NeuralMetricsService {
       overallHealth
     );
 
-    const report = {
+    const report: PerformanceReport = {
       timestamp: new Date(),
       overallHealth: Math.round(overallHealth),
       services: serviceMetrics,
       systemMetrics: {
-        cpuUsage: systemHealth.cpuUtilization,
-        memoryUsage: systemHealth.memoryUtilization,
+        cpuUsage: systemHealth.cpuUsage,
+        memoryUsage: systemHealth.memoryUsage,
         responseTime: systemHealth.responseTime,
         operationsPerSecond: systemHealth.operationsPerSecond,
         errorRate: systemHealth.errorRate
@@ -62,14 +64,14 @@ class NeuralMetricsService {
     return report;
   }
 
-  getLatestReport() {
+  getLatestReport(): PerformanceReport {
     if (!this.reports.length || (new Date().getTime() - this.lastReportTime.getTime() > 5 * 60 * 1000)) {
       return this.generatePerformanceReport();
     }
     return this.reports[this.reports.length - 1];
   }
 
-  getHistoricalReports(startTime: Date, endTime: Date) {
+  getHistoricalReports(startTime: Date, endTime: Date): PerformanceReport[] {
     return this.reports.filter(r => r.timestamp >= startTime && r.timestamp <= endTime);
   }
 
