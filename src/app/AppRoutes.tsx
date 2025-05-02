@@ -24,6 +24,7 @@ import OrusPage from '@/pages/OrusPage';
 import PersonaListingPage from '@/pages/PersonaListingPage';
 import PersonaDetailPage from '@/pages/PersonaDetailPage';
 import AdminPage from '@/pages/AdminPage';
+import AdminApiPage from '@/pages/AdminApiPage';
 import ModerationPage from '@/pages/ModerationPage';
 import VerificationPage from '@/pages/VerificationPage';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
@@ -173,6 +174,11 @@ const AppRoutes = () => {
       <Route path="/admin" element={
         <MainLayout requireAuth>
           <AdminPage />
+        </MainLayout>
+      } />
+      <Route path="/admin/apis" element={
+        <MainLayout requireAuth>
+          <AdminApiPage />
         </MainLayout>
       } />
       <Route path="/moderation" element={

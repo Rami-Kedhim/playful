@@ -57,36 +57,59 @@ const ContentGallery: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [content, setContent] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [processingContent, setProcessingContent] = useState<boolean>(false);
   const { toast } = useToast();
   const { getIntelligentRenewalCost, recordInteraction, processContent } = useContentBrainHub();
 
   useEffect(() => {
     // Process mock content to calculate real status based on dates
-    const initialProcessContent = async () => {
-      const processedContent = mockContent.map(item => {
-        const expiryDate = calculateExpiryDate(item.createdAt);
-        const daysRemaining = calculateDaysRemaining(expiryDate);
-        const status = item.status === 'draft' ? 'draft' : determineContentStatus(expiryDate);
-        
-        return {
-          ...item,
-          status,
-          daysRemaining
-        };
-      });
+    const fetchAndProcessContent = async () => {
+      setProcessingContent(true);
       
-      // Process content through Brain Hub for additional intelligence
       try {
-        const brainHubEnhancedContent = await processContent(processedContent);
-        setContent(brainHubEnhancedContent);
+        // Process the basic content first
+        const processedContent = mockContent.map(item => {
+          const expiryDate = calculateExpiryDate(item.createdAt);
+          const daysRemaining = calculateDaysRemaining(expiryDate);
+          const status = item.status === 'draft' ? 'draft' : determineContentStatus(expiryDate);
+          
+          return {
+            ...item,
+            status,
+            daysRemaining
+          };
+        });
+        
+        // Process content through Brain Hub for additional intelligence
+        try {
+          const brainHubEnhancedContent = await processContent(processedContent);
+          setContent(brainHubEnhancedContent);
+        } catch (error) {
+          console.error("Failed to process content with Brain Hub, using standard content:", error);
+          setContent(processedContent);
+          
+          toast({
+            title: "Limited Content Processing",
+            description: "Some advanced content features are unavailable. Using basic content processing.",
+            variant: "default"
+          });
+        }
       } catch (error) {
-        console.error("Failed to process content with Brain Hub, using standard content:", error);
-        setContent(processedContent);
+        console.error("Error processing content:", error);
+        setContent([]); // Set to empty array on error
+        
+        toast({
+          title: "Content Processing Error",
+          description: "Failed to process your content. Please try again later.",
+          variant: "destructive"
+        });
+      } finally {
+        setProcessingContent(false);
       }
     };
     
-    initialProcessContent();
-  }, [processContent]);
+    fetchAndProcessContent();
+  }, [processContent, toast]);
 
   const filteredContent = content.filter(item => {
     // First apply search filter if any
@@ -168,10 +191,17 @@ const ContentGallery: React.FC = () => {
       />
       
       <TabsContent value={activeTab} className="mt-4">
-        <ContentGrid 
-          content={filteredContent}
-          onRenew={handleRenewContent}
-        />
+        {processingContent ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <span className="ml-3 text-muted-foreground">Processing content...</span>
+          </div>
+        ) : (
+          <ContentGrid 
+            content={filteredContent}
+            onRenew={handleRenewContent}
+          />
+        )}
       </TabsContent>
     </div>
   );

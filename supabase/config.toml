@@ -1,27 +1,57 @@
 
+# This file contains project-specific configuration for your Supabase project
+# Make sure to update project_id to your actual Supabase project ID
+
 project_id = "haffqtqpbnaviefewfmn"
 
 [api]
-enabled = true
 port = 54321
-schemas = ["public", "storage", "graphql_public"]
+schemas = ["public", "storage", "extensions", "auth", "realtime", "vault"]
+extra_search_path = ["public", "extensions", "auth"]
+max_rows = 1000
 
 [db]
 port = 54322
+shadow_port = 54320
+major_version = 15
 
 [studio]
 port = 54323
 
 [inbucket]
 port = 54324
-
-[auth]
-enabled = true
-site_url = "http://localhost:5173"
+smtp_port = 54325
+pop3_port = 54326
 
 [storage]
-enabled = true
+file_size_limit = "50MiB"
 
-[edge_functions]
-[edge_functions.process-verification]
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = true
+
+[auth.sms]
+enable_signup = true
+enable_confirmations = true
+
+[auth.external.github]
+enabled = false
+client_id = ""
+secret = ""
+redirect_uri = ""
+url = ""
+
+[functions]
+port = 54328
+
+[functions.external-api]
 verify_jwt = true
