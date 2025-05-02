@@ -1,234 +1,256 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { ArrowUpRight, ArrowDownRight, Activity, BarChart3 } from 'lucide-react';
+import { Download, RefreshCw } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import useNeuralAnalytics from '@/hooks/useNeuralAnalytics';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import PerformanceChart from './PerformanceChart';
+import MetricsGrid from '@/components/analytics/MetricsGrid';
+import AutoRefreshControl from '@/components/analytics/AutoRefreshControl';
 
-interface NeuralAnalyticsProps {
+export interface NeuralAnalyticsProps {
   refreshInterval?: number;
 }
 
 const NeuralAnalytics: React.FC<NeuralAnalyticsProps> = ({ refreshInterval = 30000 }) => {
   const { analyticsData, detailedMetrics, loading, error, refreshAnalytics } = useNeuralAnalytics();
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [interval, setInterval] = useState(refreshInterval);
   
-  // Automatic refresh based on refreshInterval
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      refreshAnalytics();
-    }, refreshInterval);
+    if (!autoRefresh) return;
     
-    return () => clearInterval(intervalId);
-  }, [refreshInterval, refreshAnalytics]);
+    const timer = setInterval(() => {
+      refreshAnalytics();
+    }, interval);
+    
+    return () => clearInterval(timer);
+  }, [autoRefresh, interval, refreshAnalytics]);
   
-  if (loading && !analyticsData) {
-    return (
-      <div className="h-[600px] flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
+  const handleManualRefresh = () => {
+    refreshAnalytics();
+  };
   
-  if (error && !analyticsData) {
-    return (
-      <Card>
-        <CardContent className="py-10">
-          <div className="text-center text-destructive">
-            <p>Failed to load neural analytics data.</p>
-            <Button 
-              variant="outline" 
-              onClick={refreshAnalytics}
-              className="mt-4"
-            >
-              Retry
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Prepare metrics for the grid
+  const getMetrics = () => {
+    if (!analyticsData) return [];
+    
+    return [
+      {
+        title: 'Response Time',
+        value: analyticsData.systemMetrics.responseTimeMs,
+        change: analyticsData.operationalMetrics.responseTimeChange,
+        unit: 'ms'
+      },
+      {
+        title: 'Error Rate',
+        value: analyticsData.systemMetrics.errorRate,
+        change: analyticsData.operationalMetrics.errorRateChange,
+        unit: '%'
+      },
+      {
+        title: 'CPU Usage',
+        value: analyticsData.systemMetrics.cpuUsage,
+        change: 0,
+        unit: '%'
+      },
+      {
+        title: 'Memory Usage',
+        value: analyticsData.systemMetrics.memoryUsage,
+        change: 0,
+        unit: '%'
+      }
+    ];
+  };
   
-  if (!analyticsData) return null;
+  // Prepare performance chart data
+  const getPerformanceData = () => {
+    if (!detailedMetrics) return [];
+    
+    return detailedMetrics.timeSeriesData;
+  };
   
+  // Handler for interval changes
+  const handleIntervalChange = (newInterval: number) => {
+    setInterval(newInterval);
+  };
+  
+  // Handle refresh from AutoRefreshControl
+  const handleRefresh = () => {
+    refreshAnalytics();
+  };
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard 
-          title="Response Time"
-          value={analyticsData.systemMetrics.responseTimeMs}
-          change={analyticsData.operationalMetrics.responseTimeChange}
-          unit="ms"
-        />
-        <MetricCard 
-          title="Accuracy"
-          value={analyticsData.modelPerformance.accuracy * 100}
-          change={analyticsData.operationalMetrics.accuracyChange}
-          unit="%"
-        />
-        <MetricCard 
-          title="Error Rate"
-          value={analyticsData.systemMetrics.errorRate}
-          change={analyticsData.operationalMetrics.errorRateChange * -1} // Invert for better display
-          unit="%"
-          inverted // Lower is better for error rate
-        />
-        <MetricCard 
-          title="Operations"
-          value={analyticsData.operationalMetrics.totalOperations}
-          change={analyticsData.operationalMetrics.operationsChange}
-          unit=""
-        />
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Neural System Analytics</h2>
+        
+        <div className="flex items-center gap-2">
+          <AutoRefreshControl 
+            interval={interval} 
+            onIntervalChange={handleIntervalChange}
+            onRefresh={handleRefresh}
+          />
+          
+          <Button variant="outline" size="sm" onClick={() => console.log('Download analytics data')}>
+            <Download className="h-4 w-4 mr-1.5" />
+            Export
+          </Button>
+        </div>
       </div>
       
-      <Tabs defaultValue="performance" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="forecast">Forecast</TabsTrigger>
-          <TabsTrigger value="anomalies">Anomalies</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="performance" className="space-y-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Neural System Performance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px] flex items-center justify-center bg-muted/20 rounded-md">
-                <div className="text-center text-muted-foreground">
-                  <Activity className="h-8 w-8 mx-auto mb-2" />
-                  <p>Performance chart will be displayed here</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">CPU Usage</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[200px] flex items-center justify-center bg-muted/20 rounded-md">
-                  <BarChart3 className="h-8 w-8 text-muted-foreground" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Memory Usage</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[200px] flex items-center justify-center bg-muted/20 rounded-md">
-                  <BarChart3 className="h-8 w-8 text-muted-foreground" />
-                </div>
-              </CardContent>
-            </Card>
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
+      {loading && !analyticsData ? (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i}>
+                <CardContent className="p-6">
+                  <Skeleton className="h-4 w-1/2 mb-2" />
+                  <Skeleton className="h-8 w-1/3" />
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </TabsContent>
-        
-        <TabsContent value="forecast">
+          
           <Card>
             <CardHeader>
-              <CardTitle>Neural Performance Forecast</CardTitle>
+              <Skeleton className="h-5 w-1/4" />
             </CardHeader>
             <CardContent>
-              <div className="h-[400px] flex items-center justify-center bg-muted/20 rounded-md">
-                <div className="text-center text-muted-foreground">
-                  <p>Forecast chart will be displayed here</p>
-                  <p className="text-sm mt-2">Displaying predictions for the next 24 hours</p>
-                </div>
-              </div>
+              <Skeleton className="h-[300px] w-full" />
             </CardContent>
           </Card>
-        </TabsContent>
-        
-        <TabsContent value="anomalies">
-          {detailedMetrics?.anomalies && detailedMetrics.anomalies.length > 0 ? (
-            <div className="space-y-4">
-              {detailedMetrics.anomalies.map((anomaly, index) => (
-                <Card key={index} className={anomaly.resolved ? "border-muted" : "border-warning"}>
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between">
-                      <CardTitle className="text-lg">
-                        Anomaly in {anomaly.metric}
-                      </CardTitle>
-                      <span className={`text-xs px-2 py-1 rounded-md ${anomaly.resolved ? "bg-muted text-muted-foreground" : "bg-warning/20 text-warning"}`}>
-                        {anomaly.resolved ? "Resolved" : `${anomaly.severity} severity`}
-                      </span>
+        </div>
+      ) : (
+        <>
+          <MetricsGrid metrics={getMetrics()} />
+          
+          <Tabs defaultValue="performance">
+            <TabsList className="mb-4">
+              <TabsTrigger value="performance">Performance</TabsTrigger>
+              <TabsTrigger value="resources">Resource Usage</TabsTrigger>
+              <TabsTrigger value="anomalies">Anomalies</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="performance">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Neural System Performance</CardTitle>
+                </CardHeader>
+                <CardContent className="h-[400px]">
+                  {detailedMetrics ? (
+                    <PerformanceChart
+                      data={getPerformanceData()}
+                      dataKey="timestamp"
+                      lines={[
+                        { dataKey: "metrics.requestsPerSecond", name: "Requests/sec", color: "#4f46e5" },
+                        { dataKey: "metrics.responseTimeMs", name: "Response Time (ms)", color: "#16a34a" }
+                      ]}
+                      height={350}
+                    />
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <p className="text-muted-foreground">No performance data available</p>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {new Date(anomaly.timestamp).toLocaleString()}
-                    </p>
-                    <div className="grid grid-cols-2 gap-4 mb-2">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Expected</p>
-                        <p className="text-lg font-medium">{anomaly.expected}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Actual</p>
-                        <p className="text-lg font-medium">{anomaly.actual}</p>
-                      </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="resources">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Resource Utilization</CardTitle>
+                </CardHeader>
+                <CardContent className="h-[400px]">
+                  {detailedMetrics ? (
+                    <PerformanceChart
+                      data={getPerformanceData()}
+                      dataKey="timestamp"
+                      lines={[
+                        { dataKey: "metrics.cpuUsage", name: "CPU Usage (%)", color: "#dc2626" },
+                        { dataKey: "metrics.memoryUsage", name: "Memory Usage (%)", color: "#2563eb" },
+                        { dataKey: "metrics.gpuUsage", name: "GPU Usage (%)", color: "#7c3aed" }
+                      ]}
+                      height={350}
+                    />
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <p className="text-muted-foreground">No resource data available</p>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="anomalies">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Detected Anomalies</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {detailedMetrics && detailedMetrics.anomalies && detailedMetrics.anomalies.length > 0 ? (
+                    <div className="space-y-4">
+                      {detailedMetrics.anomalies.map((anomaly, index) => (
+                        <div key={index} className="bg-muted p-4 rounded-md">
+                          <div className="flex justify-between">
+                            <div>
+                              <span className={`text-sm font-medium ${anomaly.severity === 'high' ? 'text-red-500' : 'text-amber-500'}`}>
+                                {anomaly.severity.toUpperCase()} Severity
+                              </span>
+                              <h4 className="font-medium">{anomaly.metric} Anomaly</h4>
+                              <p className="text-sm text-muted-foreground">
+                                Expected: {anomaly.expected}, Actual: {anomaly.actual}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-muted-foreground">
+                                {new Date(anomaly.timestamp).toLocaleString()}
+                              </p>
+                              <span className={`text-sm ${anomaly.resolved ? 'text-green-500' : 'text-red-500'}`}>
+                                {anomaly.resolved ? 'Resolved' : 'Unresolved'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-8 text-center">
+                      <p className="text-muted-foreground">No anomalies detected in the current time period</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+          
+          {detailedMetrics && detailedMetrics.recommendations && (
             <Card>
-              <CardContent className="py-8">
-                <div className="text-center text-muted-foreground">
-                  <p>No anomalies detected in the system</p>
-                </div>
+              <CardHeader>
+                <CardTitle>Recommendations</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 list-disc pl-5">
+                  {detailedMetrics.recommendations.map((rec, idx) => (
+                    <li key={idx}>{rec}</li>
+                  ))}
+                </ul>
               </CardContent>
             </Card>
           )}
-        </TabsContent>
-      </Tabs>
+        </>
+      )}
     </div>
-  );
-};
-
-interface MetricCardProps {
-  title: string;
-  value: number;
-  change: number;
-  unit: string;
-  inverted?: boolean;
-}
-
-const MetricCard: React.FC<MetricCardProps> = ({ title, value, change, unit, inverted = false }) => {
-  const isPositive = inverted ? change < 0 : change > 0;
-  const displayValue = typeof value === 'number' ? value.toLocaleString() : value;
-  const absChange = Math.abs(change);
-  const displayChange = absChange < 0.1 ? absChange.toFixed(2) : absChange < 1 ? absChange.toFixed(1) : Math.round(absChange);
-  
-  return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex flex-col space-y-2">
-          <p className="text-sm text-muted-foreground">{title}</p>
-          <div className="flex items-baseline justify-between">
-            <p className="text-2xl font-bold">
-              {displayValue}{unit}
-            </p>
-            <div className={`flex items-center ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
-              <span className="text-xs">
-                {isPositive ? '+' : '-'}{displayChange}%
-              </span>
-              {isPositive ? (
-                <ArrowUpRight className="h-3 w-3 ml-0.5" />
-              ) : (
-                <ArrowDownRight className="h-3 w-3 ml-0.5" />
-              )}
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   );
 };
 

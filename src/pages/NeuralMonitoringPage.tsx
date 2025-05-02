@@ -8,6 +8,7 @@ import NeuralAnalytics from '@/components/neural/NeuralAnalytics';
 import NeuralSystemControls from '@/components/neural/NeuralSystemControls';
 import NeuralRecommendations from '@/components/neural/NeuralRecommendations';
 import NeuralAutomationPanel from '@/components/neural/NeuralAutomationPanel';
+import NeuralSettingsPanel from '@/components/neural/NeuralSettingsPanel';
 import { Separator } from '@/components/ui/separator';
 import AutoRefreshControl from '@/components/analytics/AutoRefreshControl';
 
@@ -92,17 +93,7 @@ const NeuralMonitoringPage: React.FC = () => {
             </TabsContent>
             
             <TabsContent value="settings">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Neural System Settings</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[500px]">
-                    {/* Neural System Settings component would go here */}
-                    <p>Configure neural system settings and parameters.</p>
-                  </div>
-                </CardContent>
-              </Card>
+              <NeuralSettingsPanel />
             </TabsContent>
           </div>
         </Tabs>
