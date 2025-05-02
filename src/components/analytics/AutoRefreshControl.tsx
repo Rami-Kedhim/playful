@@ -14,14 +14,17 @@ interface AutoRefreshControlProps {
   interval: number;
   onIntervalChange: (interval: number) => void;
   onRefresh?: () => void;
+  isPaused?: boolean;
+  onPauseToggle?: () => void;
 }
 
 const AutoRefreshControl: React.FC<AutoRefreshControlProps> = ({
   interval,
   onIntervalChange,
-  onRefresh
+  onRefresh,
+  isPaused = false, 
+  onPauseToggle
 }) => {
-  const [isPaused, setIsPaused] = useState(false);
   const [countdown, setCountdown] = useState(interval / 1000);
   
   // Handle interval changes
@@ -58,7 +61,9 @@ const AutoRefreshControl: React.FC<AutoRefreshControlProps> = ({
   };
   
   const togglePause = () => {
-    setIsPaused(!isPaused);
+    if (onPauseToggle) {
+      onPauseToggle();
+    }
   };
   
   return (
