@@ -36,6 +36,17 @@ export const calculateDaysRemaining = (expiryDate: Date): number => {
 };
 
 /**
+ * Calculate expiry date based on creation date (default 6 months)
+ * @param creationDate Date of content creation
+ * @param months Number of months until expiry
+ */
+export const calculateExpiryDate = (creationDate: Date, months: number = 6): Date => {
+  const expiryDate = new Date(creationDate);
+  expiryDate.setMonth(expiryDate.getMonth() + months);
+  return expiryDate;
+};
+
+/**
  * Determine content status based on expiry date
  * @param expiryDate The expiration date
  * @returns 'active', 'expiring', or 'expired'

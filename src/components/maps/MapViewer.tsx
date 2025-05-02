@@ -19,6 +19,7 @@ interface MapViewerProps {
   onMarkerClick?: (markerId: string) => void;
   height?: string;
   width?: string;
+  apiKey?: string; // Added missing apiKey prop
 }
 
 const MapViewer: React.FC<MapViewerProps> = ({
@@ -27,11 +28,12 @@ const MapViewer: React.FC<MapViewerProps> = ({
   markers = [],
   onMarkerClick,
   height = '400px',
-  width = '100%'
+  width = '100%',
+  apiKey // Use the provided API key
 }) => {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || ''
+    googleMapsApiKey: apiKey || process.env.GOOGLE_MAPS_API_KEY || ''
   });
 
   const mapContainerStyle = {

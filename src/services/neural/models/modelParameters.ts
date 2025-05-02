@@ -1,67 +1,52 @@
 
-import { ModelParameters } from '../types/neuralHub';
-import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
+/**
+ * Model parameters definition for neural services
+ */
+export interface ModelParameters {
+  temperature: number;
+  topP: number;
+  frequencyPenalty: number;
+  presencePenalty: number;
+  maxTokens: number;
+  modelName: string; // Added the missing modelName property
+  stopSequences?: string[];
+}
 
 /**
- * Update neural model parameters
- * @param parameters Parameters to update
+ * Default model parameters
  */
-export const updateModelParameters = (parameters: ModelParameters): void => {
-  try {
-    neuralHub.updateModelParameters(parameters);
-    console.log('Model parameters updated successfully');
-  } catch (error) {
-    console.error('Failed to update model parameters:', error);
-  }
+export const defaultModelParameters: ModelParameters = {
+  temperature: 0.7,
+  topP: 0.9,
+  frequencyPenalty: 0.0,
+  presencePenalty: 0.0,
+  maxTokens: 1000,
+  modelName: 'gpt-3.5-turbo', // Default model name
+  stopSequences: []
 };
 
 /**
- * Get default model parameters
+ * Creative model parameters
  */
-export const getDefaultModelParameters = (): ModelParameters => {
-  return {
-    temperature: 0.7,
-    frequencyPenalty: 0,
-    presencePenalty: 0,
-    maxTokens: 2048,
-    stopSequences: [],
-    modelName: 'default',
-    decayConstant: 0.85,
-    growthFactor: 1.05,
-    cyclePeriod: 24,
-    harmonicCount: 3,
-    learningRate: 0.001,
-    batchSize: 32
-  };
+export const creativeModelParameters: ModelParameters = {
+  temperature: 0.9,
+  topP: 1.0,
+  frequencyPenalty: 0.2,
+  presencePenalty: 0.1,
+  maxTokens: 1500,
+  modelName: 'gpt-4',
+  stopSequences: []
 };
 
 /**
- * Initialize default parameters
+ * Precise model parameters
  */
-export const initializeDefaultParameters = (): ModelParameters => {
-  return getDefaultModelParameters();
-};
-
-/**
- * Calculate system efficiency based on parameters
- */
-export const calculateSystemEfficiency = (params: ModelParameters): number => {
-  // Simple algorithm to calculate efficiency
-  const baseEfficiency = 0.75;
-  const tempFactor = 1 - Math.abs(params.temperature - 0.7) * 0.5;
-  const decayFactor = params.decayConstant ? (params.decayConstant / 0.85) : 1;
-  
-  return Math.min(1, Math.max(0, baseEfficiency * tempFactor * decayFactor));
-};
-
-/**
- * Validate model parameters
- */
-export const validateModelParameters = (params: ModelParameters): boolean => {
-  // Basic validation
-  if (params.temperature < 0 || params.temperature > 1) return false;
-  if (params.decayConstant && (params.decayConstant < 0 || params.decayConstant > 1)) return false;
-  if (params.maxTokens < 1 || params.maxTokens > 4096) return false;
-  
-  return true;
+export const preciseModelParameters: ModelParameters = {
+  temperature: 0.3,
+  topP: 0.8,
+  frequencyPenalty: 0.0,
+  presencePenalty: 0.0,
+  maxTokens: 800,
+  modelName: 'gpt-3.5-turbo-16k',
+  stopSequences: []
 };
