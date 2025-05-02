@@ -1,4 +1,3 @@
-
 export interface INeuralHub {
   processRequest: (request: NeuralRequest) => Promise<NeuralResponse>;
   registerModule: (moduleType: string, module: any) => void;

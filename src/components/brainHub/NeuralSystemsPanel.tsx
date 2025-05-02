@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Activity, CheckCircle, Settings } from 'lucide-react';
 import { neuralHub } from '@/services/neural/HermesOxumBrainHub';
+import { TrainingProgress } from '@/services/neural/types/neuralHub';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -33,6 +34,22 @@ type TrainingProgressType = {
   error?: string;
 };
 
+// Helper function to convert neural hub status to TrainingProgressType status
+const convertTrainingStatus = (status: string): 'running' | 'completed' | 'failed' | 'waiting' => {
+  switch (status) {
+    case 'training':
+      return 'running';
+    case 'completed':
+    case 'failed':
+    case 'waiting':
+      return status as 'completed' | 'failed' | 'waiting';
+    case 'stopped':
+      return 'failed'; // Map stopped to failed for UI purposes
+    default:
+      return 'waiting';
+  }
+};
+
 const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ systemId }) => {
   const { services, loading, error, optimizeResources } = useNeuralRegistry();
   const [activeJobs, setActiveJobs] = useState<TrainingProgressType[]>([]);
@@ -49,16 +66,15 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ systemId }) =
           loss: job.loss || 0,
           accuracy: job.accuracy || 0,
           timestamp: job.timestamp || new Date().toISOString(),
-          // Convert status to the expected union type
-          status: (job.status === 'training' ? 'running' : 
-                 (job.status === 'completed' || job.status === 'failed' || job.status === 'waiting') ? 
-                  job.status as 'completed' | 'failed' | 'waiting' : 'waiting') as 'running' | 'completed' | 'failed' | 'waiting',
+          // Use the helper function to convert status
+          status: convertTrainingStatus(job.status),
           estimatedTimeRemaining: job.timeRemaining,
           metrics: {
             precision: job.metrics?.precision,
             recall: job.metrics?.recall,
             f1Score: job.metrics?.f1Score
-          }
+          },
+          error: job.error
         }));
         setActiveJobs(convertedJobs);
       } catch (err) {

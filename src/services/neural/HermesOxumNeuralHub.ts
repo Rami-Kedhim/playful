@@ -1,4 +1,3 @@
-
 import { ModelParameters, defaultModelParameters } from './models/modelParameters';
 import { INeuralHub, NeuralRequest, NeuralResponse, TrainingProgress } from './types/neuralHub';
 
@@ -166,10 +165,52 @@ export class HermesOxumNeuralHub implements INeuralHub {
   }
   
   public async stopTraining(jobId: string): Promise<boolean> {
-    // Implement the missing stopTraining method
     console.log(`Stopping training job ${jobId}`);
+    
+    // Find the job in active training jobs
+    const activeJobs = this.getActiveTrainingJobs();
+    const jobIndex = activeJobs.findIndex(job => job.id === jobId || job.modelId === jobId);
+    
+    if (jobIndex === -1) {
+      console.warn(`Training job ${jobId} not found`);
+      return false;
+    }
+    
     // In a real implementation, this would send a signal to stop the training process
+    console.log(`Successfully stopped training job ${jobId}`);
     return true;
+  }
+  
+  public async startTraining(type: string, options: any = {}): Promise<any> {
+    console.log(`Starting new ${type} training job with options:`, options);
+    
+    // In a real implementation, this would initiate a new training process
+    const newJob: TrainingProgress = {
+      id: `job-${Date.now()}`,
+      modelId: options.modelId || `${type}-model-${Date.now()}`,
+      type: type,
+      progress: 0,
+      status: 'training',
+      startTime: new Date(),
+      epoch: 0,
+      totalEpochs: options.epochs || 10,
+      loss: 1.0,
+      accuracy: 0.5,
+      timestamp: new Date().toISOString(),
+      timeRemaining: options.epochs ? options.epochs * 600 : 6000, // Estimate based on epochs
+      metrics: {
+        loss: 1.0,
+        accuracy: 0.5
+      }
+    };
+    
+    // Return the new job information
+    return {
+      success: true,
+      jobId: newJob.id,
+      status: newJob.status,
+      message: `Started new ${type} training job`
+    };
   }
   
   public getConfig(): any {

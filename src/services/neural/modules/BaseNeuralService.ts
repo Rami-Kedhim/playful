@@ -1,67 +1,80 @@
 
-import { BaseNeuralService as BaseNeuralServiceInterface, NeuralServiceConfig } from '../types/NeuralService';
+import { BaseNeuralService as BaseNeuralServiceType, NeuralServiceConfig, ModuleType } from '../types/NeuralService';
 
-export class BaseBrainService implements BaseNeuralServiceInterface {
+/**
+ * Base implementation for all neural services
+ * Provides common functionality and standardized interfaces
+ */
+export abstract class BaseBrainService implements BaseNeuralServiceType {
   id: string;
-  name: string;
   moduleId: string;
+  name: string;
   description: string;
-  moduleType: string;
+  moduleType: ModuleType;
   version: string;
   status: 'active' | 'inactive' | 'maintenance';
   config: NeuralServiceConfig;
   
-  constructor(initialConfig: Partial<BaseNeuralServiceInterface> = {}) {
-    this.id = initialConfig.id || `service-${Math.random().toString(36).substring(2, 9)}`;
-    this.name = initialConfig.name || 'Generic Neural Service';
-    this.moduleId = initialConfig.moduleId || this.id;
-    this.description = initialConfig.description || 'A generic neural service';
-    this.moduleType = initialConfig.moduleType || 'general';
-    this.version = initialConfig.version || '1.0.0';
-    this.status = initialConfig.status || 'active';
-    this.config = initialConfig.config || {
-      enabled: true,
-      sensitivity: 0.7,
-      threshold: 0.5,
-      mode: 'standard'
-    };
+  constructor(
+    id: string,
+    moduleId: string,
+    name: string,
+    description: string,
+    moduleType: ModuleType,
+    version: string,
+    config: NeuralServiceConfig
+  ) {
+    this.id = id;
+    this.moduleId = moduleId;
+    this.name = name;
+    this.description = description;
+    this.moduleType = moduleType;
+    this.version = version;
+    this.config = config;
+    this.status = config.enabled ? 'active' : 'inactive';
   }
   
+  /**
+   * Initialize this service module
+   */
   async initialize(): Promise<boolean> {
-    console.log(`Initializing ${this.name} (${this.moduleId})...`);
-    return true;
+    try {
+      // Default implementation
+      console.log(`Initializing ${this.name} (${this.version})`);
+      this.status = this.config.enabled ? 'active' : 'inactive';
+      return this.config.enabled;
+    } catch (error) {
+      console.error(`Failed to initialize ${this.name}:`, error);
+      this.status = 'inactive';
+      return false;
+    }
   }
   
+  /**
+   * Update configuration parameters
+   */
   updateConfig(config: Partial<NeuralServiceConfig>): void {
-    this.config = {
-      ...this.config,
-      ...config
-    };
-    console.log(`Updated config for ${this.name}:`, this.config);
+    this.config = { ...this.config, ...config };
+    this.status = this.config.enabled ? 'active' : 'inactive';
+    console.log(`Updated configuration for ${this.name}`);
   }
   
-  getMetrics() {
-    return {
-      operationsCount: Math.floor(Math.random() * 10000),
-      errorRate: Math.random() * 2,
-      latency: Math.floor(Math.random() * 100)
-    };
-  }
-  
-  // This method was missing and causing errors in consumer modules
-  configure(config: Partial<NeuralServiceConfig>): boolean {
-    this.updateConfig(config);
-    return true;
-  }
-  
-  // Add getCapabilities method that was expected by NeuralServiceCard
+  /**
+   * Get available capabilities of this service
+   */
   getCapabilities(): string[] {
-    return ['basic_processing', 'data_analysis'];
+    return ['basic'];
+  }
+  
+  /**
+   * Get performance metrics for this service
+   */
+  getMetrics(): any {
+    return {
+      operationsCount: 0,
+      errorRate: 0,
+      latency: 0,
+      status: this.status
+    };
   }
 }
-
-// Use 'export type' when re-exporting with isolatedModules enabled
-export type { BaseNeuralServiceInterface };
-
-// Export the class as the default for clean imports
-export default BaseBrainService;

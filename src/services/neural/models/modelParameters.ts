@@ -1,4 +1,3 @@
-
 /**
  * Model parameters definition for neural services
  */
@@ -10,12 +9,12 @@ export interface ModelParameters {
   maxTokens: number;
   modelName: string;
   stopSequences?: string[];
-  // Add additional properties that components are trying to use
-  learningRate?: number;
-  batchSize?: number;
+  // Add properties that are being used elsewhere in the codebase
   responseFormat?: string;
   model?: string;
   decayConstant?: number;
+  learningRate?: number;
+  batchSize?: number;
 }
 
 /**
@@ -62,21 +61,32 @@ export const initializeDefaultParameters = (): ModelParameters => {
   return { ...defaultModelParameters };
 };
 
+export const getDefaultModelParameters = (): ModelParameters => {
+  return { ...defaultModelParameters };
+};
+
 export const calculateSystemEfficiency = (params: ModelParameters): number => {
-  // Mock implementation
-  return 0.85; // Return a value between 0 and 1
+  // Implementation with all parameters
+  const efficiencyScore = 
+    0.7 * (1 - params.temperature) + 
+    0.1 * (params.topP) +
+    0.1 * (1 - (params.frequencyPenalty || 0) / 2) +
+    0.1 * (1 - (params.presencePenalty || 0) / 2);
+  
+  return Math.min(1, Math.max(0, efficiencyScore));
 };
 
 export const validateModelParameters = (params: ModelParameters): boolean => {
-  // Basic validation
+  // Enhanced validation that checks all properties
   return (
     params.temperature >= 0 && 
     params.temperature <= 1 && 
-    params.maxTokens > 0
+    params.topP >= 0 &&
+    params.topP <= 1 &&
+    params.maxTokens > 0 &&
+    (params.frequencyPenalty === undefined || 
+     (params.frequencyPenalty >= -2 && params.frequencyPenalty <= 2)) &&
+    (params.presencePenalty === undefined || 
+     (params.presencePenalty >= -2 && params.presencePenalty <= 2))
   );
-};
-
-// Function being referenced in neuralHubUtils.ts
-export const getDefaultModelParameters = (): ModelParameters => {
-  return { ...defaultModelParameters };
 };
