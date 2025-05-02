@@ -4,8 +4,8 @@ import { BaseBrainService } from './BaseNeuralService';
 export class AICompanionNeuralService extends BaseBrainService {
   constructor() {
     super({
-      name: 'AI Companion Neural Service',
       moduleId: 'ai-companion-neural',
+      name: 'AI Companion Neural Service',
       description: 'Neural processing for AI companions and conversations',
       moduleType: 'ai-companion',
       version: '2.0.1'

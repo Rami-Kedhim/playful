@@ -4,8 +4,8 @@ import { BaseBrainService } from './BaseNeuralService';
 export class LivecamsNeuralService extends BaseBrainService {
   constructor() {
     super({
-      name: 'Livecams Neural Service',
       moduleId: 'livecams-neural',
+      name: 'Livecams Neural Service',
       description: 'Neural processing for livecam streams and interactions',
       moduleType: 'livecams',
       version: '1.1.2'

@@ -5,7 +5,7 @@ import { BaseNeuralService as BaseNeuralServiceType, NeuralServiceConfig, Module
  * Base implementation for all neural services
  * Provides common functionality and standardized interfaces
  */
-export abstract class BaseBrainService implements BaseNeuralServiceType {
+export class BaseBrainService implements BaseNeuralServiceType {
   id: string;
   moduleId: string;
   name: string;
@@ -16,22 +16,28 @@ export abstract class BaseBrainService implements BaseNeuralServiceType {
   config: NeuralServiceConfig;
   
   constructor(
-    id: string,
-    moduleId: string,
-    name: string,
-    description: string,
-    moduleType: ModuleType,
-    version: string,
-    config: NeuralServiceConfig
+    params: {
+      id?: string,
+      moduleId: string,
+      name: string,
+      description: string,
+      moduleType: ModuleType,
+      version: string,
+      config?: NeuralServiceConfig
+    }
   ) {
-    this.id = id;
-    this.moduleId = moduleId;
-    this.name = name;
-    this.description = description;
-    this.moduleType = moduleType;
-    this.version = version;
-    this.config = config;
-    this.status = config.enabled ? 'active' : 'inactive';
+    this.id = params.id || `neural-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    this.moduleId = params.moduleId;
+    this.name = params.name;
+    this.description = params.description;
+    this.moduleType = params.moduleType;
+    this.version = params.version;
+    this.config = params.config || {
+      enabled: true,
+      sensitivity: 0.8,
+      threshold: 0.6
+    };
+    this.status = this.config.enabled ? 'active' : 'inactive';
   }
   
   /**

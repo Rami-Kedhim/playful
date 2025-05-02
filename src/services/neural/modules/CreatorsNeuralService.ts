@@ -4,8 +4,8 @@ import { BaseBrainService } from './BaseNeuralService';
 export class CreatorsNeuralService extends BaseBrainService {
   constructor() {
     super({
-      name: 'Creators Neural Service',
       moduleId: 'creators-neural',
+      name: 'Creators Neural Service',
       description: 'Neural processing for creator content and engagement',
       moduleType: 'creators',
       version: '1.3.5'

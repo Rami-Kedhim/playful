@@ -4,8 +4,8 @@ import { BaseBrainService } from './BaseNeuralService';
 export class EscortsNeuralService extends BaseBrainService {
   constructor() {
     super({
-      name: 'Escorts Neural Service',
       moduleId: 'escorts-neural',
+      name: 'Escorts Neural Service',
       description: 'Neural processing for escort profiles and matching',
       moduleType: 'escorts',
       version: '1.2.0'

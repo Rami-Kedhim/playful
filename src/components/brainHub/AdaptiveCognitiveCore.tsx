@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -28,12 +29,12 @@ const AdaptiveCognitiveCore: React.FC<AdaptiveCognitiveProps> = ({
     };
     
     const service = new BaseBrainService({
+      moduleId: moduleId,
       name: title,
-      moduleId,
       description: 'Adaptive cognitive processing module',
       moduleType: 'cognitive',
       version: '1.2.0',
-      config
+      config: config
     });
     
     // Register the service with the neural registry
