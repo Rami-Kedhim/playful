@@ -1,6 +1,6 @@
 
 import neuralServiceRegistry from '../registry/NeuralServiceRegistry';
-import { neuralHub } from '../HermesOxumNeuralHub';
+import { neuralHub } from '../HermesOxumBrainHub';
 import { PerformanceReport, ServiceMetrics } from '@/types/neuralMetrics';
 
 class NeuralMetricsService {
@@ -24,8 +24,12 @@ class NeuralMetricsService {
       };
 
       if (status === 'active') {
-        // Use metrics.successRate only if defined
-        const serviceHealth = (metrics.successRate ?? 0.7) * 100;
+        // Use metrics.errorCount and metrics.operationsCount to calculate successRate if not defined
+        const serviceHealth = metrics.successRate !== undefined ? 
+          metrics.successRate * 100 : 
+          metrics.operationsCount > 0 ? 
+            ((metrics.operationsCount - (metrics.errorCount || 0)) / metrics.operationsCount) * 100 : 
+            70;
         totalHealth += serviceHealth;
       }
     });
@@ -35,9 +39,20 @@ class NeuralMetricsService {
       ? totalHealth / activeServices
       : 100;
 
+    const healthMetrics = neuralHub.getHealthMetrics();
+
+    // Map the health metrics to the structure expected by PerformanceReport
+    const mappedSystemMetrics = {
+      cpuUsage: healthMetrics.systemLoad ? healthMetrics.systemLoad * 100 : healthMetrics.cpuUtilization || 0,
+      memoryUsage: healthMetrics.memoryAllocation ? healthMetrics.memoryAllocation * 100 : healthMetrics.memoryUtilization || 0,
+      responseTime: healthMetrics.averageResponseTime || healthMetrics.responseTime || 0,
+      operationsPerSecond: healthMetrics.requestRate || healthMetrics.operationsPerSecond || 0,
+      errorRate: healthMetrics.errorRate || 0
+    };
+
     const recommendations = this.generateRecommendations(
       services,
-      systemHealth,
+      healthMetrics,
       overallHealth
     );
 
@@ -45,13 +60,7 @@ class NeuralMetricsService {
       timestamp: new Date(),
       overallHealth: Math.round(overallHealth),
       services: serviceMetrics,
-      systemMetrics: {
-        cpuUsage: systemHealth.cpuUsage,
-        memoryUsage: systemHealth.memoryUsage,
-        responseTime: systemHealth.responseTime,
-        operationsPerSecond: systemHealth.operationsPerSecond,
-        errorRate: systemHealth.errorRate
-      },
+      systemMetrics: mappedSystemMetrics,
       recommendations
     };
 
@@ -78,15 +87,20 @@ class NeuralMetricsService {
   generateRecommendations(services: any[], systemHealth: any, overallHealth: number): string[] {
     const recommendations: string[] = [];
 
-    if (systemHealth.cpuUtilization > 80) {
+    if (systemHealth.cpuUtilization > 80 || systemHealth.systemLoad > 0.8) {
       recommendations.push('High CPU usage detected. Consider scaling resources or optimizing processing.');
     }
 
-    if (systemHealth.memoryUtilization > 85) {
+    if (systemHealth.memoryUtilization > 85 || systemHealth.memoryAllocation > 0.85) {
       recommendations.push('Memory usage is high. Review memory allocation or check for memory leaks.');
     }
 
-    if (systemHealth.errorRate > 5) {
+    if (systemHealth.errorRate > 5 || 
+        (services.some(s => {
+          const metrics = s.getMetrics();
+          return metrics.errorCount && metrics.operationsCount && 
+                (metrics.errorCount / metrics.operationsCount > 0.05);
+        }))) {
       recommendations.push('Error rate exceeds recommended threshold. Investigate potential issues.');
     }
 

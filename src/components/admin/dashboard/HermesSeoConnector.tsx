@@ -16,17 +16,45 @@ interface HermesSeoConnectorProps {
   userId?: string;
 }
 
+// Helper to map health metrics from one format to another
+function mapHealthMetrics(metrics: any): HealthMetrics {
+  return {
+    cpuUtilization: metrics.cpuUsage || metrics.systemLoad * 100,
+    memoryUtilization: metrics.memoryUsage || metrics.memoryAllocation * 100,
+    errorRate: metrics.errorRate || 0,
+    responseTime: metrics.responseTime || metrics.averageResponseTime || 0,
+    operationsPerSecond: metrics.operationsPerSecond || metrics.requestRate || 0,
+    stability: 100 - (metrics.errorRate * 100 || 0),
+    lastUpdated: metrics.lastUpdated || Date.now(),
+    systemLoad: metrics.systemLoad || metrics.cpuUsage / 100 || 0,
+    userEngagement: metrics.userEngagement || 0.5,
+    requestsPerMinute: metrics.requestRate * 60 || metrics.requestsPerMinute || 0,
+    cpuUsage: metrics.cpuUsage || metrics.systemLoad * 100,
+    memoryUsage: metrics.memoryUsage || metrics.memoryAllocation * 100,
+    neuralAccuracy: metrics.neuralAccuracy || 0.95,
+    neuralEfficiency: metrics.neuralEfficiency || 0.9,
+    neuralLatency: metrics.neuralLatency || metrics.responseTime || 100,
+    memoryAllocation: metrics.memoryAllocation || metrics.memoryUsage / 100,
+    networkThroughput: metrics.networkThroughput || 0,
+    requestRate: metrics.requestRate || 0,
+    averageResponseTime: metrics.averageResponseTime || metrics.responseTime || 0
+  };
+}
+
 const HermesSeoConnector: React.FC<HermesSeoConnectorProps> = ({ userId }) => {
   const { insights, loading, error, refreshInsights } = useHermesInsights();
+  
   // Use neuralHub.getHealthMetrics() to get system health metrics
-  const [systemHealthMetrics, setSystemHealthMetrics] = useState<HealthMetrics>(neuralHub.getHealthMetrics());
+  const [systemHealthMetrics, setSystemHealthMetrics] = useState<HealthMetrics>(
+    mapHealthMetrics(neuralHub.getHealthMetrics())
+  );
 
   const [lastOptimizedContent, setLastOptimizedContent] = useState<SeoOptimizationResult | null>(null);
 
   // Periodically update system health metrics
   useEffect(() => {
     const intervalId = setInterval(() => {
-      setSystemHealthMetrics(neuralHub.getHealthMetrics());
+      setSystemHealthMetrics(mapHealthMetrics(neuralHub.getHealthMetrics()));
     }, 30000);
 
     return () => clearInterval(intervalId);

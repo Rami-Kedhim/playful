@@ -1,15 +1,14 @@
-export type ModuleType = 'general' | 'psychology' | 'physics' | 'economics' | 'robotics' | 'analytics' | string;
+
+export type ModuleType = 'core' | 'transformer' | 'analytics' | 'interface' | 'connector' | 'scheduler' | string;
 
 export interface NeuralServiceConfig {
   enabled: boolean;
-  sensitivity?: number;
-  threshold?: number;
-  mode?: string;
-  apiEndpoint?: string;
-  apiKey?: string;
-  autonomyLevel?: number;
-  priority?: number;
-  resourceAllocation?: number;
+  priority: string | number; // Allow both string and number for priority
+  resources: {
+    cpu: number;
+    memory: number;
+    [key: string]: any;
+  };
   [key: string]: any;
 }
 
@@ -18,39 +17,13 @@ export interface BaseNeuralService {
   moduleId: string;
   name: string;
   description: string;
-  moduleType: ModuleType;
   version: string;
-  status: 'active' | 'inactive' | 'maintenance';
+  status: 'active' | 'inactive' | 'error' | 'maintenance' | string;
+  moduleType: ModuleType;
   config: NeuralServiceConfig;
-  
-  initialize(): Promise<boolean>;
-  updateConfig(config: Partial<NeuralServiceConfig>): void;
-  getCapabilities(): string[];
-  getMetrics(): any;
-  configure?(config: Partial<NeuralServiceConfig>): boolean;
-}
-
-export interface NeuralServiceMetrics {
-  operationsCount: number;
-  errorRate: number;
-  latency: number;
+  getMetrics: () => any;
+  initialize?: () => Promise<boolean>;
+  updateConfig?: (config: NeuralServiceConfig) => void;
+  getCapabilities?: () => string[];
   [key: string]: any;
-}
-
-// Rename to NeuralServiceRegistry to match usage in registry implementation
-export interface NeuralServiceRegistry {
-  services: Map<string, BaseNeuralService>;
-  getService(moduleId: string): BaseNeuralService | undefined;
-  getAllServices(): BaseNeuralService[];
-  registerService(service: BaseNeuralService): boolean;
-  initialize(): Promise<void>;
-}
-
-// Keep NeuralRegistry for backward compatibility
-export interface NeuralRegistry {
-  services: Map<string, BaseNeuralService>;
-  getService(moduleId: string): BaseNeuralService | undefined;
-  getAllServices(): BaseNeuralService[];
-  registerService(service: BaseNeuralService): boolean;
-  initialize(): Promise<void>;
 }

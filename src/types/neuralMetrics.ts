@@ -1,3 +1,4 @@
+
 export interface HealthMetrics {
   cpuUtilization: number;
   memoryUtilization: number;
@@ -14,6 +15,10 @@ export interface HealthMetrics {
   neuralAccuracy: number;
   neuralEfficiency: number;
   neuralLatency: number;
+  memoryAllocation: number;
+  networkThroughput: number;
+  requestRate: number;
+  averageResponseTime: number;
 }
 
 export interface PerformanceReport {
@@ -35,9 +40,10 @@ export interface PerformanceReport {
 
 export interface ServiceMetrics {
   operationsCount: number;
-  errorRate: number;
+  errorCount: number;
   latency: number;
   successRate?: number;
+  errorRate?: number;
   [key: string]: any;
 }
 
