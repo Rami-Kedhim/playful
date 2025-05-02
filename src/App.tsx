@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import NeuralAnalyticsPage from './pages/NeuralAnalyticsPage';
 import NeuralMonitoringPage from './pages/NeuralMonitoringPage';
 import BrainHubPage from './pages/BrainHubPage';
+import HomePage from './pages/HomePage';
 import './App.css';
 
 function App() {
@@ -14,7 +15,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/neural-analytics" replace />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/neural-analytics" element={<NeuralAnalyticsPage />} />
         <Route path="/neural-monitoring" element={<NeuralMonitoringPage />} />
         <Route path="/brain-hub" element={<BrainHubPage />} />
