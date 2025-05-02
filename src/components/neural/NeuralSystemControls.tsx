@@ -1,423 +1,294 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import {
-  Activity,
-  AlertTriangle,
-  Gauge,
-  RefreshCw,
-  Power,
-  Zap,
-  Shield,
-  Server
+import { Switch } from '@/components/ui/switch';
+import { 
+  PowerIcon, 
+  Settings, 
+  RefreshCw, 
+  Cpu, 
+  BrainCircuit, 
+  AlertTriangle, 
+  PlayCircle, 
+  PauseCircle, 
+  Save
 } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/use-toast';
+import { NeuralModelParameters } from '@/types/neuralMetrics';
 
-const NeuralSystemControls: React.FC = () => {
-  // System control states
-  const [powerStatus, setPowerStatus] = useState(true);
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
-  const [processingPower, setProcessingPower] = useState(65);
-  const [memoryAllocation, setMemoryAllocation] = useState(40);
-  const [errorTolerance, setErrorTolerance] = useState(25);
-  const [responseLevel, setResponseLevel] = useState(70);
+const NeuralSystemControls = () => {
+  const [systemStatus, setSystemStatus] = useState<'online' | 'offline' | 'maintenance'>('online');
   const [isLoading, setIsLoading] = useState(false);
-  const [isRestarting, setIsRestarting] = useState(false);
-
-  // Handle system power toggle
-  const handlePowerToggle = () => {
-    setIsRestarting(true);
-    
-    // Simulate system restart
-    setTimeout(() => {
-      setPowerStatus(!powerStatus);
-      setIsRestarting(false);
-      
-      toast({
-        title: powerStatus ? "System shutting down" : "System powering up",
-        description: powerStatus 
-          ? "Neural system is safely shutting down all processes."
-          : "Neural system is initializing all modules and services.",
-      });
-    }, 2000);
+  const [parameters, setParameters] = useState<NeuralModelParameters>({
+    temperature: 0.7,
+    topP: 0.9,
+    frequencyPenalty: 0.5,
+    presencePenalty: 0.5,
+    maxTokens: 2048,
+    modelName: 'neural-advanced-v2',
+    processingPower: 80,
+    responsiveness: 90,
+    errorTolerance: 15,
+    adaptiveMode: true,
+    autonomousMode: false,
+    precisionFactor: 0.85,
+    maxOperations: 1000
+  });
+  
+  const handleParameterChange = (key: keyof NeuralModelParameters, value: number | boolean) => {
+    setParameters(prev => ({ ...prev, [key]: value }));
   };
-
-  // Handle maintenance mode toggle
-  const handleMaintenanceToggle = () => {
-    setMaintenanceMode(!maintenanceMode);
-    
-    toast({
-      title: !maintenanceMode ? "Maintenance mode activated" : "Maintenance mode deactivated",
-      description: !maintenanceMode 
-        ? "System will continue to process existing tasks but reject new ones."
-        : "System is now accepting all new tasks and connections.",
-      variant: !maintenanceMode ? "default" : "default",
-    });
-  };
-
-  // Handle system restart
-  const handleRestart = () => {
-    setIsRestarting(true);
-    
-    // Simulate system restart
-    setTimeout(() => {
-      setIsRestarting(false);
-      
-      toast({
-        title: "System restarted successfully",
-        description: "All neural systems have been restarted with current settings.",
-      });
-    }, 3000);
-  };
-
-  // Apply system settings
-  const handleApplySettings = () => {
+  
+  const handleSystemAction = (action: 'restart' | 'shutdown' | 'maintenance') => {
     setIsLoading(true);
     
-    // Simulate applying settings
+    // Simulate API call
     setTimeout(() => {
+      switch (action) {
+        case 'restart':
+          toast({
+            title: "System Restarting",
+            description: "Neural system is restarting. This may take a few moments.",
+          });
+          setSystemStatus('offline');
+          setTimeout(() => setSystemStatus('online'), 3000);
+          break;
+        case 'shutdown':
+          toast({
+            title: "System Shutdown",
+            description: "Neural system has been shut down.",
+          });
+          setSystemStatus('offline');
+          break;
+        case 'maintenance':
+          toast({
+            title: "Maintenance Mode",
+            description: "Neural system is now in maintenance mode.",
+          });
+          setSystemStatus('maintenance');
+          break;
+      }
       setIsLoading(false);
-      
-      toast({
-        title: "Settings applied",
-        description: "Neural system parameters have been updated successfully.",
-      });
     }, 1500);
   };
-
+  
+  const handleSaveParameters = () => {
+    setIsLoading(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      toast({
+        title: "Parameters Saved",
+        description: "Neural system parameters have been updated.",
+      });
+      setIsLoading(false);
+    }, 1000);
+  };
+  
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Power className="h-5 w-5" />
-                <span>System Power Control</span>
-              </CardTitle>
-              <div className={`flex items-center ${powerStatus ? 'text-green-500' : 'text-gray-500'}`}>
-                <span className={`inline-block h-2 w-2 rounded-full ${powerStatus ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`}></span>
-                <span className="ml-2 text-sm font-medium">
-                  {powerStatus ? 'Online' : 'Offline'}
-                </span>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-lg">System Control Panel</CardTitle>
+              <CardDescription>Manage neural system operations and performance</CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm">Status:</span>
+              <div className={`px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1
+                ${systemStatus === 'online' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 
+                  systemStatus === 'maintenance' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                  'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${
+                  systemStatus === 'online' ? 'bg-green-500' :
+                  systemStatus === 'maintenance' ? 'bg-amber-500' : 'bg-red-500'
+                }`}></span>
+                {systemStatus.charAt(0).toUpperCase() + systemStatus.slice(1)}
               </div>
             </div>
-            <CardDescription>Control system power state and maintenance mode</CardDescription>
-          </CardHeader>
-          <CardContent>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <Button 
+              variant={systemStatus === 'online' ? 'default' : 'outline'} 
+              className="flex items-center gap-2"
+              disabled={isLoading || systemStatus === 'online'}
+              onClick={() => handleSystemAction('restart')}
+            >
+              <PlayCircle className="h-4 w-4" />
+              <span>Start System</span>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2 border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-950"
+              disabled={isLoading || systemStatus === 'maintenance'}
+              onClick={() => handleSystemAction('maintenance')}
+            >
+              <Settings className="h-4 w-4" />
+              <span>Maintenance Mode</span>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2 border-red-200 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+              disabled={isLoading || systemStatus === 'offline'}
+              onClick={() => handleSystemAction('shutdown')}
+            >
+              <PauseCircle className="h-4 w-4" />
+              <span>Stop System</span>
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">System Power</Label>
-                  <p className="text-sm text-muted-foreground">
-                    {powerStatus ? 'System is running and processing requests' : 'System is offline'}
-                  </p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium flex items-center gap-1">
+                    <Cpu className="h-4 w-4" />
+                    Processing Power
+                  </label>
+                  <span className="text-sm text-muted-foreground">{parameters.processingPower}%</span>
                 </div>
-                <Switch 
-                  checked={powerStatus} 
-                  onCheckedChange={handlePowerToggle}
-                  disabled={isRestarting}
-                  aria-label="Toggle system power"
+                <Slider 
+                  value={[parameters.processingPower || 50]} 
+                  min={10} 
+                  max={100} 
+                  step={5}
+                  onValueChange={(values) => handleParameterChange('processingPower', values[0])}
+                  disabled={isLoading || systemStatus !== 'online'}
                 />
               </div>
               
-              <Separator />
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Maintenance Mode</Label>
-                  <p className="text-sm text-muted-foreground">
-                    {maintenanceMode ? 'Rejecting new connections' : 'Accepting all connections'}
-                  </p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium flex items-center gap-1">
+                    <RefreshCw className="h-4 w-4" />
+                    Responsiveness
+                  </label>
+                  <span className="text-sm text-muted-foreground">{parameters.responsiveness}%</span>
                 </div>
-                <Switch 
-                  checked={maintenanceMode} 
-                  onCheckedChange={handleMaintenanceToggle}
-                  disabled={!powerStatus || isRestarting}
-                  aria-label="Toggle maintenance mode"
+                <Slider 
+                  value={[parameters.responsiveness || 50]} 
+                  min={10} 
+                  max={100} 
+                  step={5}
+                  onValueChange={(values) => handleParameterChange('responsiveness', values[0])}
+                  disabled={isLoading || systemStatus !== 'online'}
                 />
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium flex items-center gap-1">
+                    <AlertTriangle className="h-4 w-4" />
+                    Error Tolerance
+                  </label>
+                  <span className="text-sm text-muted-foreground">{parameters.errorTolerance}%</span>
+                </div>
+                <Slider 
+                  value={[parameters.errorTolerance || 15]} 
+                  min={5} 
+                  max={50} 
+                  step={5}
+                  onValueChange={(values) => handleParameterChange('errorTolerance', values[0])}
+                  disabled={isLoading || systemStatus !== 'online'}
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium flex items-center gap-1">
+                    <BrainCircuit className="h-4 w-4" />
+                    Precision Factor
+                  </label>
+                  <span className="text-sm text-muted-foreground">{parameters.precisionFactor?.toFixed(2)}</span>
+                </div>
+                <Slider 
+                  value={[parameters.precisionFactor || 0.5]} 
+                  min={0.1} 
+                  max={1} 
+                  step={0.05}
+                  onValueChange={(values) => handleParameterChange('precisionFactor', values[0])}
+                  disabled={isLoading || systemStatus !== 'online'}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center justify-between space-x-2 rounded-md border p-4">
+                  <label className="text-sm font-medium flex items-center gap-1" htmlFor="adaptive-mode">
+                    Adaptive Mode
+                  </label>
+                  <Switch
+                    id="adaptive-mode"
+                    checked={parameters.adaptiveMode}
+                    onCheckedChange={(checked) => handleParameterChange('adaptiveMode', checked)}
+                    disabled={isLoading || systemStatus !== 'online'}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between space-x-2 rounded-md border p-4">
+                  <label className="text-sm font-medium flex items-center gap-1" htmlFor="autonomous-mode">
+                    Autonomous Mode
+                  </label>
+                  <Switch
+                    id="autonomous-mode"
+                    checked={parameters.autonomousMode}
+                    onCheckedChange={(checked) => handleParameterChange('autonomousMode', checked)}
+                    disabled={isLoading || systemStatus !== 'online'}
+                  />
+                </div>
               </div>
               
               <div className="pt-2">
                 <Button 
-                  variant="secondary" 
-                  className="w-full"
-                  onClick={handleRestart}
-                  disabled={!powerStatus || isRestarting}
+                  className="w-full flex items-center gap-2 justify-center" 
+                  disabled={isLoading || systemStatus !== 'online'}
+                  onClick={handleSaveParameters}
                 >
-                  {isRestarting ? (
-                    <>
-                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                      Restarting...
-                    </>
+                  {isLoading ? (
+                    <RefreshCw className="h-4 w-4 animate-spin" />
                   ) : (
-                    <>
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                      Restart System
-                    </>
+                    <Save className="h-4 w-4" />
                   )}
+                  <span>Save Parameters</span>
                 </Button>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              <span>System Status</span>
-            </CardTitle>
-            <CardDescription>Current system metrics and health</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <Label>CPU Usage</Label>
-                  <span className="text-sm font-medium">42%</span>
-                </div>
-                <Progress value={42} className="h-2" />
-              </div>
-              
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <Label>Memory Usage</Label>
-                  <span className="text-sm font-medium">38%</span>
-                </div>
-                <Progress value={38} className="h-2" />
-              </div>
-              
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <Label>Network Throughput</Label>
-                  <span className="text-sm font-medium">27%</span>
-                </div>
-                <Progress value={27} className="h-2" />
-              </div>
-              
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <Label>Active Connections</Label>
-                  <span className="text-sm font-medium">486</span>
-                </div>
-                <Progress value={48} className="h-2" />
-              </div>
-              
-              <div className="pt-2">
-                <div className="flex items-center">
-                  <div className="flex-1 grid grid-cols-2 gap-4 text-center">
-                    <div>
-                      <div className="text-2xl font-bold">31ms</div>
-                      <div className="text-xs text-muted-foreground">Avg Response</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold">0.8%</div>
-                      <div className="text-xs text-muted-foreground">Error Rate</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Gauge className="h-5 w-5" />
-            <span>Processing Parameters</span>
-          </CardTitle>
-          <CardDescription>Configure neural processing parameters and behavior</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="processing-power">Processing Power</Label>
-                <span className="text-sm font-medium">{processingPower}%</span>
-              </div>
-              <Slider
-                id="processing-power"
-                min={10}
-                max={100}
-                step={5}
-                value={[processingPower]}
-                onValueChange={(values) => setProcessingPower(values[0])}
-                disabled={!powerStatus || isLoading}
-              />
-              <p className="text-xs text-muted-foreground">
-                Adjust the amount of computational resources allocated to neural processing tasks
-              </p>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="memory-allocation">Memory Allocation</Label>
-                <span className="text-sm font-medium">{memoryAllocation}%</span>
-              </div>
-              <Slider
-                id="memory-allocation"
-                min={20}
-                max={90}
-                step={5}
-                value={[memoryAllocation]}
-                onValueChange={(values) => setMemoryAllocation(values[0])}
-                disabled={!powerStatus || isLoading}
-              />
-              <p className="text-xs text-muted-foreground">
-                Control memory allocation for neural models and data processing
-              </p>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="error-tolerance">Error Tolerance</Label>
-                <span className="text-sm font-medium">{errorTolerance}%</span>
-              </div>
-              <Slider
-                id="error-tolerance"
-                min={5}
-                max={50}
-                step={5}
-                value={[errorTolerance]}
-                onValueChange={(values) => setErrorTolerance(values[0])}
-                disabled={!powerStatus || isLoading}
-              />
-              <p className="text-xs text-muted-foreground">
-                Set the error tolerance threshold for neural operations
-              </p>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="response-level">Response Optimization</Label>
-                <span className="text-sm font-medium">{responseLevel}%</span>
-              </div>
-              <Slider
-                id="response-level"
-                min={10}
-                max={100}
-                step={5}
-                value={[responseLevel]}
-                onValueChange={(values) => setResponseLevel(values[0])}
-                disabled={!powerStatus || isLoading}
-              />
-              <p className="text-xs text-muted-foreground">
-                Balance between response speed and accuracy of neural processing
-              </p>
-            </div>
-            
-            <div className="flex items-center justify-between pt-4">
-              <Button variant="outline" disabled={!powerStatus || isLoading}>
-                Reset to Defaults
-              </Button>
-              <Button onClick={handleApplySettings} disabled={!powerStatus || isLoading}>
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    Applying...
-                  </>
-                ) : (
-                  "Apply Settings"
-                )}
-              </Button>
             </div>
           </div>
         </CardContent>
       </Card>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              <span>Security Controls</span>
-            </CardTitle>
-            <CardDescription>Manage system security settings</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Enhanced Security Mode</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Enable additional verification for all operations
-                  </p>
-                </div>
-                <Switch disabled={!powerStatus} />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Anomaly Detection</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Monitor and flag unusual neural patterns
-                  </p>
-                </div>
-                <Switch defaultChecked disabled={!powerStatus} />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Request Throttling</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Limit excessive requests from single sources
-                  </p>
-                </div>
-                <Switch defaultChecked disabled={!powerStatus} />
-              </div>
-              
-              <div className="pt-2">
-                <Button variant="outline" size="sm" className="w-full" disabled={!powerStatus}>
-                  <AlertTriangle className="mr-2 h-4 w-4" />
-                  Security Audit
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Server className="h-5 w-5" />
-              <span>System Actions</span>
-            </CardTitle>
-            <CardDescription>Perform administrative system operations</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <Button variant="outline" className="w-full" disabled={!powerStatus}>
-                <Zap className="mr-2 h-4 w-4" />
-                Optimize Neural Cache
-              </Button>
-              
-              <Button variant="outline" className="w-full" disabled={!powerStatus}>
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Recalibrate Response Models
-              </Button>
-              
-              <Button variant="outline" className="w-full" disabled={!powerStatus}>
-                <Activity className="mr-2 h-4 w-4" />
-                System Health Report
-              </Button>
-              
-              <Button variant="destructive" className="w-full" disabled={!powerStatus}>
-                <AlertTriangle className="mr-2 h-4 w-4" />
-                Emergency Shutdown
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">System Administration</CardTitle>
+          <CardDescription>Advanced control options for system administrators</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Button variant="outline" className="flex items-center gap-2">
+              <RefreshCw className="h-4 w-4" />
+              <span>Regenerate System Keys</span>
+            </Button>
+            
+            <Button variant="outline" className="flex items-center gap-2">
+              <PowerIcon className="h-4 w-4" />
+              <span>Clear System Cache</span>
+            </Button>
+            
+            <Button variant="outline" className="flex items-center gap-2 sm:col-span-2">
+              <BrainCircuit className="h-4 w-4" />
+              <span>Export System Diagnostics</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
