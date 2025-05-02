@@ -11,6 +11,8 @@ interface DrillableMetricCardProps {
   metricKey: 'responseTime' | 'accuracy' | 'errorRate' | 'operations';
   description?: string;
   onDrillDown: (metric: MetricDetail) => void;
+  icon?: React.ReactNode;
+  isNegative?: boolean;
 }
 
 const DrillableMetricCard: React.FC<DrillableMetricCardProps> = ({
@@ -20,7 +22,9 @@ const DrillableMetricCard: React.FC<DrillableMetricCardProps> = ({
   unit,
   metricKey,
   description = '',
-  onDrillDown
+  onDrillDown,
+  icon,
+  isNegative = false
 }) => {
   const formatValue = () => {
     if (value >= 1000000) {
@@ -45,12 +49,15 @@ const DrillableMetricCard: React.FC<DrillableMetricCardProps> = ({
       onClick={handleClick}
     >
       <CardContent className="p-6">
-        <p className="text-sm font-medium text-muted-foreground mb-2">{title}</p>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          {icon && <div className="text-muted-foreground">{icon}</div>}
+        </div>
         <div className="flex items-baseline justify-between">
           <h3 className="text-2xl font-bold">
             {formatValue()}{unit}
           </h3>
-          <p className={`text-sm font-medium ${change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+          <p className={`text-sm font-medium ${isNegative ? (change >= 0 ? 'text-red-500' : 'text-green-500') : (change >= 0 ? 'text-green-500' : 'text-red-500')}`}>
             {change >= 0 ? '+' : ''}{change}{unit.includes('%') ? '%' : ''}
           </p>
         </div>

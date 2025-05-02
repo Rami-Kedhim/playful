@@ -1,269 +1,402 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Activity, AlertTriangle, Check, Zap, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
+import { ArrowUpRight, Brain, Clock, BarChart2, Activity, AlertTriangle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import useNeuralAnalytics from '@/hooks/useNeuralAnalytics';
-import useNeuralAnalyticsDashboard from '@/hooks/useNeuralAnalyticsDashboard';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import AutoRefreshControl from '@/components/analytics/AutoRefreshControl';
 import DrillableMetricCard from '@/components/analytics/DrillableMetricCard';
-import DetailedMetricView from '@/components/analytics/DetailedMetricView';
 import AnomalyDetails from '@/components/analytics/AnomalyDetails';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
-interface NeuralAnalyticsProps {
-  refreshInterval?: number;
-}
-
-const NeuralAnalytics: React.FC<NeuralAnalyticsProps> = ({ refreshInterval = 30000 }) => {
-  const [activeTab, setActiveTab] = useState('performance');
+const NeuralAnalytics: React.FC = () => {
   const { analyticsData, detailedMetrics, loading, error, refreshAnalytics } = useNeuralAnalytics();
-  const { 
-    selectedMetric,
-    handleDrillDown,
-    handleBackToOverview,
-    getMetricValue,
-    getTrendDataForMetric
-  } = useNeuralAnalyticsDashboard();
-  const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState<boolean>(true);
-  const [currentInterval, setCurrentInterval] = useState<number>(refreshInterval);
-
-  // Auto refresh effect
+  const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState<boolean>(false);
+  const [refreshInterval, setRefreshInterval] = useState<number>(30); // in seconds
+  const [selectedMetricTab, setSelectedMetricTab] = useState<string>("system");
+  const [activeAnomalies, setActiveAnomalies] = useState<any[]>([]);
+  
+  // Auto-refresh logic
   useEffect(() => {
-    let intervalId: number | undefined;
+    let intervalId: NodeJS.Timeout | null = null;
     
-    if (isAutoRefreshEnabled && currentInterval > 0) {
-      intervalId = window.setInterval(() => {
+    if (isAutoRefreshEnabled && refreshInterval > 0) {
+      intervalId = setInterval(() => {
         refreshAnalytics();
-      }, currentInterval);
+      }, refreshInterval * 1000);
     }
     
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
+      if (intervalId) clearInterval(intervalId);
     };
-  }, [isAutoRefreshEnabled, currentInterval, refreshAnalytics]);
-
-  const handleManualRefresh = () => {
-    refreshAnalytics();
-  };
-
-  const toggleAutoRefresh = () => {
-    setIsAutoRefreshEnabled(prev => !prev);
-  };
-
-  const changeRefreshInterval = (interval: number) => {
-    setCurrentInterval(interval);
-  };
-
+  }, [isAutoRefreshEnabled, refreshInterval, refreshAnalytics]);
+  
+  // Extract relevant anomalies from the data
+  useEffect(() => {
+    if (detailedMetrics?.anomalies) {
+      setActiveAnomalies(detailedMetrics.anomalies.filter(a => !a.resolved));
+    }
+  }, [detailedMetrics]);
+  
   // Format date for display
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
+  
+  // Handle acknowledging an anomaly
+  const handleAcknowledgeAnomaly = (id: string) => {
+    setActiveAnomalies(prev => prev.filter(a => a.id !== id));
+    toast.success("Anomaly acknowledged and will be resolved");
+  };
 
-  if (loading && !analyticsData) {
+  // Handle drill down into metrics
+  const handleDrillDown = (metric: any) => {
+    setSelectedMetricTab("detailed");
+    toast.info(`Showing detailed analysis for ${metric.title}`);
+  };
+
+  // Extract and format metric values properly
+  const getMetricValue = (metricKey: string): number => {
+    if (!analyticsData) return 0;
+    
+    switch(metricKey) {
+      case 'responseTime':
+        return analyticsData.systemMetrics.responseTimeMs;
+      case 'accuracy':
+        return analyticsData.modelPerformance.accuracy * 100;
+      case 'errorRate':
+        return analyticsData.systemMetrics.errorRate;
+      case 'operations':
+        return analyticsData.operationalMetrics.totalOperations;
+      default:
+        return 0;
+    }
+  };
+
+  // Extract and format metric change values
+  const getMetricChange = (metricKey: string): number => {
+    if (!analyticsData) return 0;
+    
+    switch(metricKey) {
+      case 'responseTime':
+        return analyticsData.operationalMetrics.responseTimeChange;
+      case 'accuracy':
+        return analyticsData.operationalMetrics.accuracyChange;
+      case 'errorRate':
+        return analyticsData.operationalMetrics.errorRateChange;
+      case 'operations':
+        return analyticsData.operationalMetrics.operationsChange;
+      default:
+        return 0;
+    }
+  };
+  
+  // Format time series data for charts
+  const formatTimeSeriesData = (data: any[]) => {
+    if (!data || !Array.isArray(data)) return [];
+    return data.map(item => ({
+      time: formatDate(item.timestamp),
+      value: item.metrics.cpuUsage
+    }));
+  };
+
+  if (loading) {
     return (
-      <div className="w-full h-[400px] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <div className="h-8 w-8 border-4 border-primary border-r-transparent rounded-full animate-spin"></div>
-          <p className="text-sm text-muted-foreground">Loading neural analytics data...</p>
-        </div>
-      </div>
+      <Card className="w-full">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="flex flex-col items-center">
+              <Brain className="h-12 w-12 text-primary animate-pulse" />
+              <p className="mt-4 text-muted-foreground">Loading neural analytics...</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Error loading analytics data</AlertTitle>
-        <AlertDescription>
-          Failed to load neural system analytics. Please try again later.
-        </AlertDescription>
-        <Button variant="outline" size="sm" onClick={refreshAnalytics} className="mt-2">
-          Retry
-        </Button>
-      </Alert>
+      <Card className="w-full border-destructive">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="flex flex-col items-center text-center">
+              <AlertTriangle className="h-12 w-12 text-destructive" />
+              <p className="mt-4 text-destructive font-semibold">Error loading neural analytics</p>
+              <p className="text-sm text-muted-foreground mt-2">{error}</p>
+              <Button variant="outline" className="mt-4" onClick={refreshAnalytics}>
+                Retry
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
-  
-  // When a specific metric is selected for drill-down
-  if (selectedMetric) {
+
+  if (!analyticsData) {
     return (
-      <DetailedMetricView
-        metric={selectedMetric}
-        data={getTrendDataForMetric(selectedMetric.key)}
-        value={getMetricValue(selectedMetric.key)}
-        onBack={handleBackToOverview}
-      />
+      <Card className="w-full">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="flex flex-col items-center text-center">
+              <p className="text-muted-foreground">No data available</p>
+              <Button variant="outline" className="mt-4" onClick={refreshAnalytics}>
+                Load Data
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold flex items-center">
-            <Activity className="mr-2 h-5 w-5 text-primary" />
-            Neural System Analytics
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Monitor performance metrics and neural system health
+          <h2 className="text-2xl font-bold">Neural System Analytics</h2>
+          <p className="text-muted-foreground">
+            Last updated: {new Date(analyticsData.timestamp).toLocaleString()}
           </p>
         </div>
         
-        <AutoRefreshControl
-          interval={currentInterval}
-          onIntervalChange={changeRefreshInterval}
-          onRefresh={handleManualRefresh}
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <DateRangePicker />
+          
+          <div className="flex items-center gap-2">
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="auto-refresh" 
+                checked={isAutoRefreshEnabled}
+                onCheckedChange={setIsAutoRefreshEnabled}
+              />
+              <label 
+                htmlFor="auto-refresh" 
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Auto-refresh
+              </label>
+            </div>
+
+            <Select 
+              value={refreshInterval.toString()} 
+              onValueChange={(value) => setRefreshInterval(parseInt(value))}
+              disabled={!isAutoRefreshEnabled}
+            >
+              <SelectTrigger className="w-[130px]">
+                <SelectValue placeholder="Refresh rate" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">Every 10s</SelectItem>
+                <SelectItem value="30">Every 30s</SelectItem>
+                <SelectItem value="60">Every 1m</SelectItem>
+                <SelectItem value="300">Every 5m</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <Button variant="outline" size="icon" onClick={refreshAnalytics}>
+            <ArrowUpRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <DrillableMetricCard
           title="Response Time"
-          value={analyticsData?.systemMetrics?.responseTimeMs || 0}
+          value={getMetricValue('responseTime')}
           unit="ms"
-          change={analyticsData?.operationalMetrics?.responseTimeChange || 0}
+          change={getMetricChange('responseTime')}
+          metricKey="responseTime"
+          description="Neural system response time metrics and trends"
+          onDrillDown={handleDrillDown}
           icon={<Clock className="h-4 w-4" />}
-          onClick={() => handleDrillDown({
-            key: 'responseTime',
-            title: 'Response Time',
-            description: 'Average time to process neural operations'
-          })}
+          isNegative={true}
         />
         
         <DrillableMetricCard
           title="Accuracy"
-          value={(analyticsData?.modelPerformance?.accuracy * 100) || 0}
+          value={getMetricValue('accuracy')}
           unit="%"
-          change={analyticsData?.operationalMetrics?.accuracyChange || 0}
-          icon={<Check className="h-4 w-4" />}
-          onClick={() => handleDrillDown({
-            key: 'accuracy',
-            title: 'Neural Accuracy',
-            description: 'Precision of neural processing operations'
-          })}
+          change={getMetricChange('accuracy')}
+          metricKey="accuracy"
+          description="Model accuracy performance and trends"
+          onDrillDown={handleDrillDown}
+          icon={<Brain className="h-4 w-4" />}
         />
         
         <DrillableMetricCard
           title="Error Rate"
-          value={analyticsData?.systemMetrics?.errorRate || 0}
+          value={getMetricValue('errorRate')}
           unit="%"
-          change={analyticsData?.operationalMetrics?.errorRateChange || 0}
-          isNegative={true}
+          change={getMetricChange('errorRate')}
+          metricKey="errorRate"
+          description="System error rate metrics and anomalies"
+          onDrillDown={handleDrillDown}
           icon={<AlertTriangle className="h-4 w-4" />}
-          onClick={() => handleDrillDown({
-            key: 'errorRate',
-            title: 'Error Rate',
-            description: 'Failed operations percentage'
-          })}
+          isNegative={true}
         />
         
         <DrillableMetricCard
           title="Operations"
-          value={analyticsData?.operationalMetrics?.totalOperations || 0}
+          value={getMetricValue('operations')}
           unit=""
-          change={analyticsData?.operationalMetrics?.operationsChange || 0}
-          icon={<Zap className="h-4 w-4" />}
-          onClick={() => handleDrillDown({
-            key: 'operations',
-            title: 'Total Operations',
-            description: 'Volume of neural processing operations'
-          })}
+          change={getMetricChange('operations')}
+          metricKey="operations"
+          description="Total neural processing operations"
+          onDrillDown={handleDrillDown}
+          icon={<Activity className="h-4 w-4" />}
         />
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 mb-4">
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="operations">Operations</TabsTrigger>
-          <TabsTrigger value="anomalies">Anomalies</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="system" value={selectedMetricTab} onValueChange={setSelectedMetricTab}>
+        <div className="flex justify-between items-center">
+          <TabsList>
+            <TabsTrigger value="system">System Overview</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
+            <TabsTrigger value="anomalies">
+              Anomalies
+              {activeAnomalies.length > 0 && (
+                <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center">
+                  {activeAnomalies.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="detailed">Detailed Metrics</TabsTrigger>
+          </TabsList>
+        </div>
         
-        <TabsContent value="performance" className="space-y-4">
+        <TabsContent value="system" className="mt-6 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Neural Processing Performance</CardTitle>
-              <CardDescription>System efficiency and response metrics over time</CardDescription>
+              <CardTitle>System Health Status</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={analyticsData?.performanceForecast || []}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="date" 
-                      tickFormatter={formatDate} 
-                      minTickGap={30}
-                    />
-                    <YAxis yAxisId="left" />
-                    <YAxis yAxisId="right" orientation="right" />
-                    <Tooltip 
-                      formatter={(value) => [`${value}`, '']}
-                      labelFormatter={(label) => formatDate(label as string)}
-                    />
-                    <Legend />
-                    <Line 
-                      yAxisId="left"
-                      type="monotone" 
-                      dataKey="metrics.predictedResponseTime" 
-                      stroke="#8884d8" 
-                      name="Response Time (ms)" 
-                      activeDot={{ r: 8 }} 
-                    />
-                    <Line 
-                      yAxisId="right"
-                      type="monotone" 
-                      dataKey="metrics.expectedLoad" 
-                      stroke="#82ca9d" 
-                      name="Load" 
-                    />
-                    <Line 
-                      yAxisId="right"
-                      type="monotone" 
-                      dataKey={(d) => (1 - d.metrics.predictedErrorRate) * 100} 
-                      stroke="#ff7300" 
-                      name="Accuracy (%)" 
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+            <CardContent className="px-6">
+              <div className="mb-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">Status</p>
+                    <div className="flex items-center">
+                      <span className={`h-2 w-2 rounded-full mr-2 ${analyticsData.systemHealth.status === 'healthy' ? 'bg-green-500' : 'bg-amber-500'}`}></span>
+                      <p className="font-semibold capitalize">{analyticsData.systemHealth.status}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1 text-right">
+                    <p className="text-sm font-medium">Uptime</p>
+                    <p className="font-semibold">{analyticsData.systemHealth.uptimeHours} hours</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium">System Metrics</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">CPU Usage</p>
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium">{analyticsData.systemMetrics.cpuUsage}%</p>
+                      <div className="w-2/3 bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                        <div 
+                          className="bg-primary h-full rounded-full" 
+                          style={{ width: `${analyticsData.systemMetrics.cpuUsage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Memory Usage</p>
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium">{analyticsData.systemMetrics.memoryUsage}%</p>
+                      <div className="w-2/3 bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                        <div 
+                          className="bg-primary h-full rounded-full" 
+                          style={{ width: `${analyticsData.systemMetrics.memoryUsage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <Separator className="my-6" />
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium">Operational Summary</h4>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Successful Operations</p>
+                    <p className="text-xl font-bold">
+                      {analyticsData.operationalMetrics.successfulOperations.toLocaleString()}
+                      <span className="text-sm font-normal text-muted-foreground ml-2">
+                        ({Math.round(analyticsData.operationalMetrics.successfulOperations / analyticsData.operationalMetrics.totalOperations * 100)}%)
+                      </span>
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Failed Operations</p>
+                    <p className="text-xl font-bold">
+                      {analyticsData.operationalMetrics.failedOperations.toLocaleString()}
+                      <span className="text-sm font-normal text-muted-foreground ml-2">
+                        ({Math.round(analyticsData.operationalMetrics.failedOperations / analyticsData.operationalMetrics.totalOperations * 100)}%)
+                      </span>
+                    </p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>System Resource Utilization</CardTitle>
+                <CardTitle>Performance Forecast</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm">CPU Usage</span>
-                      <span className="text-sm font-medium">{analyticsData?.systemMetrics?.cpuUsage || 0}%</span>
-                    </div>
-                    <Progress value={analyticsData?.systemMetrics?.cpuUsage || 0} />
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm">Memory Usage</span>
-                      <span className="text-sm font-medium">{analyticsData?.systemMetrics?.memoryUsage || 0}%</span>
-                    </div>
-                    <Progress value={analyticsData?.systemMetrics?.memoryUsage || 0} />
-                  </div>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={analyticsData.performanceForecast}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="date" 
+                        tick={{ fontSize: 12 }}
+                        tickFormatter={formatDate}
+                      />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip 
+                        formatter={(value: any) => [`${typeof value === 'number' ? value.toFixed(2) : value}`, '']}
+                        labelFormatter={(label: string) => formatDate(label)}
+                      />
+                      <Line 
+                        type="monotone" 
+                        name="Expected Load" 
+                        dataKey="metrics.predictedLoad" 
+                        stroke="#8884d8" 
+                        strokeWidth={2}
+                        activeDot={{ r: 8 }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        name="Response Time" 
+                        dataKey="metrics.predictedResponseTime" 
+                        stroke="#82ca9d" 
+                        strokeWidth={2}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
@@ -273,121 +406,95 @@ const NeuralAnalytics: React.FC<NeuralAnalyticsProps> = ({ refreshInterval = 300
                 <CardTitle>Model Performance</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-40">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={[
-                        {
-                          name: 'Accuracy',
-                          value: (analyticsData?.modelPerformance?.accuracy || 0) * 100
-                        },
-                        {
-                          name: 'Precision',
-                          value: (analyticsData?.modelPerformance?.precision || 0) * 100
-                        },
-                        {
-                          name: 'Recall',
-                          value: (analyticsData?.modelPerformance?.recall || 0) * 100
-                        },
-                        {
-                          name: 'F1 Score',
-                          value: (analyticsData?.modelPerformance?.f1Score || 0) * 100
-                        }
-                      ]}
-                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis domain={[0, 100]} />
-                      <Tooltip formatter={(value) => [`${value.toFixed(2)}%`, '']} />
-                      <Bar dataKey="value" fill="#8884d8" name="Score (%)" />
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div className="grid grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Accuracy</p>
+                    <p className="text-2xl font-bold">{(analyticsData.modelPerformance.accuracy * 100).toFixed(1)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Precision</p>
+                    <p className="text-2xl font-bold">{(analyticsData.modelPerformance.precision * 100).toFixed(1)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Recall</p>
+                    <p className="text-2xl font-bold">{(analyticsData.modelPerformance.recall * 100).toFixed(1)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">F1 Score</p>
+                    <p className="text-2xl font-bold">{(analyticsData.modelPerformance.f1Score * 100).toFixed(1)}%</p>
+                  </div>
+                </div>
+                
+                <div className="mt-4">
+                  <p className="text-sm font-medium mb-3">Performance Trend</p>
+                  <div className="flex items-center">
+                    <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div 
+                        className="bg-green-500 h-full rounded-full" 
+                        style={{ width: `${analyticsData.modelPerformance.accuracy * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
         
-        <TabsContent value="operations" className="space-y-4">
+        <TabsContent value="performance" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Neural Operations Metrics</CardTitle>
-              <CardDescription>Processing volume and success rates</CardDescription>
+              <CardTitle>Historical Performance</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <p className="text-sm text-muted-foreground">Total Operations</p>
-                  <p className="text-2xl font-bold mt-1">
-                    {analyticsData?.operationalMetrics?.totalOperations?.toLocaleString() || 0}
-                  </p>
-                  <p className={`text-xs mt-2 ${analyticsData?.operationalMetrics?.operationsChange && analyticsData?.operationalMetrics?.operationsChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {analyticsData?.operationalMetrics?.operationsChange && analyticsData?.operationalMetrics?.operationsChange > 0 ? '+' : ''}
-                    {analyticsData?.operationalMetrics?.operationsChange || 0}% from last period
-                  </p>
-                </div>
-                
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <p className="text-sm text-muted-foreground">Success Rate</p>
-                  <p className="text-2xl font-bold mt-1">
-                    {analyticsData?.operationalMetrics?.successfulOperations && analyticsData?.operationalMetrics?.totalOperations
-                      ? ((analyticsData?.operationalMetrics?.successfulOperations / analyticsData?.operationalMetrics?.totalOperations) * 100).toFixed(1)
-                      : 0}%
-                  </p>
-                  <p className="text-xs mt-2 text-green-500">
-                    {analyticsData?.operationalMetrics?.successfulOperations?.toLocaleString() || 0} successful
-                  </p>
-                </div>
-                
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <p className="text-sm text-muted-foreground">Failed Operations</p>
-                  <p className="text-2xl font-bold mt-1">
-                    {analyticsData?.operationalMetrics?.failedOperations?.toLocaleString() || 0}
-                  </p>
-                  <p className="text-xs mt-2 text-red-500">
-                    {analyticsData?.operationalMetrics?.errorRate?.toFixed(2) || 0}% error rate
-                  </p>
-                </div>
-                
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <p className="text-sm text-muted-foreground">Avg Response Time</p>
-                  <p className="text-2xl font-bold mt-1">
-                    {analyticsData?.operationalMetrics?.averageResponseTime?.toFixed(0) || 0}ms
-                  </p>
-                  <p className={`text-xs mt-2 ${analyticsData?.operationalMetrics?.responseTimeChange && analyticsData?.operationalMetrics?.responseTimeChange < 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {analyticsData?.operationalMetrics?.responseTimeChange && analyticsData?.operationalMetrics?.responseTimeChange < 0 ? '' : '+'}
-                    {analyticsData?.operationalMetrics?.responseTimeChange?.toFixed(1) || 0}% from last period
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Historical Operations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80">
+              <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={detailedMetrics?.timeSeriesData || []}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
+                  <LineChart data={detailedMetrics?.timeSeriesData || []}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
-                      dataKey="timestamp"
-                      tickFormatter={(timestamp) => new Date(timestamp).toLocaleTimeString()} 
+                      dataKey="timestamp" 
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={formatDate}
                     />
-                    <YAxis />
-                    <Tooltip 
-                      labelFormatter={(timestamp) => new Date(timestamp).toLocaleString()}
+                    <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
+                    <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
+                    <Tooltip labelFormatter={(label) => formatDate(label)} />
+                    <Line 
+                      yAxisId="left"
+                      type="monotone" 
+                      dataKey="metrics.cpuUsage" 
+                      name="CPU Usage" 
+                      stroke="#8884d8" 
+                      strokeWidth={2}
+                      dot={false}
                     />
-                    <Legend />
-                    <Line type="monotone" dataKey="metrics.requestsPerSecond" stroke="#8884d8" name="Requests/s" />
-                    <Line type="monotone" dataKey="metrics.responseTimeMs" stroke="#82ca9d" name="Response Time (ms)" />
-                    <Line type="monotone" dataKey={(d) => d.metrics.errorRate * 100} stroke="#ff7300" name="Error Rate (%)" />
+                    <Line 
+                      yAxisId="left"
+                      type="monotone" 
+                      dataKey="metrics.memoryUsage" 
+                      name="Memory Usage" 
+                      stroke="#82ca9d" 
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                    <Line 
+                      yAxisId="right"
+                      type="monotone" 
+                      dataKey="metrics.responseTimeMs" 
+                      name="Response Time (ms)" 
+                      stroke="#ff7300" 
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                    <Line 
+                      yAxisId="right"
+                      type="monotone" 
+                      dataKey="metrics.errorRate" 
+                      name="Error Rate (%)" 
+                      stroke="#ff0000" 
+                      strokeWidth={2}
+                      dot={false}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -395,113 +502,53 @@ const NeuralAnalytics: React.FC<NeuralAnalyticsProps> = ({ refreshInterval = 300
           </Card>
         </TabsContent>
         
-        <TabsContent value="anomalies" className="space-y-4">
+        <TabsContent value="anomalies" className="mt-6">
+          <AnomalyDetails
+            anomalies={activeAnomalies}
+            onAcknowledge={handleAcknowledgeAnomaly}
+          />
+        </TabsContent>
+        
+        <TabsContent value="detailed" className="mt-6 space-y-6">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Detected Anomalies</CardTitle>
-                <CardDescription>Unusual patterns in neural system behavior</CardDescription>
-              </div>
-              <Badge variant={detailedMetrics?.anomalies?.length ? "destructive" : "outline"}>
-                {detailedMetrics?.anomalies?.length || 0} Anomalies
-              </Badge>
+            <CardHeader>
+              <CardTitle>Detailed Metrics Analysis</CardTitle>
             </CardHeader>
             <CardContent>
-              {detailedMetrics?.anomalies?.length ? (
-                <div className="space-y-4">
-                  {detailedMetrics.anomalies.map((anomaly, index) => (
-                    <AnomalyDetails key={index} anomaly={anomaly} />
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 bg-muted/30 rounded-lg">
-                  <Check className="h-10 w-10 text-green-500 mb-2" />
-                  <h3 className="text-lg font-medium">No anomalies detected</h3>
-                  <p className="text-muted-foreground text-sm mt-1">All systems operating within normal parameters</p>
+              {detailedMetrics && (
+                <div className="space-y-8">
+                  <div>
+                    <h3 className="font-medium text-lg mb-4">System Recommendations</h3>
+                    <ul className="space-y-2 pl-6 list-disc">
+                      {detailedMetrics.recommendations.map((rec, i) => (
+                        <li key={i} className="text-muted-foreground">{rec}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium text-lg mb-4">Trends Analysis</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="p-4 rounded-lg border bg-card">
+                        <p className="text-sm text-muted-foreground">CPU Trend</p>
+                        <p className="font-medium capitalize">{detailedMetrics.trendsAnalysis.cpuTrend}</p>
+                      </div>
+                      <div className="p-4 rounded-lg border bg-card">
+                        <p className="text-sm text-muted-foreground">Memory Trend</p>
+                        <p className="font-medium capitalize">{detailedMetrics.trendsAnalysis.memoryTrend}</p>
+                      </div>
+                      <div className="p-4 rounded-lg border bg-card">
+                        <p className="text-sm text-muted-foreground">Response Trend</p>
+                        <p className="font-medium capitalize">{detailedMetrics.trendsAnalysis.responseTrend}</p>
+                      </div>
+                      <div className="p-4 rounded-lg border bg-card">
+                        <p className="text-sm text-muted-foreground">Error Rate Trend</p>
+                        <p className="font-medium capitalize">{detailedMetrics.trendsAnalysis.errorRateTrend}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>System Recommendations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {detailedMetrics?.recommendations?.length ? (
-                  detailedMetrics.recommendations.map((rec, i) => (
-                    <div key={i} className="p-3 border rounded-md flex gap-2">
-                      <Zap className="h-5 w-5 text-amber-500 flex-shrink-0" />
-                      <p>{rec}</p>
-                    </div>
-                  ))
-                ) : (
-                  <div className="p-4 bg-muted/30 rounded-md text-center">
-                    <p className="text-muted-foreground">No recommendations available</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>System Health Analysis</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-medium mb-2">System Trends</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="p-3 border rounded-md">
-                      <p className="text-xs text-muted-foreground">CPU Trend</p>
-                      <p className="font-medium capitalize">{detailedMetrics?.trendsAnalysis?.cpuTrend || "stable"}</p>
-                    </div>
-                    <div className="p-3 border rounded-md">
-                      <p className="text-xs text-muted-foreground">Memory Trend</p>
-                      <p className="font-medium capitalize">{detailedMetrics?.trendsAnalysis?.memoryTrend || "stable"}</p>
-                    </div>
-                    <div className="p-3 border rounded-md">
-                      <p className="text-xs text-muted-foreground">Response Trend</p>
-                      <p className="font-medium capitalize">{detailedMetrics?.trendsAnalysis?.responseTrend || "stable"}</p>
-                    </div>
-                    <div className="p-3 border rounded-md">
-                      <p className="text-xs text-muted-foreground">Error Rate Trend</p>
-                      <p className="font-medium capitalize">{detailedMetrics?.trendsAnalysis?.errorRateTrend || "stable"}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-                
-                <div>
-                  <h4 className="text-sm font-medium mb-2">System Health Status</h4>
-                  <div className={`p-4 rounded-md ${
-                    analyticsData?.systemHealth?.status === 'healthy' ? 'bg-green-50 border-green-200' :
-                    analyticsData?.systemHealth?.status === 'warning' ? 'bg-amber-50 border-amber-200' :
-                    'bg-red-50 border-red-200'
-                  }`}>
-                    <div className="flex items-center gap-2">
-                      {analyticsData?.systemHealth?.status === 'healthy' ? (
-                        <Check className="h-5 w-5 text-green-500" />
-                      ) : (
-                        <AlertTriangle className="h-5 w-5 text-amber-500" />
-                      )}
-                      <p className="font-medium capitalize">
-                        {analyticsData?.systemHealth?.status || "Unknown"}
-                      </p>
-                    </div>
-                    <p className="text-sm mt-1">
-                      System uptime: {analyticsData?.systemHealth?.uptimeHours || 0} hours
-                    </p>
-                    <p className="text-xs mt-2">
-                      Last maintenance: {analyticsData?.systemHealth?.lastMaintenanceDate ? 
-                        new Date(analyticsData.systemHealth.lastMaintenanceDate).toLocaleDateString() : 'Unknown'}
-                    </p>
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
