@@ -1,188 +1,119 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, AlertTriangle, Info, Clock, Zap } from 'lucide-react';
+import React from 'react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-
-interface NeuralRecommendationsProps {
-  className?: string;
-}
+import { Lightbulb, AlertTriangle, ArrowRight } from 'lucide-react';
 
 interface Recommendation {
-  id: number;
-  message: string;
-  severity: 'high' | 'medium' | 'low' | 'info';
-  icon: 'alert' | 'info' | 'clock' | 'check' | 'zap';
-  actionable: boolean;
-  impact?: string;
-  autoApply?: boolean;
+  id: string;
+  type: 'optimization' | 'warning' | 'improvement';
+  title: string;
+  description: string;
+  impact: 'high' | 'medium' | 'low';
+  autoApplicable: boolean;
 }
 
-const NeuralRecommendations: React.FC<NeuralRecommendationsProps> = ({ className }) => {
-  const { toast } = useToast();
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([
-    {
-      id: 1,
-      message: 'Optimize neural pathways for improved response time',
-      severity: 'high',
-      icon: 'alert',
-      actionable: true,
-      impact: 'Could improve response time by up to 15%',
-      autoApply: false
-    },
-    {
-      id: 2,
-      message: 'Consider upgrading memory allocation for complex operations',
-      severity: 'medium',
-      icon: 'info',
-      actionable: true,
-      impact: 'Would reduce memory bottlenecks during peak usage',
-      autoApply: false
-    },
-    {
-      id: 3,
-      message: 'Schedule maintenance during low-traffic periods',
-      severity: 'low',
-      icon: 'clock',
-      actionable: true,
-      impact: 'Minimizes impact on system availability',
-      autoApply: true
-    },
-    {
-      id: 4,
-      message: 'Apply neural network optimization algorithm',
-      severity: 'medium',
-      icon: 'zap',
-      actionable: true,
-      impact: 'Could improve accuracy by up to 8%',
-      autoApply: false
-    },
-    {
-      id: 5,
-      message: 'All core neural systems operating within normal parameters',
-      severity: 'info',
-      icon: 'check',
-      actionable: false
-    }
-  ]);
+const mockRecommendations: Recommendation[] = [
+  {
+    id: 'rec-1',
+    type: 'optimization',
+    title: 'Optimize neural resource allocation',
+    description: 'Reallocate resources from idle services to high-demand services',
+    impact: 'high',
+    autoApplicable: true
+  },
+  {
+    id: 'rec-2',
+    type: 'warning',
+    title: 'Memory leak detected',
+    description: 'Potential memory leak in the content analysis service',
+    impact: 'medium',
+    autoApplicable: false
+  },
+  {
+    id: 'rec-3',
+    type: 'improvement',
+    title: 'Enable continuous learning',
+    description: 'Activate continuous learning to improve model accuracy',
+    impact: 'medium',
+    autoApplicable: true
+  },
+  {
+    id: 'rec-4',
+    type: 'optimization',
+    title: 'Reduce model size',
+    description: 'Switch to a lighter model for non-critical operations',
+    impact: 'low',
+    autoApplicable: true
+  }
+];
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
+const NeuralRecommendations: React.FC = () => {
+  const getImpactColor = (impact: string) => {
+    switch (impact) {
       case 'high':
-        return 'text-red-500 bg-red-50 dark:bg-red-950/30';
+        return 'text-red-500';
       case 'medium':
-        return 'text-amber-500 bg-amber-50 dark:bg-amber-950/30';
+        return 'text-amber-500';
       case 'low':
-        return 'text-blue-500 bg-blue-50 dark:bg-blue-950/30';
+        return 'text-green-500';
       default:
-        return 'text-green-500 bg-green-50 dark:bg-green-950/30';
+        return 'text-gray-500';
     }
   };
-
-  const getIcon = (icon: string) => {
-    switch (icon) {
-      case 'alert':
-        return <AlertTriangle className="h-5 w-5" />;
-      case 'info':
-        return <Info className="h-5 w-5" />;
-      case 'clock':
-        return <Clock className="h-5 w-5" />;
-      case 'zap':
-        return <Zap className="h-5 w-5" />;
+  
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'optimization':
+        return <Lightbulb className="h-4 w-4 text-primary" />;
+      case 'warning':
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+      case 'improvement':
+        return <ArrowRight className="h-4 w-4 text-green-500" />;
       default:
-        return <Check className="h-5 w-5" />;
+        return <Lightbulb className="h-4 w-4" />;
     }
   };
-
-  const handleAction = (id: number) => {
-    const recommendation = recommendations.find(rec => rec.id === id);
-    if (!recommendation) return;
-    
-    // Apply the recommendation
-    toast({
-      title: "Recommendation Applied",
-      description: `Applied: ${recommendation.message}`,
-    });
-    
-    // Remove the recommendation from the list
-    setRecommendations(prevRecs => prevRecs.filter(rec => rec.id !== id));
-  };
-
-  const handleAutoApply = () => {
-    const autoApplicable = recommendations.filter(rec => rec.autoApply && rec.actionable);
-    
-    if (autoApplicable.length === 0) {
-      toast({
-        title: "No Auto-Applicable Recommendations",
-        description: "There are no recommendations that can be automatically applied.",
-      });
-      return;
-    }
-    
-    const appliedIds = autoApplicable.map(rec => rec.id);
-    
-    toast({
-      title: "Auto-Applied Recommendations",
-      description: `Applied ${autoApplicable.length} recommendations automatically.`,
-    });
-    
-    setRecommendations(prevRecs => prevRecs.filter(rec => !appliedIds.includes(rec.id)));
-  };
-
+  
   return (
-    <Card className={className}>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle>Neural System Recommendations</CardTitle>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleAutoApply}
-        >
-          Auto-Apply Safe Changes
-        </Button>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {recommendations.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground">
-              <Check className="h-8 w-8 mx-auto mb-2" />
-              <p>All recommendations have been applied. System running optimally.</p>
-            </div>
-          ) : (
-            recommendations.map(rec => (
-              <div 
-                key={rec.id} 
-                className="p-3 rounded-lg border flex flex-col space-y-2 hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex items-start space-x-3">
-                  <div className={`p-1.5 rounded-full ${getSeverityColor(rec.severity)}`}>
-                    {getIcon(rec.icon)}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{rec.message}</p>
-                    {rec.impact && (
-                      <p className="text-sm text-muted-foreground mt-1">{rec.impact}</p>
-                    )}
-                    {rec.actionable && (
-                      <div className="mt-3">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => handleAction(rec.id)}
-                        >
-                          Apply Recommendation
-                        </Button>
-                      </div>
-                    )}
+    <ScrollArea className="h-full pr-4">
+      <div className="space-y-3">
+        {mockRecommendations.length === 0 ? (
+          <div className="text-center py-8">
+            <Lightbulb className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-muted-foreground">No recommendations at this time</p>
+          </div>
+        ) : (
+          mockRecommendations.map((rec) => (
+            <div 
+              key={rec.id} 
+              className="p-3 border rounded-lg hover:bg-accent/5 transition-colors"
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex gap-2">
+                  {getTypeIcon(rec.type)}
+                  <div>
+                    <h4 className="text-sm font-medium">{rec.title}</h4>
+                    <p className="text-xs text-muted-foreground">{rec.description}</p>
                   </div>
                 </div>
+                <span className={`text-xs font-medium ${getImpactColor(rec.impact)}`}>
+                  {rec.impact} impact
+                </span>
               </div>
-            ))
-          )}
-        </div>
-      </CardContent>
-    </Card>
+              
+              {rec.autoApplicable && (
+                <div className="mt-2 flex justify-end">
+                  <Button variant="ghost" size="sm" className="text-xs h-7">
+                    Apply
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </ScrollArea>
   );
 };
 

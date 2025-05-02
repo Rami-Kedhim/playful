@@ -1,8 +1,8 @@
 
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
-import { HeroSection } from '@/components/home/HeroSection';
-import { FeaturesSection } from '@/components/home/FeaturesSection';
+import HeroSection from '@/components/home/HeroSection';
+import FeaturesSection from '@/components/home/FeaturesSection';
 import FeaturedContent from '@/components/home/FeaturedContent';
 import NeuralHealthSummary from '@/components/neural/NeuralHealthSummary';
 

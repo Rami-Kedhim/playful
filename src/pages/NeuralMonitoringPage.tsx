@@ -3,132 +3,109 @@ import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Brain, Activity, Settings, BarChart4 } from 'lucide-react';
+import { Brain, Activity, Settings, BarChart4, Zap } from 'lucide-react';
 import NeuralAnalyticsDashboard from '@/components/neural/NeuralAnalyticsDashboard';
 import NeuralSystemControls from '@/components/neural/NeuralSystemControls';
 import NeuralRecommendations from '@/components/neural/NeuralRecommendations';
+import NeuralAutomationPanel from '@/components/neural/NeuralAutomationPanel';
 import { Separator } from '@/components/ui/separator';
 import AutoRefreshControl from '@/components/analytics/AutoRefreshControl';
 
 const NeuralMonitoringPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState(false);
-  const [refreshInterval, setRefreshInterval] = useState(30); // 30 seconds
+  const [refreshInterval, setRefreshInterval] = useState(30000); // 30 seconds
   
-  const handleToggleAutoRefresh = () => {
-    setIsAutoRefreshEnabled(prev => !prev);
-  };
-  
-  const handleChangeInterval = (interval: number) => {
-    setRefreshInterval(interval);
-  };
-
   return (
     <MainLayout
       title="Neural Monitoring System"
-      description="Advanced neural system monitoring and controls"
+      description="Monitor and control the Neural Systems"
     >
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-full">
-              <Brain className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Neural Monitoring System</h1>
-              <p className="text-muted-foreground">
-                Monitor and control neural system performance and parameters
-              </p>
-            </div>
+      <div className="px-4 py-6 lg:px-8 space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <Brain className="h-6 w-6 text-primary" />
+            <h1 className="text-2xl font-bold tracking-tight">Neural Monitoring System</h1>
           </div>
           
-          <AutoRefreshControl 
-            isAutoRefreshEnabled={isAutoRefreshEnabled}
-            refreshInterval={refreshInterval}
-            onToggleAutoRefresh={handleToggleAutoRefresh}
-            onChangeInterval={handleChangeInterval}
-          />
+          {activeTab === 'dashboard' && (
+            <AutoRefreshControl 
+              interval={refreshInterval} 
+              onIntervalChange={setRefreshInterval} 
+            />
+          )}
         </div>
         
-        <Card>
-          <CardHeader className="p-4 border-b">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid grid-cols-4 max-w-lg">
-                <TabsTrigger value="dashboard" className="flex items-center gap-2">
-                  <BarChart4 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Dashboard</span>
-                </TabsTrigger>
-                <TabsTrigger value="controls" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  <span className="hidden sm:inline">Controls</span>
-                </TabsTrigger>
-                <TabsTrigger value="recommendations" className="flex items-center gap-2">
-                  <Activity className="h-4 w-4" />
-                  <span className="hidden sm:inline">Recommendations</span>
-                </TabsTrigger>
-                <TabsTrigger value="history" className="flex items-center gap-2">
-                  <Brain className="h-4 w-4" />
-                  <span className="hidden sm:inline">Neural Architecture</span>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </CardHeader>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="dashboard" className="flex items-center gap-1">
+              <Activity className="h-4 w-4" />
+              <span className="hidden sm:inline">Dashboard</span>
+            </TabsTrigger>
+            <TabsTrigger value="automation" className="flex items-center gap-1">
+              <Zap className="h-4 w-4" />
+              <span className="hidden sm:inline">Automation</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-1">
+              <BarChart4 className="h-4 w-4" />
+              <span className="hidden sm:inline">Analytics</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-1">
+              <Settings className="h-4 w-4" />
+              <span className="hidden sm:inline">Settings</span>
+            </TabsTrigger>
+          </TabsList>
           
-          <CardContent className="p-0">
-            <TabsContent value="dashboard" className="p-6 pt-4 m-0 space-y-6">
-              <NeuralAnalyticsDashboard />
-            </TabsContent>
-            
-            <TabsContent value="controls" className="p-6 pt-4 m-0 space-y-6">
-              <NeuralSystemControls />
-            </TabsContent>
-            
-            <TabsContent value="recommendations" className="p-6 pt-4 m-0 space-y-6">
-              <NeuralRecommendations />
-            </TabsContent>
-            
-            <TabsContent value="history" className="p-6 pt-4 m-0 space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
+          <div className="mt-4">
+            <TabsContent value="dashboard" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="md:col-span-2">
                   <CardHeader>
-                    <CardTitle>System Architecture</CardTitle>
+                    <CardTitle>System Status</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="p-6 text-center border rounded-md">
-                      <Brain className="w-12 h-12 mx-auto text-muted-foreground" />
-                      <p className="mt-4 text-muted-foreground">Neural Architecture Visualization</p>
-                      <p className="text-xs text-muted-foreground mt-2">Coming Soon</p>
+                    <div className="h-[300px]">
+                      {/* Neural System Status Component */}
+                      <NeuralSystemControls />
                     </div>
                   </CardContent>
                 </Card>
                 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Historical Performance</CardTitle>
+                    <CardTitle>Neural Recommendations</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="p-6 text-center border rounded-md">
-                      <Activity className="w-12 h-12 mx-auto text-muted-foreground" />
-                      <p className="mt-4 text-muted-foreground">Neural Performance History</p>
-                      <p className="text-xs text-muted-foreground mt-2">Coming Soon</p>
+                    <div className="h-[300px]">
+                      <NeuralRecommendations />
                     </div>
                   </CardContent>
                 </Card>
               </div>
             </TabsContent>
-          </CardContent>
-        </Card>
-        
-        <Separator />
-        
-        <Card className="border-dashed">
-          <CardContent className="p-6">
-            <div className="text-center text-muted-foreground">
-              <p>Neural Monitoring System v1.0</p>
-              <p className="text-xs mt-1">Last updated: May 2, 2025</p>
-            </div>
-          </CardContent>
-        </Card>
+            
+            <TabsContent value="automation" className="min-h-[600px]">
+              <NeuralAutomationPanel />
+            </TabsContent>
+            
+            <TabsContent value="analytics">
+              <NeuralAnalyticsDashboard refreshInterval={refreshInterval} />
+            </TabsContent>
+            
+            <TabsContent value="settings">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Neural System Settings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[500px]">
+                    {/* Neural System Settings component would go here */}
+                    <p>Configure neural system settings and parameters.</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </div>
+        </Tabs>
       </div>
     </MainLayout>
   );

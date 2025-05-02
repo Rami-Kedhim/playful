@@ -1,70 +1,105 @@
 
-import React from 'react';
-import { Timer, PauseCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RefreshCcw, Pause } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface AutoRefreshControlProps {
-  isAutoRefreshEnabled: boolean;
-  refreshInterval: number; // in seconds
-  onToggleAutoRefresh: () => void;
-  onChangeInterval: (interval: number) => void;
+  interval: number;
+  onIntervalChange: (interval: number) => void;
+  onRefresh?: () => void;
 }
 
 const AutoRefreshControl: React.FC<AutoRefreshControlProps> = ({
-  isAutoRefreshEnabled,
-  refreshInterval,
-  onToggleAutoRefresh,
-  onChangeInterval
+  interval,
+  onIntervalChange,
+  onRefresh
 }) => {
-  const intervalOptions = [
-    { value: 10, label: '10s' },
-    { value: 30, label: '30s' },
-    { value: 60, label: '1m' },
-    { value: 300, label: '5m' },
-    { value: 600, label: '10m' }
-  ];
-
+  const [isPaused, setIsPaused] = useState(false);
+  const [countdown, setCountdown] = useState(interval / 1000);
+  
+  // Handle interval changes
+  useEffect(() => {
+    setCountdown(interval / 1000);
+  }, [interval]);
+  
+  // Countdown timer
+  useEffect(() => {
+    if (isPaused) return;
+    
+    let timer: number;
+    if (countdown > 0) {
+      timer = window.setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+    } else {
+      setCountdown(interval / 1000);
+      if (onRefresh) {
+        onRefresh();
+      }
+    }
+    
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [countdown, interval, isPaused, onRefresh]);
+  
+  const handleManualRefresh = () => {
+    setCountdown(interval / 1000);
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
+  
+  const togglePause = () => {
+    setIsPaused(!isPaused);
+  };
+  
   return (
-    <div className="flex items-center space-x-2">
-      <div className="flex items-center space-x-2 border rounded-md p-2 bg-card">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggleAutoRefresh}
-          className="h-8"
-        >
-          {isAutoRefreshEnabled ? (
-            <>
-              <PauseCircle className="h-4 w-4 mr-2" />
-              Pause
-            </>
-          ) : (
-            <>
-              <Timer className="h-4 w-4 mr-2" />
-              Auto-refresh
-            </>
-          )}
-        </Button>
-
-        {isAutoRefreshEnabled && (
-          <Select
-            value={String(refreshInterval)}
-            onValueChange={(value) => onChangeInterval(Number(value))}
-          >
-            <SelectTrigger className="h-8 w-28">
-              <SelectValue placeholder="Interval" />
-            </SelectTrigger>
-            <SelectContent>
-              {intervalOptions.map((option) => (
-                <SelectItem key={option.value} value={String(option.value)}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+    <div className="flex items-center space-x-2 bg-muted/30 rounded-md px-2 py-1">
+      <Select
+        value={interval.toString()}
+        onValueChange={(value) => onIntervalChange(parseInt(value))}
+      >
+        <SelectTrigger className="w-[130px] h-8">
+          <SelectValue placeholder="Refresh Rate" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="5000">5 seconds</SelectItem>
+          <SelectItem value="15000">15 seconds</SelectItem>
+          <SelectItem value="30000">30 seconds</SelectItem>
+          <SelectItem value="60000">1 minute</SelectItem>
+          <SelectItem value="300000">5 minutes</SelectItem>
+        </SelectContent>
+      </Select>
+      
+      <div className="text-xs text-muted-foreground">
+        {isPaused ? 'Paused' : `Refreshing in ${countdown}s`}
       </div>
+      
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={togglePause}
+        className="h-8 w-8"
+      >
+        {isPaused ? <RefreshCcw className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+      </Button>
+      
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={handleManualRefresh}
+        className="h-8 w-8"
+      >
+        <RefreshCcw className="h-4 w-4" />
+      </Button>
     </div>
   );
 };
