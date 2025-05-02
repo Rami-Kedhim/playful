@@ -1,3 +1,4 @@
+
 import { BaseNeuralService as BaseNeuralServiceType, NeuralServiceConfig, ModuleType } from '../types/NeuralService';
 
 /**
@@ -22,7 +23,7 @@ export class BaseBrainService implements BaseNeuralServiceType {
       description: string,
       moduleType: ModuleType,
       version: string,
-      config?: NeuralServiceConfig
+      config?: Partial<NeuralServiceConfig>
     }
   ) {
     this.id = params.id || `neural-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -31,7 +32,7 @@ export class BaseBrainService implements BaseNeuralServiceType {
     this.description = params.description;
     this.moduleType = params.moduleType;
     this.version = params.version;
-    this.config = params.config || {
+    this.config = {
       enabled: true,
       priority: 50,
       resources: {
@@ -39,7 +40,8 @@ export class BaseBrainService implements BaseNeuralServiceType {
         memory: 512
       },
       sensitivity: 0.8,
-      threshold: 0.6
+      threshold: 0.6,
+      ...params.config
     };
     this.status = this.config.enabled ? 'active' : 'inactive';
   }
@@ -84,6 +86,7 @@ export class BaseBrainService implements BaseNeuralServiceType {
       operationsCount: 0,
       errorCount: 0,
       latency: 0,
+      responseTime: 0,
       errorRate: 0,
       status: this.status
     };

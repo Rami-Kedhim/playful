@@ -12,6 +12,8 @@ export interface NeuralServiceConfig {
   sensitivity?: number;
   threshold?: number;
   mode?: string;
+  autonomyLevel?: number;
+  resourceAllocation?: number;
   [key: string]: any;
 }
 

@@ -1,3 +1,4 @@
+
 import neuralServiceRegistry from '../registry/NeuralServiceRegistry';
 import { neuralHub } from '../HermesOxumBrainHub';
 import { PerformanceReport, ServiceMetrics, HealthMetrics } from '@/types/neuralMetrics';
@@ -17,7 +18,7 @@ class NeuralMetricsService {
       const metrics = service.getMetrics();
       const status = service.config.enabled ? 'active' : 'inactive';
 
-      // Ensure metrics has required fields
+      // Ensure metrics has required fields for ServiceMetrics
       const normalizedMetrics: ServiceMetrics = {
         ...metrics,
         latency: metrics.latency || metrics.responseTime || 0,
