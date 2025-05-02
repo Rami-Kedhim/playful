@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import MainLayout from '@/components/layout/MainLayout';
 import HomePage from '@/pages/HomePage';
@@ -31,26 +31,23 @@ function App() {
   }, []);
 
   return (
-    <>
+    <Router>
       <Routes>
-        <Route element={<MainLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="/" element={<HomePage />} />
-          <Route path="/verification" element={<VerificationPage />} />
-          <Route path="/escorts" element={<Escorts />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/wallet" element={<WalletPage />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/pulse-boost" element={<PulseBoostPage />} />
-          <Route path="/brain-hub" element={<BrainHubPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/moderation" element={<ModerationPage />} />
-          <Route path="/unauthorized" element={<UnauthorizedPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
+        <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
+        <Route path="/verification" element={<MainLayout><VerificationPage /></MainLayout>} />
+        <Route path="/escorts" element={<MainLayout><Escorts /></MainLayout>} />
+        <Route path="/profile" element={<MainLayout><ProfilePage /></MainLayout>} />
+        <Route path="/wallet" element={<MainLayout><WalletPage /></MainLayout>} />
+        <Route path="/search" element={<MainLayout><SearchPage /></MainLayout>} />
+        <Route path="/pulse-boost" element={<MainLayout><PulseBoostPage /></MainLayout>} />
+        <Route path="/brain-hub" element={<MainLayout><BrainHubPage /></MainLayout>} />
+        <Route path="/admin" element={<MainLayout><AdminPage /></MainLayout>} />
+        <Route path="/moderation" element={<MainLayout><ModerationPage /></MainLayout>} />
+        <Route path="/unauthorized" element={<MainLayout><UnauthorizedPage /></MainLayout>} />
+        <Route path="*" element={<MainLayout><NotFoundPage /></MainLayout>} />
       </Routes>
       <Toaster />
-    </>
+    </Router>
   );
 }
 

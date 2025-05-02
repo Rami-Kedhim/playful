@@ -1,6 +1,7 @@
 
-// Removed duplicate exports and fixed default export style.
+// Export neural services and modules
 
+// Export base types and neural modules
 export * from './modules/BaseNeuralService';
 export * from './modules/AICompanionNeuralService';
 export * from './modules/EscortsNeuralService';
@@ -8,7 +9,7 @@ export * from './modules/CreatorsNeuralService';
 export * from './modules/LivecamsNeuralService';
 export * from './registry/NeuralServiceRegistry';
 export type { BaseNeuralService, NeuralServiceConfig, ModuleType } from './types/NeuralService';
-export * from './HermesOxumNeuralHub';
 
-// Export the neuralHub and brainHub directly 
+// Export the core neural hub instance
 export { neuralHub, brainHub } from './HermesOxumNeuralHub';
+export type { INeuralHub as NeuralHub } from './types/neuralHub';

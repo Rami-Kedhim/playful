@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, FileText, Image, Video } from 'lucide-react';
 
-interface ContentCardProps {
+export interface ContentCardProps {
   content: {
     id: string;
     title: string;

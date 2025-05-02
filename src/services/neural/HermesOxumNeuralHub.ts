@@ -1,6 +1,7 @@
 
 import { ModelParameters, BrainHubRequest, BrainHubResponse, NeuralModel, TrainingProgress, SystemHealthMetrics, NeuralService, INeuralHub } from './types/neuralHub';
-import { registerNeuralService } from './registry/NeuralServiceRegistry';
+// Fix the import - the registerNeuralService function may not exist
+// import { registerNeuralService } from './registry/NeuralServiceRegistry';
 
 class NeuralHubImpl implements INeuralHub {
   private isInitialized = false;

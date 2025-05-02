@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { GoogleMap, LoadScript, Marker, MapTypeControl } from '@react-google-maps/api';
 import { Button } from "@/components/ui/button";
 
-interface MapViewerProps {
+export interface MapViewerProps {
   apiKey: string;
   latitude: number;
   longitude: number;

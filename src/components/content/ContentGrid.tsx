@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import ContentCard from './ContentCard';
+import ContentCard, { ContentCardProps } from './ContentCard';
 
 interface ContentGridProps {
-  content: any[];
+  content: ContentCardProps['content'][];
   onRenew: (id: string) => void;
 }
 
@@ -22,7 +22,7 @@ const ContentGrid: React.FC<ContentGridProps> = ({ content, onRenew }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {content.map((item) => (
-        <ContentCard key={item.id} item={item} onRenew={onRenew} />
+        <ContentCard key={item.id} content={item} onRenew={onRenew} />
       ))}
     </div>
   );
