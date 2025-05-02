@@ -1,198 +1,285 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Check, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { NeuralModelParameters } from '@/types/neuralMetrics';
 
-interface NeuralSystemControlsProps {
-  onUpdate?: (parameters: Partial<NeuralModelParameters>) => void;
-  className?: string;
-}
-
-const NeuralSystemControls: React.FC<NeuralSystemControlsProps> = ({ 
-  onUpdate,
-  className
-}) => {
+const NeuralSystemControls: React.FC = () => {
   const { toast } = useToast();
   const [parameters, setParameters] = useState<NeuralModelParameters>({
     temperature: 0.7,
     topP: 0.9,
-    frequencyPenalty: 0.0,
-    presencePenalty: 0.0,
+    frequencyPenalty: 0.5,
+    presencePenalty: 0.5,
     maxTokens: 1000,
-    modelName: 'neural-advanced',
-    processingPower: 80,
-    responsiveness: 65,
+    modelName: "neural-advanced-v2",
+    processingPower: 75,
+    responsiveness: 60,
     errorTolerance: 25,
     adaptiveMode: true,
     autonomousMode: false,
-    precisionFactor: 70,
-    maxOperations: 5000
+    precisionFactor: 85,
+    maxOperations: 500,
+    stopSequences: ["<END>", "<STOP>"]
   });
-
-  const handleChange = (key: keyof NeuralModelParameters, value: any) => {
-    setParameters(prev => ({ ...prev, [key]: value }));
+  
+  const [optimizing, setOptimizing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  
+  const handleSliderChange = (name: keyof NeuralModelParameters, value: number[] | boolean) => {
+    setParameters(prev => ({
+      ...prev,
+      [name]: Array.isArray(value) ? value[0] : value
+    }));
   };
-
-  const handleToggle = (key: keyof NeuralModelParameters) => {
-    setParameters(prev => ({ ...prev, [key]: !prev[key] }));
+  
+  const handleSwitchChange = (name: keyof NeuralModelParameters) => {
+    setParameters(prev => ({
+      ...prev,
+      [name]: !prev[name]
+    }));
   };
-
-  const handleApply = () => {
-    if (onUpdate) {
-      onUpdate(parameters);
-    }
-    toast({
-      title: "System Controls Updated",
-      description: "Neural system parameters have been adjusted."
-    });
-  };
-
-  const handleReset = () => {
-    setParameters({
-      temperature: 0.7,
-      topP: 0.9,
-      frequencyPenalty: 0.0,
-      presencePenalty: 0.0,
-      maxTokens: 1000,
-      modelName: 'neural-advanced',
-      processingPower: 80,
-      responsiveness: 65,
-      errorTolerance: 25,
-      adaptiveMode: true,
-      autonomousMode: false,
-      precisionFactor: 70,
-      maxOperations: 5000
-    });
+  
+  const handleAutoOptimize = () => {
+    setOptimizing(true);
     
-    if (onUpdate) {
-      onUpdate({
-        temperature: 0.7,
-        topP: 0.9,
-        frequencyPenalty: 0.0,
-        presencePenalty: 0.0,
-        maxTokens: 1000,
-        modelName: 'neural-advanced',
-        processingPower: 80,
-        responsiveness: 65,
-        errorTolerance: 25,
+    // Simulate optimization process
+    setTimeout(() => {
+      setParameters({
+        temperature: 0.65,
+        topP: 0.92,
+        frequencyPenalty: 0.6,
+        presencePenalty: 0.55,
+        maxTokens: 1200,
+        modelName: "neural-advanced-v2",
+        processingPower: 85,
+        responsiveness: 70,
+        errorTolerance: 20,
         adaptiveMode: true,
-        autonomousMode: false,
-        precisionFactor: 70,
-        maxOperations: 5000
+        autonomousMode: true,
+        precisionFactor: 90,
+        maxOperations: 600,
+        stopSequences: ["<END>", "<STOP>"]
       });
-    }
-    
-    toast({
-      title: "Controls Reset",
-      description: "Neural system parameters have been reset to defaults."
-    });
+      
+      setOptimizing(false);
+      
+      toast({
+        title: "Auto-Optimization Complete",
+        description: "Parameters have been optimized for current workload.",
+      });
+    }, 2000);
   };
-
+  
+  const handleSaveChanges = () => {
+    setSaving(true);
+    
+    // Simulate saving process
+    setTimeout(() => {
+      setSaving(false);
+      
+      toast({
+        title: "Changes Saved",
+        description: "Neural system parameters have been updated.",
+      });
+    }, 1500);
+  };
+  
   return (
-    <Card className={className}>
+    <Card>
       <CardHeader>
-        <CardTitle>Neural System Controls</CardTitle>
+        <CardTitle>Neural System Parameters</CardTitle>
+        <CardDescription>Fine-tune neural processing parameters for optimal performance</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-4">
-          {/* Processing Power Control */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <Label htmlFor="processingPower">Processing Power</Label>
-              <span className="text-sm font-medium">{parameters.processingPower}%</span>
-            </div>
-            <Slider
-              id="processingPower"
-              min={10}
-              max={100}
-              step={1}
-              value={[parameters.processingPower ?? 80]}
-              onValueChange={(values) => handleChange('processingPower', values[0])}
-            />
-          </div>
-          
-          {/* Responsiveness Control */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <Label htmlFor="responsiveness">System Responsiveness</Label>
-              <span className="text-sm font-medium">{parameters.responsiveness}%</span>
-            </div>
-            <Slider
-              id="responsiveness"
-              min={10}
-              max={100}
-              step={1}
-              value={[parameters.responsiveness ?? 65]}
-              onValueChange={(values) => handleChange('responsiveness', values[0])}
-            />
-          </div>
-          
-          {/* Error Tolerance Control */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <Label htmlFor="errorTolerance">Error Tolerance</Label>
-              <span className="text-sm font-medium">{parameters.errorTolerance}%</span>
-            </div>
-            <Slider
-              id="errorTolerance"
-              min={5}
-              max={50}
-              step={1}
-              value={[parameters.errorTolerance ?? 25]}
-              onValueChange={(values) => handleChange('errorTolerance', values[0])}
-            />
-          </div>
-          
-          {/* Precision Factor Control */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <Label htmlFor="precisionFactor">Precision Factor</Label>
-              <span className="text-sm font-medium">{parameters.precisionFactor}%</span>
-            </div>
-            <Slider
-              id="precisionFactor"
-              min={10}
-              max={100}
-              step={1}
-              value={[parameters.precisionFactor ?? 70]}
-              onValueChange={(values) => handleChange('precisionFactor', values[0])}
-            />
-          </div>
-          
-          {/* Mode Toggles */}
-          <div className="space-y-3 pt-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="adaptiveMode" className="cursor-pointer">Adaptive Mode</Label>
-              <Switch
-                id="adaptiveMode"
-                checked={parameters.adaptiveMode}
-                onCheckedChange={() => handleToggle('adaptiveMode')}
+        <Alert variant="warning" className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Adjusting these parameters may affect system behavior. Advanced users only.
+          </AlertDescription>
+        </Alert>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <Label htmlFor="temperature">Temperature ({parameters.temperature.toFixed(2)})</Label>
+              </div>
+              <Slider 
+                id="temperature" 
+                min={0} 
+                max={1} 
+                step={0.01} 
+                value={[parameters.temperature]} 
+                onValueChange={(value) => handleSliderChange("temperature", value)}
               />
+              <p className="text-sm text-muted-foreground mt-1">
+                Controls randomness in output generation
+              </p>
             </div>
             
-            <div className="flex items-center justify-between">
-              <Label htmlFor="autonomousMode" className="cursor-pointer">Autonomous Mode</Label>
-              <Switch
-                id="autonomousMode"
-                checked={parameters.autonomousMode}
-                onCheckedChange={() => handleToggle('autonomousMode')}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <Label htmlFor="topP">Top P ({parameters.topP.toFixed(2)})</Label>
+              </div>
+              <Slider 
+                id="topP" 
+                min={0} 
+                max={1} 
+                step={0.01} 
+                value={[parameters.topP]} 
+                onValueChange={(value) => handleSliderChange("topP", value)}
               />
+              <p className="text-sm text-muted-foreground mt-1">
+                Alternative to temperature for nucleus sampling
+              </p>
+            </div>
+            
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <Label htmlFor="processingPower">Processing Power ({parameters.processingPower}%)</Label>
+              </div>
+              <Slider 
+                id="processingPower" 
+                min={10} 
+                max={100} 
+                step={5} 
+                value={[parameters.processingPower]} 
+                onValueChange={(value) => handleSliderChange("processingPower", value)}
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                Allocates computational resources
+              </p>
+            </div>
+            
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <Label htmlFor="precisionFactor">Precision Factor ({parameters.precisionFactor}%)</Label>
+              </div>
+              <Slider 
+                id="precisionFactor" 
+                min={50} 
+                max={99} 
+                step={1} 
+                value={[parameters.precisionFactor]} 
+                onValueChange={(value) => handleSliderChange("precisionFactor", value)}
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                Higher values increase accuracy but may reduce speed
+              </p>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <Label htmlFor="responsiveness">Responsiveness ({parameters.responsiveness}%)</Label>
+              </div>
+              <Slider 
+                id="responsiveness" 
+                min={10} 
+                max={100} 
+                step={5} 
+                value={[parameters.responsiveness]} 
+                onValueChange={(value) => handleSliderChange("responsiveness", value)}
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                Speed of system response to inputs
+              </p>
+            </div>
+            
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <Label htmlFor="errorTolerance">Error Tolerance ({parameters.errorTolerance}%)</Label>
+              </div>
+              <Slider 
+                id="errorTolerance" 
+                min={5} 
+                max={50} 
+                step={5} 
+                value={[parameters.errorTolerance]} 
+                onValueChange={(value) => handleSliderChange("errorTolerance", value)}
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                Threshold before system flags anomalies
+              </p>
+            </div>
+            
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <Label htmlFor="maxOperations">Max Operations ({parameters.maxOperations})</Label>
+              </div>
+              <Slider 
+                id="maxOperations" 
+                min={100} 
+                max={1000} 
+                step={100} 
+                value={[parameters.maxOperations]} 
+                onValueChange={(value) => handleSliderChange("maxOperations", value)}
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                Maximum operations per processing cycle
+              </p>
+            </div>
+            
+            <div className="pt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="adaptiveMode">Adaptive Mode</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Dynamically adjusts to changing conditions
+                  </p>
+                </div>
+                <Switch 
+                  id="adaptiveMode" 
+                  checked={parameters.adaptiveMode} 
+                  onCheckedChange={() => handleSwitchChange("adaptiveMode")}
+                />
+              </div>
+            </div>
+            
+            <div className="pt-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="autonomousMode">Autonomous Mode</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Allows system to self-optimize without supervision
+                  </p>
+                </div>
+                <Switch 
+                  id="autonomousMode" 
+                  checked={parameters.autonomousMode} 
+                  onCheckedChange={() => handleSwitchChange("autonomousMode")}
+                />
+              </div>
             </div>
           </div>
         </div>
         
-        {/* Action Buttons */}
-        <div className="flex space-x-3 pt-2">
-          <Button onClick={handleApply} className="flex-1">
-            Apply Changes
+        <Separator className="my-4" />
+        
+        <div className="flex items-center justify-between pt-2">
+          <Button 
+            onClick={handleAutoOptimize} 
+            disabled={optimizing}
+            variant="outline"
+          >
+            {optimizing ? 'Optimizing...' : 'Auto-Optimize Parameters'}
           </Button>
-          <Button variant="outline" onClick={handleReset}>
-            Reset
+          
+          <Button 
+            onClick={handleSaveChanges} 
+            disabled={saving}
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
+            {!saving && <Check className="ml-2 h-4 w-4" />}
           </Button>
         </div>
       </CardContent>

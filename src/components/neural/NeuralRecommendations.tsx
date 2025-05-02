@@ -103,7 +103,6 @@ const NeuralRecommendations: React.FC<NeuralRecommendationsProps> = ({ className
     toast({
       title: "Recommendation Applied",
       description: `Applied: ${recommendation.message}`,
-      duration: 3000,
     });
     
     // Remove the recommendation from the list
@@ -117,7 +116,6 @@ const NeuralRecommendations: React.FC<NeuralRecommendationsProps> = ({ className
       toast({
         title: "No Auto-Applicable Recommendations",
         description: "There are no recommendations that can be automatically applied.",
-        duration: 3000,
       });
       return;
     }
@@ -127,7 +125,6 @@ const NeuralRecommendations: React.FC<NeuralRecommendationsProps> = ({ className
     toast({
       title: "Auto-Applied Recommendations",
       description: `Applied ${autoApplicable.length} recommendations automatically.`,
-      duration: 3000,
     });
     
     setRecommendations(prevRecs => prevRecs.filter(rec => !appliedIds.includes(rec.id)));
