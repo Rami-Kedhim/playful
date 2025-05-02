@@ -1,85 +1,62 @@
 
 import React, { ReactNode } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import Navbar from '@/components/navigation/Navbar';
-import Footer from '@/components/navigation/Footer';
-import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 
 interface MainLayoutProps {
   children: ReactNode;
-  title?: string;
+  title: string;
   description?: string;
-  showHeader?: boolean;
-  hideNavbar?: boolean;
-  hideFooter?: boolean;
-  requireAuth?: boolean;
-  className?: string;
-  containerClass?: string;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({
-  children,
-  title,
-  description,
-  showHeader = true,
-  hideNavbar = false,
-  hideFooter = false,
-  requireAuth = false,
-  className,
-  containerClass = "container mx-auto px-4 py-8"
-}) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const isAuthenticated = true; // Simplified for now to fix the error
-  const isLoading = false;
-
-  React.useEffect(() => {
-    // Log page view
-    console.log('Page view:', location.pathname);
-    
-    // Check system integrity
-    const checkSystemIntegrity = async () => {
-      console.log('System integrity check completed');
-    };
-    
-    checkSystemIntegrity();
-  }, [location.pathname]);
-
-  React.useEffect(() => {
-    if (requireAuth && !isLoading && !isAuthenticated) {
-      navigate('/login', {
-        state: { from: location.pathname },
-        replace: true
-      });
-    }
-  }, [requireAuth, isLoading, isAuthenticated, navigate, location.pathname]);
-
-  if (isLoading && requireAuth) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
+const MainLayout: React.FC<MainLayoutProps> = ({ children, title, description }) => {
   return (
-    <div className={cn("min-h-screen flex flex-col bg-background", className)}>
-      {!hideNavbar && <Navbar />}
-      
-      <main className="flex-grow">
-        {(title || description) && showHeader && (
-          <header className={containerClass}>
-            {title && <h1 className="text-3xl font-bold tracking-tight">{title}</h1>}
-            {description && <p className="text-muted-foreground mt-2">{description}</p>}
-          </header>
-        )}
-        
-        <div className={containerClass}>
-          {children}
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border bg-card">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-semibold">{title}</h1>
+            {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          </div>
+          <nav>
+            <ul className="flex items-center space-x-4">
+              <li>
+                <Link 
+                  to="/neural-analytics"
+                  className="text-sm font-medium hover:text-primary transition-colors"
+                >
+                  Analytics
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/neural-monitoring"
+                  className="text-sm font-medium hover:text-primary transition-colors"
+                >
+                  Monitoring
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/brain-hub"
+                  className="text-sm font-medium hover:text-primary transition-colors"
+                >
+                  Brain Hub
+                </Link>
+              </li>
+            </ul>
+          </nav>
         </div>
+      </header>
+      <main className="container mx-auto px-4 py-6">
+        {children}
       </main>
-      
-      {!hideFooter && <Footer />}
+      <footer className="border-t border-border mt-10">
+        <div className="container mx-auto px-4 py-4">
+          <p className="text-sm text-muted-foreground text-center">
+            Neural Analytics Dashboard © {new Date().getFullYear()}
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
