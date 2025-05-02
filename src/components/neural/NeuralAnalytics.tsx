@@ -11,7 +11,11 @@ import AnomalyDetails from '@/components/analytics/AnomalyDetails';
 import PerformanceChart from '@/components/neural/PerformanceChart';
 import DetailedMetricView from '@/components/analytics/DetailedMetricView';
 
-const NeuralAnalytics: React.FC = () => {
+interface NeuralAnalyticsProps {
+  refreshInterval?: number;
+}
+
+const NeuralAnalytics: React.FC<NeuralAnalyticsProps> = ({ refreshInterval: defaultRefreshInterval }) => {
   const {
     analyticsData,
     loading,
@@ -104,7 +108,7 @@ const NeuralAnalytics: React.FC = () => {
   if (selectedMetric) {
     const metricData = getTrendDataForMetric(selectedMetric.key);
     return (
-      <DetailedMetricView
+      <DetailedMetricView 
         metric={selectedMetric}
         data={metricData}
         onBack={handleBackToOverview}
@@ -124,10 +128,11 @@ const NeuralAnalytics: React.FC = () => {
         
         <div className="flex items-center gap-2">
           <AutoRefreshControl
-            isEnabled={isAutoRefreshEnabled}
-            refreshInterval={refreshInterval}
-            onToggle={toggleAutoRefresh}
-            onChangeInterval={changeRefreshInterval}
+            interval={refreshInterval}
+            onIntervalChange={changeRefreshInterval}
+            isPaused={!isAutoRefreshEnabled}
+            onPauseToggle={toggleAutoRefresh}
+            onRefresh={handleRefresh}
           />
           
           <Button variant="outline" size="sm" onClick={handleRefresh}>
@@ -167,7 +172,10 @@ const NeuralAnalytics: React.FC = () => {
             </CardHeader>
             <CardContent>
               <PerformanceChart 
-                data={analyticsData.performanceForecast}
+                data={analyticsData.performanceForecast.map(item => ({
+                  date: item.date,
+                  value: item.metrics.predictedResponseTime
+                }))}
                 dataKey="predictedResponseTime"
                 title="Response Time Trend"
                 onRefresh={handleRefresh}
@@ -177,7 +185,13 @@ const NeuralAnalytics: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="anomalies" className="mt-6">
-          <AnomalyDetails anomalies={analyticsData.anomalies} />
+          <AnomalyDetails anomalies={analyticsData.anomalies[0] || {
+            id: "no-anomalies",
+            type: "System Status",
+            severity: "low",
+            message: "No anomalies detected in the system",
+            timestamp: new Date().toISOString()
+          }} />
         </TabsContent>
       </Tabs>
     </div>

@@ -11,11 +11,16 @@ import {
 } from '@/components/ui/select';
 
 interface AutoRefreshControlProps {
+  isPaused?: boolean;
+  onPauseToggle?: () => void;
   interval: number;
   onIntervalChange: (interval: number) => void;
   onRefresh?: () => void;
-  isPaused?: boolean;
-  onPauseToggle?: () => void;
+  isEnabled?: boolean;
+  toggleAutoRefresh?: () => void;
+  refreshInterval?: number;
+  onToggle?: () => void;
+  onChangeInterval?: (interval: number) => void;
 }
 
 const AutoRefreshControl: React.FC<AutoRefreshControlProps> = ({
@@ -23,18 +28,28 @@ const AutoRefreshControl: React.FC<AutoRefreshControlProps> = ({
   onIntervalChange,
   onRefresh,
   isPaused = false, 
-  onPauseToggle
+  onPauseToggle,
+  isEnabled, // Added for compatibility
+  refreshInterval, // Added for compatibility
+  onToggle, // Added for compatibility
+  onChangeInterval // Added for compatibility
 }) => {
-  const [countdown, setCountdown] = useState(interval / 1000);
+  // Use either the new or old prop names, preferring the new ones
+  const actualInterval = refreshInterval || interval;
+  const actualOnToggle = onToggle || onPauseToggle;
+  const actualIsPaused = isPaused !== undefined ? isPaused : !isEnabled;
+  const actualOnIntervalChange = onChangeInterval || onIntervalChange;
+  
+  const [countdown, setCountdown] = useState(actualInterval / 1000);
   
   // Handle interval changes
   useEffect(() => {
-    setCountdown(interval / 1000);
-  }, [interval]);
+    setCountdown(actualInterval / 1000);
+  }, [actualInterval]);
   
   // Countdown timer
   useEffect(() => {
-    if (isPaused) return;
+    if (actualIsPaused) return;
     
     let timer: number;
     if (countdown > 0) {
@@ -42,7 +57,7 @@ const AutoRefreshControl: React.FC<AutoRefreshControlProps> = ({
         setCountdown(countdown - 1);
       }, 1000);
     } else {
-      setCountdown(interval / 1000);
+      setCountdown(actualInterval / 1000);
       if (onRefresh) {
         onRefresh();
       }
@@ -51,26 +66,26 @@ const AutoRefreshControl: React.FC<AutoRefreshControlProps> = ({
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [countdown, interval, isPaused, onRefresh]);
+  }, [countdown, actualInterval, actualIsPaused, onRefresh]);
   
   const handleManualRefresh = () => {
-    setCountdown(interval / 1000);
+    setCountdown(actualInterval / 1000);
     if (onRefresh) {
       onRefresh();
     }
   };
   
   const togglePause = () => {
-    if (onPauseToggle) {
-      onPauseToggle();
+    if (actualOnToggle) {
+      actualOnToggle();
     }
   };
   
   return (
     <div className="flex items-center space-x-2 bg-muted/30 rounded-md px-2 py-1">
       <Select
-        value={interval.toString()}
-        onValueChange={(value) => onIntervalChange(parseInt(value))}
+        value={actualInterval.toString()}
+        onValueChange={(value) => actualOnIntervalChange(parseInt(value))}
       >
         <SelectTrigger className="w-[130px] h-8">
           <SelectValue placeholder="Refresh Rate" />
@@ -85,7 +100,7 @@ const AutoRefreshControl: React.FC<AutoRefreshControlProps> = ({
       </Select>
       
       <div className="text-xs text-muted-foreground">
-        {isPaused ? 'Paused' : `Refreshing in ${countdown}s`}
+        {actualIsPaused ? 'Paused' : `Refreshing in ${countdown}s`}
       </div>
       
       <Button
@@ -94,7 +109,7 @@ const AutoRefreshControl: React.FC<AutoRefreshControlProps> = ({
         onClick={togglePause}
         className="h-8 w-8"
       >
-        {isPaused ? <RefreshCcw className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+        {actualIsPaused ? <RefreshCcw className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
       </Button>
       
       <Button

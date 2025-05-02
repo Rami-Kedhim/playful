@@ -41,22 +41,10 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
     );
   }
 
-  // For neural performance data structure
-  const chartData = data.map(item => ({
-    date: item.date,
-    value: item.metrics[dataKey] || 0
-  }));
-
-  const formatYAxis = (value: number) => {
-    if (dataKey === 'predictedResponseTime') return `${value}ms`;
-    if (dataKey === 'predictedErrorRate') return `${(value * 100).toFixed(1)}%`;
-    return value.toString();
-  };
-
   return (
     <div className="w-full h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={chartData}>
+        <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="date"
@@ -64,7 +52,11 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
             tickFormatter={(value) => new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
           />
           <YAxis
-            tickFormatter={formatYAxis}
+            tickFormatter={(value) => {
+              if (dataKey === 'predictedResponseTime') return `${value}ms`;
+              if (dataKey === 'predictedErrorRate') return `${(value * 100).toFixed(1)}%`;
+              return value.toString();
+            }}
             tick={{ fontSize: 12 }}
           />
           <Tooltip

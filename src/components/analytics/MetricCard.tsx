@@ -5,11 +5,16 @@ import { MetricCardProps } from '@/types/analytics';
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const MetricCard: React.FC<MetricCardProps> = ({ 
+interface ExtendedMetricCardProps extends MetricCardProps {
+  onClick?: () => void;
+}
+
+const MetricCard: React.FC<ExtendedMetricCardProps> = ({
   title, 
   value, 
   change, 
-  unit 
+  unit,
+  onClick
 }) => {
   const isPositive = change > 0;
   const isNegative = change < 0;
@@ -21,7 +26,10 @@ const MetricCard: React.FC<MetricCardProps> = ({
   };
   
   return (
-    <Card>
+    <Card 
+      className={onClick ? "cursor-pointer hover:border-primary transition-colors" : ""}
+      onClick={onClick}
+    >
       <CardContent className="p-6">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
