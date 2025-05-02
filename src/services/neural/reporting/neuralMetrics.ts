@@ -1,6 +1,3 @@
-
-// Fix neuralMetrics to match HealthMetrics props exactly, and to avoid access of missing props.
-
 import neuralServiceRegistry from '../registry/NeuralServiceRegistry';
 import { neuralHub } from '../HermesOxumNeuralHub';
 
