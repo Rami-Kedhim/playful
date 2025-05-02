@@ -1,77 +1,74 @@
 
-import { formatDistance, format, differenceInDays } from 'date-fns';
-
-// Format date as relative (today, yesterday, 2 days ago, etc.)
+/**
+ * Format a date to relative time (e.g. "2 days ago")
+ * @param date Date to format
+ */
 export const formatDateRelative = (date: Date): string => {
   const now = new Date();
-  try {
-    return formatDistance(new Date(date), now, { addSuffix: true });
-  } catch (error) {
-    console.error("Error formatting date:", error);
-    return "Invalid date";
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+
+  if (diffInDays > 30) {
+    const diffInMonths = Math.floor(diffInDays / 30);
+    return `${diffInMonths} ${diffInMonths === 1 ? 'month' : 'months'} ago`;
+  } else if (diffInDays > 0) {
+    return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
+  } else if (diffInHours > 0) {
+    return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
+  } else if (diffInMinutes > 0) {
+    return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
+  } else {
+    return 'Just now';
   }
 };
 
-// Format date with standard format
-export const formatDate = (date: Date, formatStr: string = 'PPP'): string => {
-  try {
-    return format(new Date(date), formatStr);
-  } catch (error) {
-    console.error("Error formatting date:", error);
-    return "Invalid date";
-  }
-};
-
-// Calculate days remaining until a date
+/**
+ * Calculate the number of days remaining between now and a future date
+ * @param expiryDate The expiration date
+ */
 export const calculateDaysRemaining = (expiryDate: Date): number => {
   const now = new Date();
-  return Math.max(0, differenceInDays(new Date(expiryDate), now));
+  const diffInMs = expiryDate.getTime() - now.getTime();
+  const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+  return diffInDays;
 };
 
-// Calculate expiry date based on creation date (default 180 days)
-export const calculateExpiryDate = (creationDate: Date, durationDays = 180): Date => {
-  const expiryDate = new Date(creationDate);
-  expiryDate.setDate(expiryDate.getDate() + durationDays);
-  return expiryDate;
-};
-
-// Calculate renewal cost based on content status and type
-export const calculateRenewalCost = (status: string, contentType: string): number => {
-  // Base costs by content type
-  const baseCosts: Record<string, number> = {
-    text: 5,
-    image: 10,
-    video: 15,
-    audio: 12,
-    interactive: 20
-  };
-
-  // Status modifiers
-  const statusModifiers: Record<string, number> = {
-    active: 1.0,
-    expiring: 1.2,  // 20% premium for expiring content
-    expired: 1.5,   // 50% premium for expired content
-    draft: 0.8      // 20% discount for drafts
-  };
-
-  // Get base cost or default to 10
-  const baseCost = baseCosts[contentType] || 10;
-  
-  // Apply status modifier or default to 1.0
-  const modifier = statusModifiers[status] || 1.0;
-
-  return Math.round(baseCost * modifier);
-};
-
-// Determine content status based on days remaining
+/**
+ * Determine content status based on expiry date
+ * @param expiryDate The expiration date
+ * @returns 'active', 'expiring', or 'expired'
+ */
 export const determineContentStatus = (expiryDate: Date): 'active' | 'expiring' | 'expired' => {
   const daysRemaining = calculateDaysRemaining(expiryDate);
   
-  if (daysRemaining === 0) {
+  if (daysRemaining <= 0) {
     return 'expired';
-  } else if (daysRemaining <= 7) {
+  } else if (daysRemaining <= 14) {
     return 'expiring';
   } else {
     return 'active';
   }
+};
+
+/**
+ * Convert a string to a Date object
+ * @param dateString String representation of a date
+ * @returns Date object
+ */
+export const toDate = (dateString: string): Date => {
+  return new Date(dateString);
+};
+
+/**
+ * Format a date to a string in the format "MMM DD, YYYY"
+ * @param date Date to format
+ */
+export const formatDate = (date: Date): string => {
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
 };

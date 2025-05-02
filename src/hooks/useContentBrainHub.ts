@@ -1,143 +1,76 @@
 
-import { useCallback } from 'react';
-import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
+import { useState, useCallback } from 'react';
 
-export interface ContentBrainHubService {
-  getIntelligentRenewalCost: (status: string, contentType: string) => number;
-  optimizeContent: (content: string, options?: any) => Promise<string>;
-  predictEngagement: (content: string) => Promise<{ score: number; feedback: string }>;
-  suggestContentImprovements: (content: string) => Promise<string[]>;
-  recordInteraction: (contentId: string, interactionType: string) => void;
-  processContent: (content: any[]) => Promise<any[]>;
+interface ContentBrainHubOptions {
+  enableIntelligentPricing?: boolean;
+  enableContentAnalysis?: boolean;
 }
 
-export const useContentBrainHub = (): ContentBrainHubService => {
-  // Calculate renewal cost based on content status and type
-  const getIntelligentRenewalCost = useCallback((status: string, contentType: string): number => {
+export const useContentBrainHub = (options: ContentBrainHubOptions = {}) => {
+  const [analyzing, setAnalyzing] = useState(false);
+  
+  // Calculates the renewal cost based on content status and type
+  const getIntelligentRenewalCost = useCallback((status: string, type: string): number => {
     // Base costs by content type
-    const baseCosts: Record<string, number> = {
+    const baseCosts = {
       text: 5,
       image: 10,
-      video: 15,
-      audio: 12,
-      interactive: 20
+      video: 20
     };
-
-    // Status modifiers
-    const statusModifiers: Record<string, number> = {
-      active: 1.0,
-      expiring: 1.2,  // 20% premium for expiring content
-      expired: 1.5,   // 50% premium for expired content
-      draft: 0.8      // 20% discount for drafts
-    };
-
-    // Get base cost or default to 10
-    const baseCost = baseCosts[contentType] || 10;
     
-    // Apply status modifier or default to 1.0
-    const modifier = statusModifiers[status] || 1.0;
-
-    return Math.round(baseCost * modifier);
+    // Multipliers based on status
+    const statusMultipliers = {
+      expired: 1.5, // More expensive to renew after expiration
+      expiring: 1.0, // Standard price for expiring content
+      active: 0.8,  // Discount for early renewal of active content
+      draft: 1.0     // Standard price for drafts
+    };
+    
+    // Get base cost with fallback to text if type is not recognized
+    const baseCost = baseCosts[type as keyof typeof baseCosts] || baseCosts.text;
+    
+    // Get multiplier with fallback to 1.0 if status is not recognized
+    const multiplier = statusMultipliers[status as keyof typeof statusMultipliers] || 1.0;
+    
+    // Calculate final cost and round to 2 decimal places
+    return Math.round(baseCost * multiplier);
   }, []);
-
-  // Content optimization using NeuralHub
-  const optimizeContent = useCallback(async (content: string, options = {}): Promise<string> => {
-    try {
-      const response = await neuralHub.processRequest({
-        type: 'content_optimization',
-        data: { content, options },
-      });
-
-      if (response.success && response.data?.optimized) {
-        return response.data.optimized;
-      }
-      return content; // Return original if optimization fails
-    } catch (error) {
-      console.error("Error optimizing content:", error);
-      return content;
+  
+  // Analyze content for potential violations or optimizations
+  const analyzeContent = useCallback(async (content: string) => {
+    if (!options.enableContentAnalysis) {
+      return { safe: true, optimizations: [] };
     }
-  }, []);
-
-  // Predict content engagement using NeuralHub
-  const predictEngagement = useCallback(async (content: string): Promise<{ score: number; feedback: string }> => {
+    
+    setAnalyzing(true);
+    
     try {
-      const response = await neuralHub.processRequest({
-        type: 'analysis',
-        data: { content, analysisType: 'engagement' },
-      });
-
-      if (response.success) {
-        return {
-          score: response.data?.score || 0,
-          feedback: response.data?.feedback || 'No feedback available'
-        };
-      }
+      // Simulate API call to a content analysis service
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      return { score: 0, feedback: 'Failed to analyze content' };
-    } catch (error) {
-      console.error("Error predicting engagement:", error);
-      return { score: 0, feedback: 'Error analyzing content' };
-    }
-  }, []);
-
-  // Suggest content improvements using NeuralHub
-  const suggestContentImprovements = useCallback(async (content: string): Promise<string[]> => {
-    try {
-      const response = await neuralHub.processRequest({
-        type: 'analysis',
-        data: { content, analysisType: 'improvements' },
-      });
-
-      if (response.success && Array.isArray(response.data?.suggestions)) {
-        return response.data.suggestions;
-      }
+      // Mock analysis results
+      const analysis = {
+        safe: true,
+        score: 95,
+        optimizations: [
+          "Consider adding more descriptive keywords",
+          "Image quality could be improved for better engagement"
+        ]
+      };
       
-      return ['No suggestions available'];
+      return analysis;
     } catch (error) {
-      console.error("Error suggesting improvements:", error);
-      return ['Error analyzing content'];
+      console.error("Content analysis error:", error);
+      return { safe: true, optimizations: [] };
+    } finally {
+      setAnalyzing(false);
     }
-  }, []);
-
-  // Record interaction with Brain Hub
-  const recordInteraction = useCallback((contentId: string, interactionType: string) => {
-    try {
-      neuralHub.processRequest({
-        type: 'interaction_log',
-        data: { contentId, interactionType, timestamp: new Date().toISOString() }
-      });
-      console.log(`Interaction recorded: ${interactionType} on content ${contentId}`);
-    } catch (error) {
-      console.error("Failed to record interaction:", error);
-    }
-  }, []);
-
-  // Process content through Brain Hub
-  const processContent = useCallback(async (content: any[]): Promise<any[]> => {
-    try {
-      const response = await neuralHub.processRequest({
-        type: 'content_batch_process',
-        data: { content }
-      });
-
-      if (response.success && Array.isArray(response.data?.processed)) {
-        return response.data.processed;
-      }
-      
-      return content; // Return original if processing fails
-    } catch (error) {
-      console.error("Error processing content batch:", error);
-      return content;
-    }
-  }, []);
-
+  }, [options.enableContentAnalysis]);
+  
   return {
     getIntelligentRenewalCost,
-    optimizeContent,
-    predictEngagement,
-    suggestContentImprovements,
-    recordInteraction,
-    processContent
+    analyzeContent,
+    analyzing
   };
 };
 

@@ -5,20 +5,24 @@ import { Link } from 'react-router-dom';
 import { Star, Shield } from 'lucide-react';
 
 export interface ContentCardProps {
-  content: {
-    id: string;
-    name: string;
-    imageUrl: string;
-    location?: string;
-    rating?: number;
-    isPremium?: boolean;
-    price?: number;
-  }
+  id: string;
+  name: string;
+  imageUrl: string;
+  location?: string;
+  rating?: number;
+  isPremium?: boolean;
+  price?: number;
 }
 
-const ContentCard: React.FC<ContentCardProps> = ({ content }) => {
-  const { id, name, imageUrl, location, rating, isPremium, price } = content;
-  
+const ContentCard: React.FC<ContentCardProps> = ({ 
+  id, 
+  name, 
+  imageUrl, 
+  location, 
+  rating, 
+  isPremium, 
+  price 
+}) => {
   return (
     <Link to={`/profile/${id}`}>
       <Card className="overflow-hidden bg-card hover:shadow-lg transition-shadow duration-300">

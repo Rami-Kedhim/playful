@@ -1,91 +1,75 @@
 
-import React, { useState, useEffect } from 'react';
-import { GoogleMap, LoadScript, Marker, MapTypeControl } from '@react-google-maps/api';
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 
-export interface MapViewerProps {
-  apiKey: string;
-  latitude: number;
-  longitude: number;
-  markerLabel?: string;
+interface MapViewerProps {
+  center: {
+    lat: number;
+    lng: number;
+  };
+  zoom?: number;
+  markers?: Array<{
+    id: string;
+    position: {
+      lat: number;
+      lng: number;
+    };
+    title?: string;
+  }>;
+  onMarkerClick?: (markerId: string) => void;
+  height?: string;
+  width?: string;
 }
 
-const MapViewer: React.FC<MapViewerProps> = ({ apiKey, latitude, longitude, markerLabel = 'Location' }) => {
-  const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [selectedOption, setSelectedOption] = useState<string>('normal');
-
-  const mapStyles = {
-    height: '400px',
-    width: '100%'
-  };
+const MapViewer: React.FC<MapViewerProps> = ({
+  center,
+  zoom = 14,
+  markers = [],
+  onMarkerClick,
+  height = '400px',
+  width = '100%'
+}) => {
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || ''
+  });
 
   const mapContainerStyle = {
-    width: '100%',
-    height: '400px',
+    width,
+    height
   };
 
-  const center = {
-    lat: latitude,
-    lng: longitude,
-  };
-
-  const onLoad = React.useCallback(function callback(map: google.maps.Map) {
-    setMap(map);
-  }, []);
-
-  const onUnmount = React.useCallback(function callback() {
-    setMap(null);
-  }, []);
-
-  useEffect(() => {
-    if (map) {
-      map.setMapTypeId(selectedOption as google.maps.MapTypeId);
+  const handleMarkerClick = (markerId: string) => {
+    if (onMarkerClick) {
+      onMarkerClick(markerId);
     }
-  }, [selectedOption, map]);
+  };
 
-  return (
-    <LoadScript googleMapsApiKey={apiKey}>
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        zoom={13}
-        center={center}
-        onLoad={onLoad}
-        onUnmount={onUnmount}
-        mapTypeId={selectedOption as google.maps.MapTypeId}
-      >
-        <Marker position={center} label={markerLabel} />
-        <MapTypeControl
-          position={google.maps.ControlPosition.TOP_RIGHT}
-          mapTypeIds={['normal', 'satellite', 'terrain', 'hybrid']}
-          style={{ margin: '10px' }}
+  return isLoaded ? (
+    <GoogleMap
+      mapContainerStyle={mapContainerStyle}
+      center={center}
+      zoom={zoom}
+      options={{
+        disableDefaultUI: false,
+        zoomControl: true,
+        streetViewControl: true,
+        fullscreenControl: true
+      }}
+    >
+      {markers.map(marker => (
+        <Marker
+          key={marker.id}
+          position={marker.position}
+          title={marker.title}
+          onClick={() => handleMarkerClick(marker.id)}
         />
-      </GoogleMap>
-      <div className="mt-2 flex space-x-2">
-        <Button
-          size="sm"
-          variant="ubx"
-          onClick={() => setSelectedOption('normal')}
-        >Normal Map</Button>
-
-        <Button
-          size="sm"
-          variant="ubx"
-          onClick={() => setSelectedOption('satellite')}
-        >Satellite</Button>
-
-        <Button
-          size="sm"
-          variant="ubx"
-          onClick={() => setSelectedOption('terrain')}
-        >Terrain</Button>
-
-        <Button
-          size="sm"
-          variant="ubx"
-          onClick={() => setSelectedOption('hybrid')}
-        >Hybrid</Button>
-      </div>
-    </LoadScript>
+      ))}
+    </GoogleMap>
+  ) : (
+    <div style={mapContainerStyle} className="bg-gray-200 flex items-center justify-center">
+      <span className="text-gray-500">Loading map...</span>
+    </div>
   );
 };
 

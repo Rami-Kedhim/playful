@@ -3,12 +3,11 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import ContentCard, { ProfileProps } from './ContentCard';
-import { AppRoutes } from '@/utils/navigation';
+import ContentCard, { ContentCardProps } from './ContentCard';
 
 interface FeaturedContentSectionProps {
   title: string;
-  profiles: ProfileProps[];
+  profiles: ContentCardProps[];
   viewMoreLink: string;
 }
 
@@ -36,10 +35,10 @@ const FeaturedContentSection: React.FC<FeaturedContentSectionProps> = ({ title, 
                   id={profile.id}
                   name={profile.name}
                   imageUrl={profile.imageUrl}
-                  location={profile.location || ''}
-                  rating={profile.rating || 0}
+                  location={profile.location}
+                  rating={profile.rating}
                   isPremium={profile.isPremium}
-                  price={profile.price || 0}
+                  price={profile.price}
                 />
               ))
             ) : (

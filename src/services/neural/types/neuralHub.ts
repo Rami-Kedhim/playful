@@ -24,7 +24,7 @@ export interface NeuralRequest {
   type: string;
   data: any;
   options?: any;
-  filters?: any; // Adding filters property to fix errors
+  filters?: any;
 }
 
 export interface NeuralResponse {
@@ -40,7 +40,7 @@ export interface NeuralSystemStatus {
   processingQueue: number;
   latency: number;
   
-  // Additional properties needed by components
+  // Additional properties
   cpuUtilization?: number;
   memoryUtilization?: number;
   errorRate?: number;
@@ -52,7 +52,6 @@ export interface NeuralSystemStatus {
   stability?: number;
 }
 
-// Additional types needed by components
 export interface ModelParameters {
   temperature: number;
   maxTokens: number;
@@ -61,6 +60,10 @@ export interface ModelParameters {
   presencePenalty: number;
   responseFormat: string;
   model: string;
+  decayConstant?: number;
+  learningRate?: number;
+  batchSize?: number;
+  stopSequences?: string[];
 }
 
 export interface TrainingProgress {
@@ -76,6 +79,9 @@ export interface TrainingProgress {
     loss?: number;
     accuracy?: number;
   };
+  modelId?: string;
+  timeRemaining?: number;
+  error?: string;
 }
 
 export interface NeuralModel {
