@@ -6,7 +6,7 @@ import updateBrainHubAnalytics from '@/services/brainHubHealth/analyticsService'
 
 export const useBrainHubHealth = (monitoringInterval = 30000) => {
   const [health, setHealth] = useState<BrainHubHealth>({
-    status: 'unknown',
+    status: 'offline', // Changed from 'unknown' to 'offline' which is a valid status
     metrics: {
       cpuUsage: 0,
       memoryUsage: 0,
