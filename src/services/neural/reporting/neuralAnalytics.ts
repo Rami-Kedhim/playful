@@ -1,108 +1,124 @@
 
-// This file provides mock data for neural analytics
-// In a production environment, this would be replaced with real API calls
+// Mock data generation for neural analytics
+// In a real implementation, these would be API calls to the backend
 
-export function generateMockNeuralAnalytics() {
-  return {
-    systemMetrics: {
-      responseTimeMs: 120 + Math.random() * 80,
-      errorRate: 0.02 + Math.random() * 0.03,
-      throughput: 25 + Math.random() * 15,
-      cpuUtilization: 0.45 + Math.random() * 0.2,
-      memoryUtilization: 0.55 + Math.random() * 0.15,
-      networkLatency: 75 + Math.random() * 25
-    },
-    modelPerformance: {
-      accuracy: 0.92 + Math.random() * 0.07,
-      precision: 0.91 + Math.random() * 0.08,
-      recall: 0.89 + Math.random() * 0.09,
-      f1Score: 0.90 + Math.random() * 0.08
-    },
-    operationalMetrics: {
-      uptime: 99.98,
-      totalOperations: Math.floor(50000 + Math.random() * 10000),
-      operationsChange: -2 + Math.random() * 10,
-      responseTimeChange: -5 + Math.random() * 10,
-      accuracyChange: -1 + Math.random() * 5,
-      errorRateChange: Math.random() > 0.5 ? (2 + Math.random() * 3) : (-2 - Math.random() * 3)
-    },
-    performanceTrend: Array(24).fill(0).map((_, i) => ({
-      timestamp: new Date(Date.now() - (24 - i) * 60 * 60 * 1000).toISOString(),
-      responseTime: 110 + Math.sin(i / 3) * 30 + Math.random() * 20,
-      accuracy: 91 + Math.cos(i / 5) * 5 + Math.random() * 3,
-      errorRate: 2 + Math.sin(i / 4) * 1 + Math.random()
-    })),
-    performanceForecast: Array(24).fill(0).map((_, i) => ({
-      date: new Date(Date.now() + i * 60 * 60 * 1000).toISOString(),
-      metrics: {
-        predictedResponseTime: 120 + Math.sin(i / 6) * 20 + Math.random() * 15,
-        predictedErrorRate: 0.02 + Math.sin(i / 8) * 0.01 + Math.random() * 0.01,
-        expectedLoad: 100 + Math.sin(i / 4) * 30 + Math.random() * 20
-      }
-    })),
-    recommendations: [
-      "Optimize response handling in the Lucie module to improve latency",
-      "Consider scaling up resources during peak usage hours (18:00-22:00)",
-      "Implement batch processing for non-critical operations to reduce system load",
-      "Activate advanced caching for frequency-accessed persona data",
-      "Update the neural model to version 3.4.2 for improved accuracy"
-    ]
+export const generateMockNeuralAnalytics = () => {
+  // Generate random performance metrics
+  const generateRandomMetric = (base: number, variance: number) => {
+    return Math.round((base + (Math.random() * 2 - 1) * variance) * 10) / 10;
   };
-}
 
-export function generateDetailedPerformanceMetrics() {
+  const systemMetrics = {
+    cpuUsage: generateRandomMetric(45, 10),
+    memoryUsage: generateRandomMetric(38, 8),
+    responseTimeMs: generateRandomMetric(120, 30),
+    errorRate: generateRandomMetric(0.8, 0.3)
+  };
+
+  const modelPerformance = {
+    accuracy: generateRandomMetric(0.92, 0.05),
+    precision: generateRandomMetric(0.91, 0.04),
+    recall: generateRandomMetric(0.89, 0.06),
+    f1Score: generateRandomMetric(0.90, 0.05)
+  };
+
+  // Generate operational metrics
+  const operationalMetrics = {
+    totalOperations: Math.floor(10000 + Math.random() * 5000),
+    successfulOperations: Math.floor(9400 + Math.random() * 500),
+    failedOperations: Math.floor(50 + Math.random() * 30),
+    operationsPerSecond: Math.floor(100 + Math.random() * 50),
+    responseTimeChange: Math.round((Math.random() * 2 - 0.5) * 10) / 10,
+    accuracyChange: Math.round((Math.random() * 2 - 0.3) * 10) / 10,
+    operationsChange: Math.round((Math.random() * 30 - 5)),
+    errorRateChange: Math.round((Math.random() * 2 - 1.2) * 10) / 10
+  };
+
+  // Generate time series forecast data
+  const performanceForecast = [];
+  const now = new Date();
+  
+  for (let i = 0; i < 24; i++) {
+    const date = new Date(now);
+    date.setHours(now.getHours() + i);
+    
+    performanceForecast.push({
+      date: date.toISOString(),
+      metrics: {
+        predictedLoad: Math.round(45 + Math.sin(i / 6) * 20 + Math.random() * 5),
+        predictedResponseTime: Math.round(120 + Math.sin(i / 8) * 40 + Math.random() * 10),
+        predictedErrorRate: Math.max(0, Math.round((0.8 + Math.sin(i / 12) * 0.5 + Math.random() * 0.3) * 100) / 100),
+        confidence: Math.round((0.95 - i * 0.01) * 100) / 100
+      }
+    });
+  }
+
   return {
-    processingMetrics: {
-      averageThroughput: 42.5,
-      peakThroughput: 78.2,
-      bottlenecks: [
-        { module: "Hermes", impact: "High", recommendation: "Increase flow capacity" },
-        { module: "Oxum", impact: "Medium", recommendation: "Optimize boost allocation" }
-      ]
-    },
-    resourceAllocation: {
-      cpu: {
-        usage: 0.68,
-        distribution: [
-          { module: "Lucie", percent: 40 },
-          { module: "Hermes", percent: 25 },
-          { module: "Oxum", percent: 20 },
-          { module: "Orus", percent: 10 },
-          { module: "Other", percent: 5 }
-        ]
-      },
-      memory: {
-        usage: 0.72,
-        distribution: [
-          { module: "Lucie", percent: 45 },
-          { module: "Hermes", percent: 20 },
-          { module: "Oxum", percent: 15 },
-          { module: "Orus", percent: 15 },
-          { module: "Other", percent: 5 }
-        ]
-      }
-    },
-    modelPerformanceDetails: {
-      accuracyByDomain: [
-        { domain: "Persona Verification", accuracy: 0.98 },
-        { domain: "Content Moderation", accuracy: 0.95 },
-        { domain: "User Intent", accuracy: 0.87 },
-        { domain: "Flow Prediction", accuracy: 0.83 }
-      ],
-      trainingStatus: {
-        lastTraining: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        samples: 124567,
-        epochsCompleted: 42,
-        improvementFromBaseline: "12.5%"
-      }
-    },
-    integrations: {
-      services: [
-        { name: "Persona Service", status: "Healthy", latency: 28 },
-        { name: "Payment Gateway", status: "Healthy", latency: 145 },
-        { name: "Content Delivery", status: "Degraded", latency: 310 },
-        { name: "Analytics Pipeline", status: "Healthy", latency: 67 }
-      ]
+    timestamp: new Date().toISOString(),
+    systemMetrics,
+    modelPerformance,
+    operationalMetrics,
+    performanceForecast,
+    systemHealth: {
+      status: systemMetrics.errorRate > 2 ? 'warning' : 'healthy',
+      uptimeHours: Math.floor(Math.random() * 720),
+      lastMaintenanceDate: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
     }
   };
-}
+};
+
+export const generateDetailedPerformanceMetrics = () => {
+  // Generate 24 hours of data points
+  const hoursData = [];
+  const now = new Date();
+  
+  for (let i = 0; i < 24; i++) {
+    const hourTime = new Date(now);
+    hourTime.setHours(now.getHours() - 24 + i);
+    
+    hoursData.push({
+      timestamp: hourTime.toISOString(),
+      metrics: {
+        cpuUsage: Math.round(40 + Math.sin(i / 6) * 15 + Math.random() * 10),
+        memoryUsage: Math.round(35 + Math.sin(i / 8) * 10 + Math.random() * 8),
+        gpuUsage: Math.round(30 + Math.sin(i / 4) * 20 + Math.random() * 15),
+        requestsPerSecond: Math.round(80 + Math.sin(i / 3) * 40 + Math.random() * 20),
+        responseTimeMs: Math.round(110 + Math.sin(i / 5) * 30 + Math.random() * 15),
+        errorRate: Math.max(0, Math.round((0.5 + Math.sin(i / 10) * 0.4 + Math.random() * 0.3) * 100) / 100)
+      }
+    });
+  }
+  
+  return {
+    timeSeriesData: hoursData,
+    anomalies: [
+      {
+        timestamp: new Date(now.getTime() - 4 * 60 * 60 * 1000).toISOString(),
+        metric: 'memoryUsage',
+        expected: 42,
+        actual: 68,
+        severity: 'medium',
+        resolved: true
+      },
+      {
+        timestamp: new Date(now.getTime() - 10 * 60 * 60 * 1000).toISOString(),
+        metric: 'errorRate',
+        expected: 0.6,
+        actual: 2.3,
+        severity: 'high',
+        resolved: false
+      }
+    ],
+    recommendations: [
+      "Consider scaling neural processing capacity to handle peak loads",
+      "Implement additional memory optimization to reduce spikes",
+      "Schedule model retraining to address accuracy drift"
+    ],
+    trendsAnalysis: {
+      cpuTrend: 'stable',
+      memoryTrend: 'increasing',
+      responseTrend: 'improving',
+      errorRateTrend: 'stable'
+    }
+  };
+};

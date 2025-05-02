@@ -4,7 +4,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Brain, Activity, Settings, BarChart4, Zap } from 'lucide-react';
-import NeuralAnalyticsDashboard from '@/components/neural/NeuralAnalyticsDashboard';
+import NeuralAnalytics from '@/components/neural/NeuralAnalytics';
 import NeuralSystemControls from '@/components/neural/NeuralSystemControls';
 import NeuralRecommendations from '@/components/neural/NeuralRecommendations';
 import NeuralAutomationPanel from '@/components/neural/NeuralAutomationPanel';
@@ -88,7 +88,7 @@ const NeuralMonitoringPage: React.FC = () => {
             </TabsContent>
             
             <TabsContent value="analytics">
-              <NeuralAnalyticsDashboard refreshInterval={refreshInterval} />
+              <NeuralAnalytics refreshInterval={refreshInterval} />
             </TabsContent>
             
             <TabsContent value="settings">
