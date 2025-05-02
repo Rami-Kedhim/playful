@@ -42,6 +42,7 @@ export interface ServiceMetrics {
   operationsCount: number;
   errorCount: number;
   latency: number;
+  responseTime?: number;
   successRate?: number;
   errorRate?: number;
   [key: string]: any;

@@ -23,6 +23,11 @@ const AdaptiveCognitiveCore: React.FC<AdaptiveCognitiveProps> = ({
     // Create a neural service for the adaptive core
     const config: NeuralServiceConfig = {
       enabled: true,
+      priority: 75,
+      resources: {
+        cpu: 2,
+        memory: 1024
+      },
       sensitivity: 0.85,
       threshold: 0.7,
       mode: 'adaptive'

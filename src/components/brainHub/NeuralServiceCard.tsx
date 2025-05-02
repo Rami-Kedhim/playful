@@ -21,6 +21,16 @@ const NeuralServiceCard: React.FC<NeuralServiceCardProps> = ({ service, onRefres
     if (onRefresh) onRefresh();
   };
 
+  // Convert string priorities to numbers for Progress component
+  const getPriorityValue = (priority: string | number): number => {
+    if (typeof priority === 'number') return priority;
+    // Try to parse as number
+    const parsed = parseFloat(priority);
+    if (!isNaN(parsed)) return parsed;
+    // Fallback to 50 if not parseable
+    return 50;
+  };
+
   return (
     <Card className="mb-4">
       <CardHeader>
@@ -53,9 +63,9 @@ const NeuralServiceCard: React.FC<NeuralServiceCardProps> = ({ service, onRefres
         <div>
           <div className="flex items-center justify-between text-sm mb-1">
             <span>Priority</span>
-            <span>{service.config.priority ?? 50}/100</span>
+            <span>{service.config.priority}/100</span>
           </div>
-          <Progress value={service.config.priority ?? 50} className="h-2" />
+          <Progress value={getPriorityValue(service.config.priority)} className="h-2" />
         </div>
         
         <div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import neuralServiceRegistry from '@/services/neural/registry/NeuralServiceRegistry';
 import type { BaseNeuralService } from '@/services/neural/types/NeuralService';
@@ -14,18 +13,31 @@ export function useNeuralRegistry() {
       setLoading(true);
       setError(null);
       
-      // stricter callable check
+      // Initialize registry if it has an initialize method
       if (typeof neuralServiceRegistry.initialize === 'function') {
         await neuralServiceRegistry.initialize();
       }
       
       const allServices = neuralServiceRegistry.getAllServices();
-      // Ensure allServices conforms to BaseNeuralService[] type by casting or mapping
-      const typedServices: BaseNeuralService[] = allServices.map(svc => ({
-        ...svc,
-        // Ensure all required fields are present in each service
-        id: svc.id || svc.moduleId,
-      }));
+      
+      // Ensure each service meets the BaseNeuralService interface requirements
+      const typedServices: BaseNeuralService[] = allServices.map(svc => {
+        // Ensure all required fields are present
+        return {
+          ...svc,
+          id: svc.id || svc.moduleId || `neural-${Date.now()}`,
+          description: svc.description || `${svc.name || svc.moduleId} Service`,
+          version: svc.version || '1.0.0',
+          status: svc.status || (svc.config?.enabled ? 'active' : 'inactive'),
+          config: {
+            ...svc.config,
+            priority: svc.config?.priority || 50,
+            resources: svc.config?.resources || { cpu: 1, memory: 512 }
+          },
+          getMetrics: svc.getMetrics || (() => ({ operationsCount: 0, errorCount: 0, latency: 0 })),
+          getCapabilities: svc.getCapabilities || (() => ['basic'])
+        } as BaseNeuralService;
+      });
       
       setServices(typedServices);
       setLoading(false);
@@ -67,7 +79,17 @@ export function useNeuralRegistry() {
         // Cast the service to ensure it matches BaseNeuralService type
         return {
           ...service,
-          id: service.id || service.moduleId,
+          id: service.id || service.moduleId || `neural-${Date.now()}`,
+          description: service.description || `${service.name || service.moduleId} Service`,
+          version: service.version || '1.0.0',
+          status: service.status || (service.config?.enabled ? 'active' : 'inactive'),
+          config: {
+            ...service.config,
+            priority: service.config?.priority || 50,
+            resources: service.config?.resources || { cpu: 1, memory: 512 }
+          },
+          getMetrics: service.getMetrics || (() => ({ operationsCount: 0, errorCount: 0, latency: 0 })),
+          getCapabilities: service.getCapabilities || (() => ['basic'])
         } as BaseNeuralService;
       }
     }

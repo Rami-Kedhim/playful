@@ -1,4 +1,3 @@
-
 import { BaseNeuralService as BaseNeuralServiceType, NeuralServiceConfig, ModuleType } from '../types/NeuralService';
 
 /**
@@ -34,6 +33,11 @@ export class BaseBrainService implements BaseNeuralServiceType {
     this.version = params.version;
     this.config = params.config || {
       enabled: true,
+      priority: 50,
+      resources: {
+        cpu: 1,
+        memory: 512
+      },
       sensitivity: 0.8,
       threshold: 0.6
     };
@@ -78,8 +82,9 @@ export class BaseBrainService implements BaseNeuralServiceType {
   getMetrics(): any {
     return {
       operationsCount: 0,
-      errorRate: 0,
+      errorCount: 0,
       latency: 0,
+      errorRate: 0,
       status: this.status
     };
   }

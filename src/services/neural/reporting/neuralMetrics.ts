@@ -1,7 +1,6 @@
-
 import neuralServiceRegistry from '../registry/NeuralServiceRegistry';
 import { neuralHub } from '../HermesOxumBrainHub';
-import { PerformanceReport, ServiceMetrics } from '@/types/neuralMetrics';
+import { PerformanceReport, ServiceMetrics, HealthMetrics } from '@/types/neuralMetrics';
 
 class NeuralMetricsService {
   private reports: PerformanceReport[] = [];
@@ -9,7 +8,7 @@ class NeuralMetricsService {
 
   generatePerformanceReport(): PerformanceReport {
     const services = neuralServiceRegistry.getAllServices();
-    const systemHealth = neuralHub.getHealthMetrics();
+    const healthMetrics = neuralHub.getHealthMetrics();
 
     const serviceMetrics: Record<string, any> = {};
     let totalHealth = 0;
@@ -18,19 +17,28 @@ class NeuralMetricsService {
       const metrics = service.getMetrics();
       const status = service.config.enabled ? 'active' : 'inactive';
 
+      // Ensure metrics has required fields
+      const normalizedMetrics: ServiceMetrics = {
+        ...metrics,
+        latency: metrics.latency || metrics.responseTime || 0,
+        operationsCount: metrics.operationsCount || 0,
+        errorCount: metrics.errorCount || 0
+      };
+
       serviceMetrics[service.moduleId] = {
         status,
-        metrics
+        metrics: normalizedMetrics
       };
 
       if (status === 'active') {
-        // Use metrics.errorCount and metrics.operationsCount to calculate successRate if not defined
-        const serviceHealth = metrics.successRate !== undefined ? 
-          metrics.successRate * 100 : 
-          metrics.operationsCount > 0 ? 
-            ((metrics.operationsCount - (metrics.errorCount || 0)) / metrics.operationsCount) * 100 : 
-            70;
-        totalHealth += serviceHealth;
+        // Calculate success rate if not provided
+        const successRate = normalizedMetrics.successRate !== undefined ? 
+          normalizedMetrics.successRate : 
+          normalizedMetrics.operationsCount > 0 ? 
+            ((normalizedMetrics.operationsCount - (normalizedMetrics.errorCount || 0)) / normalizedMetrics.operationsCount) : 
+            0.7;
+            
+        totalHealth += (successRate * 100);
       }
     });
 
@@ -39,15 +47,13 @@ class NeuralMetricsService {
       ? totalHealth / activeServices
       : 100;
 
-    const healthMetrics = neuralHub.getHealthMetrics();
-
-    // Map the health metrics to the structure expected by PerformanceReport
+    // Map health metrics to a consistent format that matches the HealthMetrics interface
     const mappedSystemMetrics = {
-      cpuUsage: healthMetrics.systemLoad ? healthMetrics.systemLoad * 100 : healthMetrics.cpuUtilization || 0,
-      memoryUsage: healthMetrics.memoryAllocation ? healthMetrics.memoryAllocation * 100 : healthMetrics.memoryUtilization || 0,
-      responseTime: healthMetrics.averageResponseTime || healthMetrics.responseTime || 0,
-      operationsPerSecond: healthMetrics.requestRate || healthMetrics.operationsPerSecond || 0,
-      errorRate: healthMetrics.errorRate || 0
+      cpuUsage: this.getMetricValue(healthMetrics, ['systemLoad', 'cpuUtilization', 'cpuUsage'], 0) * 100,
+      memoryUsage: this.getMetricValue(healthMetrics, ['memoryAllocation', 'memoryUtilization', 'memoryUsage'], 0) * 100,
+      responseTime: this.getMetricValue(healthMetrics, ['averageResponseTime', 'responseTime'], 0),
+      operationsPerSecond: this.getMetricValue(healthMetrics, ['requestRate', 'operationsPerSecond'], 0),
+      errorRate: this.getMetricValue(healthMetrics, ['errorRate'], 0)
     };
 
     const recommendations = this.generateRecommendations(
@@ -73,6 +79,16 @@ class NeuralMetricsService {
     return report;
   }
 
+  // Helper method to safely get a metric value from different possible property names
+  private getMetricValue(object: any, propertyNames: string[], defaultValue: number): number {
+    for (const property of propertyNames) {
+      if (object && typeof object[property] === 'number') {
+        return object[property];
+      }
+    }
+    return defaultValue;
+  }
+
   getLatestReport(): PerformanceReport {
     if (!this.reports.length || (new Date().getTime() - this.lastReportTime.getTime() > 5 * 60 * 1000)) {
       return this.generatePerformanceReport();
@@ -87,19 +103,29 @@ class NeuralMetricsService {
   generateRecommendations(services: any[], systemHealth: any, overallHealth: number): string[] {
     const recommendations: string[] = [];
 
-    if (systemHealth.cpuUtilization > 80 || systemHealth.systemLoad > 0.8) {
+    // Get system load from various possible property names
+    const cpuLoad = this.getMetricValue(systemHealth, ['cpuUtilization', 'systemLoad', 'cpuUsage'], 0);
+    const memoryLoad = this.getMetricValue(systemHealth, ['memoryUtilization', 'memoryAllocation', 'memoryUsage'], 0);
+    const errorRate = this.getMetricValue(systemHealth, ['errorRate'], 0);
+
+    if (cpuLoad > 0.8 || cpuLoad > 80) {
       recommendations.push('High CPU usage detected. Consider scaling resources or optimizing processing.');
     }
 
-    if (systemHealth.memoryUtilization > 85 || systemHealth.memoryAllocation > 0.85) {
+    if (memoryLoad > 0.85 || memoryLoad > 85) {
       recommendations.push('Memory usage is high. Review memory allocation or check for memory leaks.');
     }
 
-    if (systemHealth.errorRate > 5 || 
+    if (errorRate > 0.05 || errorRate > 5 || 
         (services.some(s => {
           const metrics = s.getMetrics();
-          return metrics.errorCount && metrics.operationsCount && 
-                (metrics.errorCount / metrics.operationsCount > 0.05);
+          // Calculate error rate if not provided
+          const calculatedErrorRate = metrics.errorRate || (
+            metrics.errorCount && metrics.operationsCount ? 
+            metrics.errorCount / metrics.operationsCount : 
+            0
+          );
+          return calculatedErrorRate > 0.05;
         }))) {
       recommendations.push('Error rate exceeds recommended threshold. Investigate potential issues.');
     }

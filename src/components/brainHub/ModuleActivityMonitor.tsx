@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -45,7 +44,7 @@ const ModuleActivityMonitor: React.FC = () => {
       case 'error': return 'destructive';
       case 'warning': return 'warning';
       case 'info': return 'secondary';
-      default: return 'outline';
+      default: return 'secondary';
     }
   };
 
@@ -73,7 +72,7 @@ const ModuleActivityMonitor: React.FC = () => {
 
         <div className="space-y-2 max-h-80 overflow-y-auto p-1">
           {filteredLogs.length === 0 ? (
-            <Alert variant="outline">
+            <Alert variant="default">
               <AlertDescription className="flex items-center">
                 <Clock className="h-4 w-4 mr-2" />
                 No activity logs to display

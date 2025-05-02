@@ -4,11 +4,14 @@ export type ModuleType = 'core' | 'transformer' | 'analytics' | 'interface' | 'c
 export interface NeuralServiceConfig {
   enabled: boolean;
   priority: string | number; // Allow both string and number for priority
-  resources: {
+  resources?: {
     cpu: number;
     memory: number;
     [key: string]: any;
   };
+  sensitivity?: number;
+  threshold?: number;
+  mode?: string;
   [key: string]: any;
 }
 
