@@ -1,4 +1,3 @@
-
 import { INeuralHub, NeuralRequest, NeuralResponse, NeuralSystemStatus, TrainingProgress, ModelParameters, NeuralModel } from './types/neuralHub';
 
 /**
