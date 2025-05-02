@@ -1,101 +1,111 @@
 
 import React from 'react';
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
   LineChart,
   Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
+  ResponsiveContainer,
   Legend,
-  ResponsiveContainer
 } from 'recharts';
+import { PerformanceChartProps } from '@/types/analytics';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
-
-interface LineConfig {
-  dataKey: string;
-  name: string;
-  color: string;
-  strokeWidth?: number;
-  type?: 'monotone' | 'linear' | 'step' | 'stepBefore' | 'stepAfter';
-}
-
-interface PerformanceChartProps {
-  data: Array<Record<string, any>>;
-  dataKey: string;
-  lines: LineConfig[];
-  height?: number | string;
-  title?: string;
-  onRefresh?: () => void;
-}
 
 const PerformanceChart: React.FC<PerformanceChartProps> = ({
   data,
   dataKey,
-  lines,
-  height = "100%",
-  title,
+  title = 'Performance',
   onRefresh
 }) => {
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <p className="text-muted-foreground mb-4">No data available</p>
+        {onRefresh && (
+          <Button variant="outline" size="sm" onClick={onRefresh}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  // For neural performance data structure
+  const chartData = data.map(item => ({
+    date: item.date,
+    value: item.metrics[dataKey] || 0
+  }));
+
+  const formatYAxis = (value: number) => {
+    if (dataKey === 'predictedResponseTime') return `${value}ms`;
+    if (dataKey === 'predictedErrorRate') return `${(value * 100).toFixed(1)}%`;
+    return value.toString();
+  };
+
   return (
-    <div className="w-full">
-      {(title || onRefresh) && (
-        <div className="flex justify-between items-center mb-4">
-          {title && <h3 className="text-lg font-medium">{title}</h3>}
-          {onRefresh && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onRefresh}
-              className="flex items-center gap-1"
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-              <span>Refresh</span>
-            </Button>
-          )}
-        </div>
-      )}
-      <ResponsiveContainer width="100%" height={height}>
-        <LineChart
-          data={data}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-          <XAxis 
-            dataKey={dataKey} 
-            tick={{ fontSize: 12 }} 
+    <div className="w-full h-[300px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <XAxis
+            dataKey="date"
+            tick={{ fontSize: 12 }}
+            tickFormatter={(value) => new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
           />
-          <YAxis tick={{ fontSize: 12 }} />
-          <Tooltip 
-            contentStyle={{ 
-              backgroundColor: 'rgba(24, 24, 27, 0.9)', 
-              borderColor: 'rgba(113, 113, 122, 0.4)', 
-              borderRadius: '6px',
-              fontSize: '14px',
-              color: 'white'
-            }} 
+          <YAxis
+            tickFormatter={formatYAxis}
+            tick={{ fontSize: 12 }}
           />
-          <Legend iconType="circle" />
-          
-          {lines.map((line, index) => (
-            <Line
-              key={line.dataKey}
-              type={line.type || "monotone"}
-              dataKey={line.dataKey}
-              name={line.name}
-              stroke={line.color}
-              strokeWidth={line.strokeWidth || 2}
-              dot={{ r: 3 }}
-              activeDot={{ r: 5 }}
-              isAnimationActive={true}
-            />
-          ))}
+          <Tooltip
+            formatter={(value: number) => [
+              dataKey === 'predictedErrorRate' 
+                ? `${(value * 100).toFixed(2)}%` 
+                : dataKey === 'predictedResponseTime'
+                  ? `${value.toFixed(1)}ms`
+                  : value.toFixed(1),
+              dataKey === 'predictedErrorRate'
+                ? 'Error Rate'
+                : dataKey === 'predictedResponseTime'
+                  ? 'Response Time'
+                  : dataKey === 'expectedLoad'
+                    ? 'Expected Load'
+                    : 'Value'
+            ]}
+            labelFormatter={(label) => new Date(label).toLocaleDateString(undefined, {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            })}
+          />
+          <Legend />
+          <Line
+            type="monotone"
+            dataKey="value"
+            name={
+              dataKey === 'predictedErrorRate'
+                ? 'Error Rate'
+                : dataKey === 'predictedResponseTime'
+                  ? 'Response Time'
+                  : dataKey === 'expectedLoad'
+                    ? 'Expected Load'
+                    : 'Value'
+            }
+            stroke="#8884d8"
+            strokeWidth={2}
+            dot={{ r: 4 }}
+            activeDot={{ r: 6 }}
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>

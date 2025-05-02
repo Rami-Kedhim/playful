@@ -8,7 +8,7 @@ export interface MetricDetail {
   description?: string;
 }
 
-export default function useNeuralAnalyticsDashboard() {
+export function useNeuralAnalyticsDashboard() {
   const { analyticsData, loading, error, refreshAnalytics } = useNeuralAnalytics();
   const [dateRange, setDateRange] = useState<{from?: Date, to?: Date}>({});
   const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState<boolean>(false);
@@ -138,3 +138,5 @@ export default function useNeuralAnalyticsDashboard() {
     getTrendDataForMetric
   };
 }
+
+export default useNeuralAnalyticsDashboard;
