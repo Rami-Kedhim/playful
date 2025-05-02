@@ -1,12 +1,12 @@
 
-import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
+import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 import { BrainHubRequest } from '@/services/neural/types/neuralHub';
 
 export interface ContentOptimizationParams {
   content: string;
-  target: 'engagement' | 'conversion' | 'clarity' | 'seo';
-  contentType: 'title' | 'description' | 'body' | 'cta';
-  maxLength?: number;
+  contentType: string;
+  targetAudience?: string;
+  optimizationGoal?: string;
 }
 
 export interface ContentAnalysisResult {
@@ -16,142 +16,130 @@ export interface ContentAnalysisResult {
   suggestions: string[];
 }
 
-export interface ContentSuggestion {
-  original: string;
-  improved: string;
-  reason: string;
-}
-
 export class ContentBrainHubService {
   /**
-   * Optimizes content for a specific target and content type
+   * Optimize content using the Brain Hub neural system
    */
-  public static async optimizeContent(params: ContentOptimizationParams): Promise<string> {
+  static async optimizeContent(params: ContentOptimizationParams): Promise<string> {
     try {
       const request: BrainHubRequest = {
         type: 'content_optimization',
-        data: params
+        data: params,
       };
 
-      const response = await neuralHub.processRequest(request);
-      if (response.success && response.data) {
-        return response.data.optimizedContent || params.content;
-      } else {
-        console.warn('Content optimization failed:', response.error);
-        return params.content; // Return original content if optimization fails
+      const response = await brainHub.processRequest(request);
+
+      if (!response.success) {
+        throw new Error(response.error || 'Content optimization failed');
       }
-    } catch (error) {
-      console.error('Error during content optimization:', error);
-      return params.content; // Return original content on error
+
+      return response.data.optimizedContent || params.content;
+    } catch (error: any) {
+      console.error('Content optimization error:', error);
+      return params.content;
     }
   }
 
   /**
-   * Analyzes content and provides feedback and improvement suggestions
+   * Analyze content for strengths and weaknesses
    */
-  public static async analyzeContent(content: string, contentType: string): Promise<ContentAnalysisResult> {
+  static async analyzeContent(content: string, contentType: string): Promise<ContentAnalysisResult> {
     try {
       const request: BrainHubRequest = {
         type: 'analysis',
-        data: { content, contentType }
+        data: {
+          content,
+          contentType,
+        },
       };
 
-      const response = await neuralHub.processRequest(request);
-      if (response.success && response.data) {
-        return {
-          score: response.data.score || 0,
-          strengths: response.data.strengths || [],
-          weaknesses: response.data.weaknesses || [],
-          suggestions: response.data.suggestions || []
-        };
-      } else {
+      const response = await brainHub.processRequest(request);
+
+      if (!response.success) {
         throw new Error(response.error || 'Content analysis failed');
       }
-    } catch (error) {
-      console.error('Error analyzing content:', error);
+
+      return response.data.analysis || {
+        score: 0,
+        strengths: [],
+        weaknesses: ['Analysis processing failed'],
+        suggestions: ['Try again later'],
+      };
+    } catch (error: any) {
+      console.error('Content analysis error:', error);
       return {
         score: 0,
         strengths: [],
-        weaknesses: ['Analysis failed due to a system error'],
-        suggestions: ['Try again later']
+        weaknesses: ['Error analyzing content'],
+        suggestions: ['Please try again later'],
       };
     }
   }
 
   /**
-   * Calculates the expected renewal value based on content performance
+   * Calculate the optimal renewal value based on content engagement
    */
-  public static async calculateRenewalValue(
-    engagementMetrics: any,
-    contentType: string,
-    historicalData: any
-  ): Promise<number> {
+  static async calculateRenewalValue(engagement: any, contentType: string, history: any): Promise<number> {
     try {
       const request: BrainHubRequest = {
         type: 'calculate_renewal_value',
         data: {
-          engagementMetrics,
+          engagement,
           contentType,
-          historicalData
-        }
+          history,
+        },
       };
 
-      const response = await neuralHub.processRequest(request);
-      if (response.success && response.data && response.data.value !== undefined) {
-        return response.data.value;
-      } else {
-        console.warn('Renewal value calculation failed:', response.error);
-        return 0;
+      const response = await brainHub.processRequest(request);
+
+      if (!response.success) {
+        throw new Error(response.error || 'Renewal value calculation failed');
       }
-    } catch (error) {
-      console.error('Error calculating renewal value:', error);
-      return 0;
+
+      return response.data.value || 5;
+    } catch (error: any) {
+      console.error('Calculate renewal value error:', error);
+      return 5; // Default value on error
     }
   }
 
   /**
-   * Predicts the optimal renewal time for content
+   * Predict the optimal time for content renewal
    */
-  public static async predictRenewalTime(
-    contentId: string,
-    contentType: string,
-    currentEngagement: number
-  ): Promise<Date> {
+  static async predictRenewalTime(contentId: string, contentType: string, engagement: number): Promise<Date> {
     try {
       const request: BrainHubRequest = {
         type: 'predict_renewal_time',
         data: {
           contentId,
           contentType,
-          currentEngagement
-        }
+          engagement,
+        },
       };
 
-      const response = await neuralHub.processRequest(request);
-      if (response.success && response.data && response.data.timestamp) {
-        return new Date(response.data.timestamp);
-      } else {
-        // Default to 7 days from now if prediction fails
-        const defaultTime = new Date();
-        defaultTime.setDate(defaultTime.getDate() + 7);
-        return defaultTime;
+      const response = await brainHub.processRequest(request);
+
+      if (!response.success) {
+        throw new Error(response.error || 'Renewal time prediction failed');
       }
-    } catch (error) {
-      console.error('Error predicting renewal time:', error);
-      const defaultTime = new Date();
-      defaultTime.setDate(defaultTime.getDate() + 7);
-      return defaultTime;
+
+      const timestamp = response.data.timestamp || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      return new Date(timestamp);
+    } catch (error: any) {
+      console.error('Predict renewal time error:', error);
+      // Default to 7 days from now
+      return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     }
   }
 
   /**
-   * Records content interaction for better future recommendations
+   * Record content interaction for AI analysis
    */
-  public static async recordContentInteraction(
+  static async recordContentInteraction(
     contentId: string,
     userId: string,
     interactionType: string,
-    metadata: any
+    metadata: Record<string, any> = {}
   ): Promise<boolean> {
     try {
       const request: BrainHubRequest = {
@@ -160,16 +148,30 @@ export class ContentBrainHubService {
           contentId,
           userId,
           interactionType,
+          timestamp: new Date().toISOString(),
           metadata,
-          timestamp: new Date().toISOString()
-        }
+        },
       };
 
-      const response = await neuralHub.processRequest(request);
+      const response = await brainHub.processRequest(request);
       return response.success;
-    } catch (error) {
-      console.error('Error recording content interaction:', error);
+    } catch (error: any) {
+      console.error('Record content interaction error:', error);
       return false;
+    }
+  }
+
+  /**
+   * Process content through Brain Hub for enhanced metadata
+   */
+  static async processContent(content: any[]): Promise<any[]> {
+    try {
+      // Simply return the content as-is for now
+      // In a real implementation, this would enhance the content with AI processing
+      return content;
+    } catch (error) {
+      console.error('Process content error:', error);
+      return content;
     }
   }
 }

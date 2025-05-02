@@ -1,21 +1,35 @@
 
+import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import VerificationPage from './pages/VerificationPage';
-import Escorts from './pages/Escorts';
-import ProfilePage from './pages/ProfilePage';
-import WalletPage from './pages/WalletPage';
-import SearchPage from './pages/SearchPage';
-import PulseBoostPage from './pages/PulseBoostPage';
-import AdminPage from './pages/AdminPage';
-import ModerationPage from './pages/ModerationPage';
-import UnauthorizedPage from './pages/UnauthorizedPage';
-import BrainHubPage from './pages/BrainHubPage';
-import NotFoundPage from './pages/NotFoundPage';
 import { Toaster } from '@/components/ui/toaster';
-import MainLayout from './layouts/MainLayout';
+import MainLayout from '@/components/layout/MainLayout';
+import HomePage from '@/pages/HomePage';
+import VerificationPage from '@/pages/VerificationPage';
+import Escorts from '@/pages/Escorts';
+import ProfilePage from '@/pages/ProfilePage';
+import WalletPage from '@/pages/WalletPage';
+import SearchPage from '@/pages/SearchPage';
+import PulseBoostPage from '@/pages/PulseBoostPage';
+import AdminPage from '@/pages/AdminPage';
+import ModerationPage from '@/pages/ModerationPage';
+import UnauthorizedPage from '@/pages/UnauthorizedPage';
+import BrainHubPage from '@/pages/BrainHubPage';
+import NotFoundPage from '@/pages/NotFoundPage';
+
+// Initialize the core systems
+import { initializeSystem } from '@/core/engine';
 
 function App() {
+  // Initialize UberCore system on app start
+  React.useEffect(() => {
+    const init = async () => {
+      await initializeSystem();
+      console.log("Core systems initialized");
+    };
+    
+    init().catch(console.error);
+  }, []);
+
   return (
     <>
       <Routes>

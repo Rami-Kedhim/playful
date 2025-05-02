@@ -1,122 +1,125 @@
 
-import React, { useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import ContentStatusBadge from './ContentStatusBadge';
+import React from 'react';
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { determineContentStatus, formatDateRelative, calculateDaysRemaining } from '@/utils/dateUtils';
 import ContentExpiryInfo from './ContentExpiryInfo';
-import { calculateExpiryDate, calculateRenewalCost } from '@/utils/dateUtils';
-import { Button } from '@/components/ui/button';
 import { useContentBrainHub } from '@/hooks/useContentBrainHub';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Clock, FileText, Image, Video } from 'lucide-react';
 
 interface ContentCardProps {
-  item: {
+  content: {
     id: string;
     title: string;
     type: string;
     createdAt: Date;
+    daysRemaining?: number;
+    status?: string;
     url?: string;
     content?: string;
-    status: string;
-    daysRemaining?: number;
-    brainHubProcessed?: boolean;
-    optimizationScore?: number;
-    recommendedActions?: string[];
   };
-  onRenew: (id: string) => void;
+  onRenew?: (id: string) => void;
 }
 
-const ContentCard: React.FC<ContentCardProps> = ({ item, onRenew }) => {
-  const expiresAt = calculateExpiryDate(item.createdAt);
-  const { getIntelligentRenewalCost, recordInteraction } = useContentBrainHub();
+const ContentCard: React.FC<ContentCardProps> = ({
+  content,
+  onRenew
+}) => {
+  const { getIntelligentRenewalCost } = useContentBrainHub();
   
-  // Try to use intelligent pricing first, fall back to standard calculation
-  const lucoinCost = getIntelligentRenewalCost(item.status, item.type);
-  
-  // Record view interaction with Brain Hub when component mounts
-  useEffect(() => {
-    recordInteraction(item.id, 'view');
-  }, [item.id, recordInteraction]);
-  
-  // Handle renew button click with Brain Hub tracking
-  const handleRenew = () => {
-    recordInteraction(item.id, 'renew');
-    onRenew(item.id);
+  // Get the appropriate icon for the content type
+  const getContentTypeIcon = (type: string) => {
+    switch (type) {
+      case 'image':
+        return <Image className="h-4 w-4" />;
+      case 'video':
+        return <Video className="h-4 w-4" />;
+      case 'text':
+      default:
+        return <FileText className="h-4 w-4" />;
+    }
   };
+
+  // Get badge color based on status
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-500/10 text-green-500';
+      case 'expiring':
+        return 'bg-amber-500/10 text-amber-500';
+      case 'expired':
+        return 'bg-red-500/10 text-red-500';
+      case 'draft':
+        return 'bg-blue-500/10 text-blue-500';
+      default:
+        return 'bg-gray-500/10 text-gray-500';
+    }
+  };
+
+  // Renewal cost calculation with brain hub
+  const renewalCost = getIntelligentRenewalCost(content.status || 'active', content.type || 'text');
+  
+  // Calculate expiry date (6 months from creation)
+  const expiryDate = new Date(content.createdAt);
+  expiryDate.setMonth(expiryDate.getMonth() + 6);
   
   return (
-    <Card key={item.id} className="overflow-hidden">
-      {item.type !== 'text' && (
-        <div className="relative aspect-video bg-muted">
-          <img 
-            src={item.url} 
-            alt={item.title}
-            className="object-cover w-full h-full"
-          />
-          <div className="absolute top-2 right-2">
-            <ContentStatusBadge 
-              status={item.status as any}
-              daysRemaining={item.status === 'expiring' ? item.daysRemaining : undefined}  
-            />
+    <Card className="overflow-hidden">
+      <CardHeader className="py-3 px-4 flex flex-row justify-between items-center">
+        <div className="flex flex-1 items-start">
+          <div>
+            <div className="font-semibold truncate">{content.title}</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Created {formatDateRelative(content.createdAt)}
+            </div>
+          </div>
+        </div>
+        <Badge className={`ml-2 ${getStatusColor(content.status || 'active')}`}>
+          {content.status || 'active'}
+        </Badge>
+      </CardHeader>
+      
+      <CardContent className="p-4">
+        {content.url && content.type !== 'text' && (
+          <div className="aspect-video mb-2 bg-muted rounded-md overflow-hidden">
+            <img src={content.url} alt={content.title} className="w-full h-full object-cover" />
+          </div>
+        )}
+        
+        {content.type === 'text' && content.content && (
+          <div className="text-sm line-clamp-3 text-muted-foreground">{content.content}</div>
+        )}
+        
+        <div className="mt-3 flex items-center text-xs text-muted-foreground">
+          <div className="flex items-center mr-4">
+            {getContentTypeIcon(content.type)}
+            <span className="ml-1 capitalize">{content.type}</span>
           </div>
           
-          {item.brainHubProcessed && item.optimizationScore && (
-            <div className="absolute top-2 left-2">
-              <Badge variant="outline" className="bg-black/50 backdrop-blur-sm text-white flex items-center gap-1">
-                <Sparkles className="h-3 w-3" />
-                <span>Optimized {item.optimizationScore.toFixed(1)}</span>
-              </Badge>
+          {content.daysRemaining !== undefined && (
+            <div className="flex items-center">
+              <Clock className="h-3.5 w-3.5 mr-1" />
+              <span>
+                {content.daysRemaining > 0
+                  ? `${content.daysRemaining} days left`
+                  : 'Expired'}
+              </span>
             </div>
           )}
         </div>
-      )}
-      <CardContent className="p-4 space-y-2">
-        <div className="flex justify-between items-start">
-          <h3 className="font-medium">{item.title}</h3>
-          {item.type === 'text' && (
-            <ContentStatusBadge 
-              status={item.status as any}
-              daysRemaining={item.status === 'expiring' ? item.daysRemaining : undefined} 
-            />
-          )}
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Type: {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
-        </p>
-        {item.type === 'text' && (
-          <p className="text-sm border p-2 rounded-md bg-muted/30">
-            {item.content}
-          </p>
-        )}
-        
-        {item.recommendedActions && item.recommendedActions.length > 0 && (
-          <div className="text-xs p-2 rounded-md bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900">
-            <p className="font-medium mb-1 text-blue-700 dark:text-blue-300">Brain Hub Recommendations:</p>
-            <ul className="list-disc ml-4 text-muted-foreground space-y-1">
-              {item.recommendedActions.slice(0, 2).map((action, idx) => (
-                <li key={idx}>{action}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        
-        {item.status !== 'draft' && (
+      </CardContent>
+      
+      <CardFooter className="p-0">
+        {content.status !== 'draft' && (
           <ContentExpiryInfo 
-            createdAt={item.createdAt} 
-            expiresAt={expiresAt} 
-            onRenew={handleRenew}
-            lucoinCost={lucoinCost}
+            createdAt={content.createdAt}
+            expiresAt={expiryDate}
+            onRenew={() => onRenew && onRenew(content.id)}
+            ubxCost={renewalCost}
           />
         )}
-        {item.status === 'draft' && (
-          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/20 rounded-md text-sm border border-gray-200 dark:border-gray-800">
-            <span className="text-gray-600 dark:text-gray-400">
-              Draft content - not yet published
-            </span>
-            <Button variant="secondary" size="sm">Publish</Button>
-          </div>
-        )}
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 };

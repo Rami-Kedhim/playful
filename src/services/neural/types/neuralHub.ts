@@ -116,7 +116,6 @@ export interface INeuralHub {
   getModelParameters(): ModelParameters;
   processRequest(request: BrainHubRequest): Promise<BrainHubResponse>;
   
-  // Make these return sync arrays instead of Promises
   getHealthMetrics(): SystemHealthMetrics;
   getActiveTrainingJobs(): TrainingProgress[];
   getModels(): NeuralModel[];
@@ -125,8 +124,9 @@ export interface INeuralHub {
   getService(serviceId: string): NeuralService | undefined;
   getSystemStatus(): any;
   
-  // Add the missing methods to resolve the errors
   getConfig(): any;
   updateConfig(config: any): Promise<boolean>;
   getDecisionLogs(): any[];
 }
+
+export type NeuralHub = INeuralHub;

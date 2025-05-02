@@ -1,153 +1,90 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import React, { useState, useEffect } from 'react';
+import { GoogleMap, LoadScript, Marker, MapTypeControl } from '@react-google-maps/api';
 import { Button } from "@/components/ui/button";
-import { MapPin, Navigation, LocateFixed, Plus, Minus, Layers } from "lucide-react";
-import mapService, { MapLocation } from "@/services/maps/MapService";
 
 interface MapViewerProps {
-  origin?: MapLocation;
-  destination?: MapLocation;
-  waypoints?: MapLocation[];
-  markers?: MapLocation[];
-  height?: string;
-  width?: string;
-  className?: string;
-  showControls?: boolean;
-  onMarkerClick?: (location: MapLocation) => void;
+  apiKey: string;
+  latitude: number;
+  longitude: number;
+  markerLabel?: string;
 }
 
-const MapViewer: React.FC<MapViewerProps> = ({
-  origin,
-  destination,
-  waypoints = [],
-  markers = [],
-  height = "400px",
-  width = "100%",
-  className = "",
-  showControls = true,
-  onMarkerClick
-}) => {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
+const MapViewer: React.FC<MapViewerProps> = ({ apiKey, latitude, longitude, markerLabel = 'Location' }) => {
+  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [selectedOption, setSelectedOption] = useState<string>('normal');
+
+  const mapStyles = {
+    height: '400px',
+    width: '100%'
+  };
+
+  const mapContainerStyle = {
+    width: '100%',
+    height: '400px',
+  };
+
+  const center = {
+    lat: latitude,
+    lng: longitude,
+  };
+
+  const onLoad = React.useCallback(function callback(map: google.maps.Map) {
+    setMap(map);
+  }, []);
+
+  const onUnmount = React.useCallback(function callback() {
+    setMap(null);
+  }, []);
+
   useEffect(() => {
-    setIsLoading(true);
-    
-    try {
-      const initMap = async () => {
-        if (!mapContainerRef.current) return;
-        
-        console.log('Initializing map with:', {
-          origin,
-          destination,
-          waypoints,
-          markers
-        });
-        
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        setIsLoading(false);
-      };
-      
-      initMap();
-    } catch (err) {
-      console.error('Error initializing map:', err);
-      setError('Failed to load map');
-      setIsLoading(false);
+    if (map) {
+      map.setMapTypeId(selectedOption as google.maps.MapTypeId);
     }
-  }, [origin, destination, waypoints?.length, markers?.length]);
-
-  const handleZoomIn = () => {
-    console.log('Zoom in');
-  };
-
-  const handleZoomOut = () => {
-    console.log('Zoom out');
-  };
-
-  const handleMyLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          const { latitude, longitude } = position.coords;
-          console.log('Current location:', { latitude, longitude });
-        },
-        error => {
-          console.error('Error getting location:', error);
-        }
-      );
-    } else {
-      console.error('Geolocation not supported');
-    }
-  };
-
-  const handleToggleLayers = () => {
-    console.log('Toggle layers');
-  };
+  }, [selectedOption, map]);
 
   return (
-    <Card className={`overflow-hidden relative ${className}`} style={{ height, width }}>
-      <div
-        ref={mapContainerRef}
-        className="absolute inset-0"
-        style={{
-          backgroundColor: '#e5e7eb',
-          backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%239C92AC\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3Ccircle cx=\'13\' cy=\'13\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")'
-        }}
+    <LoadScript googleMapsApiKey={apiKey}>
+      <GoogleMap
+        mapContainerStyle={mapContainerStyle}
+        zoom={13}
+        center={center}
+        onLoad={onLoad}
+        onUnmount={onUnmount}
+        mapTypeId={selectedOption as google.maps.MapTypeId}
       >
-        {isLoading ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
-        ) : error ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <p className="text-destructive mb-2">Failed to load map</p>
-            <Button size="sm" variant="outline" onClick={() => window.location.reload()}>
-              Retry
-            </Button>
-          </div>
-        ) : (
-          <>
-            {origin && (
-              <div className="absolute left-4 top-4">
-                <Badge variant="ubx" className="flex items-center gap-1.5">
-                  <MapPin className="h-3 w-3" />
-                  Origin
-                </Badge>
-              </div>
-            )}
-            
-            {destination && (
-              <div className="absolute right-4 top-4">
-                <Badge variant="ubx" className="flex items-center gap-1.5">
-                  <Navigation className="h-3 w-3" />
-                  Destination
-                </Badge>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+        <Marker position={center} label={markerLabel} />
+        <MapTypeControl
+          position={google.maps.ControlPosition.TOP_RIGHT}
+          mapTypeIds={['normal', 'satellite', 'terrain', 'hybrid']}
+          style={{ margin: '10px' }}
+        />
+      </GoogleMap>
+      <div className="mt-2 flex space-x-2">
+        <Button
+          size="sm"
+          variant="ubx"
+          onClick={() => setSelectedOption('normal')}
+        >Normal Map</Button>
 
-      {showControls && !isLoading && !error && (
-        <div className="absolute right-4 bottom-4 flex flex-col gap-2">
-          <Button size="icon" variant="lucoin" onClick={handleZoomIn}>
-            <Plus className="h-4 w-4" />
-          </Button>
-          <Button size="icon" variant="lucoin" onClick={handleZoomOut}>
-            <Minus className="h-4 w-4" />
-          </Button>
-          <Button size="icon" variant="lucoin" onClick={handleMyLocation}>
-            <LocateFixed className="h-4 w-4" />
-          </Button>
-          <Button size="icon" variant="lucoin" onClick={handleToggleLayers}>
-            <Layers className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-    </Card>
+        <Button
+          size="sm"
+          variant="ubx"
+          onClick={() => setSelectedOption('satellite')}
+        >Satellite</Button>
+
+        <Button
+          size="sm"
+          variant="ubx"
+          onClick={() => setSelectedOption('terrain')}
+        >Terrain</Button>
+
+        <Button
+          size="sm"
+          variant="ubx"
+          onClick={() => setSelectedOption('hybrid')}
+        >Hybrid</Button>
+      </div>
+    </LoadScript>
   );
 };
 

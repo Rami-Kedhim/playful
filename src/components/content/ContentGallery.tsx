@@ -58,7 +58,7 @@ const ContentGallery: React.FC = () => {
   const [content, setContent] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const { toast } = useToast();
-  const { processContent, getIntelligentRenewalCost, recordInteraction } = useContentBrainHub();
+  const { recordInteraction, getIntelligentRenewalCost, processContent } = useContentBrainHub();
 
   useEffect(() => {
     // Process mock content to calculate real status based on dates
@@ -136,7 +136,7 @@ const ContentGallery: React.FC = () => {
     
     toast({
       title: "Content Renewed",
-      description: `Your content has been renewed for 180 days for ${renewalCost} LC`,
+      description: `Your content has been renewed for 180 days for ${renewalCost} UBX`,
     });
   };
 
