@@ -1,183 +1,195 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, Play, StopCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Clock, Play, Square, AlertTriangle } from 'lucide-react';
 import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
 import TrainingProgressDetails from './TrainingProgressDetails';
 import { TrainingProgress } from '@/services/neural/training/trainingManager';
-import { NeuralModel } from '@/services/neural/types/neuralHub';
+import { useToast } from '@/components/ui/use-toast';
 
 interface NeuralSystemsPanelProps {
-  systemId?: string;
+  autoRefresh?: boolean;
 }
 
-const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ systemId }) => {
+const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({
+  autoRefresh = true,
+}) => {
   const [trainingJobs, setTrainingJobs] = useState<TrainingProgress[]>([]);
-  const [models, setModels] = useState<NeuralModel[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [startingTraining, setStartingTraining] = useState(false);
-  
-  // Fetch initial data
-  useEffect(() => {
-    fetchData();
-  }, []);
-  
-  // Refresh data every 30 seconds
-  useEffect(() => {
-    const intervalId = setInterval(fetchData, 30000);
-    return () => clearInterval(intervalId);
-  }, []);
-  
-  // Fetch all data
-  const fetchData = () => {
+  const { toast } = useToast();
+
+  const fetchTrainingJobs = async () => {
     try {
-      setIsLoading(true);
       setError(null);
+      const jobs = neuralHub.getActiveTrainingJobs?.() || [];
+      // Make sure we're getting compatible training progress objects
+      const compatibleJobs = jobs.map(job => ({
+        id: job.id,
+        modelId: job.modelId,
+        status: job.status,
+        startTime: job.startTime,
+        currentEpoch: job.currentEpoch || 0,
+        epoch: job.epoch || 0,
+        totalEpochs: job.totalEpochs || 10,
+        progress: job.progress,
+        accuracy: job.accuracy || 0,
+        loss: job.loss || 1,
+        timestamp: job.timestamp || new Date().toISOString(),
+        targetAccuracy: job.targetAccuracy || 0.95,
+        estimatedCompletionTime: job.estimatedCompletionTime,
+        timeRemaining: job.timeRemaining || 0,
+        message: "",
+        type: job.type || "training",
+      }));
       
-      // Fetch active training jobs - synchronously now
-      const activeJobs = neuralHub.getActiveTrainingJobs();
-      setTrainingJobs(activeJobs);
-      
-      // Fetch available models - synchronously now
-      const availableModels = neuralHub.getModels();
-      setModels(availableModels);
-      
-      setIsLoading(false);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch neural systems data');
+      setTrainingJobs(compatibleJobs);
+    } catch (err) {
+      console.error('Failed to fetch training jobs:', err);
+      setError('Failed to fetch training jobs');
+    } finally {
       setIsLoading(false);
     }
   };
-  
-  // Stop a training job
+
+  useEffect(() => {
+    fetchTrainingJobs();
+    
+    if (autoRefresh) {
+      const intervalId = setInterval(fetchTrainingJobs, 10000);
+      return () => clearInterval(intervalId);
+    }
+  }, [autoRefresh]);
+
+  const handleStartTraining = async (modelType: string) => {
+    try {
+      await neuralHub.startTraining?.(modelType, {
+        epochs: 10,
+        learningRate: 0.001,
+        batchSize: 32
+      });
+      
+      toast({
+        title: `${modelType} training started`,
+        description: "Training job has been successfully added to the queue."
+      });
+      
+      fetchTrainingJobs();
+    } catch (err) {
+      toast({
+        title: "Failed to start training",
+        description: err instanceof Error ? err.message : "Unknown error occurred",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleStopTraining = async (jobId: string) => {
     try {
-      const success = await neuralHub.stopTraining(jobId);
+      const success = await neuralHub.stopTraining?.(jobId);
       
       if (success) {
-        // Remove the job from state if successful
-        setTrainingJobs(prev => prev.filter(job => job.id !== jobId));
+        toast({
+          title: "Training stopped",
+          description: "Training job has been stopped successfully."
+        });
+        
+        fetchTrainingJobs();
       } else {
-        setError('Failed to stop training job');
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to stop training job');
-    }
-  };
-  
-  // Start a new training job
-  const handleStartTraining = async (type: string) => {
-    try {
-      setStartingTraining(true);
-      setError(null);
-      
-      const result = await neuralHub.startTraining(type, { epochs: 100 });
-      
-      if (result && result.status === 'training') {
-        // Refresh data to show new job
-        fetchData();
-      } else {
-        setError(`Failed to start ${type} training: ${result.status}`);
+        throw new Error("Failed to stop training job");
       }
       
-      setStartingTraining(false);
-    } catch (err: any) {
-      setError(err.message || `Failed to start ${type} training`);
-      setStartingTraining(false);
+      return success;
+    } catch (err) {
+      toast({
+        title: "Failed to stop training",
+        description: err instanceof Error ? err.message : "Unknown error occurred",
+        variant: "destructive"
+      });
+      return false;
     }
   };
-  
+
   return (
-    <Card className="w-full">
+    <Card>
       <CardHeader>
-        <CardTitle>Neural Systems</CardTitle>
+        <CardTitle>Neural Training</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
         {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+          <div className="p-3 bg-red-50 border border-red-100 rounded-md flex items-center text-red-700">
+            <AlertTriangle className="h-4 w-4 mr-2" />
+            <span>{error}</span>
+          </div>
         )}
         
-        <h3 className="text-lg font-medium mb-4">Active Training Jobs</h3>
-        <div className="space-y-4">
-          {trainingJobs.length === 0 ? (
+        <div className="flex flex-wrap gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => handleStartTraining('text')}
+          >
+            <Play className="h-4 w-4 mr-1" />
+            Train Text Model
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => handleStartTraining('image')}
+          >
+            <Play className="h-4 w-4 mr-1" />
+            Train Image Model
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={fetchTrainingJobs}
+          >
+            Refresh Jobs
+          </Button>
+        </div>
+        
+        {isLoading ? (
+          <div className="flex items-center justify-center p-8">
+            <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
+          </div>
+        ) : trainingJobs.length > 0 ? (
+          <div className="space-y-4">
+            {trainingJobs.map(job => {
+              // Converting job to the format expected by TrainingProgressDetails
+              const progressData = {
+                modelId: job.modelId,
+                epoch: job.epoch,
+                totalEpochs: job.totalEpochs,
+                loss: job.loss,
+                accuracy: job.accuracy,
+                timestamp: job.timestamp,
+                status: job.status === 'training' ? 'running' : job.status === 'completed' ? 'completed' : job.status === 'failed' ? 'failed' : 'waiting',
+                estimatedTimeRemaining: job.timeRemaining,
+                metrics: {
+                  precision: 0.75,
+                  recall: 0.82,
+                  f1Score: 0.78
+                }
+              };
+              
+              return (
+                <TrainingProgressDetails
+                  key={job.id}
+                  progress={progressData}
+                  onCancel={() => handleStopTraining(job.id)}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center p-8 border border-dashed rounded-md">
+            <Clock className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
             <p className="text-muted-foreground">No active training jobs</p>
-          ) : (
-            trainingJobs.map(job => (
-              <TrainingProgressDetails
-                key={job.id}
-                progress={{
-                  modelId: job.modelId,
-                  epoch: job.epoch,
-                  totalEpochs: job.totalEpochs,
-                  loss: job.loss,
-                  accuracy: job.accuracy,
-                  timestamp: job.timestamp,
-                  status: job.status as any,
-                  estimatedTimeRemaining: job.timeRemaining,
-                  metrics: {
-                    precision: 0.8,
-                    recall: 0.75,
-                    f1Score: 0.77
-                  }
-                }}
-                onCancel={() => handleStopTraining(job.id)}
-              />
-            ))
-          )}
-        </div>
-        
-        <div className="mt-8">
-          <h3 className="text-lg font-medium mb-4">Training Actions</h3>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              size="sm"
-              onClick={() => handleStartTraining('text-generation')}
-              disabled={startingTraining}
-              className="flex items-center"
-            >
-              <Play className="mr-2 h-4 w-4" />
-              Text Model
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => handleStartTraining('image-analysis')}
-              disabled={startingTraining}
-              variant="outline"
-              className="flex items-center"
-            >
-              <Play className="mr-2 h-4 w-4" />
-              Vision Model
-            </Button>
+            <p className="text-xs text-muted-foreground mt-1">Start a new training job using the buttons above</p>
           </div>
-        </div>
-        
-        <div className="mt-8">
-          <h3 className="text-lg font-medium mb-4">Available Models ({models.length})</h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            {models.map(model => (
-              <div key={model.id} className="border rounded-md p-3">
-                <div className="flex justify-between items-start">
-                  <h4 className="font-medium">{model.name}</h4>
-                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                    {model.status}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground">{model.type} | v{model.version}</p>
-                <p className="text-xs mt-1">
-                  Accuracy: {(model.performance.accuracy * 100).toFixed(1)}% | 
-                  Latency: {model.performance.latency}ms
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

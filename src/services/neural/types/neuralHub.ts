@@ -52,22 +52,26 @@ export interface NeuralSystemStatus {
   stability?: number;
 }
 
+// Updated to match the ModelParameters from modelParameters.ts
 export interface ModelParameters {
   temperature: number;
   maxTokens: number;
   topP: number;
   frequencyPenalty: number;
   presencePenalty: number;
-  responseFormat: string;
-  model: string;
+  modelName: string;
+  responseFormat?: string;
+  model?: string;
   decayConstant?: number;
   learningRate?: number;
   batchSize?: number;
   stopSequences?: string[];
 }
 
+// Updated to match TrainingProgress from trainingManager.ts
 export interface TrainingProgress {
   id: string;
+  modelId: string;
   type: string;
   progress: number;
   status: 'training' | 'completed' | 'failed' | 'stopped';
@@ -75,13 +79,17 @@ export interface TrainingProgress {
   estimatedCompletionTime?: Date;
   currentEpoch?: number;
   totalEpochs?: number;
+  epoch: number;
+  loss: number;
+  accuracy: number;
+  timestamp: string;
+  timeRemaining?: number;
+  targetAccuracy?: number;
+  error?: string;
   metrics?: {
     loss?: number;
     accuracy?: number;
   };
-  modelId?: string;
-  timeRemaining?: number;
-  error?: string;
 }
 
 export interface NeuralModel {

@@ -8,7 +8,7 @@ export interface ModelParameters {
   frequencyPenalty: number;
   presencePenalty: number;
   maxTokens: number;
-  modelName: string; // Added the missing modelName property
+  modelName: string;
   stopSequences?: string[];
   // Add additional properties that components are trying to use
   learningRate?: number;
@@ -24,7 +24,7 @@ export const defaultModelParameters: ModelParameters = {
   frequencyPenalty: 0.0,
   presencePenalty: 0.0,
   maxTokens: 1000,
-  modelName: 'gpt-3.5-turbo', // Default model name
+  modelName: 'gpt-3.5-turbo', 
   stopSequences: []
 };
 
@@ -34,7 +34,7 @@ export const defaultModelParameters: ModelParameters = {
 export const creativeModelParameters: ModelParameters = {
   temperature: 0.9,
   topP: 1.0,
-  frequencyRate: 0.2,
+  frequencyPenalty: 0.2,
   presencePenalty: 0.1,
   maxTokens: 1500,
   modelName: 'gpt-4',

@@ -3,7 +3,7 @@ import React from 'react';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 
 interface MapViewerProps {
-  center: {
+  center?: {
     lat: number;
     lng: number;
   };
@@ -20,9 +20,9 @@ interface MapViewerProps {
   height?: string;
   width?: string;
   apiKey?: string; 
-  latitude?: number; // Add missing property
-  longitude?: number; // Add missing property
-  markerLabel?: string; // Add missing property
+  latitude?: number;
+  longitude?: number;
+  markerLabel?: string;
 }
 
 const MapViewer: React.FC<MapViewerProps> = ({
@@ -40,7 +40,7 @@ const MapViewer: React.FC<MapViewerProps> = ({
   // If latitude and longitude are provided, use them to create a center object
   const mapCenter = latitude && longitude 
     ? { lat: latitude, lng: longitude } 
-    : center;
+    : center || { lat: 0, lng: 0 }; // Provide fallback default
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',

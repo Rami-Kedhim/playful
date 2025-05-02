@@ -3,14 +3,15 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Clock, CheckCircle, AlertCircle, BarChart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Clock, CheckCircle, AlertCircle, BarChart, X } from 'lucide-react';
 
 interface TrainingProgress {
   modelId: string;
   epoch: number;
   totalEpochs: number;
   loss: number;
-  accuracy: number; // Added the missing accuracy property
+  accuracy: number;
   timestamp: string;
   status: 'running' | 'completed' | 'failed' | 'waiting';
   estimatedTimeRemaining?: number;
@@ -24,9 +25,10 @@ interface TrainingProgress {
 
 interface TrainingProgressDetailsProps {
   progress: TrainingProgress;
+  onCancel?: () => Promise<boolean>;
 }
 
-const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({ progress }) => {
+const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({ progress, onCancel }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'running':
@@ -64,6 +66,12 @@ const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({ progr
     return `${mins}m ${secs}s`;
   };
 
+  const handleCancelClick = async () => {
+    if (onCancel) {
+      await onCancel();
+    }
+  };
+
   return (
     <Card className="shadow-sm">
       <CardHeader className="pb-2">
@@ -71,10 +79,23 @@ const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({ progr
           <CardTitle className="text-lg font-medium">
             Training Progress: Model {progress.modelId}
           </CardTitle>
-          <Badge className={`${getStatusColor(progress.status)} flex items-center gap-1`}>
-            {getStatusIcon(progress.status)}
-            <span className="capitalize">{progress.status}</span>
-          </Badge>
+          <div className="flex items-center space-x-2">
+            <Badge className={`${getStatusColor(progress.status)} flex items-center gap-1`}>
+              {getStatusIcon(progress.status)}
+              <span className="capitalize">{progress.status}</span>
+            </Badge>
+            {onCancel && progress.status === 'running' && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-7 w-7 p-0" 
+                onClick={handleCancelClick}
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Cancel</span>
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="pt-0">

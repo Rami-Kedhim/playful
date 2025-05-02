@@ -14,12 +14,13 @@ import { ModelParameters } from '@/services/neural/models/modelParameters';
  */
 const ModelParametersPanel: React.FC = () => {
   const { getParameters, updateParameters } = useNeuralHub();
-  const [parameters, setParameters] = useState<ModelParameters>(getParameters());
+  const [parameters, setParameters] = useState<ModelParameters>(() => getParameters());
   const { toast } = useToast();
   
   // Reset parameters to current values
   useEffect(() => {
-    setParameters(getParameters());
+    const currentParams = getParameters();
+    setParameters(currentParams as ModelParameters);
   }, [getParameters]);
 
   // Update local state when a parameter changes
@@ -38,7 +39,8 @@ const ModelParametersPanel: React.FC = () => {
   
   // Reset to default values
   const handleReset = () => {
-    setParameters(getParameters());
+    const currentParams = getParameters();
+    setParameters(currentParams as ModelParameters);
     toast({
       description: "Parameters have been reset to current values."
     });

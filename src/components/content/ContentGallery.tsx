@@ -127,8 +127,11 @@ const ContentGallery: React.FC<ContentGalleryProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {content.map((item) => (
             <ContentCard 
-              key={item.id} 
-              content={item} 
+              key={item.id}
+              id={item.id}
+              name={item.title}
+              imageUrl={item.image || "https://placehold.co/600x400?text=No+Image"}
+              content={item}
               onEnhance={() => handleEnhanceContent(item.id)}
               isEnhancing={enhancing}
             />
