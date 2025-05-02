@@ -22,8 +22,12 @@ class NeuralMetricsService {
       const normalizedMetrics: ServiceMetrics = {
         ...metrics,
         latency: metrics.latency !== undefined ? metrics.latency : (metrics.responseTime || null),
+        responseTime: metrics.responseTime || metrics.latency || 0,
         operationsCount: metrics.operationsCount || 0,
-        errorCount: metrics.errorCount || 0
+        errorCount: metrics.errorCount || 0,
+        errorRate: metrics.errorRate !== undefined ? metrics.errorRate : 
+          (metrics.operationsCount > 0 && metrics.errorCount !== undefined ? 
+            metrics.errorCount / metrics.operationsCount : 0)
       };
 
       serviceMetrics[service.moduleId] = {
