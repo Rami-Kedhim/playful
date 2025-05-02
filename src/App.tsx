@@ -20,6 +20,7 @@ function App() {
     <>
       <Routes>
         <Route element={<MainLayout />}>
+          <Route index element={<HomePage />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/verification" element={<VerificationPage />} />
           <Route path="/escorts" element={<Escorts />} />

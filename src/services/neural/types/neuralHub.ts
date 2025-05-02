@@ -126,7 +126,7 @@ export interface INeuralHub {
   getSystemStatus(): any;
   
   // Add the missing methods to resolve the errors
-  getConfig?(): any;
-  updateConfig?(config: any): Promise<boolean>;
-  getDecisionLogs?(): any[];
+  getConfig(): any;
+  updateConfig(config: any): Promise<boolean>;
+  getDecisionLogs(): any[];
 }

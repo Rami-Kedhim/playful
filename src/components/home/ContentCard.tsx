@@ -1,16 +1,16 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Star, Shield } from 'lucide-react';
 
 export interface ProfileProps {
   id: string;
   name: string;
-  imageUrl?: string;      // added optional to fix TS errors related to missing imageUrl
+  imageUrl: string;
   location?: string;
   rating?: number;
-  isPremium?: boolean;    // added optional to fix TS errors related to missing isPremium
+  isPremium?: boolean;
   price?: number;
 }
 
@@ -24,41 +24,43 @@ const ContentCard: React.FC<ProfileProps> = ({
   price
 }) => {
   return (
-    <Card className="w-64 overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-      <div className="relative">
-        <img 
-          src={imageUrl} 
-          alt={name}
-          className="w-full h-40 object-cover"
-        />
-        {isPremium && (
-          <Badge className="absolute top-2 right-2 bg-gradient-to-r from-amber-500 to-amber-300 text-black">
-            Premium
-          </Badge>
-        )}
-      </div>
-      <CardContent className="p-4">
-        <h3 className="font-medium text-lg">{name}</h3>
-        <div className="flex justify-between items-center mt-2">
-          <div className="flex items-center">
-            {rating && (
-              <div className="flex items-center mr-2">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm ml-1">{rating}</span>
+    <Link to={`/profile/${id}`}>
+      <Card className="w-[250px] overflow-hidden bg-card hover:shadow-lg transition-shadow duration-300">
+        <div className="relative">
+          <img
+            src={imageUrl}
+            alt={name}
+            className="h-[200px] w-full object-cover"
+          />
+          {isPremium && (
+            <div className="absolute top-2 right-2 bg-primary/80 text-white text-xs px-2 py-1 rounded-full flex items-center">
+              <Shield className="h-3 w-3 mr-1" />
+              Premium
+            </div>
+          )}
+        </div>
+        <CardContent className="p-4">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="font-medium text-lg">{name}</h3>
+              {location && <p className="text-sm text-muted-foreground">{location}</p>}
+            </div>
+            {rating !== undefined && (
+              <div className="flex items-center bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded text-xs">
+                <Star className="h-3 w-3 fill-amber-500 text-amber-500 mr-0.5" />
+                {rating.toFixed(1)}
               </div>
-            )}
-            {location && (
-              <span className="text-xs text-muted-foreground">{location}</span>
             )}
           </div>
           {price !== undefined && (
-            <span className="font-medium">${price}</span>
+            <div className="mt-2 font-medium text-sm">
+              ${price} <span className="text-muted-foreground text-xs">/hour</span>
+            </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Link>
   );
 };
 
 export default ContentCard;
-
