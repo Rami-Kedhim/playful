@@ -1,4 +1,3 @@
-
 import { INeuralHub, NeuralRequest, NeuralResponse, NeuralSystemStatus, TrainingProgress, ModelParameters, NeuralModel } from './types/neuralHub';
 
 /**
@@ -73,7 +72,13 @@ const neuralHub = {
       neuralLatency: 120 + Math.random() * 30,
       errorRate: 1.2 + Math.random() * 0.8,
       responseTime: 165 + Math.random() * 35,
-      stability: 92 - Math.random() * 8
+      stability: 92 - Math.random() * 8,
+      memoryAllocation: 0.72 + Math.random() * 0.1,
+      networkThroughput: 42.5 + Math.random() * 10,
+      requestRate: 325 + Math.random() * 50,
+      averageResponseTime: 165 + Math.random() * 35,
+      cpuUsage: 0.65 + Math.random() * 0.15,
+      memoryUsage: 0.72 + Math.random() * 0.1
     };
   },
   
@@ -89,7 +94,18 @@ const neuralHub = {
       averageResponseTime: 145 + Math.random() * 30,
       errorRate: 0.012 + Math.random() * 0.008,
       userEngagement: 0.78 + Math.random() * 0.12,
-      lastUpdated: Date.now()
+      lastUpdated: Date.now(),
+      cpuUtilization: 0.65 + Math.random() * 0.15,
+      memoryUtilization: 0.72 + Math.random() * 0.1, 
+      responseTime: 145 + Math.random() * 30,
+      operationsPerSecond: 325 + Math.random() * 50,
+      stability: 0.92 - Math.random() * 0.08,
+      requestsPerMinute: 7 + Math.random() * 3,
+      cpuUsage: 0.65 + Math.random() * 0.15,
+      memoryUsage: 0.72 + Math.random() * 0.1,
+      neuralAccuracy: 0.92 + Math.random() * 0.05,
+      neuralEfficiency: 0.88 + Math.random() * 0.08,
+      neuralLatency: 120 + Math.random() * 30
     };
   },
   
