@@ -9,6 +9,7 @@ import RatesTab from "@/components/profile/RatesTab";
 import SafetyTips from "@/components/verification/SafetyTips";
 import VerificationBadge from "@/components/verification/VerificationBadge";
 import { useRole } from "@/hooks/auth/useRole";
+import { VerificationLevel } from "@/types/verification";
 
 interface ProfileTabsProps {
   user: User;
@@ -26,6 +27,13 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
   const handleTabChange = (value: string) => {
     onTabChange(value);
   };
+
+  // Convert the string verification level to the proper enum type
+  const verificationLevel: VerificationLevel = 
+    profile.verification_level && 
+    Object.values(VerificationLevel).includes(profile.verification_level as VerificationLevel)
+      ? (profile.verification_level as VerificationLevel)
+      : VerificationLevel.NONE;
 
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange}>
@@ -52,7 +60,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
         <div className="space-y-6">
           <div className="flex items-center gap-2 mb-4">
             <h3 className="text-xl font-semibold">Verification Status</h3>
-            <VerificationBadge level={profile.verification_level} />
+            <VerificationBadge level={verificationLevel} />
           </div>
           
           <SafetyTips />
