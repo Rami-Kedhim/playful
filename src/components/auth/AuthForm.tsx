@@ -1,13 +1,12 @@
 
 import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/auth';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from '@/components/ui/use-toast';
 
 interface AuthFormProps {
   onSuccess?: () => void;
@@ -15,185 +14,177 @@ interface AuthFormProps {
 }
 
 export const AuthForm: React.FC<AuthFormProps> = ({ 
-  onSuccess,
-  initialTab = 'login'
+  onSuccess, 
+  initialTab = 'login' 
 }) => {
-  const [tab, setTab] = useState<'login' | 'register'>(initialTab);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Login form state
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  
-  // Register form state
-  const [registerEmail, setRegisterEmail] = useState('');
-  const [registerPassword, setRegisterPassword] = useState('');
-  const [registerUsername, setRegisterUsername] = useState('');
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>(initialTab);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   
   const { login, register } = useAuth();
-  
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setIsLoading(true);
     
     try {
-      const result = await login(loginEmail, loginPassword);
+      const result = await login(email, password);
       
       if (result.success) {
-        toast.success('Login successful');
+        toast({
+          title: "Login successful",
+          description: "You have been logged in successfully.",
+        });
         onSuccess?.();
       } else {
-        toast.error('Login failed', { description: result.error });
+        toast({
+          title: "Login failed",
+          description: result.error || "Please check your credentials and try again.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
-      console.error('Login error:', error);
-      toast.error('Login failed', { description: 'An unexpected error occurred.' });
+      toast({
+        title: "Login error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
-  
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setIsLoading(true);
     
     try {
-      const result = await register(registerEmail, registerPassword, registerUsername);
+      const result = await register(email, password, username);
       
       if (result.success) {
-        toast.success('Registration successful');
+        toast({
+          title: "Registration successful",
+          description: "Your account has been created successfully.",
+        });
         onSuccess?.();
       } else {
-        toast.error('Registration failed', { description: result.error });
+        toast({
+          title: "Registration failed",
+          description: result.error || "Please check your information and try again.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
-      console.error('Registration error:', error);
-      toast.error('Registration failed', { description: 'An unexpected error occurred.' });
+      toast({
+        title: "Registration error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
-  
+
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Welcome to UberEscorts</CardTitle>
-        <CardDescription>Login or create an account to continue</CardDescription>
+        <CardTitle className="text-center">Welcome</CardTitle>
+        <CardDescription className="text-center">
+          Log in to your account or create a new one
+        </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue={tab} onValueChange={(value) => setTab(value as 'login' | 'register')}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="register">Register</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="login">
-            <form onSubmit={handleLogin} className="space-y-4 mt-4">
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'register')}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="login">Login</TabsTrigger>
+          <TabsTrigger value="register">Register</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="login">
+          <form onSubmit={handleLogin}>
+            <CardContent className="space-y-4 pt-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Email address"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
-                  autoComplete="email"
                 />
               </div>
               <div className="space-y-2">
-                <div className="flex justify-between">
+                <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
-                  <a href="#" className="text-sm text-primary hover:underline">
+                  <Button variant="link" size="sm" className="px-0 text-xs" type="button">
                     Forgot password?
-                  </a>
+                  </Button>
                 </div>
-                <Input
-                  id="password"
+                <Input 
+                  id="password" 
                   type="password"
-                  placeholder="Password"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
-                  autoComplete="current-password"
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Logging in...
-                  </>
-                ) : (
-                  'Login'
-                )}
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Logging in..." : "Login"}
               </Button>
-            </form>
-          </TabsContent>
-          
-          <TabsContent value="register">
-            <form onSubmit={handleRegister} className="space-y-4 mt-4">
+            </CardFooter>
+          </form>
+        </TabsContent>
+        
+        <TabsContent value="register">
+          <form onSubmit={handleRegister}>
+            <CardContent className="space-y-4 pt-4">
               <div className="space-y-2">
                 <Label htmlFor="register-email">Email</Label>
-                <Input
-                  id="register-email"
-                  type="email"
-                  placeholder="Email address"
-                  value={registerEmail}
-                  onChange={(e) => setRegisterEmail(e.target.value)}
+                <Input 
+                  id="register-email" 
+                  type="email" 
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
-                  autoComplete="email"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="register-username">Username</Label>
-                <Input
-                  id="register-username"
+                <Label htmlFor="username">Username</Label>
+                <Input 
+                  id="username" 
                   type="text"
-                  placeholder="Username"
-                  value={registerUsername}
-                  onChange={(e) => setRegisterUsername(e.target.value)}
+                  placeholder="Choose a username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
-                  autoComplete="username"
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="register-password">Password</Label>
-                <Input
-                  id="register-password"
+                <Input 
+                  id="register-password" 
                   type="password"
-                  placeholder="Password"
-                  value={registerPassword}
-                  onChange={(e) => setRegisterPassword(e.target.value)}
+                  placeholder="Create a password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
-                  autoComplete="new-password"
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...
-                  </>
-                ) : (
-                  'Create account'
-                )}
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Creating account..." : "Create account"}
               </Button>
-            </form>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-      <CardFooter className="flex flex-col items-center">
-        <p className="text-sm text-muted-foreground mt-2">
-          By continuing, you agree to our{" "}
-          <a href="#" className="text-primary hover:underline">
-            Terms of Service
-          </a>{" "}
-          and{" "}
-          <a href="#" className="text-primary hover:underline">
-            Privacy Policy
-          </a>
-          .
-        </p>
-      </CardFooter>
+            </CardFooter>
+          </form>
+        </TabsContent>
+      </Tabs>
     </Card>
   );
 };
