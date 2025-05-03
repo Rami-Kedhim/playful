@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import AppLayout from '@/components/layout/AppLayout';
+import { UnifiedLayout } from '@/components/layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import AICompanionChat from '@/components/ai/AICompanionChat';
@@ -34,7 +33,7 @@ const AICompanionPage = () => {
   ];
   
   return (
-    <AppLayout>
+    <UnifiedLayout>
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h1 className="text-4xl font-bold mb-4 flex items-center justify-center gap-2">
@@ -88,7 +87,7 @@ const AICompanionPage = () => {
           />
         )}
       </div>
-    </AppLayout>
+    </UnifiedLayout>
   );
 };
 

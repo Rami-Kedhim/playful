@@ -8,4 +8,4 @@ export { default as NavItems } from './NavItems';
 export { default as MainNavigation } from './MainNavigation';
 export { default as DesktopNavigation } from './DesktopNavigation';
 export { default as MobileNavigation } from './MobileNavigation';
-export { default as MobileMenu } from '@/components/layout/MobileMenu';
+export { default as MobileMenu } from '../layout/MobileMenu';
