@@ -1,11 +1,30 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { UnifiedLayout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Brain, Sparkles } from 'lucide-react';
 
 const HomePage = () => {
+  const navigate = useNavigate();
+  
+  // Use useCallback for event handlers to prevent recreation on each render
+  const handleExploreEscorts = useCallback(() => {
+    navigate('/escorts');
+  }, [navigate]);
+  
+  const handleExploreAI = useCallback(() => {
+    navigate('/ai-companions');
+  }, [navigate]);
+  
+  const handleExploreBrainHub = useCallback(() => {
+    navigate('/brain-hub');
+  }, [navigate]);
+  
+  const handleExploreMetaverse = useCallback(() => {
+    navigate('/metaverse');
+  }, [navigate]);
+
   return (
     <UnifiedLayout hideNavbar fullWidth className="px-0">
       {/* Hero Section */}

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Shield } from 'lucide-react';
@@ -10,6 +10,10 @@ interface HomeHeaderProps {
 
 const HomeHeader: React.FC<HomeHeaderProps> = ({ onExploreClick }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
   
   return (
     <header className="relative min-h-[70vh] flex items-center overflow-hidden">
@@ -41,7 +45,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ onExploreClick }) => {
                 placeholder="Search personas, services, or locations..."
                 className="pl-10 py-6"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
               />
             </div>
             <Button size="lg" onClick={onExploreClick} className="bg-primary hover:bg-primary/90">

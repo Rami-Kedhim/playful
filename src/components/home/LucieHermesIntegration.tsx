@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useHermesInsights } from '@/hooks/useHermesInsights';
 import LucieAssistant from './LucieAssistant';
@@ -10,7 +10,7 @@ export type LucieHermesIntegrationProps = {
 };
 
 export const LucieHermesIntegration = ({
-  forceVisible,
+  forceVisible = false,
   onLucieTriggered,
 }: LucieHermesIntegrationProps) => {
   const { user } = useAuth();
@@ -31,6 +31,10 @@ export const LucieHermesIntegration = ({
   const boostOffer = boostOfferInsight?.data?.boostOffer;
   const vrEvent = vrEventInsight?.description;
   const recommendedProfileId = recommendationInsight?.data?.profileId;
+  
+  const handleClose = useCallback(() => {
+    setIsVisible(false);
+  }, []);
   
   useEffect(() => {
     // Only initialize once to prevent infinite loops
@@ -78,7 +82,16 @@ export const LucieHermesIntegration = ({
         }
       }
     }
-  }, [user, onLucieTriggered, reportUserAction, boostOffer, vrEvent, recommendedProfileId, forceVisible, initialized]);
+  }, [
+    user, 
+    onLucieTriggered, 
+    reportUserAction, 
+    boostOffer, 
+    vrEvent, 
+    recommendedProfileId, 
+    forceVisible, 
+    initialized
+  ]);
 
   // Auto-hide Lucie after 2 minutes if not forced visible
   useEffect(() => {
@@ -103,7 +116,7 @@ export const LucieHermesIntegration = ({
     <LucieAssistant
       initiallyOpen={Boolean(forceVisible)}
       customInitialMessage={customMessage}
-      onClose={() => setIsVisible(false)}
+      onClose={handleClose}
     />
   );
 };

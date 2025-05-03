@@ -67,14 +67,10 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
       
       // Only mark as complete if we've actually processed URL parameters
       // This prevents unnecessary re-renders
-      if (searchParams.toString() || !filtersApplied) {
-        setInitialLoadComplete(true);
-      }
+      setInitialLoadComplete(true);
     } finally {
       // Always reset the flag when done
-      setTimeout(() => {
-        filterUpdateFromUrlRef.current = false;
-      }, 0);
+      filterUpdateFromUrlRef.current = false;
     }
   }, [searchParams, filterState, initialLoadComplete]);
   
@@ -131,9 +127,7 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
       }
     } finally {
       // Make sure we always reset this flag
-      setTimeout(() => {
-        updatingUrlRef.current = false;
-      }, 0);
+      updatingUrlRef.current = false;
     }
   }, [
     filterState.serviceTypeFilter,

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, MapPin, Star, Shield } from 'lucide-react';
@@ -14,12 +14,12 @@ interface HeroProps {
 const HeroSection = ({ searchLocation, setSearchLocation }: HeroProps) => {
   const navigate = useNavigate();
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     navigate(`/search?location=${encodeURIComponent(searchLocation)}`);
-  };
+  }, [navigate, searchLocation]);
   
-  const handleBoostClick = () => {
+  const handleBoostClick = useCallback(() => {
     // Call Oxum's boostAllocationEigen
     const mockAdjacencyMatrix = [
       [0, 1, 1, 0],
@@ -35,7 +35,11 @@ const HeroSection = ({ searchLocation, setSearchLocation }: HeroProps) => {
     } catch (error) {
       console.error('Error calculating boost scores:', error);
     }
-  };
+  }, [navigate]);
+
+  const handleLocationChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchLocation(e.target.value);
+  }, [setSearchLocation]);
 
   return (
     <section className="relative min-h-[90vh] flex flex-col justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-purple-900/90 to-gray-900">
@@ -66,7 +70,7 @@ const HeroSection = ({ searchLocation, setSearchLocation }: HeroProps) => {
                   placeholder="Enter your location..."
                   className="pl-10 py-6 bg-background/80 backdrop-blur-sm border-gray-700"
                   value={searchLocation}
-                  onChange={(e) => setSearchLocation(e.target.value)}
+                  onChange={handleLocationChange}
                 />
               </div>
               <Button type="submit" size="lg" className="bg-purple-600 hover:bg-purple-700">
