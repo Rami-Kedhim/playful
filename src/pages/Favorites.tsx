@@ -73,7 +73,7 @@ const Favorites = () => {
                       tags={escort.tags || []}
                       verified={escort.verified || false}
                       price={escort.price || 0}
-                      gender={escort.gender || ''}
+                      gender={''}
                     />
                     <Button 
                       variant="ghost" 
