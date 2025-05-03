@@ -9,6 +9,12 @@ export interface SystemIntegrityResult {
   details?: Record<string, any>;
 }
 
+export interface SessionValidationResult {
+  isValid: boolean;
+  userId?: string;
+  expiry?: Date;
+}
+
 class OrusSystem {
   checkIntegrity(): SystemIntegrityResult {
     return {
@@ -24,6 +30,20 @@ class OrusSystem {
   verifyAuthToken(token: string): boolean {
     // Mock implementation
     return token !== undefined && token !== '';
+  }
+
+  // Add the missing method that is being used across the application
+  validateSession(userId: string): SessionValidationResult {
+    // Mock implementation
+    if (!userId || userId === '') {
+      return { isValid: false };
+    }
+
+    return {
+      isValid: true,
+      userId,
+      expiry: new Date(Date.now() + 3600000) // 1 hour from now
+    };
   }
 }
 
