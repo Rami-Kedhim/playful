@@ -49,12 +49,12 @@ const HeroSection = ({ searchLocation, setSearchLocation }: HeroProps) => {
           </div>
           
           <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
-            Real • Virtual • Intelligent — <span className="text-purple-300">Your Ultimate Connection</span>
+            Digital • Personal • Intelligent — <span className="text-purple-300">Premium Connections</span>
           </h1>
           
           <p className="text-lg md:text-xl text-gray-300 mb-8">
-            The sovereign, AI-powered platform connecting you with verified escorts, creators, and AI companions 
-            in a secure and private environment, powered by the revolutionary UBX token economy.
+            An innovative platform connecting you with verified professionals and digital companions 
+            in a secure environment, enhanced by our advanced UBX blockchain technology.
           </p>
           
           <div className="flex flex-col md:flex-row gap-4 mb-10">
