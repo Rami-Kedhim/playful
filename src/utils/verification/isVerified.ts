@@ -38,5 +38,7 @@ export const hasSubmittedVerification = (user: User | null): boolean => {
   if (!user) return false;
   
   // Check user_metadata for verification submitted flag
-  return user.user_metadata?.verification_submitted === true;
+  // Use optional chaining to safely access properties
+  return user.user_metadata?.verification_submitted === true || 
+         user.user_metadata?.verification_request !== undefined;
 };

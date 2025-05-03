@@ -23,7 +23,7 @@ const ProfileEdit = () => {
   useEffect(() => {
     if (profile) {
       setFormData({
-        name: profile.name || '',
+        name: profile.name || profile.fullName || '',
         username: profile.username || '',
         bio: profile.bio || '',
         location: profile.location || '',

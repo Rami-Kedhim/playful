@@ -1,4 +1,3 @@
-
 // Fix import and missing components/variables in Wallet.tsx
 
 import { useState } from 'react';
@@ -27,7 +26,9 @@ const NETWORK_CONFIG = {
 
 const Wallet = () => {
   const { user, profile } = useAuth();
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [rechargeDialogOpen, setRechargeDialogOpen] = useState(false);
+  const [boostModalOpen, setBoostModalOpen] = useState(false);
   
   return (
     <MainLayout>
@@ -159,4 +160,3 @@ const Wallet = () => {
 };
 
 export default Wallet;
-

@@ -1,5 +1,6 @@
 
 import { useAuth } from './useAuthContext';
+import { UserRole } from '@/types/auth';
 
 export function useRole() {
   const { user, isAuthenticated } = useAuth();
@@ -25,6 +26,10 @@ export function useRole() {
     return false;
   };
   
+  const hasAnyRole = (roles: string[]): boolean => {
+    return roles.some(role => hasRole(role));
+  };
+  
   const getUserRoles = (): string[] => {
     if (!isAuthenticated || !user) return [];
     
@@ -42,10 +47,35 @@ export function useRole() {
     
     return ['user']; // Default role
   };
+
+  // Get the highest priority role (admin > moderator > creator > escort > client > user)
+  const getHighestRole = (): string => {
+    const roles = getUserRoles();
+    if (roles.includes('admin')) return 'admin';
+    if (roles.includes('moderator')) return 'moderator';
+    if (roles.includes('creator')) return 'creator';
+    if (roles.includes('escort')) return 'escort';
+    if (roles.includes('client')) return 'client';
+    return 'user';
+  };
+
+  // Role-specific boolean checks for convenient conditional rendering
+  const isAdmin = hasRole('admin');
+  const isModerator = hasRole('moderator');
+  const isCreator = hasRole('creator');
+  const isEscort = hasRole('escort');
+  const isClient = hasRole('client');
   
   return {
     hasRole,
+    hasAnyRole,
     getUserRoles,
+    highestRole: getHighestRole(),
+    isAdmin,
+    isModerator,
+    isCreator,
+    isEscort,
+    isClient
   };
 }
 

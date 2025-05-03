@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email?: string;
@@ -43,8 +42,9 @@ export interface UserProfile {
   preferences?: Record<string, any>;
   verified?: boolean;
   is_verified?: boolean; // Adding for backward compatibility
-  createdAt: string;
-  updatedAt: string;
+  isVerified?: boolean;  // Adding for standardization
+  createdAt?: string;
+  updatedAt?: string;
   gender?: string;
   location?: string;
   sexual_orientation?: string;
@@ -57,6 +57,9 @@ export interface UserProfile {
   subscription_tier?: string;
   role?: string;
   roles?: string[];
+  verification_status?: string;
+  verification_level?: string;
+  verification_submitted?: boolean;
 }
 
 export interface LoginCredentials {
@@ -70,4 +73,3 @@ export interface RegisterCredentials {
   password: string;
   confirmPassword: string;
 }
-
