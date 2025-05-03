@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { AppPaths } from '@/routes';
+import { AppPaths } from '@/routes/routeConfig';
 import { cn } from '@/lib/utils';
 import { Brain, Home, Users, Heart, MessageSquare } from 'lucide-react';
 
@@ -31,21 +31,21 @@ const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
       </NavLink>
       
       <NavLink 
-        to={AppPaths.AI_COMPANION}
-        className={({ isActive }) => 
-          cn("text-sm flex items-center gap-1.5", isActive ? "font-bold text-primary" : "text-muted-foreground hover:text-foreground")
-        }
-      >
-        <Heart className="w-4 h-4" /> AI Companions
-      </NavLink>
-      
-      <NavLink 
         to={AppPaths.NEURAL_MONITOR}
         className={({ isActive }) => 
           cn("text-sm flex items-center gap-1.5", isActive ? "font-bold text-primary" : "text-muted-foreground hover:text-foreground")
         }
       >
         <Brain className="w-4 h-4" /> Neural Monitor
+      </NavLink>
+      
+      <NavLink 
+        to={AppPaths.BRAIN_HUB}
+        className={({ isActive }) => 
+          cn("text-sm flex items-center gap-1.5", isActive ? "font-bold text-primary" : "text-muted-foreground hover:text-foreground")
+        }
+      >
+        <Brain className="w-4 h-4" /> Brain Hub
       </NavLink>
       
       <NavLink 

@@ -3,6 +3,7 @@ import { hermes } from '@/core/Hermes';
 import { oxum } from '@/core/Oxum';
 import { orus } from '@/core/Orus';
 import { lucie } from '@/core/Lucie';
+export * from './systemHealthChecker';
 
 /**
  * Get the health status of core systems as a percentage
