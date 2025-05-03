@@ -10,11 +10,10 @@ import useActiveFilters from "@/hooks/escort-filters/useActiveFilters";
 interface ResultsSectionProps {
   filterState: any;
   combinedIsLoading: boolean;
-  activeFilterCount?: number; // Optional prop for filter count
 }
 
 const ResultsSection = memo<ResultsSectionProps>(({ filterState, combinedIsLoading }) => {
-  // Get active filters using our new hook
+  // Get active filters using our hook
   const { activeFilters, activeFilterCount } = useActiveFilters(filterState);
   
   // Memoize handlers for filter removal
@@ -67,27 +66,14 @@ const ResultsSection = memo<ResultsSectionProps>(({ filterState, combinedIsLoadi
         setSortBy={filterState.setSortBy || (() => {})}
       />
 
-      {/* Mobile Applied Filters display */}
+      {/* Active Filters display - only show in mobile view */}
       <div className="lg:hidden mb-6">
-        {typeof activeFilterCount === 'number' && activeFilterCount > 0 && (
-          <div className="text-sm text-muted-foreground mb-3">
-            <span>{activeFilterCount} active filters</span> · 
-            <button 
-              onClick={filterState.clearFilters} 
-              className="ml-2 text-primary hover:underline"
-            >
-              Clear all
-            </button>
-          </div>
-        )}
-        
-        {activeFilters.length > 0 && (
-          <ActiveFiltersDisplay 
-            activeFilters={activeFilters}
-            onRemoveFilter={handleRemoveFilter}
-            onClearAllFilters={filterState.clearFilters || (() => {})}
-          />
-        )}
+        <ActiveFiltersDisplay 
+          activeFilters={activeFilters}
+          onRemoveFilter={handleRemoveFilter}
+          onClearAllFilters={filterState.clearFilters || (() => {})}
+          showFilterCount={true}
+        />
       </div>
 
       {/* No results alert */}

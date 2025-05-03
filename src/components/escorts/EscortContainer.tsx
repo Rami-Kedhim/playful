@@ -7,6 +7,7 @@ import HeaderSection from "./container/HeaderSection";
 import FilterSection from "./container/FilterSection";
 import ResultsSection from "./container/ResultsSection";
 import { ServiceTypeFilter } from "@/components/escorts/filters/ServiceTypeBadgeLabel";
+import useActiveFilters from "@/hooks/escort-filters/useActiveFilters";
 
 interface EscortContainerProps {
   escorts: Escort[];
@@ -19,6 +20,9 @@ const EscortContainer = memo<EscortContainerProps>(({ escorts, services, isLoadi
   
   // Use the filtered hook that syncs with URL
   const filterState = useEscortFilterWithUrl({ escorts });
+  
+  // Get active filter count using our hook
+  const { activeFilterCount } = useActiveFilters(filterState);
 
   // Memoize handlers to prevent unnecessary re-renders
   const safeSetServiceTypeFilter = useCallback((value: ServiceTypeFilter) => {
@@ -65,6 +69,7 @@ const EscortContainer = memo<EscortContainerProps>(({ escorts, services, isLoadi
         showFilters={showFilters}
         setShowFilters={handleSetShowFilters}
         totalCount={escorts?.length || 0}
+        activeFilterCount={activeFilterCount}
       />
       
       {/* Quick filter bar for mobile and desktop */}
