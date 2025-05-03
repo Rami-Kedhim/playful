@@ -2,409 +2,309 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Calendar, 
-  MapPin, 
-  MessageCircle, 
-  Star, 
-  Heart, 
-  Share2, 
-  Clock, 
-  CheckCircle, 
-  BarChart, 
-  User
-} from 'lucide-react';
-import { Escort } from '@/types/Escort';
-import { hermesOrusOxum } from '@/core/HermesOrusOxum';
+import { Star, MessageCircle, Heart, Share2, Calendar } from 'lucide-react';
+
+// Mock data for a single escort
+const mockEscort = {
+  id: '1',
+  name: 'Sophia',
+  age: 28,
+  gender: 'female',
+  location: 'Los Angeles, CA',
+  rating: 4.9,
+  reviewCount: 47,
+  price: 300,
+  hourlyRate: 300,
+  responseRate: 98,
+  tags: ['Elite', 'Luxury', 'Verified'],
+  services: ['Dinner Dates', 'Travel Companion', 'Cultural Events'],
+  languages: ['English', 'Spanish', 'French'],
+  height: '5\'7"',
+  weight: '125 lbs',
+  hairColor: 'Blonde',
+  eyeColor: 'Blue',
+  ethnicity: 'Caucasian',
+  measurements: '36-24-36',
+  isVerified: true,
+  availableNow: true,
+  featured: true,
+  imageUrl: 'https://i.pravatar.cc/300?img=1',
+  gallery: [
+    'https://i.pravatar.cc/800?img=1',
+    'https://i.pravatar.cc/800?img=5',
+    'https://i.pravatar.cc/800?img=9',
+    'https://i.pravatar.cc/800?img=20',
+    'https://i.pravatar.cc/800?img=22',
+  ],
+  bio: "Hi there! I'm Sophia, a friendly and sophisticated companion. I love deep conversations, fine dining, and creating memorable experiences. I have a background in art history and enjoy visiting museums and galleries. Looking forward to meeting you!",
+  description: "I provide an upscale companion experience tailored to your needs. Whether you're seeking stimulating conversation over dinner, a partner for a high-profile event, or just someone to explore the city with, I'm the perfect choice for discerning gentlemen who appreciate elegance and intelligence.",
+  rates: {
+    hourly: 300,
+    twoHours: 550,
+    dinner: 800,
+    overnight: 1500,
+  }
+};
 
 const EscortDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const [escort, setEscort] = useState<Escort | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [escort, setEscort] = useState(mockEscort);
+  const [activeTab, setActiveTab] = useState('about');
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
-    // Mock fetch escort data
-    const fetchEscort = async () => {
-      setLoading(true);
-      try {
-        // In a real app, this would be an API call
-        // Simulate API call with timeout
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Record that the profile was viewed in analytics
-        if (id) {
-          hermesOrusOxum.recordProfileView(id);
-        }
-        
-        // Mock data
-        const mockEscort: Escort = {
-          id: id || '1',
-          name: 'Sophia',
-          age: 28,
-          gender: 'female',
-          location: 'Los Angeles, CA',
-          bio: 'Hi there! I'm Sophia, a friendly and sophisticated companion. I love deep conversations, fine dining, and creating memorable experiences. I have a background in art history and enjoy visiting museums and galleries. Looking forward to meeting you!',
-          services: ['Dinner Dates', 'Travel Companion', 'Cultural Events'],
-          languages: ['English', 'Spanish', 'French'],
-          height: 175,
-          weight: 58,
-          hairColor: 'Blonde',
-          eyeColor: 'Blue',
-          rating: 4.9,
-          reviewCount: 47,
-          hourlyRate: 300,
-          isVerified: true,
-          availableNow: true,
-          imageUrl: 'https://i.pravatar.cc/400?img=1',
-          images: [
-            'https://i.pravatar.cc/400?img=1',
-            'https://i.pravatar.cc/400?img=2',
-            'https://i.pravatar.cc/400?img=3',
-            'https://i.pravatar.cc/400?img=4'
-          ],
-          tags: ['Elite', 'Luxury', 'Verified', 'Highly Rated'],
-          responseRate: 98,
-          lastActive: new Date(),
-          education: 'Bachelor in Fine Arts',
-          interests: ['Art', 'Travel', 'Culinary Experiences', 'Literature'],
-          socialLinks: {
-            instagram: 'sophia_elite',
-            twitter: 'sophia_luxury'
-          }
-        };
-        
-        setEscort(mockEscort);
-      } catch (error) {
-        console.error('Error fetching escort:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEscort();
+    // In a real app, we would fetch the escort details using the ID
+    console.log(`Fetching details for escort ID: ${id}`);
+    // For now, we'll just use the mock data
   }, [id]);
 
-  if (loading) {
-    return (
-      <MainLayout title="Loading..." showBreadcrumbs>
-        <div className="flex justify-center items-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </MainLayout>
-    );
-  }
-
-  if (!escort) {
-    return (
-      <MainLayout title="Escort Not Found" showBreadcrumbs>
-        <div className="flex flex-col justify-center items-center min-h-[60vh]">
-          <h2 className="text-2xl font-bold mb-2">Profile Not Found</h2>
-          <p className="text-muted-foreground">The escort profile you're looking for doesn't exist or has been removed.</p>
-          <Button className="mt-4" asChild>
-            <a href="/escorts">Browse Escorts</a>
-          </Button>
-        </div>
-      </MainLayout>
-    );
-  }
+  const toggleFavorite = () => {
+    setIsFavorite(!isFavorite);
+  };
 
   return (
     <MainLayout
-      title={`${escort.name}, ${escort.age}`}
-      description={`${escort.location} • ${escort.gender}`}
+      title={`${escort.name} | UberEscorts`}
+      description={`View ${escort.name}'s profile, a ${escort.age}-year-old ${escort.gender} escort in ${escort.location}`}
       showBreadcrumbs
     >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 py-6">
-        {/* Left Column - Images */}
-        <div className="lg:col-span-2">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <img
-                src={escort.imageUrl || escort.images?.[0]}
-                alt={escort.name}
-                className="w-full h-[400px] object-cover rounded-lg"
-              />
-            </div>
-            {escort.images?.slice(1, 4).map((img, idx) => (
-              <div key={idx} className="relative">
-                <img
-                  src={img}
-                  alt={`${escort.name} ${idx + 2}`}
-                  className="w-full h-48 object-cover rounded-lg"
+      <div className="container mx-auto py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Profile Image and Quick Info */}
+          <div className="lg:col-span-1">
+            <Card className="overflow-hidden">
+              <div className="relative aspect-[3/4]">
+                <img 
+                  src={escort.imageUrl} 
+                  alt={escort.name} 
+                  className="w-full h-full object-cover"
                 />
-                {idx === 2 && escort.images && escort.images.length > 4 && (
-                  <div className="absolute inset-0 bg-black/70 flex items-center justify-center rounded-lg">
-                    <span className="text-white text-xl font-semibold">+{escort.images.length - 4} more</span>
-                  </div>
+                {escort.availableNow && (
+                  <Badge className="absolute top-4 right-4 bg-green-500 text-white">
+                    Available Now
+                  </Badge>
                 )}
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8">
-            <Tabs defaultValue="about">
-              <TabsList className="w-full grid grid-cols-4">
-                <TabsTrigger value="about">About</TabsTrigger>
-                <TabsTrigger value="services">Services</TabsTrigger>
-                <TabsTrigger value="reviews">Reviews</TabsTrigger>
-                <TabsTrigger value="availability">Availability</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="about" className="mt-6">
-                <Card>
-                  <CardContent className="pt-6">
-                    <h3 className="text-xl font-semibold mb-4">About Me</h3>
-                    <p className="text-muted-foreground">{escort.bio}</p>
-                    
-                    <div className="grid grid-cols-2 gap-y-4 gap-x-8 mt-6">
-                      <div>
-                        <h4 className="text-sm font-medium text-muted-foreground mb-2">Height</h4>
-                        <p>{escort.height} cm</p>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-muted-foreground mb-2">Weight</h4>
-                        <p>{escort.weight} kg</p>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-muted-foreground mb-2">Hair Color</h4>
-                        <p>{escort.hairColor}</p>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-muted-foreground mb-2">Eye Color</h4>
-                        <p>{escort.eyeColor}</p>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-muted-foreground mb-2">Education</h4>
-                        <p>{escort.education}</p>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-muted-foreground mb-2">Languages</h4>
-                        <div className="flex gap-2 flex-wrap">
-                          {escort.languages?.map(lang => (
-                            <Badge key={lang} variant="outline">{lang}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-6">
-                      <h4 className="text-sm font-medium text-muted-foreground mb-2">Interests</h4>
-                      <div className="flex gap-2 flex-wrap">
-                        {escort.interests?.map(interest => (
-                          <Badge key={interest} variant="secondary">{interest}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="services" className="mt-6">
-                <Card>
-                  <CardContent className="pt-6">
-                    <h3 className="text-xl font-semibold mb-4">Services Offered</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {escort.services?.map((service, idx) => (
-                        <div key={idx} className="flex items-center p-3 border rounded-lg">
-                          <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                          <span>{service}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="reviews" className="mt-6">
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-xl font-semibold">Client Reviews</h3>
-                      <div className="flex items-center">
-                        <Star className="h-5 w-5 text-yellow-400 mr-1" fill="currentColor" />
-                        <span className="font-semibold">{escort.rating}</span>
-                        <span className="text-muted-foreground ml-1">({escort.reviewCount} reviews)</span>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="p-4 border rounded-lg">
-                        <div className="flex justify-between items-center mb-2">
-                          <div className="flex items-center">
-                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mr-2">
-                              <User className="h-4 w-4" />
-                            </div>
-                            <span className="font-medium">James R.</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Star className="h-4 w-4 text-yellow-400" fill="currentColor" />
-                            <Star className="h-4 w-4 text-yellow-400" fill="currentColor" />
-                            <Star className="h-4 w-4 text-yellow-400" fill="currentColor" />
-                            <Star className="h-4 w-4 text-yellow-400" fill="currentColor" />
-                            <Star className="h-4 w-4 text-yellow-400" fill="currentColor" />
-                          </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          Sophia is incredibly charming and intelligent. Our dinner date was perfect, with engaging conversation and a genuine connection. Highly recommended!
-                        </p>
-                        <div className="text-xs text-muted-foreground mt-2">3 weeks ago</div>
-                      </div>
-                      
-                      <div className="p-4 border rounded-lg">
-                        <div className="flex justify-between items-center mb-2">
-                          <div className="flex items-center">
-                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mr-2">
-                              <User className="h-4 w-4" />
-                            </div>
-                            <span className="font-medium">Michael T.</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Star className="h-4 w-4 text-yellow-400" fill="currentColor" />
-                            <Star className="h-4 w-4 text-yellow-400" fill="currentColor" />
-                            <Star className="h-4 w-4 text-yellow-400" fill="currentColor" />
-                            <Star className="h-4 w-4 text-yellow-400" fill="currentColor" />
-                            <Star className="h-4 w-4 text-yellow-400" fill="currentColor" />
-                          </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          It was a pleasure to attend an art exhibition with Sophia. Her knowledge of art history made the experience much more enriching. She's classy, punctual and very attentive.
-                        </p>
-                        <div className="text-xs text-muted-foreground mt-2">1 month ago</div>
-                      </div>
-                      
-                      <Button variant="outline" className="w-full">
-                        View All Reviews
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="availability" className="mt-6">
-                <Card>
-                  <CardContent className="pt-6">
-                    <h3 className="text-xl font-semibold mb-4">Availability</h3>
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="p-4 border rounded-lg">
-                        <div className="flex items-center text-green-600">
-                          <Clock className="h-4 w-4 mr-2" />
-                          <span className="font-medium">Available Now</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {escort.availableNow ? 'Ready to meet today' : 'Check availability for today'}
-                        </p>
-                      </div>
-                      
-                      <div className="flex flex-col items-center justify-center p-6 border rounded-lg">
-                        <Calendar className="h-8 w-8 text-muted-foreground mb-2" />
-                        <p className="text-center text-muted-foreground">
-                          Detailed availability calendar will be visible after verification
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
-        
-        {/* Right Column - Contact & Booking */}
-        <div>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
-                  <span className="text-muted-foreground">{escort.location}</span>
-                </div>
-                {escort.isVerified && (
-                  <Badge className="bg-green-500 hover:bg-green-600">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Verified
+                {escort.featured && (
+                  <Badge className="absolute top-4 left-4 bg-gradient-to-r from-amber-500 to-amber-300 text-black">
+                    Featured
                   </Badge>
                 )}
               </div>
-              
-              <div className="mb-6">
-                <div className="text-2xl font-bold text-primary">${escort.hourlyRate}/hr</div>
-                <div className="text-sm text-muted-foreground">Minimum booking: 2 hours</div>
-              </div>
-              
-              <Button className="w-full mb-3">
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Contact Now
-              </Button>
-              
-              <Button variant="outline" className="w-full">
-                <Calendar className="h-4 w-4 mr-2" />
-                Book Appointment
-              </Button>
-              
-              <div className="mt-6 pt-6 border-t">
-                <div className="flex justify-between mb-4">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center">
-                    <BarChart className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-muted-foreground">Response Rate</span>
+                    <Star className="h-5 w-5 text-yellow-500 fill-yellow-500 mr-1" />
+                    <span className="font-medium">{escort.rating}</span>
+                    <span className="text-muted-foreground text-sm ml-1">({escort.reviewCount} reviews)</span>
                   </div>
-                  <span className="font-medium">{escort.responseRate}%</span>
+                  <div className="text-right">
+                    <Badge variant="outline" className="mr-1">ID Verified</Badge>
+                  </div>
                 </div>
                 
-                <div className="flex justify-between">
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-muted-foreground">Response Time</span>
-                  </div>
-                  <span className="font-medium">~1 hour</span>
+                <div className="flex justify-between mb-2">
+                  <Button onClick={toggleFavorite} variant="outline" className="flex-1 mr-1">
+                    <Heart className={`mr-2 h-4 w-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+                    {isFavorite ? 'Favorited' : 'Favorite'}
+                  </Button>
+                  <Button variant="outline" className="flex-1 ml-1">
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share
+                  </Button>
                 </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setIsFavorite(!isFavorite)}
-                className={isFavorite ? "text-red-500" : ""}
-              >
-                <Heart className={isFavorite ? "fill-current" : ""} />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Share2 />
-              </Button>
-            </CardFooter>
-          </Card>
+                
+                <Button className="w-full mt-2">
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Message
+                </Button>
+                
+                <Button variant="secondary" className="w-full mt-2">
+                  <Calendar className="mr-2 h-4 w-4" />
+                  Book Appointment
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
           
-          <Card className="mt-6">
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Safety Tips</h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start">
-                  <CheckCircle className="h-4 w-4 mr-2 text-green-500 mt-0.5" />
-                  <span>Meet in public places for first encounters</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-4 w-4 mr-2 text-green-500 mt-0.5" />
-                  <span>Use our secure messaging system</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-4 w-4 mr-2 text-green-500 mt-0.5" />
-                  <span>Share your meeting details with a trusted friend</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-4 w-4 mr-2 text-green-500 mt-0.5" />
-                  <span>Report suspicious behavior immediately</span>
-                </li>
-              </ul>
-              <Button variant="link" className="p-0 h-auto mt-2 text-sm">
-                Learn more about safety
-              </Button>
-            </CardContent>
-          </Card>
+          {/* Right Column - Profile Details */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h1 className="text-3xl font-bold">{escort.name}, {escort.age}</h1>
+                    <p className="text-muted-foreground">{escort.location}</p>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {escort.tags.map((tag, index) => (
+                        <Badge key={index} variant="outline">{tag}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xl font-bold">${escort.hourlyRate}</div>
+                    <div className="text-sm text-muted-foreground">per hour</div>
+                    <div className="text-sm text-green-500 mt-1">{escort.responseRate}% response rate</div>
+                  </div>
+                </div>
+                
+                <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="grid grid-cols-4">
+                    <TabsTrigger value="about">About</TabsTrigger>
+                    <TabsTrigger value="services">Services</TabsTrigger>
+                    <TabsTrigger value="rates">Rates</TabsTrigger>
+                    <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="about" className="mt-4">
+                    <h3 className="font-semibold text-lg mb-2">About Me</h3>
+                    <p className="mb-4">{escort.bio}</p>
+                    <p>{escort.description}</p>
+                    
+                    <div className="grid grid-cols-2 gap-y-3 gap-x-6 mt-6">
+                      <div className="text-muted-foreground">Height</div>
+                      <div>{escort.height}</div>
+                      
+                      <div className="text-muted-foreground">Weight</div>
+                      <div>{escort.weight}</div>
+                      
+                      <div className="text-muted-foreground">Hair Color</div>
+                      <div>{escort.hairColor}</div>
+                      
+                      <div className="text-muted-foreground">Eye Color</div>
+                      <div>{escort.eyeColor}</div>
+                      
+                      <div className="text-muted-foreground">Ethnicity</div>
+                      <div>{escort.ethnicity}</div>
+                      
+                      <div className="text-muted-foreground">Measurements</div>
+                      <div>{escort.measurements}</div>
+                      
+                      <div className="text-muted-foreground">Languages</div>
+                      <div>{escort.languages.join(", ")}</div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="services" className="mt-4">
+                    <h3 className="font-semibold text-lg mb-4">Services Offered</h3>
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {escort.services.map((service, index) => (
+                        <li key={index} className="flex items-center">
+                          <span className="h-2 w-2 bg-primary rounded-full mr-2"></span>
+                          {service}
+                        </li>
+                      ))}
+                    </ul>
+                  </TabsContent>
+                  
+                  <TabsContent value="rates" className="mt-4">
+                    <h3 className="font-semibold text-lg mb-4">Rates</h3>
+                    <div className="grid grid-cols-2 gap-y-4">
+                      <div className="text-muted-foreground">1 Hour</div>
+                      <div className="font-medium">${escort.rates.hourly}</div>
+                      
+                      <div className="text-muted-foreground">2 Hours</div>
+                      <div className="font-medium">${escort.rates.twoHours}</div>
+                      
+                      <div className="text-muted-foreground">Dinner Date</div>
+                      <div className="font-medium">${escort.rates.dinner}</div>
+                      
+                      <div className="text-muted-foreground">Overnight</div>
+                      <div className="font-medium">${escort.rates.overnight}</div>
+                    </div>
+                    <p className="mt-6 text-sm text-muted-foreground">
+                      Please contact me directly for special requests or longer bookings.
+                    </p>
+                  </TabsContent>
+                  
+                  <TabsContent value="reviews" className="mt-4">
+                    <h3 className="font-semibold text-lg mb-4">Client Reviews</h3>
+                    <div className="flex items-center mb-6">
+                      <div className="text-2xl font-bold mr-2">{escort.rating}</div>
+                      <div className="flex items-center mr-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star 
+                            key={star} 
+                            className={`h-5 w-5 ${star <= Math.round(escort.rating) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`} 
+                          />
+                        ))}
+                      </div>
+                      <span className="text-muted-foreground">({escort.reviewCount} reviews)</span>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex justify-between mb-2">
+                            <div className="flex items-center">
+                              <Avatar className="h-8 w-8 mr-2">
+                                <img src="https://i.pravatar.cc/100?img=60" alt="Client" />
+                              </Avatar>
+                              <span className="font-medium">John D.</span>
+                            </div>
+                            <div className="flex">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star 
+                                  key={star}
+                                  className={`h-4 w-4 ${star <= 5 ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-sm">Sophia is incredible! She's intelligent, beautiful, and has amazing conversational skills. Our dinner date was perfect.</p>
+                          <div className="text-xs text-muted-foreground mt-2">March 15, 2025</div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex justify-between mb-2">
+                            <div className="flex items-center">
+                              <Avatar className="h-8 w-8 mr-2">
+                                <img src="https://i.pravatar.cc/100?img=33" alt="Client" />
+                              </Avatar>
+                              <span className="font-medium">Robert M.</span>
+                            </div>
+                            <div className="flex">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star 
+                                  key={star}
+                                  className={`h-4 w-4 ${star <= 4 ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-sm">Great companion for my business event. Very professional and charming.</p>
+                          <div className="text-xs text-muted-foreground mt-2">February 28, 2025</div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    
+                    <Button variant="outline" className="mt-4 w-full">View All Reviews</Button>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+            
+            <div className="mt-6">
+              <h3 className="text-xl font-bold mb-4">Gallery</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {escort.gallery.map((image, index) => (
+                  <div key={index} className="aspect-square overflow-hidden rounded-md">
+                    <img 
+                      src={image} 
+                      alt={`${escort.name} gallery ${index + 1}`} 
+                      className="w-full h-full object-cover hover:scale-105 transition-transform"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </MainLayout>
