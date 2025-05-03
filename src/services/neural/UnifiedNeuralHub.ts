@@ -1,295 +1,254 @@
 
-import { INeuralHub, NeuralRequest, NeuralResponse, NeuralSystemStatus, ModelParameters } from './types/neuralHub';
-import { HealthMetrics } from '@/types/neuralMetrics';
+import { NeuralRequest, NeuralResponse, INeuralHub, NeuralSystemStatus, ModelParameters } from './types/neuralHub';
+import neuralServiceRegistry from './registry/NeuralServiceRegistry';
 import neuralMetricsProvider from './monitoring/NeuralMetricsProvider';
 
 /**
- * UnifiedNeuralHub - A standardized hub that combines functionality from
- * neuralHub and brainHub into a single, consistent API.
+ * Unified Neural Hub
+ * A centralized service that provides access to all neural capabilities
+ * with standardized APIs and metrics collection
  */
 export class UnifiedNeuralHub implements INeuralHub {
-  private modules: Record<string, any> = {};
-  private isInitialized: boolean = false;
-  private modelParameters: ModelParameters = {
+  private static instance: UnifiedNeuralHub;
+  private initialized: boolean = false;
+  private defaultModelParameters: ModelParameters = {
     temperature: 0.7,
-    maxTokens: 1000,
-    topP: 1,
+    maxTokens: 500,
+    topP: 0.9,
     frequencyPenalty: 0,
     presencePenalty: 0,
-    modelName: 'neural-default',
+    modelName: 'neural-default'
   };
   
-  /**
-   * Initialize the neural hub
-   */
-  async initialize(): Promise<void> {
-    if (this.isInitialized) return;
-    
-    console.log('Initializing Unified Neural Hub');
-    
-    // Initialize base systems
-    this.registerDefaultModules();
-    
-    this.isInitialized = true;
-    console.log('Unified Neural Hub initialized successfully');
+  private startTime: number = Date.now();
+  
+  private constructor() {
+    // Private constructor for singleton pattern
+  }
+  
+  public static getInstance(): UnifiedNeuralHub {
+    if (!UnifiedNeuralHub.instance) {
+      UnifiedNeuralHub.instance = new UnifiedNeuralHub();
+    }
+    return UnifiedNeuralHub.instance;
   }
   
   /**
-   * Register default modules
+   * Initialize the neural hub and all registered modules
    */
-  private registerDefaultModules(): void {
-    // Register core modules
-    // This will be expanded based on actual modules needed
-    this.registerModule('core', {
-      process: (data: any) => ({ success: true, data: { processed: true, ...data } })
-    });
+  public async initialize(): Promise<void> {
+    if (this.initialized) {
+      console.log('NeuralHub already initialized');
+      return;
+    }
     
-    // Register system modules
-    this.registerModule('system', {
-      getStatus: () => this.getSystemStatus(),
-      getMetrics: () => neuralMetricsProvider.getMetrics()
-    });
+    console.log('Initializing NeuralHub...');
+    try {
+      // Initialize all registered services
+      const services = neuralServiceRegistry.getAllServices();
+      
+      for (const service of services) {
+        if (service.initialize) {
+          await service.initialize();
+        }
+      }
+      
+      this.initialized = true;
+      this.startTime = Date.now();
+      console.log('NeuralHub initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize NeuralHub', error);
+      throw error;
+    }
   }
   
   /**
    * Process a request through the neural hub
+   * @param request The neural request to process
+   * @returns A promise resolving to the neural response
    */
-  async processRequest(request: NeuralRequest): Promise<NeuralResponse> {
-    try {
-      // Ensure hub is initialized
-      if (!this.isInitialized) {
+  public async processRequest(request: NeuralRequest): Promise<NeuralResponse> {
+    if (!this.initialized) {
+      try {
         await this.initialize();
-      }
-      
-      // Extract request details
-      const { type, data, options, filters } = request;
-      
-      // Determine appropriate module for handling the request
-      const moduleType = this.determineModuleType(type);
-      const module = this.getModule(moduleType);
-      
-      if (!module) {
-        return { 
+      } catch (error) {
+        return {
           success: false,
-          error: `No module found to handle request type: ${type}`
+          error: 'NeuralHub initialization failed'
+        };
+      }
+    }
+    
+    console.log(`[NeuralHub] Processing request: ${request.type}`);
+    
+    try {
+      // Find the appropriate service for the request type
+      const service = this.getServiceForRequestType(request.type);
+      
+      if (!service) {
+        return {
+          success: false,
+          error: `No service found for request type: ${request.type}`
         };
       }
       
-      // Log the request (can be expanded for better monitoring)
-      console.log(`Processing ${type} request with ${moduleType} module`);
-      
-      // Process based on request type
-      let result: any;
-      
-      switch (type) {
-        case 'analysis':
-        case 'generation':
-        case 'moderation':
-        case 'transformation':
-          result = await this.processAIRequest(type, data, options, module);
-          break;
-          
-        case 'register_component':
-        case 'unregister_component':
-        case 'sync_components':
-          result = await this.processComponentRequest(type, data, module);
-          break;
-          
-        case 'register_capabilities':
-        case 'record_interaction':
-          result = await this.processCapabilityRequest(type, data, module);
-          break;
-          
-        default:
-          // Generic processing for custom request types
-          result = module.process ? await module.process(data, options, filters) : null;
+      // Process the request using the service
+      if (typeof service.processRequest !== 'function') {
+        return {
+          success: false,
+          error: `Service ${service.name} does not support request processing`
+        };
       }
       
-      return { success: true, data: result };
-    } catch (error: any) {
-      console.error('Error processing neural request:', error);
+      // Track performance metrics
+      const startTime = performance.now();
+      
+      // Process the request
+      const response = await service.processRequest(request.data, request.options, request.filters);
+      
+      // Calculate processing time
+      const processingTime = performance.now() - startTime;
+      
+      // Log the processing time
+      console.log(`[NeuralHub] Request ${request.type} processed in ${processingTime.toFixed(2)}ms`);
+      
+      return {
+        success: true,
+        data: response
+      };
+    } catch (error) {
+      console.error(`[NeuralHub] Error processing request: ${request.type}`, error);
+      
+      // Update error metrics
+      this.updateErrorMetrics();
+      
       return {
         success: false,
-        error: error.message || 'Unknown error processing request'
+        error: error instanceof Error ? error.message : 'Unknown error processing request'
       };
     }
   }
   
   /**
-   * Process AI-related requests
+   * Register a new module with the neural hub
+   * @param moduleType The type of module to register
+   * @param module The module instance to register
    */
-  private async processAIRequest(type: string, data: any, options: any, module: any): Promise<any> {
-    // Process AI-specific requests
-    if (module.processAIRequest) {
-      return await module.processAIRequest(type, data, options);
-    }
-    
-    // Fallback to generic processing
-    return { processed: true, type, data };
+  public registerModule(moduleType: string, module: any): void {
+    neuralServiceRegistry.registerService(moduleType, module);
   }
   
   /**
-   * Process component registration requests
+   * Get a registered module by type
+   * @param moduleType The type of module to get
+   * @returns The module instance or undefined if not found
    */
-  private async processComponentRequest(type: string, data: any, module: any): Promise<any> {
-    // Handle component registration/unregistration
-    switch (type) {
-      case 'register_component':
-        return { registered: true, componentId: data.componentId };
-        
-      case 'unregister_component':
-        return { unregistered: true, componentId: data.componentId };
-        
-      case 'sync_components':
-        return { 
-          synced: true, 
-          sourceComponentId: data.sourceComponentId,
-          targetComponentId: data.targetComponentId
-        };
-        
-      default:
-        return { processed: true };
-    }
+  public getModule(moduleType: string): any {
+    return neuralServiceRegistry.getService(moduleType);
   }
   
   /**
-   * Process capability-related requests
+   * Get the current system status
+   * @returns The current system status
    */
-  private async processCapabilityRequest(type: string, data: any, module: any): Promise<any> {
-    // Handle capability requests
-    switch (type) {
-      case 'register_capabilities':
-        return { 
-          registered: true, 
-          componentId: data.componentId,
-          capabilities: data.capabilities
-        };
-        
-      case 'record_interaction':
-        return { recorded: true, interactionType: data.interactionType };
-        
-      default:
-        return { processed: true };
-    }
-  }
-  
-  /**
-   * Determine the module type based on request type
-   */
-  private determineModuleType(requestType: string): string {
-    // Map request types to module types
-    const moduleMap: Record<string, string> = {
-      'analysis': 'analytics',
-      'generation': 'generator',
-      'moderation': 'moderation',
-      'transformation': 'transformer',
-      'register_component': 'system',
-      'unregister_component': 'system',
-      'sync_components': 'system',
-      'register_capabilities': 'capabilities',
-      'record_interaction': 'tracking'
-    };
-    
-    return moduleMap[requestType] || 'core';
-  }
-  
-  /**
-   * Register a module with the neural hub
-   */
-  registerModule(moduleType: string, module: any): void {
-    this.modules[moduleType] = module;
-  }
-  
-  /**
-   * Get a module by type
-   */
-  getModule(moduleType: string): any {
-    return this.modules[moduleType] || null;
-  }
-  
-  /**
-   * Get the system status
-   */
-  getSystemStatus(): NeuralSystemStatus {
+  public getSystemStatus(): NeuralSystemStatus {
+    const services = neuralServiceRegistry.getAllServices();
     const metrics = neuralMetricsProvider.getMetrics();
     
     return {
-      operational: true,
-      uptime: Date.now() - (global.startTime || Date.now()),
-      activeModules: Object.keys(this.modules),
-      processingQueue: 0,
-      latency: metrics.neuralLatency,
-      
-      // Additional metrics
+      operational: this.initialized,
+      uptime: Date.now() - this.startTime,
+      activeModules: services.filter(s => s.status === 'active').map(s => s.moduleId),
+      processingQueue: 0, // TODO: Implement queue tracking
+      latency: metrics.responseTime || 0,
       cpuUtilization: metrics.cpuUtilization,
       memoryUtilization: metrics.memoryUtilization,
       errorRate: metrics.errorRate,
       responseTime: metrics.responseTime,
       operationsPerSecond: metrics.operationsPerSecond,
-      neuralAccuracy: metrics.neuralAccuracy,
-      neuralEfficiency: metrics.neuralEfficiency,
-      neuralLatency: metrics.neuralLatency,
       stability: metrics.stability
     };
   }
   
   /**
-   * Get health metrics
-   */
-  getHealthMetrics(): HealthMetrics {
-    return neuralMetricsProvider.getMetrics();
-  }
-  
-  /**
    * Get current model parameters
    */
-  getModelParameters(): ModelParameters {
-    return { ...this.modelParameters };
+  public getModelParameters(): ModelParameters {
+    return { ...this.defaultModelParameters };
   }
   
   /**
    * Update model parameters
    */
-  updateModelParameters(parameters: Partial<ModelParameters>): void {
-    this.modelParameters = {
-      ...this.modelParameters,
+  public updateModelParameters(parameters: Partial<ModelParameters>): void {
+    this.defaultModelParameters = {
+      ...this.defaultModelParameters,
       ...parameters
     };
   }
   
   /**
-   * Get configuration
+   * Get a service instance by ID
    */
-  getConfig(): any {
-    return {
-      isInitialized: this.isInitialized,
-      registeredModules: Object.keys(this.modules),
-      modelParameters: this.modelParameters
-    };
+  public getService(serviceId: string): any {
+    return neuralServiceRegistry.getService(serviceId);
   }
   
   /**
-   * Update configuration
+   * Get all available services
    */
-  async updateConfig(config: any): Promise<boolean> {
-    try {
-      if (config.modelParameters) {
-        this.updateModelParameters(config.modelParameters);
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Error updating Neural Hub config:', error);
-      return false;
+  public getAllServices(): any[] {
+    return neuralServiceRegistry.getAllServices();
+  }
+  
+  /**
+   * Get health metrics of the neural hub
+   */
+  public getHealthMetrics(): any {
+    return neuralMetricsProvider.getMetrics();
+  }
+  
+  /**
+   * Update error metrics when a request fails
+   */
+  private updateErrorMetrics(): void {
+    const currentMetrics = neuralMetricsProvider.getMetrics();
+    
+    // Increment error rate
+    const newErrorRate = (currentMetrics.errorRate || 0) + 0.5;
+    
+    // Update metrics
+    neuralMetricsProvider.updateMetrics({
+      ...currentMetrics,
+      errorRate: Math.min(newErrorRate, 100)
+    });
+  }
+  
+  /**
+   * Find the appropriate service to handle a request type
+   */
+  private getServiceForRequestType(requestType: string): any {
+    const services = neuralServiceRegistry.getAllServices();
+    
+    // First, try to find an exact match by moduleId
+    const exactMatch = services.find(s => s.moduleId === requestType);
+    if (exactMatch) {
+      return exactMatch;
     }
+    
+    // Next, look for a service that handles this request type
+    for (const service of services) {
+      if (service.handlesRequestType && service.handlesRequestType(requestType)) {
+        return service;
+      }
+    }
+    
+    // Finally, look for the default handler
+    return services.find(s => s.moduleId === 'default-handler');
   }
 }
 
-// Export the singleton instance
-const unifiedNeuralHub = new UnifiedNeuralHub();
-
-// For backward compatibility
-export const neuralHub = unifiedNeuralHub;
-export const brainHub = unifiedNeuralHub;
-
-export default unifiedNeuralHub;
+// Export singleton instances for both backward compatibility and new code
+export const neuralHub = UnifiedNeuralHub.getInstance();
+export const brainHub = neuralHub; // Alias for backward compatibility
+export default neuralHub;
