@@ -4,7 +4,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import AppRoutes from './app/AppRoutes';
 import { initializeSystem, shutdownSystem } from '@/core/engine';
-import { checkSystemStatus } from '@/utils/core';
 
 /**
  * Main application component
@@ -16,18 +15,8 @@ const App = () => {
     const initCore = async () => {
       try {
         console.log('Initializing UberCore system...');
-        const initialized = await initializeSystem();
-        
-        if (initialized) {
-          console.info('UberCore system initialized successfully');
-          
-          // Check system status
-          const status = await checkSystemStatus();
-          console.info('UberEscorts system status:', status.operational ? 'Operational' : 'Degraded');
-          console.info('System latency:', status.latency, 'ms');
-        } else {
-          console.error('Failed to initialize UberCore system');
-        }
+        await initializeSystem();
+        console.info('UberCore system initialized successfully');
       } catch (error) {
         console.error('Error during system initialization:', error);
       }

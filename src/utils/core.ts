@@ -1,36 +1,66 @@
 
 /**
- * Core utility functions for the UberEscorts system
+ * Core utility functions for system status and health checks
  */
 
-/**
- * Check the system status
- * @returns Object containing system status information
- */
+// Check system status and return operational info
 export const checkSystemStatus = async () => {
-  // In a real app, this would make API calls to backend services
+  try {
+    // In a real app, this would make API calls or check subsystems
+    // For now, we'll return mock data
+    return {
+      operational: true,
+      latency: 42,
+      status: 'operational',
+      services: {
+        auth: { status: 'operational' },
+        database: { status: 'operational' },
+        api: { status: 'operational' }
+      }
+    };
+  } catch (error) {
+    console.error('Error checking system status:', error);
+    return {
+      operational: false,
+      latency: 999,
+      status: 'degraded',
+      services: {
+        auth: { status: 'unknown' },
+        database: { status: 'unknown' },
+        api: { status: 'unknown' }
+      }
+    };
+  }
+};
+
+// Check system health more comprehensively
+export const checkSystemHealth = async () => {
+  try {
+    // Mock implementation for now
+    return {
+      healthy: true,
+      components: [
+        { name: 'Authentication', status: 'healthy', uptime: 99.9 },
+        { name: 'Database', status: 'healthy', uptime: 99.8 },
+        { name: 'API Gateway', status: 'healthy', uptime: 99.7 },
+        { name: 'Neural System', status: 'healthy', uptime: 99.6 }
+      ]
+    };
+  } catch (error) {
+    console.error('Error checking system health:', error);
+    return {
+      healthy: false,
+      components: []
+    };
+  }
+};
+
+// Get overall system metrics
+export const getSystemMetrics = () => {
   return {
-    operational: true,
-    latency: Math.floor(Math.random() * 50) + 10, // Simulate latency between 10-60ms
-    aiModels: {
-      lucie: 'operational',
-      oxum: 'operational',
-      hermes: 'operational',
-      orus: 'operational'
-    }
+    responseTime: 42,
+    requests: 1337,
+    errors: 0,
+    warnings: 2
   };
-};
-
-/**
- * Format a timestamp into a readable date string
- */
-export const formatTimestamp = (timestamp: number): string => {
-  return new Date(timestamp).toLocaleString();
-};
-
-/**
- * Generate a unique ID for system operations
- */
-export const generateOperationId = (): string => {
-  return `op_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 };
