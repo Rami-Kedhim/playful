@@ -55,7 +55,7 @@ export const useAuth = (): AuthContextType => {
   const signIn = login;
   const signOut = logout;
   
-  const register = async (email: string, password: string, username: string): Promise<any> => {
+  const register = async (email: string, password: string, username?: string): Promise<any> => {
     // Mock registration logic
     setIsLoading(true);
     try {
