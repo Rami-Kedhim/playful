@@ -67,7 +67,9 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
       
       // Only mark as complete if we've actually processed URL parameters
       // This prevents unnecessary re-renders
-      setInitialLoadComplete(true);
+      if (filtersApplied || !searchParams.toString()) {
+        setInitialLoadComplete(true);
+      }
     } finally {
       // Always reset the flag when done
       filterUpdateFromUrlRef.current = false;
@@ -144,7 +146,11 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
   // Use effect to call the memoized update function
   useEffect(() => {
     if (initialLoadComplete) {
-      updateUrlFromFilters();
+      // Use setTimeout to avoid immediate updates that can cause loops
+      const timer = setTimeout(() => {
+        updateUrlFromFilters();
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [
     updateUrlFromFilters,

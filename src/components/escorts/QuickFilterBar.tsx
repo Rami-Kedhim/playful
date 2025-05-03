@@ -66,19 +66,6 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
     }
   }, [availableNow, setAvailableNow]);
 
-  // Memoize the location and more filters click handlers
-  const handleLocationClick = useCallback(() => {
-    if (onLocationClick) {
-      onLocationClick();
-    }
-  }, [onLocationClick]);
-
-  const handleShowMoreFilters = useCallback(() => {
-    if (onShowMoreFilters) {
-      onShowMoreFilters();
-    }
-  }, [onShowMoreFilters]);
-
   return (
     <Card className={className}>
       <CardContent className="p-3">
@@ -157,7 +144,7 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleLocationClick}
+                onClick={onLocationClick}
                 className="flex items-center gap-1"
               >
                 <Map className="h-4 w-4" />
@@ -169,7 +156,7 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
               variant="outline"
               size="sm"
               className="flex items-center gap-1"
-              onClick={handleShowMoreFilters}
+              onClick={onShowMoreFilters}
             >
               <Tags className="h-4 w-4" />
               <span>More Filters</span>

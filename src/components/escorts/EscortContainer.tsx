@@ -20,15 +20,14 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
   // Use the filtered hook that syncs with URL
   const filterState = useEscortFilterWithUrl({ escorts });
 
-  // Memoize the service type filter to prevent re-renders
+  // Memoize handlers to prevent unnecessary re-renders
   const safeSetServiceTypeFilter = useCallback((value: ServiceTypeFilter) => {
     if (value === "" || value === "in-person" || value === "virtual" || value === "both") {
       filterState.setServiceTypeFilter(value);
     } else {
-      // Ignore or reset to empty if invalid
       filterState.setServiceTypeFilter("");
     }
-  }, [filterState.setServiceTypeFilter]);
+  }, [filterState]);
 
   // Consider both internal and external loading states
   const combinedIsLoading = useMemo(() => 
@@ -48,8 +47,11 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
     if (filterState.serviceTypeFilter) count++;
     
     // Count array-based filters
-    count += (filterState.selectedServices?.length || 0);
-    count += (filterState.selectedGenders?.length || 0);
+    const services = filterState.selectedServices || [];
+    count += services.length;
+    
+    const genders = filterState.selectedGenders || [];
+    count += genders.length;
     
     // Count filters from properties that might not be directly defined in the type
     const orientations = (filterState as any).selectedOrientations;
@@ -81,35 +83,30 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
     (filterState as any).ageRange
   ]);
 
-  // Memoize show filters toggle to prevent re-renders
+  // Memoize event handlers for stable references
   const toggleShowFilters = useCallback(() => {
-    setShowFilters(prevState => !prevState);
+    setShowFilters(prev => !prev);
   }, []);
   
-  // Memoize setShowFilters to prevent re-renders
   const handleSetShowFilters = useCallback((value: boolean) => {
     setShowFilters(value);
   }, []);
 
-  // Memoize location click handler
   const handleLocationClick = useCallback(() => {
     setShowFilters(true);
   }, []);
 
-  // Memoize verifiedOnly setter to prevent re-renders
   const handleSetVerifiedOnly = useCallback((value: boolean) => {
     filterState.setVerifiedOnly(value);
-  }, [filterState.setVerifiedOnly]);
+  }, [filterState]);
 
-  // Memoize availableNow setter to prevent re-renders
   const handleSetAvailableNow = useCallback((value: boolean) => {
     filterState.setAvailableNow(value);
-  }, [filterState.setAvailableNow]);
+  }, [filterState]);
 
-  // Memoize ratingMin setter to prevent re-renders
   const handleSetRatingMin = useCallback((value: number) => {
     filterState.setRatingMin(value);
-  }, [filterState.setRatingMin]);
+  }, [filterState]);
 
   return (
     <>
