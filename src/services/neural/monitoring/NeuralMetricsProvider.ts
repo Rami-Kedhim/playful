@@ -1,11 +1,10 @@
-
-import { HealthMetrics, PerformanceReport } from '@/types/neuralMetrics';
+import { HealthMetrics, ServiceMetrics } from '@/types/neuralMetrics';
 
 /**
  * Service responsible for providing neural metrics from various sources
  * This helps decouple the large NeuralHub from metrics collection
  */
-class NeuralMetricsProvider {
+export class NeuralMetricsProvider {
   private lastMetricsUpdate: number = Date.now();
   private cachedMetrics: HealthMetrics;
   private metricsHistory: HealthMetrics[] = [];
@@ -256,6 +255,12 @@ class NeuralMetricsProvider {
       neuralAccuracy: Math.random(),
       neuralEfficiency: Math.random(),
       neuralLatency: Math.random() * 100,
+      
+      // Add required fields that were missing
+      memoryAllocation: Math.random() * 100,
+      networkThroughput: Math.random(),
+      requestRate: Math.random() * 100,
+      averageResponseTime: Math.random() * 200
     };
   }
   
@@ -279,6 +284,57 @@ class NeuralMetricsProvider {
       neuralAccuracy: 0.92,
       neuralEfficiency: 0.85,
       neuralLatency: 45,
+      
+      // Add required fields that were missing
+      memoryAllocation: 42,
+      networkThroughput: 0,
+      requestRate: 850,
+      averageResponseTime: 120
+    };
+  }
+  
+  /**
+   * Create a complete ServiceMetrics object
+   * This fixes the error at line 152
+   */
+  createServiceMetrics(data: any): ServiceMetrics {
+    return {
+      operationsCount: data.operationsCount || 0,
+      errorCount: data.errorCount || 0,
+      errorRate: data.errorRate || 0,
+      latency: data.latency !== undefined ? data.latency : null,
+      responseTime: data.responseTime || 0,
+      successRate: data.successRate !== undefined ? data.successRate : 1.0
+    };
+  }
+  
+  /**
+   * Create complete HealthMetrics object
+   * This fixes the errors at lines 243 and 266
+   */
+  createHealthMetrics(data: any): HealthMetrics {
+    return {
+      cpuUtilization: data.cpuUtilization || 0,
+      memoryUtilization: data.memoryUtilization || 0,
+      errorRate: data.errorRate || 0,
+      responseTime: data.responseTime || 0,
+      operationsPerSecond: data.operationsPerSecond || 0,
+      stability: data.stability || 0,
+      lastUpdated: data.lastUpdated || Date.now(),
+      systemLoad: data.systemLoad || 0,
+      userEngagement: data.userEngagement || 0,
+      requestsPerMinute: data.requestsPerMinute || 0,
+      cpuUsage: data.cpuUsage || data.cpuUtilization || 0,
+      memoryUsage: data.memoryUsage || data.memoryUtilization || 0,
+      neuralAccuracy: data.neuralAccuracy || 0,
+      neuralEfficiency: data.neuralEfficiency || 0,
+      neuralLatency: data.neuralLatency || 0,
+      
+      // Add required fields that were missing
+      memoryAllocation: data.memoryAllocation || data.memoryUtilization / 100 || 0,
+      networkThroughput: data.networkThroughput || 0,
+      requestRate: data.requestRate || data.operationsPerSecond || 0,
+      averageResponseTime: data.averageResponseTime || data.responseTime || 0
     };
   }
   

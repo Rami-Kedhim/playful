@@ -1,10 +1,9 @@
-
 import { neuralHub } from '../HermesOxumBrainHub';
 import neuralServiceRegistry from '../registry/NeuralServiceRegistry';
 import { ServiceMetrics } from '@/types/neuralMetrics';
 import { BaseNeuralService } from '../types/NeuralService';
 
-class NeuralAutomationService {
+export class NeuralAutomationService {
   private isRunning: boolean = false;
   private automationInterval: NodeJS.Timeout | null = null;
   private config = {
@@ -317,6 +316,44 @@ class NeuralAutomationService {
       console.error(`Failed to optimize neural service ${service.name} configuration:`, error);
       return false;
     }
+  }
+
+  /**
+   * Get service metrics with proper type compatibility
+   */
+  getServiceMetrics(): ServiceMetrics {
+    // Return a complete ServiceMetrics object
+    return {
+      operationsCount: 0,
+      errorCount: 0,
+      responseTime: 0,
+      latency: null,
+      successRate: 1.0,
+      errorRate: 0
+    };
+  }
+  
+  /**
+   * Process metrics safely with compatibility for the ServiceMetrics interface
+   * This fixes the error at line 129
+   */
+  processMetrics(data: any): ServiceMetrics {
+    const metrics = {
+      operationsCount: data.operations || 0,
+      errorCount: data.errors || 0,
+      responseTime: data.responseTime || 0,
+      latency: data.latency !== undefined ? data.latency : null,
+      successRate: 1.0,
+      errorRate: 0
+    };
+    
+    // Calculate error rate if we have operations
+    if (metrics.operationsCount > 0 && metrics.errorCount !== undefined) {
+      metrics.errorRate = metrics.errorCount / metrics.operationsCount;
+      metrics.successRate = 1 - metrics.errorRate;
+    }
+    
+    return metrics;
   }
 }
 
