@@ -1,29 +1,26 @@
-import { HealthMetrics, PerformanceReport } from '@/types/neuralMetrics';
+
+import { HealthMetrics, ServiceMetrics, PerformanceReport } from '@/types/neuralMetrics';
 import neuralMetricsProvider from './NeuralMetricsProvider';
+import neuralServiceRegistry from '../registry/NeuralServiceRegistry';
 import { neuralReporter } from '../reporting/NeuralReporter';
-import { NeuralSystemStatus } from '../types/neuralHub';
-import { neuralHub } from '../UnifiedNeuralHub';
 
 /**
- * A centralized monitoring service for neural systems
- * Provides real-time monitoring, alerts, and system health checks
+ * Neural System Monitor - Responsible for monitoring the health and performance
+ * of the neural system components
  */
 export class NeuralSystemMonitor {
   private static instance: NeuralSystemMonitor;
-  private isMonitoring: boolean = false;
+  private isActiveMonitoring: boolean = false;
   private monitoringInterval: NodeJS.Timeout | null = null;
-  private alertThresholds: Record<string, number> = {
-    cpuUtilization: 90,
-    memoryUtilization: 85,
-    errorRate: 5,
-    responseTime: 500,
-    stability: 0.7
-  };
+  private healthCheckInterval: number = 30000; // 30 seconds default
   
   private constructor() {
     // Private constructor for singleton
   }
   
+  /**
+   * Get singleton instance
+   */
   public static getInstance(): NeuralSystemMonitor {
     if (!NeuralSystemMonitor.instance) {
       NeuralSystemMonitor.instance = new NeuralSystemMonitor();
@@ -32,53 +29,51 @@ export class NeuralSystemMonitor {
   }
   
   /**
-   * Start monitoring the neural system
-   * @param intervalMs Monitoring interval in milliseconds
-   * @returns A function to stop monitoring
+   * Check if monitoring is active
    */
-  public startMonitoring(intervalMs: number = 30000): () => void {
-    if (this.isMonitoring) {
-      console.info('Neural system monitoring is already active');
-      return this.stopMonitoring;
-    }
-    
-    this.isMonitoring = true;
-    console.info(`Starting neural system monitoring with interval ${intervalMs}ms`);
-    
-    // Initial check
-    this.performHealthCheck();
-    
-    // Set up interval for regular monitoring
-    const intervalId = setInterval(() => {
-      this.performHealthCheck();
-    }, intervalMs);
-    
-    this.monitoringInterval = intervalId;
-    
-    // Return function to stop monitoring
-    return this.stopMonitoring;
+  public isActive(): boolean {
+    return this.isActiveMonitoring;
   }
   
   /**
-   * Stop the neural system monitoring
+   * Start monitoring neural system health
    */
-  public stopMonitoring = (): void => {
-    if (!this.isMonitoring || this.monitoringInterval === null) {
-      console.info('Neural system monitoring is not active');
+  public startMonitoring(interval: number = 30000): void {
+    if (this.isActiveMonitoring) {
+      console.warn('Neural system monitoring is already active');
       return;
     }
     
-    clearInterval(this.monitoringInterval);
-    this.monitoringInterval = null;
-    this.isMonitoring = false;
-    console.info('Neural system monitoring stopped');
+    this.healthCheckInterval = interval;
+    this.isActiveMonitoring = true;
+    
+    // Perform initial health check
+    this.performHealthCheck();
+    
+    // Set up interval for regular health checks
+    this.monitoringInterval = setInterval(() => {
+      this.performHealthCheck();
+    }, interval);
+    
+    console.log(`Neural system monitoring started with ${interval}ms interval`);
   }
   
   /**
-   * Check if monitoring is currently active
+   * Stop monitoring neural system health
    */
-  public isActive(): boolean {
-    return this.isMonitoring;
+  public stopMonitoring(): void {
+    if (!this.isActiveMonitoring) {
+      console.warn('Neural system monitoring is not active');
+      return;
+    }
+    
+    if (this.monitoringInterval) {
+      clearInterval(this.monitoringInterval);
+      this.monitoringInterval = null;
+    }
+    
+    this.isActiveMonitoring = false;
+    console.log('Neural system monitoring stopped');
   }
   
   /**
@@ -86,106 +81,108 @@ export class NeuralSystemMonitor {
    */
   public performHealthCheck(): PerformanceReport {
     try {
-      // Get the latest metrics
-      const metrics = neuralMetricsProvider.getMetrics();
-      
-      // Generate a performance report
+      // Get a performance report from the neural reporter
       const report = neuralReporter.generateReport();
       
-      // Check for alerts
-      const alerts = this.checkForAlerts(metrics);
-      
-      // Log critical alerts
-      if (alerts.critical.length > 0) {
-        console.error('CRITICAL NEURAL SYSTEM ALERTS:', alerts.critical);
-      }
-      
-      // Log warnings
-      if (alerts.warnings.length > 0) {
-        console.warn('Neural system warnings:', alerts.warnings);
-      }
+      // Process the report to detect any issues
+      this.processHealthReport(report);
       
       return report;
     } catch (error) {
-      console.error('Error during neural system health check:', error);
-      throw error;
+      console.error('Error performing neural system health check:', error);
+      
+      // Generate a minimal error report
+      const errorReport: PerformanceReport = {
+        timestamp: new Date(),
+        overallHealth: 0,
+        services: {},
+        systemMetrics: {
+          cpuUsage: 0,
+          memoryUsage: 0,
+          responseTime: 0,
+          operationsPerSecond: 0,
+          errorRate: 1.0
+        },
+        recommendations: ['Investigate and resolve the system error']
+      };
+      
+      return errorReport;
+    }
+  }
+  
+  /**
+   * Process health report to detect issues
+   */
+  private processHealthReport(report: PerformanceReport): void {
+    // Check overall health score
+    if (report.overallHealth < 50) {
+      console.warn(`Neural system health is critical: ${report.overallHealth}%`);
+      // Trigger alerts or notifications
+    } else if (report.overallHealth < 80) {
+      console.warn(`Neural system health needs attention: ${report.overallHealth}%`);
+    }
+    
+    // Check individual services
+    Object.entries(report.services).forEach(([serviceId, serviceData]) => {
+      if (serviceData.status === 'error') {
+        console.error(`Service ${serviceId} is in error state`);
+        // Trigger service-specific alerts
+      } else if (serviceData.status === 'maintenance') {
+        console.warn(`Service ${serviceId} is in maintenance mode`);
+      }
+      
+      // Check service metrics for issues
+      const metrics = serviceData.metrics;
+      if (metrics.errorRate > 0.1) {
+        console.warn(`Service ${serviceId} has high error rate: ${metrics.errorRate}`);
+      }
+      if (metrics.responseTime > 500) {
+        console.warn(`Service ${serviceId} has high response time: ${metrics.responseTime}ms`);
+      }
+    });
+    
+    // Check system metrics
+    const systemMetrics = report.systemMetrics;
+    if (systemMetrics.cpuUsage > 90) {
+      console.warn(`High CPU usage: ${systemMetrics.cpuUsage}%`);
+    }
+    if (systemMetrics.memoryUsage > 90) {
+      console.warn(`High memory usage: ${systemMetrics.memoryUsage}%`);
+    }
+    if (systemMetrics.errorRate > 0.05) {
+      console.warn(`Elevated error rate: ${systemMetrics.errorRate}`);
     }
   }
   
   /**
    * Get the current system status
    */
-  public getSystemStatus(): NeuralSystemStatus {
-    try {
-      return neuralHub.getSystemStatus();
-    } catch (error) {
-      console.error('Error getting neural system status:', error);
-      
-      // Return a default error status
-      return {
-        operational: false,
-        uptime: 0,
-        activeModules: [],
-        processingQueue: 0,
-        latency: 0,
-        errorRate: 100
-      };
-    }
-  }
-  
-  /**
-   * Update the alert thresholds
-   */
-  public updateAlertThresholds(thresholds: Partial<Record<string, number>>): void {
-    this.alertThresholds = {
-      ...this.alertThresholds,
-      ...thresholds
+  public getSystemStatus(): any {
+    const services = neuralServiceRegistry.getAllServices();
+    
+    // Calculate overall status
+    let activeServices = 0;
+    let errorServices = 0;
+    let maintenanceServices = 0;
+    
+    services.forEach(service => {
+      if (service.status === 'active') activeServices++;
+      else if (service.status === 'error') errorServices++;
+      else if (service.status === 'maintenance') maintenanceServices++;
+    });
+    
+    let systemStatus = 'healthy';
+    if (errorServices > 0) systemStatus = 'degraded';
+    if (errorServices > services.length / 3) systemStatus = 'critical';
+    
+    return {
+      status: systemStatus,
+      totalServices: services.length,
+      activeServices,
+      errorServices,
+      maintenanceServices,
+      lastChecked: new Date()
     };
-    console.info('Neural system alert thresholds updated:', this.alertThresholds);
-  }
-  
-  /**
-   * Check metrics for any alerts
-   */
-  private checkForAlerts(metrics: HealthMetrics): {
-    critical: string[];
-    warnings: string[];
-  } {
-    const critical: string[] = [];
-    const warnings: string[] = [];
-    
-    // Check CPU utilization
-    if (metrics.cpuUtilization > this.alertThresholds.cpuUtilization) {
-      critical.push(`CPU utilization critical: ${metrics.cpuUtilization.toFixed(1)}%`);
-    } else if (metrics.cpuUtilization > this.alertThresholds.cpuUtilization * 0.8) {
-      warnings.push(`High CPU utilization: ${metrics.cpuUtilization.toFixed(1)}%`);
-    }
-    
-    // Check memory utilization
-    if (metrics.memoryUtilization > this.alertThresholds.memoryUtilization) {
-      critical.push(`Memory utilization critical: ${metrics.memoryUtilization.toFixed(1)}%`);
-    } else if (metrics.memoryUtilization > this.alertThresholds.memoryUtilization * 0.8) {
-      warnings.push(`High memory utilization: ${metrics.memoryUtilization.toFixed(1)}%`);
-    }
-    
-    // Check error rate
-    if (metrics.errorRate > this.alertThresholds.errorRate) {
-      critical.push(`Error rate critical: ${metrics.errorRate.toFixed(2)}%`);
-    } else if (metrics.errorRate > this.alertThresholds.errorRate * 0.5) {
-      warnings.push(`Elevated error rate: ${metrics.errorRate.toFixed(2)}%`);
-    }
-    
-    // Check response time
-    if (metrics.responseTime > this.alertThresholds.responseTime) {
-      warnings.push(`High response time: ${metrics.responseTime.toFixed(0)}ms`);
-    }
-    
-    // Check stability
-    if (metrics.stability < this.alertThresholds.stability) {
-      warnings.push(`System stability concern: ${(metrics.stability * 100).toFixed(1)}%`);
-    }
-    
-    return { critical, warnings };
   }
   
   /**
@@ -205,6 +202,56 @@ export class NeuralSystemMonitor {
       requestsProcessed: 0,
       errors: 0
     };
+  }
+  
+  /**
+   * Reset a specific neural service
+   */
+  public async resetService(serviceId: string): Promise<boolean> {
+    const service = neuralServiceRegistry.getService(serviceId);
+    if (!service) {
+      console.error(`Service ${serviceId} not found`);
+      return false;
+    }
+    
+    try {
+      if (service.reset && typeof service.reset === 'function') {
+        await service.reset();
+        return true;
+      }
+      
+      if (service.initialize && typeof service.initialize === 'function') {
+        await service.initialize();
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error(`Failed to reset service ${serviceId}:`, error);
+      return false;
+    }
+  }
+  
+  /**
+   * Reset the entire neural system
+   */
+  public async resetSystem(): Promise<boolean> {
+    try {
+      const services = neuralServiceRegistry.getAllServices();
+      
+      let success = true;
+      for (const service of services) {
+        if (service.reset && typeof service.reset === 'function') {
+          const result = await service.reset();
+          if (!result) success = false;
+        }
+      }
+      
+      return success;
+    } catch (error) {
+      console.error('Failed to reset neural system:', error);
+      return false;
+    }
   }
 }
 
