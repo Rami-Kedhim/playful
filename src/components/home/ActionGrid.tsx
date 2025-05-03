@@ -19,7 +19,7 @@ const ActionGrid = () => {
       title: 'Top-up Wallet',
       description: 'Add UBX tokens to your account',
       icon: <Wallet className="h-10 w-10 text-green-400" />,
-      url: '/wallet',
+      url: AppPaths.WALLET,
       bgColor: 'bg-gradient-to-br from-green-900/30 to-green-700/20',
       borderColor: 'border-green-500/30'
     },

@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { Routes, Route, useRouteError } from 'react-router-dom';
-import { routesWithElements as routes } from '@/routes';
+import { Routes, Route } from 'react-router-dom';
+import { routes as routeConfig } from '@/routes/routeConfig.tsx';
 
 const AppRoutes = () => {
   return (
     <Routes>
-      {routes.map((route, index) => {
+      {routeConfig.map((route, index) => {
         // For parent routes with children, we need to render the element
         if (route.children) {
           return (

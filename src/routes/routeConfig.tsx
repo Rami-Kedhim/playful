@@ -3,14 +3,13 @@ import React, { lazy, Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import LoadingSpinner from '@/components/ui/loading-spinner';
-import { AppPaths } from './routeConfig';
 
 // Lazy load pages
 const HomePage = lazy(() => import('@/pages/HomePage'));
 const SafetyPage = lazy(() => import('@/pages/SafetyPage'));
 const AICompanionDemo = lazy(() => import('@/pages/ai-companion-demo'));
 const RouteSharePage = lazy(() => import('@/pages/RouteSharePage'));
-const HermesSeoHome = lazy(() => import('@/pages/SEOPage'));
+const SEOPage = lazy(() => import('@/pages/SEOPage'));
 
 // Define route configuration with elements
 export const routes: RouteObject[] = [
@@ -27,7 +26,7 @@ export const routes: RouteObject[] = [
         ),
       },
       {
-        path: AppPaths.SAFETY,
+        path: 'safety',
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <SafetyPage />
@@ -35,7 +34,7 @@ export const routes: RouteObject[] = [
         ),
       },
       {
-        path: AppPaths.AI_COMPANION,
+        path: 'ai-companion',
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <AICompanionDemo />
@@ -43,7 +42,7 @@ export const routes: RouteObject[] = [
         ),
       },
       {
-        path: AppPaths.ROUTE_SHARE,
+        path: 'share',
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <RouteSharePage />
@@ -51,10 +50,10 @@ export const routes: RouteObject[] = [
         ),
       },
       {
-        path: AppPaths.SEO,
+        path: 'seo',
         element: (
           <Suspense fallback={<LoadingSpinner />}>
-            <HermesSeoHome />
+            <SEOPage />
           </Suspense>
         ),
       },

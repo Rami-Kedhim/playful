@@ -2,7 +2,7 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { getRoutesByCategory, RouteCategory } from '@/routes';
+import { getRoutesByCategory, RouteCategory, AppPaths } from '@/routes/routeConfig';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { useRole } from '@/hooks/auth/useRole';
 import { 
@@ -33,7 +33,8 @@ const iconMap: Record<string, React.ReactNode> = {
   '/admin': <Shield className="w-4 h-4" />,
   '/moderation': <Shield className="w-4 h-4" />,
   '/safety': <Shield className="w-4 h-4" />,
-  '/seo': <Search className="w-4 h-4" />
+  '/seo': <Search className="w-4 h-4" />,
+  '/share': <Shield className="w-4 h-4" />
 };
 
 interface AppNavigationProps {

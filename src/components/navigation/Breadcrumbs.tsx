@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import { AppPaths } from '@/routes/routeConfig';
 
 export const Breadcrumbs = () => {
   const location = useLocation();
@@ -14,7 +15,7 @@ export const Breadcrumbs = () => {
 
   return (
     <div className="flex items-center text-sm text-muted-foreground">
-      <Link to="/" className="hover:text-foreground transition-colors">
+      <Link to={AppPaths.HOME} className="hover:text-foreground transition-colors">
         Home
       </Link>
       
@@ -22,19 +23,26 @@ export const Breadcrumbs = () => {
         const routeTo = `/${pathnames.slice(0, index + 1).join('/')}`;
         const isLast = index === pathnames.length - 1;
         
+        // Format the breadcrumb name for better display
+        const formattedName = name
+          .replace(/-/g, ' ')
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+        
         return (
           <React.Fragment key={name}>
             <ChevronRight className="mx-1 h-4 w-4" />
             {isLast ? (
               <span className="font-medium text-foreground">
-                {name.charAt(0).toUpperCase() + name.slice(1).replace('-', ' ')}
+                {formattedName}
               </span>
             ) : (
               <Link 
                 to={routeTo}
                 className="hover:text-foreground transition-colors"
               >
-                {name.charAt(0).toUpperCase() + name.slice(1).replace('-', ' ')}
+                {formattedName}
               </Link>
             )}
           </React.Fragment>
