@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { FavoritesProvider } from '@/contexts/FavoritesContext';
 import AppRoutes from './AppRoutes';
 import { initializeSystem, shutdownSystem } from '@/core/engine';
 import { checkSystemStatus } from '@/utils/core';
@@ -10,7 +11,7 @@ import { toast } from '@/components/ui/use-toast';
 
 /**
  * Main application component
- * Initializes the UberCore ecosystem
+ * Initializes the UberEscorts ecosystem
  */
 const App = () => {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -21,11 +22,11 @@ const App = () => {
     const initCore = async () => {
       try {
         setIsInitializing(true);
-        console.log('Initializing UberCore system...');
+        console.log('Initializing UberEscorts system...');
         const initialized = await initializeSystem();
         
         if (initialized) {
-          console.info('UberCore system initialized successfully');
+          console.info('UberEscorts system initialized successfully');
           setIsInitialized(true);
           
           // Check system status
@@ -41,7 +42,7 @@ const App = () => {
             });
           }
         } else {
-          console.error('Failed to initialize UberCore system');
+          console.error('Failed to initialize UberEscorts system');
           toast({
             title: "Initialization Failed",
             description: "System will operate with limited functionality.",
@@ -63,7 +64,7 @@ const App = () => {
     initCore();
     
     return () => {
-      // Shutdown UberCore when app unmounts
+      // Shutdown UberEscorts when app unmounts
       shutdownSystem();
     };
   }, []);
@@ -71,8 +72,10 @@ const App = () => {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
-        <Toaster />
+        <FavoritesProvider>
+          <AppRoutes />
+          <Toaster />
+        </FavoritesProvider>
       </AuthProvider>
     </BrowserRouter>
   );

@@ -4,6 +4,7 @@
 export const AppPaths = {
   HOME: '/',
   ESCORTS: '/escorts',
+  ESCORT_DETAIL: '/escorts/:id',
   NEURAL_MONITOR: '/neural/monitor',
   NEURAL_ANALYTICS: '/neural/analytics',
   BRAIN_HUB: '/brain-hub',
@@ -59,6 +60,21 @@ export const routes: RouteDefinition[] = [
     path: AppPaths.ESCORTS,
     title: 'Escorts',
     category: 'escort',
+  },
+  {
+    path: AppPaths.ESCORT_DETAIL,
+    title: 'Escort Profile',
+    category: 'escort',
+  },
+  {
+    path: AppPaths.MESSAGES,
+    title: 'Messages',
+    category: 'core',
+  },
+  {
+    path: AppPaths.FAVORITES,
+    title: 'Favorites',
+    category: 'core',
   },
   {
     path: AppPaths.SAFETY,

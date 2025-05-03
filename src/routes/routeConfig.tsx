@@ -16,6 +16,10 @@ const BrainHubPage = lazy(() => import('@/pages/BrainHubPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const WalletPage = lazy(() => import('@/pages/UpdatedWallet'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
+const EscortsPage = lazy(() => import('@/pages/EscortsPage'));
+const EscortDetailPage = lazy(() => import('@/pages/EscortDetailPage'));
+const MessagesPage = lazy(() => import('@/pages/MessagesPage'));
+const FavoritesPage = lazy(() => import('@/pages/FavoritesPage'));
 
 // Define route configuration with elements
 export const routes: RouteDefinition[] = [
@@ -123,6 +127,49 @@ export const routes: RouteDefinition[] = [
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <ProfilePage />
+          </Suspense>
+        ),
+      },
+      // New escort routes
+      {
+        path: 'escorts',
+        title: 'Escorts',
+        category: 'escort',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <EscortsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'escorts/:id',
+        title: 'Escort Profile',
+        category: 'escort',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <EscortDetailPage />
+          </Suspense>
+        ),
+      },
+      // Messages page
+      {
+        path: 'messages',
+        title: 'Messages',
+        category: 'core',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <MessagesPage />
+          </Suspense>
+        ),
+      },
+      // Favorites page
+      {
+        path: 'favorites',
+        title: 'Favorites',
+        category: 'core',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <FavoritesPage />
           </Suspense>
         ),
       },
