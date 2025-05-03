@@ -4,8 +4,9 @@
  */
 
 export interface NeuralRequest {
-  type: 'analysis' | 'generation' | 'moderation' | 'transformation';
+  type: 'analysis' | 'generation' | 'moderation' | 'transformation' | string;
   data: any;
+  filters?: Record<string, any>;
 }
 
 export interface NeuralResponse {
@@ -15,6 +16,11 @@ export interface NeuralResponse {
 }
 
 class NeuralHub {
+  async initialize(): Promise<boolean> {
+    console.log('Initializing Neural Hub...');
+    return true;
+  }
+  
   async processRequest(request: NeuralRequest): Promise<NeuralResponse> {
     console.log(`Processing neural request of type ${request.type}`);
     
@@ -33,9 +39,44 @@ class NeuralHub {
       }
     };
   }
+  
+  // Add missing methods that are referenced in components
+  async getDecisionLogs(moduleId?: string): Promise<any[]> {
+    console.log(`Getting decision logs for module ${moduleId || 'all'}`);
+    return [
+      { timestamp: new Date().toISOString(), decision: 'approve', confidence: 0.95, module: moduleId || 'core' },
+      { timestamp: new Date(Date.now() - 3600000).toISOString(), decision: 'reject', confidence: 0.87, module: moduleId || 'core' }
+    ];
+  }
+  
+  async getActiveTrainingJobs(): Promise<any[]> {
+    return [
+      { id: 'job-1', progress: 75, model: 'sentiment-analysis', startedAt: new Date(Date.now() - 7200000).toISOString() },
+      { id: 'job-2', progress: 45, model: 'image-recognition', startedAt: new Date(Date.now() - 3600000).toISOString() }
+    ];
+  }
+  
+  async stopTraining(jobId: string): Promise<boolean> {
+    console.log(`Stopping training job ${jobId}`);
+    return true;
+  }
+  
+  getSystemStatus(): any {
+    return {
+      status: 'operational',
+      uptime: 99.8,
+      activeModels: 6,
+      queuedRequests: 2
+    };
+  }
 }
 
 class BrainHub {
+  async initialize(): Promise<boolean> {
+    console.log('Initializing Brain Hub...');
+    return true;
+  }
+
   async processRequest(request: NeuralRequest): Promise<NeuralResponse> {
     console.log(`Processing brain hub request: ${request.type}`);
     
@@ -48,6 +89,14 @@ class BrainHub {
         result: `Brain Hub processed ${request.type}`,
         timestamp: new Date().toISOString()
       }
+    };
+  }
+  
+  getSystemStatus(): any {
+    return {
+      status: 'operational',
+      processingNodes: 12,
+      avgResponseTime: 234
     };
   }
 }

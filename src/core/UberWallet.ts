@@ -10,6 +10,16 @@ export interface UbxTransactionResult {
   timestamp: Date;
 }
 
+export interface UbxTransaction {
+  id: string;
+  userId: string;
+  amount: number;
+  transactionType: string;
+  description?: string;
+  createdAt: Date;
+  status: 'completed' | 'pending' | 'failed';
+}
+
 export class UberWallet {
   async getBalance(userId: string): Promise<number> {
     // Mock implementation
@@ -24,6 +34,43 @@ export class UberWallet {
       success: true,
       message: `Successfully spent ${amount} UBX`,
       transactionId: `tx-${Date.now()}`,
+      timestamp: new Date()
+    };
+  }
+  
+  // Add missing methods referenced in WalletPage
+  async getTransactionHistory(userId: string): Promise<UbxTransaction[]> {
+    // Mock implementation
+    return [
+      { 
+        id: `tx-${Date.now()-1000}`, 
+        userId, 
+        amount: -50, 
+        transactionType: 'purchase', 
+        description: 'Purchased boost',
+        createdAt: new Date(Date.now() - 3600000),
+        status: 'completed'
+      },
+      { 
+        id: `tx-${Date.now()-2000}`, 
+        userId, 
+        amount: 200, 
+        transactionType: 'deposit', 
+        description: 'Added funds',
+        createdAt: new Date(Date.now() - 7200000),
+        status: 'completed'
+      }
+    ];
+  }
+  
+  async purchaseUbx(userId: string, amount: number): Promise<UbxTransactionResult> {
+    console.log(`User ${userId} purchasing ${amount} UBX`);
+    
+    // Mock implementation
+    return {
+      success: true,
+      message: `Successfully purchased ${amount} UBX`,
+      transactionId: `purchase-${Date.now()}`,
       timestamp: new Date()
     };
   }

@@ -4,6 +4,12 @@
 
 // Core AI Systems
 export * from './Lucie';          // AI Generation, Content Moderation
+
+// Re-export Lucie ContentGenerationRequest specifically to avoid ambiguity
+import { lucie, LucieSystem, ContentModerationResult } from './Lucie';
+export { lucie, LucieSystem, ContentModerationResult };
+export type { ContentGenerationRequest } from './Lucie';
+
 export * from './Hermes';         // Flow Dynamics, User Routing
 export * from './LucieOrchestratorAdapter'; // Backward compatibility for lucieOrchestrator
 export * from './HermesOrusOxum'; // Unified core integration
@@ -23,8 +29,8 @@ export {
 export * from './Orus';           // Security, Session Validation
 
 // Export UberWallet without re-exporting the types that are already exported
-import { uberWallet, UberWallet } from './UberWallet';
-export { uberWallet, UberWallet };
+import { uberWallet, UberWallet, UbxTransaction } from './UberWallet';
+export { uberWallet, UberWallet, UbxTransaction };
 
 // Core System
 export * from './UberCore';       // Base System Integration
