@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { routes } from '@/routes/routeConfig';
+import { routesWithElements as routes } from '@/routes';
 
 const AppRoutes = () => {
   return (

@@ -42,13 +42,15 @@ export interface RouteDefinition {
   path: string;
   title: string;
   category: RouteCategory;
+  element?: React.ReactNode;
   isAuthRequired?: boolean;
   roles?: string[];
   description?: string;
 }
 
-// Export routes array for use in AppRoutes
-export const routes = [
+// We'll use the routes defined in routeConfig.tsx which includes elements
+// This is just a navigation structure without elements
+export const routes: RouteDefinition[] = [
   {
     path: AppPaths.HOME,
     title: 'Home',
