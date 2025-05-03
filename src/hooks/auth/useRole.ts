@@ -9,6 +9,9 @@ export interface UseRoleReturn {
   isEscort: boolean;
   isClient: boolean;
   hasRole: (role: string) => boolean;
+  hasAnyRole: (roles: string[]) => boolean;
+  highestRole: string;
+  isCreator: boolean;
 }
 
 export const useRole = (): UseRoleReturn => {
@@ -22,12 +25,32 @@ export const useRole = (): UseRoleReturn => {
     return roles.includes(role);
   };
   
+  const hasAnyRole = (roleList: string[]): boolean => {
+    if (!isAuthenticated) return false;
+    return roleList.some(role => roles.includes(role));
+  };
+
+  // Determine the highest role based on a hierarchy
+  const determineHighestRole = (): string => {
+    if (hasRole('admin')) return 'Admin';
+    if (hasRole('moderator')) return 'Moderator';
+    if (hasRole('creator')) return 'Creator';
+    if (hasRole('escort')) return 'Escort';
+    if (hasRole('client')) return 'Client';
+    return 'User';
+  };
+  
   return {
     isAdmin: hasRole('admin'),
     isModerator: hasRole('moderator'),
     isContentCreator: hasRole('creator'),
+    isCreator: hasRole('creator'),
     isEscort: hasRole('escort'),
     isClient: hasRole('client'),
-    hasRole
+    hasRole,
+    hasAnyRole,
+    highestRole: determineHighestRole()
   };
 };
+
+export default useRole;
