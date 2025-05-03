@@ -30,11 +30,8 @@ export const processUBXTransaction = async (params: TransactionParams): Promise<
         const amountToValidate = params.amount < 0 ? Math.abs(params.amount) : params.amount;
         
         // Use the resilient validation with retry for critical payment paths
-        await validateGlobalPriceWithRetry(amountToValidate, {
-          transaction_type: params.transactionType,
-          user_id: params.userId,
-          description: params.description
-        });
+        // Pass number of retries instead of object
+        await validateGlobalPriceWithRetry(amountToValidate, 3);
       } catch (error: any) {
         console.error('[Oxum Enforcement Error]:', error);
         return {

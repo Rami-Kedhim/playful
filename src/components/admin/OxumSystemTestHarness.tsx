@@ -42,7 +42,7 @@ const OxumSystemTestHarness: React.FC = () => {
       let result;
       
       if (withRetry) {
-        const numRetries = parseInt(retries, 10);
+        const numRetries = parseInt(retries);
         result = await validateGlobalPriceWithRetry(priceValue, numRetries);
       } else {
         result = await validateGlobalPrice(priceValue);

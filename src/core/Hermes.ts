@@ -80,6 +80,12 @@ class HermesSystem {
     
     return actions[Math.floor(Math.random() * actions.length)];
   }
+
+  // Add the missing enterSpatialFlow method
+  enterSpatialFlow(userId: string, roomId: string): void {
+    console.log(`User ${userId} entered spatial flow for room ${roomId}`);
+    // In a real system, this would track spatial room entry
+  }
 }
 
 export const hermes = new HermesSystem();

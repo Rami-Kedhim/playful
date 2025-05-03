@@ -1,4 +1,3 @@
-
 import { hermes } from '@/core/Hermes';
 import { oxum } from '@/core/Oxum';
 import { orus } from '@/core/Orus';
@@ -103,4 +102,11 @@ export function calculateProfileVisibility(profileId: string) {
  */
 export function getRecommendedAction(userId: string) {
   return hermes.recommendNextAction(userId);
+}
+
+/**
+ * Calculate visibility score for a profile
+ */
+export function getProfileVisibilityScore(profileId: string): number {
+  return hermes.calculateVisibilityScore(profileId);
 }
