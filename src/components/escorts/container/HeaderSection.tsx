@@ -6,9 +6,15 @@ interface HeaderSectionProps {
   showFilters: boolean;
   setShowFilters: (show: boolean) => void;
   totalCount?: number;
+  activeFilterCount?: number; // Added this prop
 }
 
-const HeaderSection = ({ showFilters, setShowFilters, totalCount = 0 }: HeaderSectionProps) => {
+const HeaderSection = ({ 
+  showFilters, 
+  setShowFilters, 
+  totalCount = 0,
+  activeFilterCount = 0 // Set default value
+}: HeaderSectionProps) => {
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
       <div>
@@ -16,6 +22,7 @@ const HeaderSection = ({ showFilters, setShowFilters, totalCount = 0 }: HeaderSe
         <p className="text-muted-foreground">
           Find the perfect companion for your needs
           {totalCount > 0 && <span> • {totalCount} escorts available</span>}
+          {activeFilterCount > 0 && <span> • {activeFilterCount} active {activeFilterCount === 1 ? 'filter' : 'filters'}</span>}
         </p>
       </div>
 
