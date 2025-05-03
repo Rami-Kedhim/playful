@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { AppPaths } from '@/routes/routeConfig';
+import { AppPaths } from '@/routes';
 import { cn } from '@/lib/utils';
 import { 
   Home, 
