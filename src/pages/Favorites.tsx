@@ -15,11 +15,11 @@ const Favorites = () => {
   const { showWarning } = useNotifications();
   
   const escortFavorites = featuredEscorts.filter(escort => 
-    favorites.includes(escort.id)
+    favorites.escorts.some(fav => fav.id === escort.id)
   );
   
   const handleClearFavorites = () => {
-    clearFavorites();
+    clearFavorites(activeTab as 'escorts' | 'creators' | 'livecams');
     showWarning("Favorites Cleared", "All items have been removed from your favorites");
   };
   
@@ -32,7 +32,9 @@ const Favorites = () => {
             My Favorites
           </h1>
           
-          {favorites.length > 0 && (
+          {(activeTab === 'escorts' ? favorites.escorts.length > 0 : 
+           activeTab === 'creators' ? favorites.creators.length > 0 :
+           favorites.livecams.length > 0) && (
             <Button 
               variant="destructive" 
               size="sm"
@@ -75,7 +77,7 @@ const Favorites = () => {
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          onClick={() => removeFavorite(escort.id)}
+                          onClick={() => removeFavorite('escorts', escort.id)}
                         >
                           <Heart className="h-5 w-5 fill-primary text-primary" />
                         </Button>

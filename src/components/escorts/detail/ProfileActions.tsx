@@ -24,10 +24,10 @@ const ProfileActions = ({
   
   const handleFavoriteToggle = async () => {
     setIsLoadingFavorite(true);
-    toggleFavorite(escort.id);
+    toggleFavorite('escorts', escort.id);
     toast({
-      title: isFavorite(escort.id) ? "Removed from favorites" : "Added to favorites",
-      description: isFavorite(escort.id) 
+      title: isFavorite('escorts', escort.id) ? "Removed from favorites" : "Added to favorites",
+      description: isFavorite('escorts', escort.id) 
         ? `${escort.name} has been removed from your favorites.` 
         : `${escort.name} has been added to your favorites.`,
     });
@@ -58,9 +58,9 @@ const ProfileActions = ({
       >
         <Heart 
           size={16} 
-          className={`mr-2 ${isFavorite(escort.id) ? "fill-red-500 text-red-500" : ""}`} 
+          className={`mr-2 ${isFavorite('escorts', escort.id) ? "fill-red-500 text-red-500" : ""}`} 
         />
-        {isFavorite(escort.id) ? "Favorited" : "Favorite"}
+        {isFavorite('escorts', escort.id) ? "Favorited" : "Favorite"}
       </EnhancedButton>
       
       <EnhancedButton 

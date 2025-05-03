@@ -26,13 +26,13 @@ const EscortContactCard: React.FC<EscortContactCardProps> = ({
   onMessage
 }) => {
   const { toggleFavorite, isFavorite } = useFavorites();
-  const favorite = isFavorite(escort.id);
+  const favorite = isFavorite('escorts', escort.id);
 
   // Safe access to reviewCount, fallback to 0 if undefined
   const reviewsCount = typeof escort.reviewCount === 'number' ? escort.reviewCount : 0;
 
   const handleFavoriteToggle = () => {
-    toggleFavorite(escort.id);
+    toggleFavorite('escorts', escort.id);
   };
 
   return (

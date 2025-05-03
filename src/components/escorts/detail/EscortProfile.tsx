@@ -34,7 +34,7 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
   };
 
   const handleFavoriteToggle = () => {
-    toggleFavorite(escort.id);
+    toggleFavorite('escorts', escort.id);
   };
 
   return (

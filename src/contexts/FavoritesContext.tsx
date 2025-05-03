@@ -10,8 +10,9 @@ interface FavoritesContextProps {
   };
   addFavorite: (type: 'escorts' | 'creators' | 'livecams', item: any) => void;
   removeFavorite: (type: 'escorts' | 'creators' | 'livecams', id: string) => void;
-  clearFavorites: (type: 'escorts' | 'creators' | 'livecams') => void;
+  clearFavorites: (type?: 'escorts' | 'creators' | 'livecams') => void;
   isFavorite: (type: 'escorts' | 'creators' | 'livecams', id: string) => boolean;
+  toggleFavorite: (type: 'escorts' | 'creators' | 'livecams', id: string) => void;
 }
 
 const FavoritesContext = createContext<FavoritesContextProps | undefined>(undefined);
@@ -73,15 +74,33 @@ export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }
     }));
   };
 
-  const clearFavorites = (type: 'escorts' | 'creators' | 'livecams') => {
-    setFavorites(prev => ({
-      ...prev,
-      [type]: []
-    }));
+  const clearFavorites = (type?: 'escorts' | 'creators' | 'livecams') => {
+    if (type) {
+      setFavorites(prev => ({
+        ...prev,
+        [type]: []
+      }));
+    } else {
+      setFavorites({
+        escorts: [],
+        creators: [],
+        livecams: []
+      });
+    }
   };
 
   const isFavorite = (type: 'escorts' | 'creators' | 'livecams', id: string) => {
     return favorites[type].some(item => item.id === id);
+  };
+  
+  const toggleFavorite = (type: 'escorts' | 'creators' | 'livecams', id: string) => {
+    if (isFavorite(type, id)) {
+      removeFavorite(type, id);
+    } else {
+      // Find the item in some data source and add it
+      // For now, we'll just add an object with the ID
+      addFavorite(type, { id });
+    }
   };
 
   return (
@@ -90,7 +109,8 @@ export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }
       addFavorite,
       removeFavorite,
       clearFavorites,
-      isFavorite
+      isFavorite,
+      toggleFavorite
     }}>
       {children}
     </FavoritesContext.Provider>

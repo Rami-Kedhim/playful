@@ -22,7 +22,7 @@ const EscortQuickActions: React.FC<EscortQuickActionsProps> = ({
   const { toggleFavorite } = useFavorites();
   
   const handleFavoriteToggle = () => {
-    toggleFavorite(escort.id);
+    toggleFavorite('escorts', escort.id);
   };
   
   return (

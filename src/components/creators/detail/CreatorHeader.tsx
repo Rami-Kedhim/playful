@@ -21,7 +21,7 @@ const CreatorHeader: React.FC<CreatorHeaderProps> = ({
   const { toggleFavorite } = useFavorites();
   
   const handleFavoriteToggle = () => {
-    toggleFavorite(creator.id);
+    toggleFavorite('creators', creator.id);
   };
   
   return (
