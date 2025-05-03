@@ -42,7 +42,7 @@ export interface UserProfile {
   location?: string;
   gallery_images?: string[];
   social_links?: Record<string, string>;
-  createdAt?: string; // Added to match auth.UserProfile
+  createdAt: string; // Added to match auth.UserProfile
 }
 
 // Add missing credential interfaces
