@@ -1,45 +1,97 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from '@/hooks/auth';
 
 const Profile = () => {
+  const [activeTab, setActiveTab] = useState("info");
   const { user } = useAuth();
-
-  const getUserInitials = () => {
-    if (user?.name) {
-      return user.name.substring(0, 1).toUpperCase();
-    }
-    if (user?.email) {
-      return user.email.substring(0, 1).toUpperCase();
-    }
-    return 'U';
-  };
-
+  
   return (
-    <Layout title="Profile" description="Your personal profile">
-      <Card className="mb-8">
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pb-4">
-          <Avatar className="h-20 w-20">
-            <AvatarImage src={user?.avatarUrl} alt={user?.name || user?.email || 'User'} />
-            <AvatarFallback className="text-2xl">{getUserInitials()}</AvatarFallback>
-          </Avatar>
-          <div>
-            <CardTitle>{user?.name || 'User'}</CardTitle>
-            <CardDescription>{user?.email}</CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div>
-              <span className="font-medium">Member since: </span>
-              <span>{user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}</span>
+    <Layout title="My Profile" description="Manage your personal information and preferences">
+      <div className="max-w-4xl mx-auto">
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+              <Avatar className="h-24 w-24 border-2 border-primary">
+                <AvatarImage src={user?.avatar || ""} />
+                <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
+              </Avatar>
+              
+              <div className="flex-1 text-center md:text-left">
+                <h1 className="text-2xl font-bold">{user?.name || "User"}</h1>
+                <p className="text-muted-foreground">{user?.email || ""}</p>
+                
+                <div className="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
+                  <Button variant="outline" size="sm">Edit Profile</Button>
+                  <Button variant="outline" size="sm">View Public Profile</Button>
+                </div>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+        
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-4 mb-8">
+            <TabsTrigger value="info">Info</TabsTrigger>
+            <TabsTrigger value="bookings">Bookings</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
+            <TabsTrigger value="preferences">Preferences</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="info">
+            <Card>
+              <CardHeader>
+                <CardTitle>Personal Information</CardTitle>
+                <CardDescription>Manage your personal details</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p>Profile information content will go here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="bookings">
+            <Card>
+              <CardHeader>
+                <CardTitle>Booking History</CardTitle>
+                <CardDescription>View your past and upcoming bookings</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p>No bookings to display.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="payments">
+            <Card>
+              <CardHeader>
+                <CardTitle>Payment History</CardTitle>
+                <CardDescription>View your transaction history</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p>No payments to display.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="preferences">
+            <Card>
+              <CardHeader>
+                <CardTitle>Account Preferences</CardTitle>
+                <CardDescription>Customize your account settings</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p>Preference settings will go here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </Layout>
   );
 };
