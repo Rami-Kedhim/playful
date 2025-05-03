@@ -1,6 +1,6 @@
 
 import React, { lazy, Suspense } from 'react';
-import { RouteObject } from 'react-router-dom';
+import { RouteDefinition } from './routeConfig';
 import MainLayout from '@/layouts/MainLayout';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 
@@ -10,15 +10,24 @@ const SafetyPage = lazy(() => import('@/pages/SafetyPage'));
 const AICompanionDemo = lazy(() => import('@/pages/ai-companion-demo'));
 const RouteSharePage = lazy(() => import('@/pages/RouteSharePage'));
 const SEOPage = lazy(() => import('@/pages/SEOPage'));
+const NeuralMonitorPage = lazy(() => import('@/pages/neural/NeuralMonitorPage'));
+const NeuralAnalyticsPage = lazy(() => import('@/pages/neural/NeuralAnalyticsPage'));
+const BrainHubPage = lazy(() => import('@/pages/BrainHubPage'));
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 // Define route configuration with elements
-export const routes: RouteObject[] = [
+export const routes: RouteDefinition[] = [
   {
     path: '/',
+    title: 'Main',
+    category: 'core',
     element: <MainLayout />,
     children: [
       {
         index: true,
+        path: '',
+        title: 'Home',
+        category: 'core',
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <HomePage />
@@ -27,6 +36,8 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'safety',
+        title: 'Safety',
+        category: 'safety',
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <SafetyPage />
@@ -35,6 +46,8 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'ai-companion',
+        title: 'AI Companion',
+        category: 'core',
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <AICompanionDemo />
@@ -43,6 +56,8 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'share',
+        title: 'Share Route',
+        category: 'safety',
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <RouteSharePage />
@@ -51,12 +66,54 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'seo',
+        title: 'SEO Tools',
+        category: 'core',
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <SEOPage />
           </Suspense>
         ),
       },
+      {
+        path: 'neural/monitor',
+        title: 'Neural Monitor',
+        category: 'neural',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <NeuralMonitorPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'neural/analytics',
+        title: 'Neural Analytics',
+        category: 'neural',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <NeuralAnalyticsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'brain-hub',
+        title: 'Brain Hub',
+        category: 'neural',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <BrainHubPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '*',
+        title: 'Not Found',
+        category: 'core',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <NotFoundPage />
+          </Suspense>
+        ),
+      }
     ],
   },
 ];

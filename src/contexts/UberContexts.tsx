@@ -1,25 +1,16 @@
 
-import React from 'react';
-import { AuthProvider } from '@/hooks/auth';
-import { LucieProvider } from '@/contexts/LucieContext';
-import { HermesProvider } from '@/contexts/HermesContext';
-import { OxumProvider } from '@/contexts/OxumContext';
+import React, { ReactNode } from 'react';
 
 interface UberContextsProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-const UberContextsProvider = ({ children }: UberContextsProviderProps) => {
+const UberContextsProvider: React.FC<UberContextsProviderProps> = ({ children }) => {
+  // This is a placeholder for all the context providers that will be used in the app
   return (
-    <AuthProvider>
-      <LucieProvider>
-        <HermesProvider>
-          <OxumProvider>
-            {children}
-          </OxumProvider>
-        </HermesProvider>
-      </LucieProvider>
-    </AuthProvider>
+    <>
+      {children}
+    </>
   );
 };
 

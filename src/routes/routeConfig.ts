@@ -23,9 +23,6 @@ export const AppPaths = {
   SEO: '/seo'
 };
 
-export type RoutePaths = typeof AppPaths;
-
-// Define our route categories
 export type RouteCategory = 
   'core' | 
   'escort' | 
@@ -47,6 +44,8 @@ export interface RouteDefinition {
   isAuthRequired?: boolean;
   roles?: string[];
   description?: string;
+  children?: RouteDefinition[];
+  index?: boolean;
 }
 
 // Define routes without elements (for navigation purposes)
@@ -80,6 +79,22 @@ export const routes: RouteDefinition[] = [
     path: AppPaths.SEO,
     title: 'SEO Tools',
     category: 'core',
+  },
+  // Neural routes
+  {
+    path: AppPaths.NEURAL_MONITOR,
+    title: 'Neural Monitor',
+    category: 'neural',
+  },
+  {
+    path: AppPaths.NEURAL_ANALYTICS,
+    title: 'Neural Analytics',
+    category: 'neural',
+  },
+  {
+    path: AppPaths.BRAIN_HUB,
+    title: 'Brain Hub',
+    category: 'neural',
   },
   // Add more routes as needed
 ];

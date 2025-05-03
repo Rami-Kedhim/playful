@@ -1,132 +1,130 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Brain, 
-  LineChart, 
-  FileText, 
-  Settings, 
-  Sparkles, 
-  ArrowUpRight,
-  Search,
-  TrendingUp,
-  History
-} from 'lucide-react';
+import HermesSeoNavigation from './HermesSeoNavigation';
 
-const HermesSeoHome: React.FC = () => {
-  const navigate = useNavigate();
-  
-  const seoTools = [
-    {
-      title: "Content Optimization",
-      description: "Optimize your content for better search visibility",
-      icon: <FileText className="h-6 w-6 text-primary" />,
-      path: "/seo/optimize-content"
-    },
-    {
-      title: "Profile Optimization",
-      description: "Enhance your profile's SEO performance",
-      icon: <Search className="h-6 w-6 text-primary" />,
-      path: "/seo/optimize-profile"
-    },
-    {
-      title: "Live Optimization",
-      description: "Real-time SEO improvements for your content",
-      icon: <Sparkles className="h-6 w-6 text-primary" />,
-      path: "/seo/optimize-live"
-    },
-    {
-      title: "SEO Analytics",
-      description: "View detailed performance metrics and insights",
-      icon: <LineChart className="h-6 w-6 text-primary" />,
-      path: "/seo/analytics"
-    },
-    {
-      title: "Optimization History",
-      description: "Review your past SEO improvements",
-      icon: <History className="h-6 w-6 text-primary" />,
-      path: "/seo/history"
-    },
-    {
-      title: "SEO Tools",
-      description: "Advanced tools for SEO management",
-      icon: <Settings className="h-6 w-6 text-primary" />,
-      path: "/seo/tools"
-    }
-  ];
-  
+const HermesSeoHome = () => {
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center">
-            <Brain className="mr-2 h-8 w-8 text-primary" />
-            HERMES SEO Dashboard
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            AI-powered optimization tools to enhance your content visibility
+    <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] h-full">
+      {/* Sidebar Navigation */}
+      <HermesSeoNavigation />
+      
+      {/* Main Content */}
+      <div className="p-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">SEO Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome to the HERMES SEO Dashboard. Optimize your content visibility and boost your rankings.
           </p>
         </div>
         
-        <Button onClick={() => navigate('/seo/new-optimization')} className="flex items-center">
-          <Sparkles className="mr-2 h-4 w-4" />
-          New Optimization
-        </Button>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {seoTools.map((tool) => (
-          <Card key={tool.path} className="group hover:shadow-md transition-all">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center">
-                  {tool.icon}
-                  <span className="ml-2">{tool.title}</span>
-                </div>
-                <ArrowUpRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </CardTitle>
-              <CardDescription>{tool.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link to={tool.path}>
-                <Button variant="ghost" className="w-full justify-start">
-                  Go to {tool.title}
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      
-      <Card className="bg-primary/5 border-primary/20">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Brain className="mr-2 h-6 w-6 text-primary" />
-            HERMES Intelligence Integration
-          </CardTitle>
-          <CardDescription>
-            HERMES AI is powering your SEO performance through advanced neural models
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row justify-between gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center">
-                <TrendingUp className="h-5 w-5 text-green-500 mr-2" />
-                <span className="font-medium">+32% Visibility Improvement</span>
+        {/* Dashboard Content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {/* SEO Score Card */}
+          <div className="bg-card rounded-lg shadow-sm border p-6">
+            <h3 className="font-medium mb-4">Overall SEO Score</h3>
+            <div className="flex items-center justify-center">
+              <div className="h-32 w-32 rounded-full flex items-center justify-center 
+                  bg-gradient-to-br from-green-500/20 to-green-700/20 
+                  border-4 border-green-500">
+                <span className="text-3xl font-bold">86%</span>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Average improvement in content visibility with HERMES optimization
-              </p>
             </div>
-            <Button variant="outline" onClick={() => navigate('/seo/analytics')}>
-              View Detailed Analytics
-            </Button>
+            <div className="mt-4 text-sm text-center text-muted-foreground">
+              Your profile is well optimized
+            </div>
           </div>
-        </CardContent>
-      </Card>
+          
+          {/* Keywords Card */}
+          <div className="bg-card rounded-lg shadow-sm border p-6">
+            <h3 className="font-medium mb-4">Top Keywords</h3>
+            <ul className="space-y-2">
+              <li className="flex justify-between">
+                <span>Escort services</span>
+                <span className="font-medium">92%</span>
+              </li>
+              <li className="flex justify-between">
+                <span>Premium companion</span>
+                <span className="font-medium">87%</span>
+              </li>
+              <li className="flex justify-between">
+                <span>VIP escort</span>
+                <span className="font-medium">81%</span>
+              </li>
+              <li className="flex justify-between">
+                <span>Luxury date</span>
+                <span className="font-medium">76%</span>
+              </li>
+            </ul>
+          </div>
+          
+          {/* Visibility Card */}
+          <div className="bg-card rounded-lg shadow-sm border p-6">
+            <h3 className="font-medium mb-4">Profile Visibility</h3>
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm">Search Visibility</span>
+                  <span className="text-sm font-medium">78%</span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div className="bg-primary h-2 rounded-full" style={{ width: '78%' }}></div>
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm">Platform Ranking</span>
+                  <span className="text-sm font-medium">92%</span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div className="bg-primary h-2 rounded-full" style={{ width: '92%' }}></div>
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm">External Visibility</span>
+                  <span className="text-sm font-medium">63%</span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div className="bg-primary h-2 rounded-full" style={{ width: '63%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Recommendations Section */}
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4">Optimization Recommendations</h2>
+          <div className="bg-card rounded-lg shadow-sm border p-6">
+            <ul className="space-y-3">
+              <li className="flex items-start">
+                <div className="mr-3 mt-0.5 h-5 w-5 rounded-full bg-amber-500/20 flex items-center justify-center">
+                  <span className="text-amber-500 text-xs">!</span>
+                </div>
+                <span>Add more high-quality images to improve engagement metrics</span>
+              </li>
+              <li className="flex items-start">
+                <div className="mr-3 mt-0.5 h-5 w-5 rounded-full bg-amber-500/20 flex items-center justify-center">
+                  <span className="text-amber-500 text-xs">!</span>
+                </div>
+                <span>Update your profile description with more targeted keywords</span>
+              </li>
+              <li className="flex items-start">
+                <div className="mr-3 mt-0.5 h-5 w-5 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <span className="text-green-500 text-xs">✓</span>
+                </div>
+                <span>Your profile title is well-optimized</span>
+              </li>
+              <li className="flex items-start">
+                <div className="mr-3 mt-0.5 h-5 w-5 rounded-full bg-red-500/20 flex items-center justify-center">
+                  <span className="text-red-500 text-xs">×</span>
+                </div>
+                <span>Missing location keywords in your profile</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

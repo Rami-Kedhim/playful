@@ -1,43 +1,33 @@
 
+import { useState } from 'react';
 import { useAuth } from './useAuthContext';
 
-export const useRole = () => {
-  const auth = useAuth();
+export interface UseRoleReturn {
+  isAdmin: boolean;
+  isModerator: boolean;
+  isContentCreator: boolean;
+  isEscort: boolean;
+  isClient: boolean;
+  hasRole: (role: string) => boolean;
+}
 
-  const hasRole = (role: string) => {
-    return auth.checkRole?.(role) || false;
-  };
-
-  const hasAnyRole = (roles: string[]) => {
-    return roles.some(role => hasRole(role));
-  };
-
-  // Helper properties for common role checks
-  const isAdmin = hasRole('admin');
-  const isModerator = hasRole('moderator');
-  const isCreator = hasRole('creator');
-  const isEscort = hasRole('escort');
+export const useRole = (): UseRoleReturn => {
+  const { user, isAuthenticated } = useAuth();
   
-  // Get the highest role from a hierarchy
-  const getHighestRole = (): string => {
-    if (isAdmin) return 'admin';
-    if (isModerator) return 'moderator';
-    if (isCreator) return 'creator';
-    if (isEscort) return 'escort';
-    return 'user';
+  // Mock implementation - in a real app, this would come from the user object
+  const [roles] = useState<string[]>(user?.roles || []);
+  
+  const hasRole = (role: string): boolean => {
+    if (!isAuthenticated) return false;
+    return roles.includes(role);
   };
-
-  const highestRole = getHighestRole();
-
+  
   return {
-    hasRole,
-    hasAnyRole,
-    isAdmin,
-    isModerator,
-    isCreator,
-    isEscort,
-    highestRole
+    isAdmin: hasRole('admin'),
+    isModerator: hasRole('moderator'),
+    isContentCreator: hasRole('creator'),
+    isEscort: hasRole('escort'),
+    isClient: hasRole('client'),
+    hasRole
   };
 };
-
-export default useRole;

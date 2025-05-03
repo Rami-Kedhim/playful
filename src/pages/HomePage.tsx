@@ -41,7 +41,7 @@ const HomePage = () => {
   };
 
   return (
-    <UnifiedLayout hideNavbar={true} fullWidth={true}>
+    <div className="bg-background text-foreground min-h-screen">
       {/* Hero Section with HomeHeader */}
       <HomeHeader onExploreClick={handleExploreEscorts} />
       
@@ -88,7 +88,7 @@ const HomePage = () => {
           </Button>
         </div>
       </div>
-    </UnifiedLayout>
+    </div>
   );
 };
 
