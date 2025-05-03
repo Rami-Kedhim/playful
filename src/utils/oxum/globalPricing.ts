@@ -1,3 +1,4 @@
+
 /**
  * Oxum Global Pricing System
  * Implements Rule #001: Global Price Symmetry - All boost prices must be identical worldwide
@@ -42,7 +43,7 @@ export const validateGlobalPrice = async (price: number): Promise<any> => {
 // Validate global price with retries
 export const validateGlobalPriceWithRetry = async (
   price: number, 
-  retries = 3 || {} as any // Allow both number and object for backward compatibility
+  retries: number = MAX_RETRY_ATTEMPTS
 ): Promise<any> => {
   const numRetries = typeof retries === 'number' ? retries : MAX_RETRY_ATTEMPTS;
   
