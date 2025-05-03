@@ -1,12 +1,12 @@
 
 import React from 'react';
-import Layout from '@/components/layout/Layout';
+import MainLayout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
 const Messages = () => {
   return (
-    <Layout title="Messages" description="Your conversations with escorts and creators">
+    <MainLayout title="Messages" description="Your conversations with escorts and creators">
       <div className="max-w-3xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">Recent Messages</h2>
@@ -25,7 +25,7 @@ const Messages = () => {
           </Button>
         </div>
       </div>
-    </Layout>
+    </MainLayout>
   );
 };
 

@@ -1,18 +1,18 @@
 
 import React, { useState } from 'react';
-import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from '@/hooks/auth';
+import MainLayout from '@/components/layout/Layout';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("info");
   const { user } = useAuth();
   
   return (
-    <Layout title="My Profile" description="Manage your personal information and preferences">
+    <MainLayout title="My Profile" description="Manage your personal information and preferences">
       <div className="max-w-4xl mx-auto">
         <Card className="mb-6">
           <CardContent className="pt-6">
@@ -92,7 +92,7 @@ const Profile = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
+    </MainLayout>
   );
 };
 

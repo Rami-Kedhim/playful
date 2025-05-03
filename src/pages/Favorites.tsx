@@ -1,148 +1,132 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useFavorites } from '@/contexts/FavoritesContext';
-import Layout from '@/components/layout/Layout';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import EscortCard from '@/components/escorts/EscortCard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Escort } from '@/types/Escort';
-import { Heart } from 'lucide-react';
+import { useFavorites } from '@/contexts/FavoritesContext';
+import { Button } from '@/components/ui/button';
+import { Heart, Users, Video } from 'lucide-react';
+import MainLayout from '@/components/layout/Layout';
 
 const Favorites = () => {
-  const { favorites, toggleFavorite } = useFavorites();
-  const [activeTab, setActiveTab] = useState<'escorts' | 'creators' | 'livecams'>('escorts');
-  
-  // Check if all sections are empty
-  const isEmpty = !favorites.escorts.length && 
-                 !favorites.creators.length && 
-                 !favorites.livecams.length;
+  const { favorites, removeFavorite } = useFavorites();
+  const [activeTab, setActiveTab] = useState("escorts");
   
   const handleRemoveFavorite = (type: 'escorts' | 'creators' | 'livecams', id: string) => {
-    toggleFavorite(type, id);
+    removeFavorite(type, id);
   };
   
+  // Check if there are any favorites across all types
+  const hasFavorites = 
+    favorites.escorts.length > 0 || 
+    favorites.creators.length > 0 || 
+    favorites.livecams.length > 0;
+  
   return (
-    <Layout title="My Favorites" description="View and manage your favorite escorts, creators and livecams">
-      <div className="max-w-7xl mx-auto">
-        {isEmpty ? (
-          <Card className="text-center">
-            <CardContent className="pt-10 pb-10">
-              <div className="flex flex-col items-center">
-                <Heart className="h-16 w-16 text-muted-foreground mb-4" />
-                <h2 className="text-xl font-semibold mb-2">No favorites yet</h2>
-                <p className="text-muted-foreground mb-6">
-                  Add escorts, creators or livecams to your favorites to view them here
-                </p>
-                <div className="flex gap-2">
-                  <Button asChild>
-                    <a href="/escorts">Browse Escorts</a>
-                  </Button>
-                  <Button variant="outline" asChild>
-                    <a href="/creators">Browse Creators</a>
-                  </Button>
-                </div>
+    <MainLayout title="Favorites" description="Manage your favorite escorts, creators, and livecams">
+      <div className="max-w-6xl mx-auto">
+        <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="w-full grid grid-cols-3 mb-6">
+            <TabsTrigger value="escorts" className="flex items-center gap-1.5">
+              <Heart className="h-4 w-4" />
+              <span>Escorts</span>
+            </TabsTrigger>
+            <TabsTrigger value="creators" className="flex items-center gap-1.5">
+              <Users className="h-4 w-4" />
+              <span>Creators</span>
+            </TabsTrigger>
+            <TabsTrigger value="livecams" className="flex items-center gap-1.5">
+              <Video className="h-4 w-4" />
+              <span>Livecams</span>
+            </TabsTrigger>
+          </TabsList>
+          
+          {!hasFavorites && (
+            <div className="text-center p-8 bg-card rounded-lg border border-border">
+              <Heart className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <h2 className="text-xl font-medium mb-2">No favorites yet</h2>
+              <p className="text-muted-foreground mb-4">
+                Save your favorite escorts, creators, and livecams to quickly access them later
+              </p>
+              <Button className="mr-2" asChild>
+                <a href="/escorts">Browse Escorts</a>
+              </Button>
+              <Button variant="outline" asChild>
+                <a href="/creators">Browse Creators</a>
+              </Button>
+            </div>
+          )}
+          
+          <TabsContent value="escorts">
+            {favorites.escorts.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {favorites.escorts.map((escort) => (
+                  <div key={escort.id} className="relative">
+                    <EscortCard 
+                      key={escort.id} 
+                      name={escort.name}
+                      location={escort.location}
+                      image={escort.images?.[0] || ''}
+                      id={escort.id}
+                      isFavorite={true}
+                      age={escort.age}
+                      rating={escort.rating}
+                      tags={escort.tags || []}
+                      verificationLevel={escort.verificationLevel}
+                    />
+                    <Button 
+                      variant="ghost" 
+                      className="absolute top-2 right-2" 
+                      onClick={() => handleRemoveFavorite('escorts', escort.id)}
+                    >
+                      <Heart className="h-5 w-5 fill-red-500 text-red-500" />
+                    </Button>
+                  </div>
+                ))}
               </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <>
-            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'escorts' | 'creators' | 'livecams')}>
-              <TabsList className="mb-8">
-                <TabsTrigger value="escorts">
-                  Escorts ({favorites.escorts.length})
-                </TabsTrigger>
-                <TabsTrigger value="creators">
-                  Creators ({favorites.creators.length})
-                </TabsTrigger>
-                <TabsTrigger value="livecams">
-                  Livecams ({favorites.livecams.length})
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="escorts">
-                {favorites.escorts.length === 0 ? (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>No favorite escorts</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>You haven't added any escorts to your favorites yet.</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {favorites.escorts.map((escort) => (
-                      <div key={escort.id} className="relative">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full"
-                          onClick={() => handleRemoveFavorite('escorts', escort.id)}
-                        >
-                          <Heart className="h-5 w-5 fill-current" />
-                        </Button>
-                        <EscortCard
-                          id={escort.id}
-                          name={escort.name || "Escort"}
-                          age={escort.age || 25}
-                          location={escort.location || "Unknown"}
-                          rating={escort.rating || 4.5}
-                          reviews={escort.reviewCount || 0}
-                          tags={escort.tags || []}
-                          imageUrl={escort.imageUrl || escort.profileImage || ""}
-                          price={escort.price || 0}
-                          verified={escort.isVerified || false}
-                          gender={escort.gender || "Female"}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="creators">
-                {favorites.creators.length === 0 ? (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>No favorite creators</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>You haven't added any creators to your favorites yet.</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {favorites.creators.map(creator => (
-                      <div key={creator.id}>Creator card will go here</div>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="livecams">
-                {favorites.livecams.length === 0 ? (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>No favorite livecams</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>You haven't added any livecams to your favorites yet.</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {favorites.livecams.map(livecam => (
-                      <div key={livecam.id}>Livecam card will go here</div>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          </>
-        )}
+            ) : (
+              <div className="text-center p-8 bg-card rounded-lg border border-border">
+                <p>No favorite escorts yet</p>
+                <Button className="mt-4" asChild>
+                  <a href="/escorts">Browse Escorts</a>
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="creators">
+            {favorites.creators.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Creator cards would go here */}
+                <p>Your favorite creators</p>
+              </div>
+            ) : (
+              <div className="text-center p-8 bg-card rounded-lg border border-border">
+                <p>No favorite creators yet</p>
+                <Button className="mt-4" asChild>
+                  <a href="/creators">Browse Creators</a>
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="livecams">
+            {favorites.livecams.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Livecam cards would go here */}
+                <p>Your favorite livecams</p>
+              </div>
+            ) : (
+              <div className="text-center p-8 bg-card rounded-lg border border-border">
+                <p>No favorite livecams yet</p>
+                <Button className="mt-4" asChild>
+                  <a href="/livecams">Browse Livecams</a>
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
-    </Layout>
+    </MainLayout>
   );
 };
 
