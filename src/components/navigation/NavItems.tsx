@@ -1,65 +1,129 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { AppRoutes } from '@/utils/navigation';
+import { AppPaths } from '@/routes/routeConfig';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRole } from '@/hooks/auth/useRole';
-import RoleBasedContent from '@/components/auth/RoleBasedContent';
-import { Brain, ShieldCheck, Sparkles, Wallet } from 'lucide-react';
+import { Brain, ShieldCheck, Sparkles, Wallet, User, MessageSquare } from 'lucide-react';
 
 const NavItems = () => {
   const { isAdmin, isModerator } = useRole();
+  const { isAuthenticated } = useAuth();
+  const location = useLocation();
+  
+  // Function to check if a link is active
+  const isActive = (path: string) => {
+    return location.pathname === path || 
+           (path !== '/' && location.pathname.startsWith(path));
+  };
 
   return (
     <nav className="flex items-center space-x-4">
-      <Link to={AppRoutes.HOME} className={cn("text-sm font-medium transition-colors hover:text-primary flex items-center")}>
+      <Link 
+        to={AppPaths.HOME} 
+        className={cn(
+          "text-sm font-medium transition-colors hover:text-primary flex items-center",
+          isActive(AppPaths.HOME) && "text-primary"
+        )}
+      >
         Home
       </Link>
       
-      <RoleBasedContent allowedRoles={['admin']}>
-        <Link to="/admin" className={cn("text-sm font-medium transition-colors hover:text-primary flex items-center")}>
-          <ShieldCheck className="h-4 w-4 mr-1" />
-          Admin
-        </Link>
-      </RoleBasedContent>
-
-      <RoleBasedContent allowedRoles={['admin', 'moderator']}>
-        <Link to="/moderation" className={cn("text-sm font-medium transition-colors hover:text-primary flex items-center")}>
-          <ShieldCheck className="h-4 w-4 mr-1" />
-          Moderation
-        </Link>
-      </RoleBasedContent>
-
-      <Link to={AppRoutes.SEARCH} className={cn("text-sm font-medium transition-colors hover:text-primary flex items-center")}>
-        Search
-      </Link>
+      {isAuthenticated && (
+        <>
+          <Link 
+            to="/profile" 
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary flex items-center",
+              isActive('/profile') && "text-primary"
+            )}
+          >
+            <User className="h-4 w-4 mr-1" />
+            Profile
+          </Link>
+          
+          <Link 
+            to="/messages" 
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary flex items-center",
+              isActive('/messages') && "text-primary"
+            )}
+          >
+            <MessageSquare className="h-4 w-4 mr-1" />
+            Messages
+          </Link>
+          
+          <Link 
+            to={AppPaths.WALLET} 
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary flex items-center",
+              isActive(AppPaths.WALLET) && "text-primary"
+            )}
+          >
+            <Wallet className="h-4 w-4 mr-1" />
+            Wallet
+          </Link>
+        </>
+      )}
       
-      <Link to="/profile" className={cn("text-sm font-medium transition-colors hover:text-primary flex items-center")}>
-        Profile
-      </Link>
-
-      <Link to="/neural/monitor" className={cn("text-sm font-medium transition-colors hover:text-primary flex items-center")}>
+      <Link 
+        to="/neural/monitor" 
+        className={cn(
+          "text-sm font-medium transition-colors hover:text-primary flex items-center",
+          isActive('/neural/monitor') && "text-primary"
+        )}
+      >
         <Brain className="h-4 w-4 mr-1" />
         Neural Monitor
       </Link>
-
-      <Link to={AppRoutes.WALLET} className={cn("text-sm font-medium transition-colors hover:text-primary flex items-center")}>
-        <Wallet className="h-4 w-4 mr-1" />
-        Wallet
-      </Link>
       
-      <Link to={AppRoutes.PULSE_BOOST} className={cn("text-sm font-medium transition-colors hover:text-primary flex items-center")}>
-        <Sparkles className="h-4 w-4 mr-1" />
-        Boost
-      </Link>
-      
-      <Link to={AppRoutes.PERSONAS} className={cn("text-sm font-medium transition-colors hover:text-primary flex items-center")}>
-        UberPersonas
-      </Link>
-      
-      <Link to={AppRoutes.BRAIN_HUB} className={cn("text-sm font-medium transition-colors hover:text-primary flex items-center")}>
+      <Link 
+        to={AppPaths.BRAIN_HUB} 
+        className={cn(
+          "text-sm font-medium transition-colors hover:text-primary flex items-center",
+          isActive(AppPaths.BRAIN_HUB) && "text-primary"
+        )}
+      >
         <Brain className="h-4 w-4 mr-1" />
         Brain Hub
+      </Link>
+      
+      {isAdmin && (
+        <Link 
+          to="/admin" 
+          className={cn(
+            "text-sm font-medium transition-colors hover:text-primary flex items-center",
+            isActive('/admin') && "text-primary"
+          )}
+        >
+          <ShieldCheck className="h-4 w-4 mr-1" />
+          Admin
+        </Link>
+      )}
+      
+      {isModerator && (
+        <Link 
+          to="/moderation" 
+          className={cn(
+            "text-sm font-medium transition-colors hover:text-primary flex items-center",
+            isActive('/moderation') && "text-primary"
+          )}
+        >
+          <ShieldCheck className="h-4 w-4 mr-1" />
+          Moderation
+        </Link>
+      )}
+      
+      <Link 
+        to={AppPaths.PULSE_BOOST} 
+        className={cn(
+          "text-sm font-medium transition-colors hover:text-primary flex items-center",
+          isActive(AppPaths.PULSE_BOOST) && "text-primary"
+        )}
+      >
+        <Sparkles className="h-4 w-4 mr-1" />
+        Boost
       </Link>
     </nav>
   );

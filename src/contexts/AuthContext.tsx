@@ -26,5 +26,5 @@ export const useAuthContext = (): AuthContextType => {
   return context;
 };
 
-// Export the useAuth hook for backward compatibility
+// Export the useAuth hook as an alias to useAuthContext for backward compatibility
 export const useAuth = useAuthContext;

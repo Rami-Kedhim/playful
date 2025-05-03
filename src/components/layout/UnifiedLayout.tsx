@@ -1,10 +1,11 @@
 
 import React from 'react';
+import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 
 export interface UnifiedLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   hideHeader?: boolean;
   hideFooter?: boolean;
   title?: string;
@@ -39,7 +40,7 @@ const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
       )}
       
       <main className="flex-grow">
-        {children}
+        {children || <Outlet />}
       </main>
       
       {!hideFooter && <Footer />}

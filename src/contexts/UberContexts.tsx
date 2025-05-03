@@ -1,16 +1,17 @@
 
 import React, { ReactNode } from 'react';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 interface UberContextsProviderProps {
   children: ReactNode;
 }
 
 const UberContextsProvider: React.FC<UberContextsProviderProps> = ({ children }) => {
-  // This is a placeholder for all the context providers that will be used in the app
+  // Wrap all application contexts here
   return (
-    <>
+    <AuthProvider>
       {children}
-    </>
+    </AuthProvider>
   );
 };
 

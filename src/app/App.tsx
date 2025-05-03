@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
-import UberContextsProvider from '@/contexts/UberContexts';
+import { AuthProvider } from '@/contexts/AuthContext';
 import AppRoutes from './AppRoutes';
 import { initializeSystem, shutdownSystem } from '@/core/engine';
 import { checkSystemStatus } from '@/utils/core';
@@ -70,10 +70,10 @@ const App = () => {
   
   return (
     <BrowserRouter>
-      <UberContextsProvider>
+      <AuthProvider>
         <AppRoutes />
         <Toaster />
-      </UberContextsProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 };

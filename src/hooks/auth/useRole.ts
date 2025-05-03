@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { useAuth } from './useAuthContext';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types/auth';
 
 export interface UseRoleReturn {
@@ -18,26 +18,41 @@ export interface UseRoleReturn {
 export const useRole = (): UseRoleReturn => {
   const { user, isAuthenticated } = useAuth();
   
-  // Convert complex UserRole array to simple string array
-  const getRoleStrings = (roles: UserRole[] | undefined): string[] => {
-    if (!roles) return [];
+  // Helper function to convert complex role objects to string array
+  const getRoleStrings = (userRoles?: UserRole[] | string[] | string): string[] => {
+    if (!userRoles) return [];
     
-    return roles.map(role => {
-      if (typeof role === 'string') {
-        return role;
-      }
-      return role.name;
-    });
+    // If it's a single string
+    if (typeof userRoles === 'string') {
+      return [userRoles];
+    }
+    
+    // If it's an array
+    if (Array.isArray(userRoles)) {
+      return userRoles.map(role => {
+        if (typeof role === 'string') {
+          return role;
+        }
+        // If role is an object with name property
+        if (typeof role === 'object' && role !== null && 'name' in role) {
+          return role.name;
+        }
+        return '';
+      }).filter(Boolean);
+    }
+    
+    return [];
   };
   
-  // Mock implementation - in a real app, this would come from the user object
-  const [roleStrings] = useState<string[]>(
-    user?.roles ? 
-      Array.isArray(user.roles) ? 
-        getRoleStrings(user.roles as UserRole[]) : 
-        [user.roles as string] 
-    : []
-  );
+  const [roleStrings, setRoleStrings] = useState<string[]>([]);
+  
+  useEffect(() => {
+    if (user?.roles) {
+      setRoleStrings(getRoleStrings(user.roles));
+    } else {
+      setRoleStrings([]);
+    }
+  }, [user]);
   
   const hasRole = (role: string): boolean => {
     if (!isAuthenticated) return false;

@@ -9,3 +9,5 @@ export { default as AppLayout } from './AppLayout';
 
 // Export other layout-related components
 export { default as MobileMenu } from './MobileMenu';
+export { default as Header } from './Header';
+export { default as Footer } from './Footer';
