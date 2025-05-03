@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { NeuralModelParameters } from '@/types/neuralMetrics';
-import { Reset, Power, Zap } from 'lucide-react';
+import { RotateCcw, Power, Zap } from 'lucide-react';
 
 interface NeuralSystemControlsProps {
   onReset?: () => Promise<boolean>;
@@ -100,7 +100,7 @@ const NeuralSystemControls: React.FC<NeuralSystemControlsProps> = ({
               onClick={handleReset}
               disabled={isProcessing || !onReset}
             >
-              <Reset className="h-4 w-4 mr-2" />
+              <RotateCcw className="h-4 w-4 mr-2" />
               Reset
             </Button>
             <Button
