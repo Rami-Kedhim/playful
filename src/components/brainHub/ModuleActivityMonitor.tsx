@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,15 +25,17 @@ const ModuleActivityMonitor: React.FC = () => {
   useEffect(() => {
     // Fetch logs when component mounts
     if (neuralHub.getDecisionLogs) {
-      const decisionLogs = neuralHub.getDecisionLogs();
-      setLogs(decisionLogs);
+      neuralHub.getDecisionLogs().then(decisionLogs => {
+        setLogs(decisionLogs as LogEntry[]);
+      });
     }
 
     // Set up periodic refresh
     const intervalId = setInterval(() => {
       if (neuralHub.getDecisionLogs) {
-        const decisionLogs = neuralHub.getDecisionLogs();
-        setLogs(decisionLogs);
+        neuralHub.getDecisionLogs().then(decisionLogs => {
+          setLogs(decisionLogs as LogEntry[]);
+        });
       }
     }, 30000);
 

@@ -74,6 +74,19 @@ export class UberWallet {
       timestamp: new Date()
     };
   }
+  
+  // Add the missing debit method that is used in aiOrchestration.ts
+  async debit(userId: string, amount: number, purpose: string): Promise<UbxTransactionResult> {
+    console.log(`Debiting ${amount} UBX from user ${userId} for ${purpose}`);
+    
+    // Mock implementation
+    return {
+      success: true,
+      message: `Successfully debited ${amount} UBX`,
+      transactionId: `debit-${Date.now()}`,
+      timestamp: new Date()
+    };
+  }
 }
 
 export const uberWallet = new UberWallet();

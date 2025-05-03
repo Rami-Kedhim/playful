@@ -24,7 +24,7 @@ export interface ContentModerationResult {
   score: number;
 }
 
-class LucieSystem {
+export class LucieSystem {
   private initialized: boolean = false;
   
   async initialize(): Promise<boolean> {
@@ -40,11 +40,16 @@ class LucieSystem {
         aiGeneration: 'online',
         contentModeration: 'online',
         sentimentAnalysis: 'online',
+      },
+      // Add modelStatus property
+      modelStatus: {
+        textGeneration: 'optimal',
+        imageGeneration: 'optimal',
+        contentModeration: 'optimal'
       }
     };
   }
 
-  // Add the missing methods that are being used across the application
   async generateContent(request: ContentGenerationRequest): Promise<ContentGenerationResponse> {
     console.log(`Generating content for user ${request.userId}, type: ${request.type}`);
     // Mock implementation

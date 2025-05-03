@@ -1,261 +1,137 @@
 
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle, AlertCircle, Info, Terminal } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { 
-  runPricingSystemSelfTest, 
   getOxumPriceSystemHealth, 
-  emergencyPriceValidationOverride,
-  validateGlobalPrice,
-  validateGlobalPriceWithRetry,
-  GLOBAL_UBX_RATE
-} from "@/utils/oxum/globalPricing";
-
-interface TestResult {
-  success: boolean;
-  timestamp: string;
-  message: string;
-  details?: any;
-}
+  validateGlobalPrice, 
+  validateGlobalPriceWithRetry 
+} from '@/utils/oxum/globalPricing';
 
 const OxumSystemTestHarness: React.FC = () => {
-  const [activeTab, setActiveTab] = useState("diagnostics");
-  const [isRunningTests, setIsRunningTests] = useState(false);
-  const [lastTestResult, setLastTestResult] = useState<TestResult | null>(null);
-  const [healthData, setHealthData] = useState<any>(null);
-  const [isEmergencyMode, setIsEmergencyMode] = useState(false);
-  
-  const runDiagnostics = async () => {
-    setIsRunningTests(true);
+  const [healthStatus, setHealthStatus] = useState<any>(null);
+  const [price, setPrice] = useState<string>('100');
+  const [retries, setRetries] = useState<string>('3');
+  const [validationResult, setValidationResult] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const checkSystemHealth = async () => {
+    setIsLoading(true);
     try {
-      const result = await runPricingSystemSelfTest();
-      setLastTestResult({
-        success: result.success,
-        timestamp: new Date().toISOString(),
-        message: result.success 
-          ? `Self-test completed successfully. All ${result.testsPassed} tests passed.`
-          : `Self-test failed. ${result.failedTests.length} tests failed.`,
-        details: result
-      });
-      
-      // Also update health data
-      const health = await getOxumPriceSystemHealth();
-      setHealthData(health);
-    } catch (error: any) {
-      setLastTestResult({
-        success: false,
-        timestamp: new Date().toISOString(),
-        message: `Error running diagnostics: ${error.message || 'Unknown error'}`,
+      const status = await getOxumPriceSystemHealth();
+      setHealthStatus(status);
+    } catch (error) {
+      console.error('Error checking system health:', error);
+      setHealthStatus({
+        status: 'error',
+        message: 'Failed to check system health'
       });
     } finally {
-      setIsRunningTests(false);
+      setIsLoading(false);
     }
   };
-  
-  const toggleEmergencyMode = async () => {
+
+  const validatePrice = async (withRetry: boolean = false) => {
+    setIsLoading(true);
+    setValidationResult(null);
+    
     try {
-      const newMode = !isEmergencyMode;
-      const result = await emergencyPriceValidationOverride({ force: newMode });
+      const priceValue = parseFloat(price);
+      let result;
       
-      if (result.success) {
-        setIsEmergencyMode(newMode);
-        setLastTestResult({
-          success: true,
-          timestamp: result.timestamp,
-          message: result.message,
-          details: { emergencyMode: newMode }
-        });
+      if (withRetry) {
+        const numRetries = parseInt(retries, 10);
+        result = await validateGlobalPriceWithRetry(priceValue, numRetries);
       } else {
-        setLastTestResult({
-          success: false,
-          timestamp: result.timestamp,
-          message: result.message,
-          details: { emergencyMode: isEmergencyMode } // Unchanged
-        });
+        result = await validateGlobalPrice(priceValue);
       }
-    } catch (error: any) {
-      setLastTestResult({
-        success: false,
-        timestamp: new Date().toISOString(),
-        message: `Error toggling emergency mode: ${error.message || 'Unknown error'}`,
+      
+      setValidationResult(result);
+    } catch (error) {
+      console.error('Error validating price:', error);
+      setValidationResult({
+        valid: false,
+        error: 'Validation failed'
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="bg-muted/40">
-        <CardTitle className="flex items-center text-lg">
-          <Terminal className="mr-2 h-5 w-5" />
-          Oxum System Test Harness
-        </CardTitle>
-        <div className="flex items-center text-sm text-muted-foreground">
-          <span>Oxum Rule #001 Global Price Check System</span>
-          <Badge variant="outline" className="ml-2">v2.3.1</Badge>
-        </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Oxum Price System Test</CardTitle>
       </CardHeader>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mx-6 my-2">
-          <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
-          <TabsTrigger value="health">System Health</TabsTrigger>
-          <TabsTrigger value="emergency">Emergency Controls</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="diagnostics" className="p-0">
-          <CardContent className="space-y-4 pt-2">
-            {lastTestResult && (
-              <Alert variant={lastTestResult.success ? "default" : "destructive"}>
-                {lastTestResult.success ? (
-                  <CheckCircle className="h-4 w-4" />
-                ) : (
-                  <AlertCircle className="h-4 w-4" />
-                )}
-                <AlertTitle>{lastTestResult.success ? 'Test Passed' : 'Test Failed'}</AlertTitle>
-                <AlertDescription>
-                  {lastTestResult.message}
-                  {lastTestResult.details && lastTestResult.details.testsRun && (
-                    <div className="mt-2 text-xs">
-                      <div>Tests run: {lastTestResult.details.testsRun}</div>
-                      <div>Tests passed: {lastTestResult.details.testsPassed}</div>
-                      {lastTestResult.details.failedTests?.length > 0 && (
-                        <div>Failed tests: {lastTestResult.details.failedTests.length}</div>
-                      )}
-                    </div>
-                  )}
-                  <div className="text-xs mt-2 opacity-70">
-                    {new Date(lastTestResult.timestamp).toLocaleString()}
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
-            
-            <div className="text-sm">
-              <p>Run diagnostics on the Oxum Global Price System to verify rule enforcement.</p>
-              <div className="mt-4 bg-muted p-3 rounded-md text-xs">
-                <p><strong>Note:</strong> This will test the following components:</p>
-                <ul className="list-disc pl-5 mt-1 space-y-1">
-                  <li>Global Price Rule Enforcement</li>
-                  <li>Price Validation Routines</li>
-                  <li>Tolerance Calculators</li>
-                  <li>Override Permission System</li>
-                </ul>
-              </div>
+      <CardContent className="space-y-4">
+        <div>
+          <Button 
+            onClick={checkSystemHealth}
+            disabled={isLoading}
+          >
+            Check System Health
+          </Button>
+          
+          {healthStatus && (
+            <div className="mt-4 p-4 border rounded-md bg-muted/50">
+              <p>Status: {healthStatus.status}</p>
+              {healthStatus.message && <p>Message: {healthStatus.message}</p>}
+              {healthStatus.uptime && <p>Uptime: {healthStatus.uptime}%</p>}
             </div>
-          </CardContent>
-          <CardFooter className="border-t px-6 py-4">
-            <Button onClick={runDiagnostics} disabled={isRunningTests}>
-              {isRunningTests ? 'Running Tests...' : 'Run Diagnostics'}
-            </Button>
-          </CardFooter>
-        </TabsContent>
+          )}
+        </div>
         
-        <TabsContent value="health" className="p-0">
-          <CardContent className="space-y-4 pt-4">
-            {healthData ? (
-              <div className="space-y-4">
-                <Alert variant={healthData.status === 'healthy' ? 'default' : 'warning'}>
-                  <Info className="h-4 w-4" />
-                  <AlertTitle>System Status: {healthData.status}</AlertTitle>
-                  <AlertDescription>
-                    Last updated: {new Date(healthData.lastUpdate).toLocaleString()}
-                  </AlertDescription>
-                </Alert>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <Card>
-                    <CardHeader className="py-3">
-                      <CardTitle className="text-sm">Response Time</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{healthData.metrics.responseTime}ms</div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="py-3">
-                      <CardTitle className="text-sm">Error Rate</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{(healthData.metrics.errorRate * 100).toFixed(2)}%</div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="py-3">
-                      <CardTitle className="text-sm">Uptime</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{healthData.metrics.uptime}%</div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <div className="text-muted-foreground">No health data available</div>
-                <Button onClick={runDiagnostics} className="mt-4" variant="outline">
-                  Fetch Health Data
-                </Button>
+        <div className="border-t pt-4">
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="price">Price Value</Label>
+              <Input
+                id="price"
+                type="text"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="retries">Retries (for retry validation)</Label>
+              <Input
+                id="retries"
+                type="text"
+                value={retries}
+                onChange={(e) => setRetries(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => validatePrice(false)}
+                disabled={isLoading}
+                variant="outline"
+              >
+                Validate Price
+              </Button>
+              <Button 
+                onClick={() => validatePrice(true)}
+                disabled={isLoading}
+              >
+                Validate With Retry
+              </Button>
+            </div>
+            
+            {validationResult && (
+              <div className="p-4 border rounded-md bg-muted/50">
+                <p>Valid: {validationResult.valid ? 'Yes' : 'No'}</p>
+                {validationResult.message && <p>Message: {validationResult.message}</p>}
+                {validationResult.retries !== undefined && <p>Retries used: {validationResult.retries}</p>}
+                {validationResult.error && <p className="text-red-500">Error: {validationResult.error}</p>}
               </div>
             )}
-          </CardContent>
-        </TabsContent>
-        
-        <TabsContent value="emergency" className="p-0">
-          <CardContent className="space-y-4 pt-4">
-            <Alert variant="warning">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Emergency Controls</AlertTitle>
-              <AlertDescription>
-                These controls should only be used in emergency situations. All actions are logged.
-              </AlertDescription>
-            </Alert>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="emergency-mode" className="font-medium">
-                    Emergency Override Mode
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Disables automatic rule enforcement
-                  </p>
-                </div>
-                <Switch 
-                  id="emergency-mode" 
-                  checked={isEmergencyMode} 
-                  onCheckedChange={toggleEmergencyMode}
-                />
-              </div>
-              
-              <div className="text-sm bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 p-3 rounded-md">
-                <p className="font-medium text-red-700 dark:text-red-400">Warning:</p>
-                <p className="mt-1 text-red-600 dark:text-red-300">
-                  Enabling emergency mode will bypass all Oxum Rule #001 price validations.
-                  The global price of {GLOBAL_UBX_RATE} UBX will not be enforced while this mode is active.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="border-t px-6 py-4">
-            <Button 
-              variant="destructive" 
-              disabled={!isEmergencyMode} 
-              onClick={() => emergencyPriceValidationOverride({ force: false })}
-            >
-              Force Disable Emergency Mode
-            </Button>
-          </CardFooter>
-        </TabsContent>
-      </Tabs>
+          </div>
+        </div>
+      </CardContent>
     </Card>
   );
 };

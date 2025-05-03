@@ -1,155 +1,106 @@
 
-import { lucie } from '@/core/Lucie';
-import { oxum } from '@/core/Oxum';
 import { hermes } from '@/core/Hermes';
+import { oxum } from '@/core/Oxum';
 import { orus } from '@/core/Orus';
-import { uberWallet } from '@/core/UberWallet';
-import { SystemStatus } from '@/types/shared';
+import { lucie } from '@/core/Lucie';
 
 /**
- * UberCore Integration Utilities
- * Provides standardized methods for UI components to interact with UberCore modules
- * Following the architecture master plan requirements
+ * Get the health status of core systems as a percentage
  */
-
-export interface CoreModuleStatus {
-  operational: boolean;
-  latency: number;
-  lastUpdated: Date;
+export function getCoreSystemHealth() {
+  const hermesStatus = hermes.getSystemStatus();
+  const oxumStatus = oxum.checkSystemStatus();
+  const lucieStatus = lucie.getSystemStatus();
+  
+  // Convert statuses to health percentages
+  const hermesHealth = hermesStatus.status === 'operational' ? 100 : 50;
+  const oxumHealth = oxumStatus.operational ? 100 : 50;
+  
+  // Get status from Lucie models
+  const lucieHealth = 
+    lucieStatus.modules.aiGeneration === 'online' && 
+    lucieStatus.modules.contentModeration === 'online' && 
+    lucieStatus.modules.sentimentAnalysis === 'online' ? 100 : 75;
+  
+  // Calculate average health
+  const overallHealth = Math.round((hermesHealth + oxumHealth + lucieHealth) / 3);
+  
+  return {
+    overall: overallHealth,
+    systems: {
+      hermes: hermesHealth,
+      oxum: oxumHealth,
+      lucie: lucieHealth
+    }
+  };
 }
 
-// System status integration
-export const getSystemStatus = async (): Promise<SystemStatus> => {
-  try {
-    // Check system integrity via Orus
-    const integrityResult = orus.checkIntegrity();
-    
-    // Get status from each module
-    return {
-      operational: integrityResult.isValid,
-      lastUpdated: new Date(),
-      latency: 120, // Placeholder, would be measured in production
-      aiModels: {
-        conversation: 'active',
-        generation: 'active',
-        analysis: 'active',
-      },
-      metrics: {
-        responseTime: 120,
-        activeSessions: 53,
-        processingLoad: 12
-      }
-    };
-  } catch (error) {
-    console.error('Error getting system status:', error);
-    return {
-      operational: false,
-      lastUpdated: new Date(),
-      latency: 0,
-      aiModels: {
-        conversation: 'error',
-        generation: 'error',
-        analysis: 'error',
-      },
-      metrics: {
-        responseTime: 0,
-        activeSessions: 0,
-        processingLoad: 0
-      }
-    };
-  }
-};
+/**
+ * Log an interaction in the system
+ */
+export function logInteraction(system: string, action: string, data?: any) {
+  const connectionId = `log-${Date.now()}`;
+  const timestamp = new Date().toISOString();
+  
+  hermes.connect({
+    system,
+    connectionId,
+    metadata: { action, timestamp },
+    userId: 'system' // Adding required userId parameter
+  });
+  
+  console.info(`[${system}] ${action}`, data);
+}
 
-// Hermes interaction logger - to be used whenever a user interacts with a component
-export const logInteraction = (component: string, action: string, metadata: Record<string, any> = {}): void => {
-  try {
-    const connectionId = `interaction-${Date.now()}`;
-    
-    // Connect to Hermes
-    hermes.connect({
-      system: component,
-      connectionId,
-      metadata: {
-        ...metadata,
-        action,
-        timestamp: new Date().toISOString()
-      }
-    });
-    
-    // Route flow if source and destination are provided
-    if (metadata.source && metadata.destination) {
-      hermes.routeFlow({
-        source: metadata.source,
-        destination: metadata.destination,
-        params: {
-          action,
-          ...metadata
-        }
-      });
-    }
-    
-    console.log(`[Hermes] Logged interaction: ${component}:${action}`, metadata);
-  } catch (error) {
-    console.error('Error logging interaction:', error);
-  }
-};
+/**
+ * Track user flow between pages
+ */
+export function trackNavigation(source: string, destination: string, userId: string) {
+  hermes.routeFlow({
+    source,
+    destination,
+    params: { userId, timestamp: new Date().toISOString() }
+  });
+  
+  // Also log as an interaction
+  logInteraction('Navigation', 'page_change', {
+    from: source,
+    to: destination,
+    userId
+  });
+}
 
-// Session validation through Orus
-export const validateUserSession = (userId: string): boolean => {
-  try {
-    const sessionResult = orus.validateSession(userId);
-    return sessionResult.isValid;
-  } catch (error) {
-    console.error('Session validation error:', error);
-    return false;
+/**
+ * Validate a user session
+ */
+export function validateUserSession(token: string) {
+  if (!token) {
+    return { valid: false, reason: 'No token provided' };
   }
-};
-
-// Oxum boost utility
-export const checkBoostEligibility = (userId: string): { isEligible: boolean, reason?: string } => {
-  // This would interact with Oxum in production
+  
+  const result = orus.validateSession(token);
+  
+  if (!result.isValid) {
+    logInteraction('Security', 'invalid_session', { token });
+  }
+  
   return {
-    isEligible: true,
-    reason: 'User is eligible for boost'
+    valid: result.isValid,
+    userId: result.userId,
+    expiry: result.expiry
   };
-};
+}
 
-// Get visibility score for a profile
-export const getProfileVisibilityScore = (profileId: string): number => {
+/**
+ * Calculate visibility score for a profile
+ */
+export function calculateProfileVisibility(profileId: string) {
   return hermes.calculateVisibilityScore(profileId);
-};
+}
 
-// Get recommended action from Hermes
-export const getRecommendedUserAction = (userId: string): string => {
+/**
+ * Get recommended next action for a user
+ */
+export function getRecommendedAction(userId: string) {
   return hermes.recommendNextAction(userId);
-};
-
-// Process a payment through UberWallet
-export const processPayment = async (
-  userId: string, 
-  amount: number, 
-  purpose: string
-): Promise<{success: boolean, message: string}> => {
-  try {
-    const result = await uberWallet.spendUbx(userId, amount, purpose);
-    
-    // Log the transaction in Hermes
-    logInteraction('UberWallet', 'payment', {
-      userId,
-      amount,
-      purpose,
-      success: result.success
-    });
-    
-    return {
-      success: result.success,
-      message: result.message || 'Payment processed'
-    };
-  } catch (error) {
-    console.error('Payment processing error:', error);
-    return {
-      success: false,
-      message: 'Payment failed: An unexpected error occurred'
-    };
-  }
-};
+}

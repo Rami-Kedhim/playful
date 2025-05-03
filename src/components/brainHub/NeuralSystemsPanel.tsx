@@ -1,168 +1,188 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Activity, CheckCircle, Settings } from 'lucide-react';
-import { neuralHub } from '@/services/neural/HermesOxumBrainHub';
-import { TrainingProgress } from '@/services/neural/types/neuralHub';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import useNeuralRegistry from '@/hooks/useNeuralRegistry';
-import TrainingProgressDetails from './TrainingProgressDetails';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AlertTriangle, Brain, Database, Play, StopCircle, X } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
+import { neuralHub } from '@/services/neural/HermesOxumBrainHub';
 
-interface NeuralServicesPanelProps {
-  systemId?: string;
+interface TrainingJob {
+  id: string;
+  progress: number;
+  model: string;
+  startedAt: string;
 }
 
-// Define a type that matches the required TrainingProgress type for TrainingProgressDetails
-type TrainingProgressType = {
-  modelId: string;
-  epoch: number;
-  totalEpochs: number;
-  loss: number;
-  accuracy: number;
-  timestamp: string;
-  status: 'running' | 'completed' | 'failed' | 'waiting';
-  estimatedTimeRemaining?: number;
-  metrics: {
-    precision?: number;
-    recall?: number;
-    f1Score?: number;
-  };
-  error?: string;
-};
+const NeuralSystemsPanel = () => {
+  const [activeTab, setActiveTab] = useState('training');
+  const [trainingJobs, setTrainingJobs] = useState<TrainingJob[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-// Helper function to convert neural hub status to TrainingProgressType status
-const convertTrainingStatus = (status: string): 'running' | 'completed' | 'failed' | 'waiting' => {
-  switch (status) {
-    case 'training':
-      return 'running';
-    case 'completed':
-    case 'failed':
-    case 'waiting':
-      return status as 'completed' | 'failed' | 'waiting';
-    case 'stopped':
-      return 'failed'; // Map stopped to failed for UI purposes
-    default:
-      return 'waiting';
-  }
-};
-
-const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ systemId }) => {
-  const { services, loading, error, optimizeResources } = useNeuralRegistry();
-  const [activeJobs, setActiveJobs] = useState<TrainingProgressType[]>([]);
-  
-  useEffect(() => {
-    const fetchJobs = () => {
-      try {
-        // Get jobs from neural hub but convert them to the correct type
-        const rawJobs = neuralHub.getActiveTrainingJobs ? neuralHub.getActiveTrainingJobs() : [];
-        const convertedJobs: TrainingProgressType[] = rawJobs.map(job => ({
-          modelId: job.modelId || 'unknown',
-          epoch: job.epoch || 0,
-          totalEpochs: job.totalEpochs || 10,
-          loss: job.loss || 0,
-          accuracy: job.accuracy || 0,
-          timestamp: job.timestamp || new Date().toISOString(),
-          // Use the helper function to convert status
-          status: convertTrainingStatus(job.status),
-          estimatedTimeRemaining: job.timeRemaining,
-          metrics: {
-            precision: job.metrics?.precision,
-            recall: job.metrics?.recall,
-            f1Score: job.metrics?.f1Score
-          },
-          error: job.error
-        }));
-        setActiveJobs(convertedJobs);
-      } catch (err) {
-        console.error('Failed to fetch training jobs:', err);
-      }
-    };
-    
-    fetchJobs();
-    const intervalId = setInterval(fetchJobs, 30000);
-    return () => clearInterval(intervalId);
-  }, []);
-  
-  const handleCancelTraining = async (jobId: string) => {
-    if (neuralHub.stopTraining) {
-      return await neuralHub.stopTraining(jobId);
+  const loadTrainingJobs = async () => {
+    try {
+      setIsLoading(true);
+      const jobs = await neuralHub.getActiveTrainingJobs();
+      setTrainingJobs(jobs as TrainingJob[]);
+    } catch (error) {
+      console.error('Error loading training jobs:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load training jobs.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
     }
-    return false;
   };
-  
+
+  useEffect(() => {
+    loadTrainingJobs();
+
+    // Refresh every 10 seconds
+    const interval = setInterval(loadTrainingJobs, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleStopTraining = async (jobId: string) => {
+    try {
+      await neuralHub.stopTraining(jobId);
+      toast({
+        title: 'Training Stopped',
+        description: `Training job ${jobId} has been stopped.`,
+      });
+      
+      // Remove from local state
+      setTrainingJobs(prev => prev.filter(job => job.id !== jobId));
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to stop training.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const formatDuration = (startDateStr: string) => {
+    const startDate = new Date(startDateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - startDate.getTime();
+    const diffHrs = Math.floor(diffMs / 3600000);
+    const diffMins = Math.floor((diffMs % 3600000) / 60000);
+    
+    return `${diffHrs}h ${diffMins}m`;
+  };
+
   return (
-    <Card>
+    <Card className="mb-4">
       <CardHeader>
-        <CardTitle>Neural Services</CardTitle>
+        <CardTitle className="flex items-center">
+          <Brain className="h-5 w-5 mr-2" />
+          Neural Systems
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {loading ? (
-          <div className="flex items-center justify-center p-4">
-            <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
-          </div>
-        ) : (
-          <>
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">Active Services</h3>
-              <Button variant="outline" size="sm" onClick={optimizeResources}>
-                <Settings className="h-4 w-4 mr-2" /> Optimize Resources
-              </Button>
-            </div>
-            
-            <div className="space-y-4">
-              {services.map(service => (
-                <div key={service.moduleId} className="p-4 border rounded-md">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <Badge variant={service.config.enabled ? 'default' : 'secondary'}>
-                        {service.config.enabled ? 'Active' : 'Inactive'}
-                      </Badge>
-                      <h4 className="font-medium">{service.name}</h4>
+      <CardContent>
+        <Tabs defaultValue="training" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-2">
+            <TabsTrigger value="training">Training</TabsTrigger>
+            <TabsTrigger value="models">Models</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="training" className="space-y-4 mt-4">
+            {trainingJobs.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Database className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                <p>No active training jobs</p>
+              </div>
+            ) : (
+              trainingJobs.map(job => (
+                <div key={job.id} className="border rounded-md p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <div>
+                      <h4 className="font-medium">{job.model}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Running for {formatDuration(job.startedAt)}
+                      </p>
                     </div>
-                    <Switch checked={service.config.enabled} />
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={() => handleStopTraining(job.id)}
+                    >
+                      <StopCircle className="h-4 w-4 mr-1" />
+                      Stop
+                    </Button>
                   </div>
                   
-                  <div className="mt-2">
-                    <p className="text-sm text-muted-foreground">{service.moduleType}</p>
-                    <div className="mt-2 space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span>Usage</span>
-                        <span>78%</span>
-                      </div>
-                      <Progress value={78} className="h-1" />
-                    </div>
+                  <Progress value={job.progress} className="h-2" />
+                  
+                  <div className="flex justify-between mt-1">
+                    <span className="text-xs text-muted-foreground">ID: {job.id}</span>
+                    <span className="text-xs">{job.progress}%</span>
                   </div>
                 </div>
-              ))}
-              
-              {services.length === 0 && (
-                <div className="text-center p-4 border border-dashed rounded-md">
-                  <p className="text-muted-foreground">No neural services available</p>
-                </div>
-              )}
-            </div>
-            
-            {activeJobs.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-lg font-medium mb-2">Active Training Jobs</h3>
-                {activeJobs.map(job => (
-                  <TrainingProgressDetails 
-                    key={job.modelId}
-                    progress={job}
-                    onCancel={() => handleCancelTraining(job.modelId)}
-                  />
-                ))}
-              </div>
+              ))
             )}
-          </>
-        )}
+            
+            <Button 
+              className="w-full" 
+              onClick={loadTrainingJobs}
+              disabled={isLoading}
+            >
+              Refresh
+            </Button>
+          </TabsContent>
+          
+          <TabsContent value="models" className="space-y-4 mt-4">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div className="border rounded-md p-4">
+                <div className="flex items-center mb-2">
+                  <div className="h-3 w-3 rounded-full bg-green-500 mr-2"></div>
+                  <h4 className="font-medium">Content Moderation v3</h4>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">Active - 99.8% accuracy</p>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline">
+                    <Play className="h-3 w-3 mr-1" />
+                    Test
+                  </Button>
+                  <Button size="sm" variant="outline">Stats</Button>
+                </div>
+              </div>
+              
+              <div className="border rounded-md p-4">
+                <div className="flex items-center mb-2">
+                  <div className="h-3 w-3 rounded-full bg-green-500 mr-2"></div>
+                  <h4 className="font-medium">Persona Generator</h4>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">Active - 95.2% accuracy</p>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline">
+                    <Play className="h-3 w-3 mr-1" />
+                    Test
+                  </Button>
+                  <Button size="sm" variant="outline">Stats</Button>
+                </div>
+              </div>
+              
+              <div className="border rounded-md p-4 border-amber-500/30">
+                <div className="flex items-center mb-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-500 mr-2" />
+                  <h4 className="font-medium">Sentiment Analysis</h4>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">Degraded - 87.5% accuracy</p>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline">Details</Button>
+                  <Button size="sm" variant="outline">Retrain</Button>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
 };
 
-export default NeuralServicesPanel;
+export default NeuralSystemsPanel;

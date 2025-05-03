@@ -1,149 +1,94 @@
-
 /**
- * Global UBX pricing utilities
+ * Global pricing utilities for Oxum system
  */
 
-// Global UBX rate constant
-export const GLOBAL_UBX_RATE = 10; // 10 UBX = 1 USD
-
-/**
- * Convert UBX to local currency
- */
-export const convertUbxToLocalCurrency = (
-  amount: number, 
-  currency: string = 'USD'
-): string => {
-  // Mock implementation - in real app would use exchange rates
-  const rate = currency === 'USD' ? 0.1 : 0.09; // Simple mock conversion rates
-  return `${(amount * rate).toFixed(2)} ${currency}`;
-};
-
-/**
- * Convert local currency to UBX
- */
-export const convertLocalCurrencyToUbx = (
-  amount: number, 
-  currency: string = 'USD'
-): number => {
-  // Mock implementation
-  const rate = currency === 'USD' ? 10 : 11; // Simple mock conversion rates
-  return Math.round(amount * rate);
-};
-
-/**
- * Run self-test on pricing system
- */
-export const runPricingSystemSelfTest = async () => {
-  // Mock implementation
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  return {
-    success: true,
-    testsRun: 8,
-    testsPassed: 7,
-    failedTests: [
-      { name: 'network-latency', reason: 'Response time exceeded threshold' }
-    ]
-  };
-};
-
-/**
- * Get health of Oxum price system
- */
-export const getOxumPriceSystemHealth = async () => {
-  // Mock implementation
+// Get health status of the Oxum price system
+export const getOxumPriceSystemHealth = async (): Promise<any> => {
+  // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 800));
   
   return {
-    status: 'operational',
-    lastUpdate: new Date().toISOString(),
-    metrics: {
-      responseTime: 145,
-      errorRate: 0.02,
-      uptime: 99.8
-    }
+    status: 'healthy',
+    uptime: 99.9,
+    message: 'All pricing systems operational',
+    lastUpdated: new Date().toISOString()
   };
 };
 
-/**
- * Emergency override for price validation
- */
-export const emergencyPriceValidationOverride = async (options: { force: boolean }) => {
-  // Mock implementation
-  await new Promise(resolve => setTimeout(resolve, 1000));
+// Validate a global price
+export const validateGlobalPrice = async (price: number): Promise<any> => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 600));
+  
+  const valid = price > 0 && price < 10000;
   
   return {
-    success: true,
-    message: 'Emergency override applied successfully',
-    timestamp: Date.now()
+    valid,
+    message: valid ? 'Price is within acceptable range' : 'Price outside acceptable range',
+    timestamp: new Date().toISOString()
   };
 };
 
-/**
- * Validate global price against Oxum rules
- */
-export const validateGlobalPrice = (
-  amount: number, 
-  context: Record<string, any> = {}
-): boolean => {
-  // Mock implementation - in a real app would have complex validation logic
-  if (amount < 0) {
-    throw new Error('Price cannot be negative');
-  }
+// Validate global price with retries
+export const validateGlobalPriceWithRetry = async (price: number, retries = 3): Promise<any> => {
+  // Simulate network issues with a small chance of failure on first attempts
+  let attempt = 0;
+  let success = false;
+  let result;
   
-  if (amount > 100000) {
-    throw new Error('Price exceeds maximum allowed value');
-  }
-  
-  // If we have a market reference, check if price is within acceptable range
-  if (context.marketReference) {
-    const deviation = Math.abs((amount - context.marketReference) / context.marketReference);
-    if (deviation > 0.25) {
-      throw new Error('Price deviates too much from market reference');
-    }
-  }
-  
-  return true;
-};
-
-/**
- * Validate global price with retry mechanism
- */
-export const validateGlobalPriceWithRetry = async (
-  amount: number,
-  context: Record<string, any> = {},
-  maxRetries = 3
-): Promise<boolean> => {
-  let retries = 0;
-  
-  while (retries < maxRetries) {
+  while (!success && attempt < retries) {
+    attempt++;
+    
     try {
-      validateGlobalPrice(amount, context);
-      return true;
-    } catch (error) {
-      retries++;
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 400));
       
-      // If we've reached max retries, throw the error
-      if (retries >= maxRetries) {
-        throw error;
+      // Simulate random failure in first attempts
+      if (attempt < retries && Math.random() < 0.3) {
+        throw new Error('Network error');
       }
       
-      // Wait before retrying
-      await new Promise(resolve => setTimeout(resolve, 500 * retries));
+      const valid = price > 0 && price < 10000;
+      
+      result = {
+        valid,
+        message: valid ? 'Price validated successfully' : 'Price outside acceptable range',
+        timestamp: new Date().toISOString(),
+        retries: attempt - 1
+      };
+      
+      success = true;
+    } catch (error) {
+      // If we've used all retries, throw the error
+      if (attempt >= retries) {
+        throw error;
+      }
+      // Otherwise, we'll retry
+      await new Promise(resolve => setTimeout(resolve, 300));
     }
   }
   
-  return false;
+  return result;
 };
 
-/**
- * Get system status
- */
-export const getOxumSystemStatus = async () => {
-  return {
-    status: 'operational',
-    version: '2.3.1',
-    uptime: 99.8,
-    lastRestart: new Date(Date.now() - 3600000 * 24).toISOString()
+// Export additional utility functions for global pricing
+export const calculatePriceAdjustment = (basePrice: number, regionCode: string): number => {
+  // Region-specific price adjustments
+  const regionFactors: Record<string, number> = {
+    'US': 1.0,
+    'EU': 1.1,
+    'UK': 1.15,
+    'JP': 1.2,
+    'AU': 1.15,
   };
+  
+  const factor = regionFactors[regionCode] || 1.0;
+  return basePrice * factor;
+};
+
+export const formatCurrency = (amount: number, currency = 'USD'): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency
+  }).format(amount);
 };

@@ -6,8 +6,9 @@
 export * from './Lucie';          // AI Generation, Content Moderation
 
 // Re-export Lucie ContentGenerationRequest specifically to avoid ambiguity
-import { lucie, LucieSystem, ContentModerationResult } from './Lucie';
-export { lucie, LucieSystem, ContentModerationResult };
+import { lucie, ContentModerationResult } from './Lucie';
+export { lucie, ContentModerationResult };
+// Use 'export type' for TypeScript types when isolatedModules is enabled
 export type { ContentGenerationRequest } from './Lucie';
 
 export * from './Hermes';         // Flow Dynamics, User Routing
@@ -21,16 +22,20 @@ import {
   SessionValidationResult as OxumSessionValidationResult
 } from './Oxum';
 export { 
-  oxum, 
-  type OxumSystemIntegrityResult, 
-  type OxumSessionValidationResult 
+  oxum 
+};
+// Use 'export type' for TypeScript types when isolatedModules is enabled
+export type { 
+  OxumSystemIntegrityResult, 
+  OxumSessionValidationResult 
 };
 
 export * from './Orus';           // Security, Session Validation
 
 // Export UberWallet without re-exporting the types that are already exported
-import { uberWallet, UberWallet, UbxTransaction } from './UberWallet';
-export { uberWallet, UberWallet, UbxTransaction };
+import { uberWallet, UberWallet } from './UberWallet';
+export { uberWallet, UberWallet };
+export type { UbxTransaction, UbxTransactionResult } from './UberWallet';
 
 // Core System
 export * from './UberCore';       // Base System Integration

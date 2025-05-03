@@ -6,7 +6,7 @@
 export interface ConnectParams {
   system: string;
   connectionId: string;
-  userId: string;
+  userId?: string;  // Make userId optional to fix errors
   metadata?: Record<string, any>;
 }
 
@@ -33,52 +33,52 @@ class HermesSystem {
   getSystemStatus() {
     return {
       status: 'operational',
-      activeFlows: 42,
-      routingEfficiency: 98.7
+      activeFlows: 128,
+      processingDelay: 0.8,
     };
   }
-
-  // Add the missing methods that are being used across the application
+  
   connect(params: ConnectParams): void {
-    console.log(`Connecting to system ${params.system} with connectionId ${params.connectionId} for user ${params.userId}`);
-    // Mock implementation - would normally connect to a service
+    console.log(`Hermes connecting ${params.system} with ID ${params.connectionId}`);
+    // In a real system, this would establish a connection
   }
-
+  
   routeFlow(params: RouteFlowParams): void {
     console.log(`Routing from ${params.source} to ${params.destination}`);
-    // Mock implementation - would normally handle routing logic
+    // In a real system, this would track user flow
   }
-
-  recommendNextAction(userId: string): string {
-    // Mock implementation - would normally analyze user behavior and recommend actions
-    const actions = ['search', 'escorts', 'messages', 'metaverse', 'pulse-boost'];
-    return actions[Math.floor(Math.random() * actions.length)];
-  }
-
-  calculateVisibilityScore(profileId: string): number {
-    // Mock implementation - would normally calculate based on various factors
-    return Math.floor(Math.random() * 80) + 20; // Random score between 20-100
-  }
-
+  
   getUserJourneyInsights(userId: string): UserJourneyInsights {
     // Mock implementation
     return {
       patterns: [
-        { name: 'Browser', confidence: 0.85 },
-        { name: 'Engager', confidence: 0.72 },
-        { name: 'Transactor', confidence: 0.41 }
+        { name: "Weekly Active User", confidence: 0.87 },
+        { name: "Explorer", confidence: 0.65 },
+        { name: "High Engagement", confidence: 0.72 }
       ],
       suggestions: [
-        'Explore featured profiles',
-        'Check your messages',
-        'Boost your profile visibility'
+        "Recommend boost feature",
+        "Show premium escort content",
+        "Offer wallet promotion"
       ]
     };
   }
-
-  enterSpatialFlow(userId: string, roomId: string): void {
-    console.log(`User ${userId} entering spatial flow for room ${roomId}`);
-    // Mock implementation - would normally track spatial navigation
+  
+  calculateVisibilityScore(profileId: string): number {
+    // Mock implementation - would normally calculate based on many factors
+    return Math.floor(Math.random() * 100) + 1;
+  }
+  
+  recommendNextAction(userId: string): string {
+    // Mock implementation
+    const actions = [
+      "Browse escorts near you",
+      "Check latest messages",
+      "Update your profile",
+      "Explore premium features"
+    ];
+    
+    return actions[Math.floor(Math.random() * actions.length)];
   }
 }
 

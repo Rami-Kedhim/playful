@@ -44,8 +44,22 @@ class NeuralHub {
   async getDecisionLogs(moduleId?: string): Promise<any[]> {
     console.log(`Getting decision logs for module ${moduleId || 'all'}`);
     return [
-      { timestamp: new Date().toISOString(), decision: 'approve', confidence: 0.95, module: moduleId || 'core' },
-      { timestamp: new Date(Date.now() - 3600000).toISOString(), decision: 'reject', confidence: 0.87, module: moduleId || 'core' }
+      { 
+        timestamp: new Date().toISOString(), 
+        severity: "info", 
+        module: moduleId || 'core', 
+        message: "Processed user request",
+        decision: 'approve', 
+        confidence: 0.95
+      },
+      { 
+        timestamp: new Date(Date.now() - 3600000).toISOString(), 
+        severity: "warning", 
+        module: moduleId || 'moderation',
+        message: "Content flagged for review",
+        decision: 'reject', 
+        confidence: 0.87 
+      }
     ];
   }
   
