@@ -2,14 +2,13 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserProfile } from "@/types/user";
+import { User } from "@/types/user";
 import AboutTab from "@/components/profile/AboutTab";
 import ServicesTab from "@/components/profile/ServicesTab";
 import RatesTab from "@/components/profile/RatesTab";
 import SafetyTips from "@/components/verification/SafetyTips";
 import VerificationBadge from "@/components/verification/VerificationBadge";
 import { useRole } from "@/hooks/auth/useRole";
-import { Shield, UserCheck, DollarSign, Info } from "lucide-react";
-import { User } from "@/types/user";
 
 interface ProfileTabsProps {
   user: User;
@@ -32,53 +31,31 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
     <Tabs value={activeTab} onValueChange={handleTabChange}>
       <TabsList className="grid grid-cols-4 mb-8">
         <TabsTrigger value="about">About</TabsTrigger>
-        <TabsTrigger value="photos">Photos</TabsTrigger>
-        <TabsTrigger value="reviews">Reviews</TabsTrigger>
-        <TabsTrigger value="settings">Settings</TabsTrigger>
+        <TabsTrigger value="services">Services</TabsTrigger>
+        <TabsTrigger value="rates">Rates</TabsTrigger>
+        <TabsTrigger value="safety">Safety</TabsTrigger>
       </TabsList>
       
       <TabsContent value="about">
-        <div className="prose dark:prose-invert max-w-none">
-          <h3>Bio</h3>
-          <p>{profile.bio || "No bio information available."}</p>
-          
-          <h3>Contact Information</h3>
-          <p>Phone: {profile.phone || "Not provided"}</p>
-          <p>Website: {profile.website || "Not provided"}</p>
-        </div>
+        <AboutTab profile={profile} />
       </TabsContent>
       
-      <TabsContent value="photos">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {(profile.avatarUrl || profile.avatar_url) ? (
-            <div className="aspect-square bg-muted rounded-md overflow-hidden">
-              <img 
-                src={profile.avatarUrl || profile.avatar_url} 
-                alt="Profile" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ) : (
-            <p>No photos available.</p>
-          )}
-        </div>
+      <TabsContent value="services">
+        <ServicesTab profile={profile} />
       </TabsContent>
       
-      <TabsContent value="reviews">
-        <p>No reviews yet.</p>
+      <TabsContent value="rates">
+        <RatesTab profile={profile} />
       </TabsContent>
       
-      <TabsContent value="settings">
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Account Settings</h3>
-          <p>Manage your profile settings and preferences.</p>
-          
-          <div className="border p-4 rounded-md">
-            <h4 className="font-medium mb-2">Personal Information</h4>
-            <p>Name: {user.name}</p>
-            <p>Email: {user.email}</p>
-            <p>Role: {user.roles?.[0] || user.role || 'User'}</p>
+      <TabsContent value="safety">
+        <div className="space-y-6">
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-xl font-semibold">Verification Status</h3>
+            <VerificationBadge level={profile.verification_level} />
           </div>
+          
+          <SafetyTips />
         </div>
       </TabsContent>
     </Tabs>

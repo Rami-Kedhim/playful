@@ -14,6 +14,8 @@ const NeuralMonitorPage = lazy(() => import('@/pages/neural/NeuralMonitorPage'))
 const NeuralAnalyticsPage = lazy(() => import('@/pages/neural/NeuralAnalyticsPage'));
 const BrainHubPage = lazy(() => import('@/pages/BrainHubPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const WalletPage = lazy(() => import('@/pages/UpdatedWallet'));
+const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 
 // Define route configuration with elements
 export const routes: RouteDefinition[] = [
@@ -101,6 +103,26 @@ export const routes: RouteDefinition[] = [
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <BrainHubPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'wallet',
+        title: 'Wallet',
+        category: 'wallet',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <WalletPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'profile',
+        title: 'Profile',
+        category: 'core',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <ProfilePage />
           </Suspense>
         ),
       },

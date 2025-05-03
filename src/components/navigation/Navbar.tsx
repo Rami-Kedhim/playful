@@ -1,13 +1,26 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
-  Menu, X, User, Search, Bell, Wallet, MessagesSquare
+  Menu, X, User, Search, Bell, Wallet, MessagesSquare, Brain, Shield
 } from 'lucide-react';
+import { useAuth } from '@/hooks/auth';
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const location = useLocation();
+  
+  const handleLogout = async () => {
+    await logout();
+  };
+  
+  // Check if a path is active
+  const isActive = (path: string) => {
+    return location.pathname === path || 
+      (path !== '/' && location.pathname.startsWith(path));
+  };
   
   return (
     <header className="bg-background border-b border-border sticky top-0 z-40">
@@ -23,17 +36,29 @@ const Navbar: React.FC = () => {
             
             {/* Desktop Navigation */}
             <nav className="ml-8 hidden md:flex space-x-4">
-              <Link to="/escorts" className="px-3 py-2 text-sm font-medium">
+              <Link 
+                to="/escorts" 
+                className={`px-3 py-2 text-sm font-medium ${isActive('/escorts') ? 'text-primary' : ''}`}
+              >
                 Escorts
               </Link>
-              <Link to="/ai-companions" className="px-3 py-2 text-sm font-medium">
+              <Link 
+                to="/ai-companion" 
+                className={`px-3 py-2 text-sm font-medium ${isActive('/ai-companion') ? 'text-primary' : ''}`}
+              >
                 AI Companions
               </Link>
-              <Link to="/creators" className="px-3 py-2 text-sm font-medium">
-                Creators
+              <Link 
+                to="/neural/monitor" 
+                className={`px-3 py-2 text-sm font-medium ${isActive('/neural') ? 'text-primary' : ''}`}
+              >
+                Neural
               </Link>
-              <Link to="/metaverse" className="px-3 py-2 text-sm font-medium">
-                Metaverse
+              <Link 
+                to="/safety" 
+                className={`px-3 py-2 text-sm font-medium ${isActive('/safety') ? 'text-primary' : ''}`}
+              >
+                Safety
               </Link>
             </nav>
           </div>
@@ -55,17 +80,31 @@ const Navbar: React.FC = () => {
                 <Wallet className="h-5 w-5" />
               </Button>
             </Link>
-            <Link to="/profile">
+            <Link to="/notifications">
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
               </Button>
             </Link>
-            <Link to="/profile">
-              <Button>
-                <User className="h-4 w-4 mr-2" />
-                Profile
-              </Button>
-            </Link>
+            {user ? (
+              <div className="flex items-center gap-2">
+                <Link to="/profile">
+                  <Button variant="ghost">
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </Button>
+                </Link>
+                <Button variant="outline" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Link to="/auth">
+                <Button>
+                  <User className="h-4 w-4 mr-2" />
+                  Login
+                </Button>
+              </Link>
+            )}
           </div>
           
           {/* Mobile Menu Button */}
@@ -93,48 +132,60 @@ const Navbar: React.FC = () => {
               Escorts
             </Link>
             <Link 
-              to="/ai-companions" 
+              to="/ai-companion" 
               className="px-3 py-2 text-sm font-medium rounded-md hover:bg-accent"
               onClick={() => setIsMenuOpen(false)}
             >
               AI Companions
             </Link>
             <Link 
-              to="/creators" 
+              to="/neural/monitor" 
               className="px-3 py-2 text-sm font-medium rounded-md hover:bg-accent"
               onClick={() => setIsMenuOpen(false)}
             >
-              Creators
+              Neural Monitor
             </Link>
             <Link 
-              to="/metaverse" 
+              to="/safety" 
               className="px-3 py-2 text-sm font-medium rounded-md hover:bg-accent"
               onClick={() => setIsMenuOpen(false)}
             >
-              Metaverse
+              Safety
             </Link>
-            <div className="border-t border-border pt-3 flex justify-around">
-              <Link to="/search" onClick={() => setIsMenuOpen(false)}>
-                <Button variant="ghost" size="icon">
-                  <Search className="h-5 w-5" />
-                </Button>
+            <Link 
+              to="/wallet" 
+              className="px-3 py-2 text-sm font-medium rounded-md hover:bg-accent"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Wallet
+            </Link>
+            <Link 
+              to="/profile" 
+              className="px-3 py-2 text-sm font-medium rounded-md hover:bg-accent"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Profile
+            </Link>
+            {user ? (
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  handleLogout();
+                  setIsMenuOpen(false);
+                }}
+                className="mt-2"
+              >
+                Logout
+              </Button>
+            ) : (
+              <Link 
+                to="/auth" 
+                onClick={() => setIsMenuOpen(false)}
+                className="w-full"
+              >
+                <Button className="w-full mt-2">Login</Button>
               </Link>
-              <Link to="/messages" onClick={() => setIsMenuOpen(false)}>
-                <Button variant="ghost" size="icon">
-                  <MessagesSquare className="h-5 w-5" />
-                </Button>
-              </Link>
-              <Link to="/wallet" onClick={() => setIsMenuOpen(false)}>
-                <Button variant="ghost" size="icon">
-                  <Wallet className="h-5 w-5" />
-                </Button>
-              </Link>
-              <Link to="/profile" onClick={() => setIsMenuOpen(false)}>
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
-                </Button>
-              </Link>
-            </div>
+            )}
           </nav>
         </div>
       )}

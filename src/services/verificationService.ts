@@ -1,3 +1,4 @@
+
 import { VerificationRequest, VerificationStatus, VerificationLevel, VerificationDocument } from '@/types/verification';
 
 // Mock verification requests data

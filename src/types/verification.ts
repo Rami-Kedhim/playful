@@ -51,4 +51,5 @@ export interface VerificationRequest {
   verificationLevel?: VerificationLevel;
   // Additional properties referenced in the code
   reviewer_id?: string;
+  reviewed_by?: string;
 }

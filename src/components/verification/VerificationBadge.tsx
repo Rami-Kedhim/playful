@@ -1,79 +1,73 @@
 
-import React from 'react';
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import React from "react";
+import { Shield, ShieldCheck, ShieldAlert } from "lucide-react";
 import { VerificationLevel } from "@/types/verification";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 interface VerificationBadgeProps {
-  level?: VerificationLevel;
+  level: VerificationLevel | undefined;
+  size?: "sm" | "md" | "lg";
   showLabel?: boolean;
-  className?: string;
-  size?: 'sm' | 'md' | 'lg';
 }
 
-const VerificationBadge: React.FC<VerificationBadgeProps> = ({
-  level = VerificationLevel.BASIC,
-  showLabel = true,
-  className = "",
-  size = 'md',
+const VerificationBadge: React.FC<VerificationBadgeProps> = ({ 
+  level = "none", 
+  size = "md", 
+  showLabel = true 
 }) => {
-  const getLevelColor = () => {
-    switch (level) {
-      case VerificationLevel.PREMIUM:
-        return "bg-purple-100 text-purple-800 border-purple-300";
-      case VerificationLevel.ENHANCED:
-        return "bg-blue-100 text-blue-800 border-blue-300";
-      case VerificationLevel.BASIC:
-      default:
-        return "bg-green-100 text-green-800 border-green-300";
-    }
-  };
+  let icon, label, badgeColor;
   
-  const getIconSize = () => {
-    switch (size) {
-      case 'sm': return 'h-3 w-3';
-      case 'lg': return 'h-5 w-5';
-      case 'md': 
-      default: return 'h-4 w-4';
-    }
-  };
-  
-  const getTooltipText = () => {
-    switch (level) {
-      case VerificationLevel.PREMIUM:
-        return "Premium Verification - Highest level of verification";
-      case VerificationLevel.ENHANCED:
-        return "Enhanced Verification - Additional identity checks completed";
-      case VerificationLevel.BASIC:
-      default:
-        return "Basic Verification - Identity has been verified";
-    }
-  };
+  switch (level) {
+    case "premium":
+      icon = <ShieldCheck className="h-4 w-4" />;
+      label = "Premium";
+      badgeColor = "bg-purple-500 hover:bg-purple-600";
+      break;
+    case "enhanced":
+      icon = <ShieldCheck className="h-4 w-4" />;
+      label = "Enhanced";
+      badgeColor = "bg-blue-500 hover:bg-blue-600";
+      break;
+    case "basic":
+      icon = <Shield className="h-4 w-4" />;
+      label = "Verified";
+      badgeColor = "bg-green-500 hover:bg-green-600";
+      break;
+    default:
+      icon = <ShieldAlert className="h-4 w-4" />;
+      label = "Unverified";
+      badgeColor = "bg-gray-500 hover:bg-gray-600";
+  }
+
+  const sizeClass = {
+    sm: "text-xs py-0.5 px-1.5",
+    md: "text-sm py-1 px-2",
+    lg: "text-base py-1.5 px-3"
+  }[size];
+
+  const tooltipContent = {
+    premium: "Premium verification with background check and official ID verification",
+    enhanced: "Enhanced verification with multiple forms of ID verified",
+    basic: "Basic verification with photo ID",
+    none: "This profile is not verified"
+  }[level];
+
+  if (level === "none") {
+    return null;
+  }
 
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Badge 
-            variant="outline" 
-            className={`${getLevelColor()} flex items-center gap-1 py-1 px-2 ${className}`}
-          >
-            <CheckCircle className={getIconSize()} />
-            {showLabel && (
-              <span className="ml-1">
-                {level.charAt(0).toUpperCase() + level.slice(1)} Verified
-              </span>
-            )}
+          <Badge className={`${badgeColor} ${sizeClass} flex items-center gap-1`}>
+            {icon}
+            {showLabel && <span>{label}</span>}
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{getTooltipText()}</p>
+          <p>{tooltipContent}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

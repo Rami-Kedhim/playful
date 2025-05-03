@@ -1,149 +1,151 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { uberWallet } from '@/core/UberWallet';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import UBXPriceDisplay from '@/components/oxum/UBXPriceDisplay';
-import OxumInfoTooltip from '@/components/oxum/OxumInfoTooltip';
-import { useToast } from '@/hooks/use-toast';
-import { Wallet, Loader2, Clock, ArrowUpRight } from 'lucide-react';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { 
+  Table, 
+  TableBody, 
+  TableCaption, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { Loader2 } from "lucide-react";
+import { uberWallet, UbxTransaction } from '@/core/UberWallet';
 import { useAuth } from '@/hooks/auth';
-import { useNavigate } from 'react-router-dom';
 
-const UpdatedWallet = () => {
+const UpdatedWalletPage: React.FC = () => {
   const { user, profile } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
-  const [transactions, setTransactions] = useState([]);
-  const [balance, setBalance] = useState(0);
+  const userId = user?.id || 'anonymous';
   
-  useEffect(() => {
-    const loadWalletData = async () => {
-      if (!user?.id) return;
-      
-      try {
-        setIsLoading(true);
-        const walletBalance = await uberWallet.getBalance(user.id);
-        const txHistory = await uberWallet.getTransactionHistory(user.id);
-        
-        setBalance(walletBalance);
-        setTransactions(txHistory);
-      } catch (error) {
-        console.error('Failed to load wallet data:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load wallet data. Please try again.',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadWalletData();
-  }, [user?.id]);
+  const [transactions, setTransactions] = useState<UbxTransaction[]>([]);
+  const [balance, setBalance] = useState({
+    available: 0,
+    pending: 0,
+    reserved: 0,
+    total: 0
+  });
 
-  if (isLoading) {
+  const loadData = async () => {
+    try {
+      // Get balance
+      if (userId) {
+        const balanceAmount = await uberWallet.getBalance(userId);
+        
+        // Create a structured balance object
+        setBalance({
+          available: balanceAmount * 0.8,
+          pending: balanceAmount * 0.1,
+          reserved: balanceAmount * 0.1,
+          total: balanceAmount
+        });
+        
+        // Get transaction history
+        const history = await uberWallet.getTransactionHistory(userId);
+        setTransactions(history);
+      }
+    } catch (error) {
+      console.error('Error loading wallet data:', error);
+    }
+  };
+
+  const handleAddFunds = async () => {
+    try {
+      // In a real app, this would open a payment flow
+      // For demo, just add 100 UBX
+      const amount = 100;
+      
+      const result = await uberWallet.purchaseUbx(userId, amount);
+      
+      if (result.success) {
+        // Update balance (in a real app, we would fetch the new balance)
+        const newTotal = balance.total + amount;
+        setBalance({
+          available: newTotal * 0.8,
+          pending: newTotal * 0.1,
+          reserved: newTotal * 0.1,
+          total: newTotal
+        });
+        
+        // Refresh transaction history
+        const history = await uberWallet.getTransactionHistory(userId);
+        setTransactions(history);
+      }
+    } catch (error) {
+      console.error('Error adding funds:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [userId]);
+
+  if (!user) {
     return (
-      <div className="flex justify-center items-center h-40">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   // Check for boosted status with fallbacks
   const isBoostedProfile = profile?.isBoosted || profile?.is_boosted;
-  
+
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold flex items-center gap-2 mb-6">
-        <Wallet className="h-7 w-7" />
-        Wallet
-      </h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Wallet</h1>
       
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Balance Card */}
+      <div className="grid gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Your Balance</CardTitle>
+            <CardTitle>Balance</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col gap-2">
-              <div className="flex items-baseline">
-                <span className="text-4xl font-bold">{balance}</span>
-                <span className="ml-2 text-xl">UBX</span>
-              </div>
-              
-              <p className="text-sm text-muted-foreground">
-                Equivalent to approximately ${(balance * 0.1).toFixed(2)} USD
-              </p>
-              
-              <div className="mt-4 flex flex-col sm:flex-row gap-2">
-                <Button onClick={() => navigate('/wallet/add-funds')}>
-                  Add Funds
-                </Button>
-                <Button variant="outline" onClick={() => navigate('/wallet/withdraw')}>
-                  Withdraw
-                </Button>
-              </div>
-              
-              {isBoostedProfile && (
-                <div className="mt-4 p-3 bg-primary/10 rounded-md flex items-center gap-2">
-                  <Badge variant="outline" className="bg-primary/20">
-                    Boosted
-                  </Badge>
-                  <span className="text-sm">Your profile is currently boosted!</span>
-                </div>
-              )}
+            <div className="text-3xl font-bold">{balance.total} UBX</div>
+            <div className="text-sm text-muted-foreground mt-2">
+              Available: {balance.available.toFixed(2)} UBX
             </div>
+            
+            <Button className="mt-4" onClick={handleAddFunds}>
+              Add Funds
+            </Button>
           </CardContent>
         </Card>
         
-        {/* Transaction History */}
         <Card>
           <CardHeader>
             <CardTitle>Transaction History</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableCaption>Your recent transactions</TableCaption>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions.length > 0 ? (
-                  transactions.map((tx) => (
-                    <TableRow key={tx.id}>
-                      <TableCell className="font-medium">{tx.description || tx.type}</TableCell>
-                      <TableCell>{new Date(tx.date).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-right">{tx.amount} UBX</TableCell>
-                    </TableRow>
-                  ))
-                ) : (
+            {transactions.length === 0 ? (
+              <p className="text-muted-foreground">No transactions yet</p>
+            ) : (
+              <Table>
+                <TableCaption>A history of your recent transactions</TableCaption>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center py-4 text-muted-foreground">
-                      No transactions yet
-                    </TableCell>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Amount</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {transactions.map((tx) => (
+                    <TableRow key={tx.id}>
+                      <TableCell className="font-medium">{tx.description || tx.transactionType}</TableCell>
+                      <TableCell>{new Date(tx.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell className={tx.amount > 0 ? 'text-green-500' : ''}>
+                        {tx.amount > 0 ? '+' : ''}{tx.amount} UBX
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -151,4 +153,4 @@ const UpdatedWallet = () => {
   );
 };
 
-export default UpdatedWallet;
+export default UpdatedWalletPage;
