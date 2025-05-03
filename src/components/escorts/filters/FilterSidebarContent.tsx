@@ -1,15 +1,15 @@
 
-import React from "react";
-import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Form } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Search, Euro } from "lucide-react";
-import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
-import ServiceTypeRadioGroup from './ServiceTypeRadioGroup';
+import { Input } from "@/components/ui/input";
+import { StarIcon } from "lucide-react";
+import { ServiceTypeFilter } from "./ServiceTypeBadgeLabel";
 
 interface FilterSidebarContentProps {
   searchQuery: string;
@@ -27,34 +27,38 @@ interface FilterSidebarContentProps {
   toggleGender: (gender: string) => void;
   selectedOrientations: string[];
   toggleOrientation: (orientation: string) => void;
-  ageRange?: [number, number];
-  setAgeRange?: (range: number[]) => void;
-  ratingMin?: number;
-  setRatingMin?: (rating: number) => void;
-  availableNow?: boolean;
-  setAvailableNow?: (available: boolean) => void;
+  ageRange: [number, number];
+  setAgeRange: (range: number[]) => void;
+  ratingMin: number;
+  setRatingMin: (rating: number) => void;
+  availableNow: boolean;
+  setAvailableNow: (available: boolean) => void;
   serviceTypeFilter: ServiceTypeFilter;
   setServiceTypeFilter: (type: ServiceTypeFilter) => void;
-  // New properties for EnhancedEscortFilters compatibility
-  heightRange?: [number, number];
-  setHeightRange?: (range: number[]) => void;
-  weightRange?: [number, number];
-  setWeightRange?: (range: number[]) => void;
-  selectedLanguages?: string[];
-  toggleLanguage?: (language: string) => void;
-  selectedHairColors?: string[];
-  toggleHairColor?: (color: string) => void;
-  selectedEyeColors?: string[];
-  toggleEyeColor?: (color: string) => void;
-  selectedEthnicities?: string[];
-  toggleEthnicity?: (ethnicity: string) => void;
-  selectedBodyTypes?: string[];
-  toggleBodyType?: (bodyType: string) => void;
-  selectedDays?: string[];
-  toggleDay?: (day: string) => void;
-  selectedHours?: string[];
-  toggleHour?: (hour: string) => void;
 }
+
+// Define gender options
+const genderOptions = [
+  { id: "female", label: "Female" },
+  { id: "male", label: "Male" },
+  { id: "non-binary", label: "Non-binary" },
+  { id: "transgender", label: "Transgender" }
+];
+
+// Define orientation options
+const orientationOptions = [
+  { id: "straight", label: "Straight" },
+  { id: "gay", label: "Gay" },
+  { id: "lesbian", label: "Lesbian" },
+  { id: "bisexual", label: "Bisexual" }
+];
+
+// Define service type options
+const serviceTypeOptions = [
+  { id: "in-person", label: "In-Person" },
+  { id: "virtual", label: "Virtual" },
+  { id: "both", label: "Both" }
+];
 
 const FilterSidebarContent = ({
   searchQuery,
@@ -72,192 +76,203 @@ const FilterSidebarContent = ({
   toggleGender,
   selectedOrientations,
   toggleOrientation,
-  ageRange = [18, 50],
-  setAgeRange = () => {},
-  ratingMin = 0,
-  setRatingMin = () => {},
-  availableNow = false,
-  setAvailableNow = () => {},
+  ageRange,
+  setAgeRange,
+  ratingMin,
+  setRatingMin,
+  availableNow,
+  setAvailableNow,
   serviceTypeFilter,
   setServiceTypeFilter
 }: FilterSidebarContentProps) => {
-  // Common gender options
-  const genderOptions = ["female", "male", "transgender", "non-binary"];
-  
-  // Common orientation options
-  const orientationOptions = ["straight", "gay", "lesbian", "bisexual", "pansexual"];
-  
+  // Create form schema
+  const formSchema = z.object({
+    search: z.string().optional(),
+    location: z.string().optional(),
+    verified: z.boolean().optional(),
+    available: z.boolean().optional(),
+    serviceType: z.enum(["in-person", "virtual", "both", ""]).optional(),
+    rating: z.number().min(0).max(5).optional(),
+    services: z.array(z.string()).optional(),
+    genders: z.array(z.string()).optional(),
+    orientations: z.array(z.string()).optional(),
+    ageRange: z.array(z.number()).length(2).optional(),
+    priceRange: z.array(z.number()).length(2).optional(),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      search: searchQuery,
+      location: location,
+      verified: verifiedOnly,
+      available: availableNow,
+      serviceType: serviceTypeFilter,
+      rating: ratingMin,
+      services: selectedServices,
+      genders: selectedGenders,
+      orientations: selectedOrientations,
+      ageRange: ageRange,
+      priceRange: priceRange,
+    },
+  });
+
+  // Handle search input changes
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Handle location input changes
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocation(e.target.value);
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="search">Search</Label>
-        <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+    <Form {...form}>
+      <div className="space-y-6">
+        {/* Search */}
+        <div className="space-y-2">
+          <Label htmlFor="search">Search</Label>
           <Input
             id="search"
-            placeholder="Search by name, location..."
+            placeholder="Search escorts..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
+            onChange={handleSearchChange}
           />
         </div>
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="location">Location</Label>
-        <Input
-          id="location"
-          placeholder="City, Country"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <Label>Service Type</Label>
-        <ServiceTypeRadioGroup 
-          serviceTypeFilter={serviceTypeFilter}
-          setServiceTypeFilter={setServiceTypeFilter}
-          layout="vertical"
-          showLabels={true}
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="price-range">Price Range</Label>
-          <span className="text-sm">
-            {priceRange[0]} - {priceRange[1]} LC
-          </span>
+
+        {/* Location */}
+        <div className="space-y-2">
+          <Label htmlFor="location">Location</Label>
+          <Input
+            id="location"
+            placeholder="City or area..."
+            value={location}
+            onChange={handleLocationChange}
+          />
         </div>
-        <Slider
-          id="price-range"
-          min={0}
-          max={1000}
-          step={10}
-          value={priceRange}
-          onValueChange={setPriceRange}
-        />
-      </div>
-      
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="verified"
-          checked={verifiedOnly}
-          onCheckedChange={setVerifiedOnly}
-        />
-        <Label htmlFor="verified">Verified Only</Label>
-      </div>
-      
-      {setAvailableNow && (
+
+        {/* Verified Only */}
         <div className="flex items-center space-x-2">
-          <Switch
+          <Checkbox
+            id="verified"
+            checked={verifiedOnly}
+            onCheckedChange={(checked) => setVerifiedOnly(checked === true)}
+          />
+          <Label htmlFor="verified" className="cursor-pointer">
+            Verified Only
+          </Label>
+        </div>
+
+        {/* Available Now */}
+        <div className="flex items-center space-x-2">
+          <Checkbox
             id="available-now"
             checked={availableNow}
-            onCheckedChange={setAvailableNow}
+            onCheckedChange={(checked) => setAvailableNow(checked === true)}
           />
-          <Label htmlFor="available-now">Available Now</Label>
+          <Label htmlFor="available-now" className="cursor-pointer">
+            Available Now
+          </Label>
         </div>
-      )}
-      
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="gender">
-          <AccordionTrigger>Gender</AccordionTrigger>
-          <AccordionContent>
-            <div className="grid grid-cols-2 gap-2">
-              {genderOptions.map((gender) => (
-                <Button
-                  key={gender}
-                  variant={selectedGenders.includes(gender) ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => toggleGender(gender)}
-                  className="justify-start"
-                >
-                  <span className="capitalize">{gender}</span>
-                </Button>
-              ))}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-        
-        <AccordionItem value="orientation">
-          <AccordionTrigger>Orientation</AccordionTrigger>
-          <AccordionContent>
-            <div className="grid grid-cols-2 gap-2">
-              {orientationOptions.map((orientation) => (
-                <Button
-                  key={orientation}
-                  variant={selectedOrientations.includes(orientation) ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => toggleOrientation(orientation)}
-                  className="justify-start"
-                >
-                  <span className="capitalize">{orientation}</span>
-                </Button>
-              ))}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-        
-        <AccordionItem value="age">
-          <AccordionTrigger>Age Range</AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">
-                  {ageRange[0]} - {ageRange[1]} years
-                </span>
+
+        {/* Service Type */}
+        <div className="space-y-2">
+          <Label>Service Type</Label>
+          <RadioGroup
+            value={serviceTypeFilter}
+            onValueChange={(value) => setServiceTypeFilter(value as ServiceTypeFilter)}
+          >
+            {serviceTypeOptions.map((option) => (
+              <div key={option.id} className="flex items-center space-x-2">
+                <RadioGroupItem value={option.id} id={`service-type-${option.id}`} />
+                <Label htmlFor={`service-type-${option.id}`} className="cursor-pointer">
+                  {option.label}
+                </Label>
               </div>
-              <Slider
-                min={18}
-                max={99}
-                step={1}
-                value={ageRange}
-                onValueChange={setAgeRange}
-              />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-        
-        <AccordionItem value="rating">
-          <AccordionTrigger>Minimum Rating</AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">
-                  {ratingMin} stars and above
-                </span>
-              </div>
-              <Slider
-                min={0}
-                max={5}
-                step={0.5}
-                value={[ratingMin]}
-                onValueChange={([value]) => setRatingMin(value)}
-              />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-        
-        <AccordionItem value="services">
-          <AccordionTrigger>Services</AccordionTrigger>
-          <AccordionContent>
-            <div className="flex flex-wrap gap-2">
+            ))}
+          </RadioGroup>
+        </div>
+
+        {/* Rating */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label>Rating</Label>
+            <span className="text-sm flex items-center">
+              {ratingMin}+ <StarIcon className="h-4 w-4 ml-1 text-yellow-400 inline-block" />
+            </span>
+          </div>
+          <Slider
+            value={[ratingMin]}
+            min={0}
+            max={5}
+            step={1}
+            onValueChange={(value) => setRatingMin(value[0])}
+          />
+        </div>
+
+        {/* Services */}
+        {services.length > 0 && (
+          <div className="space-y-2">
+            <Label className="block mb-2">Services</Label>
+            <div className="space-y-1">
               {services.map((service) => (
-                <Badge
-                  key={service}
-                  variant={selectedServices.includes(service) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => toggleService(service)}
-                >
-                  {service}
-                </Badge>
+                <div key={service} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`service-${service}`}
+                    checked={selectedServices.includes(service)}
+                    onCheckedChange={() => toggleService(service)}
+                  />
+                  <Label htmlFor={`service-${service}`} className="cursor-pointer">
+                    {service}
+                  </Label>
+                </div>
               ))}
             </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </div>
+          </div>
+        )}
+
+        {/* Gender */}
+        <div className="space-y-2">
+          <Label className="block mb-2">Gender</Label>
+          <div className="space-y-1">
+            {genderOptions.map((gender) => (
+              <div key={gender.id} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`gender-${gender.id}`}
+                  checked={selectedGenders.includes(gender.id)}
+                  onCheckedChange={() => toggleGender(gender.id)}
+                />
+                <Label htmlFor={`gender-${gender.id}`} className="cursor-pointer">
+                  {gender.label}
+                </Label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Orientation - left as a placeholder for now */}
+        {selectedOrientations && (
+          <div className="space-y-2">
+            <Label className="block mb-2">Orientation</Label>
+            <div className="space-y-1">
+              {orientationOptions.map((orientation) => (
+                <div key={orientation.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`orientation-${orientation.id}`}
+                    checked={selectedOrientations.includes(orientation.id)}
+                    onCheckedChange={() => toggleOrientation(orientation.id)}
+                  />
+                  <Label htmlFor={`orientation-${orientation.id}`} className="cursor-pointer">
+                    {orientation.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </Form>
   );
 };
 

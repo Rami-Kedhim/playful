@@ -1,138 +1,57 @@
 
-import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Loader2, SlidersHorizontal } from 'lucide-react';
-import EscortGrid from '@/components/escorts/EscortGrid';
-import AppliedFilters from '@/components/filters/AppliedFilters';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
+import EscortResults from "@/components/escorts/EscortResults";
+import SearchBar from "@/components/escorts/SearchBar";
 
 interface ResultsSectionProps {
   filterState: any;
   combinedIsLoading: boolean;
 }
 
-const ResultsSection: React.FC<ResultsSectionProps> = ({ 
-  filterState,
-  combinedIsLoading
-}) => {
-  // Convert filter state to applied filters format
-  const getAppliedFilters = () => {
-    const filters = [];
-
-    if (filterState.location) {
-      filters.push({
-        label: "Location",
-        key: "location",
-        value: filterState.location
-      });
-    }
-
-    if (filterState.searchQuery) {
-      filters.push({
-        label: "Search",
-        key: "searchQuery", 
-        value: filterState.searchQuery
-      });
-    }
-
-    if (filterState.serviceTypeFilter) {
-      filters.push({
-        label: "Service Type",
-        key: "serviceType",
-        value: filterState.serviceTypeFilter
-      });
-    }
-
-    if (filterState.verifiedOnly) {
-      filters.push({
-        label: "Verified",
-        key: "verifiedOnly"
-      });
-    }
-
-    if (filterState.availableNow) {
-      filters.push({
-        label: "Available Now",
-        key: "availableNow"
-      });
-    }
-
-    return filters;
-  };
-
-  const handleRemoveFilter = (filter: { key: string, value?: string }) => {
-    switch (filter.key) {
-      case 'location':
-        filterState.setLocation('');
-        break;
-      case 'searchQuery':
-        filterState.setSearchQuery('');
-        break;
-      case 'serviceType':
-        filterState.setServiceTypeFilter('');
-        break;
-      case 'verifiedOnly':
-        filterState.setVerifiedOnly(false);
-        break;
-      case 'availableNow':
-        filterState.setAvailableNow(false);
-        break;
-      default:
-        break;
-    }
-  };
-
-  const appliedFilters = getAppliedFilters();
+const ResultsSection = ({ filterState, combinedIsLoading }: ResultsSectionProps) => {
+  // Get the standard services list
+  const commonServices = [
+    "Dinner Date", 
+    "Travel Companion",
+    "Event Companion",
+    "Massage",
+    "In-Person Meeting",
+    "Virtual Meeting"
+  ];
 
   return (
     <div className="lg:col-span-3">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div>
-          <h2 className="text-xl font-bold mb-2">Escorts</h2>
-          <div className="text-muted-foreground">
-            {combinedIsLoading ? (
-              <div className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Loading results...
-              </div>
-            ) : (
-              <>
-                Showing {filterState.paginatedEscorts.length} of {filterState.totalResults} escorts
-              </>
-            )}
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <select
-            className="bg-background border rounded-md px-3 py-1 text-sm"
-            value={filterState.sortBy}
-            onChange={(e) => filterState.setSortBy(e.target.value)}
-            disabled={combinedIsLoading}
-          >
-            <option value="newest">Latest</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="rating">Highest Rated</option>
-          </select>
-        </div>
+      <SearchBar
+        searchQuery={filterState.searchQuery}
+        setSearchQuery={filterState.setSearchQuery}
+        sortBy={filterState.sortBy}
+        setSortBy={filterState.setSortBy}
+      />
+
+      {/* Mobile Applied Filters display */}
+      <div className="lg:hidden mb-6">
+        {/* Mobile applied filters would go here if needed */}
       </div>
-      
-      {appliedFilters.length > 0 && (
-        <div className="mb-6">
-          <AppliedFilters 
-            filters={appliedFilters} 
-            removeFilter={handleRemoveFilter} 
-            clearFilters={filterState.clearFilters} 
-          />
-        </div>
+
+      {/* No results alert */}
+      {!combinedIsLoading && filterState.filteredEscorts.length === 0 && (
+        <Alert variant="warning" className="mb-6">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>No results found</AlertTitle>
+          <AlertDescription>
+            No escorts match your current filters. Try adjusting your criteria or clearing some filters.
+          </AlertDescription>
+        </Alert>
       )}
-      
-      <EscortGrid 
-        escorts={filterState.paginatedEscorts}
-        loading={combinedIsLoading}
-        totalPages={filterState.totalPages}
+
+      <EscortResults
+        escorts={filterState.filteredEscorts}
+        clearFilters={filterState.clearFilters}
         currentPage={filterState.currentPage}
-        onPageChange={filterState.setCurrentPage}
+        setCurrentPage={filterState.setCurrentPage}
+        totalPages={filterState.totalPages}
+        isLoading={combinedIsLoading}
       />
     </div>
   );
