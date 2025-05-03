@@ -4,6 +4,8 @@ import type { AuthContextType } from './types';
 import { User } from '@/types/user';
 import { UserProfile } from '@/types/auth';
 
+export type { AuthContextType };
+
 export const useAuth = (): AuthContextType => {
   // Mock implementation for development
   const [user, setUser] = useState<User | null>(null);
@@ -48,7 +50,6 @@ export const useAuth = (): AuthContextType => {
   const logout = async (): Promise<void> => {
     setUser(null);
     setIsAuthenticated(false);
-    return Promise.resolve();
   };
 
   const signIn = login;

@@ -1,7 +1,6 @@
 
 // Export the main layout component
 export { UnifiedLayout } from './UnifiedLayout';
-export { default as UnifiedLayout } from './UnifiedLayout';
 
 // Legacy layout aliases for backward compatibility
 export { default as MainLayout } from './MainLayout';
