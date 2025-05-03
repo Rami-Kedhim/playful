@@ -17,6 +17,11 @@ export interface User {
     [key: string]: any;
   };
   ubxBalance?: number;
+  // Add missing properties used in components
+  website?: string;
+  bio?: string;
+  isVerified?: boolean;
+  avatar_url?: string; // For backward compatibility
 }
 
 export interface UserProfile {
@@ -37,4 +42,18 @@ export interface UserProfile {
   location?: string;
   gallery_images?: string[];
   social_links?: Record<string, string>;
+  createdAt?: string; // Added to match auth.UserProfile
+}
+
+// Add missing credential interfaces
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterCredentials {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
 }
