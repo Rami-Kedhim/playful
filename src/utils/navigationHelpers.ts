@@ -24,8 +24,10 @@ export function getBreadcrumbsFromPath(path: string) {
     const part = parts[i];
     currentPath += `/${part}`;
     
-    // Skip ID parts in the breadcrumb
-    if (i < parts.length - 1 && parts[i+1].match(/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i)) {
+    // Skip ID parts in the breadcrumb (UUIDs, numeric IDs, etc)
+    if (i < parts.length - 1 && 
+        (parts[i+1].match(/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i) ||
+         parts[i+1].match(/^\d+$/))) {
       continue;
     }
     
@@ -33,7 +35,7 @@ export function getBreadcrumbsFromPath(path: string) {
     let label = part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ');
     
     // Handle special cases
-    if (part === 'ai-companions') {
+    if (part === 'ai-companion') {
       label = 'AI Companions';
     } else if (part === 'brain-hub') {
       label = 'Brain Hub';

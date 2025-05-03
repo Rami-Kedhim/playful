@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { Heart, Trash2, MapPin } from 'lucide-react';
 import { Escort } from '@/types/Escort';
+import { Link } from 'react-router-dom';
 
 // Mock data for favorites display
 const mockEscorts: Escort[] = [
@@ -104,14 +105,18 @@ const FavoritesPage = () => {
                 {favorites.map(escort => (
                   <Card key={escort.id} className="p-4">
                     <div className="flex flex-col">
-                      <img 
-                        src={escort.imageUrl} 
-                        alt={escort.name} 
-                        className="w-full h-64 object-cover rounded-md mb-3"
-                      />
+                      <Link to={`/escorts/${escort.id}`}>
+                        <img 
+                          src={escort.imageUrl} 
+                          alt={escort.name} 
+                          className="w-full h-64 object-cover rounded-md mb-3"
+                        />
+                      </Link>
                       <div className="flex justify-between items-center">
                         <div>
-                          <h3 className="text-lg font-medium">{escort.name}</h3>
+                          <Link to={`/escorts/${escort.id}`}>
+                            <h3 className="text-lg font-medium hover:text-primary transition-colors">{escort.name}</h3>
+                          </Link>
                           <p className="text-sm text-muted-foreground flex items-center">
                             <MapPin className="h-3.5 w-3.5 mr-1" />
                             {escort.location}
@@ -136,7 +141,9 @@ const FavoritesPage = () => {
                 <p className="text-muted-foreground mb-6">
                   You haven't added any escorts to your favorites
                 </p>
-                <Button>Browse Escorts</Button>
+                <Button asChild>
+                  <Link to="/escorts">Browse Escorts</Link>
+                </Button>
               </div>
             )}
           </TabsContent>
@@ -148,7 +155,9 @@ const FavoritesPage = () => {
               <p className="text-muted-foreground mb-6">
                 You haven't added any creators to your favorites
               </p>
-              <Button>Browse Creators</Button>
+              <Button asChild>
+                <Link to="/creators">Browse Creators</Link>
+              </Button>
             </div>
           </TabsContent>
           
@@ -159,7 +168,9 @@ const FavoritesPage = () => {
               <p className="text-muted-foreground mb-6">
                 You haven't added any livecams to your favorites
               </p>
-              <Button>Browse Livecams</Button>
+              <Button asChild>
+                <Link to="/livecams">Browse Livecams</Link>
+              </Button>
             </div>
           </TabsContent>
         </Tabs>

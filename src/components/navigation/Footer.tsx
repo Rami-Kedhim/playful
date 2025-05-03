@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, Brain, MessageSquare, Github } from 'lucide-react';
+import { Shield, Brain, MessageSquare, Github, Laptop, AlertTriangle, Heart, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -11,9 +12,12 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-bold text-lg mb-4">UberPlatform</h3>
+            <h3 className="font-bold text-lg mb-4 flex items-center">
+              <Laptop className="h-5 w-5 mr-2 text-primary" />
+              UberEscorts
+            </h3>
             <p className="text-muted-foreground">
-              The premier Web3 platform for secure, verified connections and services.
+              The premier platform for secure, verified connections and premium services.
             </p>
           </div>
           
@@ -27,17 +31,17 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/escorts" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Explore
+                  Escorts
                 </Link>
               </li>
               <li>
-                <Link to="/wallet" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Wallet
+                <Link to="/creators" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Creators
                 </Link>
               </li>
               <li>
-                <Link to="/profile" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Profile
+                <Link to="/livecams" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Livecams
                 </Link>
               </li>
             </ul>
@@ -61,6 +65,11 @@ const Footer = () => {
                   <MessageSquare className="h-4 w-4" /> Messaging
                 </Link>
               </li>
+              <li>
+                <Link to="/favorites" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+                  <Heart className="h-4 w-4" /> Favorites
+                </Link>
+              </li>
             </ul>
           </div>
           
@@ -82,16 +91,24 @@ const Footer = () => {
                   Community Guidelines
                 </Link>
               </li>
+              <li>
+                <Link to="/compliance" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" /> Compliance Center
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
         
         <div className="border-t border-border mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            &copy; {currentYear} UberPlatform. All rights reserved.
+            &copy; {currentYear} UberEscorts. All rights reserved.
           </p>
           <div className="flex items-center space-x-4 mt-4 md:mt-0">
-            <a href="https://github.com" className="text-muted-foreground hover:text-foreground" target="_blank" rel="noreferrer">
+            <Link to="/about" className="text-muted-foreground hover:text-foreground">About</Link>
+            <Link to="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link>
+            <Link to="/faq" className="text-muted-foreground hover:text-foreground">FAQ</Link>
+            <a href="#" className="text-muted-foreground hover:text-foreground" aria-label="Project Repository">
               <Github className="h-5 w-5" />
             </a>
           </div>
