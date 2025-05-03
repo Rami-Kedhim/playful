@@ -28,6 +28,7 @@ import AdminApiPage from '@/pages/AdminApiPage';
 import ModerationPage from '@/pages/ModerationPage';
 import VerificationPage from '@/pages/VerificationPage';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
+import AssessmentPage from '@/pages/AssessmentPage';
 
 // UberCore initialization
 import { lucie } from '@/core/Lucie';
@@ -167,6 +168,13 @@ const AppRoutes = () => {
       <Route path="/orus" element={
         <MainLayout>
           <OrusPage />
+        </MainLayout>
+      } />
+      
+      {/* Assessment Page */}
+      <Route path="/assessment" element={
+        <MainLayout>
+          <AssessmentPage />
         </MainLayout>
       } />
       
