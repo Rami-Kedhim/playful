@@ -65,14 +65,13 @@ const Favorites = () => {
                       key={escort.id} 
                       name={escort.name || ''}
                       location={escort.location || ''}
-                      imageUrl={escort.images?.[0] || escort.profileImage || ''}
+                      imageUrl={escort.images?.[0] || ''}
                       id={escort.id}
-                      isFavorite={true}
                       age={escort.age || 0}
-                      rating={escort.rating || 0}
-                      reviews={escort.reviewCount || 0}
+                      rating={0}
+                      reviews={0}
                       tags={escort.tags || []}
-                      verified={escort.isVerified || false}
+                      verified={escort.verified || false}
                       price={escort.price || 0}
                       gender={escort.gender || ''}
                     />

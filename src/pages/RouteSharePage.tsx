@@ -2,7 +2,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MainLayout } from '@/layouts';
+import MainLayout from '@/layouts/MainLayout';
 
 const RouteSharePage = () => {
   const location = useLocation();
