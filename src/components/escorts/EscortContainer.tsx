@@ -44,10 +44,8 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
     ].filter(Boolean).length + 
     (filterState.selectedServices?.length || 0) +
     (filterState.selectedGenders?.length || 0) +
-    // Safely access properties that might not exist in the type
     ((filterState as any).selectedOrientations?.length || 0) +
     (filterState.ratingMin > 0 ? 1 : 0) +
-    // Safely access price and age range using type assertion
     (((filterState as any).priceRange?.[0] > 0 || (filterState as any).priceRange?.[1] < 500) ? 1 : 0) +
     (((filterState as any).ageRange?.[0] > 21 || (filterState as any).ageRange?.[1] < 50) ? 1 : 0);
   }, [

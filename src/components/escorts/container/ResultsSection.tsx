@@ -21,22 +21,6 @@ const ResultsSection = ({ filterState, combinedIsLoading, activeFilterCount }: R
     "Virtual Meeting"
   ];
 
-  // Use provided activeFilterCount or calculate if not provided
-  const displayFilterCount = activeFilterCount !== undefined ? activeFilterCount : 
-    [
-      filterState.searchQuery, 
-      filterState.location,
-      filterState.verifiedOnly,
-      filterState.availableNow,
-      filterState.serviceTypeFilter
-    ].filter(Boolean).length + 
-    (filterState.selectedServices?.length || 0) +
-    (filterState.selectedGenders?.length || 0) +
-    ((filterState as any).selectedOrientations?.length || 0) +
-    (filterState.ratingMin > 0 ? 1 : 0) +
-    (((filterState as any).priceRange?.[0] > 0 || (filterState as any).priceRange?.[1] < 500) ? 1 : 0) +
-    (((filterState as any).ageRange?.[0] > 21 || (filterState as any).ageRange?.[1] < 50) ? 1 : 0);
-
   return (
     <div className="lg:col-span-3">
       <SearchBar
@@ -48,9 +32,9 @@ const ResultsSection = ({ filterState, combinedIsLoading, activeFilterCount }: R
 
       {/* Mobile Applied Filters display */}
       <div className="lg:hidden mb-6">
-        {displayFilterCount > 0 && (
+        {typeof activeFilterCount === 'number' && activeFilterCount > 0 && (
           <div className="text-sm text-muted-foreground">
-            <span>{displayFilterCount} active filters</span> · 
+            <span>{activeFilterCount} active filters</span> · 
             <button 
               onClick={filterState.clearFilters} 
               className="ml-2 text-primary hover:underline"

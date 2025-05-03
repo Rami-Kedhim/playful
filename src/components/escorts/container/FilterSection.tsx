@@ -39,8 +39,8 @@ const FilterSection = ({
             setSearchQuery={filterState.setSearchQuery || (() => {})}
             location={filterState.location || ""}
             setLocation={filterState.setLocation || (() => {})}
-            priceRange={filterState.priceRange || [0, 500]}
-            setPriceRange={filterState.handlePriceRangeChange || (() => {})}
+            priceRange={(filterState as any).priceRange || [0, 500]}
+            setPriceRange={(filterState as any).handlePriceRangeChange || (() => {})}
             verifiedOnly={filterState.verifiedOnly || false}
             setVerifiedOnly={filterState.setVerifiedOnly || (() => {})}
             selectedServices={filterState.selectedServices || []}
