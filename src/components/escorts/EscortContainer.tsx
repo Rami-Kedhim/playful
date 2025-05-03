@@ -1,5 +1,5 @@
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, memo } from "react";
 import { useEscortFilterWithUrl } from "@/hooks/useEscortFilterWithUrl";
 import { Escort } from "@/types/Escort";
 import QuickFilterBar from "./QuickFilterBar";
@@ -14,7 +14,7 @@ interface EscortContainerProps {
   isLoading?: boolean;
 }
 
-const EscortContainer = ({ escorts, services, isLoading: externalLoading = false }: EscortContainerProps) => {
+const EscortContainer = memo<EscortContainerProps>(({ escorts, services, isLoading: externalLoading = false }) => {
   const [showFilters, setShowFilters] = useState(false);
   
   // Use the filtered hook that syncs with URL
@@ -33,55 +33,6 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
   const combinedIsLoading = useMemo(() => 
     filterState.isLoading || externalLoading
   , [filterState.isLoading, externalLoading]);
-  
-  // Calculate active filter count with safe access to properties using optional chaining
-  const activeFilterCount = useMemo(() => {
-    // Base count for simple filters
-    let count = 0;
-    
-    // Count simple filters
-    if (filterState.searchQuery) count++;
-    if (filterState.location) count++;
-    if (filterState.verifiedOnly) count++;
-    if (filterState.availableNow) count++;
-    if (filterState.serviceTypeFilter) count++;
-    
-    // Count array-based filters
-    const services = filterState.selectedServices || [];
-    count += services.length;
-    
-    const genders = filterState.selectedGenders || [];
-    count += genders.length;
-    
-    // Count filters from properties that might not be directly defined in the type
-    const orientations = (filterState as any).selectedOrientations;
-    if (orientations && orientations.length) count += orientations.length;
-    
-    // Count range-based filters
-    if (filterState.ratingMin > 0) count++;
-    
-    // Price range
-    const priceRange = (filterState as any).priceRange;
-    if (priceRange && (priceRange[0] > 0 || priceRange[1] < 500)) count++;
-    
-    // Age range
-    const ageRange = (filterState as any).ageRange;
-    if (ageRange && (ageRange[0] > 21 || ageRange[1] < 50)) count++;
-    
-    return count;
-  }, [
-    filterState.searchQuery,
-    filterState.location,
-    filterState.verifiedOnly,
-    filterState.availableNow,
-    filterState.serviceTypeFilter,
-    filterState.selectedServices,
-    filterState.selectedGenders,
-    (filterState as any).selectedOrientations,
-    filterState.ratingMin,
-    (filterState as any).priceRange,
-    (filterState as any).ageRange
-  ]);
 
   // Memoize event handlers for stable references
   const toggleShowFilters = useCallback(() => {
@@ -143,11 +94,12 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
         <ResultsSection
           filterState={filterState}
           combinedIsLoading={combinedIsLoading}
-          activeFilterCount={activeFilterCount}
         />
       </div>
     </>
   );
-};
+});
+
+EscortContainer.displayName = 'EscortContainer';
 
 export default EscortContainer;

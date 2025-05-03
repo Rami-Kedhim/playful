@@ -4,6 +4,9 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import FilterSidebar from "@/components/escorts/FilterSidebar";
+import ActiveFiltersDisplay from "./ActiveFiltersDisplay";
+import useActiveFilters from "@/hooks/escort-filters/useActiveFilters";
+import { useCallback } from "react";
 
 interface FilterSectionProps {
   showFilters: boolean;
@@ -18,6 +21,50 @@ const FilterSection = ({
   filterState,
   services
 }: FilterSectionProps) => {
+  // Get active filters using our new hook
+  const { activeFilters } = useActiveFilters(filterState);
+  
+  // Memoize handlers for filter removal
+  const handleRemoveFilter = useCallback((filter: { key: string; label: string; value?: string | number }) => {
+    switch (filter.key) {
+      case 'searchQuery':
+        filterState.setSearchQuery?.('');
+        break;
+      case 'location':
+        filterState.setLocation?.('');
+        break;
+      case 'serviceTypeFilter':
+        filterState.setServiceTypeFilter?.('');
+        break;
+      case 'verifiedOnly':
+        filterState.setVerifiedOnly?.(false);
+        break;
+      case 'availableNow':
+        filterState.setAvailableNow?.(false);
+        break;
+      case 'ratingMin':
+        filterState.setRatingMin?.(0);
+        break;
+      case 'priceRange':
+        filterState.setPriceRange?.([0, 500]);
+        break;
+      case 'ageRange':
+        filterState.setAgeRange?.([21, 50]);
+        break;
+      case 'selectedGenders':
+        filterState.setSelectedGenders?.([]);
+        break;
+      case 'selectedOrientations':
+        filterState.setSelectedOrientations?.([]);
+        break;
+      case 'selectedServices':
+        filterState.setSelectedServices?.([]);
+        break;
+      default:
+        break;
+    }
+  }, [filterState]);
+  
   // For mobile view - dialog
   const mobileFilters = (
     <Dialog open={showFilters} onOpenChange={setShowFilters}>
@@ -77,6 +124,17 @@ const FilterSection = ({
   // For desktop view - sidebar
   const desktopFilters = (
     <div className="hidden lg:block">
+      {/* Active filters display for desktop */}
+      {activeFilters.length > 0 && (
+        <div className="mb-4">
+          <ActiveFiltersDisplay 
+            activeFilters={activeFilters}
+            onRemoveFilter={handleRemoveFilter}
+            onClearAllFilters={filterState.clearFilters || (() => {})}
+          />
+        </div>
+      )}
+      
       <FilterSidebar
         searchQuery={filterState.searchQuery || ""}
         setSearchQuery={filterState.setSearchQuery || (() => {})}
