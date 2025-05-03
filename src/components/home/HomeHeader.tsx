@@ -48,7 +48,11 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ onExploreClick }) => {
                 onChange={handleSearchChange}
               />
             </div>
-            <Button size="lg" onClick={onExploreClick} className="bg-primary hover:bg-primary/90">
+            <Button 
+              size="lg" 
+              className="bg-primary hover:bg-primary/90"
+              onClick={onExploreClick} // Use the passed callback
+            >
               Boost Now with UBX
             </Button>
           </div>

@@ -8,7 +8,7 @@ import { oxum } from '@/core/Oxum';
 
 interface HeroProps {
   searchLocation: string;
-  setSearchLocation: (location: string) => void;
+  setSearchLocation: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const HeroSection = ({ searchLocation, setSearchLocation }: HeroProps) => {

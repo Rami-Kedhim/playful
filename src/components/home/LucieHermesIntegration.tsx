@@ -36,15 +36,21 @@ export const LucieHermesIntegration = ({
     setIsVisible(false);
   }, []);
   
+  // Memoize the function for reporting user action to prevent infinite loops
+  const reportAction = useCallback((actionType: string, category: string) => {
+    if (user?.id) {
+      reportUserAction(actionType, category);
+    }
+  }, [user?.id, reportUserAction]);
+
+  // This effect will only run once after initial render and when dependencies change
   useEffect(() => {
     // Only initialize once to prevent infinite loops
     if (!initialized) {
       setInitialized(true);
       
-      // For demo purposes, show Lucie based on conditions or forced visibility
-      const shouldShowLucie = forceVisible || Math.random() > 0.5;
-      
-      if (shouldShowLucie) {
+      // This is a demo, so we show Lucie based on forceVisible or a random chance
+      if (forceVisible || Math.random() > 0.5) {
         setIsVisible(true);
 
         let personalizedMessage = '';
@@ -76,16 +82,14 @@ export const LucieHermesIntegration = ({
           onLucieTriggered(reason);
         }
         
-        // Record this interaction for analytics
-        if (user?.id) {
-          reportUserAction('lucie-shown', 'ai_companion_interaction');
-        }
+        // Record this interaction for analytics, but use our memoized function
+        reportAction('lucie-shown', 'ai_companion_interaction');
       }
     }
   }, [
     user, 
     onLucieTriggered, 
-    reportUserAction, 
+    reportAction, 
     boostOffer, 
     vrEvent, 
     recommendedProfileId, 
