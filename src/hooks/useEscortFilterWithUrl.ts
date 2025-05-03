@@ -11,10 +11,13 @@ interface UseEscortFilterWithUrlProps {
 
 export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [initialLoad, setInitialLoad] = useState(true);
   const filterState = useEscortFilter({ escorts });
   
-  // Load filters from URL on mount
+  // Load filters from URL on mount only once
   useEffect(() => {
+    if (!initialLoad) return;
+    
     // Get filter values from URL parameters
     const serviceType = searchParams.get('serviceType') as ServiceTypeFilter;
     const verified = searchParams.get('verified') === 'true';
@@ -23,35 +26,60 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
     const query = searchParams.get('q') || '';
     const rating = searchParams.get('rating');
     
+    // Create a batch of updates to apply at once
+    const updates = {};
+    let hasUpdates = false;
+    
     // Update filter state based on URL parameters
     if (serviceType && ['in-person', 'virtual', 'both'].includes(serviceType)) {
-      filterState.setServiceTypeFilter(serviceType);
+      updates['serviceTypeFilter'] = serviceType;
+      hasUpdates = true;
     }
     
     if (verified) {
-      filterState.setVerifiedOnly(true);
+      updates['verifiedOnly'] = true;
+      hasUpdates = true;
     }
     
     if (available) {
-      filterState.setAvailableNow(true);
+      updates['availableNow'] = true;
+      hasUpdates = true;
     }
     
     if (location) {
-      filterState.setLocation(location);
+      updates['location'] = location;
+      hasUpdates = true;
     }
     
     if (query) {
-      filterState.setSearchQuery(query);
+      updates['searchQuery'] = query;
+      hasUpdates = true;
     }
     
     if (rating) {
-      filterState.setRatingMin(parseInt(rating, 10));
+      updates['ratingMin'] = parseInt(rating, 10);
+      hasUpdates = true;
     }
     
-  }, [searchParams, filterState]);
+    // Apply all updates without triggering multiple renders
+    if (hasUpdates) {
+      if (updates['serviceTypeFilter']) filterState.setServiceTypeFilter(updates['serviceTypeFilter']);
+      if (updates['verifiedOnly']) filterState.setVerifiedOnly(true);
+      if (updates['availableNow']) filterState.setAvailableNow(true);
+      if (updates['location']) filterState.setLocation(updates['location']);
+      if (updates['searchQuery']) filterState.setSearchQuery(updates['searchQuery']);
+      if (updates['ratingMin']) filterState.setRatingMin(updates['ratingMin']);
+    }
+    
+    // Mark initial load as complete to prevent further URL->state syncs
+    setInitialLoad(false);
+  }, [searchParams, filterState, initialLoad]);
   
-  // Update URL when filters change
+  // Update URL when filters change, but only after initial load is complete
   useEffect(() => {
+    // Skip URL updates during initial load to prevent loops
+    if (initialLoad) return;
+    
     const params = new URLSearchParams();
     
     if (filterState.serviceTypeFilter) {
@@ -78,6 +106,7 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
       params.set('rating', filterState.ratingMin.toString());
     }
     
+    // Use { replace: true } to avoid adding to browser history
     setSearchParams(params, { replace: true });
   }, [
     filterState.serviceTypeFilter,
@@ -86,7 +115,8 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
     filterState.location,
     filterState.searchQuery,
     filterState.ratingMin,
-    setSearchParams
+    setSearchParams,
+    initialLoad
   ]);
   
   return filterState;
