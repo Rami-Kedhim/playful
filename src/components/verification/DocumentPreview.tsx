@@ -14,9 +14,10 @@ interface DocumentPreviewProps {
 const DocumentPreview = ({ document, onView }: DocumentPreviewProps) => {
   const [isViewerOpen, setIsViewerOpen] = React.useState(false);
 
-  const documentType = document.documentType ?? 'Unknown';
-  const documentUrl = document.fileUrl ?? '';
-  const uploadDate = document.uploadedAt ?? '';
+  // Use fallbacks to handle missing properties
+  const documentType = document.type || document.documentType || 'Unknown';
+  const documentUrl = document.filePath || document.fileUrl || '';
+  const uploadDate = document.uploadedAt ? document.uploadedAt.toString() : '';
 
   return (
     <>

@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { VerificationRequest, VerificationStatus, VerificationLevel } from '@/types/verification';
+import { VerificationRequest, VerificationStatus, VerificationLevel, VerificationDocument } from '@/types/verification';
 import { getAllVerificationRequests } from '@/services/verificationService';
 
 interface NormalizedVerificationDocument {
@@ -30,8 +30,8 @@ const VerificationDashboard = () => {
       const data = await getAllVerificationRequests();
       const normalizedRequests = data.map(request => ({
         ...request,
-        profile_id: request.profile_id || '',
-        requested_level: (request.requested_level as VerificationLevel) || VerificationLevel.BASIC,
+        profile_id: request.profile_id || request.userId || '',
+        requestedLevel: request.requestedLevel || request.requested_level || VerificationLevel.BASIC,
         documents: request.documents || [],
       }));
       setRequests(normalizedRequests);
@@ -56,7 +56,7 @@ const VerificationDashboard = () => {
       <TableBody>
         {requests.map(request => (
           <TableRow key={request.id}>
-            <TableCell>{request.profile_id}</TableCell>
+            <TableCell>{request.profile_id || request.userId}</TableCell>
             <TableCell>
               {request.status === VerificationStatus.APPROVED && (
                 <span className="text-green-600">Approved</span>
@@ -74,10 +74,10 @@ const VerificationDashboard = () => {
                   onClick={() =>
                     handleDocumentClick({
                       id: request.documents[0].id,
-                      documentType: request.documents[0].documentType,
+                      documentType: request.documents[0].type || request.documents[0].documentType || "Unknown",
                       status: request.documents[0].status,
-                      fileUrl: request.documents[0].fileUrl,
-                      uploadedAt: request.documents[0].uploadedAt,
+                      fileUrl: request.documents[0].filePath || request.documents[0].fileUrl || "",
+                      uploadedAt: request.documents[0].uploadedAt ? request.documents[0].uploadedAt.toString() : undefined,
                     }, request)
                   }
                 >

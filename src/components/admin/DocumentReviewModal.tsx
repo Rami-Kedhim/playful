@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
@@ -55,14 +56,14 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
   };
 
   const getDocumentUrl = () => {
-    return document.fileUrl || '';
+    return document.filePath || document.fileUrl || '';
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>Document Review - {document.documentType}</DialogTitle>
+          <DialogTitle>Document Review - {document.type || document.documentType}</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-6">
@@ -78,7 +79,7 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
             {getDocumentUrl() && getDocumentUrl().match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
               <img
                 src={getDocumentUrl()}
-                alt={document.documentType}
+                alt={document.type || document.documentType || "Document"}
                 className="w-full h-auto max-h-[500px] object-contain"
               />
             ) : (
@@ -100,10 +101,10 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
             <h3 className="font-medium">Document Information</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="font-medium">Type</div>
-              <div>{document.documentType}</div>
+              <div>{document.type || document.documentType}</div>
               
               <div className="font-medium">Uploaded</div>
-              <div>{new Date(document.uploadedAt || Date.now()).toLocaleString()}</div>
+              <div>{document.uploadedAt ? new Date(document.uploadedAt).toLocaleString() : 'Unknown'}</div>
               
               <div className="font-medium">Status</div>
               <div>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,10 +21,10 @@ const DocumentReview = ({ document }: DocumentReviewProps) => {
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
-  const documentType = document.documentType || 'Unknown';
-  const imageUrl = document.fileUrl || '';
-
-  const uploadDate = document.uploadedAt || '';
+  // Use fallbacks for potentially missing properties
+  const documentType = document.type || document.documentType || 'Unknown';
+  const imageUrl = document.filePath || document.fileUrl || '';
+  const uploadDate = document.uploadedAt ? document.uploadedAt.toString() : '';
 
   return (
     <Card>

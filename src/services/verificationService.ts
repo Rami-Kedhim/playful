@@ -1,42 +1,55 @@
+
 import { VerificationRequest, VerificationStatus, VerificationLevel, VerificationDocument } from '@/types/verification';
 
 // Mock verification requests data
 const mockVerificationRequests: VerificationRequest[] = [
   {
     id: '1',
+    userId: 'user-123',
     profile_id: 'prof-123',
     status: VerificationStatus.PENDING,
+    requestedLevel: VerificationLevel.BASIC,
     requested_level: VerificationLevel.BASIC,
-    created_at: new Date().toISOString(),
+    submittedAt: new Date(), // Use Date object
+    created_at: new Date().toISOString(), // Keep string for backward compat
     documents: [
       {
         id: 'doc-1',
-        documentType: 'id_card',
-        fileUrl: 'https://picsum.photos/id/1018/800/600',
-        uploadedAt: new Date().toISOString(),
+        type: 'id_card',
+        filePath: 'https://picsum.photos/id/1018/800/600',
+        documentType: 'id_card', // Add documentType
+        fileUrl: 'https://picsum.photos/id/1018/800/600', // Add fileUrl
+        uploadedAt: new Date(),
         status: VerificationStatus.PENDING,
       },
       {
         id: 'doc-2',
+        type: 'selfie',
+        filePath: 'https://picsum.photos/id/1025/800/600',
         documentType: 'selfie',
         fileUrl: 'https://picsum.photos/id/1025/800/600',
-        uploadedAt: new Date().toISOString(),
+        uploadedAt: new Date(),
         status: VerificationStatus.PENDING,
       }
     ]
   },
   {
     id: '2',
+    userId: 'user-456',
     profile_id: 'prof-456',
     status: VerificationStatus.PENDING,
+    requestedLevel: VerificationLevel.ENHANCED,
     requested_level: VerificationLevel.ENHANCED,
+    submittedAt: new Date(Date.now() - 86400000),
     created_at: new Date(Date.now() - 86400000).toISOString(),
     documents: [
       {
         id: 'doc-3',
+        type: 'passport',
+        filePath: 'https://picsum.photos/id/1035/800/600',
         documentType: 'passport',
         fileUrl: 'https://picsum.photos/id/1035/800/600',
-        uploadedAt: new Date(Date.now() - 86400000).toISOString(),
+        uploadedAt: new Date(Date.now() - 86400000),
         status: VerificationStatus.PENDING,
       }
     ]
@@ -69,10 +82,13 @@ export const approveVerificationRequest = async (id: string): Promise<boolean> =
 
   if (index === -1) return false;
 
+  const now = new Date();
+  
   mockVerificationRequests[index] = {
     ...mockVerificationRequests[index],
     status: VerificationStatus.APPROVED,
-    reviewed_at: new Date().toISOString(),
+    reviewedAt: now,
+    reviewed_at: now.toISOString(),
     reviewed_by: 'admin-user-id'
   };
 
@@ -94,11 +110,14 @@ export const rejectVerificationRequest = async (id: string, reason: string): Pro
   const index = mockVerificationRequests.findIndex(req => req.id === id);
 
   if (index === -1) return false;
+  
+  const now = new Date();
 
   mockVerificationRequests[index] = {
     ...mockVerificationRequests[index],
     status: VerificationStatus.REJECTED,
-    reviewed_at: new Date().toISOString(),
+    reviewedAt: now,
+    reviewed_at: now.toISOString(),
     reviewed_by: 'admin-user-id',
     reviewer_notes: reason,
     rejectionReason: reason
@@ -116,20 +135,24 @@ export const createVerificationRequest = async (
   await new Promise(resolve => setTimeout(resolve, 1000));
 
   const newRequestId = `req-${Date.now()}`;
+  const now = new Date();
 
   const newDocuments: VerificationDocument[] = documents.map((doc, index) => ({
     ...doc,
     id: `doc-${Date.now()}-${index}`,
     status: VerificationStatus.PENDING,
-    uploadedAt: new Date().toISOString(),
+    uploadedAt: now,
   }));
 
   const newRequest: VerificationRequest = {
     id: newRequestId,
+    userId: profileId,
     profile_id: profileId,
     status: VerificationStatus.PENDING,
+    requestedLevel: level as any,
     requested_level: level as any,
-    created_at: new Date().toISOString(),
+    submittedAt: now,
+    created_at: now.toISOString(),
     documents: newDocuments,
   };
 

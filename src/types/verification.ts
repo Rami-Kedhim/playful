@@ -10,6 +10,7 @@ export enum VerificationLevel {
 export enum VerificationStatus {
   NONE = "none",
   PENDING = "pending",
+  IN_REVIEW = "in_review", // Added IN_REVIEW status
   APPROVED = "approved",
   REJECTED = "rejected",
   EXPIRED = "expired"
@@ -22,6 +23,12 @@ export interface VerificationDocument {
   status: VerificationStatus;
   uploadedAt: Date;
   reviewedAt?: Date;
+  
+  // Adding properties used in components
+  documentType?: string;
+  fileUrl?: string;
+  // For backward compatibility
+  verification_request_id?: string;
 }
 
 export interface VerificationRequest {
@@ -33,4 +40,13 @@ export interface VerificationRequest {
   reviewedAt?: Date;
   documents: VerificationDocument[];
   notes?: string;
+  
+  // Adding properties used in components
+  profile_id?: string;
+  requested_level?: VerificationLevel;
+  created_at?: string;
+  reviewed_at?: string;
+  reviewer_notes?: string;
+  rejectionReason?: string;
+  verificationLevel?: VerificationLevel;
 }

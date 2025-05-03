@@ -1,22 +1,26 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useEffect, useState } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Wallet, CircleDollarSign, PackageOpen, Clock, ArrowUpRight } from 'lucide-react';
 import UBXPriceDisplay from '@/components/oxum/UBXPriceDisplay';
 import OxumInfoTooltip from '@/components/oxum/OxumInfoTooltip';
-import { toast } from '@/components/ui/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from '@/components/ui/tabs';
+import { Loader2, ArrowRight, Zap, Plus, CreditCard } from 'lucide-react';
+import { useAuth } from '@/hooks/auth';
+import MainLayout from '@/components/layout/MainLayout';
+import { UserProfile } from '@/types/auth';
 
 const UpdatedWallet: React.FC = () => {
   const { user, profile } = useAuth();
