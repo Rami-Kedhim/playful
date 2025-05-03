@@ -1,34 +1,33 @@
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UnifiedLayout } from '@/layouts';
+import { UnifiedLayout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import HomeHeader from '@/components/home/HomeHeader';
 import ActionGrid from '@/components/home/ActionGrid';
 import BoostLiveMonitor from '@/components/home/BoostLiveMonitor';
 import HeroSection from '@/components/home/HeroSection';
-import { AppPaths } from '@/routes/routeConfig';
+import { AppPaths } from '@/routes';
 import FeaturesSection from '@/components/home/FeaturesSection';
 import TrustSection from '@/components/home/TrustSection';
 import MetaverseSection from '@/components/home/MetaverseSection';
 import CtaSection from '@/components/home/CtaSection';
 
 const HomePage = () => {
-  console.log('Rendering HomePage'); // Debug log
   const navigate = useNavigate();
-  const [searchLocation, setSearchLocation] = React.useState('');
+  const [searchLocation, setSearchLocation] = useState('');
   
   // Use React.useCallback for event handlers
-  const handleExploreEscorts = React.useCallback(() => {
+  const handleExploreEscorts = useCallback(() => {
     navigate(AppPaths.ESCORTS);
   }, [navigate]);
   
-  const handleExploreAI = React.useCallback(() => {
+  const handleExploreAI = useCallback(() => {
     navigate(AppPaths.AI_COMPANION);
   }, [navigate]);
   
-  const handleExploreBrainHub = React.useCallback(() => {
+  const handleExploreBrainHub = useCallback(() => {
     navigate(AppPaths.BRAIN_HUB);
   }, [navigate]);
   
@@ -42,7 +41,7 @@ const HomePage = () => {
   };
 
   return (
-    <UnifiedLayout hideNavbar fullWidth>
+    <UnifiedLayout hideNavbar={false} fullWidth={false}>
       {/* Hero Section with HomeHeader */}
       <HomeHeader onExploreClick={handleExploreEscorts} />
       

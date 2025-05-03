@@ -14,7 +14,8 @@ import {
   Heart,
   Wallet,
   Settings,
-  User
+  User,
+  Search
 } from 'lucide-react';
 
 // Map of icons to use for each route
@@ -31,7 +32,8 @@ const iconMap: Record<string, React.ReactNode> = {
   '/settings': <Settings className="w-4 h-4" />,
   '/admin': <Shield className="w-4 h-4" />,
   '/moderation': <Shield className="w-4 h-4" />,
-  '/safety': <Shield className="w-4 h-4" />
+  '/safety': <Shield className="w-4 h-4" />,
+  '/seo': <Search className="w-4 h-4" />
 };
 
 interface AppNavigationProps {

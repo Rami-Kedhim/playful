@@ -48,7 +48,7 @@ const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
 }) => {
   const containerClasses = containerClass || cn(
     "container mx-auto px-4 py-6",
-    fullWidth ? "max-w-none" : ""
+    fullWidth ? "max-w-none px-0" : ""
   );
 
   return (

@@ -1,5 +1,5 @@
 
-// Add missing routes to the AppPaths object
+// Define application paths and route categories
 
 export const AppPaths = {
   HOME: '/',
@@ -19,7 +19,8 @@ export const AppPaths = {
   PERSONAS: '/personas',
   PULSE_BOOST: '/pulse/boost',
   SEARCH: '/search',
-  ROUTE_SHARE: '/share'
+  ROUTE_SHARE: '/share',
+  SEO: '/seo'
 };
 
 export type RoutePaths = typeof AppPaths;
@@ -74,6 +75,11 @@ export const routes: RouteDefinition[] = [
     path: AppPaths.ROUTE_SHARE,
     title: 'Share Route',
     category: 'safety',
+  },
+  {
+    path: AppPaths.SEO,
+    title: 'SEO Tools',
+    category: 'core',
   },
   // Add more routes as needed
 ];

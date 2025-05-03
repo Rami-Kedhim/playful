@@ -10,6 +10,7 @@ const HomePage = lazy(() => import('@/pages/HomePage'));
 const SafetyPage = lazy(() => import('@/pages/SafetyPage'));
 const AICompanionDemo = lazy(() => import('@/pages/ai-companion-demo'));
 const RouteSharePage = lazy(() => import('@/pages/RouteSharePage'));
+const HermesSeoHome = lazy(() => import('@/pages/SEOPage'));
 
 // Define route configuration with elements
 export const routes: RouteObject[] = [
@@ -46,6 +47,14 @@ export const routes: RouteObject[] = [
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <RouteSharePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: AppPaths.SEO,
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <HermesSeoHome />
           </Suspense>
         ),
       },

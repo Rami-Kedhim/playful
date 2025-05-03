@@ -8,7 +8,8 @@ import {
   Users, 
   Brain, 
   Shield, 
-  MessageSquare
+  MessageSquare,
+  Search
 } from 'lucide-react';
 
 interface NavLinksProps {
@@ -70,6 +71,15 @@ const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
         }
       >
         <Shield className="w-4 h-4" /> Safety
+      </NavLink>
+
+      <NavLink 
+        to={AppPaths.SEO}
+        className={({ isActive }) => 
+          cn("text-sm flex items-center gap-1.5", isActive ? "font-bold text-primary" : "text-muted-foreground hover:text-foreground")
+        }
+      >
+        <Search className="w-4 h-4" /> SEO
       </NavLink>
     </nav>
   );
