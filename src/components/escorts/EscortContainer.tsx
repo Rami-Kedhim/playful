@@ -28,7 +28,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
       // Ignore or reset to empty if invalid
       filterState.setServiceTypeFilter("");
     }
-  }, [filterState.setServiceTypeFilter]);
+  }, [filterState]);
 
   // Consider both internal and external loading states
   const combinedIsLoading = filterState.isLoading || externalLoading;
@@ -94,6 +94,27 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
     setShowFilters(true);
   }, []);
 
+  // Memoize verifiedOnly setter to prevent re-renders
+  const handleSetVerifiedOnly = useCallback((value: boolean) => {
+    if (filterState.setVerifiedOnly) {
+      filterState.setVerifiedOnly(value);
+    }
+  }, [filterState]);
+
+  // Memoize availableNow setter to prevent re-renders
+  const handleSetAvailableNow = useCallback((value: boolean) => {
+    if (filterState.setAvailableNow) {
+      filterState.setAvailableNow(value);
+    }
+  }, [filterState]);
+
+  // Memoize ratingMin setter to prevent re-renders
+  const handleSetRatingMin = useCallback((value: number) => {
+    if (filterState.setRatingMin) {
+      filterState.setRatingMin(value);
+    }
+  }, [filterState]);
+
   return (
     <>
       <HeaderSection 
@@ -107,15 +128,15 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
         serviceTypeFilter={filterState.serviceTypeFilter}
         setServiceTypeFilter={safeSetServiceTypeFilter}
         verifiedOnly={filterState.verifiedOnly}
-        setVerifiedOnly={filterState.setVerifiedOnly}
+        setVerifiedOnly={handleSetVerifiedOnly}
         availableNow={filterState.availableNow}
-        setAvailableNow={filterState.setAvailableNow}
+        setAvailableNow={handleSetAvailableNow}
         location={filterState.location}
         onLocationClick={handleLocationClick}
         onShowMoreFilters={toggleShowFilters}
         className="mb-6 md:mb-8"
         ratingMin={filterState.ratingMin}
-        setRatingMin={filterState.setRatingMin}
+        setRatingMin={handleSetRatingMin}
       />
       
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

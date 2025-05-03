@@ -40,7 +40,9 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
 }) => {
   // Use memoized callback functions for all handlers to prevent re-renders
   const handleTypeClick = useCallback((type: ServiceTypeFilter) => {
-    setServiceTypeFilter(serviceTypeFilter === type ? '' : type);
+    if (setServiceTypeFilter) {
+      setServiceTypeFilter(serviceTypeFilter === type ? '' : type);
+    }
   }, [serviceTypeFilter, setServiceTypeFilter]);
 
   // Use memoized callback for handling rating click
