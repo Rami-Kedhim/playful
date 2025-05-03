@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { 
-  VibrateIcon, 
+  Vibrate as VibrateIcon, 
   Pause
 } from 'lucide-react';
 
