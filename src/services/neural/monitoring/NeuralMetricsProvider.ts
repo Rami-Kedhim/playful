@@ -121,10 +121,15 @@ export class NeuralMetricsProvider {
     return {
       operationsCount: 0,
       errorCount: 0,
-      latency: 0,       // Changed from null to 0 to match interface requirement
+      latency: 0,
       responseTime: 0,
       successRate: 1.0,
-      errorRate: 0
+      errorRate: 0,
+      processingSpeed: 0,
+      accuracy: 0,
+      uptime: 0,
+      requestsProcessed: 0,
+      errors: 0
     };
   }
 

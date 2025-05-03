@@ -8,12 +8,20 @@ import { BaseNeuralService } from '@/services/neural/index';
 function normalizeMetrics(metrics: any): ServiceMetrics {
   // First, create an object with all required properties initialized
   const normalizedMetrics: ServiceMetrics = {
+    // Core metrics
     operationsCount: 0,
     errorCount: 0,
-    latency: null, // Initialize as null since it might not be available
+    latency: 0, // Changed from null to 0 to match the interface
     responseTime: 0,
     errorRate: 0,
-    successRate: 1.0
+    successRate: 1.0,
+    
+    // Base metrics from BaseBrainService
+    processingSpeed: 0,
+    accuracy: 0,
+    uptime: 0,
+    requestsProcessed: 0,
+    errors: 0
   };
   
   // Then populate from the source metrics, with appropriate fallbacks
@@ -21,7 +29,7 @@ function normalizeMetrics(metrics: any): ServiceMetrics {
   normalizedMetrics.errorCount = metrics.errorCount || 0;
   
   // Handle latency/responseTime interoperability
-  normalizedMetrics.latency = metrics.latency !== undefined ? metrics.latency : (metrics.responseTime || null);
+  normalizedMetrics.latency = metrics.latency !== undefined ? metrics.latency : (metrics.responseTime || 0); 
   normalizedMetrics.responseTime = metrics.responseTime !== undefined ? metrics.responseTime : (metrics.latency || 0);
   
   // Calculate error and success rates if not provided
@@ -38,6 +46,13 @@ function normalizeMetrics(metrics: any): ServiceMetrics {
   } else if (normalizedMetrics.operationsCount > 0 && normalizedMetrics.errorCount !== undefined) {
     normalizedMetrics.successRate = 1 - (normalizedMetrics.errorCount / normalizedMetrics.operationsCount);
   }
+  
+  // Add BaseBrainService metrics
+  normalizedMetrics.processingSpeed = metrics.processingSpeed || 0;
+  normalizedMetrics.accuracy = metrics.accuracy || 0;
+  normalizedMetrics.uptime = metrics.uptime || 0;
+  normalizedMetrics.requestsProcessed = metrics.requestsProcessed || 0;
+  normalizedMetrics.errors = metrics.errors || 0;
   
   // Include any additional properties from the original metrics
   return {
@@ -62,10 +77,15 @@ export function collectServiceMetrics(services: BaseNeuralService[]): Record<str
       serviceMetrics[service.moduleId] = {
         operationsCount: 0,
         errorCount: 0,
-        latency: null,
+        latency: 0, // Changed from null to 0
         responseTime: 0,
         errorRate: 0,
         successRate: 0,
+        processingSpeed: 0,
+        accuracy: 0,
+        uptime: 0,
+        requestsProcessed: 0,
+        errors: 0,
         error: `Failed to collect metrics: ${error}`
       };
     }

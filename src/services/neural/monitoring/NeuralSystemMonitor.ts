@@ -1,4 +1,3 @@
-
 import { HealthMetrics, PerformanceReport } from '@/types/neuralMetrics';
 import neuralMetricsProvider from './NeuralMetricsProvider';
 import { neuralReporter } from '../reporting/NeuralReporter';
@@ -187,6 +186,25 @@ export class NeuralSystemMonitor {
     }
     
     return { critical, warnings };
+  }
+  
+  /**
+   * Get default service metrics
+   */
+  private getDefaultServiceMetrics(): ServiceMetrics {
+    return {
+      operationsCount: 0,
+      errorCount: 0,
+      latency: 0,
+      responseTime: 0,
+      successRate: 1.0,
+      errorRate: 0,
+      processingSpeed: 0,
+      accuracy: 0,
+      uptime: 0,
+      requestsProcessed: 0,
+      errors: 0
+    };
   }
 }
 

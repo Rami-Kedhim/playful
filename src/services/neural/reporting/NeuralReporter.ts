@@ -113,7 +113,12 @@ export class NeuralReporter {
       latency: 0,
       responseTime: 0,
       successRate: 1.0,
-      errorRate: 0
+      errorRate: 0,
+      processingSpeed: 0,
+      accuracy: 0,
+      uptime: 0,
+      requestsProcessed: 0,
+      errors: 0
     };
   }
   
