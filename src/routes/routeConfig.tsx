@@ -11,7 +11,7 @@ const SafetyPage = lazy(() => import('@/pages/SafetyPage'));
 const AICompanionDemo = lazy(() => import('@/pages/ai-companion-demo'));
 const RouteSharePage = lazy(() => import('@/pages/RouteSharePage'));
 
-// Define route configuration
+// Define route configuration with elements
 export const routes: RouteObject[] = [
   {
     path: '/',

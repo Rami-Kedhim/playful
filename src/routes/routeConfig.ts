@@ -24,7 +24,7 @@ export const AppPaths = {
 
 export type RoutePaths = typeof AppPaths;
 
-// Add these helper types and functions to make them available for import
+// Define our route categories
 export type RouteCategory = 
   'core' | 
   'escort' | 
@@ -48,33 +48,32 @@ export interface RouteDefinition {
   description?: string;
 }
 
-// We'll use the routes defined in routeConfig.tsx which includes elements
-// This is just a navigation structure without elements
+// Define routes without elements (for navigation purposes)
 export const routes: RouteDefinition[] = [
   {
     path: AppPaths.HOME,
     title: 'Home',
-    category: 'core' as RouteCategory,
+    category: 'core',
   },
   {
     path: AppPaths.ESCORTS,
     title: 'Escorts',
-    category: 'escort' as RouteCategory,
+    category: 'escort',
   },
   {
     path: AppPaths.SAFETY,
     title: 'Safety',
-    category: 'safety' as RouteCategory,
+    category: 'safety',
   },
   {
     path: AppPaths.AI_COMPANION,
     title: 'AI Companion',
-    category: 'core' as RouteCategory,
+    category: 'core',
   },
   {
     path: AppPaths.ROUTE_SHARE,
     title: 'Share Route',
-    category: 'safety' as RouteCategory,
+    category: 'safety',
   },
   // Add more routes as needed
 ];
