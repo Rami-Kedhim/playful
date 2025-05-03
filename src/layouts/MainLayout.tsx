@@ -3,6 +3,7 @@ import React, { ReactNode } from 'react';
 import MainNavigation from '@/components/navigation/MainNavigation';
 import Footer from '@/components/navigation/Footer';
 import { cn } from '@/lib/utils';
+import Breadcrumbs from '@/components/navigation/Breadcrumbs';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -13,6 +14,7 @@ interface MainLayoutProps {
   hideFooter?: boolean;
   fullWidth?: boolean;
   className?: string;
+  showBreadcrumbs?: boolean;
 }
 
 /**
@@ -26,7 +28,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   hideNavbar = false,
   hideFooter = false,
   fullWidth = false,
-  className
+  className,
+  showBreadcrumbs = false
 }) => {
   return (
     <div className={cn("flex min-h-screen flex-col bg-background", className)}>
@@ -39,6 +42,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             {description && <p className="text-muted-foreground mt-1">{description}</p>}
           </div>
         </header>
+      )}
+      
+      {showBreadcrumbs && (
+        <div className="container mx-auto px-4 py-2">
+          <Breadcrumbs />
+        </div>
       )}
       
       <main className={cn("flex-grow", !fullWidth && containerClass)}>

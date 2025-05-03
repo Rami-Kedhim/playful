@@ -5,7 +5,7 @@ import EscortCard from '@/components/escorts/EscortCard';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { Button } from '@/components/ui/button';
 import { Heart, Users, Video } from 'lucide-react';
-import MainLayout from '@/components/layout/Layout';
+import MainLayout from '@/layouts/MainLayout';
 
 const Favorites = () => {
   const { favorites, removeFavorite } = useFavorites();
@@ -22,7 +22,7 @@ const Favorites = () => {
     favorites.livecams.length > 0;
   
   return (
-    <MainLayout title="Favorites" description="Manage your favorite escorts, creators, and livecams">
+    <MainLayout title="Favorites" description="Manage your favorite escorts, creators, and livecams" showBreadcrumbs>
       <div className="max-w-6xl mx-auto">
         <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full grid grid-cols-3 mb-6">
@@ -63,15 +63,18 @@ const Favorites = () => {
                   <div key={escort.id} className="relative">
                     <EscortCard 
                       key={escort.id} 
-                      name={escort.name}
-                      location={escort.location}
-                      image={escort.images?.[0] || ''}
+                      name={escort.name || ''}
+                      location={escort.location || ''}
+                      imageUrl={escort.images?.[0] || escort.profileImage || ''}
                       id={escort.id}
                       isFavorite={true}
-                      age={escort.age}
-                      rating={escort.rating}
+                      age={escort.age || 0}
+                      rating={escort.rating || 0}
+                      reviews={escort.reviewCount || 0}
                       tags={escort.tags || []}
-                      verificationLevel={escort.verificationLevel}
+                      verified={escort.isVerified || false}
+                      price={escort.price || 0}
+                      gender={escort.gender || ''}
                     />
                     <Button 
                       variant="ghost" 
