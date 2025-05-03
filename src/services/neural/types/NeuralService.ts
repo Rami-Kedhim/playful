@@ -28,7 +28,7 @@ export interface BaseNeuralService {
   config: NeuralServiceConfig;
   getMetrics: () => any;
   initialize?: () => Promise<boolean>;
-  updateConfig?: (config: NeuralServiceConfig) => void;
+  updateConfig?: (config: Partial<NeuralServiceConfig>) => void;
   getCapabilities?: () => string[];
   processRequest?: (request: any) => Promise<any>;
   canHandleRequestType?: (requestType: string) => boolean;

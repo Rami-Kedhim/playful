@@ -20,6 +20,8 @@ const LivecamConsumer: React.FC<LivecamConsumerProps> = ({ streamId }) => {
     
     // Set configuration
     livecamsService.updateConfig({
+      enabled: true,
+      priority: 'high',
       sensitivity: 0.9,
       threshold: 0.7,
       mode: 'streaming'

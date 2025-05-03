@@ -20,6 +20,8 @@ const AICompanionConsumer: React.FC<AICompanionConsumerProps> = ({ companionId }
     
     // Set configuration
     aiCompanionService.updateConfig({
+      enabled: true,
+      priority: 'high',
       sensitivity: 0.95,
       threshold: 0.8,
       mode: 'empathetic'

@@ -44,7 +44,13 @@ export class BaseBrainService implements BaseNeuralService {
       accuracy: 0.95 + Math.random() * 0.05,
       uptime: 100,
       requestsProcessed: Math.floor(Math.random() * 1000),
-      errors: Math.floor(Math.random() * 10)
+      errors: Math.floor(Math.random() * 10),
+      operationsCount: Math.floor(Math.random() * 1000),
+      errorCount: Math.floor(Math.random() * 10),
+      latency: Math.random() * 100,
+      responseTime: Math.random() * 200,
+      errorRate: Math.random() * 0.05,
+      successRate: 0.95 + Math.random() * 0.05
     };
   }
   
@@ -55,7 +61,7 @@ export class BaseBrainService implements BaseNeuralService {
     return true;
   }
   
-  updateConfig(config: NeuralServiceConfig): void {
+  updateConfig(config: Partial<NeuralServiceConfig>): void {
     this.config = {
       ...this.config,
       ...config

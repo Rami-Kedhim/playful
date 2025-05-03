@@ -1,5 +1,4 @@
 
-
 export interface HealthMetrics {
   // Core metrics that are used across the system
   cpuUtilization: number;
@@ -45,13 +44,23 @@ export interface PerformanceReport {
 }
 
 export interface ServiceMetrics {
+  // Core metrics
   operationsCount: number;
   errorCount: number;
-  latency: number | null; // Making latency nullable to support cases where only responseTime is available
-  responseTime: number;  // Ensure responseTime is always available
-  successRate: number;  // Add as required field
-  errorRate: number;    // Add as required field
-  [key: string]: any;  // Allow additional properties
+  latency: number;
+  responseTime: number;
+  successRate: number;
+  errorRate: number;
+  
+  // Base metrics from BaseBrainService
+  processingSpeed: number;
+  accuracy: number;
+  uptime: number;
+  requestsProcessed: number;
+  errors: number;
+  
+  // Allow additional properties
+  [key: string]: any;
 }
 
 // Extended ModelParameters interface to include neural system controls

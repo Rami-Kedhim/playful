@@ -20,6 +20,8 @@ const EscortConsumer: React.FC<EscortConsumerProps> = ({ escortId }) => {
     
     // Set configuration
     escortsService.updateConfig({
+      enabled: true,
+      priority: 'high',
       sensitivity: 0.85,
       threshold: 0.65,
       mode: 'enhanced'

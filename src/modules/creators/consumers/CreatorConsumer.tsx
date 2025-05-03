@@ -20,6 +20,8 @@ const CreatorConsumer: React.FC<CreatorConsumerProps> = ({ creatorId }) => {
     
     // Set configuration
     creatorsService.updateConfig({
+      enabled: true,
+      priority: 'medium',
       sensitivity: 0.8,
       threshold: 0.6,
       mode: 'creative'
