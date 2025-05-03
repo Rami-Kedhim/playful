@@ -1,331 +1,351 @@
 
-import React, { useState, useEffect } from 'react';
-import { ScrollRevealGroup } from '@/components/ui/scroll-reveal-group';
-import PageLayout from '@/components/layout/PageLayout';
-import { Container } from '@/components/ui/container';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import React, { useState } from 'react';
+import { UnifiedLayout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Users, MapPin } from 'lucide-react';
-import { lucie } from '@/core/Lucie';
-import { hermes } from '@/core/Hermes';
-import { oxum } from '@/core/Oxum';
-import { logInteraction } from '@/utils/uberCore';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Slider } from '@/components/ui/slider';
+import { Check, Search, Filter } from 'lucide-react';
 
-// Type for escort profiles
-interface EscortProfile {
-  id: string;
-  name: string;
-  imageUrl?: string;
-  location?: string;
-  rating?: number;
-  age?: number;
-  services?: string[];
-  tags?: string[];
-  boosted?: boolean;
-  boostScore?: number;
-  distance?: number;
-  hourlyRate?: number;
-  currency?: string;
-  gender?: string;
-  languages?: string[];
-  availability?: string;
-  isVerified?: boolean;
-}
+// Mock data for escort profiles
+const mockEscorts = [
+  {
+    id: 'esc-1',
+    name: 'Sophia',
+    age: 25,
+    location: 'New York',
+    pricePerHour: 350,
+    rating: 4.9,
+    verified: true,
+    image: '/sophia-escort.png',
+    services: ['Companionship', 'Dinner Date', 'Events'],
+    description: 'Elegant and sophisticated companion for upscale events.',
+  },
+  {
+    id: 'esc-2',
+    name: 'Isabella',
+    age: 24,
+    location: 'Los Angeles',
+    pricePerHour: 380,
+    rating: 4.8,
+    verified: true,
+    image: '/isabella-escort.png',
+    services: ['Travel Companion', 'Private Parties', 'Weekend Getaway'],
+    description: 'Adventurous spirit with a passion for luxury experiences.',
+  },
+  {
+    id: 'esc-3',
+    name: 'Olivia',
+    age: 27,
+    location: 'Miami',
+    pricePerHour: 400,
+    rating: 4.7,
+    verified: true,
+    image: '/olivia-escort.png',
+    services: ['VIP Events', 'Dinner Date', 'Cultural Outings'],
+    description: 'Cultured and well-traveled companion for discerning clients.',
+  },
+  {
+    id: 'esc-4',
+    name: 'Emma',
+    age: 26,
+    location: 'Chicago',
+    pricePerHour: 320,
+    rating: 4.6,
+    verified: false,
+    image: '/emma-escort.png',
+    services: ['Dinner Date', 'Cultural Events', 'Private Gatherings'],
+    description: 'Charming and intellectual companion for meaningful connections.',
+  },
+  {
+    id: 'esc-5',
+    name: 'Ava',
+    age: 23,
+    location: 'Las Vegas',
+    pricePerHour: 450,
+    rating: 4.9,
+    verified: true,
+    image: '/ava-escort.png',
+    services: ['Casino Companion', 'Nightlife', 'Weekend Experiences'],
+    description: 'Vibrant and energetic personality, perfect for exciting adventures.',
+  },
+  {
+    id: 'esc-6',
+    name: 'Mia',
+    age: 29,
+    location: 'San Francisco',
+    pricePerHour: 380,
+    rating: 4.8,
+    verified: true,
+    image: '/mia-escort.png',
+    services: ['Business Events', 'Cultural Tours', 'Fine Dining'],
+    description: 'Sophisticated and intelligent companion for executive engagements.',
+  },
+];
 
-const EscortsPage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [escorts, setEscorts] = useState<EscortProfile[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [location, setLocation] = useState('New York');
-  
-  useEffect(() => {
-    // Log page view through Hermes for analytics
-    logInteraction('EscortsPage', 'page-view', {
-      category: activeCategory,
-      location
-    });
-    
-    loadEscorts();
-  }, [activeCategory, location]);
-  
-  const loadEscorts = async () => {
-    setIsLoading(true);
-    
-    try {
-      // Log flow through Hermes
-      hermes.connect({
-        system: 'EscortsPage',
-        connectionId: `escorts-load-${Date.now()}`
-      });
-      
-      // In a real implementation, this would fetch from a backend
-      // For demo, we'll simulate a delayed response with mock data
-      setTimeout(() => {
-        const mockEscorts: EscortProfile[] = [
-          {
-            id: '1',
-            name: 'Jessica',
-            imageUrl: 'https://example.com/image1.jpg',
-            location: 'New York',
-            rating: 4.9,
-            age: 24,
-            services: ['Companionship', 'Dinner Dates'],
-            tags: ['premium', 'verified'],
-            boosted: true,
-            boostScore: oxum.calculateBoostScore('1'),
-            distance: 1.2,
-            hourlyRate: 300,
-            currency: 'USD',
-            gender: 'Female',
-            languages: ['English', 'Spanish'],
-            availability: 'Evenings & Weekends',
-            isVerified: true
-          },
-          {
-            id: '2',
-            name: 'Emma',
-            imageUrl: 'https://example.com/image2.jpg',
-            location: 'New York',
-            rating: 4.7,
-            age: 27,
-            services: ['Companionship', 'Travel Companion'],
-            tags: ['gfe', 'travel'],
-            boosted: false,
-            distance: 2.5,
-            hourlyRate: 250,
-            currency: 'USD',
-            gender: 'Female',
-            languages: ['English', 'French'],
-            availability: 'Weekends Only',
-            isVerified: true
-          },
-          {
-            id: '3',
-            name: 'Michael',
-            imageUrl: 'https://example.com/image3.jpg',
-            location: 'New York',
-            rating: 4.8,
-            age: 29,
-            services: ['Companionship', 'Events'],
-            tags: ['elite', 'professional'],
-            boosted: true,
-            boostScore: oxum.calculateBoostScore('3'),
-            distance: 3.1,
-            hourlyRate: 280,
-            currency: 'USD',
-            gender: 'Male',
-            languages: ['English'],
-            availability: 'Anytime',
-            isVerified: true
-          }
-        ];
-        
-        // Filter by category if needed
-        const filteredEscorts = activeCategory === 'all' 
-          ? mockEscorts 
-          : mockEscorts.filter(escort => 
-              escort.tags?.includes(activeCategory) || 
-              escort.services?.includes(activeCategory));
-        
-        setEscorts(filteredEscorts);
-        setIsLoading(false);
-      }, 1000);
-      
-    } catch (error) {
-      console.error('Error loading escorts:', error);
-      setIsLoading(false);
-    }
-  };
-  
-  const handleSearch = () => {
-    logInteraction('EscortsPage', 'search', {
-      query: searchQuery,
-      location
-    });
-    loadEscorts();
-  };
-  
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
-
+const EscortCard = ({ escort }) => {
   return (
-    <PageLayout title="Escorts" subtitle="Find verified companions near you">
-      <Container>
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Input
-                type="text"
-                placeholder="Search by name, services..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="pl-10"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            </div>
-            
-            <div className="relative md:w-1/3">
-              <Input
-                type="text"
-                placeholder="Location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="pl-10"
-              />
-              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            </div>
-            
-            <Button onClick={handleSearch}>
-              Search
-            </Button>
+    <Card className="overflow-hidden h-full border border-border/40">
+      <div className="aspect-[3/4] relative bg-muted">
+        {escort.image ? (
+          <img 
+            src={escort.image} 
+            alt={escort.name} 
+            className="object-cover w-full h-full"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+            {escort.name.charAt(0)}
           </div>
-          
-          <Tabs defaultValue={activeCategory} onValueChange={setActiveCategory}>
-            <TabsList className="grid grid-cols-4">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="premium">Premium</TabsTrigger>
-              <TabsTrigger value="gfe">GFE</TabsTrigger>
-              <TabsTrigger value="travel">Travel</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value={activeCategory} className="mt-6">
-              <ScrollRevealGroup
-                animation="fade-up"
-                staggerDelay={0.1}
-                containerClassName="space-y-6"
-              >
-                {isLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[1, 2, 3, 4, 5, 6].map((i) => (
-                      <Card key={i} className="overflow-hidden">
-                        <CardContent className="p-0">
-                          <div className="aspect-[3/4] w-full bg-muted">
-                            <Skeleton className="h-full w-full" />
-                          </div>
-                          <div className="p-4 space-y-2">
-                            <Skeleton className="h-5 w-2/3" />
-                            <Skeleton className="h-4 w-1/2" />
-                            <Skeleton className="h-4 w-1/4" />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : escorts.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {escorts.map((escort) => (
-                      <EscortCard key={escort.id} escort={escort} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Users className="mx-auto h-12 w-12 text-muted-foreground/60" />
-                    <h3 className="mt-4 text-lg font-medium">No escorts found</h3>
-                    <p className="text-muted-foreground mt-2">
-                      Try adjusting your search criteria or location.
-                    </p>
-                  </div>
-                )}
-              </ScrollRevealGroup>
-            </TabsContent>
-          </Tabs>
+        )}
+        {escort.verified && (
+          <div className="absolute top-2 right-2 bg-green-500 text-white p-1 rounded-full">
+            <Check className="h-4 w-4" />
+          </div>
+        )}
+      </div>
+      <CardContent className="p-4">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="font-medium text-lg">{escort.name}, {escort.age}</h3>
+          <span className="text-sm text-muted-foreground">${escort.pricePerHour}/hr</span>
         </div>
-      </Container>
-    </PageLayout>
+        <div className="flex items-center gap-1 mb-2">
+          <span className="text-sm text-muted-foreground">{escort.location}</span>
+          <span className="text-sm text-yellow-500 ml-auto">★ {escort.rating}</span>
+        </div>
+        <div className="text-sm text-muted-foreground line-clamp-2 mb-3">
+          {escort.description}
+        </div>
+        <div className="flex flex-wrap gap-1">
+          {escort.services.slice(0, 2).map((service, idx) => (
+            <span key={idx} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+              {service}
+            </span>
+          ))}
+          {escort.services.length > 2 && (
+            <span className="text-xs bg-muted px-2 py-1 rounded-full">
+              +{escort.services.length - 2} more
+            </span>
+          )}
+        </div>
+        <Button className="w-full mt-4">View Profile</Button>
+      </CardContent>
+    </Card>
   );
 };
 
-interface EscortCardProps {
-  escort: EscortProfile;
-}
+const FilterSection = ({ onFilterChange, filters }) => {
+  const [priceRange, setPriceRange] = useState([filters.minPrice, filters.maxPrice]);
+  const [locationFilter, setLocationFilter] = useState(filters.location);
+  
+  const handlePriceChange = (value) => {
+    setPriceRange(value);
+    onFilterChange({
+      ...filters,
+      minPrice: value[0],
+      maxPrice: value[1]
+    });
+  };
 
-const EscortCard = ({ escort }: EscortCardProps) => {
+  const handleLocationChange = (e) => {
+    setLocationFilter(e.target.value);
+    onFilterChange({
+      ...filters,
+      location: e.target.value
+    });
+  };
+  
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
-      <CardContent className="p-0">
-        <div className="aspect-[3/4] w-full bg-muted relative">
-          {escort.imageUrl ? (
-            <img 
-              src={escort.imageUrl} 
-              alt={escort.name} 
-              className="object-cover w-full h-full" 
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium mb-2">Price Range</h3>
+        <div className="px-2">
+          <Slider 
+            defaultValue={priceRange}
+            max={1000}
+            step={10}
+            onValueChange={handlePriceChange}
+            className="my-4"
+          />
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>${priceRange[0]}</span>
+            <span>${priceRange[1]}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <h3 className="text-lg font-medium mb-2">Location</h3>
+        <Input 
+          placeholder="Search location" 
+          value={locationFilter}
+          onChange={handleLocationChange}
+        />
+      </div>
+      
+      <div>
+        <h3 className="text-lg font-medium mb-2">Services</h3>
+        <div className="space-y-2">
+          {['Dinner Date', 'Travel Companion', 'VIP Events', 'Cultural Outings'].map((service) => (
+            <label key={service} className="flex items-center space-x-2">
+              <input 
+                type="checkbox" 
+                className="rounded border-gray-300 text-primary focus:ring-primary"
+                onChange={() => onFilterChange({
+                  ...filters,
+                  services: filters.services.includes(service)
+                    ? filters.services.filter(s => s !== service)
+                    : [...filters.services, service]
+                })}
+                checked={filters.services.includes(service)}
+              />
+              <span>{service}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+      
+      <div>
+        <h3 className="text-lg font-medium mb-2">Verification</h3>
+        <label className="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            className="rounded border-gray-300 text-primary focus:ring-primary"
+            onChange={() => onFilterChange({
+              ...filters,
+              onlyVerified: !filters.onlyVerified
+            })}
+            checked={filters.onlyVerified}
+          />
+          <span>Show only verified</span>
+        </label>
+      </div>
+    </div>
+  );
+};
+
+const EscortsPage = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    minPrice: 0,
+    maxPrice: 1000,
+    location: '',
+    services: [],
+    onlyVerified: false
+  });
+  
+  const filteredEscorts = mockEscorts.filter(escort => {
+    // Apply search query
+    if (searchQuery && !escort.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
+        !escort.location.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
+    }
+    
+    // Apply price filter
+    if (escort.pricePerHour < filters.minPrice || escort.pricePerHour > filters.maxPrice) {
+      return false;
+    }
+    
+    // Apply location filter
+    if (filters.location && !escort.location.toLowerCase().includes(filters.location.toLowerCase())) {
+      return false;
+    }
+    
+    // Apply services filter
+    if (filters.services.length > 0 && !escort.services.some(service => filters.services.includes(service))) {
+      return false;
+    }
+    
+    // Apply verification filter
+    if (filters.onlyVerified && !escort.verified) {
+      return false;
+    }
+    
+    return true;
+  });
+  
+  return (
+    <UnifiedLayout title="Premium Escort Services" description="Connect with verified professional escorts for companionship and more">
+      <div className="container mx-auto">
+        {/* Search and Filter Bar */}
+        <div className="flex flex-col md:flex-row gap-4 mb-8">
+          <div className="relative flex-grow">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search escorts by name or location" 
+              className="pl-9"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-          ) : (
-            <div className="flex items-center justify-center h-full bg-muted">
-              <Users className="h-12 w-12 text-muted-foreground/60" />
-            </div>
-          )}
-          
-          {escort.boosted && (
-            <div className="absolute top-2 right-2">
-              <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full flex items-center">
-                Boosted
-              </div>
-            </div>
-          )}
-          
-          {escort.isVerified && (
-            <div className="absolute top-2 left-2">
-              <div className="bg-green-500/80 text-white text-xs px-2 py-1 rounded-full flex items-center">
-                Verified
-              </div>
-            </div>
-          )}
+          </div>
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <Filter className="h-4 w-4" />
+            Filters
+          </Button>
         </div>
         
-        <div className="p-4">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="font-medium">{escort.name}, {escort.age}</h3>
-              {escort.location && (
-                <p className="text-sm text-muted-foreground flex items-center">
-                  <MapPin className="h-3 w-3 mr-1" />{escort.location}
-                </p>
-              )}
+        <div className="grid md:grid-cols-4 gap-6">
+          {/* Filter Sidebar - Desktop */}
+          <div className={`hidden md:block`}>
+            <FilterSection onFilterChange={setFilters} filters={filters} />
+          </div>
+          
+          {/* Mobile Filter Section */}
+          {showFilters && (
+            <div className="md:hidden bg-card p-4 rounded-lg border border-border mb-6">
+              <FilterSection onFilterChange={setFilters} filters={filters} />
             </div>
-            {escort.rating && (
-              <div className="flex items-center text-sm font-medium">
-                ★ {escort.rating.toFixed(1)}
+          )}
+          
+          {/* Escort Cards Grid */}
+          <div className="md:col-span-3">
+            <div className="mb-4 flex justify-between items-center">
+              <h2 className="text-xl font-semibold">
+                {filteredEscorts.length} {filteredEscorts.length === 1 ? 'Escort' : 'Escorts'} Available
+              </h2>
+              <div className="text-sm text-muted-foreground">
+                Sort by: 
+                <select className="ml-2 bg-transparent border-none outline-none">
+                  <option>Relevance</option>
+                  <option>Price: Low to High</option>
+                  <option>Price: High to Low</option>
+                  <option>Rating: High to Low</option>
+                </select>
+              </div>
+            </div>
+            
+            {filteredEscorts.length === 0 ? (
+              <div className="text-center py-12 bg-card border border-border rounded-lg">
+                <p className="text-muted-foreground">No escorts found matching your criteria.</p>
+                <Button variant="outline" className="mt-4" onClick={() => {
+                  setSearchQuery('');
+                  setFilters({
+                    minPrice: 0,
+                    maxPrice: 1000,
+                    location: '',
+                    services: [],
+                    onlyVerified: false
+                  });
+                }}>
+                  Clear Filters
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredEscorts.map(escort => (
+                  <EscortCard key={escort.id} escort={escort} />
+                ))}
               </div>
             )}
           </div>
-          
-          {escort.tags && escort.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {escort.tags.map((tag) => (
-                <span 
-                  key={tag} 
-                  className="bg-secondary text-secondary-foreground text-xs px-2 py-0.5 rounded-full"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-          
-          <div className="flex justify-between items-center mt-3">
-            <div className="font-medium">
-              {escort.hourlyRate && escort.currency && (
-                <p>${escort.hourlyRate}</p>
-              )}
-            </div>
-            <div>
-              {escort.distance && (
-                <p className="text-xs text-muted-foreground">{escort.distance} miles away</p>
-              )}
-            </div>
-          </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </UnifiedLayout>
   );
 };
 
