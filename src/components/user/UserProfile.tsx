@@ -35,7 +35,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ hideSignOut = false }) => {
                   user.email?.split('@')[0] || 
                   'User';
   const initials = username.slice(0, 2).toUpperCase();
-  const avatarUrl = user.avatar_url || user.user_metadata?.avatar_url;
+  const avatarUrl = user.avatarUrl || user.avatar_url;
 
   return (
     <Card>
@@ -55,7 +55,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ hideSignOut = false }) => {
       <CardContent className="space-y-2">
         <div className="flex items-center gap-2">
           <User className="h-4 w-4 opacity-70" />
-          <span className="text-sm text-muted-foreground">Member since {new Date(user.created_at).toLocaleDateString()}</span>
+          <span className="text-sm text-muted-foreground">Member since {new Date(user.created_at || '').toLocaleDateString()}</span>
         </div>
       </CardContent>
       

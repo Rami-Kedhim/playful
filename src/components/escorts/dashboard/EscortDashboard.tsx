@@ -48,7 +48,7 @@ const EscortDashboard = () => {
           <Button onClick={() => navigate(`/escorts/${profile?.username}`)}>View Public Profile</Button>
         </div>
 
-        {profile?.is_verified ? (
+        {profile?.verified || profile?.is_verified ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList className="grid grid-cols-4 w-full md:w-auto">
               <TabsTrigger value="bookings">Bookings</TabsTrigger>

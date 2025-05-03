@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthResult } from '@/types/auth';
@@ -66,9 +67,7 @@ export function usePasswordManagement() {
         redirectTo: `${window.location.origin}/auth/password/update`,
       });
       
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
       
       setIsLoading(false);
       
@@ -85,7 +84,7 @@ export function usePasswordManagement() {
         success: false,
         user: null,
         session: null,
-        error
+        error: error.message
       };
     }
   };

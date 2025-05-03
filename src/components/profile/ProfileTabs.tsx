@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, UserProfile } from '@/types/user';
+import { User } from '@/types/user';
+import { UserProfile } from '@/types/auth';
 
 interface ProfileTabsProps {
   user: User;
@@ -69,7 +70,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
             <h4 className="font-medium mb-2">Personal Information</h4>
             <p>Name: {user.name}</p>
             <p>Email: {user.email}</p>
-            <p>Role: {user.role}</p>
+            <p>Role: {user.roles?.[0] || user.role || 'User'}</p>
           </div>
         </div>
       </TabsContent>

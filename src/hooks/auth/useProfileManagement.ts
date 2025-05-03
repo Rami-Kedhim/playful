@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { AuthUser, UserProfile, DatabaseGender } from '@/types/auth';
+import { User } from '@/types/user';
+import { UserProfile } from '@/types/auth';
 
 export const useProfileManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -17,10 +18,10 @@ export const useProfileManagement = () => {
     
     try {
       // First update the auth metadata if needed
-      if (profileData.username || profileData.avatar_url) {
+      if (profileData.username || profileData.avatarUrl) {
         const authUpdate = {
           ...(profileData.username && { username: profileData.username }),
-          ...(profileData.avatar_url && { avatar_url: profileData.avatar_url }),
+          ...(profileData.avatarUrl && { avatar_url: profileData.avatarUrl }),
         };
         
         const { error: authError } = await supabase.auth.updateUser({
@@ -30,15 +31,14 @@ export const useProfileManagement = () => {
         if (authError) throw authError;
       }
       
-      // Process gender field to ensure it matches DatabaseGender type
+      // Process gender field if it exists
       let processedData = { ...profileData };
       
-      // Map extended gender values to supported DatabaseGender values
-      if (profileData.gender) {
-        const gender = profileData.gender.toString();
+      if (processedData.gender) {
+        const gender = processedData.gender.toString();
         if (!['male', 'female', 'other', 'trans', 'non-binary'].includes(gender)) {
           // Default fallback for any unsupported values
-          processedData.gender = 'other' as DatabaseGender;
+          processedData.gender = 'other';
         }
       }
       

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CardContent, CardFooter } from '@/components/ui/card';
-import { UserProfile } from '@/types/user';
+import { UserProfile } from '@/types/auth';
 
 interface ProfileEditFormProps {
   initialData: UserProfile;

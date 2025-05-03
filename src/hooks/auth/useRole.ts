@@ -1,90 +1,52 @@
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { UserRole } from '@/types/auth';
+import { useAuth } from './useAuthContext';
 
-export interface UseRoleReturn {
-  isAdmin: boolean;
-  isModerator: boolean;
-  isContentCreator: boolean;
-  isEscort: boolean;
-  isClient: boolean;
-  isCreator: boolean;
-  hasRole: (role: string) => boolean;
-  hasAnyRole: (roles: string[]) => boolean;
-  highestRole: string;
-}
-
-export const useRole = (): UseRoleReturn => {
+export function useRole() {
   const { user, isAuthenticated } = useAuth();
   
-  // Helper function to convert complex role objects to string array
-  const getRoleStrings = (userRoles?: UserRole[] | string[] | string): string[] => {
-    if (!userRoles) return [];
-    
-    // If it's a single string
-    if (typeof userRoles === 'string') {
-      return [userRoles];
-    }
-    
-    // If it's an array
-    if (Array.isArray(userRoles)) {
-      return userRoles.map(role => {
-        if (typeof role === 'string') {
-          return role;
-        }
-        // If role is an object with name property
-        if (typeof role === 'object' && role !== null && 'name' in role) {
-          return role.name;
-        }
-        return '';
-      }).filter(Boolean);
-    }
-    
-    return [];
-  };
-  
-  const [roleStrings, setRoleStrings] = useState<string[]>([]);
-  
-  useEffect(() => {
-    if (user?.roles) {
-      setRoleStrings(getRoleStrings(user.roles));
-    } else {
-      setRoleStrings([]);
-    }
-  }, [user]);
-  
   const hasRole = (role: string): boolean => {
-    if (!isAuthenticated) return false;
-    return roleStrings.includes(role);
+    if (!isAuthenticated || !user) return false;
+    
+    // First check the roles array
+    if (user.roles && Array.isArray(user.roles)) {
+      return user.roles.includes(role);
+    }
+    
+    // Then check the role property
+    if (user.role) {
+      return user.role === role;
+    }
+    
+    // Finally check the user_metadata
+    if (user.user_metadata && user.user_metadata.role) {
+      return user.user_metadata.role === role;
+    }
+    
+    return false;
   };
   
-  const hasAnyRole = (roleList: string[]): boolean => {
-    if (!isAuthenticated) return false;
-    return roleList.some(role => roleStrings.includes(role));
-  };
-
-  // Determine the highest role based on a hierarchy
-  const determineHighestRole = (): string => {
-    if (hasRole('admin')) return 'Admin';
-    if (hasRole('moderator')) return 'Moderator';
-    if (hasRole('creator')) return 'Creator';
-    if (hasRole('escort')) return 'Escort';
-    if (hasRole('client')) return 'Client';
-    return 'User';
+  const getUserRoles = (): string[] => {
+    if (!isAuthenticated || !user) return [];
+    
+    if (user.roles && Array.isArray(user.roles)) {
+      return user.roles;
+    }
+    
+    if (user.role) {
+      return [user.role];
+    }
+    
+    if (user.user_metadata && user.user_metadata.role) {
+      return [user.user_metadata.role];
+    }
+    
+    return ['user']; // Default role
   };
   
   return {
-    isAdmin: hasRole('admin'),
-    isModerator: hasRole('moderator'),
-    isContentCreator: hasRole('creator'),
-    isCreator: hasRole('creator'),
-    isEscort: hasRole('escort'),
-    isClient: hasRole('client'),
     hasRole,
-    hasAnyRole,
-    highestRole: determineHighestRole()
+    getUserRoles,
   };
-};
+}
 
 export default useRole;

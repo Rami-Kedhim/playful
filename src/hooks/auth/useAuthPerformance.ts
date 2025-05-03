@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -98,7 +99,7 @@ export const useAuthPerformance = () => {
         user: null,
         session: null
       };
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please check your credentials.";
       setError(errorMessage);
       
@@ -112,7 +113,7 @@ export const useAuthPerformance = () => {
         success: false,
         user: null,
         session: null,
-        error
+        error: errorMessage
       };
     }
   };

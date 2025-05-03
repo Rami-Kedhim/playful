@@ -109,8 +109,8 @@ export const useAuthOperations = ({
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
       
-      // Update roles if role changed
-      if (userData.role && userData.role !== user.role) {
+      // Update roles if roles changed
+      if (userData.roles && userData.roles !== user.roles) {
         setUserRoles(getUserRoles(updatedUser));
       }
       

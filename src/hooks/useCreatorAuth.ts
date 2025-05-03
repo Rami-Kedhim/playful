@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/auth";
 
@@ -26,7 +27,10 @@ export const useCreatorAuth = () => {
       }
 
       // Check if user has creator role
-      const hasCreatorRole = user.user_metadata?.role === 'creator';
+      const hasCreatorRole = user.roles?.includes('creator') || 
+                            user.role === 'creator' || 
+                            user.user_metadata?.role === 'creator';
+                            
       setIsCreator(hasCreatorRole);
 
       if (hasCreatorRole) {

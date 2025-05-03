@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { User, UserProfile } from '@/types/user';
+import { User } from '@/types/user';
+import { UserProfile } from '@/types/auth';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, MapPin, User as UserIcon, Mail } from 'lucide-react';
@@ -16,7 +17,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, profile }) => {
         .split(' ')
         .map(n => n[0])
         .join('')
-    : user.email.charAt(0).toUpperCase();
+    : user.email?.charAt(0).toUpperCase() || 'U';
 
   return (
     <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
@@ -29,7 +30,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, profile }) => {
         <div className="flex flex-col md:flex-row md:items-center gap-2">
           <h1 className="text-2xl font-bold">{user.name || 'Unnamed User'}</h1>
           
-          {user.isVerified && (
+          {(user.isVerified || profile.verified || profile.is_verified) && (
             <div className="inline-flex items-center text-green-600">
               <CheckCircle className="h-4 w-4 mr-1" />
               <span className="text-sm">Verified</span>
@@ -52,7 +53,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, profile }) => {
           
           <div className="flex items-center">
             <UserIcon className="h-4 w-4 mr-1" />
-            <span>{user.role}</span>
+            <span>{user.roles?.[0] || user.role || 'User'}</span>
           </div>
         </div>
         

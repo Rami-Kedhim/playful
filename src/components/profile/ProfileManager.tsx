@@ -36,7 +36,7 @@ const ProfileManager = ({ defaultTab = "account" }: ProfileManagerProps) => {
     name: user.name || '',
     bio: user.bio || '',
     avatarUrl: user.avatarUrl || '',
-    role: user.role || 'user',
+    role: user.roles?.[0] || user.role || 'user',
     roles: user.roles || [],
   } : null;
   
