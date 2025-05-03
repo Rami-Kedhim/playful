@@ -1,27 +1,58 @@
 
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import NeuralAnalyticsPage from './pages/NeuralAnalyticsPage';
-import NeuralMonitoringPage from './pages/NeuralMonitoringPage';
-import BrainHubPage from './pages/BrainHubPage';
-import HomePage from './pages/HomePage';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { Toaster } from '@/components/ui/toaster';
+import AppRoutes from './app/AppRoutes';
+import { initializeSystem, shutdownSystem } from '@/core/engine';
+import { checkSystemStatus } from '@/utils/core';
 import './App.css';
 
-function App() {
+/**
+ * Main application component
+ * Initializes the UberCore ecosystem
+ */
+const App = () => {
   useEffect(() => {
-    console.log('Neural analytics dashboard initialized');
+    // Initialize UberCore system
+    const initCore = async () => {
+      try {
+        console.log('Initializing UberCore system...');
+        const initialized = await initializeSystem();
+        
+        if (initialized) {
+          console.info('UberCore system initialized successfully');
+          
+          // Check system status
+          const status = await checkSystemStatus();
+          console.info('UberEscorts system status:', status.operational ? 'Operational' : 'Degraded');
+          console.info('System latency:', status.latency, 'ms');
+          console.info('AI Models:', 
+            Object.entries(status.aiModels)
+              .map(([key, value]) => `${key}: ${value}`)
+              .join(', ')
+          );
+        } else {
+          console.error('Failed to initialize UberCore system');
+        }
+      } catch (error) {
+        console.error('Error during system initialization:', error);
+      }
+    };
+    
+    initCore();
+    
+    return () => {
+      // Shutdown UberCore when app unmounts
+      shutdownSystem();
+    };
   }, []);
-
+  
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/neural-analytics" element={<NeuralAnalyticsPage />} />
-        <Route path="/neural-monitoring" element={<NeuralMonitoringPage />} />
-        <Route path="/brain-hub" element={<BrainHubPage />} />
-      </Routes>
+      <AppRoutes />
+      <Toaster />
     </Router>
   );
-}
+};
 
 export default App;

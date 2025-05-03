@@ -1,81 +1,97 @@
 
-import React, { useState } from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import HeroSection from '@/components/home/HeroSection';
-import FeaturesSection from '@/components/home/FeaturesSection';
-import { FeaturedContent } from '@/components/home/FeaturedContent';
-import NeuralHealthSummary from '@/components/neural/NeuralHealthSummary';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { UnifiedLayout } from '@/components/layout';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, Brain, Sparkles } from 'lucide-react';
 
-// Define the mock data with the correct type annotations
-const mockEscorts = [
-  {
-    id: "escort-1",
-    title: "Sophia",
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cG9ydHJhaXR8ZW58MHx8MHx8fDA%3D",
-    type: "escort" as const,  // Using 'as const' to specify this is a literal type
-    rating: 4.9,
-    price: "$300/hr",
-    location: "New York, NY",
-    featured: true
-  },
-  {
-    id: "escort-2",
-    title: "Jessica",
-    image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjR8fHBvcnRyYWl0fGVufDB8fDB8fHww",
-    type: "escort" as const,
-    rating: 4.7,
-    price: "$250/hr",
-    location: "Los Angeles, CA"
-  },
-  {
-    id: "escort-3",
-    title: "Emma",
-    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cG9ydHJhaXR8ZW58MHx8MHx8fDA%3D",
-    type: "escort" as const,
-    rating: 4.8,
-    price: "$280/hr",
-    location: "Miami, FL",
-    featured: true
-  },
-  {
-    id: "escort-4",
-    title: "Isabella",
-    image: "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjd8fHBvcnRyYWl0fGVufDB8fDB8fHww",
-    type: "escort" as const,
-    rating: 4.6,
-    price: "$220/hr",
-    location: "Chicago, IL"
-  }
-];
-
-const HomePage: React.FC = () => {
-  const [searchLocation, setSearchLocation] = useState("");
-  
+const HomePage = () => {
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8 space-y-12">
-        <HeroSection 
-          searchLocation={searchLocation}
-          setSearchLocation={setSearchLocation}
-        />
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <FeaturedContent 
-              title="Popular Escorts"
-              items={mockEscorts}
-              type="escort"
-              viewAllLink="/escorts"
-            />
-          </div>
-          <div>
-            <NeuralHealthSummary />
+    <UnifiedLayout hideNavbar fullWidth className="px-0">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-b from-background to-background/80 pt-16 pb-12">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-violet-500">
+            UberEscorts Platform
+          </h1>
+          <p className="text-muted-foreground max-w-xl mx-auto mb-8">
+            Advanced AI-powered companion and escort services with neural processing technology.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild size="lg">
+              <Link to="/escorts">
+                Browse Escorts <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link to="/ai-companions">
+                AI Companions <Sparkles className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </div>
-        
-        <FeaturesSection />
-      </div>
-    </MainLayout>
+      </section>
+
+      {/* Main Features */}
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">Platform Features</h2>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-card p-6 rounded-lg shadow-sm border">
+              <h3 className="text-xl font-semibold mb-3">Escort Services</h3>
+              <p className="text-muted-foreground mb-4">
+                Browse and connect with professional escorts verified by our system.
+              </p>
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/escorts">Explore Services</Link>
+              </Button>
+            </div>
+            
+            <div className="bg-card p-6 rounded-lg shadow-sm border">
+              <h3 className="text-xl font-semibold mb-3">AI Companions</h3>
+              <p className="text-muted-foreground mb-4">
+                Intelligent AI companions powered by our advanced neural systems.
+              </p>
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/ai-companions">Meet Companions</Link>
+              </Button>
+            </div>
+            
+            <div className="bg-card p-6 rounded-lg shadow-sm border">
+              <h3 className="text-xl font-semibold mb-3">Metaverse Experience</h3>
+              <p className="text-muted-foreground mb-4">
+                Immersive experiences in our virtual metaverse environments.
+              </p>
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/metaverse">Enter Metaverse</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Neural System Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-4 text-center">
+          <div className="inline-block mb-4">
+            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 mx-auto">
+              <Brain className="h-8 w-8 text-primary" />
+            </div>
+          </div>
+          <h2 className="text-3xl font-bold mb-4">UberCore Neural System</h2>
+          <p className="text-muted-foreground max-w-lg mx-auto mb-8">
+            Our platform is powered by the advanced UberCore neural system, providing intelligent matching, personalized experiences, and robust security.
+          </p>
+          <Button asChild variant="outline">
+            <Link to="/brain-hub">
+              <Brain className="mr-2 h-4 w-4" />
+              Explore Brain Hub
+            </Link>
+          </Button>
+        </div>
+      </section>
+    </UnifiedLayout>
   );
 };
 

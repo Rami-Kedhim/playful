@@ -5,7 +5,7 @@ import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
 import SignupPage from '@/pages/SignupPage';
 import NotFoundPage from '@/pages/NotFoundPage';
-import MainLayout from '@/components/layout/MainLayout';
+import { UnifiedLayout } from '@/components/layout';
 import { AppRoutes as AppRoutePaths } from '@/utils/navigation';
 import MetaversePage from '@/pages/MetaversePage';
 import WalletPage from '@/pages/WalletPage';
@@ -28,6 +28,8 @@ import AdminApiPage from '@/pages/AdminApiPage';
 import ModerationPage from '@/pages/ModerationPage';
 import VerificationPage from '@/pages/VerificationPage';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
+import NeuralAnalyticsPage from '@/pages/NeuralAnalyticsPage';
+import NeuralMonitoringPage from '@/pages/NeuralMonitoringPage';
 
 // UberCore initialization
 import { lucie } from '@/core/Lucie';
@@ -93,103 +95,120 @@ const AppRoutes = () => {
       
       {/* Core system routes */}
       <Route path="/metaverse" element={
-        <MainLayout>
+        <UnifiedLayout>
           <MetaversePage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/wallet" element={
-        <MainLayout>
+        <UnifiedLayout>
           <WalletPage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/pulse-boost" element={
-        <MainLayout>
+        <UnifiedLayout>
           <PulseBoostPage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/ai-companions" element={
-        <MainLayout>
+        <UnifiedLayout>
           <AICompanionsPage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/messages" element={
-        <MainLayout>
+        <UnifiedLayout>
           <MessagesPage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/search" element={
-        <MainLayout>
+        <UnifiedLayout>
           <SearchPage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/escorts" element={
-        <MainLayout>
+        <UnifiedLayout>
           <EscortsPage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/profile" element={
-        <MainLayout>
+        <UnifiedLayout>
           <ProfilePage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/persona/:id" element={
-        <MainLayout>
+        <UnifiedLayout>
           <PersonaDetailPage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/personas" element={
-        <MainLayout>
+        <UnifiedLayout>
           <PersonaListingPage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       
       {/* UberCore system pages */}
       <Route path="/brain-hub" element={
-        <MainLayout>
+        <UnifiedLayout>
           <BrainHubPage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/lucie" element={
-        <MainLayout>
+        <UnifiedLayout>
           <LuciePage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/oxum" element={
-        <MainLayout>
+        <UnifiedLayout>
           <OxumPage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/hermes" element={
-        <MainLayout>
+        <UnifiedLayout>
           <HermesPage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/orus" element={
-        <MainLayout>
+        <UnifiedLayout>
           <OrusPage />
-        </MainLayout>
+        </UnifiedLayout>
+      } />
+      
+      {/* Neural monitoring and analytics */}
+      <Route path="/neural/monitor" element={
+        <UnifiedLayout title="Neural Monitoring" showBreadcrumbs>
+          <NeuralMonitoringPage />
+        </UnifiedLayout>
+      } />
+      <Route path="/neural-monitoring" element={
+        <UnifiedLayout title="Neural Monitoring" showBreadcrumbs>
+          <NeuralMonitoringPage />
+        </UnifiedLayout>
+      } />
+      <Route path="/neural-analytics" element={
+        <UnifiedLayout title="Neural Analytics" showBreadcrumbs>
+          <NeuralAnalyticsPage />
+        </UnifiedLayout>
       } />
       
       {/* Admin routes */}
       <Route path="/admin" element={
-        <MainLayout requireAuth>
+        <UnifiedLayout requireAuth>
           <AdminPage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/admin/apis" element={
-        <MainLayout requireAuth>
+        <UnifiedLayout requireAuth>
           <AdminApiPage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/moderation" element={
-        <MainLayout requireAuth>
+        <UnifiedLayout requireAuth>
           <ModerationPage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/verification" element={
-        <MainLayout>
+        <UnifiedLayout>
           <VerificationPage />
-        </MainLayout>
+        </UnifiedLayout>
       } />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
       
