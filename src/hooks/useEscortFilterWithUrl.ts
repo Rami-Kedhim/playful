@@ -61,15 +61,15 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
       }
       
       if (rating) {
-        filterState.setRatingMin(parseInt(rating, 10));
-        filtersApplied = true;
+        const ratingValue = parseInt(rating, 10);
+        if (!isNaN(ratingValue)) {
+          filterState.setRatingMin(ratingValue);
+          filtersApplied = true;
+        }
       }
       
-      // Only mark as complete if we've actually processed URL parameters
-      // This prevents unnecessary re-renders
-      if (filtersApplied || !searchParams.toString()) {
-        setInitialLoadComplete(true);
-      }
+      // Only mark as complete after we've processed URL parameters
+      setInitialLoadComplete(true);
     } finally {
       // Always reset the flag when done
       filterUpdateFromUrlRef.current = false;
@@ -146,11 +146,11 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
   // Use effect to call the memoized update function
   useEffect(() => {
     if (initialLoadComplete) {
-      // Use setTimeout to avoid immediate updates that can cause loops
-      const timer = setTimeout(() => {
+      // Use requestAnimationFrame instead of setTimeout to avoid timer-based state updates
+      const animationId = requestAnimationFrame(() => {
         updateUrlFromFilters();
-      }, 0);
-      return () => clearTimeout(timer);
+      });
+      return () => cancelAnimationFrame(animationId);
     }
   }, [
     updateUrlFromFilters,

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { UnifiedLayout } from "@/components/layout";
 import EscortScraper from "@/services/scrapers/EscortScraper";
 import { Escort } from "@/types/Escort";
@@ -10,8 +10,8 @@ const EscortsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Service options for filtering - memoized to prevent re-renders
-  const services = [
+  // Memoize service options to prevent re-renders
+  const services = useMemo(() => [
     "Dinner Date",
     "Travel Companion",
     "Event Companion",
@@ -20,7 +20,7 @@ const EscortsPage = () => {
     "Virtual Meeting",
     "Overnight",
     "Weekend",
-  ];
+  ], []);
 
   // Use useCallback to prevent recreation on every render
   const fetchEscorts = useCallback(async () => {
