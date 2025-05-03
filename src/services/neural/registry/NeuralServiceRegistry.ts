@@ -1,4 +1,3 @@
-
 /**
  * Mock neural service registry for the Brain Hub system
  */
@@ -27,11 +26,23 @@ const neuralServiceRegistry = {
         getMetrics: () => ({
           operationsCount: 45672,
           errorCount: 182,
-          responseTime: 124.6
+          responseTime: 124.6,
+          processingSpeed: 95.7,
+          accuracy: 0.98,
+          uptime: 99.9,
+          requestsProcessed: 46000,
+          errors: 182,
+          latency: 124.6,
+          errorRate: 0.004,
+          successRate: 0.996
         }),
         initialize: async () => true,
         updateConfig: (config: any) => {},
-        getCapabilities: () => ['core-processing', 'data-analysis', 'neural-inference']
+        getCapabilities: () => ['core-processing', 'data-analysis', 'neural-inference'],
+        reset: async () => {
+          console.log('Resetting Neural Core Processor');
+          return true;
+        }
       },
       {
         id: 'data-transformer-1',
@@ -52,11 +63,23 @@ const neuralServiceRegistry = {
         getMetrics: () => ({
           operationsCount: 32790,
           errorCount: 59,
-          responseTime: 87.3
+          responseTime: 87.3,
+          processingSpeed: 112.4,
+          accuracy: 0.99,
+          uptime: 99.8,
+          requestsProcessed: 33000,
+          errors: 59,
+          latency: 87.3,
+          errorRate: 0.002,
+          successRate: 0.998
         }),
         initialize: async () => true,
         updateConfig: (config: any) => {},
-        getCapabilities: () => ['data-transformation', 'format-conversion', 'normalization']
+        getCapabilities: () => ['data-transformation', 'format-conversion', 'normalization'],
+        reset: async () => {
+          console.log('Resetting Data Transformer');
+          return true;
+        }
       }
     ];
   },

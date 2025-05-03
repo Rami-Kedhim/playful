@@ -32,5 +32,6 @@ export interface BaseNeuralService {
   getCapabilities?: () => string[];
   processRequest?: (request: any) => Promise<any>;
   canHandleRequestType?: (requestType: string) => boolean;
+  reset?: () => Promise<boolean>; // Add the reset method
   [key: string]: any;
 }

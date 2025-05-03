@@ -11,7 +11,7 @@ function normalizeMetrics(metrics: any): ServiceMetrics {
     // Core metrics
     operationsCount: 0,
     errorCount: 0,
-    latency: 0, // Changed from null to 0 to match the interface
+    latency: 0,
     responseTime: 0,
     errorRate: 0,
     successRate: 1.0,
@@ -77,7 +77,7 @@ export function collectServiceMetrics(services: BaseNeuralService[]): Record<str
       serviceMetrics[service.moduleId] = {
         operationsCount: 0,
         errorCount: 0,
-        latency: 0, // Changed from null to 0
+        latency: 0,
         responseTime: 0,
         errorRate: 0,
         successRate: 0,

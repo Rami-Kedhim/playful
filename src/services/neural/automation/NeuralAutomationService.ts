@@ -78,6 +78,26 @@ export class NeuralAutomationService extends BaseBrainService {
     }
   }
   
+  /**
+   * Reset the automation service to its initial state
+   */
+  async reset(): Promise<boolean> {
+    try {
+      console.log('Resetting Neural Automation Service');
+      this.operationsCount = 0;
+      this.errorCount = 0;
+      this.averageResponseTime = 0;
+      this.averageLatency = 0;
+      this.successRate = 1.0;
+      this.errorRate = 0;
+      return await this.initialize();
+    } catch (error) {
+      console.error('Failed to reset Neural Automation Service:', error);
+      this.status = 'error';
+      return false;
+    }
+  }
+  
   getCapabilities(): string[] {
     return [
       'task-automation',

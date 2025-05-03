@@ -84,4 +84,19 @@ export class BaseBrainService implements BaseNeuralService {
     // By default, a service can handle requests that match its module type
     return this.moduleType === requestType;
   }
+  
+  // Add the reset method to the BaseBrainService class
+  async reset(): Promise<boolean> {
+    try {
+      console.log(`Resetting ${this.name} (${this.moduleId}) service`);
+      // Reset service to initial state
+      this.status = 'inactive';
+      // Re-initialize after reset
+      return await this.initialize();
+    } catch (error) {
+      console.error(`Failed to reset ${this.name} service:`, error);
+      this.status = 'error';
+      return false;
+    }
+  }
 }
