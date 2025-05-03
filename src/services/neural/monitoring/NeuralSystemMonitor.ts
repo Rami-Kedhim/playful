@@ -12,7 +12,7 @@ import { neuralHub } from '../UnifiedNeuralHub';
 export class NeuralSystemMonitor {
   private static instance: NeuralSystemMonitor;
   private isMonitoring: boolean = false;
-  private monitoringInterval: number | null = null;
+  private monitoringInterval: NodeJS.Timeout | null = null;
   private alertThresholds: Record<string, number> = {
     cpuUtilization: 90,
     memoryUtilization: 85,

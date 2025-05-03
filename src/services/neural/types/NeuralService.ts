@@ -30,5 +30,7 @@ export interface BaseNeuralService {
   initialize?: () => Promise<boolean>;
   updateConfig?: (config: NeuralServiceConfig) => void;
   getCapabilities?: () => string[];
+  processRequest?: (request: any) => Promise<any>;
+  canHandleRequestType?: (requestType: string) => boolean;
   [key: string]: any;
 }

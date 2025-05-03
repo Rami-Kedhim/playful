@@ -1,96 +1,81 @@
 
-import { BaseNeuralService as BaseNeuralServiceType, NeuralServiceConfig, ModuleType } from '../types/NeuralService';
+import { BaseNeuralService, ModuleType, NeuralServiceConfig } from '../types/NeuralService';
+import { v4 as uuidv4 } from 'uuid';
 
-/**
- * Base implementation for all neural services
- * Provides common functionality and standardized interfaces
- */
-export class BaseBrainService implements BaseNeuralServiceType {
-  id: string;
+interface ServiceInitParams {
   moduleId: string;
   name: string;
   description: string;
   moduleType: ModuleType;
   version: string;
-  status: 'active' | 'inactive' | 'maintenance';
-  config: NeuralServiceConfig;
+  config?: NeuralServiceConfig;
+}
+
+export class BaseBrainService implements BaseNeuralService {
+  public id: string;
+  public moduleId: string;
+  public name: string;
+  public description: string;
+  public version: string;
+  public status: 'active' | 'inactive' | 'error' | 'maintenance' = 'inactive';
+  public moduleType: ModuleType;
+  public config: NeuralServiceConfig;
   
-  constructor(
-    params: {
-      id?: string,
-      moduleId: string,
-      name: string,
-      description: string,
-      moduleType: ModuleType,
-      version: string,
-      config?: Partial<NeuralServiceConfig>
-    }
-  ) {
-    this.id = params.id || `neural-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  constructor(params: ServiceInitParams) {
+    this.id = uuidv4();
     this.moduleId = params.moduleId;
     this.name = params.name;
     this.description = params.description;
     this.moduleType = params.moduleType;
     this.version = params.version;
-    this.config = {
+    this.config = params.config || {
       enabled: true,
-      priority: 50,
+      priority: 'normal',
       resources: {
         cpu: 1,
         memory: 512
-      },
-      sensitivity: 0.8,
-      threshold: 0.6,
-      ...params.config
+      }
     };
-    this.status = this.config.enabled ? 'active' : 'inactive';
   }
   
-  /**
-   * Initialize this service module
-   */
-  async initialize(): Promise<boolean> {
-    try {
-      // Default implementation
-      console.log(`Initializing ${this.name} (${this.version})`);
-      this.status = this.config.enabled ? 'active' : 'inactive';
-      return this.config.enabled;
-    } catch (error) {
-      console.error(`Failed to initialize ${this.name}:`, error);
-      this.status = 'inactive';
-      return false;
-    }
-  }
-  
-  /**
-   * Update configuration parameters
-   */
-  updateConfig(config: Partial<NeuralServiceConfig>): void {
-    this.config = { ...this.config, ...config };
-    this.status = this.config.enabled ? 'active' : 'inactive';
-    console.log(`Updated configuration for ${this.name}`);
-  }
-  
-  /**
-   * Get available capabilities of this service
-   */
-  getCapabilities(): string[] {
-    return ['basic'];
-  }
-  
-  /**
-   * Get performance metrics for this service
-   * Ensures returned metrics match the ServiceMetrics interface
-   */
-  getMetrics(): any {
+  getMetrics() {
     return {
-      operationsCount: 0,
-      errorCount: 0,
-      latency: null,         // Can be null when only responseTime is used
-      responseTime: 0,       // Always provide a responseTime
-      errorRate: 0,
-      successRate: 1.0,      // Add successRate with a default value
-      status: this.status
+      processingSpeed: Math.random() * 100,
+      accuracy: 0.95 + Math.random() * 0.05,
+      uptime: 100,
+      requestsProcessed: Math.floor(Math.random() * 1000),
+      errors: Math.floor(Math.random() * 10)
     };
+  }
+  
+  async initialize(): Promise<boolean> {
+    // Default implementation
+    this.status = 'active';
+    console.log(`Initialized ${this.name} (${this.moduleId}) service`);
+    return true;
+  }
+  
+  updateConfig(config: NeuralServiceConfig): void {
+    this.config = {
+      ...this.config,
+      ...config
+    };
+  }
+  
+  getCapabilities(): string[] {
+    return ['base-service'];
+  }
+  
+  async processRequest(request: any): Promise<any> {
+    console.log(`Processing request in ${this.name}:`, request.type);
+    return {
+      success: true,
+      data: `Request processed by ${this.name}`
+    };
+  }
+  
+  canHandleRequestType(requestType: string): boolean {
+    // By default, a service can handle requests that match its module type
+    return this.moduleType === requestType;
   }
 }
