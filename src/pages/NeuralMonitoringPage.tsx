@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MainLayout } from '@/layouts';
+import MainLayout from '@/layouts/MainLayout';
 
 const NeuralMonitoringPage = () => {
   return (

@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense } from 'react';
 import { RouteDefinition } from './routeConfig';
 import MainLayout from '@/layouts/MainLayout';
@@ -8,7 +9,7 @@ import { Outlet } from 'react-router-dom';
 const HomePage = lazy(() => import('@/pages/HomePage'));
 const SafetyPage = lazy(() => import('@/pages/SafetyPage'));
 const AICompanionDemo = lazy(() => import('@/pages/ai-companion-demo'));
-const RouteSharePage = lazy(() => import('@/pages/RouteSharePage'));
+const RouteSharePage = lazy(() => import('@/pages/safety/RouteSharePage'));
 const SEOPage = lazy(() => import('@/pages/SEOPage'));
 const NeuralMonitoringPage = lazy(() => import('@/pages/NeuralMonitoringPage'));
 const NeuralAnalyticsPage = lazy(() => import('@/pages/NeuralAnalyticsPage'));

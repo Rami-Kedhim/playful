@@ -1,91 +1,84 @@
 
 import React from 'react';
-import { MainLayout } from '@/layouts';
-import { Shield, MapPin, AlertTriangle, CheckCircle } from 'lucide-react';
+import MainLayout from '@/layouts/MainLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Shield, Share2, Bell, LockKeyhole } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { AppPaths } from '@/routes/routeConfig';
 
-const SafetyPage: React.FC = () => {
+const SafetyPage = () => {
   return (
-    <MainLayout>
-      <div className="container max-w-6xl mx-auto py-8 px-4 sm:px-6">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">Safety Center</h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Your safety is our top priority. Learn about our safety features and best practices.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <Shield className="h-6 w-6 text-primary" />
-              </div>
-              <CardTitle>Identity Verification</CardTitle>
-              <CardDescription>
-                Our multi-level verification system ensures authenticity.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">
-                Every user undergoes our rigorous verification process to validate their identity and ensure the safety of our community.
-              </p>
-              <Button variant="link" className="mt-4 p-0">Learn more about verification</Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <MapPin className="h-6 w-6 text-primary" />
-              </div>
-              <CardTitle>Route Sharing</CardTitle>
-              <CardDescription>
-                Share your location with trusted contacts for additional security.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">
-                Our route sharing feature allows you to automatically share your location with trusted contacts during appointments.
-              </p>
-              <Button asChild variant="link" className="mt-4 p-0">
-                <Link to={AppPaths.ROUTE_SHARE}>Setup route sharing</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <AlertTriangle className="h-6 w-6 text-primary" />
-              </div>
-              <CardTitle>Safety Guidelines</CardTitle>
-              <CardDescription>
-                Best practices and tips for safe interactions.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">
-                Learn about best practices, warning signs, and what to do in case of emergency.
-              </p>
-              <Button variant="link" className="mt-4 p-0">View safety guidelines</Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="bg-muted rounded-lg p-8 text-center mb-12">
-          <h2 className="text-2xl font-bold mb-4">Emergency Resources</h2>
-          <p className="mb-6 max-w-2xl mx-auto">
-            If you're in an emergency situation, please contact local emergency services immediately.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button variant="destructive" size="lg">Emergency Contact</Button>
-            <Button variant="outline" size="lg">Report Suspicious Activity</Button>
-          </div>
-        </div>
+    <MainLayout
+      title="Safety Center"
+      description="Comprehensive safety features and resources for your peace of mind"
+      showBreadcrumbs
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Share2 className="h-5 w-5 text-primary" />
+              Route Sharing
+            </CardTitle>
+            <CardDescription>
+              Share your travel plans with trusted contacts
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4">Let trusted friends or family know where you're going and when you expect to arrive. Get notified if something seems off.</p>
+            <Button asChild>
+              <Link to="/share">Share Your Route</Link>
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-primary" />
+              Emergency Alerts
+            </CardTitle>
+            <CardDescription>
+              Quick access to emergency services
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4">Set up emergency contacts and quick access alerts for immediate help if you ever feel unsafe.</p>
+            <Button variant="outline">Configure Alerts</Button>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-primary" />
+              Verification System
+            </CardTitle>
+            <CardDescription>
+              How we verify our users and service providers
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4">Learn about our comprehensive verification process to ensure all users on our platform are legitimate and meet our safety standards.</p>
+            <Button variant="outline">Learn More</Button>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <LockKeyhole className="h-5 w-5 text-primary" />
+              Privacy Settings
+            </CardTitle>
+            <CardDescription>
+              Control your personal information
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4">Manage what information is visible to others and control how your data is used across the platform.</p>
+            <Button variant="outline">Privacy Settings</Button>
+          </CardContent>
+        </Card>
       </div>
     </MainLayout>
   );
