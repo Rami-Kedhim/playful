@@ -1,5 +1,5 @@
 
-import MainLayout from '@/components/layout/Layout';
+import MainLayout from '@/layouts/MainLayout';
 import UnifiedLayout from './UnifiedLayout';
 
 export { MainLayout, UnifiedLayout };

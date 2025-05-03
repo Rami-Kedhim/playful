@@ -68,12 +68,12 @@ const Favorites = () => {
                       imageUrl={escort.images?.[0] || ''}
                       id={escort.id}
                       age={escort.age || 0}
-                      rating={0}
-                      reviews={0}
+                      rating={0} // Default rating since it doesn't exist in Escort type
+                      reviews={0} // Default reviews count
                       tags={escort.tags || []}
                       verified={escort.verified || false}
                       price={escort.price || 0}
-                      gender={''}
+                      gender="" // Provide default empty string for gender
                     />
                     <Button 
                       variant="ghost" 
