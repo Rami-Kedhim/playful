@@ -1,173 +1,149 @@
 
-import React, { useState, useEffect } from 'react';
-import { Layout } from '@/layouts';
-import EscortGrid from '@/components/escorts/EscortGrid';
-import EscortFilters from '@/components/escorts/filters/EscortFilters';
+import React from 'react';
+import MainLayout from '@/layouts/MainLayout';
+import EscortContainer from '@/components/escorts/EscortContainer';
 import { Escort } from '@/types/Escort';
-import { useEscorts } from '@/hooks/useEscorts';
-import { Loader2 } from 'lucide-react';
+
+// Mock data for escorts
+const mockEscorts: Escort[] = [
+  {
+    id: '1',
+    name: 'Sophia',
+    age: 28,
+    gender: 'female',
+    location: 'Los Angeles, CA',
+    rating: 4.9,
+    reviewCount: 47,
+    price: 300,
+    tags: ['Elite', 'Luxury', 'Verified'],
+    imageUrl: 'https://i.pravatar.cc/300?img=1',
+    availableNow: true,
+    isVerified: true,
+    responseRate: 98
+  },
+  {
+    id: '2',
+    name: 'Isabella',
+    age: 24,
+    gender: 'female',
+    location: 'New York, NY',
+    rating: 4.8,
+    reviewCount: 32,
+    price: 250,
+    tags: ['GFE', 'Party', 'Travel'],
+    imageUrl: 'https://i.pravatar.cc/300?img=5',
+    availableNow: false,
+    isVerified: true,
+    responseRate: 95
+  },
+  {
+    id: '3',
+    name: 'Emma',
+    age: 26,
+    gender: 'female',
+    location: 'Miami, FL',
+    rating: 4.7,
+    reviewCount: 28,
+    price: 280,
+    tags: ['Luxury', 'Events', 'Travel'],
+    imageUrl: 'https://i.pravatar.cc/300?img=9',
+    availableNow: true,
+    isVerified: true,
+    responseRate: 90
+  },
+  {
+    id: '4',
+    name: 'James',
+    age: 30,
+    gender: 'male',
+    location: 'Chicago, IL',
+    rating: 4.8,
+    reviewCount: 19,
+    price: 320,
+    tags: ['Athletic', 'Dinner', 'Events'],
+    imageUrl: 'https://i.pravatar.cc/300?img=3',
+    availableNow: false,
+    isVerified: true,
+    responseRate: 96
+  },
+  {
+    id: '5',
+    name: 'Olivia',
+    age: 27,
+    gender: 'female',
+    location: 'Las Vegas, NV',
+    rating: 4.9,
+    reviewCount: 41,
+    price: 350,
+    tags: ['VIP', 'Events', 'Travel'],
+    imageUrl: 'https://i.pravatar.cc/300?img=20',
+    availableNow: true,
+    isVerified: true,
+    responseRate: 99
+  },
+  {
+    id: '6',
+    name: 'Ethan',
+    age: 29,
+    gender: 'male',
+    location: 'San Francisco, CA',
+    rating: 4.7,
+    reviewCount: 23,
+    price: 300,
+    tags: ['Professional', 'Dinner', 'Travel'],
+    imageUrl: 'https://i.pravatar.cc/300?img=30',
+    availableNow: true,
+    isVerified: true,
+    responseRate: 94
+  },
+  {
+    id: '7',
+    name: 'Ava',
+    age: 25,
+    gender: 'female',
+    location: 'Boston, MA',
+    rating: 4.6,
+    reviewCount: 18,
+    price: 270,
+    tags: ['Luxury', 'Culture', 'Events'],
+    imageUrl: 'https://i.pravatar.cc/300?img=22',
+    availableNow: false,
+    isVerified: true,
+    responseRate: 92
+  },
+  {
+    id: '8',
+    name: 'Noah',
+    age: 31,
+    gender: 'male',
+    location: 'Seattle, WA',
+    rating: 4.8,
+    reviewCount: 25,
+    price: 290,
+    tags: ['Business', 'Travel', 'Sophisticated'],
+    imageUrl: 'https://i.pravatar.cc/300?img=55',
+    availableNow: false,
+    isVerified: true,
+    responseRate: 97
+  },
+];
+
+// Mock services available on the platform
+const services = [
+  'Companion', 'Dinner Date', 'Travel Partner', 'Events', 
+  'Cultural Activities', 'Education', 'Tourism', 'Networking',
+  'Business Functions', 'Social Events', 'Gala', 'VIP'
+];
 
 const EscortsPage = () => {
-  // Fetch escorts data
-  const {
-    escorts,
-    featuredEscorts,
-    loading,
-    filters,
-    updateFilters,
-    applyCurrentFilters,
-    clearAllFilters,
-  } = useEscorts();
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [location, setLocation] = useState('');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
-  const [serviceType, setServiceType] = useState<"" | "in-person" | "virtual" | "both">("");
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
-  const [selectedOrientations, setSelectedOrientations] = useState<string[]>([]);
-  const [ageRange, setAgeRange] = useState<[number, number]>([18, 65]);
-  const [ratingMin, setRatingMin] = useState(0);
-  const [availableNow, setAvailableNow] = useState(false);
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
-  
-  // Handle service selection
-  const toggleService = (service: string) => {
-    setSelectedServices(prev => 
-      prev.includes(service)
-        ? prev.filter(s => s !== service)
-        : [...prev, service]
-    );
-  };
-  
-  // Handle gender selection
-  const toggleGender = (gender: string) => {
-    setSelectedGenders(prev => 
-      prev.includes(gender)
-        ? prev.filter(g => g !== gender)
-        : [...prev, gender]
-    );
-  };
-  
-  // Handle orientation selection
-  const toggleOrientation = (orientation: string) => {
-    setSelectedOrientations(prev => 
-      prev.includes(orientation)
-        ? prev.filter(o => o !== orientation)
-        : [...prev, orientation]
-    );
-  };
-  
-  // Apply filters
-  const handleApplyFilters = () => {
-    updateFilters({
-      searchQuery,
-      location,
-      priceRange,
-      serviceType,
-      services: selectedServices,
-      genders: selectedGenders,
-      orientations: selectedOrientations,
-      ageRange,
-      ratingMin,
-      availableNow,
-      verifiedOnly,
-    });
-    applyCurrentFilters();
-  };
-  
-  // Clear filters
-  const handleClearFilters = () => {
-    setSearchQuery('');
-    setLocation('');
-    setPriceRange([0, 1000]);
-    setServiceType("");
-    setSelectedServices([]);
-    setSelectedGenders([]);
-    setSelectedOrientations([]);
-    setAgeRange([18, 65]);
-    setRatingMin(0);
-    setAvailableNow(false);
-    setVerifiedOnly(false);
-    clearAllFilters();
-  };
-  
   return (
-    <Layout 
-      title="Find Escorts" 
-      description="Discover verified escorts in your area"
+    <MainLayout
+      title="Explore Companions"
+      description="Find the perfect companion for any occasion"
       showBreadcrumbs
     >
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Filters */}
-        <div className="lg:col-span-1">
-          <EscortFilters 
-            onApply={handleApplyFilters}
-            onClear={handleClearFilters}
-            onUpdate={updateFilters}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            location={location}
-            setLocation={setLocation}
-            priceRange={priceRange}
-            setPriceRange={setPriceRange}
-            serviceType={serviceType}
-            setServiceType={setServiceType}
-            selectedServices={selectedServices}
-            toggleService={toggleService}
-            selectedGenders={selectedGenders}
-            toggleGender={toggleGender}
-            selectedOrientations={selectedOrientations}
-            toggleOrientation={toggleOrientation}
-            ageRange={ageRange}
-            setAgeRange={setAgeRange}
-            ratingMin={ratingMin}
-            setRatingMin={setRatingMin}
-            availableNow={availableNow}
-            setAvailableNow={setAvailableNow}
-            verifiedOnly={verifiedOnly}
-            setVerifiedOnly={setVerifiedOnly}
-          />
-        </div>
-        
-        {/* Main content */}
-        <div className="lg:col-span-3">
-          {/* Featured Escorts */}
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Featured Escorts</h2>
-            {loading ? (
-              <div className="flex justify-center items-center min-h-[200px]">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : featuredEscorts.length > 0 ? (
-              <EscortGrid 
-                escorts={featuredEscorts} 
-                loading={loading}
-                emptyMessage="No featured escorts available."
-              />
-            ) : (
-              <p className="text-muted-foreground">No featured escorts available at the moment.</p>
-            )}
-          </section>
-          
-          {/* All Escorts */}
-          <section>
-            <h2 className="text-2xl font-bold mb-4">All Escorts</h2>
-            {loading ? (
-              <div className="flex justify-center items-center min-h-[300px]">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : (
-              <EscortGrid 
-                escorts={escorts} 
-                loading={loading}
-                emptyMessage="No escorts found matching your criteria."
-              />
-            )}
-          </section>
-        </div>
-      </div>
-    </Layout>
+      <EscortContainer escorts={mockEscorts} services={services} />
+    </MainLayout>
   );
 };
 
