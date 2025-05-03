@@ -1,7 +1,7 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import useFilterResults from "@/hooks/escort-filters/useFilterResults";
-import { Escort } from "@/types/Escort"; // Use 'Escort' with capital E and string height
+import { Escort } from "@/types/Escort";
 
 interface UseEscortFilterProps {
   escorts: Escort[];
@@ -26,8 +26,8 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
   const [availableNow, setAvailableNow] = useState<boolean>(false);
   const [serviceTypeFilter, setServiceTypeFilter] = useState<"" | "in-person" | "virtual" | "both">("");
   
-  // Combined filter state for useFilterResults hook
-  const filters = {
+  // Combined filter state for useFilterResults hook - memoize to prevent recreating on each render
+  const filters = useMemo(() => ({
     searchQuery,
     location,
     priceRange,
@@ -41,7 +41,21 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
     availableNow,
     serviceTypeFilter,
     currentPage
-  };
+  }), [
+    searchQuery,
+    location,
+    priceRange,
+    verifiedOnly,
+    selectedServices,
+    sortBy,
+    selectedGenders,
+    selectedOrientations,
+    ageRange,
+    ratingMin,
+    availableNow,
+    serviceTypeFilter,
+    currentPage
+  ]);
   
   // Get filtered, sorted, and paginated escorts
   const { 
@@ -57,17 +71,15 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
     setIsLoading(isFiltering);
   }, [isFiltering]);
   
-  // Handle price range change from slider component
+  // Handler functions wrapped with useCallback
   const handlePriceRangeChange = useCallback((values: number[]) => {
     setPriceRange([values[0], values[1]]);
   }, []);
   
-  // Handle age range change from slider component
   const handleAgeRangeChange = useCallback((values: number[]) => {
     setAgeRange([values[0], values[1]]);
   }, []);
   
-  // Toggle service selection
   const toggleService = useCallback((service: string) => {
     setSelectedServices(prev => 
       prev.includes(service)
@@ -76,7 +88,6 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
     );
   }, []);
   
-  // Toggle gender selection
   const toggleGender = useCallback((gender: string) => {
     setSelectedGenders(prev => 
       prev.includes(gender)
@@ -85,7 +96,6 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
     );
   }, []);
   
-  // Toggle orientation selection
   const toggleOrientation = useCallback((orientation: string) => {
     setSelectedOrientations(prev => 
       prev.includes(orientation)
@@ -94,7 +104,6 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
     );
   }, []);
   
-  // Clear all filters
   const clearFilters = useCallback(() => {
     setSearchQuery("");
     setLocation("");
@@ -111,6 +120,7 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
     setServiceTypeFilter("");
   }, []);
   
+  // Return the filter state and handlers as a single object
   return {
     // Filter state
     searchQuery,
@@ -128,26 +138,26 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
     serviceTypeFilter,
     isLoading,
     
-    // Filter actions
-    setSearchQuery,
-    setLocation,
-    setPriceRange,
+    // Filter actions - with stable references
+    setSearchQuery: useCallback((query: string) => setSearchQuery(query), []),
+    setLocation: useCallback((loc: string) => setLocation(loc), []),
+    setPriceRange: useCallback((range: [number, number]) => setPriceRange(range), []),
     handlePriceRangeChange,
-    setVerifiedOnly,
-    setSelectedServices,
+    setVerifiedOnly: useCallback((verified: boolean) => setVerifiedOnly(verified), []),
+    setSelectedServices: useCallback((services: string[]) => setSelectedServices(services), []),
     toggleService,
-    setSortBy,
-    setCurrentPage,
-    setSelectedGenders,
+    setSortBy: useCallback((sort: string) => setSortBy(sort), []),
+    setCurrentPage: useCallback((page: number) => setCurrentPage(page), []),
+    setSelectedGenders: useCallback((genders: string[]) => setSelectedGenders(genders), []),
     toggleGender,
-    setSelectedOrientations,
+    setSelectedOrientations: useCallback((orientations: string[]) => setSelectedOrientations(orientations), []),
     toggleOrientation,
-    setAgeRange,
+    setAgeRange: useCallback((range: [number, number]) => setAgeRange(range), []),
     handleAgeRangeChange,
-    setRatingMin,
-    setAvailableNow,
-    setServiceTypeFilter,
-    setIsLoading,
+    setRatingMin: useCallback((rating: number) => setRatingMin(rating), []),
+    setAvailableNow: useCallback((available: boolean) => setAvailableNow(available), []),
+    setServiceTypeFilter: useCallback((type: "" | "in-person" | "virtual" | "both") => setServiceTypeFilter(type), []),
+    setIsLoading: useCallback((loading: boolean) => setIsLoading(loading), []),
     clearFilters,
     
     // Filter results
@@ -159,4 +169,3 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
 };
 
 export default useEscortFilter;
-

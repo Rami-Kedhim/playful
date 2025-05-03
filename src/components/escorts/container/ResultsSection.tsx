@@ -1,4 +1,5 @@
 
+import { memo } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import EscortResults from "@/components/escorts/EscortResults";
@@ -10,7 +11,7 @@ interface ResultsSectionProps {
   activeFilterCount?: number; // Optional prop for filter count
 }
 
-const ResultsSection = ({ filterState, combinedIsLoading, activeFilterCount }: ResultsSectionProps) => {
+const ResultsSection = memo<ResultsSectionProps>(({ filterState, combinedIsLoading, activeFilterCount }) => {
   // Get the standard services list
   const commonServices = [
     "Dinner Date", 
@@ -66,6 +67,8 @@ const ResultsSection = ({ filterState, combinedIsLoading, activeFilterCount }: R
       />
     </div>
   );
-};
+});
+
+ResultsSection.displayName = 'ResultsSection';
 
 export default ResultsSection;
