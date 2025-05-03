@@ -9,6 +9,10 @@ import ActionGrid from '@/components/home/ActionGrid';
 import BoostLiveMonitor from '@/components/home/BoostLiveMonitor';
 import HeroSection from '@/components/home/HeroSection';
 import { AppPaths } from '@/routes';
+import FeaturesSection from '@/components/home/FeaturesSection';
+import TrustSection from '@/components/home/TrustSection';
+import MetaverseSection from '@/components/home/MetaverseSection';
+import CtaSection from '@/components/home/CtaSection';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -56,20 +60,32 @@ const HomePage = () => {
           <BoostLiveMonitor stats={boostStats} isLoading={false} />
         </div>
         
-        {/* Call to Action */}
-        <div className="mt-12 text-center">
-          <h2 className="text-2xl font-bold mb-4">Ready to explore?</h2>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button onClick={handleExploreEscorts}>
-              Find Escorts <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <Button variant="outline" onClick={handleExploreAI}>
-              AI Companions <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <Button variant="outline" onClick={handleExploreBrainHub}>
-              Brain Hub <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
+        {/* Features Section */}
+        <FeaturesSection />
+        
+        {/* Trust Section */}
+        <TrustSection />
+      </div>
+      
+      {/* Metaverse Section */}
+      <MetaverseSection />
+      
+      {/* CTA Section */}
+      <CtaSection />
+      
+      {/* Call to Action */}
+      <div className="container mx-auto px-4 mt-12 mb-16 text-center">
+        <h2 className="text-2xl font-bold mb-4">Ready to explore?</h2>
+        <div className="flex flex-wrap justify-center gap-4">
+          <Button onClick={handleExploreEscorts}>
+            Find Escorts <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+          <Button variant="outline" onClick={handleExploreAI}>
+            AI Companions <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+          <Button variant="outline" onClick={handleExploreBrainHub}>
+            Brain Hub <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
         </div>
       </div>
     </UnifiedLayout>

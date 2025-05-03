@@ -49,7 +49,7 @@ const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
       </NavLink>
       
       <NavLink 
-        to="/messages"
+        to={AppPaths.MESSAGES}
         className={({ isActive }) => 
           cn("text-sm flex items-center gap-1.5", isActive ? "font-bold text-primary" : "text-muted-foreground hover:text-foreground")
         }

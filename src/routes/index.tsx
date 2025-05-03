@@ -54,5 +54,6 @@ export const AppPaths = {
   NEURAL_ANALYTICS: '/neural/analytics',
   NEURAL_MONITOR: '/neural/monitor',
   BRAIN_HUB: '/brain-hub',
-  PROFILE: '/profile'
+  PROFILE: '/profile',
+  MESSAGES: '/messages'  // Added this missing route
 };

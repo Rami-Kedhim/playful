@@ -29,16 +29,16 @@ export const UnifiedLayout: React.FC<LayoutProps> = ({
     <div className="flex flex-col min-h-screen">
       {!hideNavbar && <Navbar />}
       
-      <main className={`flex-1 ${fullWidth ? 'w-full' : 'container mx-auto px-4'} py-6 ${className}`}>
+      <main className={`flex-1 ${fullWidth ? 'w-full' : 'container mx-auto px-4'} ${className}`}>
         {(title || description) && (
-          <div className="mb-6">
+          <div className="mb-6 pt-6">
             {title && <h1 className="text-2xl md:text-3xl font-bold">{title}</h1>}
             {description && <p className="text-muted-foreground mt-1">{description}</p>}
           </div>
         )}
         
         {showBreadcrumbs && (
-          <div className="mb-4">
+          <div className="mb-4 pt-4">
             <Breadcrumbs />
           </div>
         )}

@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Users, Wallet, Boxes, MessageSquare } from 'lucide-react';
-import { AppRoutes } from '@/utils/navigation';
+import { AppPaths } from '@/routes';
 
 const ActionGrid = () => {
   const actions = [
@@ -11,7 +11,7 @@ const ActionGrid = () => {
       title: 'Enter Metaverse',
       description: 'Explore immersive 3D environments',
       icon: <Boxes className="h-10 w-10 text-purple-400" />,
-      url: AppRoutes.METAVERSE,
+      url: '/metaverse',
       bgColor: 'bg-gradient-to-br from-purple-900/30 to-purple-700/20',
       borderColor: 'border-purple-500/30'
     },
@@ -19,7 +19,7 @@ const ActionGrid = () => {
       title: 'Top-up Wallet',
       description: 'Add UBX tokens to your account',
       icon: <Wallet className="h-10 w-10 text-green-400" />,
-      url: AppRoutes.WALLET,
+      url: '/wallet',
       bgColor: 'bg-gradient-to-br from-green-900/30 to-green-700/20',
       borderColor: 'border-green-500/30'
     },
@@ -27,7 +27,7 @@ const ActionGrid = () => {
       title: 'Meet Companions',
       description: 'Discover virtual AI companions',
       icon: <Users className="h-10 w-10 text-blue-400" />,
-      url: AppRoutes.AI_COMPANION,
+      url: AppPaths.AI_COMPANION,
       bgColor: 'bg-gradient-to-br from-blue-900/30 to-blue-700/20',
       borderColor: 'border-blue-500/30'
     },
@@ -35,7 +35,7 @@ const ActionGrid = () => {
       title: 'Chat & Messages',
       description: 'View your conversations',
       icon: <MessageSquare className="h-10 w-10 text-amber-400" />,
-      url: AppRoutes.MESSAGES,
+      url: AppPaths.MESSAGES,
       bgColor: 'bg-gradient-to-br from-amber-900/30 to-amber-700/20',
       borderColor: 'border-amber-500/30'
     }
