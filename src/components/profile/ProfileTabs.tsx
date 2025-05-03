@@ -1,13 +1,15 @@
+
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserProfile } from "@/types/user";
-import AboutTab from "./AboutTab";
-import ServicesTab from "./ServicesTab";
-import RatesTab from "./RatesTab";
+import AboutTab from "@/components/profile/AboutTab";
+import ServicesTab from "@/components/profile/ServicesTab";
+import RatesTab from "@/components/profile/RatesTab";
 import SafetyTips from "@/components/verification/SafetyTips";
 import VerificationBadge from "@/components/verification/VerificationBadge";
-import { useRole } from "@/hooks/useRole";
+import { useRole } from "@/hooks/auth/useRole";
 import { Shield, UserCheck, DollarSign, Info } from "lucide-react";
+import { User } from "@/types/user";
 
 interface ProfileTabsProps {
   user: User;

@@ -1,4 +1,3 @@
-
 import { VerificationRequest, VerificationStatus, VerificationLevel, VerificationDocument } from '@/types/verification';
 
 // Mock verification requests data
@@ -89,7 +88,7 @@ export const approveVerificationRequest = async (id: string): Promise<boolean> =
     status: VerificationStatus.APPROVED,
     reviewedAt: now,
     reviewed_at: now.toISOString(),
-    reviewed_by: 'admin-user-id'
+    notes: "Approved by admin" // Using notes which is in the type definition
   };
 
   if (mockVerificationRequests[index].documents) {
@@ -118,9 +117,9 @@ export const rejectVerificationRequest = async (id: string, reason: string): Pro
     status: VerificationStatus.REJECTED,
     reviewedAt: now,
     reviewed_at: now.toISOString(),
-    reviewed_by: 'admin-user-id',
-    reviewer_notes: reason,
-    rejectionReason: reason
+    notes: reason, // Using notes which is in the type definition
+    reviewer_notes: reason, // Keeping for backward compatibility
+    rejectionReason: reason // Keeping for backward compatibility
   };
 
   return true;

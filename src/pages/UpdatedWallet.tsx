@@ -1,224 +1,153 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
-import UBXPriceDisplay from '@/components/oxum/UBXPriceDisplay';
-import OxumInfoTooltip from '@/components/oxum/OxumInfoTooltip';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { uberWallet } from '@/core/UberWallet';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import UBXPriceDisplay from '@/components/oxum/UBXPriceDisplay';
+import OxumInfoTooltip from '@/components/oxum/OxumInfoTooltip';
+import { useToast } from '@/hooks/use-toast';
+import { Wallet, Loader2, Clock, ArrowUpRight } from 'lucide-react';
 import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from '@/components/ui/tabs';
-import { Loader2, ArrowRight, Zap, Plus, CreditCard } from 'lucide-react';
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { useAuth } from '@/hooks/auth';
-import MainLayout from '@/components/layout/MainLayout';
-import { UserProfile } from '@/types/auth';
+import { useNavigate } from 'react-router-dom';
 
-const UpdatedWallet: React.FC = () => {
+const UpdatedWallet = () => {
   const { user, profile } = useAuth();
-  const [selectedTab, setSelectedTab] = useState<string>("balance");
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
-  const [isBoostModalOpen, setBoostModalOpen] = useState(false);
-  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const { toast } = useToast();
   const navigate = useNavigate();
-
+  const [isLoading, setIsLoading] = useState(true);
+  const [transactions, setTransactions] = useState([]);
+  const [balance, setBalance] = useState(0);
+  
   useEffect(() => {
-    // Mock transaction loading
-    const loadTransactions = async () => {
-      setIsLoadingTransactions(true);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setTransactions([
-        { id: 'tx-1', type: 'credit', amount: 50, description: 'Referral bonus', date: new Date() },
-        { id: 'tx-2', type: 'debit', amount: -20, description: 'Content purchase', date: new Date() },
-      ]);
-      setIsLoadingTransactions(false);
+    const loadWalletData = async () => {
+      if (!user?.id) return;
+      
+      try {
+        setIsLoading(true);
+        const walletBalance = await uberWallet.getBalance(user.id);
+        const txHistory = await uberWallet.getTransactionHistory(user.id);
+        
+        setBalance(walletBalance);
+        setTransactions(txHistory);
+      } catch (error) {
+        console.error('Failed to load wallet data:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load wallet data. Please try again.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
     };
+    
+    loadWalletData();
+  }, [user?.id]);
 
-    loadTransactions();
-  }, []);
-
-  const isUserBoosted = profile?.isBoosted || profile?.is_boosted || false;
-
-  const renderTransactionHistory = () => {
-    if (isLoadingTransactions) {
-      return (
-        <div className="flex justify-center items-center p-4">
-          <Loader2 className="h-6 w-6 animate-spin" />
-        </div>
-      );
-    }
-
-    if (!transactions.length) {
-      return <p className="text-muted-foreground">No transactions yet.</p>;
-    }
-
+  if (isLoading) {
     return (
-      <Table>
-        <TableCaption>Your recent transactions.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[100px]">Date</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead className="text-right">Amount</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {transactions.map((transaction) => (
-            <TableRow key={transaction.id}>
-              <TableCell className="font-medium">{transaction.date.toLocaleDateString()}</TableCell>
-              <TableCell>{transaction.description}</TableCell>
-              <TableCell className="text-right">{transaction.amount} UBX</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    );
-  };
-
-  const renderSubscriptionStatus = () => {
-    // Check the boosted status with fallbacks for both property formats
-    const isBoostedProfile = profile?.isBoosted || profile?.is_boosted;
-
-    if (isBoostedProfile) {
-      return (
-        <div className="space-y-6">
-          <h3 className="text-xl font-semibold">Boosted</h3>
-          <p className="text-muted-foreground">You are currently boosted.</p>
-        </div>
-      );
-    } else {
-      return (
-        <div className="space-y-6">
-          <h3 className="text-xl font-semibold">Not Boosted</h3>
-          <p className="text-muted-foreground">You are not currently boosted.</p>
-        </div>
-      );
-    }
-  };
-
-  const renderSubscriptionTier = () => {
-    // Use optional chaining for subscription tier to prevent errors
-    const tier = profile?.subscription_tier;
-    
-    if (tier === 'free') {
-      return (
-        <div className="space-y-6">
-          <h3 className="text-xl font-semibold">Free Tier</h3>
-          <p className="text-muted-foreground">You are currently on the free tier.</p>
-          <Button onClick={() => setIsUpgradeModalOpen(true)}>
-            Upgrade Subscription
-          </Button>
-        </div>
-      );
-    }
-    
-    if (tier === 'basic') {
-      return (
-        <div className="space-y-6">
-          <h3 className="text-xl font-semibold">Basic Tier</h3>
-          <p className="text-muted-foreground">You are currently on the basic tier.</p>
-          <Badge variant="secondary">Active</Badge>
-          <p className="text-sm">Renews on next billing cycle.</p>
-          <Button onClick={() => setIsUpgradeModalOpen(true)}>
-            Manage Subscription
-          </Button>
-        </div>
-      );
-    }
-    
-    if (tier === 'premium') {
-      return (
-        <div className="space-y-6">
-          <h3 className="text-xl font-semibold">Premium Tier</h3>
-          <p className="text-muted-foreground">You are currently on the premium tier.</p>
-          <Badge variant="success">Active</Badge>
-          <p className="text-sm">Renews on next billing cycle.</p>
-          <Button onClick={() => setIsUpgradeModalOpen(true)}>
-            Manage Subscription
-          </Button>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="space-y-6">
-        <h3 className="text-xl font-semibold">Unknown Tier</h3>
-        <p className="text-muted-foreground">Your subscription tier is unknown.</p>
-        <Button onClick={() => setIsUpgradeModalOpen(true)}>
-          Manage Subscription
-        </Button>
+      <div className="flex justify-center items-center h-40">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );
-  };
+  }
 
-  const handleRecharge = () => {
-    // Recharge functionality
-  };
-
+  // Check for boosted status with fallbacks
+  const isBoostedProfile = profile?.isBoosted || profile?.is_boosted;
+  
   return (
-    <MainLayout>
-      <div className="container max-w-4xl py-8">
-        <h1 className="text-3xl font-bold mb-6">Wallet</h1>
-
-        <Tabs defaultValue={selectedTab} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="balance">Balance</TabsTrigger>
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
-            <TabsTrigger value="subscription">Subscription</TabsTrigger>
-          </TabsList>
-          <TabsContent value="balance">
-            <Card>
-              <CardHeader>
-                <CardTitle>UBX Balance</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-3xl font-bold">
-                    <UBXPriceDisplay amount={user?.ubxBalance || 0} />
-                  </div>
-                  <p className="text-muted-foreground">
-                    Your current UBX balance.
-                  </p>
-                  <Button onClick={() => navigate('/boost')}>
-                    {isUserBoosted ? 'Manage Boost' : 'Boost Profile'}
-                  </Button>
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold flex items-center gap-2 mb-6">
+        <Wallet className="h-7 w-7" />
+        Wallet
+      </h1>
+      
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Balance Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Balance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-baseline">
+                <span className="text-4xl font-bold">{balance}</span>
+                <span className="ml-2 text-xl">UBX</span>
+              </div>
+              
+              <p className="text-sm text-muted-foreground">
+                Equivalent to approximately ${(balance * 0.1).toFixed(2)} USD
+              </p>
+              
+              <div className="mt-4 flex flex-col sm:flex-row gap-2">
+                <Button onClick={() => navigate('/wallet/add-funds')}>
+                  Add Funds
+                </Button>
+                <Button variant="outline" onClick={() => navigate('/wallet/withdraw')}>
+                  Withdraw
+                </Button>
+              </div>
+              
+              {isBoostedProfile && (
+                <div className="mt-4 p-3 bg-primary/10 rounded-md flex items-center gap-2">
+                  <Badge variant="outline" className="bg-primary/20">
+                    Boosted
+                  </Badge>
+                  <span className="text-sm">Your profile is currently boosted!</span>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="transactions">
-            <Card>
-              <CardHeader>
-                <CardTitle>Transaction History</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {renderTransactionHistory()}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="subscription">
-            <Card>
-              <CardHeader>
-                <CardTitle>Subscription Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {renderSubscriptionStatus()}
-                {renderSubscriptionTier()}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Transaction History */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Transaction History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableCaption>Your recent transactions</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {transactions.length > 0 ? (
+                  transactions.map((tx) => (
+                    <TableRow key={tx.id}>
+                      <TableCell className="font-medium">{tx.description || tx.type}</TableCell>
+                      <TableCell>{new Date(tx.date).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-right">{tx.amount} UBX</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center py-4 text-muted-foreground">
+                      No transactions yet
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
-    </MainLayout>
+    </div>
   );
 };
 

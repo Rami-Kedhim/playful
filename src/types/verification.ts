@@ -41,7 +41,7 @@ export interface VerificationRequest {
   documents: VerificationDocument[];
   notes?: string;
   
-  // Adding properties used in components
+  // Adding properties for backward compatibility and used in components
   profile_id?: string;
   requested_level?: VerificationLevel;
   created_at?: string;
@@ -49,4 +49,6 @@ export interface VerificationRequest {
   reviewer_notes?: string;
   rejectionReason?: string;
   verificationLevel?: VerificationLevel;
+  // Additional properties referenced in the code
+  reviewer_id?: string;
 }
