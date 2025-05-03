@@ -86,8 +86,18 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
     // Skip URL updates during initial load to prevent loops
     if (initialLoad) return;
     
-    const params = new URLSearchParams();
+    // Use a shallow copy of current params to avoid direct modification
+    const params = new URLSearchParams(searchParams.toString());
     
+    // Clear existing filter params first
+    params.delete('serviceType');
+    params.delete('verified');
+    params.delete('available'); 
+    params.delete('location');
+    params.delete('q');
+    params.delete('rating');
+    
+    // Only set parameters for active filters
     if (filterState.serviceTypeFilter) {
       params.set('serviceType', filterState.serviceTypeFilter);
     }
@@ -112,8 +122,14 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
       params.set('rating', filterState.ratingMin.toString());
     }
     
-    // Use { replace: true } to avoid adding to browser history
-    setSearchParams(params, { replace: true });
+    // Compare current and new params to avoid unnecessary history entries
+    const currentParamsString = searchParams.toString();
+    const newParamsString = params.toString();
+    
+    if (currentParamsString !== newParamsString) {
+      // Use { replace: true } to avoid adding to browser history
+      setSearchParams(params, { replace: true });
+    }
   }, [
     filterState.serviceTypeFilter,
     filterState.verifiedOnly,
@@ -122,7 +138,8 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
     filterState.searchQuery,
     filterState.ratingMin,
     setSearchParams,
-    initialLoad
+    initialLoad,
+    searchParams
   ]);
   
   return filterState;

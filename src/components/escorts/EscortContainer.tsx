@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useEscortFilterWithUrl } from "@/hooks/useEscortFilterWithUrl";
 import { Escort } from "@/types/Escort";
 import QuickFilterBar from "./QuickFilterBar";
@@ -20,15 +20,15 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
   // Use the filtered hook that syncs with URL
   const filterState = useEscortFilterWithUrl({ escorts });
 
-  // Restrict to allowed values only for serviceTypeFilter when setting
-  const safeSetServiceTypeFilter = (value: ServiceTypeFilter) => {
+  // Memoize the service type filter to prevent re-renders
+  const safeSetServiceTypeFilter = useCallback((value: ServiceTypeFilter) => {
     if (value === "" || value === "in-person" || value === "virtual" || value === "both") {
       filterState.setServiceTypeFilter(value);
     } else {
       // Ignore or reset to empty if invalid
       filterState.setServiceTypeFilter("");
     }
-  };
+  }, [filterState]);
 
   // Consider both internal and external loading states
   const combinedIsLoading = filterState.isLoading || externalLoading;
@@ -78,6 +78,11 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
     (filterState as any).priceRange,
     (filterState as any).ageRange
   ]);
+
+  // Memoize show filters toggle to prevent re-renders
+  const toggleShowFilters = useCallback(() => {
+    setShowFilters(prev => !prev);
+  }, []);
 
   return (
     <>

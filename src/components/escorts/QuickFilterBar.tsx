@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -38,21 +38,35 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
   ratingMin = 0,
   setRatingMin
 }) => {
-  // Use a callback function for handling type clicks
-  const handleTypeClick = (type: ServiceTypeFilter) => {
+  // Use memoized callback functions for all handlers to prevent re-renders
+  const handleTypeClick = useCallback((type: ServiceTypeFilter) => {
     if (serviceTypeFilter === type) {
       setServiceTypeFilter('');
     } else {
       setServiceTypeFilter(type);
     }
-  };
+  }, [serviceTypeFilter, setServiceTypeFilter]);
 
-  // Use callback for handling rating click
-  const handleRatingClick = () => {
+  // Use memoized callback for handling rating click
+  const handleRatingClick = useCallback(() => {
     if (setRatingMin) {
       setRatingMin(ratingMin > 0 ? 0 : 4);
     }
-  };
+  }, [ratingMin, setRatingMin]);
+  
+  // Use memoized callback for handling verified toggle
+  const handleVerifiedClick = useCallback(() => {
+    if (setVerifiedOnly) {
+      setVerifiedOnly(!verifiedOnly);
+    }
+  }, [verifiedOnly, setVerifiedOnly]);
+  
+  // Use memoized callback for handling available toggle
+  const handleAvailableClick = useCallback(() => {
+    if (setAvailableNow) {
+      setAvailableNow(!availableNow);
+    }
+  }, [availableNow, setAvailableNow]);
 
   return (
     <Card className={className}>
@@ -96,7 +110,7 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
               <Button 
                 variant={verifiedOnly ? "default" : "outline"}
                 size="sm"
-                onClick={() => setVerifiedOnly(!verifiedOnly)}
+                onClick={handleVerifiedClick}
                 className="flex items-center gap-1"
               >
                 <BadgeCheck className="h-4 w-4" />
@@ -108,7 +122,7 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
               <Button
                 variant={availableNow ? "default" : "outline"}
                 size="sm"
-                onClick={() => setAvailableNow(!availableNow)}
+                onClick={handleAvailableClick}
                 className="flex items-center gap-1"
               >
                 <Clock className="h-4 w-4" />
