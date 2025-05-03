@@ -33,7 +33,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
   // Consider both internal and external loading states
   const combinedIsLoading = filterState.isLoading || externalLoading;
   
-  // Calculate active filter count
+  // Calculate active filter count - ensure properties exist before checking length
   const activeFilterCount = useMemo(() => {
     return [
       filterState.searchQuery, 
@@ -42,21 +42,21 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
       filterState.availableNow,
       filterState.serviceTypeFilter
     ].filter(Boolean).length + 
-    filterState.selectedServices.length +
-    filterState.selectedGenders.length +
-    filterState.selectedOrientations.length +
+    (filterState.selectedServices?.length || 0) +
+    (filterState.selectedGenders?.length || 0) +
+    (filterState.selectedOrientations?.length || 0) +
     (filterState.ratingMin > 0 ? 1 : 0) +
-    (filterState.priceRange[0] > 0 || filterState.priceRange[1] < 500 ? 1 : 0) +
-    (filterState.ageRange[0] > 21 || filterState.ageRange[1] < 50 ? 1 : 0);
+    ((filterState.priceRange?.[0] > 0 || filterState.priceRange?.[1] < 500) ? 1 : 0) +
+    ((filterState.ageRange?.[0] > 21 || filterState.ageRange?.[1] < 50) ? 1 : 0);
   }, [
     filterState.searchQuery,
     filterState.location,
     filterState.verifiedOnly,
     filterState.availableNow,
     filterState.serviceTypeFilter,
-    filterState.selectedServices.length,
-    filterState.selectedGenders.length,
-    filterState.selectedOrientations.length,
+    filterState.selectedServices,
+    filterState.selectedGenders,
+    filterState.selectedOrientations,
     filterState.ratingMin,
     filterState.priceRange,
     filterState.ageRange
@@ -67,7 +67,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
       <HeaderSection 
         showFilters={showFilters}
         setShowFilters={setShowFilters}
-        totalCount={escorts.length}
+        totalCount={escorts?.length || 0}
       />
       
       {/* Quick filter bar for mobile and desktop */}
@@ -91,8 +91,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
           showFilters={showFilters}
           setShowFilters={setShowFilters}
           filterState={filterState}
-          services={services}
-          activeFilterCount={activeFilterCount}
+          services={services || []}
         />
         
         <ResultsSection

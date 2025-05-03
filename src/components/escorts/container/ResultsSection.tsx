@@ -20,7 +20,7 @@ const ResultsSection = ({ filterState, combinedIsLoading }: ResultsSectionProps)
     "Virtual Meeting"
   ];
 
-  // Count active filters
+  // Count active filters - ensure properties exist before checking length
   const activeFilterCount = [
     filterState.searchQuery, 
     filterState.location,
@@ -28,20 +28,20 @@ const ResultsSection = ({ filterState, combinedIsLoading }: ResultsSectionProps)
     filterState.availableNow,
     filterState.serviceTypeFilter
   ].filter(Boolean).length + 
-  filterState.selectedServices.length +
-  filterState.selectedGenders.length +
-  filterState.selectedOrientations.length +
+  (filterState.selectedServices?.length || 0) +
+  (filterState.selectedGenders?.length || 0) +
+  (filterState.selectedOrientations?.length || 0) +
   (filterState.ratingMin > 0 ? 1 : 0) +
-  (filterState.priceRange[0] > 0 || filterState.priceRange[1] < 500 ? 1 : 0) +
-  (filterState.ageRange[0] > 21 || filterState.ageRange[1] < 50 ? 1 : 0);
+  ((filterState.priceRange?.[0] > 0 || filterState.priceRange?.[1] < 500) ? 1 : 0) +
+  ((filterState.ageRange?.[0] > 21 || filterState.ageRange?.[1] < 50) ? 1 : 0);
 
   return (
     <div className="lg:col-span-3">
       <SearchBar
-        searchQuery={filterState.searchQuery}
-        setSearchQuery={filterState.setSearchQuery}
-        sortBy={filterState.sortBy}
-        setSortBy={filterState.setSortBy}
+        searchQuery={filterState.searchQuery || ""}
+        setSearchQuery={filterState.setSearchQuery || (() => {})}
+        sortBy={filterState.sortBy || "newest"}
+        setSortBy={filterState.setSortBy || (() => {})}
       />
 
       {/* Mobile Applied Filters display */}
@@ -60,7 +60,7 @@ const ResultsSection = ({ filterState, combinedIsLoading }: ResultsSectionProps)
       </div>
 
       {/* No results alert */}
-      {!combinedIsLoading && filterState.filteredEscorts.length === 0 && (
+      {!combinedIsLoading && filterState.filteredEscorts && filterState.filteredEscorts.length === 0 && (
         <Alert variant="warning" className="mb-6">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>No results found</AlertTitle>
@@ -71,11 +71,11 @@ const ResultsSection = ({ filterState, combinedIsLoading }: ResultsSectionProps)
       )}
 
       <EscortResults
-        escorts={filterState.filteredEscorts}
+        escorts={filterState.filteredEscorts || []}
         clearFilters={filterState.clearFilters}
-        currentPage={filterState.currentPage}
-        setCurrentPage={filterState.setCurrentPage}
-        totalPages={filterState.totalPages}
+        currentPage={filterState.currentPage || 1}
+        setCurrentPage={filterState.setCurrentPage || (() => {})}
+        totalPages={filterState.totalPages || 1}
         isLoading={combinedIsLoading}
       />
     </div>
