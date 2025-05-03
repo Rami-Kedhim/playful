@@ -35,14 +35,22 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
   onLocationClick,
   onShowMoreFilters,
   className,
-  ratingMin,
+  ratingMin = 0,
   setRatingMin
 }) => {
+  // Use a callback function for handling type clicks
   const handleTypeClick = (type: ServiceTypeFilter) => {
     if (serviceTypeFilter === type) {
       setServiceTypeFilter('');
     } else {
       setServiceTypeFilter(type);
+    }
+  };
+
+  // Use callback for handling rating click
+  const handleRatingClick = () => {
+    if (setRatingMin) {
+      setRatingMin(ratingMin > 0 ? 0 : 4);
     }
   };
 
@@ -112,7 +120,7 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
               <Button
                 variant={ratingMin > 0 ? "default" : "outline"}
                 size="sm"
-                onClick={() => setRatingMin(ratingMin > 0 ? 0 : 4)}
+                onClick={handleRatingClick}
                 className="flex items-center gap-1"
               >
                 <Star className="h-4 w-4" />

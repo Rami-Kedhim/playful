@@ -61,19 +61,25 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
       hasUpdates = true;
     }
     
-    // Apply all updates without triggering multiple renders
+    // Apply all updates at once to minimize renders
     if (hasUpdates) {
-      if (updates['serviceTypeFilter']) filterState.setServiceTypeFilter(updates['serviceTypeFilter']);
-      if (updates['verifiedOnly']) filterState.setVerifiedOnly(true);
-      if (updates['availableNow']) filterState.setAvailableNow(true);
-      if (updates['location']) filterState.setLocation(updates['location']);
-      if (updates['searchQuery']) filterState.setSearchQuery(updates['searchQuery']);
-      if (updates['ratingMin']) filterState.setRatingMin(updates['ratingMin']);
+      setTimeout(() => {
+        // Use setTimeout to ensure these are applied outside the current render cycle
+        if (updates['serviceTypeFilter']) filterState.setServiceTypeFilter(updates['serviceTypeFilter']);
+        if (updates['verifiedOnly']) filterState.setVerifiedOnly(true);
+        if (updates['availableNow']) filterState.setAvailableNow(true);
+        if (updates['location']) filterState.setLocation(updates['location']);
+        if (updates['searchQuery']) filterState.setSearchQuery(updates['searchQuery']);
+        if (updates['ratingMin']) filterState.setRatingMin(updates['ratingMin']);
+        
+        // Mark initial load as complete to prevent further URL->state syncs
+        setInitialLoad(false);
+      }, 0);
+    } else {
+      // If no updates needed, still mark initial load complete
+      setInitialLoad(false);
     }
-    
-    // Mark initial load as complete to prevent further URL->state syncs
-    setInitialLoad(false);
-  }, [searchParams, filterState, initialLoad]);
+  }, [searchParams, filterState]);
   
   // Update URL when filters change, but only after initial load is complete
   useEffect(() => {
