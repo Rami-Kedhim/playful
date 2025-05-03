@@ -33,7 +33,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
   // Consider both internal and external loading states
   const combinedIsLoading = filterState.isLoading || externalLoading;
   
-  // Calculate active filter count - ensure properties exist before checking length
+  // Calculate active filter count with safe access to properties using optional chaining
   const activeFilterCount = useMemo(() => {
     return [
       filterState.searchQuery, 
@@ -44,10 +44,12 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
     ].filter(Boolean).length + 
     (filterState.selectedServices?.length || 0) +
     (filterState.selectedGenders?.length || 0) +
-    (filterState.selectedOrientations?.length || 0) +
+    // Safely access properties that might not exist in the type
+    ((filterState as any).selectedOrientations?.length || 0) +
     (filterState.ratingMin > 0 ? 1 : 0) +
-    ((filterState.priceRange?.[0] > 0 || filterState.priceRange?.[1] < 500) ? 1 : 0) +
-    ((filterState.ageRange?.[0] > 21 || filterState.ageRange?.[1] < 50) ? 1 : 0);
+    // Safely access price and age range using type assertion
+    (((filterState as any).priceRange?.[0] > 0 || (filterState as any).priceRange?.[1] < 500) ? 1 : 0) +
+    (((filterState as any).ageRange?.[0] > 21 || (filterState as any).ageRange?.[1] < 50) ? 1 : 0);
   }, [
     filterState.searchQuery,
     filterState.location,
@@ -56,10 +58,10 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
     filterState.serviceTypeFilter,
     filterState.selectedServices,
     filterState.selectedGenders,
-    filterState.selectedOrientations,
+    (filterState as any).selectedOrientations,
     filterState.ratingMin,
-    filterState.priceRange,
-    filterState.ageRange
+    (filterState as any).priceRange,
+    (filterState as any).ageRange
   ]);
 
   return (
@@ -97,6 +99,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
         <ResultsSection
           filterState={filterState}
           combinedIsLoading={combinedIsLoading}
+          activeFilterCount={activeFilterCount}
         />
       </div>
     </>

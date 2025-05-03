@@ -7,9 +7,10 @@ import SearchBar from "@/components/escorts/SearchBar";
 interface ResultsSectionProps {
   filterState: any;
   combinedIsLoading: boolean;
+  activeFilterCount?: number; // Add this as an optional prop
 }
 
-const ResultsSection = ({ filterState, combinedIsLoading }: ResultsSectionProps) => {
+const ResultsSection = ({ filterState, combinedIsLoading, activeFilterCount }: ResultsSectionProps) => {
   // Get the standard services list
   const commonServices = [
     "Dinner Date", 
@@ -20,20 +21,21 @@ const ResultsSection = ({ filterState, combinedIsLoading }: ResultsSectionProps)
     "Virtual Meeting"
   ];
 
-  // Count active filters - ensure properties exist before checking length
-  const activeFilterCount = [
-    filterState.searchQuery, 
-    filterState.location,
-    filterState.verifiedOnly,
-    filterState.availableNow,
-    filterState.serviceTypeFilter
-  ].filter(Boolean).length + 
-  (filterState.selectedServices?.length || 0) +
-  (filterState.selectedGenders?.length || 0) +
-  (filterState.selectedOrientations?.length || 0) +
-  (filterState.ratingMin > 0 ? 1 : 0) +
-  ((filterState.priceRange?.[0] > 0 || filterState.priceRange?.[1] < 500) ? 1 : 0) +
-  ((filterState.ageRange?.[0] > 21 || filterState.ageRange?.[1] < 50) ? 1 : 0);
+  // Use provided activeFilterCount or calculate if not provided
+  const displayFilterCount = activeFilterCount !== undefined ? activeFilterCount : 
+    [
+      filterState.searchQuery, 
+      filterState.location,
+      filterState.verifiedOnly,
+      filterState.availableNow,
+      filterState.serviceTypeFilter
+    ].filter(Boolean).length + 
+    (filterState.selectedServices?.length || 0) +
+    (filterState.selectedGenders?.length || 0) +
+    (filterState.selectedOrientations?.length || 0) +
+    (filterState.ratingMin > 0 ? 1 : 0) +
+    ((filterState.priceRange?.[0] > 0 || filterState.priceRange?.[1] < 500) ? 1 : 0) +
+    ((filterState.ageRange?.[0] > 21 || filterState.ageRange?.[1] < 50) ? 1 : 0);
 
   return (
     <div className="lg:col-span-3">
@@ -46,9 +48,9 @@ const ResultsSection = ({ filterState, combinedIsLoading }: ResultsSectionProps)
 
       {/* Mobile Applied Filters display */}
       <div className="lg:hidden mb-6">
-        {activeFilterCount > 0 && (
+        {displayFilterCount > 0 && (
           <div className="text-sm text-muted-foreground">
-            <span>{activeFilterCount} active filters</span> · 
+            <span>{displayFilterCount} active filters</span> · 
             <button 
               onClick={filterState.clearFilters} 
               className="ml-2 text-primary hover:underline"
