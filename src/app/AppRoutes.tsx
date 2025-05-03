@@ -1,9 +1,12 @@
 
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { routes } from '@/routes';
 
 const AppRoutes = () => {
+  // Add console log to debug routes
+  console.log('Loading routes:', routes);
+  
   return (
     <Routes>
       {routes.map((route) => (

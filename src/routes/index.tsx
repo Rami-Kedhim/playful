@@ -9,6 +9,7 @@ import BrainHubPage from '@/pages/BrainHubPage';
 import EscortsPage from '@/pages/EscortsPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import ProfilePage from '@/pages/ProfilePage';
+import MessagesPage from '@/pages/MessagesPage';
 
 // Define our unified routes
 export const routes: RouteObject[] = [
@@ -41,6 +42,10 @@ export const routes: RouteObject[] = [
     element: <ProfilePage />
   },
   {
+    path: '/messages',
+    element: <MessagesPage />
+  },
+  {
     path: '*',
     element: <NotFoundPage />
   }
@@ -55,5 +60,5 @@ export const AppPaths = {
   NEURAL_MONITOR: '/neural/monitor',
   BRAIN_HUB: '/brain-hub',
   PROFILE: '/profile',
-  MESSAGES: '/messages'  // Added this missing route
+  MESSAGES: '/messages'
 };

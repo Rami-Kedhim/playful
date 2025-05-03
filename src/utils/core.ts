@@ -1,55 +1,36 @@
 
-import { getSystemStatus as getDetailedSystemStatus } from './uberCore';
-import { SystemStatus } from '@/types/shared';
+/**
+ * Core utility functions for the UberEscorts system
+ */
 
 /**
- * Check the overall system status
- * @returns A promise that resolves to a SystemStatus object
+ * Check the system status
+ * @returns Object containing system status information
  */
-export const checkSystemStatus = async (): Promise<SystemStatus> => {
-  try {
-    const status = await getDetailedSystemStatus();
-    return status;
-  } catch (error) {
-    console.error('Error checking system status:', error);
-    
-    // Return a default error status
-    return {
-      operational: false,
-      latency: -1,
-      lastUpdated: new Date(),
-      aiModels: {
-        conversation: 'error',
-        generation: 'error',
-        analysis: 'error'
-      },
-      metrics: {
-        responseTime: -1,
-        activeSessions: 0,
-        processingLoad: 0
-      }
-    };
-  }
+export const checkSystemStatus = async () => {
+  // In a real app, this would make API calls to backend services
+  return {
+    operational: true,
+    latency: Math.floor(Math.random() * 50) + 10, // Simulate latency between 10-60ms
+    aiModels: {
+      lucie: 'operational',
+      oxum: 'operational',
+      hermes: 'operational',
+      orus: 'operational'
+    }
+  };
 };
 
 /**
- * Check if a specific core subsystem is available
- * @param subsystem The name of the subsystem to check
- * @returns A promise that resolves to a boolean indicating if the subsystem is available
+ * Format a timestamp into a readable date string
  */
-export const checkSubsystemAvailability = async (subsystem: string): Promise<boolean> => {
-  try {
-    const status = await getDetailedSystemStatus();
-    
-    // Check if subsystem is mentioned in the aiModels
-    if (status.aiModels && subsystem in status.aiModels) {
-      return status.aiModels[subsystem as keyof typeof status.aiModels] === 'active';
-    }
-    
-    // Default to overall operational status
-    return status.operational;
-  } catch (error) {
-    console.error(`Error checking ${subsystem} availability:`, error);
-    return false;
-  }
+export const formatTimestamp = (timestamp: number): string => {
+  return new Date(timestamp).toLocaleString();
+};
+
+/**
+ * Generate a unique ID for system operations
+ */
+export const generateOperationId = (): string => {
+  return `op_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 };

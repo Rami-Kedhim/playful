@@ -1,16 +1,23 @@
 
 import React from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import ProfileOverview from '@/components/profile/ProfileOverview';
-import RequireAuth from '@/components/auth/RequireAuth';
+import { UnifiedLayout } from '@/layouts';
 
 const ProfilePage = () => {
   return (
-    <RequireAuth>
-      <MainLayout>
-        <ProfileOverview />
-      </MainLayout>
-    </RequireAuth>
+    <UnifiedLayout
+      title="My Profile"
+      description="Manage your personal information"
+      showBreadcrumbs
+    >
+      <div className="py-8">
+        <div className="bg-card rounded-lg shadow p-6 text-center">
+          <h2 className="text-xl font-medium mb-4">Your Profile</h2>
+          <p className="text-muted-foreground">
+            Manage your account settings, profile information, and preferences
+          </p>
+        </div>
+      </div>
+    </UnifiedLayout>
   );
 };
 

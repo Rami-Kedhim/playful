@@ -1,38 +1,24 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { UnifiedLayout } from '@/layouts';
 import { Button } from '@/components/ui/button';
-import { Home, ArrowLeft } from 'lucide-react';
-import MainLayout from '@/components/layout/MainLayout';
+import { Link } from 'react-router-dom';
+import { AppPaths } from '@/routes';
 
 const NotFoundPage = () => {
   return (
-    <MainLayout>
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
-        <div className="bg-purple-500/10 p-6 rounded-full">
-          <span className="text-5xl sm:text-7xl font-bold text-purple-400">404</span>
-        </div>
-        
-        <h1 className="text-3xl sm:text-4xl font-bold">Page Not Found</h1>
-        
-        <p className="text-lg text-muted-foreground max-w-md">
-          The page you are looking for doesn't exist or has been moved.
+    <UnifiedLayout hideNavbar>
+      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center">
+        <h1 className="text-6xl font-bold mb-4">404</h1>
+        <h2 className="text-2xl font-medium mb-2">Page Not Found</h2>
+        <p className="text-muted-foreground mb-8">
+          The page you are looking for does not exist or has been moved.
         </p>
-        
-        <div className="flex flex-col sm:flex-row gap-4 mt-8">
-          <Button asChild variant="default">
-            <Link to="/">
-              <Home className="mr-2 h-4 w-4" /> Go to Homepage
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link to="javascript:history.back()">
-              <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
-            </Link>
-          </Button>
-        </div>
+        <Button asChild>
+          <Link to={AppPaths.HOME}>Return to Home</Link>
+        </Button>
       </div>
-    </MainLayout>
+    </UnifiedLayout>
   );
 };
 

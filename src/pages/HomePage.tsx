@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UnifiedLayout } from '@/layouts';
 import { Button } from '@/components/ui/button';
@@ -15,19 +15,20 @@ import MetaverseSection from '@/components/home/MetaverseSection';
 import CtaSection from '@/components/home/CtaSection';
 
 const HomePage = () => {
+  console.log('Rendering HomePage'); // Debug log
   const navigate = useNavigate();
-  const [searchLocation, setSearchLocation] = useState('');
+  const [searchLocation, setSearchLocation] = React.useState('');
   
-  // Use useCallback for event handlers to prevent recreation on each render
-  const handleExploreEscorts = useCallback(() => {
+  // Use React.useCallback for event handlers
+  const handleExploreEscorts = React.useCallback(() => {
     navigate(AppPaths.ESCORTS);
   }, [navigate]);
   
-  const handleExploreAI = useCallback(() => {
+  const handleExploreAI = React.useCallback(() => {
     navigate(AppPaths.AI_COMPANION);
   }, [navigate]);
   
-  const handleExploreBrainHub = useCallback(() => {
+  const handleExploreBrainHub = React.useCallback(() => {
     navigate(AppPaths.BRAIN_HUB);
   }, [navigate]);
   
