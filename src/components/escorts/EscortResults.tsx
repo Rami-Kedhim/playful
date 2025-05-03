@@ -1,9 +1,9 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
 import EscortCard from "@/components/escorts/EscortCard";
-import { Escort } from "@/types/Escort";  // Fixed casing here
+import { Escort } from "@/types/Escort";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BadgeCheck, Calendar, MapPin } from "lucide-react";
 import ServiceTypeBadgeLabel from "./filters/ServiceTypeBadgeLabel";
@@ -22,16 +22,17 @@ interface EscortResultsProps {
   isLoading: boolean;
 }
 
-const EscortResults = ({
+const EscortResults = memo<EscortResultsProps>(({
   escorts,
   clearFilters,
   currentPage,
   setCurrentPage,
   totalPages,
   isLoading,
-}: EscortResultsProps) => {
+}) => {
   const [localLoading, setLocalLoading] = useState(false);
 
+  // Use page change effect with cleanup
   useEffect(() => {
     if (currentPage) {
       setLocalLoading(true);
@@ -43,6 +44,11 @@ const EscortResults = ({
   }, [currentPage]);
 
   const loading = isLoading || localLoading;
+
+  // Memoize the handler for page changes
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, [setCurrentPage]);
 
   if (loading) {
     return (
@@ -151,7 +157,7 @@ const EscortResults = ({
           <Pagination 
             totalPages={totalPages}
             currentPage={currentPage}
-            onPageChange={setCurrentPage}
+            onPageChange={handlePageChange}
             className="px-2 py-1"
           />
         </div>
@@ -166,7 +172,8 @@ const EscortResults = ({
       </div>
     </>
   );
-};
+});
+
+EscortResults.displayName = 'EscortResults';
 
 export default EscortResults;
-

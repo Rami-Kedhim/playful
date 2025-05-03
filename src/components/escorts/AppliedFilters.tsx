@@ -1,7 +1,6 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { useDebounce } from '@/hooks/use-debounce';
 import ServiceTypeBadgeLabel, { type ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
 interface Filter {
@@ -33,7 +32,7 @@ const AppliedFilters: React.FC<AppliedFiltersProps> = ({
     <div className="flex flex-wrap gap-2">
       {filters.map((filter, index) => (
         <FilterBadge
-          key={index}
+          key={`${filter.key}-${filter.value || index}`}
           filter={filter}
           onRemove={() => removeFilter(filter)}
         />
@@ -54,7 +53,8 @@ interface FilterBadgeProps {
   onRemove: () => void;
 }
 
-const FilterBadge: React.FC<FilterBadgeProps> = ({ filter, onRemove }) => {
+// Memoize FilterBadge to prevent unnecessary rerenders
+const FilterBadge = memo<FilterBadgeProps>(({ filter, onRemove }) => {
   // Special service type rendering
   if (filter.key === 'serviceType' || filter.key === 'service') {
     // Ensure the value is one of the valid ServiceTypeFilter values
@@ -68,6 +68,7 @@ const FilterBadge: React.FC<FilterBadgeProps> = ({ filter, onRemove }) => {
         <button 
           onClick={onRemove}
           className="rounded-full w-5 h-5 flex items-center justify-center hover:bg-secondary text-muted-foreground transition-colors"
+          aria-label="Remove filter"
         >
           ×
         </button>
@@ -84,11 +85,14 @@ const FilterBadge: React.FC<FilterBadgeProps> = ({ filter, onRemove }) => {
       <button 
         onClick={onRemove}
         className="rounded-full w-5 h-5 flex items-center justify-center hover:bg-muted text-muted-foreground transition-colors"
+        aria-label="Remove filter"
       >
         ×
       </button>
     </Badge>
   );
-};
+});
 
-export default AppliedFilters;
+FilterBadge.displayName = 'FilterBadge';
+
+export default memo(AppliedFilters);
