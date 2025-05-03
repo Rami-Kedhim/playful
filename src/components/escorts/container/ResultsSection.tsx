@@ -7,7 +7,7 @@ import SearchBar from "@/components/escorts/SearchBar";
 interface ResultsSectionProps {
   filterState: any;
   combinedIsLoading: boolean;
-  activeFilterCount?: number; // Add this as an optional prop
+  activeFilterCount?: number; // Optional prop for filter count
 }
 
 const ResultsSection = ({ filterState, combinedIsLoading, activeFilterCount }: ResultsSectionProps) => {
@@ -32,10 +32,10 @@ const ResultsSection = ({ filterState, combinedIsLoading, activeFilterCount }: R
     ].filter(Boolean).length + 
     (filterState.selectedServices?.length || 0) +
     (filterState.selectedGenders?.length || 0) +
-    (filterState.selectedOrientations?.length || 0) +
+    ((filterState as any).selectedOrientations?.length || 0) +
     (filterState.ratingMin > 0 ? 1 : 0) +
-    ((filterState.priceRange?.[0] > 0 || filterState.priceRange?.[1] < 500) ? 1 : 0) +
-    ((filterState.ageRange?.[0] > 21 || filterState.ageRange?.[1] < 50) ? 1 : 0);
+    (((filterState as any).priceRange?.[0] > 0 || (filterState as any).priceRange?.[1] < 500) ? 1 : 0) +
+    (((filterState as any).ageRange?.[0] > 21 || (filterState as any).ageRange?.[1] < 50) ? 1 : 0);
 
   return (
     <div className="lg:col-span-3">

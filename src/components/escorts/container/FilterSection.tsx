@@ -35,35 +35,35 @@ const FilterSection = ({
         
         <div className="flex-1 overflow-auto p-4">
           <FilterSidebar
-            searchQuery={filterState.searchQuery}
-            setSearchQuery={filterState.setSearchQuery}
-            location={filterState.location}
-            setLocation={filterState.setLocation}
+            searchQuery={filterState.searchQuery || ""}
+            setSearchQuery={filterState.setSearchQuery || (() => {})}
+            location={filterState.location || ""}
+            setLocation={filterState.setLocation || (() => {})}
             priceRange={filterState.priceRange || [0, 500]}
             setPriceRange={filterState.handlePriceRangeChange || (() => {})}
-            verifiedOnly={filterState.verifiedOnly}
-            setVerifiedOnly={filterState.setVerifiedOnly}
+            verifiedOnly={filterState.verifiedOnly || false}
+            setVerifiedOnly={filterState.setVerifiedOnly || (() => {})}
             selectedServices={filterState.selectedServices || []}
-            toggleService={filterState.toggleService}
+            toggleService={filterState.toggleService || (() => {})}
             services={services}
-            clearFilters={filterState.clearFilters}
+            clearFilters={filterState.clearFilters || (() => {})}
             selectedGenders={filterState.selectedGenders || []}
             toggleGender={filterState.toggleGender || (() => {})}
-            selectedOrientations={filterState.selectedOrientations || []}
-            toggleOrientation={filterState.toggleOrientation || (() => {})}
-            ageRange={filterState.ageRange || [21, 50]}
-            setAgeRange={filterState.handleAgeRangeChange || (() => {})}
+            selectedOrientations={(filterState as any).selectedOrientations || []}
+            toggleOrientation={(filterState as any).toggleOrientation || (() => {})}
+            ageRange={(filterState as any).ageRange || [21, 50]}
+            setAgeRange={(filterState as any).handleAgeRangeChange || (() => {})}
             ratingMin={filterState.ratingMin || 0}
-            setRatingMin={filterState.setRatingMin}
-            availableNow={filterState.availableNow}
-            setAvailableNow={filterState.setAvailableNow}
+            setRatingMin={filterState.setRatingMin || (() => {})}
+            availableNow={filterState.availableNow || false}
+            setAvailableNow={filterState.setAvailableNow || (() => {})}
             serviceTypeFilter={filterState.serviceTypeFilter || ""}
-            setServiceTypeFilter={filterState.setServiceTypeFilter}
+            setServiceTypeFilter={filterState.setServiceTypeFilter || (() => {})}
           />
         </div>
         
         <div className="p-4 border-t flex justify-between">
-          <Button variant="outline" onClick={filterState.clearFilters}>
+          <Button variant="outline" onClick={filterState.clearFilters || (() => {})}>
             Clear all
           </Button>
           <Button onClick={() => setShowFilters(false)}>
@@ -78,30 +78,30 @@ const FilterSection = ({
   const desktopFilters = (
     <div className="hidden lg:block">
       <FilterSidebar
-        searchQuery={filterState.searchQuery}
-        setSearchQuery={filterState.setSearchQuery}
-        location={filterState.location}
-        setLocation={filterState.setLocation}
-        priceRange={filterState.priceRange || [0, 500]}
-        setPriceRange={filterState.handlePriceRangeChange || (() => {})}
-        verifiedOnly={filterState.verifiedOnly}
-        setVerifiedOnly={filterState.setVerifiedOnly}
+        searchQuery={filterState.searchQuery || ""}
+        setSearchQuery={filterState.setSearchQuery || (() => {})}
+        location={filterState.location || ""}
+        setLocation={filterState.setLocation || (() => {})}
+        priceRange={(filterState as any).priceRange || [0, 500]}
+        setPriceRange={(filterState as any).handlePriceRangeChange || (() => {})}
+        verifiedOnly={filterState.verifiedOnly || false}
+        setVerifiedOnly={filterState.setVerifiedOnly || (() => {})}
         selectedServices={filterState.selectedServices || []}
-        toggleService={filterState.toggleService}
+        toggleService={filterState.toggleService || (() => {})}
         services={services}
-        clearFilters={filterState.clearFilters}
+        clearFilters={filterState.clearFilters || (() => {})}
         selectedGenders={filterState.selectedGenders || []}
         toggleGender={filterState.toggleGender || (() => {})}
-        selectedOrientations={filterState.selectedOrientations || []}
-        toggleOrientation={filterState.toggleOrientation || (() => {})}
-        ageRange={filterState.ageRange || [21, 50]}
-        setAgeRange={filterState.handleAgeRangeChange || (() => {})}
+        selectedOrientations={(filterState as any).selectedOrientations || []}
+        toggleOrientation={(filterState as any).toggleOrientation || (() => {})}
+        ageRange={(filterState as any).ageRange || [21, 50]}
+        setAgeRange={(filterState as any).handleAgeRangeChange || (() => {})}
         ratingMin={filterState.ratingMin || 0}
-        setRatingMin={filterState.setRatingMin}
-        availableNow={filterState.availableNow}
-        setAvailableNow={filterState.setAvailableNow}
+        setRatingMin={filterState.setRatingMin || (() => {})}
+        availableNow={filterState.availableNow || false}
+        setAvailableNow={filterState.setAvailableNow || (() => {})}
         serviceTypeFilter={filterState.serviceTypeFilter || ""}
-        setServiceTypeFilter={filterState.setServiceTypeFilter}
+        setServiceTypeFilter={filterState.setServiceTypeFilter || (() => {})}
       />
     </div>
   );
