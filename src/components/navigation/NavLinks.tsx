@@ -3,7 +3,13 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { AppPaths } from '@/routes/routeConfig';
 import { cn } from '@/lib/utils';
-import { Brain, Home, Users, Heart, MessageSquare } from 'lucide-react';
+import { 
+  Home, 
+  Users, 
+  Brain, 
+  Shield, 
+  MessageSquare
+} from 'lucide-react';
 
 interface NavLinksProps {
   className?: string;
@@ -55,6 +61,15 @@ const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
         }
       >
         <MessageSquare className="w-4 h-4" /> Messages
+      </NavLink>
+      
+      <NavLink 
+        to={AppPaths.SAFETY}
+        className={({ isActive }) => 
+          cn("text-sm flex items-center gap-1.5", isActive ? "font-bold text-primary" : "text-muted-foreground hover:text-foreground")
+        }
+      >
+        <Shield className="w-4 h-4" /> Safety
       </NavLink>
     </nav>
   );
