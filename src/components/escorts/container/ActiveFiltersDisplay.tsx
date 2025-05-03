@@ -2,7 +2,6 @@
 import React, { memo, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
-import { ServiceTypeFilter } from "@/components/escorts/filters/ServiceTypeBadgeLabel";
 
 interface Filter {
   key: string;
