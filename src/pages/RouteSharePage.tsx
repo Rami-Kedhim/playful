@@ -1,45 +1,42 @@
 
 import React from 'react';
-import { UnifiedLayout } from '@/layouts';
+import { useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Share2 } from 'lucide-react';
 
-const RouteSharePage: React.FC = () => {
+const RouteSharePage = () => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const shareId = queryParams.get('id') || 'No ID provided';
+  const shareType = queryParams.get('type') || 'Unknown type';
+
   return (
-    <UnifiedLayout>
-      <div className="container max-w-6xl mx-auto py-8 px-4 sm:px-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Route Sharing</h1>
-          <p className="text-muted-foreground">
-            Share your route with trusted contacts for added safety.
-          </p>
-        </div>
-
-        <Card className="mb-8">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-primary" />
-              <CardTitle>Route Sharing Settings</CardTitle>
+    <div className="container mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Shared Content</h1>
+      
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Shared Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div>
+              <strong>Share ID:</strong> {shareId}
             </div>
-          </CardHeader>
-          <CardContent>
-            <p>This is the route sharing feature. Configure your safety contacts and preferences here.</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Share2 className="h-5 w-5 text-primary" />
-              <CardTitle>Safety Contacts</CardTitle>
+            <div>
+              <strong>Type:</strong> {shareType}
             </div>
-          </CardHeader>
-          <CardContent>
-            <p>Add and manage contacts who will receive your location updates.</p>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <div className="mt-8">
+        <h2 className="text-2xl font-semibold mb-4">Content will load here</h2>
+        <p className="text-muted-foreground">
+          This is a placeholder for shared content. In a real implementation, this would fetch 
+          the content based on the share ID and type.
+        </p>
       </div>
-    </UnifiedLayout>
+    </div>
   );
 };
 
