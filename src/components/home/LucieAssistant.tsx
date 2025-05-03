@@ -1,15 +1,10 @@
 
-import { useRef, useEffect, useState } from 'react';
-import { X, MessageCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { X, MessageSquare, Send } from 'lucide-react';
 import { useLucieAssistant } from '@/hooks/useLucieAssistant';
-import LucieHeader from './lucie-assistant/LucieHeader';
 import LucieMessageList from './lucie-assistant/LucieMessageList';
-import LucieInputBox from './lucie-assistant/LucieInputBox';
-import LucieConfetti from './lucie-assistant/LucieConfetti';
-import { useUserAIContext } from '@/hooks/useUserAIContext';
-import AICompanionChatStyles from '@/components/ai/companion-chat/AICompanionChatStyles';
 
 interface LucieAssistantProps {
   initiallyOpen?: boolean;
@@ -17,167 +12,102 @@ interface LucieAssistantProps {
   onClose?: () => void;
 }
 
-const LucieAssistant = ({ 
-  initiallyOpen = false, 
-  customInitialMessage, 
-  onClose 
-}: LucieAssistantProps) => {
-  const {
-    messages,
+const LucieAssistant: React.FC<LucieAssistantProps> = ({
+  initiallyOpen = true,
+  customInitialMessage,
+  onClose
+}) => {
+  const [inputValue, setInputValue] = useState('');
+  const lucieHook = useLucieAssistant({
+    initialMessages: customInitialMessage ? [{
+      id: 'initial',
+      content: customInitialMessage,
+      role: 'assistant',
+      timestamp: new Date()
+    }] : undefined
+  });
+
+  const { 
+    messages, 
+    sendMessage, 
+    isLoading, 
     isTyping,
     isOpen,
-    sendMessage,
-    toggleChat,
-    clearMessages
-  } = useLucieAssistant();
+    toggleChat
+  } = lucieHook;
 
-  const { aiContext, trackInteraction } = useUserAIContext();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [celebration, setCelebration] = useState(false);
-  const [celebrationTrigger, setCelebrationTrigger] = useState(0); // Counter to trigger celebrations
-  
-  // Set initial open state from props
+  // Handle form submission
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (inputValue.trim() && !isLoading) {
+      sendMessage(inputValue);
+      setInputValue('');
+    }
+  };
+
+  // Initialize open state
   useEffect(() => {
-    if (initiallyOpen && !isOpen) {
+    if (initiallyOpen !== undefined && initiallyOpen !== isOpen) {
       toggleChat();
     }
   }, [initiallyOpen, isOpen, toggleChat]);
 
-  // Auto-scroll to the bottom when messages change
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
-
-  // Set custom initial message if provided
-  useEffect(() => {
-    if (customInitialMessage && messages.length === 1) {
-      const welcomeMessage = messages[0];
-      if (welcomeMessage && welcomeMessage.role === 'assistant' && welcomeMessage.content.includes("I'm Lucie")) {
-        // Only clear once to prevent infinite loop
-        const shouldClear = welcomeMessage.content !== customInitialMessage;
-        if (shouldClear) {
-          clearMessages();
-        }
-      }
-    }
-  }, [customInitialMessage, messages, clearMessages]);
-  
-  // Check for celebratory messages with more sophisticated detection
-  useEffect(() => {
-    if (messages.length > 0) {
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage.role === 'assistant') {
-        // List of positive indicators that should trigger celebration
-        const positiveIndicators = [
-          'successfully', 'great news', 'congratulations', 'completed', 
-          'welcome aboard', 'thank you', 'well done', 'perfect', 'excellent', 
-          'awesome', 'amazing', 'fantastic', 'wonderful', 'bravo', 'brilliant',
-          'outstanding', 'superb', 'impressive'
-        ];
-        
-        // Check for positive phrases or exclamation marks with positive words
-        const content = lastMessage.content.toLowerCase();
-        const hasPositiveIndicator = positiveIndicators.some(phrase => content.includes(phrase));
-        const hasExcitedTone = content.includes('!') && 
-          (content.includes('great') || content.includes('good') || content.includes('love'));
-        
-        // Check for celebratory emojis
-        const celebrationEmojis = ['🎉', '🎊', '🥳', '👏', '✨', '🙌'];
-        const hasEmoji = celebrationEmojis.some(emoji => lastMessage.content.includes(emoji));
-        
-        if (hasPositiveIndicator || hasExcitedTone || hasEmoji) {
-          setCelebration(true);
-          setCelebrationTrigger(prev => prev + 1); // Increment to trigger animation
-          
-          // Reset celebration after a delay
-          setTimeout(() => setCelebration(false), 4000);
-        }
-      }
-    }
-  }, [messages]);
-
-  // Handle suggested action clicks
-  const handleSuggestedActionClick = (action: string) => {
-    sendMessage(action);
-    
-    // Track interaction for personalization
-    if (aiContext) {
-      trackInteraction(action);
-    }
-  };
-
-  // Handle message send with tracking
-  const handleSendMessage = (message: string) => {
-    sendMessage(message);
-    
-    // Track interaction for personalization
-    if (aiContext) {
-      trackInteraction(message);
-    }
-  };
-
-  // Determine if AI assistant should be disabled
-  const isDisabled = aiContext ? !aiContext.isEnabled : false;
+  if (!isOpen) {
+    return (
+      <Button
+        className="fixed bottom-6 right-6 flex items-center shadow-lg"
+        onClick={toggleChat}
+      >
+        <MessageSquare className="mr-2 h-4 w-4" />
+        Chat with Lucie
+      </Button>
+    );
+  }
 
   return (
-    <>
-      <AICompanionChatStyles />
-
-      {/* Enhanced Floating button with pulse effect */}
-      <Button
-        onClick={toggleChat}
-        className={`fixed right-6 bottom-6 p-3 w-14 h-14 flex items-center justify-center rounded-full shadow-lg z-50 transition-transform duration-300 hover:scale-105 ${
-          isOpen ? 'bg-gray-700' : 'bg-primary animate-pulse-glow'
-        }`}
-        aria-label={isOpen ? "Close chat assistant" : "Open chat assistant"}
-      >
-        {isOpen ? <X size={24} /> : <MessageCircle size={24} className="animate-float" />}
-      </Button>
-
-      {/* Chat window */}
-      {isOpen && !isDisabled && (
-        <Card 
-          className={`fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 flex flex-col animate-fade-in ${
-            celebration ? 'animate-pop' : ''
-          }`}
-          key={`chat-window-${celebrationTrigger}`} // Re-render on celebration for animations
+    <Card className="fixed bottom-6 right-6 w-80 md:w-96 shadow-xl flex flex-col h-96">
+      <CardHeader className="bg-primary text-primary-foreground p-3 flex-shrink-0">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-base">Lucie Assistant</CardTitle>
+          <div className="flex space-x-1">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-primary-foreground h-7 w-7" 
+              onClick={onClose || toggleChat}
+            >
+              <X size={16} />
+              <span className="sr-only">Close</span>
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0 flex-grow overflow-hidden flex flex-col">
+        <LucieMessageList messages={messages} isTyping={isTyping} />
+        
+        <form 
+          onSubmit={handleSubmit}
+          className="p-3 border-t flex space-x-2"
         >
-          <LucieHeader 
-            onClose={onClose || toggleChat} 
-            onMinimize={toggleChat}
-            showAnimation={true}
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Type your message..."
+            className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            disabled={isLoading}
           />
-          <LucieMessageList 
-            messages={messages} 
-            isTyping={isTyping}
-            messagesEndRef={messagesEndRef}
-            onSuggestedActionClick={handleSuggestedActionClick}
-          />
-          <LucieInputBox onSendMessage={handleSendMessage} />
-            
-          {celebration && (
-            <LucieConfetti 
-              show={celebration} 
-              onComplete={() => setCelebration(false)} 
-            />
-          )}
-        </Card>
-      )}
-      
-      {/* Disabled state */}
-      {isOpen && isDisabled && (
-        <Card className="fixed bottom-24 right-6 w-80 sm:w-96 bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 p-4 animate-fade-in">
-          <h3 className="font-medium mb-2">AI Assistant Disabled</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            You have disabled the AI assistant in your settings. 
-            Enable it again in your profile settings.
-          </p>
-          <Button onClick={toggleChat} variant="outline" size="sm">
-            Close
+          <Button 
+            type="submit" 
+            size="icon"
+            disabled={isLoading || !inputValue.trim()}
+          >
+            <Send size={18} />
+            <span className="sr-only">Send</span>
           </Button>
-        </Card>
-      )}
-    </>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 

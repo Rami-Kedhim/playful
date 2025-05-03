@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { lucie } from '@/core/Lucie';
 
-type LucieMessage = {
+export type LucieMessage = {
   id: string;
   content: string;
   role: 'user' | 'assistant';
@@ -18,11 +18,17 @@ interface UseLucieAssistantOptions {
 export const useLucieAssistant = (options: UseLucieAssistantOptions = {}) => {
   const [messages, setMessages] = useState<LucieMessage[]>(options.initialMessages || []);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [context, setContext] = useState<Record<string, any>>(options.initialContext || {});
   
   // Helper function to generate a unique ID
   const generateId = () => `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  const toggleChat = useCallback(() => {
+    setIsOpen(prev => !prev);
+  }, []);
 
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim()) return;
@@ -38,6 +44,7 @@ export const useLucieAssistant = (options: UseLucieAssistantOptions = {}) => {
       
       setMessages(prev => [...prev, userMessage]);
       setIsLoading(true);
+      setIsTyping(true);
       setError(null);
       
       // Check if content is appropriate
@@ -51,6 +58,7 @@ export const useLucieAssistant = (options: UseLucieAssistantOptions = {}) => {
         };
         setMessages(prev => [...prev, warningMessage]);
         setIsLoading(false);
+        setIsTyping(false);
         return;
       }
       
@@ -78,6 +86,7 @@ export const useLucieAssistant = (options: UseLucieAssistantOptions = {}) => {
       setError('An error occurred while processing your request.');
     } finally {
       setIsLoading(false);
+      setIsTyping(false);
     }
   }, [messages, context, options.userId]);
 
@@ -95,11 +104,14 @@ export const useLucieAssistant = (options: UseLucieAssistantOptions = {}) => {
   return {
     messages,
     isLoading,
+    isTyping,
+    isOpen,
     error,
     context,
     sendMessage,
     clearMessages,
-    updateContext
+    updateContext,
+    toggleChat
   };
 };
 

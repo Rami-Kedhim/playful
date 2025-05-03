@@ -1,7 +1,18 @@
-
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { routeRegistry, RouteDefinition, RouteCategory } from '@/utils/navigation/routeRegistry';
+
+export type RouteCategory = 
+  'core' | 
+  'escort' | 
+  'client' | 
+  'creator' | 
+  'metaverse' | 
+  'neural' | 
+  'admin' | 
+  'auth' | 
+  'safety' | 
+  'wallet' | 
+  'settings';
 
 export const AppPaths = {
   HOME: '/',
@@ -17,7 +28,8 @@ export const AppPaths = {
   ADMIN: '/admin',
   MODERATION: '/moderation',
   SAFETY: '/safety',
-  AI_COMPANION: '/ai-companions'
+  AI_COMPANION: '/ai-companions',
+  ROUTE_SHARE: '/safety/route-share'
 };
 
 // Dynamically import components to prevent circular dependencies
@@ -34,6 +46,8 @@ const AdminConfig = React.lazy(() => import('@/pages/AdminConfig'));
 const ModerationPage = React.lazy(() => import('@/pages/ModerationPage'));
 const NotFoundPage = React.lazy(() => import('@/pages/NotFoundPage'));
 const AICompanionPage = React.lazy(() => import('@/pages/AICompanionPage'));
+const SafetyPage = React.lazy(() => import('@/pages/SafetyPage'));
+const RouteSharePage = React.lazy(() => import('@/pages/RouteSharePage'));
 
 // Routes configuration with React components
 export const routes = [
@@ -114,6 +128,18 @@ export const routes = [
     element: <React.Suspense fallback={<div>Loading...</div>}><AICompanionPage /></React.Suspense>,
     title: 'AI Companions',
     category: 'core' as RouteCategory
+  },
+  {
+    path: AppPaths.SAFETY,
+    element: <React.Suspense fallback={<div>Loading...</div>}><SafetyPage /></React.Suspense>,
+    title: 'Safety',
+    category: 'safety' as RouteCategory
+  },
+  {
+    path: AppPaths.ROUTE_SHARE,
+    element: <React.Suspense fallback={<div>Loading...</div>}><RouteSharePage /></React.Suspense>,
+    title: 'Route Share',
+    category: 'safety' as RouteCategory
   },
   {
     path: '*',

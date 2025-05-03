@@ -9,7 +9,7 @@ interface AICompanionChatProps {
   className?: string;
 }
 
-// Define message type
+// Define message type with proper sender type
 interface Message {
   id: string;
   text: string;
@@ -42,7 +42,7 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
-    const userMessage = {
+    const userMessage: Message = {
       id: `user-${Date.now()}`,
       text: inputValue,
       sender: 'user',

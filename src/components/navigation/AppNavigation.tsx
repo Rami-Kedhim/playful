@@ -2,7 +2,8 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { getRoutesByCategory, RouteCategory } from '@/routes/routeConfig';
+import { getRoutesByCategory } from '@/routes/routeConfig';
+import { type RouteCategory } from '@/routes/routeConfig'; 
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { useRole } from '@/hooks/auth/useRole';
 import { 
