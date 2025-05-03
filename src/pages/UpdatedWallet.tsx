@@ -1,20 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import { useAuth } from '@/contexts/AuthContext';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { UBXPriceDisplay } from '@/components/oxum/UBXPriceDisplay';
-import { OxumInfoTooltip } from '@/components/oxum/OxumInfoTooltip';
+import { Wallet, CircleDollarSign, PackageOpen, Clock, ArrowUpRight } from 'lucide-react';
+import UBXPriceDisplay from '@/components/oxum/UBXPriceDisplay';
+import OxumInfoTooltip from '@/components/oxum/OxumInfoTooltip';
 import { toast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import { Loader2 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -25,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-const UpdatedWallet = () => {
+const UpdatedWallet: React.FC = () => {
   const { user, profile } = useAuth();
   const [selectedTab, setSelectedTab] = useState<string>("balance");
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -87,10 +80,32 @@ const UpdatedWallet = () => {
     );
   };
 
-  const renderSubscriptionContent = () => {
-    const subscriptionTier = profile?.subscription_tier || 'free';
+  const renderSubscriptionStatus = () => {
+    // Check the boosted status with fallbacks for both property formats
+    const isBoostedProfile = profile?.isBoosted || profile?.is_boosted;
+
+    if (isBoostedProfile) {
+      return (
+        <div className="space-y-6">
+          <h3 className="text-xl font-semibold">Boosted</h3>
+          <p className="text-muted-foreground">You are currently boosted.</p>
+        </div>
+      );
+    } else {
+      return (
+        <div className="space-y-6">
+          <h3 className="text-xl font-semibold">Not Boosted</h3>
+          <p className="text-muted-foreground">You are not currently boosted.</p>
+        </div>
+      );
+    }
+  };
+
+  const renderSubscriptionTier = () => {
+    // Use optional chaining for subscription tier to prevent errors
+    const tier = profile?.subscription_tier;
     
-    if (subscriptionTier === 'free') {
+    if (tier === 'free') {
       return (
         <div className="space-y-6">
           <h3 className="text-xl font-semibold">Free Tier</h3>
@@ -102,7 +117,7 @@ const UpdatedWallet = () => {
       );
     }
     
-    if (subscriptionTier === 'basic') {
+    if (tier === 'basic') {
       return (
         <div className="space-y-6">
           <h3 className="text-xl font-semibold">Basic Tier</h3>
@@ -116,7 +131,7 @@ const UpdatedWallet = () => {
       );
     }
     
-    if (subscriptionTier === 'premium') {
+    if (tier === 'premium') {
       return (
         <div className="space-y-6">
           <h3 className="text-xl font-semibold">Premium Tier</h3>
@@ -139,6 +154,10 @@ const UpdatedWallet = () => {
         </Button>
       </div>
     );
+  };
+
+  const handleRecharge = () => {
+    // Recharge functionality
   };
 
   return (
@@ -188,7 +207,8 @@ const UpdatedWallet = () => {
                 <CardTitle>Subscription Details</CardTitle>
               </CardHeader>
               <CardContent>
-                {renderSubscriptionContent()}
+                {renderSubscriptionStatus()}
+                {renderSubscriptionTier()}
               </CardContent>
             </Card>
           </TabsContent>

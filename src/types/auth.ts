@@ -15,20 +15,31 @@ export interface UserProfile {
   userId: string;
   username?: string;
   fullName?: string;
+  name?: string;
   bio?: string;
   avatarUrl?: string;
   avatar_url?: string; // For backward compatibility
   preferences?: Record<string, any>;
   verified?: boolean;
   is_verified?: boolean; // For backward compatibility
+  isVerified?: boolean;  // For standardization
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
   gender?: string;
   location?: string;
   sexual_orientation?: string;
   website?: string;
+  phone?: string;
   ubxBalance?: number;
   ubx_balance?: number; // For backward compatibility
+  isBoosted?: boolean;
+  is_boosted?: boolean; // For backward compatibility
+  subscription_tier?: string;
+  role?: string;
+  roles?: string[];
+  verification_status?: string;
+  verification_level?: string;
+  verification_submitted?: boolean;
 }
 
 export type VerificationLevel = 'none' | 'basic' | 'full';

@@ -37,8 +37,7 @@ export const getUserVerificationLevel = (user: User | null): VerificationLevel =
 export const hasSubmittedVerification = (user: User | null): boolean => {
   if (!user) return false;
   
-  // Check user_metadata for verification submitted flag
-  // Use optional chaining to safely access properties
+  // Check user_metadata for verification submitted flag using optional chaining
   return user.user_metadata?.verification_submitted === true || 
          user.user_metadata?.verification_request !== undefined;
 };

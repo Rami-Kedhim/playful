@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email?: string;
@@ -23,11 +24,14 @@ export interface User {
     verification_status?: string;
     verification_level?: string;
     isVerified?: boolean;
+    verification_submitted?: boolean;
+    preferences?: Record<string, any>;
   };
   ubxBalance?: number;
   bio?: string;
   website?: string;
   isVerified?: boolean;
+  phone?: string;
 }
 
 export interface UserProfile {
@@ -43,7 +47,7 @@ export interface UserProfile {
   verified?: boolean;
   is_verified?: boolean; // Adding for backward compatibility
   isVerified?: boolean;  // Adding for standardization
-  createdAt?: string;
+  createdAt: string;
   updatedAt?: string;
   gender?: string;
   location?: string;
