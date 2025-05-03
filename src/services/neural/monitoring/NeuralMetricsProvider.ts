@@ -76,14 +76,15 @@ export class NeuralMetricsProvider {
   /**
    * Calculate overall health score
    */
-  calculateOverallHealth(): number {
+  calculateOverallHealth(): string {
     let healthScore = 100;
     
     healthScore -= this.cachedMetrics.cpuUtilization / 100 * 20;
     healthScore -= this.cachedMetrics.memoryUtilization / 100 * 30;
     healthScore -= this.cachedMetrics.errorRate * 50;
     
-    return Math.max(0, healthScore);
+    // Convert to string for return type consistency
+    return healthScore.toFixed(0);
   }
   
   /**

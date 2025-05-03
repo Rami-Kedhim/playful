@@ -1,5 +1,5 @@
 
-import { SystemHealthMetrics } from './neural/NeuralSystemMetrics';
+import { NeuralSystemMetrics } from './neural/NeuralSystemMetrics';
 
 export interface ServiceMetrics {
   operationsCount: number;
@@ -42,4 +42,17 @@ export interface HealthMetrics {
   operationsPerSecond?: number;
   errorRate: number;
   [key: string]: any;
+}
+
+// Add NeuralModelParameters interface used by NeuralSystemControls.tsx
+export interface NeuralModelParameters {
+  decayConstant: number;
+  growthFactor: number;
+  cyclePeriod: number;
+  harmonicCount: number;
+  bifurcationPoint: number;
+  attractorStrength: number;
+  learningRate: number;
+  batchSize: number;
+  temperature: number;
 }
