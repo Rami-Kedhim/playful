@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useEscortFilter } from '@/hooks/useEscortFilter';
 import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
@@ -11,12 +11,13 @@ interface UseEscortFilterWithUrlProps {
 
 export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [initialLoad, setInitialLoad] = useState(true);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const updatingUrlRef = useRef(false);
   const filterState = useEscortFilter({ escorts });
   
   // Load filters from URL on mount only once
   useEffect(() => {
-    if (!initialLoad) return;
+    if (initialLoadComplete) return;
     
     // Get filter values from URL parameters
     const serviceType = searchParams.get('serviceType') as ServiceTypeFilter;
@@ -26,65 +27,48 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
     const query = searchParams.get('q') || '';
     const rating = searchParams.get('rating');
     
-    // Create a batch of updates to apply at once
-    const updates = {};
-    let hasUpdates = false;
+    // Apply all filters asynchronously to avoid render cycles
+    const applyFilters = () => {
+      // Only apply filters that actually exist in the URL
+      if (serviceType && ['in-person', 'virtual', 'both'].includes(serviceType)) {
+        filterState.setServiceTypeFilter(serviceType);
+      }
+      
+      if (verified) {
+        filterState.setVerifiedOnly(true);
+      }
+      
+      if (available) {
+        filterState.setAvailableNow(true);
+      }
+      
+      if (location) {
+        filterState.setLocation(location);
+      }
+      
+      if (query) {
+        filterState.setSearchQuery(query);
+      }
+      
+      if (rating) {
+        filterState.setRatingMin(parseInt(rating, 10));
+      }
+      
+      // Mark initial load as complete to prevent further URL->state syncs
+      setInitialLoadComplete(true);
+    };
     
-    // Update filter state based on URL parameters
-    if (serviceType && ['in-person', 'virtual', 'both'].includes(serviceType)) {
-      updates['serviceTypeFilter'] = serviceType;
-      hasUpdates = true;
-    }
-    
-    if (verified) {
-      updates['verifiedOnly'] = true;
-      hasUpdates = true;
-    }
-    
-    if (available) {
-      updates['availableNow'] = true;
-      hasUpdates = true;
-    }
-    
-    if (location) {
-      updates['location'] = location;
-      hasUpdates = true;
-    }
-    
-    if (query) {
-      updates['searchQuery'] = query;
-      hasUpdates = true;
-    }
-    
-    if (rating) {
-      updates['ratingMin'] = parseInt(rating, 10);
-      hasUpdates = true;
-    }
-    
-    // Apply all updates at once to minimize renders
-    if (hasUpdates) {
-      setTimeout(() => {
-        // Use setTimeout to ensure these are applied outside the current render cycle
-        if (updates['serviceTypeFilter']) filterState.setServiceTypeFilter(updates['serviceTypeFilter']);
-        if (updates['verifiedOnly']) filterState.setVerifiedOnly(true);
-        if (updates['availableNow']) filterState.setAvailableNow(true);
-        if (updates['location']) filterState.setLocation(updates['location']);
-        if (updates['searchQuery']) filterState.setSearchQuery(updates['searchQuery']);
-        if (updates['ratingMin']) filterState.setRatingMin(updates['ratingMin']);
-        
-        // Mark initial load as complete to prevent further URL->state syncs
-        setInitialLoad(false);
-      }, 0);
-    } else {
-      // If no updates needed, still mark initial load complete
-      setInitialLoad(false);
-    }
+    // Use setTimeout to break the potential render cycle
+    const timeoutId = setTimeout(applyFilters, 0);
+    return () => clearTimeout(timeoutId);
   }, [searchParams, filterState]);
   
   // Update URL when filters change, but only after initial load is complete
   useEffect(() => {
     // Skip URL updates during initial load to prevent loops
-    if (initialLoad) return;
+    if (!initialLoadComplete || updatingUrlRef.current) return;
+    
+    updatingUrlRef.current = true;
     
     // Use a shallow copy of current params to avoid direct modification
     const params = new URLSearchParams(searchParams.toString());
@@ -122,14 +106,24 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
       params.set('rating', filterState.ratingMin.toString());
     }
     
-    // Compare current and new params to avoid unnecessary history entries
-    const currentParamsString = searchParams.toString();
-    const newParamsString = params.toString();
+    // Safely update URL parameters
+    const timeoutId = setTimeout(() => {
+      // Compare current and new params to avoid unnecessary history entries
+      const currentParamsString = searchParams.toString();
+      const newParamsString = params.toString();
+      
+      if (currentParamsString !== newParamsString) {
+        // Use { replace: true } to avoid adding to browser history
+        setSearchParams(params, { replace: true });
+      }
+      
+      updatingUrlRef.current = false;
+    }, 0);
     
-    if (currentParamsString !== newParamsString) {
-      // Use { replace: true } to avoid adding to browser history
-      setSearchParams(params, { replace: true });
-    }
+    return () => {
+      clearTimeout(timeoutId);
+      updatingUrlRef.current = false;
+    };
   }, [
     filterState.serviceTypeFilter,
     filterState.verifiedOnly,
@@ -138,7 +132,7 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
     filterState.searchQuery,
     filterState.ratingMin,
     setSearchParams,
-    initialLoad,
+    initialLoadComplete,
     searchParams
   ]);
   

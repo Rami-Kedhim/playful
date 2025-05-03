@@ -28,7 +28,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
       // Ignore or reset to empty if invalid
       filterState.setServiceTypeFilter("");
     }
-  }, [filterState]);
+  }, [filterState.setServiceTypeFilter]);
 
   // Consider both internal and external loading states
   const combinedIsLoading = filterState.isLoading || externalLoading;
@@ -81,14 +81,24 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
 
   // Memoize show filters toggle to prevent re-renders
   const toggleShowFilters = useCallback(() => {
-    setShowFilters(prev => !prev);
+    setShowFilters(prevState => !prevState);
+  }, []);
+  
+  // Memoize setShowFilters to prevent re-renders
+  const handleSetShowFilters = useCallback((value: boolean) => {
+    setShowFilters(value);
+  }, []);
+
+  // Memoize location click handler
+  const handleLocationClick = useCallback(() => {
+    setShowFilters(true);
   }, []);
 
   return (
     <>
       <HeaderSection 
         showFilters={showFilters}
-        setShowFilters={setShowFilters}
+        setShowFilters={handleSetShowFilters}
         totalCount={escorts?.length || 0}
       />
       
@@ -101,8 +111,8 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
         availableNow={filterState.availableNow}
         setAvailableNow={filterState.setAvailableNow}
         location={filterState.location}
-        onLocationClick={() => setShowFilters(true)}
-        onShowMoreFilters={() => setShowFilters(true)}
+        onLocationClick={handleLocationClick}
+        onShowMoreFilters={toggleShowFilters}
         className="mb-6 md:mb-8"
         ratingMin={filterState.ratingMin}
         setRatingMin={filterState.setRatingMin}
@@ -111,7 +121,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <FilterSection
           showFilters={showFilters}
-          setShowFilters={setShowFilters}
+          setShowFilters={handleSetShowFilters}
           filterState={filterState}
           services={services || []}
         />

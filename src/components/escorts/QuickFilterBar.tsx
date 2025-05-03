@@ -1,5 +1,5 @@
 
-import React, { useCallback } from 'react';
+import React, { useCallback, memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -40,11 +40,7 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
 }) => {
   // Use memoized callback functions for all handlers to prevent re-renders
   const handleTypeClick = useCallback((type: ServiceTypeFilter) => {
-    if (serviceTypeFilter === type) {
-      setServiceTypeFilter('');
-    } else {
-      setServiceTypeFilter(type);
-    }
+    setServiceTypeFilter(serviceTypeFilter === type ? '' : type);
   }, [serviceTypeFilter, setServiceTypeFilter]);
 
   // Use memoized callback for handling rating click
@@ -67,6 +63,19 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
       setAvailableNow(!availableNow);
     }
   }, [availableNow, setAvailableNow]);
+
+  // Memoize the location and more filters click handlers
+  const handleLocationClick = useCallback(() => {
+    if (onLocationClick) {
+      onLocationClick();
+    }
+  }, [onLocationClick]);
+
+  const handleShowMoreFilters = useCallback(() => {
+    if (onShowMoreFilters) {
+      onShowMoreFilters();
+    }
+  }, [onShowMoreFilters]);
 
   return (
     <Card className={className}>
@@ -146,7 +155,7 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={onLocationClick}
+                onClick={handleLocationClick}
                 className="flex items-center gap-1"
               >
                 <Map className="h-4 w-4" />
@@ -158,7 +167,7 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
               variant="outline"
               size="sm"
               className="flex items-center gap-1"
-              onClick={onShowMoreFilters}
+              onClick={handleShowMoreFilters}
             >
               <Tags className="h-4 w-4" />
               <span>More Filters</span>
@@ -171,4 +180,5 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
   );
 };
 
-export default QuickFilterBar;
+// Use memo to prevent unnecessary re-renders
+export default memo(QuickFilterBar);
