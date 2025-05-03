@@ -18,7 +18,7 @@ const Profile = () => {
           <CardContent className="pt-6">
             <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
               <Avatar className="h-24 w-24 border-2 border-primary">
-                <AvatarImage src={user?.avatar || ""} />
+                <AvatarImage src={user?.avatarUrl || user?.avatar_url || ""} />
                 <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
               </Avatar>
               
