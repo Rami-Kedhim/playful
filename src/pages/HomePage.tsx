@@ -8,7 +8,7 @@ import HomeHeader from '@/components/home/HomeHeader';
 import ActionGrid from '@/components/home/ActionGrid';
 import BoostLiveMonitor from '@/components/home/BoostLiveMonitor';
 import HeroSection from '@/components/home/HeroSection';
-import { AppPaths } from '@/routes';
+import { AppPaths } from '@/routes/routeConfig';
 import FeaturesSection from '@/components/home/FeaturesSection';
 import TrustSection from '@/components/home/TrustSection';
 import MetaverseSection from '@/components/home/MetaverseSection';

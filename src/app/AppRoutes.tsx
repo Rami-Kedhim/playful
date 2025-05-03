@@ -2,7 +2,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { routes } from '@/routes/routeConfig';
-import RoleBasedRoute from '@/components/auth/RoleBasedRoute';
 
 const AppRoutes = () => {
   return (

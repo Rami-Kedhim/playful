@@ -1,190 +1,106 @@
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { lucie } from '@/core/Lucie';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/auth/useAuth';
 
-export interface LucieMessage {
+type LucieMessage = {
   id: string;
-  role: 'user' | 'assistant';
   content: string;
+  role: 'user' | 'assistant';
   timestamp: Date;
-  emotion?: 'neutral' | 'happy' | 'thinking' | 'confused' | 'friendly' | 'concerned';
-  suggestedActions?: string[];
-  links?: { text: string; url: string }[];
-  visualElements?: {
-    type: 'image' | 'chart' | 'map';
-    data: any;
-  }[];
+};
+
+interface UseLucieAssistantOptions {
+  initialMessages?: LucieMessage[];
+  initialContext?: Record<string, any>;
+  userId?: string;
 }
 
-interface RouteContextSafe {
-  userId: string;
-  walletId?: string;
-  actionType?: string;
-  contentPurpose?: string;
-  personalityType?: string;
-  [key: string]: any;
-}
-
-export function useLucieAssistant() {
-  const { user } = useAuth();
-  const [messages, setMessages] = useState<LucieMessage[]>([]);
-  const [isTyping, setIsTyping] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+export const useLucieAssistant = (options: UseLucieAssistantOptions = {}) => {
+  const [messages, setMessages] = useState<LucieMessage[]>(options.initialMessages || []);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
-  const initializedRef = useRef(false);
-  const sessionStartedRef = useRef(false);
+  const [context, setContext] = useState<Record<string, any>>(options.initialContext || {});
+  
+  // Helper function to generate a unique ID
+  const generateId = () => `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-  // Initialize with welcome message only once
-  useEffect(() => {
-    if (!sessionStartedRef.current && isOpen && messages.length === 0) {
-      sessionStartedRef.current = true;
-      
-      const welcomeMessage: LucieMessage = {
-        id: 'welcome-' + Date.now(),
-        role: 'assistant',
-        content: "Hi there! I'm Lucie, your personal UberEscorts assistant. How can I help you today?",
-        timestamp: new Date(),
-        suggestedActions: [
-          "Find escorts near me",
-          "Browse creator content",
-          "Check my wallet"
-        ],
-        emotion: "friendly"
-      };
-      
-      setMessages([welcomeMessage]);
-    }
-  }, [messages.length, isOpen]);
-
-  // Reset the session when chat is closed
-  useEffect(() => {
-    if (!isOpen) {
-      sessionStartedRef.current = false;
-    }
-  }, [isOpen]);
-
-  // Send a message to Lucie
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim()) return;
-
-    setIsTyping(true);
-    setError(null);
-
+    
     try {
-      // Add user message to the UI immediately for better UX
+      // Add user message to state
       const userMessage: LucieMessage = {
-        id: Date.now().toString(),
-        role: 'user',
+        id: generateId(),
         content,
-        timestamp: new Date(),
+        role: 'user',
+        timestamp: new Date()
       };
-
-      setMessages(prev => [...prev, userMessage]);
-
-      // Provide userId for context or fallback to 'anonymous'
-      const userId = user?.id || 'anonymous';
-
-      // Use Lucie's generateContent method to get a response
-      const response = await lucie.generateContent({
-        prompt: content,
-        type: 'text',
-        nsfw: false,
-        userId,
-      });
-
-      if (!response.success) {
-        throw new Error("Failed to generate response");
-      }
-
-      // Determine emotion based on response content
-      let emotion: LucieMessage['emotion'] = 'neutral';
-      const responseText = response.text || '';
       
-      if (responseText.includes('sorry') || responseText.includes('apologize')) {
-        emotion = 'concerned';
-      } else if (responseText.includes('great') || responseText.includes('happy')) {
-        emotion = 'happy';
-      } else if (responseText.includes('let me think') || responseText.includes('hmm')) {
-        emotion = 'thinking';
-      } else if (responseText.includes('?')) {
-        emotion = 'confused';
-      } else {
-        emotion = 'friendly';
+      setMessages(prev => [...prev, userMessage]);
+      setIsLoading(true);
+      setError(null);
+      
+      // Check if content is appropriate
+      const moderationResult = await lucie.moderateContent(content);
+      if (!moderationResult.safe) {
+        const warningMessage: LucieMessage = {
+          id: generateId(),
+          content: "I'm sorry, but I cannot process that request as it may contain inappropriate content.",
+          role: 'assistant',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, warningMessage]);
+        setIsLoading(false);
+        return;
       }
-
-      // Generate relevant suggested actions based on the response
-      const suggestedActions = generateSuggestedActions(content, responseText);
-
-      // Create the Lucie response message
-      const lucieMessage: LucieMessage = {
-        id: 'lucie-' + Date.now().toString(),
-        role: 'assistant',
-        content: responseText,
-        timestamp: new Date(),
-        emotion,
-        suggestedActions
+      
+      // Generate Lucie's response
+      const messageHistory = messages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
+      const enhancedContext = {
+        ...context,
+        userId: options.userId || 'anonymous',
+        messageHistory
       };
-
-      setMessages(prev => [...prev, lucieMessage]);
-
-    } catch (err: any) {
-      console.error('Error sending message to Lucie:', err);
-      setError('Failed to get a response. Please try again.');
-      toast({
-        title: "Error",
-        description: "Failed to get response from assistant.",
-        variant: "destructive",
-      });
+      
+      const response = await lucie.generateContent(content, enhancedContext);
+      
+      // Add assistant message to state
+      const assistantMessage: LucieMessage = {
+        id: generateId(),
+        content: response,
+        role: 'assistant',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (err) {
+      console.error('Error in Lucie assistant:', err);
+      setError('An error occurred while processing your request.');
     } finally {
-      setIsTyping(false);
+      setIsLoading(false);
     }
-  }, [user, toast]);
-
-  const toggleChat = useCallback(() => {
-    setIsOpen(prev => !prev);
-  }, []);
+  }, [messages, context, options.userId]);
 
   const clearMessages = useCallback(() => {
-    // Reset the messages list
     setMessages([]);
-    sessionStartedRef.current = false; // Allow re-initialization
   }, []);
 
-  // Helper to generate suggested actions based on context
-  function generateSuggestedActions(userQuery: string, response: string): string[] {
-    const lowerQuery = userQuery.toLowerCase();
-    
-    // Default suggestions
-    const defaultSuggestions = ["Find escorts near me", "Browse creators", "Check wallet balance"];
-    
-    // Context-aware suggestions
-    if (lowerQuery.includes('escort') || lowerQuery.includes('book')) {
-      return ["View popular escorts", "Filter by service", "Show verified only"];
-    }
-    
-    if (lowerQuery.includes('creator') || lowerQuery.includes('content')) {
-      return ["Browse top creators", "See latest posts", "Subscribe"];
-    }
-    
-    if (lowerQuery.includes('wallet') || lowerQuery.includes('pay') || lowerQuery.includes('money')) {
-      return ["Check balance", "Add funds", "View transaction history"];
-    }
-    
-    return defaultSuggestions;
-  }
+  const updateContext = useCallback((newContext: Record<string, any>) => {
+    setContext(prev => ({
+      ...prev,
+      ...newContext
+    }));
+  }, []);
 
   return {
     messages,
-    isTyping,
-    isOpen,
+    isLoading,
     error,
+    context,
     sendMessage,
-    toggleChat,
-    clearMessages
+    clearMessages,
+    updateContext
   };
-}
+};
 
 export default useLucieAssistant;

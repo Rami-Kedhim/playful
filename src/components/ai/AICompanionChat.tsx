@@ -1,126 +1,159 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import AICompanionChatList from './companion-chat/AICompanionChatList';
-import AICompanionChatControls from './companion-chat/AICompanionChatControls';
-import AICompanionChatHeader from './companion-chat/AICompanionChatHeader';
 import { lucie } from '@/core/Lucie';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { toast } from 'sonner';
 
-export interface AICompanionChatProps {
-  aiName?: string;
-  aiAvatar?: string;
+// Define props interface
+interface AICompanionChatProps {
+  companionId: string;
   initialMessage?: string;
-  onSendMessage?: (message: string) => Promise<string>;
-  onClose?: () => void;
-  companionId?: string;
-  initiallyOpen?: boolean;
-  userId?: string;
-  personalityType?: string;
-  name?: string;
-  avatarUrl?: string;
-  userCredits?: number;
+  className?: string;
+}
+
+// Define message type
+interface Message {
+  id: string;
+  text: string;
+  sender: 'user' | 'ai';
+  timestamp: Date;
 }
 
 const AICompanionChat: React.FC<AICompanionChatProps> = ({
-  aiName = "Assistant",
-  aiAvatar,
-  initialMessage = "Hello! How can I assist you today?",
-  onClose,
   companionId,
-  name,
-  avatarUrl,
-  personalityType,
+  initialMessage = "Hi there! How can I assist you today?",
+  className = ""
 }) => {
-  const { user } = useAuth();
-  const [messages, setMessages] = useState<{id: string; role: string; content: string; timestamp: Date;}[]>([]);
-  const [isTyping, setIsTyping] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Use name and avatar from props or defaults
-  const displayName = name || aiName;
-  const displayAvatar = avatarUrl || aiAvatar;
-
-  // Session id for orchestration, use companionId or fallback to user ID timestamped
-  const sessionId = companionId || (user?.id ? `${user.id}-session` : `anon-session-${Date.now()}`);
-
+  // Initialize chat with AI's greeting
   useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([{ id: 'welcome', role: 'assistant', content: initialMessage, timestamp: new Date() }]);
+    if (initialMessage) {
+      setMessages([{
+        id: `ai-${Date.now()}`,
+        text: initialMessage,
+        sender: 'ai',
+        timestamp: new Date()
+      }]);
     }
-  }, [initialMessage, messages.length]);
+  }, [initialMessage]);
 
-  const handleSendMessage = async (userInput: string) => {
-    if (!userInput.trim()) return;
+  // Function to handle sending messages
+  const handleSendMessage = async () => {
+    if (!inputValue.trim()) return;
 
-    if (!user) {
-      toast.error('You must be logged in to send messages.');
-      return;
-    }
+    const userMessage = {
+      id: `user-${Date.now()}`,
+      text: inputValue,
+      sender: 'user',
+      timestamp: new Date()
+    };
 
-    const userMessage = { id: `user-${Date.now()}`, role: 'user', content: userInput, timestamp: new Date() };
-    setMessages((prev) => [...prev, userMessage]);
-
-    setIsTyping(true);
-    setError(null);
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsLoading(true);
 
     try {
-      const userContext = {
-        userId: user.id,
-        // walletId is optional, safely read if exists
-        walletId: (user as any)?.walletId || undefined,
-        personalityType,
-        characterId: companionId,
-      };
+      // Check content moderation
+      const moderationResult = await lucie.moderateContent(inputValue);
+      
+      if (!moderationResult.safe) {
+        // Handle inappropriate content
+        setMessages(prev => [...prev, {
+          id: `ai-${Date.now()}`,
+          text: "I'm sorry, but I cannot respond to that type of content.",
+          sender: 'ai',
+          timestamp: new Date()
+        }]);
+        setIsLoading(false);
+        return;
+      }
 
-      // Call Lucie AI to generate response
-      const response = await lucie.generateContent({
-        prompt: userInput,
-        type: 'text',
-        nsfw: false,
-        userId: user.id,
+      // Generate AI response using the updated method name
+      const response = await lucie.generateContent(inputValue, {
+        companionId,
+        history: messages.map(m => `${m.sender}: ${m.text}`).join('\n')
       });
 
-      const responseText = response.text || "I'm sorry, I couldn't generate a response.";
-      const assistantMessage = { id: `assistant-${Date.now()}`, role: 'assistant', content: responseText, timestamp: new Date() };
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err: any) {
-      setError('Failed to get a response. Please try again.');
-      console.error('Error sending message through Lucie:', err);
+      setMessages(prev => [...prev, {
+        id: `ai-${Date.now()}`,
+        text: response,
+        sender: 'ai',
+        timestamp: new Date()
+      }]);
+    } catch (error) {
+      console.error('Error in AI response:', error);
+      setMessages(prev => [...prev, {
+        id: `ai-${Date.now()}`,
+        text: "I'm having trouble connecting. Please try again later.",
+        sender: 'ai',
+        timestamp: new Date()
+      }]);
     } finally {
-      setIsTyping(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <Card className="flex flex-col h-[600px] w-full max-w-lg mx-auto">
-      <AICompanionChatHeader
-        displayName={displayName}
-        displayAvatar={displayAvatar}
-        onClose={onClose}
-        isMuted={false}
-        toggleMute={() => {}}
-      />
-      <AICompanionChatList
-        messages={messages}
-        isTyping={isTyping}
-        aiName={displayName}
-        aiAvatar={displayAvatar}
-        onSpeakMessage={() => {}}
-        onUnlockContent={() => toast.info("Premium content unlocking not implemented")}
-      />
-      <CardContent>
-        <AICompanionChatControls
-          onSendMessage={handleSendMessage}
-          isTyping={isTyping}
-          isSpeaking={false}
-          onStopSpeaking={() => {}}
-          companion={{ name: displayName }}
-        />
-        {error && <div className="mt-2 text-sm text-destructive">{error}</div>}
-      </CardContent>
-    </Card>
+    <div className={`flex flex-col h-full border rounded-lg overflow-hidden ${className}`}>
+      <div className="bg-primary text-primary-foreground p-3">
+        <h3 className="text-lg font-medium">AI Companion Chat</h3>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map(message => (
+          <div 
+            key={message.id} 
+            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
+            <div 
+              className={`max-w-[80%] p-3 rounded-lg ${
+                message.sender === 'user' 
+                  ? 'bg-primary text-primary-foreground rounded-tr-none' 
+                  : 'bg-muted rounded-tl-none'
+              }`}
+            >
+              <p>{message.text}</p>
+              <span className="text-xs opacity-70 block mt-1">
+                {message.timestamp.toLocaleTimeString()}
+              </span>
+            </div>
+          </div>
+        ))}
+        
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="bg-muted p-3 rounded-lg rounded-tl-none">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      <div className="border-t p-3">
+        <div className="flex space-x-2">
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            placeholder="Type your message..."
+            className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <button
+            onClick={handleSendMessage}
+            disabled={isLoading || !inputValue.trim()}
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 disabled:opacity-50"
+          >
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

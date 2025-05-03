@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Users, Wallet, Boxes, MessageSquare } from 'lucide-react';
-import { AppPaths } from '@/routes';
+import { AppPaths } from '@/routes/routeConfig';
 
 const ActionGrid = () => {
   const actions = [
