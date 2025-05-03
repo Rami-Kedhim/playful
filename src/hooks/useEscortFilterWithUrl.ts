@@ -13,64 +13,74 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
   const [searchParams, setSearchParams] = useSearchParams();
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const updatingUrlRef = useRef(false);
+  const filterUpdateFromUrlRef = useRef(false);
   const filterState = useEscortFilter({ escorts });
   
   // Load filters from URL on mount only once
   useEffect(() => {
-    if (initialLoadComplete) return;
+    if (initialLoadComplete || filterUpdateFromUrlRef.current) return;
     
-    // Get filter values from URL parameters
-    const serviceType = searchParams.get('serviceType') as ServiceTypeFilter;
-    const verified = searchParams.get('verified') === 'true';
-    const available = searchParams.get('available') === 'true';
-    const location = searchParams.get('location') || '';
-    const query = searchParams.get('q') || '';
-    const rating = searchParams.get('rating');
+    filterUpdateFromUrlRef.current = true;
     
-    // Flag to track if any filter was applied from URL
-    let filtersApplied = false;
-    
-    // Only apply filters that actually exist in the URL
-    if (serviceType && ['in-person', 'virtual', 'both'].includes(serviceType)) {
-      filterState.setServiceTypeFilter(serviceType);
-      filtersApplied = true;
-    }
-    
-    if (verified) {
-      filterState.setVerifiedOnly(true);
-      filtersApplied = true;
-    }
-    
-    if (available) {
-      filterState.setAvailableNow(true);
-      filtersApplied = true;
-    }
-    
-    if (location) {
-      filterState.setLocation(location);
-      filtersApplied = true;
-    }
-    
-    if (query) {
-      filterState.setSearchQuery(query);
-      filtersApplied = true;
-    }
-    
-    if (rating) {
-      filterState.setRatingMin(parseInt(rating, 10));
-      filtersApplied = true;
-    }
-    
-    // Only mark as complete if we've actually processed URL parameters
-    // This prevents unnecessary re-renders
-    if (filtersApplied || !searchParams.toString()) {
-      setInitialLoadComplete(true);
+    try {
+      // Get filter values from URL parameters
+      const serviceType = searchParams.get('serviceType') as ServiceTypeFilter;
+      const verified = searchParams.get('verified') === 'true';
+      const available = searchParams.get('available') === 'true';
+      const location = searchParams.get('location') || '';
+      const query = searchParams.get('q') || '';
+      const rating = searchParams.get('rating');
+      
+      // Flag to track if any filter was applied from URL
+      let filtersApplied = false;
+      
+      // Only apply filters that actually exist in the URL
+      if (serviceType && ['in-person', 'virtual', 'both'].includes(serviceType)) {
+        filterState.setServiceTypeFilter(serviceType);
+        filtersApplied = true;
+      }
+      
+      if (searchParams.has('verified')) {
+        filterState.setVerifiedOnly(verified);
+        filtersApplied = true;
+      }
+      
+      if (searchParams.has('available')) {
+        filterState.setAvailableNow(available);
+        filtersApplied = true;
+      }
+      
+      if (location) {
+        filterState.setLocation(location);
+        filtersApplied = true;
+      }
+      
+      if (query) {
+        filterState.setSearchQuery(query);
+        filtersApplied = true;
+      }
+      
+      if (rating) {
+        filterState.setRatingMin(parseInt(rating, 10));
+        filtersApplied = true;
+      }
+      
+      // Only mark as complete if we've actually processed URL parameters
+      // This prevents unnecessary re-renders
+      if (searchParams.toString() || !filtersApplied) {
+        setInitialLoadComplete(true);
+      }
+    } finally {
+      // Always reset the flag when done
+      setTimeout(() => {
+        filterUpdateFromUrlRef.current = false;
+      }, 0);
     }
   }, [searchParams, filterState, initialLoadComplete]);
   
   // Update URL when filters change, but only after initial load is complete
   const updateUrlFromFilters = useCallback(() => {
-    if (!initialLoadComplete || updatingUrlRef.current) return;
+    if (!initialLoadComplete || updatingUrlRef.current || filterUpdateFromUrlRef.current) return;
     
     updatingUrlRef.current = true;
     

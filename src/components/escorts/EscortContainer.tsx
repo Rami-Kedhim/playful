@@ -28,10 +28,12 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
       // Ignore or reset to empty if invalid
       filterState.setServiceTypeFilter("");
     }
-  }, [filterState]);
+  }, [filterState.setServiceTypeFilter]);
 
   // Consider both internal and external loading states
-  const combinedIsLoading = filterState.isLoading || externalLoading;
+  const combinedIsLoading = useMemo(() => 
+    filterState.isLoading || externalLoading
+  , [filterState.isLoading, externalLoading]);
   
   // Calculate active filter count with safe access to properties using optional chaining
   const activeFilterCount = useMemo(() => {
@@ -96,24 +98,18 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
 
   // Memoize verifiedOnly setter to prevent re-renders
   const handleSetVerifiedOnly = useCallback((value: boolean) => {
-    if (filterState.setVerifiedOnly) {
-      filterState.setVerifiedOnly(value);
-    }
-  }, [filterState]);
+    filterState.setVerifiedOnly(value);
+  }, [filterState.setVerifiedOnly]);
 
   // Memoize availableNow setter to prevent re-renders
   const handleSetAvailableNow = useCallback((value: boolean) => {
-    if (filterState.setAvailableNow) {
-      filterState.setAvailableNow(value);
-    }
-  }, [filterState]);
+    filterState.setAvailableNow(value);
+  }, [filterState.setAvailableNow]);
 
   // Memoize ratingMin setter to prevent re-renders
   const handleSetRatingMin = useCallback((value: number) => {
-    if (filterState.setRatingMin) {
-      filterState.setRatingMin(value);
-    }
-  }, [filterState]);
+    filterState.setRatingMin(value);
+  }, [filterState.setRatingMin]);
 
   return (
     <>
