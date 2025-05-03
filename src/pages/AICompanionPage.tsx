@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { UnifiedLayout } from '@/layouts';
+import { MainLayout } from '@/layouts';
 
 const AICompanionPage = () => {
   return (
-    <UnifiedLayout
+    <MainLayout
       title="AI Companions"
       description="Explore virtual companions with advanced AI personalities"
       showBreadcrumbs
@@ -17,7 +17,7 @@ const AICompanionPage = () => {
           </p>
         </div>
       </div>
-    </UnifiedLayout>
+    </MainLayout>
   );
 };
 

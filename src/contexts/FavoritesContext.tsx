@@ -7,6 +7,8 @@ interface FavoritesContextType {
   favorites: string[];
   isFavorite: (id: string) => boolean;
   toggleFavorite: (id: string) => void;
+  clearFavorites: () => void;
+  removeFavorite: (id: string) => void;
   loading: boolean;
 }
 
@@ -45,11 +47,7 @@ export const FavoritesProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const toggleFavorite = (id: string): void => {
     if (isFavorite(id)) {
-      setFavorites(favorites.filter(fav => fav !== id));
-      toast({
-        title: "Removed from favorites",
-        description: "The escort has been removed from your favorites",
-      });
+      removeFavorite(id);
     } else {
       setFavorites([...favorites, id]);
       toast({
@@ -58,9 +56,32 @@ export const FavoritesProvider: React.FC<{ children: ReactNode }> = ({ children 
       });
     }
   };
+  
+  const removeFavorite = (id: string): void => {
+    setFavorites(favorites.filter(fav => fav !== id));
+    toast({
+      title: "Removed from favorites",
+      description: "The escort has been removed from your favorites",
+    });
+  };
+  
+  const clearFavorites = (): void => {
+    setFavorites([]);
+    toast({
+      title: "Favorites cleared",
+      description: "All items have been removed from your favorites",
+    });
+  };
 
   return (
-    <FavoritesContext.Provider value={{ favorites, isFavorite, toggleFavorite, loading }}>
+    <FavoritesContext.Provider value={{ 
+      favorites, 
+      isFavorite, 
+      toggleFavorite, 
+      clearFavorites,
+      removeFavorite,
+      loading 
+    }}>
       {children}
     </FavoritesContext.Provider>
   );

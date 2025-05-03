@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { UnifiedLayout } from '@/layouts';
+import { MainLayout } from '@/layouts';
 
 const NeuralAnalyticsPage = () => {
   return (
-    <UnifiedLayout
+    <MainLayout
       title="Neural Analytics"
       description="Advanced analytics powered by our neural network"
       showBreadcrumbs
@@ -17,7 +17,7 @@ const NeuralAnalyticsPage = () => {
           </p>
         </div>
       </div>
-    </UnifiedLayout>
+    </MainLayout>
   );
 };
 

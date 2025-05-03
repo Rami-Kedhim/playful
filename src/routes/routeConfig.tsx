@@ -27,7 +27,9 @@ export const routes: RouteDefinition[] = [
     path: '/',
     title: 'Main',
     category: 'core',
-    element: <MainLayout />,
+    element: <MainLayout>
+      <Outlet />
+    </MainLayout>,
     children: [
       {
         index: true,
@@ -186,5 +188,8 @@ export const routes: RouteDefinition[] = [
     ],
   },
 ];
+
+// Don't forget to import the Outlet component
+import { Outlet } from 'react-router-dom';
 
 export default routes;

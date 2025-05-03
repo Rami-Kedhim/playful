@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { UnifiedLayout } from '@/layouts';
+import { MainLayout } from '@/layouts';
 import { Shield, MapPin, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { AppPaths } from '@/routes/routeConfig';
 
 const SafetyPage: React.FC = () => {
   return (
-    <UnifiedLayout>
+    <MainLayout>
       <div className="container max-w-6xl mx-auto py-8 px-4 sm:px-6">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2">Safety Center</h1>
@@ -87,7 +87,7 @@ const SafetyPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </UnifiedLayout>
+    </MainLayout>
   );
 };
 

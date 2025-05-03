@@ -88,7 +88,7 @@ const EscortDetailPage: React.FC = () => {
             </Link>
           </Button>
           
-          {escort.isVerified && (
+          {escort.verified && (
             <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium flex items-center">
               <Shield className="h-3 w-3 mr-1" />
               Verified

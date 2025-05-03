@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { UnifiedLayout } from '@/layouts';
+import { MainLayout } from '@/layouts';
 
 const ProfilePage = () => {
   return (
-    <UnifiedLayout
+    <MainLayout
       title="My Profile"
       description="Manage your personal information"
       showBreadcrumbs
@@ -17,7 +17,7 @@ const ProfilePage = () => {
           </p>
         </div>
       </div>
-    </UnifiedLayout>
+    </MainLayout>
   );
 };
 
