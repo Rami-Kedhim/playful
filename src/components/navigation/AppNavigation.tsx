@@ -2,7 +2,7 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { routeRegistry, RouteCategory, getRoutesByCategory } from '@/utils/navigation/routeRegistry';
+import { getRoutesByCategory, RouteCategory } from '@/routes/routeConfig';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { useRole } from '@/hooks/auth/useRole';
 import { 
@@ -30,7 +30,8 @@ const iconMap: Record<string, React.ReactNode> = {
   '/wallet': <Wallet className="w-4 h-4" />,
   '/settings': <Settings className="w-4 h-4" />,
   '/admin': <Shield className="w-4 h-4" />,
-  '/moderation': <Shield className="w-4 h-4" />
+  '/moderation': <Shield className="w-4 h-4" />,
+  '/safety': <Shield className="w-4 h-4" />
 };
 
 interface AppNavigationProps {
@@ -40,7 +41,7 @@ interface AppNavigationProps {
 }
 
 const AppNavigation: React.FC<AppNavigationProps> = ({ 
-  showCategories = ['core', 'escort', 'neural'],
+  showCategories = ['core', 'escort', 'neural', 'safety'],
   className = "",
   onItemClick
 }) => {

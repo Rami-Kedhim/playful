@@ -1,205 +1,115 @@
 
 /**
- * UberEscorts System Health Checker
- * 
- * Utility for checking the health of all UberCore systems
- * and ensuring proper connection between modules
+ * System Health Checker Utilities
+ * Used for checking the health of various UberEscorts core systems
  */
 
 import { hermes } from '@/core/Hermes';
 import { oxum } from '@/core/Oxum';
-import { orus } from '@/core/Orus';
 import { lucie } from '@/core/Lucie';
 import { uberCore } from '@/core/UberCore';
-import { hermesOrusOxum } from '@/core/HermesOrusOxum';
-import { getCoreSystemHealth } from '@/utils/uberCore';
 
-export interface SystemHealthResult {
+export interface SystemHealthStatus {
   operational: boolean;
+  overallHealth: number; // 0-100
+  subsystems: Record<string, SubsystemHealth>;
   latency: number;
-  systemStatus: {
-    hermes: {
-      status: string;
-      health: number;
-    };
-    oxum: {
-      status: string;
-      health: number;
-    };
-    orus: {
-      status: string;
-      health: number;
-    };
-    lucie: {
-      status: string;
-      health: number;
-    };
-    uberCore: {
-      status: string;
-      health: number;
-    };
-  };
-  integrity: {
-    valid: boolean;
-    details?: any;
-  };
-  integrationHealth: {
-    hermesOrusOxum: boolean;
-    lucieIntegration: boolean;
-    orusSecurityValid: boolean;
-  };
-  warnings: string[];
   timestamp: string;
 }
 
+export interface SubsystemHealth {
+  status: 'operational' | 'degraded' | 'offline';
+  health: number; // 0-100
+  latency?: number;
+  message?: string;
+}
+
 /**
- * Check the health and status of all UberCore systems
+ * Check the health status of all core systems
  */
-export async function checkSystemStatus(): Promise<SystemHealthResult> {
-  const startTime = Date.now();
-  const warnings: string[] = [];
+export async function checkSystemStatus(): Promise<SystemHealthStatus> {
+  const startTime = performance.now();
   
-  // Get core health status from uberCore utility
-  const coreHealth = getCoreSystemHealth();
-  
-  // Check individual system statuses
+  // Get status from each subsystem
   const hermesStatus = hermes.getSystemStatus();
   const oxumStatus = oxum.checkSystemStatus();
-  const orusIntegrity = orus.checkIntegrity();
   const lucieStatus = lucie.getSystemStatus();
-  const uberCoreStatus = uberCore.getSystemStatus();
+  const coreStatus = uberCore.checkSubsystemHealth();
   
-  // Check integration between systems
-  const integration = hermesOrusOxum.validateEcosystem();
+  // Calculate health metrics from statuses
+  const hermesHealth = hermesStatus.status === 'operational' ? 100 : 
+                       hermesStatus.status === 'degraded' ? 50 : 0;
   
-  // Check Lucie integration by looking at the modules status
-  const lucieIntegrationValid = lucieStatus.modules && 
-    Object.values(lucieStatus.modules).every(status => status === 'online');
+  const oxumHealth = oxumStatus.operational ? 100 : 50;
   
-  // Track latency
-  const latency = Date.now() - startTime;
+  const lucieHealth = Object.values(lucieStatus.modules).every(status => status === 'online') ? 100 :
+                      Object.values(lucieStatus.modules).some(status => status === 'offline') ? 20 : 60;
   
-  // Check for any warnings
-  if (coreHealth.overall < 80) {
-    warnings.push(`System health is below optimal levels (${coreHealth.overall}%)`);
-  }
+  const coreHealth = coreStatus.reduce((sum, item) => sum + item.health, 0) / coreStatus.length;
   
-  if (!integration.secure) {
-    warnings.push('Security integrity issues detected');
-  }
+  // Calculate overall health score (weighted average)
+  const overallHealth = Math.round((
+    hermesHealth * 0.3 + 
+    oxumHealth * 0.3 + 
+    lucieHealth * 0.2 + 
+    coreHealth * 0.2
+  ));
   
-  if (!integration.operational) {
-    warnings.push('Core systems integration is not fully operational');
-  }
-  
-  // Determine overall operational status
-  const operational = coreHealth.overall >= 70 && 
-    integration.operational && 
-    integration.secure && 
-    orusIntegrity.isValid;
+  // Calculate latency
+  const endTime = performance.now();
+  const latency = Math.round(endTime - startTime);
   
   return {
-    operational,
-    latency,
-    systemStatus: {
+    operational: overallHealth > 50,
+    overallHealth,
+    subsystems: {
       hermes: {
-        status: hermesStatus.status,
-        health: coreHealth.systems.hermes
+        status: hermesStatus.status === 'operational' ? 'operational' : 'degraded',
+        health: hermesHealth
       },
       oxum: {
         status: oxumStatus.operational ? 'operational' : 'degraded',
-        health: coreHealth.systems.oxum
-      },
-      orus: {
-        status: orusIntegrity.isValid ? 'operational' : 'compromised',
-        health: orusIntegrity.isValid ? 100 : 50
+        health: oxumHealth
       },
       lucie: {
-        status: lucieIntegrationValid ? 'operational' : 'degraded',
-        health: coreHealth.systems.lucie
+        status: lucieHealth > 80 ? 'operational' : lucieHealth > 30 ? 'degraded' : 'offline',
+        health: lucieHealth
       },
-      uberCore: {
-        status: uberCoreStatus.status,
-        health: uberCoreStatus.uptime > 90 ? 100 : 75
+      core: {
+        status: coreHealth > 80 ? 'operational' : coreHealth > 30 ? 'degraded' : 'offline',
+        health: coreHealth
       }
     },
-    integrity: {
-      valid: orusIntegrity.isValid,
-      details: orusIntegrity
-    },
-    integrationHealth: {
-      hermesOrusOxum: integration.operational && integration.secure,
-      lucieIntegration: lucieIntegrationValid,
-      orusSecurityValid: orusIntegrity.isValid
-    },
-    warnings,
+    latency,
     timestamp: new Date().toISOString()
   };
 }
 
 /**
- * Check for missing routes and broken links
+ * Check if a specific subsystem is operational
  */
-export function checkRoutesIntegrity(routes: any[]): {
-  valid: boolean;
-  brokenRoutes: string[];
-  duplicateRoutes: string[];
-} {
-  const routePaths = routes.map(route => route.path);
-  const uniquePaths = new Set(routePaths);
-  
-  // Find duplicate routes
-  const duplicateRoutes: string[] = [];
-  routePaths.forEach(path => {
-    if (routePaths.filter(p => p === path).length > 1 && !duplicateRoutes.includes(path)) {
-      duplicateRoutes.push(path);
-    }
-  });
-  
-  // Check for routes with missing components
-  const brokenRoutes = routes
-    .filter(route => !route.element)
-    .map(route => route.path);
-  
-  return {
-    valid: duplicateRoutes.length === 0 && brokenRoutes.length === 0,
-    brokenRoutes,
-    duplicateRoutes
-  };
+export function isSubsystemOperational(subsystemName: string): boolean {
+  switch (subsystemName.toLowerCase()) {
+    case 'hermes':
+      return hermes.getSystemStatus().status === 'operational';
+    case 'oxum':
+      return oxum.checkSystemStatus().operational;
+    case 'lucie': 
+      return Object.values(lucie.getSystemStatus().modules).every(status => status === 'online');
+    case 'core':
+      return uberCore.getSystemStatus().status === 'operational';
+    default:
+      return false;
+  }
 }
 
 /**
- * Check UberCore initialization status
+ * Format a health percentage for display
  */
-export function checkInitializationStatus(): {
-  initialized: boolean;
-  components: Record<string, boolean>;
-} {
-  // These checks are simplified; in a real system you'd have more robust checks
-  return {
-    initialized: true, // This would be determined by actual system state
-    components: {
-      hermes: true,
-      oxum: true,
-      orus: true,
-      lucie: true,
-      uberCore: true
-    }
-  };
-}
-
-/**
- * Run a comprehensive system check 
- */
-export async function runSystemDiagnostics(): Promise<any> {
-  const healthStatus = await checkSystemStatus();
-  const initStatus = checkInitializationStatus();
-  
-  // Add more diagnostics here
-  
-  return {
-    health: healthStatus,
-    initialization: initStatus,
-    timestamp: new Date().toISOString()
-  };
+export function formatHealthPercentage(health: number): string {
+  if (health >= 90) return `${health}% (Excellent)`;
+  if (health >= 70) return `${health}% (Good)`;
+  if (health >= 50) return `${health}% (Fair)`;
+  if (health >= 30) return `${health}% (Poor)`;
+  return `${health}% (Critical)`;
 }
