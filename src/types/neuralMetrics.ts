@@ -19,7 +19,7 @@ export interface HealthMetrics {
   neuralEfficiency: number;
   neuralLatency: number;
   
-  // Required fields that were missing but used in some services
+  // Required fields that are needed for compatibility
   memoryAllocation: number;
   networkThroughput: number;
   requestRate: number;
@@ -48,8 +48,8 @@ export interface ServiceMetrics {
   errorCount: number;
   latency: number | null; // Making latency nullable to support cases where only responseTime is available
   responseTime: number;  // Ensure responseTime is always available
-  successRate: number;  // Added as required field
-  errorRate: number;    // Added as required field
+  successRate: number;  // Add as required field
+  errorRate: number;    // Add as required field
   [key: string]: any;  // Allow additional properties
 }
 
