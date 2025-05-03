@@ -24,4 +24,62 @@ export const AppPaths = {
 
 export type RoutePaths = typeof AppPaths;
 
+// Add these helper types and functions to make them available for import
+export type RouteCategory = 
+  'core' | 
+  'escort' | 
+  'client' | 
+  'creator' | 
+  'metaverse' | 
+  'neural' | 
+  'admin' | 
+  'auth' | 
+  'safety' | 
+  'wallet' | 
+  'settings';
+
+export interface RouteDefinition {
+  path: string;
+  title: string;
+  category: RouteCategory;
+  isAuthRequired?: boolean;
+  roles?: string[];
+  description?: string;
+}
+
+// Export routes array for use in AppRoutes
+export const routes = [
+  {
+    path: AppPaths.HOME,
+    title: 'Home',
+    category: 'core' as RouteCategory,
+  },
+  {
+    path: AppPaths.ESCORTS,
+    title: 'Escorts',
+    category: 'escort' as RouteCategory,
+  },
+  {
+    path: AppPaths.SAFETY,
+    title: 'Safety',
+    category: 'safety' as RouteCategory,
+  },
+  {
+    path: AppPaths.AI_COMPANION,
+    title: 'AI Companion',
+    category: 'core' as RouteCategory,
+  },
+  {
+    path: AppPaths.ROUTE_SHARE,
+    title: 'Share Route',
+    category: 'safety' as RouteCategory,
+  },
+  // Add more routes as needed
+];
+
+// Helper function to get routes by category
+export const getRoutesByCategory = (category: RouteCategory): RouteDefinition[] => {
+  return routes.filter(route => route.category === category);
+};
+
 export default AppPaths;

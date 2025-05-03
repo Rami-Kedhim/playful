@@ -8,10 +8,9 @@ const AppRoutes = () => {
     <Routes>
       {routes.map((route) => {
         const routePath = route.path || '';
-        const routeElement = route.element;
         
         // Check if routeElement exists
-        if (!routeElement) {
+        if (!route.element) {
           console.warn(`No element provided for route: ${routePath}`);
           return null;
         }
@@ -20,7 +19,7 @@ const AppRoutes = () => {
           <Route 
             key={routePath}
             path={routePath}
-            element={routeElement}
+            element={route.element}
           />
         );
       })}

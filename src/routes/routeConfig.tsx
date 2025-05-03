@@ -3,28 +3,7 @@ import React, { lazy, Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import LoadingSpinner from '@/components/ui/loading-spinner';
-
-// App paths
-export const AppPaths = {
-  HOME: '/',
-  ESCORTS: '/escorts',
-  NEURAL_MONITOR: '/neural/monitor',
-  NEURAL_ANALYTICS: '/neural/analytics',
-  BRAIN_HUB: '/brain-hub',
-  MESSAGES: '/messages',
-  FAVORITES: '/favorites',
-  PROFILE: '/profile',
-  WALLET: '/wallet',
-  SETTINGS: '/settings',
-  ADMIN: '/admin',
-  MODERATION: '/moderation',
-  SAFETY: '/safety',
-  AI_COMPANION: '/ai-companion',
-  PERSONAS: '/personas',
-  PULSE_BOOST: '/pulse/boost',
-  SEARCH: '/search',
-  ROUTE_SHARE: '/share'
-};
+import { AppPaths, RouteCategory } from './routeConfig';
 
 // Lazy load pages
 const HomePage = lazy(() => import('@/pages/HomePage'));
