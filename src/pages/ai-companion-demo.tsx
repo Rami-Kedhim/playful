@@ -24,6 +24,9 @@ const AICompanionDemo = () => {
           <CardContent className="h-[500px]">
             <AICompanionChat 
               companionId={demoCompanion.companionId}
+              name={demoCompanion.name}
+              personalityType={demoCompanion.personalityType}
+              avatarUrl={demoCompanion.avatarUrl}
               initialMessage={`Hi there! I'm ${demoCompanion.name}. How can I help you today?`}
               className="h-full"
             />

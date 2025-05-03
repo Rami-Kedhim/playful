@@ -1,13 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { lucie } from '@/core/Lucie';
-
-// Define props interface
-interface AICompanionChatProps {
-  companionId: string;
-  initialMessage?: string;
-  className?: string;
-}
+import { AICompanionChatProps } from './companion-chat/AICompanionChatProps';
 
 // Define message type with proper sender type
 interface Message {
@@ -19,8 +13,14 @@ interface Message {
 
 const AICompanionChat: React.FC<AICompanionChatProps> = ({
   companionId,
+  name,
+  avatarUrl,
+  personalityType,
   initialMessage = "Hi there! How can I assist you today?",
-  className = ""
+  className = "",
+  userId,
+  userCredits,
+  onClose
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
