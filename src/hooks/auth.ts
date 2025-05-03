@@ -4,15 +4,13 @@
 import { 
   useAuth,
   useRole,
-  AuthProvider
+  AuthProvider 
 } from './auth/index';
-
-import type { AuthContextType } from './auth/types';
 
 export { 
   useAuth, 
-  AuthProvider, 
+  AuthProvider,
   useRole
 };
 
-export type { AuthContextType };
+export default useAuth;
