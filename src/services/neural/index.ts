@@ -10,6 +10,6 @@ export * from './modules/LivecamsNeuralService';
 export * from './registry/NeuralServiceRegistry';
 export type { BaseNeuralService, NeuralServiceConfig, ModuleType } from './types/NeuralService';
 
-// Export the core neural hub instance
-export { neuralHub, brainHub } from './HermesOxumBrainHub';
+// Export the unified neural hub instance and aliases for backward compatibility
+export { neuralHub, brainHub, default as unifiedNeuralHub } from './UnifiedNeuralHub';
 export type { INeuralHub as NeuralHub } from './types/neuralHub';

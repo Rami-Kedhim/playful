@@ -1,3 +1,4 @@
+
 import { HealthMetrics, ServiceMetrics, PerformanceReport } from '@/types/neuralMetrics';
 
 /**
@@ -114,12 +115,13 @@ export class NeuralMetricsProvider {
   
   /**
    * Get default service metrics
+   * Updated to ensure all required fields are present
    */
   getDefaultServiceMetrics(): ServiceMetrics {
     return {
       operationsCount: 0,
       errorCount: 0,
-      latency: null,
+      latency: 0,       // Changed from null to 0 to match interface requirement
       responseTime: 0,
       successRate: 1.0,
       errorRate: 0
@@ -159,6 +161,7 @@ export class NeuralMetricsProvider {
 
   /**
    * Create complete HealthMetrics object
+   * Ensures all required fields are populated
    */
   createHealthMetrics(data: any): HealthMetrics {
     return {
