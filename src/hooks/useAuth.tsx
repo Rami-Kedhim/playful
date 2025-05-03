@@ -4,7 +4,7 @@
 import { 
   AuthProvider, 
   useAuth 
-} from './auth';
+} from '@/contexts/AuthContext';
 
 export { 
   useAuth, 

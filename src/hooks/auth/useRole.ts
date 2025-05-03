@@ -31,7 +31,13 @@ export const useRole = (): UseRoleReturn => {
   };
   
   // Mock implementation - in a real app, this would come from the user object
-  const [roleStrings] = useState<string[]>(getRoleStrings(user?.roles as UserRole[]));
+  const [roleStrings] = useState<string[]>(
+    user?.roles ? 
+      Array.isArray(user.roles) ? 
+        getRoleStrings(user.roles as UserRole[]) : 
+        [user.roles as string] 
+    : []
+  );
   
   const hasRole = (role: string): boolean => {
     if (!isAuthenticated) return false;

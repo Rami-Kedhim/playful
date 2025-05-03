@@ -28,4 +28,3 @@ export const useAuthContext = (): AuthContextType => {
 
 // Export the useAuth hook for backward compatibility
 export const useAuth = useAuthContext;
-

@@ -1,4 +1,3 @@
-
 import { User, UserProfile } from '@/types/auth';
 
 export interface AuthContextType {
@@ -9,25 +8,29 @@ export interface AuthContextType {
   loading: boolean;
   error: string | null;
   initialized: boolean;
-  checkRole: (role: string) => boolean;
-  login: (email: string, password: string, options?: any) => Promise<any>;
+  
+  // Authentication methods
+  login: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
-  signIn: (email: string, password: string, options?: any) => Promise<any>;
+  signIn: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<void>;
-  register: (email: string, password: string, username?: string, options?: any) => Promise<any>;
-  updateUser: (data: Partial<User>) => Promise<boolean>;
-  updateUserProfile: (data: Partial<UserProfile>) => Promise<boolean>;
-  updateProfile: (data: Partial<UserProfile>) => Promise<boolean>;
+  register: (email: string, password: string, username?: string) => Promise<any>;
+  
+  // User management methods
+  updateUser: (userData: Partial<User>) => Promise<boolean>;
+  updateUserProfile: (profileData: Partial<UserProfile>) => Promise<boolean>;
+  updateProfile: (profileData: Partial<UserProfile>) => Promise<boolean>;
   loadUserProfile: () => Promise<User | null>;
   refreshProfile: () => Promise<void>;
+  
+  // Password related methods
   sendPasswordResetEmail: (email: string) => Promise<any>;
-  resetPassword: (token: string, password: string) => Promise<any>;
+  resetPassword: (password: string, token: string) => Promise<any>;
   requestPasswordReset: (email: string) => Promise<any>;
   verifyEmail: (token: string) => Promise<any>;
-  updatePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
+  updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
+  
+  // Other methods
   deleteAccount: () => Promise<boolean>;
-}
-
-export interface AuthProviderProps {
-  children: React.ReactNode;
+  checkRole: (role: string) => boolean;
 }
