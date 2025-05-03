@@ -1,5 +1,5 @@
 
-import { MapPin, Video } from "lucide-react";
+import { MapPin, Video, Users } from "lucide-react";
 
 export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "";
 
@@ -26,8 +26,8 @@ const ServiceTypeBadgeLabel = ({ type }: ServiceTypeBadgeLabelProps) => {
     case "both":
       return (
         <span className="inline-flex items-center gap-1 text-green-500">
-          <MapPin className="h-3 w-3" />
-          <span>Both</span>
+          <Users className="h-3 w-3" />
+          <span>Both Services</span>
         </span>
       );
     default:

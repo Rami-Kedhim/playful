@@ -20,6 +20,21 @@ const ResultsSection = ({ filterState, combinedIsLoading }: ResultsSectionProps)
     "Virtual Meeting"
   ];
 
+  // Count active filters
+  const activeFilterCount = [
+    filterState.searchQuery, 
+    filterState.location,
+    filterState.verifiedOnly,
+    filterState.availableNow,
+    filterState.serviceTypeFilter
+  ].filter(Boolean).length + 
+  filterState.selectedServices.length +
+  filterState.selectedGenders.length +
+  filterState.selectedOrientations.length +
+  (filterState.ratingMin > 0 ? 1 : 0) +
+  (filterState.priceRange[0] > 0 || filterState.priceRange[1] < 500 ? 1 : 0) +
+  (filterState.ageRange[0] > 21 || filterState.ageRange[1] < 50 ? 1 : 0);
+
   return (
     <div className="lg:col-span-3">
       <SearchBar
@@ -31,7 +46,17 @@ const ResultsSection = ({ filterState, combinedIsLoading }: ResultsSectionProps)
 
       {/* Mobile Applied Filters display */}
       <div className="lg:hidden mb-6">
-        {/* Mobile applied filters would go here if needed */}
+        {activeFilterCount > 0 && (
+          <div className="text-sm text-muted-foreground">
+            <span>{activeFilterCount} active filters</span> · 
+            <button 
+              onClick={filterState.clearFilters} 
+              className="ml-2 text-primary hover:underline"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
       </div>
 
       {/* No results alert */}

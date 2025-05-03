@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useEscortFilterWithUrl } from "@/hooks/useEscortFilterWithUrl";
 import { Escort } from "@/types/Escort";
 import QuickFilterBar from "./QuickFilterBar";
@@ -32,12 +32,42 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
 
   // Consider both internal and external loading states
   const combinedIsLoading = filterState.isLoading || externalLoading;
+  
+  // Calculate active filter count
+  const activeFilterCount = useMemo(() => {
+    return [
+      filterState.searchQuery, 
+      filterState.location,
+      filterState.verifiedOnly,
+      filterState.availableNow,
+      filterState.serviceTypeFilter
+    ].filter(Boolean).length + 
+    filterState.selectedServices.length +
+    filterState.selectedGenders.length +
+    filterState.selectedOrientations.length +
+    (filterState.ratingMin > 0 ? 1 : 0) +
+    (filterState.priceRange[0] > 0 || filterState.priceRange[1] < 500 ? 1 : 0) +
+    (filterState.ageRange[0] > 21 || filterState.ageRange[1] < 50 ? 1 : 0);
+  }, [
+    filterState.searchQuery,
+    filterState.location,
+    filterState.verifiedOnly,
+    filterState.availableNow,
+    filterState.serviceTypeFilter,
+    filterState.selectedServices.length,
+    filterState.selectedGenders.length,
+    filterState.selectedOrientations.length,
+    filterState.ratingMin,
+    filterState.priceRange,
+    filterState.ageRange
+  ]);
 
   return (
     <>
       <HeaderSection 
         showFilters={showFilters}
         setShowFilters={setShowFilters}
+        totalCount={escorts.length}
       />
       
       {/* Quick filter bar for mobile and desktop */}
@@ -62,6 +92,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
           setShowFilters={setShowFilters}
           filterState={filterState}
           services={services}
+          activeFilterCount={activeFilterCount}
         />
         
         <ResultsSection
