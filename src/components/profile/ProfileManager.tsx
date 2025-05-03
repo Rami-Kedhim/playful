@@ -17,7 +17,6 @@ import AccountSettings from "./AccountSettings";
 import NotificationSettings from "./NotificationSettings";
 import SecuritySettings from "./SecuritySettings";
 import { useAuth } from '@/hooks/auth';
-import { useAuthActions } from "@/hooks/auth";
 import { Loader2 } from "lucide-react";
 
 interface ProfileManagerProps {
@@ -26,8 +25,7 @@ interface ProfileManagerProps {
 
 const ProfileManager = ({ defaultTab = "account" }: ProfileManagerProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
-  const { refreshProfile } = useAuthActions();
+  const { user, refreshProfile } = useAuth();
   
   // Mock profile data since we don't have a real profile property
   const profile = user ? {

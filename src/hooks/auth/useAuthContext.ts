@@ -2,8 +2,7 @@
 import { useState } from 'react';
 import type { AuthContextType } from './types';
 import { User } from '@/types/user';
-
-export { AuthContextType };
+import { UserProfile } from '@/types/auth';
 
 export const useAuth = (): AuthContextType => {
   // Mock implementation for development
@@ -11,7 +10,7 @@ export const useAuth = (): AuthContextType => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(true);
   
@@ -49,6 +48,7 @@ export const useAuth = (): AuthContextType => {
   const logout = async (): Promise<void> => {
     setUser(null);
     setIsAuthenticated(false);
+    return Promise.resolve();
   };
 
   const signIn = login;
@@ -91,17 +91,17 @@ export const useAuth = (): AuthContextType => {
   };
 
   // Add other required methods with basic implementations
-  const updateUserProfile = async () => true;
-  const updateUser = async () => true;
-  const updateProfile = async () => true;
-  const loadUserProfile = async () => user;
-  const refreshProfile = async () => {};
-  const sendPasswordResetEmail = async () => ({ success: true });
-  const resetPassword = async () => ({ success: true });
-  const requestPasswordReset = async () => ({ success: true });
-  const verifyEmail = async () => ({ success: true });
-  const updatePassword = async () => true;
-  const deleteAccount = async () => true;
+  const updateUserProfile = async () => { return Promise.resolve(true); };
+  const updateUser = async () => { return Promise.resolve(true); };
+  const updateProfile = async () => { return Promise.resolve(true); };
+  const loadUserProfile = async () => { return Promise.resolve(user); };
+  const refreshProfile = async () => { return Promise.resolve(); };
+  const sendPasswordResetEmail = async () => { return Promise.resolve({ success: true }); };
+  const resetPassword = async () => { return Promise.resolve({ success: true }); };
+  const requestPasswordReset = async () => { return Promise.resolve({ success: true }); };
+  const verifyEmail = async () => { return Promise.resolve({ success: true }); };
+  const updatePassword = async () => { return Promise.resolve(true); };
+  const deleteAccount = async () => { return Promise.resolve(true); };
   
   return {
     user,

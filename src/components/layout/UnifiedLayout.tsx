@@ -9,7 +9,7 @@ export interface UnifiedLayoutProps {
   hideFooter?: boolean;
 }
 
-export const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({ 
+const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({ 
   children, 
   hideHeader = false,
   hideFooter = false 
@@ -24,3 +24,6 @@ export const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
     </div>
   );
 };
+
+export { UnifiedLayout };
+export default UnifiedLayout;
