@@ -26,7 +26,7 @@ export interface User {
 
 export interface UserProfile {
   id: string;
-  userId?: string;
+  userId: string; // Changed from optional to required to match auth.UserProfile
   username?: string;
   bio?: string;
   avatar_url?: string;
