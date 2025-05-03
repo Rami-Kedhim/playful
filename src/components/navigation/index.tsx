@@ -8,4 +8,6 @@ export { default as NavItems } from './NavItems';
 export { default as MainNavigation } from './MainNavigation';
 export { default as DesktopNavigation } from './DesktopNavigation';
 export { default as MobileNavigation } from './MobileNavigation';
-export { default as MobileMenu } from '../layout/MobileMenu';
+
+// Import MobileMenu directly from layout instead of creating a circular dependency
+// This fixes the circular import issues
