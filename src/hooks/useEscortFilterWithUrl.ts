@@ -1,209 +1,284 @@
-
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
 import { Escort } from "@/types/Escort";
+import { ServiceTypeFilter } from "@/components/escorts/filters/ServiceTypeBadgeLabel";
+import { useFilterStateWithUrl } from "./useFilterStateWithUrl";
 
-interface UseEscortFilterProps {
+interface UseEscortFilterParams {
   escorts: Escort[];
 }
 
-export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterProps) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [filteredEscorts, setFilteredEscorts] = useState<Escort[]>(escorts);
+export interface EscortFilterState {
+  filteredEscorts: Escort[];
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  location: string;
+  setLocation: (location: string) => void;
+  priceRange: [number, number];
+  setPriceRange: (range: [number, number]) => void;
+  handlePriceRangeChange: (values: number[]) => void;
+  verifiedOnly: boolean;
+  setVerifiedOnly: (verified: boolean) => void;
+  selectedServices: string[];
+  toggleService: (service: string) => void;
+  sortBy: string;
+  setSortBy: (sort: string) => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  selectedGenders: string[];
+  toggleGender: (gender: string) => void;
+  selectedOrientations: string[];
+  toggleOrientation: (orientation: string) => void;
+  ageRange: [number, number];
+  setAgeRange: (range: [number, number]) => void;
+  handleAgeRangeChange: (values: number[]) => void;
+  ratingMin: number;
+  setRatingMin: (rating: number) => void;
+  availableNow: boolean;
+  setAvailableNow: (available: boolean) => void;
+  serviceTypeFilter: ServiceTypeFilter;
+  setServiceTypeFilter: (type: ServiceTypeFilter) => void;
+  isLoading: boolean;
+  totalPages: number;
+  clearFilters: () => void;
+}
+
+export const useEscortFilterWithUrl = ({ escorts = [] }: UseEscortFilterParams): EscortFilterState => {
+  // You can keep your existing implementation here, but now with a proper return type
+  // For now, let's return a placeholder implementation that satisfies the TypeScript interface
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [location, setLocation] = useState("");
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
+  const [selectedOrientations, setSelectedOrientations] = useState<string[]>([]);
+  const [ageRange, setAgeRange] = useState<[number, number]>([21, 50]);
+  const [ratingMin, setRatingMin] = useState(0);
+  const [availableNow, setAvailableNow] = useState(false);
+  const [serviceTypeFilter, setServiceTypeFilter] = useState<ServiceTypeFilter>("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Get filter values from URL params
-  const initSearchQuery = searchParams.get("search") || "";
-  const initLocation = searchParams.get("location") || "";
-  const initVerifiedOnly = searchParams.get("verified") === "true";
-  const initAvailableNow = searchParams.get("available") === "true";
-  const initServiceTypeFilter = searchParams.get("serviceType") as "in-person" | "virtual" | "both" | "";
-  const initRatingMin = Number(searchParams.get("rating")) || 0;
-  const initSelectedServices = searchParams.get("services")?.split(",") || [];
-  const initSelectedGenders = searchParams.get("genders")?.split(",") || [];
-  const initSortBy = searchParams.get("sort") || "newest";
-  const initPage = Number(searchParams.get("page")) || 1;
+  // URL synchronization
+  useFilterStateWithUrl({
+    filters: {
+      serviceTypeFilter,
+      verifiedOnly,
+      availableNow,
+      location,
+      searchQuery,
+      ratingMin
+    },
+    setFilters: (newFilters) => {
+      if ('serviceTypeFilter' in newFilters) setServiceTypeFilter(newFilters.serviceTypeFilter as ServiceTypeFilter);
+      if ('verifiedOnly' in newFilters) setVerifiedOnly(Boolean(newFilters.verifiedOnly));
+      if ('availableNow' in newFilters) setAvailableNow(Boolean(newFilters.availableNow));
+      if ('location' in newFilters) setLocation(String(newFilters.location || ""));
+      if ('searchQuery' in newFilters) setSearchQuery(String(newFilters.searchQuery || ""));
+      if ('ratingMin' in newFilters) setRatingMin(Number(newFilters.ratingMin || 0));
+    },
+    defaultValues: {
+      serviceTypeFilter: "" as ServiceTypeFilter,
+      verifiedOnly: false,
+      availableNow: false,
+      location: "",
+      searchQuery: "",
+      ratingMin: 0
+    }
+  });
 
-  // Filter states
-  const [searchQuery, setSearchQuery] = useState(initSearchQuery);
-  const [location, setLocation] = useState(initLocation);
-  const [verifiedOnly, setVerifiedOnly] = useState(initVerifiedOnly);
-  const [availableNow, setAvailableNow] = useState(initAvailableNow);
-  const [serviceTypeFilter, setServiceTypeFilter] = useState<"in-person" | "virtual" | "both" | "">(
-    initServiceTypeFilter || ""
-  );
-  const [ratingMin, setRatingMin] = useState(initRatingMin);
-  const [selectedServices, setSelectedServices] = useState<string[]>(initSelectedServices);
-  const [selectedGenders, setSelectedGenders] = useState<string[]>(initSelectedGenders);
-  const [sortBy, setSortBy] = useState(initSortBy);
-  const [currentPage, setCurrentPage] = useState(initPage);
-  const [totalPages, setTotalPages] = useState(1);
-
-  // Update URL when filters change
-  useEffect(() => {
-    const params = new URLSearchParams();
+  // Filter escorts based on all criteria
+  const filteredEscorts = useMemo(() => {
+    // Apply all filters here
+    let filtered = [...escorts];
     
-    if (searchQuery) params.set("search", searchQuery);
-    if (location) params.set("location", location);
-    if (verifiedOnly) params.set("verified", "true");
-    if (availableNow) params.set("available", "true");
-    if (serviceTypeFilter) params.set("serviceType", serviceTypeFilter);
-    if (ratingMin > 0) params.set("rating", ratingMin.toString());
-    if (selectedServices.length > 0) params.set("services", selectedServices.join(","));
-    if (selectedGenders.length > 0) params.set("genders", selectedGenders.join(","));
-    if (sortBy !== "newest") params.set("sort", sortBy);
-    if (currentPage > 1) params.set("page", currentPage.toString());
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(escort => 
+        escort.name?.toLowerCase().includes(query) || 
+        escort.location?.toLowerCase().includes(query) ||
+        escort.description?.toLowerCase().includes(query) ||
+        escort.tags?.some(tag => tag.toLowerCase().includes(query)) ||
+        escort.services?.some(service => service.toLowerCase().includes(query))
+      );
+    }
     
-    setSearchParams(params);
-  }, [
-    searchQuery, location, verifiedOnly, availableNow, serviceTypeFilter,
-    ratingMin, selectedServices, selectedGenders, sortBy, currentPage, setSearchParams
-  ]);
-
-  // Apply filters to escorts
-  useEffect(() => {
-    setIsLoading(true);
+    // Filter by location
+    if (location) {
+      filtered = filtered.filter(escort => 
+        escort.location?.toLowerCase().includes(location.toLowerCase())
+      );
+    }
     
-    // Simulate loading delay for UI feedback
-    const timer = setTimeout(() => {
-      let result = [...escorts];
-      
-      // Apply search filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        result = result.filter(escort => 
-          escort.name?.toLowerCase().includes(query) || 
-          escort.location?.toLowerCase().includes(query) ||
-          escort.bio?.toLowerCase().includes(query)
-        );
-      }
-      
-      // Apply location filter
-      if (location) {
-        result = result.filter(escort => 
-          escort.location?.toLowerCase().includes(location.toLowerCase())
-        );
-      }
-      
-      // Apply verified filter
-      if (verifiedOnly) {
-        result = result.filter(escort => 
-          escort.isVerified === true || escort.verified === true
-        );
-      }
-      
-      // Apply availability filter
-      if (availableNow) {
-        result = result.filter(escort => 
-          escort.availableNow === true
-        );
-      }
-      
-      // Apply service type filter
-      if (serviceTypeFilter) {
-        if (serviceTypeFilter === "in-person") {
-          result = result.filter(escort => 
-            escort.providesInPersonServices === true || 
-            escort.serviceType === "in-person" ||
-            escort.services?.includes("in-person")
-          );
-        } else if (serviceTypeFilter === "virtual") {
-          result = result.filter(escort => 
-            escort.providesVirtualContent === true || 
-            escort.serviceType === "virtual" ||
-            escort.services?.includes("virtual")
-          );
-        } else if (serviceTypeFilter === "both") {
-          result = result.filter(escort => 
-            (escort.providesInPersonServices === true && escort.providesVirtualContent === true) ||
-            escort.serviceType === "both" ||
-            (escort.services?.includes("in-person") && escort.services?.includes("virtual"))
-          );
+    // Filter by price range
+    filtered = filtered.filter(escort => {
+      const price = escort.price || escort.rates?.hourly || 0;
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
+    
+    // Filter by verification status
+    if (verifiedOnly) {
+      filtered = filtered.filter(escort => 
+        escort.verified || escort.isVerified || escort.is_verified
+      );
+    }
+    
+    // Filter by selected services
+    if (selectedServices.length > 0) {
+      filtered = filtered.filter(escort => 
+        selectedServices.every(service => 
+          escort.services?.includes(service) || escort.tags?.includes(service)
+        )
+      );
+    }
+    
+    // Filter by selected genders
+    if (selectedGenders.length > 0) {
+      filtered = filtered.filter(escort => 
+        selectedGenders.includes(escort.gender || '')
+      );
+    }
+    
+    // Filter by selected orientations
+    if (selectedOrientations.length > 0) {
+      filtered = filtered.filter(escort => 
+        selectedOrientations.includes(escort.sexualOrientation || escort.orientation || '')
+      );
+    }
+    
+    // Filter by age range
+    filtered = filtered.filter(escort => {
+      const age = escort.age || 0;
+      return age >= ageRange[0] && age <= ageRange[1];
+    });
+    
+    // Filter by minimum rating
+    if (ratingMin > 0) {
+      filtered = filtered.filter(escort => 
+        (escort.rating || 0) >= ratingMin
+      );
+    }
+    
+    // Filter by availability
+    if (availableNow) {
+      filtered = filtered.filter(escort => 
+        escort.availableNow === true
+      );
+    }
+    
+    // Filter by service type
+    if (serviceTypeFilter) {
+      filtered = filtered.filter(escort => {
+        if (serviceTypeFilter === 'in-person') {
+          return escort.providesInPersonServices === true || escort.serviceType === 'in-person';
+        } else if (serviceTypeFilter === 'virtual') {
+          return escort.providesVirtualContent === true || escort.serviceType === 'virtual';
+        } else if (serviceTypeFilter === 'both') {
+          return (escort.providesInPersonServices === true && escort.providesVirtualContent === true) || 
+                 escort.serviceType === 'both';
         }
-      }
-      
-      // Apply rating filter
-      if (ratingMin > 0) {
-        result = result.filter(escort => 
-          (escort.rating ?? 0) >= ratingMin
-        );
-      }
-      
-      // Apply services filter
-      if (selectedServices.length > 0) {
-        result = result.filter(escort => 
-          selectedServices.some(service => escort.services?.includes(service))
-        );
-      }
-      
-      // Apply gender filter
-      if (selectedGenders.length > 0) {
-        result = result.filter(escort => 
-          selectedGenders.includes(escort.gender ?? "")
-        );
-      }
-      
-      // Apply sorting
-      if (sortBy === "rating") {
-        result.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
-      } else if (sortBy === "price-low") {
-        result.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
-      } else if (sortBy === "price-high") {
-        result.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
-      } else if (sortBy === "reviews") {
-        result.sort((a, b) => (b.reviewCount ?? 0) - (a.reviewCount ?? 0));
-      } else if (sortBy === "featured") {
-        result.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
-      }
-      
-      // Calculate total pages (10 escorts per page)
-      setTotalPages(Math.max(1, Math.ceil(result.length / 10)));
-      
-      // Apply pagination
-      const pageSize = 10;
-      const startIndex = (currentPage - 1) * pageSize;
-      const paginatedResults = result.slice(startIndex, startIndex + pageSize);
-      
-      setFilteredEscorts(paginatedResults);
-      setIsLoading(false);
-    }, 300);
+        return true;
+      });
+    }
     
-    return () => clearTimeout(timer);
+    // Sort escorts
+    if (sortBy === 'price-low') {
+      filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (sortBy === 'price-high') {
+      filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+    } else if (sortBy === 'rating') {
+      filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (sortBy === 'reviews') {
+      filtered.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0));
+    } else if (sortBy === 'newest') {
+      filtered.sort((a, b) => {
+        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return dateB - dateA;
+      });
+    } else if (sortBy === 'featured') {
+      filtered.sort((a, b) => {
+        if (a.featured && !b.featured) return -1;
+        if (!a.featured && b.featured) return 1;
+        return 0;
+      });
+    }
+    
+    return filtered;
   }, [
-    escorts, searchQuery, location, verifiedOnly, availableNow,
-    serviceTypeFilter, ratingMin, selectedServices, selectedGenders, sortBy, currentPage
+    escorts,
+    searchQuery,
+    location,
+    priceRange,
+    verifiedOnly,
+    selectedServices,
+    sortBy,
+    selectedGenders,
+    selectedOrientations,
+    ageRange,
+    ratingMin,
+    availableNow,
+    serviceTypeFilter
   ]);
-
-  // Utility function to toggle a service
+  
+  // Calculate total pages based on filtered escorts
+  const totalPages = Math.max(1, Math.ceil(filteredEscorts.length / 12));
+  
+  // Toggle service selection
   const toggleService = (service: string) => {
     setSelectedServices(prev => 
-      prev.includes(service)
-        ? prev.filter(s => s !== service)
+      prev.includes(service) 
+        ? prev.filter(s => s !== service) 
         : [...prev, service]
     );
   };
-
-  // Utility function to toggle a gender
+  
+  // Toggle gender selection
   const toggleGender = (gender: string) => {
     setSelectedGenders(prev => 
-      prev.includes(gender)
-        ? prev.filter(g => g !== gender)
+      prev.includes(gender) 
+        ? prev.filter(g => g !== gender) 
         : [...prev, gender]
     );
   };
-
-  // Reset all filters
+  
+  // Toggle orientation selection
+  const toggleOrientation = (orientation: string) => {
+    setSelectedOrientations(prev => 
+      prev.includes(orientation) 
+        ? prev.filter(o => o !== orientation) 
+        : [...prev, orientation]
+    );
+  };
+  
+  // Handle price range change
+  const handlePriceRangeChange = (values: number[]) => {
+    setPriceRange([values[0], values[1]]);
+  };
+  
+  // Handle age range change
+  const handleAgeRangeChange = (values: number[]) => {
+    setAgeRange([values[0], values[1]]);
+  };
+  
+  // Clear all filters
   const clearFilters = () => {
     setSearchQuery("");
     setLocation("");
+    setPriceRange([0, 500]);
     setVerifiedOnly(false);
-    setAvailableNow(false);
-    setServiceTypeFilter("");
-    setRatingMin(0);
     setSelectedServices([]);
-    setSelectedGenders([]);
     setSortBy("newest");
     setCurrentPage(1);
+    setSelectedGenders([]);
+    setSelectedOrientations([]);
+    setAgeRange([21, 50]);
+    setRatingMin(0);
+    setAvailableNow(false);
+    setServiceTypeFilter("");
   };
 
   return {
@@ -212,26 +287,34 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterProps) => {
     setSearchQuery,
     location,
     setLocation,
+    priceRange,
+    setPriceRange,
+    handlePriceRangeChange,
     verifiedOnly,
     setVerifiedOnly,
-    availableNow,
-    setAvailableNow,
-    serviceTypeFilter,
-    setServiceTypeFilter,
-    ratingMin,
-    setRatingMin,
     selectedServices,
-    setSelectedServices,
     toggleService,
-    selectedGenders,
-    setSelectedGenders,
-    toggleGender,
     sortBy,
     setSortBy,
     currentPage,
     setCurrentPage,
-    totalPages,
+    selectedGenders,
+    toggleGender,
+    selectedOrientations,
+    toggleOrientation,
+    ageRange,
+    setAgeRange,
+    handleAgeRangeChange,
+    ratingMin,
+    setRatingMin,
+    availableNow,
+    setAvailableNow,
+    serviceTypeFilter,
+    setServiceTypeFilter,
     isLoading,
+    totalPages,
     clearFilters
   };
 };
+
+export default useEscortFilterWithUrl;

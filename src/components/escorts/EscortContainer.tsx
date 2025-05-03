@@ -35,19 +35,36 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
   
   // Calculate active filter count with safe access to properties using optional chaining
   const activeFilterCount = useMemo(() => {
-    return [
-      filterState.searchQuery, 
-      filterState.location,
-      filterState.verifiedOnly,
-      filterState.availableNow,
-      filterState.serviceTypeFilter
-    ].filter(Boolean).length + 
-    (filterState.selectedServices?.length || 0) +
-    (filterState.selectedGenders?.length || 0) +
-    ((filterState as any).selectedOrientations?.length || 0) +
-    (filterState.ratingMin > 0 ? 1 : 0) +
-    (((filterState as any).priceRange?.[0] > 0 || (filterState as any).priceRange?.[1] < 500) ? 1 : 0) +
-    (((filterState as any).ageRange?.[0] > 21 || (filterState as any).ageRange?.[1] < 50) ? 1 : 0);
+    // Base count for simple filters
+    let count = 0;
+    
+    // Count simple filters
+    if (filterState.searchQuery) count++;
+    if (filterState.location) count++;
+    if (filterState.verifiedOnly) count++;
+    if (filterState.availableNow) count++;
+    if (filterState.serviceTypeFilter) count++;
+    
+    // Count array-based filters
+    count += (filterState.selectedServices?.length || 0);
+    count += (filterState.selectedGenders?.length || 0);
+    
+    // Count filters from properties that might not be directly defined in the type
+    const orientations = (filterState as any).selectedOrientations;
+    if (orientations && orientations.length) count += orientations.length;
+    
+    // Count range-based filters
+    if (filterState.ratingMin > 0) count++;
+    
+    // Price range
+    const priceRange = (filterState as any).priceRange;
+    if (priceRange && (priceRange[0] > 0 || priceRange[1] < 500)) count++;
+    
+    // Age range
+    const ageRange = (filterState as any).ageRange;
+    if (ageRange && (ageRange[0] > 21 || ageRange[1] < 50)) count++;
+    
+    return count;
   }, [
     filterState.searchQuery,
     filterState.location,
