@@ -10,6 +10,9 @@ interface ServiceTypeBadgeLabelProps {
   type?: ServiceTypeFilter; // Add this prop to accept both naming conventions
   includeIcon?: boolean;
   size?: "sm" | "default" | "lg"; // Add 'lg' size option
+  showIcon?: boolean; // Added showIcon prop
+  color?: string; // Added color prop
+  className?: string; // Add className prop for custom styling
 }
 
 /**
@@ -20,10 +23,16 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
   serviceType,
   type,
   includeIcon = true,
-  size = "default"
+  size = "default",
+  showIcon, // This will override includeIcon if provided
+  color,
+  className: customClassName = ""
 }) => {
   // Use type prop if serviceType is not provided
   const actualType = serviceType || type || "";
+  
+  // Use showIcon prop if provided, otherwise fall back to includeIcon
+  const shouldShowIcon = showIcon !== undefined ? showIcon : includeIcon;
   
   const getServiceTypeDetails = () => {
     switch (actualType) {
@@ -32,28 +41,28 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
           label: "In Person",
           icon: <Users size={16} />,
           variant: "outline" as const,
-          className: "text-blue-500 border-blue-200"
+          className: color ? `text-${color}` : "text-blue-500 border-blue-200"
         };
       case "virtual":
         return { 
           label: "Virtual",
           icon: <Video size={16} />,
           variant: "outline" as const,
-          className: "text-purple-500 border-purple-200" 
+          className: color ? `text-${color}` : "text-purple-500 border-purple-200" 
         };
       case "both":
         return { 
           label: "Both Types",
           icon: <Zap size={16} />,
           variant: "outline" as const,
-          className: "text-green-500 border-green-200" 
+          className: color ? `text-${color}` : "text-green-500 border-green-200" 
         };
       default:
         return { 
           label: "Any Type",
           icon: null,
           variant: "outline" as const,
-          className: "text-gray-500 border-gray-200" 
+          className: color ? `text-${color}` : "text-gray-500 border-gray-200" 
         };
     }
   };
@@ -63,9 +72,9 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
   return (
     <Badge 
       variant={variant}
-      className={`${className} ${size === "sm" ? "text-xs py-0 px-1.5" : size === "lg" ? "text-base py-1 px-3" : ""}`}
+      className={`${className} ${customClassName} ${size === "sm" ? "text-xs py-0 px-1.5" : size === "lg" ? "text-base py-1 px-3" : ""}`}
     >
-      {includeIcon && icon && <span className="mr-1">{icon}</span>}
+      {shouldShowIcon && icon && <span className="mr-1">{icon}</span>}
       {label}
     </Badge>
   );

@@ -8,10 +8,10 @@ export const useFilterState = (): EscortFilterState & EscortFilterActions => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState("newest");
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
   const [selectedOrientations, setSelectedOrientations] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
   const [ageRange, setAgeRange] = useState<[number, number]>([21, 60]);
   const [ratingMin, setRatingMin] = useState(0);
   const [availableNow, setAvailableNow] = useState(false);
@@ -68,10 +68,10 @@ export const useFilterState = (): EscortFilterState & EscortFilterActions => {
     setPriceRange([0, 1000]);
     setVerifiedOnly(false);
     setSelectedServices([]);
-    setSortBy("newest");
-    setCurrentPage(1);
     setSelectedGenders([]);
     setSelectedOrientations([]);
+    setSortBy("newest");
+    setCurrentPage(1);
     setAgeRange([21, 60]);
     setRatingMin(0);
     setAvailableNow(false);
@@ -91,16 +91,16 @@ export const useFilterState = (): EscortFilterState & EscortFilterActions => {
     selectedServices,
     setSelectedServices,
     toggleService,
-    sortBy,
-    setSortBy,
-    currentPage,
-    setCurrentPage,
     selectedGenders,
     setSelectedGenders,
     toggleGender,
     selectedOrientations,
     setSelectedOrientations,
     toggleOrientation,
+    sortBy,
+    setSortBy,
+    currentPage,
+    setCurrentPage,
     ageRange,
     setAgeRange,
     handleAgeRangeChange,
