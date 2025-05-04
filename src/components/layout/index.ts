@@ -1,6 +1,7 @@
 
 // Export the main layout component
 export { UnifiedLayout } from '@/layouts';
+export type { UnifiedLayoutProps } from '@/layouts';
 
 // Legacy layout aliases for backward compatibility
 export { default as MainLayout } from '@/layouts/MainLayout';

@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { UnifiedLayout, UnifiedLayoutProps } from '@/layouts';
+import { UnifiedLayout } from '@/layouts';
+import { UnifiedLayoutProps } from '@/layouts/UnifiedLayout';
 
 // This file exists for backward compatibility
 // Components importing from AppLayout will use the UnifiedLayout
