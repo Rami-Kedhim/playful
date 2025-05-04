@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X, MessageSquare, Send } from 'lucide-react';
-import { useLucieAssistant } from '@/hooks/useLucieAssistant';
+import { useLucieAssistant, Message } from '@/hooks/useLucieAssistant';
 import LucieMessageList from './lucie-assistant/LucieMessageList';
 
 interface LucieAssistantProps {
@@ -18,13 +18,16 @@ const LucieAssistant: React.FC<LucieAssistantProps> = ({
   onClose
 }) => {
   const [inputValue, setInputValue] = useState('');
+  const initialMessages = customInitialMessage ? [{
+    id: 'initial',
+    content: customInitialMessage,
+    role: 'assistant',
+    timestamp: new Date()
+  }] : undefined;
+
   const lucieHook = useLucieAssistant({
-    initialMessages: customInitialMessage ? [{
-      id: 'initial',
-      content: customInitialMessage,
-      role: 'assistant',
-      timestamp: new Date()
-    }] : undefined
+    initialMessages,
+    autoOpen: initiallyOpen
   });
 
   const { 
@@ -52,6 +55,14 @@ const LucieAssistant: React.FC<LucieAssistantProps> = ({
     }
   }, [initiallyOpen, isOpen, toggleChat]);
 
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      toggleChat();
+    }
+  };
+
   if (!isOpen) {
     return (
       <Button
@@ -74,7 +85,7 @@ const LucieAssistant: React.FC<LucieAssistantProps> = ({
               variant="ghost" 
               size="icon" 
               className="text-primary-foreground h-7 w-7" 
-              onClick={onClose || toggleChat}
+              onClick={handleClose}
             >
               <X size={16} />
               <span className="sr-only">Close</span>

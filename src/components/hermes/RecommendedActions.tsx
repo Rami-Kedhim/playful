@@ -13,7 +13,7 @@ interface RecommendedActionsProps {
 const RecommendedActions: React.FC<RecommendedActionsProps> = ({ userId, context }) => {
   const [recommendation, setRecommendation] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const hermesFlow = useHermesFlow('recommended-actions');
+  const hermesFlow = useHermesFlow({ flowId: 'recommended-actions' });
 
   const fetchRecommendation = async () => {
     setIsLoading(true);

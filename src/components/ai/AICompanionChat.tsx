@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Send } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { lucie } from '@/core/Lucie';
-import { GenerateContentResult } from '@/types/core-systems';
+import { GenerateContentResult, ModerateContentParams } from '@/types/core-systems';
 
 // Update Message interface to properly handle GenerateContentResult
 interface Message {
@@ -18,14 +18,24 @@ interface Message {
 
 interface AICompanionChatProps {
   companionName?: string;
+  companionId?: string; // Add companionId prop
   primaryColor?: string;
   initialMessage?: string;
+  name?: string; // Add name prop
+  avatarUrl?: string; // Add avatarUrl prop
+  personalityType?: string; // Add personalityType prop
+  onClose?: () => void; // Add onClose prop
 }
 
 const AICompanionChat: React.FC<AICompanionChatProps> = ({
   companionName = 'AI Companion',
+  companionId, // Use companionId if provided
   primaryColor = '#7c3aed',
   initialMessage = "Hi there! I'm your AI companion. How can I assist you today?",
+  name, // Use name if provided
+  avatarUrl, // Use avatarUrl if provided
+  personalityType, // Use personalityType if provided
+  onClose, // Use onClose if provided
 }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -37,7 +47,10 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  const displayName = name || companionName;
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -58,13 +71,17 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+    setIsTyping(true);
 
     try {
       // Moderate content before processing
-      const moderationResult = await lucie.moderateContent({
+      const moderationParams: ModerateContentParams = {
         content: input.trim(),
         contentType: 'text',
-      });
+        context: {}
+      };
+      
+      const moderationResult = await lucie.moderateContent(moderationParams);
 
       if (!moderationResult.safe) {
         // Handle unsafe content
@@ -78,11 +95,20 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
           },
         ]);
         setIsLoading(false);
+        setIsTyping(false);
         return;
       }
 
       // Generate AI response
-      const response = await lucie.generateContent(input.trim());
+      // Add context about the companion if available
+      const contextInfo = personalityType 
+        ? `You are an AI companion with a ${personalityType} personality. Your ID is ${companionId || 'unspecified'}.`
+        : '';
+
+      const response = await lucie.generateContent(input.trim(), { 
+        context: contextInfo,
+        companionId
+      });
       
       // Add AI response to chat
       setMessages((prev) => [
@@ -107,6 +133,7 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
       ]);
     } finally {
       setIsLoading(false);
+      setIsTyping(false);
     }
   };
 
@@ -116,7 +143,23 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
         className="py-3 px-4 font-semibold border-b"
         style={{ backgroundColor: primaryColor, color: 'white' }}
       >
-        {companionName}
+        <div className="flex justify-between items-center">
+          <span>{displayName}</span>
+          {onClose && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onClose}
+              className="h-6 w-6 text-white hover:bg-white/20"
+            >
+              <span className="sr-only">Close</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </Button>
+          )}
+        </div>
       </div>
       
       <ScrollArea className="flex-1 p-4">
@@ -139,7 +182,7 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
               </div>
             </div>
           ))}
-          {isLoading && (
+          {isTyping && (
             <div className="flex justify-start">
               <div className="max-w-[80%] rounded-lg p-3 bg-muted">
                 <div className="flex space-x-2">

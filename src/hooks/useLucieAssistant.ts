@@ -1,14 +1,53 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { lucie } from '@/core/Lucie';
-import { GenerateContentResult, Message, ModerateContentParams } from '@/types/core-systems';
+import { GenerateContentResult, ModerateContentParams } from '@/types/core-systems';
 
-export function useLucieAssistant(initialSystemPrompt: string = '') {
-  const [messages, setMessages] = useState<Message[]>([]);
+export interface Message {
+  id: string;
+  text: string;
+  sender: 'user' | 'ai';
+  timestamp: Date;
+}
+
+export interface LucieMessage {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant' | 'system';
+  timestamp: Date;
+}
+
+interface UseLucieAssistantOptions {
+  initialSystemPrompt?: string;
+  initialMessages?: LucieMessage[];
+  autoOpen?: boolean;
+}
+
+export function useLucieAssistant(options: UseLucieAssistantOptions = {}) {
+  const {
+    initialSystemPrompt = '',
+    initialMessages = [],
+    autoOpen = false
+  } = typeof options === 'string' ? { initialSystemPrompt: options } : options;
+
+  const [messages, setMessages] = useState<Message[]>(
+    initialMessages.map(msg => ({
+      id: msg.id,
+      text: msg.content,
+      sender: msg.role === 'user' ? 'user' : 'ai',
+      timestamp: msg.timestamp
+    }))
+  );
   const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [systemPrompt, setSystemPrompt] = useState(initialSystemPrompt);
+  const [isOpen, setIsOpen] = useState(autoOpen);
+
+  const toggleChat = useCallback(() => {
+    setIsOpen(prev => !prev);
+  }, []);
 
   const updateSystemPrompt = useCallback((newPrompt: string) => {
     setSystemPrompt(newPrompt);
@@ -42,6 +81,7 @@ export function useLucieAssistant(initialSystemPrompt: string = '') {
     if (!text.trim()) return null;
     
     setIsLoading(true);
+    setIsTyping(true);
     setError(null);
     
     try {
@@ -49,10 +89,13 @@ export function useLucieAssistant(initialSystemPrompt: string = '') {
       addUserMessage(text);
       
       // Moderate content
-      const moderationResult = await lucie.moderateContent({
+      const moderationParams: ModerateContentParams = {
         content: text,
-        contentType: 'text'
-      });
+        contentType: 'text',
+        context: {}
+      };
+      
+      const moderationResult = await lucie.moderateContent(moderationParams);
       
       if (!moderationResult.safe) {
         const safetyMessage = "I'm sorry, I can't respond to that type of content. Let's talk about something else.";
@@ -61,7 +104,12 @@ export function useLucieAssistant(initialSystemPrompt: string = '') {
       }
       
       // Generate response
-      const response = await lucie.generateContent(text, options);
+      const contextOptions = {
+        systemPrompt,
+        ...options
+      };
+      
+      const response = await lucie.generateContent(text, contextOptions);
       
       // Add AI response
       addAIMessage(response.content);
@@ -72,8 +120,9 @@ export function useLucieAssistant(initialSystemPrompt: string = '') {
       return null;
     } finally {
       setIsLoading(false);
+      setIsTyping(false);
     }
-  }, [addUserMessage, addAIMessage]);
+  }, [addUserMessage, addAIMessage, systemPrompt]);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
@@ -82,13 +131,16 @@ export function useLucieAssistant(initialSystemPrompt: string = '') {
   return {
     messages,
     isLoading,
+    isTyping,
     error,
     systemPrompt,
     sendMessage,
     addUserMessage,
     addAIMessage,
     updateSystemPrompt,
-    clearMessages
+    clearMessages,
+    isOpen,
+    toggleChat
   };
 }
 

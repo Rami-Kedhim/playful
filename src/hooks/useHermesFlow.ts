@@ -1,120 +1,167 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { hermes } from '@/core/Hermes';
-import { UserJourneyInsights } from '@/types/core-systems';
 
-interface UseHermesFlowOptions {
-  userId: string;
-  trackPageChanges?: boolean;
-  trackEvents?: boolean;
+export interface UserJourneyInsights {
+  totalSessions: number;
+  averageDuration: number;
+  commonPaths: {
+    source: string;
+    destination: string;
+    count: number;
+  }[];
+  conversionRate?: number;
+  bounceRate?: number;
 }
 
-interface TrackEventOptions {
-  category: string;
-  action: string;
-  label?: string;
-  value?: number;
+export interface TrackEventOptions {
+  event: string;
+  props?: Record<string, any>;
+  userId?: string;
 }
 
-export function useHermesFlow(options: UseHermesFlowOptions) {
-  const { userId, trackPageChanges = true, trackEvents = true } = options;
-  const location = useLocation();
-  const [previousPath, setPreviousPath] = useState<string | null>(null);
+export interface UseHermesFlowOptions {
+  flowId?: string;
+  userId?: string;
+  autoConnect?: boolean;
+}
+
+export function useHermesFlow(flowIdOrOptions: string | UseHermesFlowOptions) {
   const [isConnected, setIsConnected] = useState(false);
-  const [insights, setInsights] = useState<UserJourneyInsights | null>(null);
+  const [insights, setInsights] = useState<UserJourneyInsights>({
+    totalSessions: 0,
+    averageDuration: 0,
+    commonPaths: [],
+    conversionRate: 0,
+    bounceRate: 0
+  });
   const [isLoading, setIsLoading] = useState(false);
 
-  // Connect to Hermes on mount
-  useEffect(() => {
-    const connectionId = `user-${userId}-${Date.now()}`;
-    
-    hermes.connect({
-      connectionId,
-      system: 'web-client',
-      userId,
-      metadata: {
-        initialPath: location.pathname,
-        timestamp: new Date().toISOString()
-      }
-    });
-    
-    setIsConnected(true);
-    
-    // Clean up on unmount
-    return () => {
-      setIsConnected(false);
-    };
-  }, [userId]);
+  // Normalize options
+  const options = typeof flowIdOrOptions === 'string'
+    ? { flowId: flowIdOrOptions }
+    : flowIdOrOptions;
 
-  // Track page changes
+  const { flowId = 'default', userId = 'anonymous', autoConnect = true } = options;
+
   useEffect(() => {
-    if (!trackPageChanges || !isConnected) return;
-    
-    const currentPath = location.pathname;
-    
-    // Don't track the initial page load as a navigation
-    if (previousPath !== null) {
-      hermes.routeFlow({
-        source: previousPath,
-        destination: currentPath,
-        params: {
-          userId,
-          timestamp: new Date().toISOString()
-        }
-      });
+    if (autoConnect) {
+      connectToFlow();
     }
-    
-    // Update previous path
-    setPreviousPath(currentPath);
-  }, [location.pathname, previousPath, userId, trackPageChanges, isConnected]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flowId, userId, autoConnect]);
 
-  // Track custom events
-  const trackEvent = useCallback((options: TrackEventOptions) => {
-    if (!trackEvents || !isConnected) return;
-    
-    const { category, action, label, value } = options;
-    
-    const connectionId = `event-${userId}-${Date.now()}`;
-    hermes.connect({
-      connectionId,
-      system: category,
-      userId,
-      metadata: {
-        action,
-        label,
-        value,
-        path: location.pathname,
-        timestamp: new Date().toISOString()
-      }
-    });
-  }, [userId, trackEvents, isConnected, location.pathname]);
-
-  // Function to load user journey insights
-  const loadInsights = useCallback(async (timeRange?: string) => {
-    if (!userId) return null;
-    
-    setIsLoading(true);
-    
+  // Connect to the Hermes flow
+  const connectToFlow = async () => {
     try {
-      // Get insights for this user
-      const userInsights = hermes.getUserJourneyInsights(userId, timeRange);
-      setInsights(userInsights);
-      return userInsights;
+      const connectionResult = await hermes.connect({
+        system: 'HermesFlow',
+        connectionId: flowId,
+        userId,
+        metadata: { timestamp: new Date().toISOString() }
+      });
+
+      setIsConnected(connectionResult.connected);
     } catch (error) {
-      console.error("Error loading user journey insights:", error);
-      return null;
+      console.error('Failed to connect to Hermes flow:', error);
+      setIsConnected(false);
+    }
+  };
+
+  // Load user journey insights
+  const loadInsights = async (timeRange: string = '7d') => {
+    setIsLoading(true);
+    try {
+      // In a real implementation, this would call the actual API
+      // For now we'll simulate the response
+      const mockInsights: UserJourneyInsights = {
+        totalSessions: Math.floor(Math.random() * 100) + 50,
+        averageDuration: Math.floor(Math.random() * 600) + 120,
+        commonPaths: [
+          { source: '/home', destination: '/profiles', count: 45 },
+          { source: '/profiles', destination: '/messages', count: 32 },
+          { source: '/home', destination: '/search', count: 28 }
+        ],
+        conversionRate: Math.random() * 0.15 + 0.05,
+        bounceRate: Math.random() * 0.4 + 0.2
+      };
+      
+      setInsights(mockInsights);
+      return mockInsights;
+    } catch (error) {
+      console.error('Failed to load user journey insights:', error);
+      return insights;
     } finally {
       setIsLoading(false);
     }
-  }, [userId]);
+  };
+
+  // Track an event within the flow
+  const trackEvent = (options: TrackEventOptions) => {
+    if (!isConnected) {
+      console.warn('Cannot track event: not connected to Hermes flow');
+      return false;
+    }
+
+    try {
+      hermes.track({
+        event: options.event,
+        properties: options.props || {},
+        userId: options.userId || userId,
+        timestamp: new Date().toISOString()
+      });
+      return true;
+    } catch (error) {
+      console.error('Failed to track Hermes event:', error);
+      return false;
+    }
+  };
+
+  // Track a step in the flow
+  const trackStep = (step: string, data?: Record<string, any>) => {
+    return trackEvent({
+      event: `flow_step_${step}`,
+      props: {
+        flowId,
+        step,
+        ...data
+      },
+      userId
+    });
+  };
+
+  // Get recommended action for the user
+  const getRecommendedAction = async (userId: string, context?: Record<string, any>) => {
+    try {
+      // In a real implementation, this would call the actual API
+      // For now we'll simulate the response
+      const recommendations = [
+        "Check out our newly verified profiles",
+        "Update your preferences to see more relevant profiles",
+        "Complete your profile to get better matches",
+        "Explore our premium features for enhanced experience",
+        "Try our AI companion for personalized recommendations"
+      ];
+      
+      // Return a pseudo-random but consistent recommendation based on userId
+      const userIdSum = userId.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      const recommendationIndex = userIdSum % recommendations.length;
+      
+      return recommendations[recommendationIndex];
+    } catch (error) {
+      console.error('Failed to get recommended action:', error);
+      return "Explore our featured profiles to discover new connections.";
+    }
+  };
 
   return {
     isConnected,
     trackEvent,
     insights,
     loadInsights,
-    isLoading
+    isLoading,
+    trackStep,
+    getRecommendedAction
   };
 }
 

@@ -2,12 +2,13 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { MainLayout } from '@/layouts/MainLayout';
+import MainLayout from '@/layouts/MainLayout';
 
 const NotFound: React.FC = () => {
   return (
     <MainLayout
-      showNavigation={false}
+      hideNavbar={true}
+      hideFooter={true}
     >
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
         <h1 className="text-4xl font-bold">404</h1>

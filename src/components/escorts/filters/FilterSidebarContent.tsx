@@ -1,314 +1,232 @@
 
 import React from 'react';
-import { Slider } from '@/components/ui/slider';
-import { 
-  Accordion, 
-  AccordionContent, 
-  AccordionItem, 
-  AccordionTrigger 
-} from '@/components/ui/accordion';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ServiceTypeBadgeLabel, ServiceTypeFilter } from './ServiceTypeBadgeLabel';
-import { MultiCheckboxFilter } from './MultiCheckboxFilter';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Toggle } from "@/components/ui/toggle";
+import { Check } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import ServiceTypeFilter from './ServiceTypeFilter';
+import type { ServiceTypeFilter as ServiceTypeFilterType } from './ServiceTypeBadgeLabel';
+import { MultiCheckboxFilter } from '@/components/escorts/filters/MultiCheckboxFilter';
 import { Option } from '@/types/core-systems';
 
-export interface FilterSidebarContentProps {
+interface FilterSidebarContentProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   location: string;
   setLocation: (location: string) => void;
   priceRange: [number, number];
   setPriceRange: (range: number[]) => void;
-  ageRange: [number, number];
-  setAgeRange: (range: number[]) => void;
-  gender: string[];
-  setGender: (gender: string[]) => void;
-  serviceTypeFilter: ServiceTypeFilter;
-  setServiceTypeFilter: (type: ServiceTypeFilter) => void;
-  selectedBodyTypes: string[];
-  setSelectedBodyTypes: (types: string[]) => void;
-  selectedEthnicities: string[];
-  setSelectedEthnicities: (ethnicities: string[]) => void;
-  selectedHairColors: string[];
-  setSelectedHairColors: (colors: string[]) => void;
-  selectedServices: string[];
-  setSelectedServices: (services: string[]) => void;
   verifiedOnly: boolean;
   setVerifiedOnly: (verified: boolean) => void;
-  availableNow: boolean;
-  setAvailableNow: (available: boolean) => void;
+  selectedServices: string[];
+  toggleService: (service: string) => void;
+  services: string[];
+  clearFilters: () => void;
+  selectedGenders: string[];
+  toggleGender: (gender: string) => void;
+  selectedOrientations: string[];
+  toggleOrientation: (orientation: string) => void;
+  ageRange?: [number, number];
+  setAgeRange?: (range: number[]) => void;
   ratingMin?: number;
   setRatingMin?: (rating: number) => void;
+  availableNow?: boolean;
+  setAvailableNow?: (available: boolean) => void;
+  serviceTypeFilter: ServiceTypeFilterType;
+  setServiceTypeFilter: (type: ServiceTypeFilterType) => void;
 }
 
-export const FilterSidebarContent: React.FC<FilterSidebarContentProps> = ({
+const FilterSidebarContent: React.FC<FilterSidebarContentProps> = ({
   searchQuery,
   setSearchQuery,
   location,
   setLocation,
   priceRange,
   setPriceRange,
-  ageRange,
-  setAgeRange,
-  gender,
-  setGender,
-  serviceTypeFilter,
-  setServiceTypeFilter,
-  selectedBodyTypes,
-  setSelectedBodyTypes,
-  selectedEthnicities,
-  setSelectedEthnicities,
-  selectedHairColors,
-  setSelectedHairColors,
-  selectedServices,
-  setSelectedServices,
   verifiedOnly,
   setVerifiedOnly,
-  availableNow,
-  setAvailableNow,
+  selectedServices,
+  toggleService,
+  services,
+  selectedGenders,
+  toggleGender,
+  selectedOrientations,
+  toggleOrientation,
+  ageRange = [18, 60],
+  setAgeRange = () => {},
   ratingMin = 0,
-  setRatingMin = () => {}
+  setRatingMin = () => {},
+  availableNow = false,
+  setAvailableNow = () => {},
+  serviceTypeFilter,
+  setServiceTypeFilter
 }) => {
-  // Gender options
   const genderOptions: Option[] = [
     { value: 'female', label: 'Female' },
     { value: 'male', label: 'Male' },
-    { value: 'transgender', label: 'Transgender' },
+    { value: 'trans', label: 'Transgender' },
     { value: 'non-binary', label: 'Non-binary' }
   ];
 
-  // Body type options
-  const bodyTypeOptions: Option[] = [
-    { value: 'slim', label: 'Slim' },
-    { value: 'athletic', label: 'Athletic' },
-    { value: 'average', label: 'Average' },
-    { value: 'curvy', label: 'Curvy' },
-    { value: 'muscular', label: 'Muscular' },
-    { value: 'plus-size', label: 'Plus Size' }
+  const orientationOptions: Option[] = [
+    { value: 'straight', label: 'Straight' },
+    { value: 'gay', label: 'Gay' },
+    { value: 'lesbian', label: 'Lesbian' },
+    { value: 'bisexual', label: 'Bisexual' },
+    { value: 'pansexual', label: 'Pansexual' }
   ];
 
-  // Ethnicity options
-  const ethnicityOptions: Option[] = [
-    { value: 'asian', label: 'Asian' },
-    { value: 'black', label: 'Black' },
-    { value: 'caucasian', label: 'Caucasian' },
-    { value: 'hispanic', label: 'Hispanic' },
-    { value: 'middle-eastern', label: 'Middle Eastern' },
-    { value: 'mixed', label: 'Mixed' },
-    { value: 'other', label: 'Other' }
-  ];
+  const serviceOptions: Option[] = services.map(service => ({
+    value: service,
+    label: service
+  }));
 
-  // Hair color options
-  const hairColorOptions: Option[] = [
-    { value: 'black', label: 'Black' },
-    { value: 'blonde', label: 'Blonde' },
-    { value: 'brown', label: 'Brown' },
-    { value: 'red', label: 'Red' },
-    { value: 'grey', label: 'Grey/Silver' },
-    { value: 'other', label: 'Other' }
-  ];
+  // Convert arrays to proper format for MultiCheckboxFilter
+  const handleGenderToggle = (value: string) => {
+    toggleGender(value);
+  };
 
-  // Services options
-  const serviceOptions: Option[] = [
-    { value: 'massage', label: 'Massage' },
-    { value: 'companionship', label: 'Companionship' },
-    { value: 'dinner-date', label: 'Dinner Date' },
-    { value: 'overnight', label: 'Overnight' },
-    { value: 'travel', label: 'Travel Companion' },
-    { value: 'roleplay', label: 'Roleplay' },
-    { value: 'fetish', label: 'Fetish' }
-  ];
+  const handleOrientationToggle = (value: string) => {
+    toggleOrientation(value);
+  };
 
-  const handleGenderChange = (gender: string) => {
-    if (gender === 'any') {
-      setGender([]);
-    } else {
-      setGender(prev => 
-        prev.includes(gender) 
-          ? prev.filter(g => g !== gender) 
-          : [...prev, gender]
-      );
-    }
+  const handleServiceToggle = (value: string) => {
+    toggleService(value);
   };
 
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <label className="text-sm font-medium">Search</label>
-        <Input
-          type="text"
-          placeholder="Search name or keywords"
-          value={searchQuery}
+        <Label htmlFor="search">Search</Label>
+        <Input 
+          id="search"
+          value={searchQuery} 
           onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search escorts..."
         />
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Location</label>
-        <Input
-          type="text"
-          placeholder="City, State or Region"
-          value={location}
+        <Label htmlFor="location">Location</Label>
+        <Input 
+          id="location"
+          value={location} 
           onChange={(e) => setLocation(e.target.value)}
+          placeholder="City, state, or country"
         />
       </div>
 
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="service-type">
-          <AccordionTrigger className="text-sm">Service Type</AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            <div className="grid grid-cols-1 gap-2">
-              {(['in-person', 'virtual', 'both'] as ServiceTypeFilter[]).map((type) => (
-                <Button 
-                  key={type}
-                  variant={serviceTypeFilter === type ? 'default' : 'outline'}
-                  className="justify-start"
-                  onClick={() => setServiceTypeFilter(type)}
-                >
-                  <ServiceTypeBadgeLabel type={type} color={serviceTypeFilter === type ? 'default' : 'outline'} />
-                </Button>
-              ))}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+      <Separator />
 
-        <AccordionItem value="price-range">
-          <AccordionTrigger className="text-sm">Price Range ($ per hour)</AccordionTrigger>
-          <AccordionContent className="py-4">
-            <div className="px-2">
-              <Slider
-                value={[priceRange[0], priceRange[1]]}
-                min={0}
-                max={1000}
-                step={10}
-                onValueChange={(value) => setPriceRange([value[0], value[1]])}
-              />
-              <div className="flex justify-between mt-2 text-sm">
-                <span>${priceRange[0]}</span>
-                <span>${priceRange[1]}+</span>
-              </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+      <ServiceTypeFilter
+        serviceTypeFilter={serviceTypeFilter}
+        setServiceTypeFilter={setServiceTypeFilter}
+        className="mb-4"
+      />
 
-        <AccordionItem value="age-range">
-          <AccordionTrigger className="text-sm">Age Range</AccordionTrigger>
-          <AccordionContent className="py-4">
-            <div className="px-2">
-              <Slider
-                value={[ageRange[0], ageRange[1]]}
-                min={18}
-                max={60}
-                step={1}
-                onValueChange={(value) => setAgeRange([value[0], value[1]])}
-              />
-              <div className="flex justify-between mt-2 text-sm">
-                <span>{ageRange[0]}</span>
-                <span>{ageRange[1]}+</span>
-              </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+      <Separator />
 
-        <AccordionItem value="gender">
-          <AccordionTrigger className="text-sm">Gender</AccordionTrigger>
-          <AccordionContent>
-            <div className="grid grid-cols-1 gap-2">
-              {genderOptions.map((option) => (
-                <div key={option.value} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={`gender-${option.value}`} 
-                    checked={gender.includes(option.value)} 
-                    onCheckedChange={() => handleGenderChange(option.value)}
-                  />
-                  <Label htmlFor={`gender-${option.value}`}>{option.label}</Label>
-                </div>
-              ))}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+      <div className="space-y-2">
+        <Label>Price Range (per hour)</Label>
+        <div className="pt-4">
+          <Slider
+            defaultValue={[priceRange[0], priceRange[1]]}
+            min={0}
+            max={1000}
+            step={50}
+            onValueChange={(values) => setPriceRange(values as [number, number])}
+          />
+          <div className="flex justify-between mt-2">
+            <span className="text-sm">${priceRange[0]}</span>
+            <span className="text-sm">${priceRange[1]}+</span>
+          </div>
+        </div>
+      </div>
 
-        <AccordionItem value="verification-availability">
-          <AccordionTrigger className="text-sm">Verification & Availability</AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="verified-only" 
-                  checked={verifiedOnly}
-                  onCheckedChange={() => setVerifiedOnly(!verifiedOnly)}
-                />
-                <Label htmlFor="verified-only">Verified Profiles Only</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="available-now" 
-                  checked={availableNow}
-                  onCheckedChange={() => setAvailableNow(!availableNow)}
-                />
-                <Label htmlFor="available-now">Available Now</Label>
-              </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+      <Separator />
 
-        <AccordionItem value="minimum-rating">
-          <AccordionTrigger className="text-sm">Minimum Rating</AccordionTrigger>
-          <AccordionContent>
-            <div className="px-2 py-2">
-              <Slider
-                value={[ratingMin]}
-                min={0}
-                max={5}
-                step={1}
-                onValueChange={(value) => setRatingMin(value[0])}
-              />
-              <div className="flex justify-between mt-2 text-sm">
-                <span>Any</span>
-                <span>{ratingMin}+ Stars</span>
-              </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+      <div>
+        <Toggle 
+          pressed={verifiedOnly} 
+          onPressedChange={setVerifiedOnly}
+          className="w-full justify-start gap-2"
+        >
+          <Check className={`h-4 w-4 ${verifiedOnly ? "opacity-100" : "opacity-0"}`} />
+          Verified Only
+        </Toggle>
+      </div>
 
-        <AccordionItem value="advanced-filters">
-          <AccordionTrigger className="text-sm">Advanced Filters</AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-6 py-2">
-              <MultiCheckboxFilter
-                title="Body Type"
-                options={bodyTypeOptions}
-                selectedValues={selectedBodyTypes}
-                onChange={setSelectedBodyTypes}
-              />
-              
-              <MultiCheckboxFilter
-                title="Ethnicity"
-                options={ethnicityOptions}
-                selectedValues={selectedEthnicities}
-                onChange={setSelectedEthnicities}
-              />
-              
-              <MultiCheckboxFilter
-                title="Hair Color"
-                options={hairColorOptions}
-                selectedValues={selectedHairColors}
-                onChange={setSelectedHairColors}
-              />
-              
-              <MultiCheckboxFilter
-                title="Services Offered"
-                options={serviceOptions}
-                selectedValues={selectedServices}
-                onChange={setSelectedServices}
-              />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      <div>
+        <Toggle 
+          pressed={availableNow} 
+          onPressedChange={setAvailableNow}
+          className="w-full justify-start gap-2"
+        >
+          <Check className={`h-4 w-4 ${availableNow ? "opacity-100" : "opacity-0"}`} />
+          Available Now
+        </Toggle>
+      </div>
+
+      <Separator />
+
+      <MultiCheckboxFilter
+        title="Gender"
+        options={genderOptions}
+        selectedValues={selectedGenders}
+        onChange={handleGenderToggle}
+      />
+
+      <MultiCheckboxFilter
+        title="Sexual Orientation"
+        options={orientationOptions}
+        selectedValues={selectedOrientations}
+        onChange={handleOrientationToggle}
+      />
+
+      <MultiCheckboxFilter
+        title="Services"
+        options={serviceOptions}
+        selectedValues={selectedServices}
+        onChange={handleServiceToggle}
+      />
+
+      <Separator />
+
+      <div className="space-y-2">
+        <Label>Age Range</Label>
+        <div className="pt-4">
+          <Slider
+            defaultValue={[ageRange[0], ageRange[1]]}
+            min={18}
+            max={65}
+            step={1}
+            onValueChange={(values) => setAgeRange(values as [number, number])}
+          />
+          <div className="flex justify-between mt-2">
+            <span className="text-sm">{ageRange[0]} years</span>
+            <span className="text-sm">{ageRange[1]} years</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Minimum Rating</Label>
+        <div className="pt-4">
+          <Slider
+            defaultValue={[ratingMin]}
+            min={0}
+            max={5}
+            step={0.5}
+            onValueChange={(values) => setRatingMin(values[0])}
+          />
+          <div className="flex justify-between mt-2">
+            <span className="text-sm">Any</span>
+            <span className="text-sm">{ratingMin} stars+</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
