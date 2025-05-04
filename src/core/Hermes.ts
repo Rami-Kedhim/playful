@@ -1,196 +1,136 @@
 
-/**
- * Hermes Analytics System
- * Core analytics, tracking, and user journey insights for the UberEscorts platform
- */
-
-interface UserState {
-  id: string;
-  sessionId: string;
-  lastActivity: Date;
-  location: string;
-  preferences: Record<string, any>;
-  metaverse: {
-    hasEntered: boolean;
-    lastEntryTime?: Date;
-    totalTimeSpent: number;
-  };
-  isActive: boolean;
-}
-
-interface PageViewEvent {
-  path: string;
-  referrer: string;
-  timestamp: Date;
-  metadata?: Record<string, any>;
-}
-
-export class HermesAnalytics {
-  private readonly userStates = new Map<string, UserState>();
-  private readonly pageViews = new Map<string, PageViewEvent[]>();
-  
-  /**
-   * Track a user page view
-   */
-  trackPageView(userId: string, path: string, referrer = '', metadata?: Record<string, any>): void {
-    if (!this.pageViews.has(userId)) {
-      this.pageViews.set(userId, []);
-    }
-    
-    const pageViews = this.pageViews.get(userId);
-    if (pageViews) {
-      pageViews.push({
-        path,
-        referrer,
-        timestamp: new Date(),
-        metadata
-      });
-    }
-    
-    console.log(`[Hermes] Tracked page view for user ${userId}: ${path}`);
-  }
-  
-  /**
-   * Track a user event
-   */
-  trackEvent(userId: string, eventType: string, metadata?: Record<string, any>): void {
-    console.log(`[Hermes] Tracked event for user ${userId}: ${eventType}`, metadata);
-  }
-  
-  /**
-   * Connect user to Hermes
-   */
-  connect(params: { 
-    system: string; 
-    connectionId: string; 
+// Define the interface for the Hermes analytics system
+export interface HermesAnalytics {
+  connect: (config: {
+    system: string;
+    connectionId: string;
     userId: string;
     metadata?: Record<string, any>;
-  }): void {
-    console.log(`[Hermes] Connected ${params.userId} to ${params.system}`, params);
-    
-    const userState: UserState = {
-      id: params.userId,
-      sessionId: params.connectionId,
-      lastActivity: new Date(),
-      location: 'unknown',
-      preferences: {},
-      metaverse: {
-        hasEntered: false,
-        totalTimeSpent: 0
-      },
-      isActive: true
-    };
-    
-    this.userStates.set(params.userId, userState);
-  }
+  }) => void;
   
-  /**
-   * Get user state
-   */
-  getUserState(userId: string): UserState | undefined {
-    return this.userStates.get(userId);
-  }
+  trackEvent: (
+    userId: string, 
+    eventName: string, 
+    eventData?: Record<string, any>
+  ) => void;
   
-  /**
-   * Update user location
-   */
-  updateUserLocation(userId: string, location: string): void {
-    const userState = this.userStates.get(userId);
-    if (userState) {
-      userState.location = location;
-    }
-  }
-  
-  /**
-   * Update user preferences
-   */
-  updateUserPreferences(userId: string, preferences: Record<string, any>): void {
-    const userState = this.userStates.get(userId);
-    if (userState) {
-      userState.preferences = {
-        ...userState.preferences,
-        ...preferences
-      };
-    }
-  }
-  
-  /**
-   * Enter spatial flow (metaverse)
-   */
-  enterSpatialFlow(userId: string, spaceId: string): void {
-    const userState = this.userStates.get(userId);
-    if (userState) {
-      userState.metaverse.hasEntered = true;
-      userState.metaverse.lastEntryTime = new Date();
-    }
-    
-    console.log(`[Hermes] User ${userId} entered spatial flow: ${spaceId}`);
-  }
-  
-  /**
-   * Exit spatial flow (metaverse)
-   */
-  exitSpatialFlow(userId: string): void {
-    const userState = this.userStates.get(userId);
-    if (userState && userState.metaverse.lastEntryTime) {
-      const timeSpent = new Date().getTime() - userState.metaverse.lastEntryTime.getTime();
-      userState.metaverse.totalTimeSpent += timeSpent;
-      delete userState.metaverse.lastEntryTime;
-    }
-  }
+  trackPageView: (
+    userId: string,
+    url: string,
+    referrer?: string,
+    additionalData?: Record<string, any>
+  ) => void;
 
-  /**
-   * Get user journey insights
-   */
-  getUserJourneyInsights(userId: string): Record<string, any> {
-    const userState = this.userStates.get(userId);
-    const pageViews = this.pageViews.get(userId) || [];
-    
-    // Mock some insights based on available data
-    return {
-      userId,
-      totalPageViews: pageViews.length,
-      mostVisitedPages: this.getMostVisitedPages(pageViews),
-      averageSessionDuration: userState ? Math.random() * 600 : 0, // mock 0-10 minutes
-      lastActive: userState?.lastActivity || new Date(),
-      metaverseEngagement: userState?.metaverse.totalTimeSpent || 0,
-      potentialInterests: this.getPotentialInterests(pageViews),
-    };
-  }
+  // Flow management methods
+  enterSpatialFlow: (userId: string, roomId: string) => void;
+  exitSpatialFlow: (userId: string) => void;
+  routeFlow: (userId: string, route: string, metadata?: Record<string, any>) => void;
   
-  /**
-   * Helper: Get most visited pages
-   */
-  private getMostVisitedPages(pageViews: PageViewEvent[]): Record<string, number> {
-    const pageCounts: Record<string, number> = {};
-    
-    pageViews.forEach(event => {
-      if (!pageCounts[event.path]) {
-        pageCounts[event.path] = 0;
-      }
-      pageCounts[event.path]++;
-    });
-    
-    return pageCounts;
-  }
+  // System status and analytics methods
+  getSystemStatus: () => {
+    status: 'operational' | 'degraded' | 'offline';
+    modules: Record<string, 'online' | 'offline' | 'degraded'>;
+  };
   
-  /**
-   * Helper: Get potential interests from page views
-   */
-  private getPotentialInterests(pageViews: PageViewEvent[]): string[] {
-    const interests = new Set<string>();
-    
-    // This is a simple mock implementation
-    pageViews.forEach(event => {
-      if (event.path.includes('escorts')) interests.add('escorts');
-      if (event.path.includes('creators')) interests.add('creators');
-      if (event.path.includes('metaverse')) interests.add('metaverse');
-      if (event.path.includes('livecams')) interests.add('livecams');
-    });
-    
-    return Array.from(interests);
-  }
+  getUserJourneyInsights: (userId: string) => {
+    entryPoint: string;
+    exitPoint: string;
+    durationSeconds: number;
+    pageViews: number;
+    conversionRate: number;
+  };
+
+  // Visibility and recommendation methods
+  calculateVisibilityScore: (profileId: string) => Promise<number>;
+  recommendNextAction: (userId: string, context?: Record<string, any>) => Promise<string>;
+  getRecommendedAction: (userId: string, context?: Record<string, any>) => Promise<string>;
+  
+  // System management
+  initialize: (config: Record<string, any>) => Promise<boolean>;
+  disconnect: () => void;
 }
 
-export const hermes = new HermesAnalytics();
-export default hermes;
+// Create the Hermes analytics instance with implementation
+const hermes: HermesAnalytics = {
+  connect: ({ system, connectionId, userId, metadata = {} }) => {
+    console.log(`[Hermes] Connected to ${system} with ID ${connectionId} for user ${userId}`);
+    // Implementation would handle the actual connection
+  },
+  
+  trackEvent: (userId, eventName, eventData = {}) => {
+    console.log(`[Hermes] Event tracked: ${eventName} for user ${userId}`, eventData);
+    // Implementation would send the event to analytics
+  },
+  
+  trackPageView: (userId, url, referrer = '', additionalData = {}) => {
+    console.log(`[Hermes] Page view tracked: ${url} for user ${userId} from ${referrer}`);
+    // Implementation would record the page view
+  },
+
+  enterSpatialFlow: (userId, roomId) => {
+    console.log(`[Hermes] User ${userId} entered spatial flow for room ${roomId}`);
+    // Implementation would track entrance to spatial experience
+  },
+  
+  exitSpatialFlow: (userId) => {
+    console.log(`[Hermes] User ${userId} exited spatial flow`);
+    // Implementation would track exit from spatial experience
+  },
+  
+  routeFlow: (userId, route, metadata = {}) => {
+    console.log(`[Hermes] User ${userId} routed to ${route}`);
+    // Implementation would track user flow
+  },
+  
+  getSystemStatus: () => {
+    // Implementation would check actual system health
+    return {
+      status: 'operational',
+      modules: {
+        analytics: 'online',
+        tracking: 'online',
+        visibility: 'online',
+        recommendations: 'online'
+      }
+    };
+  },
+  
+  getUserJourneyInsights: (userId) => {
+    // Implementation would provide actual insights
+    return {
+      entryPoint: '/home',
+      exitPoint: '/profile',
+      durationSeconds: 360,
+      pageViews: 5,
+      conversionRate: 0.15
+    };
+  },
+
+  calculateVisibilityScore: async (profileId) => {
+    // Implementation would calculate a real visibility score
+    return Promise.resolve(85);
+  },
+  
+  recommendNextAction: async (userId, context = {}) => {
+    // Implementation would provide personalized recommendations
+    return Promise.resolve('Visit profile settings to complete your verification');
+  },
+  
+  getRecommendedAction: async (userId, context = {}) => {
+    // Implementation would provide personalized recommendations
+    return Promise.resolve('Complete your profile to improve visibility');
+  },
+  
+  initialize: async (config) => {
+    console.log('[Hermes] Initializing system', config);
+    // Implementation would initialize the system
+    return Promise.resolve(true);
+  },
+  
+  disconnect: () => {
+    console.log('[Hermes] Disconnecting system');
+    // Implementation would clean up and disconnect
+  }
+};
+
+export { hermes };

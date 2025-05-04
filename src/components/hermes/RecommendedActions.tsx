@@ -1,105 +1,64 @@
 
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useHermesFlow } from '@/hooks/useHermesFlow';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Compass, Search, MessageSquare, Globe, Zap } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowRight, Lightbulb } from 'lucide-react';
+import { useHermesFlow } from '@/hooks/useHermesFlow';
 
-interface RecommendedActionProps {
-  className?: string;
-  onActionSelected?: (action: string) => void;
+interface RecommendedActionsProps {
+  userId: string;
+  context?: Record<string, any>;
 }
 
-export const RecommendedActions = ({ className, onActionSelected }: RecommendedActionProps) => {
-  const { getRecommendedAction } = useHermesFlow();
-  const [recommendedAction, setRecommendedAction] = useState<string>('explore');
-  const navigate = useNavigate();
+const RecommendedActions: React.FC<RecommendedActionsProps> = ({ userId, context }) => {
+  const [recommendation, setRecommendation] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const hermesFlow = useHermesFlow('recommended-actions');
+
+  const fetchRecommendation = async () => {
+    setIsLoading(true);
+    try {
+      // Using the hermes.getRecommendedAction method from global hermes service
+      const action = await hermesFlow.getRecommendedAction(userId, context);
+      setRecommendation(action);
+    } catch (error) {
+      console.error('Error fetching recommended action:', error);
+      setRecommendation('Explore our featured profiles to discover new connections.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Get recommendation from Hermes
-    const action = getRecommendedAction();
-    setRecommendedAction(action);
-  }, [getRecommendedAction]);
+    fetchRecommendation();
+  }, [userId]);
 
-  const handleActionClick = (action: string, path: string) => {
-    if (onActionSelected) {
-      onActionSelected(action);
-    }
-    navigate(path);
+  const handleActionTaken = () => {
+    hermesFlow.trackStep('recommendation_clicked', { 
+      recommendation, 
+      timestamp: new Date().toISOString() 
+    });
   };
-
-  const getActionDetails = () => {
-    switch (recommendedAction) {
-      case 'search':
-        return {
-          title: 'Discover Escorts',
-          description: 'Find the perfect companion based on your preferences',
-          icon: <Search className="h-5 w-5" />,
-          path: '/search'
-        };
-      case 'escorts':
-        return {
-          title: 'Browse Escorts',
-          description: 'Explore our selection of high-quality escorts',
-          icon: <Compass className="h-5 w-5" />,
-          path: '/escorts'
-        };
-      case 'messages':
-        return {
-          title: 'Check Messages',
-          description: 'Review and respond to your conversations',
-          icon: <MessageSquare className="h-5 w-5" />,
-          path: '/messages'
-        };
-      case 'metaverse':
-        return {
-          title: 'Enter Metaverse',
-          description: 'Experience our immersive virtual environment',
-          icon: <Globe className="h-5 w-5" />,
-          path: '/metaverse'
-        };
-      case 'pulse-boost':
-      default:
-        return {
-          title: 'Boost Your Profile',
-          description: 'Increase your visibility with PulseBoost',
-          icon: <Zap className="h-5 w-5" />,
-          path: '/pulse-boost'
-        };
-    }
-  };
-
-  const actionDetails = getActionDetails();
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          {actionDetails.icon}
-          <span>Recommended for You</span>
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg flex items-center">
+          <Lightbulb className="h-5 w-5 mr-2 text-yellow-500" />
+          Recommended for You
         </CardTitle>
-        <CardDescription>Based on your activity</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-4">
-          <div className="bg-primary/10 p-3 rounded-full">
-            {actionDetails.icon}
-          </div>
-          <div>
-            <h3 className="font-medium">{actionDetails.title}</h3>
-            <p className="text-sm text-muted-foreground">{actionDetails.description}</p>
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter>
+        <p className="text-muted-foreground mb-4">{recommendation || 'Loading recommendation...'}</p>
         <Button 
+          variant="outline" 
           className="w-full" 
-          onClick={() => handleActionClick(recommendedAction, actionDetails.path)}
+          onClick={handleActionTaken}
+          disabled={isLoading || !recommendation}
         >
-          {`Go to ${actionDetails.title}`}
+          Take Action <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
-      </CardFooter>
+      </CardContent>
     </Card>
   );
 };

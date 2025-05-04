@@ -3,7 +3,7 @@ import React from 'react';
 import { Users, Video, Activity } from 'lucide-react';
 import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
 
-interface ServiceTypeIconProps {
+export interface ServiceTypeIconProps {
   type: ServiceTypeFilter;
   size?: number;
   className?: string;
@@ -28,6 +28,7 @@ const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({
       case "both":
         return "text-green-500";
       case "any":
+      case "":
       default:
         return "text-gray-500";
     }
@@ -43,6 +44,7 @@ const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({
     case "both":
       return <Activity size={size} className={iconClassName} />;
     case "any":
+    case "":
     default:
       return null;
   }

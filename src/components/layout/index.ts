@@ -4,9 +4,8 @@ export { default as UnifiedHeader } from './UnifiedHeader';
 export { default as UnifiedFooter } from './UnifiedFooter';
 
 // Re-export from layouts for backward compatibility
-export { UnifiedLayout } from '@/layouts';
+export { UnifiedLayout, MainLayout } from '@/layouts';
 export type { UnifiedLayoutProps } from '@/layouts';
-export { default as MainLayout } from '@/layouts/MainLayout';
 
 // Export legacy components for backward compatibility
 // These components should eventually be removed or refactored

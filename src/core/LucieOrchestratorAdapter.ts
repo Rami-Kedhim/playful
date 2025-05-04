@@ -1,5 +1,5 @@
 
-import { lucie, ModerateContentParams, ModerateContentResult } from './Lucie';
+import { lucie, ModerateContentParams, ModerateContentResult, GenerateContentResult } from './Lucie';
 
 // Define types for the adapter
 interface ContentRequest {
@@ -21,8 +21,9 @@ interface ModerationResult {
 export class LucieOrchestratorAdapter {
   async generateAIResponse(request: ContentRequest): Promise<string> {
     try {
-      // Use the renamed method
-      return await lucie.generateContent(request.prompt);
+      // Use the Lucie AI system to generate content
+      const result = await lucie.generateContent(request.prompt);
+      return result.content;
     } catch (error) {
       console.error('Error in Lucie orchestrator generating content:', error);
       return 'I encountered an error processing your request.';
@@ -34,7 +35,11 @@ export class LucieOrchestratorAdapter {
     sentiment: 'positive' | 'negative' | 'neutral' 
   }> {
     try {
-      return await lucie.analyzeSentiment(text);
+      const result = await lucie.analyzeSentiment(text);
+      return {
+        score: result.score,
+        sentiment: result.sentiment
+      };
     } catch (error) {
       console.error('Error in Lucie sentiment analysis:', error);
       return {
@@ -53,7 +58,6 @@ export class LucieOrchestratorAdapter {
       
       const result: ModerateContentResult = await lucie.moderateContent(params);
       
-      // Use the correct property names
       return {
         isApproved: result.safe,
         issues: result.issues || [],

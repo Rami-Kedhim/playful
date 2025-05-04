@@ -9,6 +9,11 @@ export interface MainLayoutProps {
   containerClass?: string;
   hideNavbar?: boolean;
   hideFooter?: boolean;
+  title?: string;
+  description?: string;
+  showBreadcrumbs?: boolean;
+  showNavigation?: boolean;
+  fullWidth?: boolean;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({
@@ -16,10 +21,29 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   containerClass,
   hideNavbar = false,
   hideFooter = false,
+  title,
+  description,
+  showBreadcrumbs = false,
+  showNavigation = true,
+  fullWidth = false,
 }) => {
   return (
     <div className="flex min-h-screen flex-col">
       {!hideNavbar && <UnifiedHeader />}
+      
+      {(title || description || showBreadcrumbs) && (
+        <div className="bg-muted/20 border-b border-border">
+          <div className="container mx-auto px-4 py-4">
+            {showBreadcrumbs && (
+              <div className="mb-2 text-sm text-muted-foreground">
+                {/* Breadcrumbs would be rendered here */}
+              </div>
+            )}
+            {title && <h1 className="text-2xl font-bold">{title}</h1>}
+            {description && <p className="text-muted-foreground mt-1">{description}</p>}
+          </div>
+        </div>
+      )}
       
       <main className={cn("flex-1", containerClass)}>
         {children}

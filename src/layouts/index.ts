@@ -1,5 +1,5 @@
 
-import MainLayout from '@/layouts/MainLayout';
+import MainLayout from './MainLayout';
 import UnifiedLayout from './UnifiedLayout';
 import type { UnifiedLayoutProps } from './UnifiedLayout';
 
