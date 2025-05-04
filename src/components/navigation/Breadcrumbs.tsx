@@ -1,54 +1,45 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
-import { AppPaths } from '@/routes/routeConfig';
+import { useLocation, Link } from 'react-router-dom';
+import { Home, ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-export const Breadcrumbs = () => {
+interface BreadcrumbsProps {
+  className?: string;
+}
+
+const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ className }) => {
   const location = useLocation();
-  const pathnames = location.pathname.split('/').filter(x => x);
-  
-  // Don't render breadcrumbs on homepage
-  if (pathnames.length === 0) {
-    return null;
-  }
+  const pathnames = location.pathname.split('/').filter((x) => x);
 
   return (
-    <div className="flex items-center text-sm text-muted-foreground">
-      <Link to={AppPaths.HOME} className="hover:text-foreground transition-colors">
-        Home
+    <nav aria-label="breadcrumb" className={cn("flex items-center space-x-2 text-sm text-muted-foreground", className)}>
+      <Link to="/" className="flex items-center hover:text-foreground transition-colors">
+        <Home className="h-4 w-4 mr-1" />
+        <span className="sr-only sm:not-sr-only">Home</span>
       </Link>
       
       {pathnames.map((name, index) => {
         const routeTo = `/${pathnames.slice(0, index + 1).join('/')}`;
         const isLast = index === pathnames.length - 1;
         
-        // Format the breadcrumb name for better display
-        const formattedName = name
-          .replace(/-/g, ' ')
-          .split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
-        
         return (
-          <React.Fragment key={name}>
-            <ChevronRight className="mx-1 h-4 w-4" />
-            {isLast ? (
-              <span className="font-medium text-foreground">
-                {formattedName}
-              </span>
-            ) : (
-              <Link 
-                to={routeTo}
-                className="hover:text-foreground transition-colors"
-              >
-                {formattedName}
-              </Link>
-            )}
+          <React.Fragment key={routeTo}>
+            <ChevronRight className="h-4 w-4" />
+            <Link 
+              to={routeTo}
+              className={cn(
+                "hover:text-foreground transition-colors capitalize",
+                isLast ? "text-foreground font-medium" : ""
+              )}
+              aria-current={isLast ? 'page' : undefined}
+            >
+              {name.replace(/-/g, ' ')}
+            </Link>
           </React.Fragment>
         );
       })}
-    </div>
+    </nav>
   );
 };
 

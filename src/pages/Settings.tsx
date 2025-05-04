@@ -1,12 +1,12 @@
 
 import React from 'react';
-import MainLayout from '@/layouts/MainLayout';
+import { UnifiedLayout } from '@/layouts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Settings = () => {
   return (
-    <MainLayout title="Settings" description="Manage your account settings and preferences">
+    <UnifiedLayout title="Settings" description="Manage your account settings and preferences">
       <div className="max-w-4xl mx-auto">
         <Tabs defaultValue="account">
           <TabsList className="grid w-full grid-cols-4 mb-8">
@@ -65,7 +65,7 @@ const Settings = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </MainLayout>
+    </UnifiedLayout>
   );
 };
 

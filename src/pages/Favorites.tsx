@@ -5,7 +5,7 @@ import EscortCard from '@/components/escorts/EscortCard';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { Button } from '@/components/ui/button';
 import { Heart, Users, Video } from 'lucide-react';
-import MainLayout from '@/layouts/MainLayout';
+import { UnifiedLayout } from '@/layouts';
 
 const Favorites = () => {
   const { favorites, removeFavorite } = useFavorites();
@@ -22,7 +22,7 @@ const Favorites = () => {
     favorites.livecams.length > 0;
   
   return (
-    <MainLayout title="Favorites" description="Manage your favorite escorts, creators, and livecams" showBreadcrumbs>
+    <UnifiedLayout title="Favorites" description="Manage your favorite escorts, creators, and livecams" showBreadcrumbs>
       <div className="max-w-6xl mx-auto">
         <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full grid grid-cols-3 mb-6">
@@ -128,7 +128,7 @@ const Favorites = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </MainLayout>
+    </UnifiedLayout>
   );
 };
 

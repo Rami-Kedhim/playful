@@ -1,6 +1,6 @@
 
 import React from 'react';
-import MainLayout from '@/layouts/MainLayout';
+import { UnifiedLayout } from '@/layouts';
 import EscortContainer from '@/components/escorts/EscortContainer';
 import { Escort } from '@/types/Escort';
 
@@ -137,13 +137,13 @@ const services = [
 
 const EscortsPage = () => {
   return (
-    <MainLayout
+    <UnifiedLayout
       title="Explore Companions"
       description="Find the perfect companion for any occasion"
       showBreadcrumbs
     >
       <EscortContainer escorts={mockEscorts} services={services} />
-    </MainLayout>
+    </UnifiedLayout>
   );
 };
 

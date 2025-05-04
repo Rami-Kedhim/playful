@@ -1,8 +1,11 @@
 
-import MainLayout from './MainLayout';
+import React from 'react';
+import { UnifiedLayout, UnifiedLayoutProps } from '@/layouts';
 
-/**
- * AppLayout is just an alias for MainLayout to maintain compatibility with existing code
- * @deprecated Use MainLayout directly instead
- */
-export default MainLayout;
+// This file exists for backward compatibility
+// Components importing from AppLayout will use the UnifiedLayout
+const AppLayout: React.FC<UnifiedLayoutProps> = (props) => {
+  return <UnifiedLayout {...props} />;
+};
+
+export default AppLayout;
