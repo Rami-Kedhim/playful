@@ -4,9 +4,9 @@ import MainLayout from '@/layouts/MainLayout';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { LivecamDetailSidebar } from './LivecamDetailSidebar';
+import LivecamDetailSidebar from './LivecamDetailSidebar';
 
-interface LivecamDetailLayoutProps {
+export interface LivecamDetailLayoutProps {
   children: ReactNode;
   livecamId: string;
   username: string;

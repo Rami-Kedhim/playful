@@ -12,32 +12,47 @@ interface LucieAssistantProps {
   onClose?: () => void;
 }
 
+// Extend the Message type to match LucieMessageList expectations
+interface LucieMessage {
+  id: string;
+  sender: 'user' | 'assistant';
+  text: string;
+}
+
 const LucieAssistant: React.FC<LucieAssistantProps> = ({
   initiallyOpen = true,
   customInitialMessage,
   onClose
 }) => {
   const [inputValue, setInputValue] = useState('');
-  const initialMessages = customInitialMessage ? [{
-    id: 'initial',
-    content: customInitialMessage,
-    role: 'assistant',
-    timestamp: new Date()
-  }] : undefined;
+  const [isOpen, setIsOpen] = useState(initiallyOpen);
+  const [isTyping, setIsTyping] = useState(false);
+  
+  // Initialize LucieAssistant hook
+  const {
+    messages: apiMessages,
+    sendMessage,
+    isLoading,
+  } = useLucieAssistant();
 
-  const lucieHook = useLucieAssistant({
-    initialMessages,
-    autoOpen: initiallyOpen
-  });
+  // Convert API messages to the format expected by LucieMessageList
+  const messages: LucieMessage[] = apiMessages.map(msg => ({
+    id: msg.id,
+    sender: msg.role === 'user' ? 'user' : 'assistant',
+    text: msg.content
+  }));
 
-  const { 
-    messages, 
-    sendMessage, 
-    isLoading, 
-    isTyping,
-    isOpen,
-    toggleChat
-  } = lucieHook;
+  // Add initial message if provided
+  useEffect(() => {
+    if (customInitialMessage && messages.length === 0) {
+      // The actual message will be added via the API
+      // This is just for UI indication
+      setIsTyping(true);
+      setTimeout(() => {
+        setIsTyping(false);
+      }, 1000);
+    }
+  }, [customInitialMessage, messages.length]);
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
@@ -45,15 +60,14 @@ const LucieAssistant: React.FC<LucieAssistantProps> = ({
     if (inputValue.trim() && !isLoading) {
       sendMessage(inputValue);
       setInputValue('');
+      setIsTyping(true);
+      setTimeout(() => setIsTyping(false), 1000);
     }
   };
 
-  // Initialize open state
-  useEffect(() => {
-    if (initiallyOpen !== undefined && initiallyOpen !== isOpen) {
-      toggleChat();
-    }
-  }, [initiallyOpen, isOpen, toggleChat]);
+  const toggleChat = () => {
+    setIsOpen(!isOpen);
+  };
 
   const handleClose = () => {
     if (onClose) {

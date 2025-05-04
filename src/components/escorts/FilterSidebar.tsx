@@ -1,7 +1,7 @@
 
 import { Separator } from "@/components/ui/separator";
 import FilterSidebarHeader from "./filters/FilterSidebarHeader";
-import FilterSidebarContent from "./filters/FilterSidebarContent";
+import FilterSidebarContent, { FilterSidebarContentProps } from "./filters/FilterSidebarContent";
 
 interface FilterSidebarProps {
   searchQuery: string;
@@ -74,6 +74,7 @@ const FilterSidebar = ({
         selectedServices={selectedServices}
         toggleService={toggleService}
         services={services}
+        clearFilters={clearFilters}
         selectedGenders={selectedGenders}
         toggleGender={toggleGender}
         selectedOrientations={selectedOrientations}

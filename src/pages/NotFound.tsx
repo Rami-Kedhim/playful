@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import MainLayout from '@/layouts/MainLayout';
+import MainLayout from '@/components/layout/MainLayout';
 
 const NotFound: React.FC = () => {
   return (

@@ -1,17 +1,16 @@
 
 import React from 'react';
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Toggle } from "@/components/ui/toggle";
-import { Check } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import ServiceTypeFilter from './ServiceTypeFilter';
-import type { ServiceTypeFilter as ServiceTypeFilterType } from './ServiceTypeBadgeLabel';
-import { MultiCheckboxFilter } from '@/components/escorts/filters/MultiCheckboxFilter';
-import { Option } from '@/types/core-systems';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Slider } from '@/components/ui/slider';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import ServiceTypeBadgeLabel from "./ServiceTypeBadgeLabel";
+import { Badge } from '@/components/ui/badge';
 
-interface FilterSidebarContentProps {
+export interface FilterSidebarContentProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   location: string;
@@ -23,7 +22,7 @@ interface FilterSidebarContentProps {
   selectedServices: string[];
   toggleService: (service: string) => void;
   services: string[];
-  clearFilters: () => void;
+  clearFilters: () => void; // Make clearFilters required
   selectedGenders: string[];
   toggleGender: (gender: string) => void;
   selectedOrientations: string[];
@@ -34,8 +33,8 @@ interface FilterSidebarContentProps {
   setRatingMin?: (rating: number) => void;
   availableNow?: boolean;
   setAvailableNow?: (available: boolean) => void;
-  serviceTypeFilter: ServiceTypeFilterType;
-  setServiceTypeFilter: (type: ServiceTypeFilterType) => void;
+  serviceTypeFilter: "in-person" | "virtual" | "both" | "any" | "";
+  setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "any" | "") => void;
 }
 
 const FilterSidebarContent: React.FC<FilterSidebarContentProps> = ({
@@ -50,6 +49,7 @@ const FilterSidebarContent: React.FC<FilterSidebarContentProps> = ({
   selectedServices,
   toggleService,
   services,
+  clearFilters,
   selectedGenders,
   toggleGender,
   selectedOrientations,
@@ -61,171 +61,217 @@ const FilterSidebarContent: React.FC<FilterSidebarContentProps> = ({
   availableNow = false,
   setAvailableNow = () => {},
   serviceTypeFilter,
-  setServiceTypeFilter
+  setServiceTypeFilter,
 }) => {
-  const genderOptions: Option[] = [
-    { value: 'female', label: 'Female' },
-    { value: 'male', label: 'Male' },
-    { value: 'trans', label: 'Transgender' },
-    { value: 'non-binary', label: 'Non-binary' }
+  // Define fixed options
+  const genderOptions = [
+    { id: 'female', name: 'Female' },
+    { id: 'male', name: 'Male' },
+    { id: 'transgender', name: 'Transgender' },
+    { id: 'non-binary', name: 'Non-Binary' },
   ];
-
-  const orientationOptions: Option[] = [
-    { value: 'straight', label: 'Straight' },
-    { value: 'gay', label: 'Gay' },
-    { value: 'lesbian', label: 'Lesbian' },
-    { value: 'bisexual', label: 'Bisexual' },
-    { value: 'pansexual', label: 'Pansexual' }
+  
+  const orientationOptions = [
+    { id: 'straight', name: 'Straight' },
+    { id: 'gay', name: 'Gay' },
+    { id: 'lesbian', name: 'Lesbian' },
+    { id: 'bisexual', name: 'Bisexual' },
+    { id: 'pansexual', name: 'Pansexual' },
   ];
-
-  const serviceOptions: Option[] = services.map(service => ({
-    value: service,
-    label: service
-  }));
-
-  // Convert arrays to proper format for MultiCheckboxFilter
-  const handleGenderToggle = (value: string) => {
-    toggleGender(value);
+  
+  const handleServiceTypeChange = (value: string) => {
+    setServiceTypeFilter(value as "in-person" | "virtual" | "both" | "any" | "");
   };
-
-  const handleOrientationToggle = (value: string) => {
-    toggleOrientation(value);
+  
+  const handlePriceRangeChange = (values: number[]) => {
+    setPriceRange([values[0], values[1]]);
   };
-
-  const handleServiceToggle = (value: string) => {
-    toggleService(value);
+  
+  const handleAgeRangeChange = (values: number[]) => {
+    if (setAgeRange) {
+      setAgeRange([values[0], values[1]]);
+    }
   };
-
+  
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      {/* Search */}
       <div className="space-y-2">
-        <Label htmlFor="search">Search</Label>
-        <Input 
-          id="search"
-          value={searchQuery} 
+        <Label htmlFor="search-filter">Search</Label>
+        <Input
+          id="search-filter"
+          placeholder="Search by name, description..."
+          value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search escorts..."
+          className="w-full"
         />
       </div>
-
+      
+      {/* Location */}
       <div className="space-y-2">
-        <Label htmlFor="location">Location</Label>
-        <Input 
-          id="location"
-          value={location} 
+        <Label htmlFor="location-filter">Location</Label>
+        <Input
+          id="location-filter"
+          placeholder="Enter city or zip code"
+          value={location}
           onChange={(e) => setLocation(e.target.value)}
-          placeholder="City, state, or country"
+          className="w-full"
         />
       </div>
-
-      <Separator />
-
-      <ServiceTypeFilter
-        serviceTypeFilter={serviceTypeFilter}
-        setServiceTypeFilter={setServiceTypeFilter}
-        className="mb-4"
-      />
-
-      <Separator />
-
+      
+      {/* Service Type */}
       <div className="space-y-2">
-        <Label>Price Range (per hour)</Label>
-        <div className="pt-4">
-          <Slider
-            defaultValue={[priceRange[0], priceRange[1]]}
-            min={0}
-            max={1000}
-            step={50}
-            onValueChange={(values) => setPriceRange(values as [number, number])}
-          />
-          <div className="flex justify-between mt-2">
-            <span className="text-sm">${priceRange[0]}</span>
-            <span className="text-sm">${priceRange[1]}+</span>
+        <Label>Service Type</Label>
+        <RadioGroup value={serviceTypeFilter} onValueChange={handleServiceTypeChange}>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="" id="service-type-any" />
+            <Label htmlFor="service-type-any">Any</Label>
           </div>
-        </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="in-person" id="service-type-in-person" />
+            <Label htmlFor="service-type-in-person">In-person</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="virtual" id="service-type-virtual" />
+            <Label htmlFor="service-type-virtual">Virtual</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="both" id="service-type-both" />
+            <Label htmlFor="service-type-both">Both</Label>
+          </div>
+        </RadioGroup>
       </div>
-
-      <Separator />
-
-      <div>
-        <Toggle 
-          pressed={verifiedOnly} 
-          onPressedChange={setVerifiedOnly}
-          className="w-full justify-start gap-2"
-        >
-          <Check className={`h-4 w-4 ${verifiedOnly ? "opacity-100" : "opacity-0"}`} />
-          Verified Only
-        </Toggle>
-      </div>
-
-      <div>
-        <Toggle 
-          pressed={availableNow} 
-          onPressedChange={setAvailableNow}
-          className="w-full justify-start gap-2"
-        >
-          <Check className={`h-4 w-4 ${availableNow ? "opacity-100" : "opacity-0"}`} />
-          Available Now
-        </Toggle>
-      </div>
-
-      <Separator />
-
-      <MultiCheckboxFilter
-        title="Gender"
-        options={genderOptions}
-        selectedValues={selectedGenders}
-        onChange={handleGenderToggle}
-      />
-
-      <MultiCheckboxFilter
-        title="Sexual Orientation"
-        options={orientationOptions}
-        selectedValues={selectedOrientations}
-        onChange={handleOrientationToggle}
-      />
-
-      <MultiCheckboxFilter
-        title="Services"
-        options={serviceOptions}
-        selectedValues={selectedServices}
-        onChange={handleServiceToggle}
-      />
-
-      <Separator />
-
+      
+      {/* Price Range */}
       <div className="space-y-2">
-        <Label>Age Range</Label>
-        <div className="pt-4">
+        <div className="flex justify-between">
+          <Label>Price Range</Label>
+          <span className="text-sm text-muted-foreground">
+            ${priceRange[0]} - ${priceRange[1]}
+          </span>
+        </div>
+        <Slider
+          value={priceRange}
+          min={0}
+          max={500}
+          step={10}
+          onValueChange={handlePriceRangeChange}
+          className="w-full"
+        />
+      </div>
+      
+      {/* Age Range */}
+      {setAgeRange && (
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <Label>Age Range</Label>
+            <span className="text-sm text-muted-foreground">
+              {ageRange[0]} - {ageRange[1]}
+            </span>
+          </div>
           <Slider
-            defaultValue={[ageRange[0], ageRange[1]]}
+            value={ageRange}
             min={18}
-            max={65}
+            max={60}
             step={1}
-            onValueChange={(values) => setAgeRange(values as [number, number])}
+            onValueChange={handleAgeRangeChange}
+            className="w-full"
           />
-          <div className="flex justify-between mt-2">
-            <span className="text-sm">{ageRange[0]} years</span>
-            <span className="text-sm">{ageRange[1]} years</span>
-          </div>
+        </div>
+      )}
+      
+      {/* Gender */}
+      <div className="space-y-2">
+        <Label>Gender</Label>
+        <div className="flex flex-wrap gap-2">
+          {genderOptions.map((gender) => (
+            <Badge
+              key={gender.id}
+              variant={selectedGenders.includes(gender.id) ? "default" : "outline"}
+              className="cursor-pointer"
+              onClick={() => toggleGender(gender.id)}
+            >
+              {gender.name}
+            </Badge>
+          ))}
         </div>
       </div>
-
+      
+      {/* Orientation */}
       <div className="space-y-2">
-        <Label>Minimum Rating</Label>
-        <div className="pt-4">
+        <Label>Orientation</Label>
+        <div className="flex flex-wrap gap-2">
+          {orientationOptions.map((orientation) => (
+            <Badge
+              key={orientation.id}
+              variant={selectedOrientations.includes(orientation.id) ? "default" : "outline"}
+              className="cursor-pointer"
+              onClick={() => toggleOrientation(orientation.id)}
+            >
+              {orientation.name}
+            </Badge>
+          ))}
+        </div>
+      </div>
+      
+      {/* Services */}
+      <div className="space-y-2">
+        <Label>Services Offered</Label>
+        <div className="grid grid-cols-1 gap-2">
+          {services.map((service) => (
+            <div key={service} className="flex items-center space-x-2">
+              <Checkbox
+                id={`service-${service}`}
+                checked={selectedServices.includes(service)}
+                onCheckedChange={() => toggleService(service)}
+              />
+              <Label htmlFor={`service-${service}`} className="cursor-pointer">
+                {service}
+              </Label>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      {/* Rating */}
+      {setRatingMin && (
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <Label>Minimum Rating</Label>
+            <span className="text-sm text-muted-foreground">{ratingMin} stars</span>
+          </div>
           <Slider
-            defaultValue={[ratingMin]}
+            value={[ratingMin]}
             min={0}
             max={5}
             step={0.5}
             onValueChange={(values) => setRatingMin(values[0])}
+            className="w-full"
           />
-          <div className="flex justify-between mt-2">
-            <span className="text-sm">Any</span>
-            <span className="text-sm">{ratingMin} stars+</span>
-          </div>
         </div>
+      )}
+      
+      {/* Switches */}
+      <div className="space-y-4">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="verified-only"
+            checked={verifiedOnly}
+            onCheckedChange={setVerifiedOnly}
+          />
+          <Label htmlFor="verified-only">Verified Only</Label>
+        </div>
+        
+        {setAvailableNow && (
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="available-now"
+              checked={availableNow}
+              onCheckedChange={setAvailableNow}
+            />
+            <Label htmlFor="available-now">Available Now</Label>
+          </div>
+        )}
       </div>
     </div>
   );

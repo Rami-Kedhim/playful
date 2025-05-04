@@ -21,6 +21,12 @@ const EscortContainer: React.FC<EscortContainerProps> = ({ escorts, loading = fa
   const filterState = useEscortFilterWithUrl({ escorts });
   const filteredEscorts = filterState.filteredEscorts();
   
+  // Mock services array for FilterSidebar
+  const services = [
+    "Massage", "Date Night", "Companionship", "Travel Partner", 
+    "Dinner Date", "Private Party", "Event Escort"
+  ];
+  
   // Check for active filters
   const hasActiveFilters = (
     filterState.searchQuery !== '' ||
@@ -34,6 +40,34 @@ const EscortContainer: React.FC<EscortContainerProps> = ({ escorts, loading = fa
     filterState.selectedServices.length > 0 ||
     filterState.ratingMin > 0
   );
+
+  // Helper functions needed for FilterSidebar
+  const toggleService = (service: string) => {
+    const current = [...filterState.selectedServices];
+    if (current.includes(service)) {
+      filterState.setSelectedServices(current.filter(s => s !== service));
+    } else {
+      filterState.setSelectedServices([...current, service]);
+    }
+  };
+
+  const toggleGender = (gender: string) => {
+    const current = [...filterState.selectedGenders];
+    if (current.includes(gender)) {
+      filterState.setSelectedGenders(current.filter(g => g !== gender));
+    } else {
+      filterState.setSelectedGenders([...current, gender]);
+    }
+  };
+
+  const toggleOrientation = (orientation: string) => {
+    const current = [...filterState.selectedOrientations];
+    if (current.includes(orientation)) {
+      filterState.setSelectedOrientations(current.filter(o => o !== orientation));
+    } else {
+      filterState.setSelectedOrientations([...current, orientation]);
+    }
+  };
 
   return (
     <div className="relative grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6">
@@ -70,7 +104,30 @@ const EscortContainer: React.FC<EscortContainerProps> = ({ escorts, loading = fa
                 )}
               </div>
               <FilterSidebar 
-                {...filterState}
+                searchQuery={filterState.searchQuery}
+                setSearchQuery={filterState.setSearchQuery}
+                location={filterState.location}
+                setLocation={filterState.setLocation}
+                priceRange={filterState.priceRange}
+                setPriceRange={filterState.setPriceRange}
+                verifiedOnly={filterState.verifiedOnly}
+                setVerifiedOnly={filterState.setVerifiedOnly}
+                selectedServices={filterState.selectedServices}
+                toggleService={toggleService}
+                services={services}
+                clearFilters={filterState.resetFilters}
+                selectedGenders={filterState.selectedGenders}
+                toggleGender={toggleGender}
+                selectedOrientations={filterState.selectedOrientations}
+                toggleOrientation={toggleOrientation}
+                ageRange={filterState.ageRange}
+                setAgeRange={filterState.setAgeRange}
+                ratingMin={filterState.ratingMin}
+                setRatingMin={filterState.setRatingMin}
+                availableNow={filterState.availableNow}
+                setAvailableNow={filterState.setAvailableNow}
+                serviceTypeFilter={filterState.serviceTypeFilter}
+                setServiceTypeFilter={filterState.setServiceTypeFilter}
               />
             </SheetContent>
           </Sheet>
@@ -95,7 +152,30 @@ const EscortContainer: React.FC<EscortContainerProps> = ({ escorts, loading = fa
             )}
           </div>
           <FilterSidebar 
-            {...filterState}
+            searchQuery={filterState.searchQuery}
+            setSearchQuery={filterState.setSearchQuery}
+            location={filterState.location}
+            setLocation={filterState.setLocation}
+            priceRange={filterState.priceRange}
+            setPriceRange={filterState.setPriceRange}
+            verifiedOnly={filterState.verifiedOnly}
+            setVerifiedOnly={filterState.setVerifiedOnly}
+            selectedServices={filterState.selectedServices}
+            toggleService={toggleService}
+            services={services}
+            clearFilters={filterState.resetFilters}
+            selectedGenders={filterState.selectedGenders}
+            toggleGender={toggleGender}
+            selectedOrientations={filterState.selectedOrientations}
+            toggleOrientation={toggleOrientation}
+            ageRange={filterState.ageRange}
+            setAgeRange={filterState.setAgeRange}
+            ratingMin={filterState.ratingMin}
+            setRatingMin={filterState.setRatingMin}
+            availableNow={filterState.availableNow}
+            setAvailableNow={filterState.setAvailableNow}
+            serviceTypeFilter={filterState.serviceTypeFilter}
+            setServiceTypeFilter={filterState.setServiceTypeFilter}
           />
         </div>
       )}

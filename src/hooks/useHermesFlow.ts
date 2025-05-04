@@ -1,158 +1,170 @@
 
-import { useState, useEffect } from 'react';
-import { hermes } from '@/core/Hermes';
+import { useState, useEffect, useCallback } from 'react';
+import hermesOrusOxum from '@/core/HermesOrusOxum';
 
+// Define interfaces for the hook
 export interface UserJourneyInsights {
-  totalSessions: number;
-  averageDuration: number;
-  commonPaths: {
-    source: string;
-    destination: string;
-    count: number;
-  }[];
-  conversionRate?: number;
-  bounceRate?: number;
+  timestamp: string;
+  profileViews: number;
+  activeBoosts: number;
+  conversionRate: number;
+  averageScore: number;
 }
 
 export interface TrackEventOptions {
-  event: string;
-  props?: Record<string, any>;
-  userId?: string;
+  eventType: string;
+  profileId?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface RecommendedAction {
+  type: string;
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high';
+  actionUrl?: string;
 }
 
 export interface UseHermesFlowOptions {
-  flowId?: string;
-  userId?: string;
   autoConnect?: boolean;
+  initialTimeRange?: string;
 }
 
-export function useHermesFlow(flowIdOrOptions: string | UseHermesFlowOptions) {
+const defaultInsights: UserJourneyInsights = {
+  timestamp: new Date().toISOString(),
+  profileViews: 0,
+  activeBoosts: 0,
+  conversionRate: 0,
+  averageScore: 0
+};
+
+const useHermesFlow = (options: UseHermesFlowOptions = {}) => {
+  const { autoConnect = true, initialTimeRange = '7d' } = options;
   const [isConnected, setIsConnected] = useState(false);
-  const [insights, setInsights] = useState<UserJourneyInsights>({
-    totalSessions: 0,
-    averageDuration: 0,
-    commonPaths: [],
-    conversionRate: 0,
-    bounceRate: 0
-  });
+  const [insights, setInsights] = useState<UserJourneyInsights>(defaultInsights);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Normalize options
-  const options = typeof flowIdOrOptions === 'string'
-    ? { flowId: flowIdOrOptions }
-    : flowIdOrOptions;
-
-  const { flowId = 'default', userId = 'anonymous', autoConnect = true } = options;
-
-  useEffect(() => {
-    if (autoConnect) {
-      connectToFlow();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flowId, userId, autoConnect]);
-
-  // Connect to the Hermes flow
-  const connectToFlow = async () => {
+  // Connect to Hermes system
+  const connect = useCallback(async () => {
     try {
-      const connectionResult = await hermes.connect({
-        system: 'HermesFlow',
-        connectionId: flowId,
-        userId,
-        metadata: { timestamp: new Date().toISOString() }
-      });
-
-      setIsConnected(connectionResult.connected);
-    } catch (error) {
-      console.error('Failed to connect to Hermes flow:', error);
-      setIsConnected(false);
-    }
-  };
-
-  // Load user journey insights
-  const loadInsights = async (timeRange: string = '7d') => {
-    setIsLoading(true);
-    try {
-      // In a real implementation, this would call the actual API
-      // For now we'll simulate the response
-      const mockInsights: UserJourneyInsights = {
-        totalSessions: Math.floor(Math.random() * 100) + 50,
-        averageDuration: Math.floor(Math.random() * 600) + 120,
-        commonPaths: [
-          { source: '/home', destination: '/profiles', count: 45 },
-          { source: '/profiles', destination: '/messages', count: 32 },
-          { source: '/home', destination: '/search', count: 28 }
-        ],
-        conversionRate: Math.random() * 0.15 + 0.05,
-        bounceRate: Math.random() * 0.4 + 0.2
-      };
+      setIsLoading(true);
+      // Simulate connection
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setIsConnected(true);
       
-      setInsights(mockInsights);
-      return mockInsights;
+      // Get initial insights
+      const boostQueue = hermesOrusOxum.getBoostQueue();
+      
+      setInsights({
+        timestamp: new Date().toISOString(),
+        profileViews: Math.floor(Math.random() * 500) + 100,
+        activeBoosts: boostQueue.activeBoosts,
+        conversionRate: Math.random() * 10 + 2,
+        averageScore: boostQueue.averageScore
+      });
     } catch (error) {
-      console.error('Failed to load user journey insights:', error);
-      return insights;
+      console.error('Failed to connect to Hermes system:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  // Track an event within the flow
-  const trackEvent = (options: TrackEventOptions) => {
+  // Load insights based on time range
+  const loadInsights = useCallback(async (timeRange: string = '7d') => {
+    if (!isConnected) return defaultInsights;
+    
+    setIsLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 700));
+      
+      const boostQueue = hermesOrusOxum.getBoostQueue();
+      const optimalTime = hermesOrusOxum.getOptimalTimeWindow();
+      
+      // Calculate a time impact score
+      const currentHour = new Date().getHours();
+      const timeImpact = hermesOrusOxum.calculateTimeImpact(currentHour, optimalTime);
+      
+      const newInsights: UserJourneyInsights = {
+        timestamp: new Date().toISOString(),
+        profileViews: Math.floor(Math.random() * 500) + 100,
+        activeBoosts: boostQueue.activeBoosts,
+        conversionRate: Math.random() * 10 + 2,
+        averageScore: timeImpact
+      };
+      
+      setInsights(newInsights);
+      return newInsights;
+    } catch (error) {
+      console.error('Failed to load insights:', error);
+      return defaultInsights;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isConnected]);
+
+  // Track an event in the Hermes system
+  const trackEvent = useCallback((options: TrackEventOptions) => {
     if (!isConnected) {
-      console.warn('Cannot track event: not connected to Hermes flow');
+      console.warn('Hermes system not connected. Event not tracked:', options.eventType);
       return false;
     }
-
+    
     try {
-      hermes.track({
-        event: options.event,
-        properties: options.props || {},
-        userId: options.userId || userId,
-        timestamp: new Date().toISOString()
-      });
+      // Record the event
+      console.log(`[Hermes] Tracking event: ${options.eventType}`, options);
+      
+      if (options.profileId) {
+        hermesOrusOxum.recordProfileView(options.profileId);
+      }
+      
       return true;
     } catch (error) {
-      console.error('Failed to track Hermes event:', error);
+      console.error('Failed to track event:', error);
       return false;
     }
-  };
+  }, [isConnected]);
 
-  // Track a step in the flow
-  const trackStep = (step: string, data?: Record<string, any>) => {
-    return trackEvent({
-      event: `flow_step_${step}`,
-      props: {
-        flowId,
-        step,
-        ...data
-      },
-      userId
-    });
-  };
-
-  // Get recommended action for the user
-  const getRecommendedAction = async (userId: string, context?: Record<string, any>) => {
-    try {
-      // In a real implementation, this would call the actual API
-      // For now we'll simulate the response
-      const recommendations = [
-        "Check out our newly verified profiles",
-        "Update your preferences to see more relevant profiles",
-        "Complete your profile to get better matches",
-        "Explore our premium features for enhanced experience",
-        "Try our AI companion for personalized recommendations"
-      ];
-      
-      // Return a pseudo-random but consistent recommendation based on userId
-      const userIdSum = userId.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-      const recommendationIndex = userIdSum % recommendations.length;
-      
-      return recommendations[recommendationIndex];
-    } catch (error) {
-      console.error('Failed to get recommended action:', error);
-      return "Explore our featured profiles to discover new connections.";
+  // Get recommended actions based on insights
+  const getRecommendedAction = useCallback((): RecommendedAction | null => {
+    if (!isConnected || !insights) return null;
+    
+    // Simple recommendation logic based on current insights
+    if (insights.activeBoosts < 20) {
+      return {
+        type: 'boost',
+        title: 'Boost Your Profile',
+        description: 'Your profile could use a visibility boost to attract more views.',
+        priority: 'high',
+        actionUrl: '/boost'
+      };
+    } else if (insights.conversionRate < 5) {
+      return {
+        type: 'improve_profile',
+        title: 'Improve Your Profile',
+        description: 'Add more details and photos to increase your conversion rate.',
+        priority: 'medium',
+        actionUrl: '/profile/edit'
+      };
     }
-  };
+    
+    return null;
+  }, [isConnected, insights]);
+
+  // Track a user journey step
+  const trackStep = useCallback((stepName: string, metadata?: Record<string, any>) => {
+    return trackEvent({
+      eventType: `journey_step_${stepName}`,
+      metadata
+    });
+  }, [trackEvent]);
+
+  // Auto-connect on mount if enabled
+  useEffect(() => {
+    if (autoConnect) {
+      connect();
+    }
+  }, [autoConnect, connect]);
 
   return {
     isConnected,
@@ -160,9 +172,9 @@ export function useHermesFlow(flowIdOrOptions: string | UseHermesFlowOptions) {
     insights,
     loadInsights,
     isLoading,
-    trackStep,
-    getRecommendedAction
+    getRecommendedAction,
+    trackStep
   };
-}
+};
 
 export default useHermesFlow;

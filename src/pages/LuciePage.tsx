@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import MainLayout from '@/layouts/MainLayout';
+import MainLayout from '@/components/layout/MainLayout';
 
 const LuciePage: React.FC = () => {
   return (

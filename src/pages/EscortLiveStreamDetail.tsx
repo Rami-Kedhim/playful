@@ -106,6 +106,10 @@ const EscortLiveStreamDetail: React.FC = () => {
   
   return (
     <LivecamDetailLayout
+      livecamId={id || ''}
+      username={escort.name}
+      isOnline={true}
+      viewerCount={Math.floor(Math.random() * 100) + 10}
       title={titleContent}
       mainContent={mainContent}
       sidebar={sidebarContent}
