@@ -51,10 +51,10 @@ export interface EscortFilterState {
   priceRange: [number, number];
   verifiedOnly: boolean;
   selectedServices: string[];
-  sortBy: string;
-  currentPage: number;
   selectedGenders: string[];
   selectedOrientations: string[];
+  sortBy: string;
+  currentPage: number;
   ageRange: [number, number];
   ratingMin: number;
   availableNow: boolean;
@@ -70,12 +70,12 @@ export interface EscortFilterActions {
   setVerifiedOnly: (verified: boolean) => void;
   setSelectedServices: (services: string[]) => void;
   toggleService: (service: string) => void;
-  setSortBy: (sort: string) => void;
-  setCurrentPage: (page: number) => void;
   setSelectedGenders: (genders: string[]) => void;
   toggleGender: (gender: string) => void;
   setSelectedOrientations: (orientations: string[]) => void;
   toggleOrientation: (orientation: string) => void;
+  setSortBy: (sort: string) => void;
+  setCurrentPage: (page: number) => void;
   setAgeRange: (range: [number, number]) => void;
   handleAgeRangeChange: (values: number[]) => void;
   setRatingMin: (rating: number) => void;

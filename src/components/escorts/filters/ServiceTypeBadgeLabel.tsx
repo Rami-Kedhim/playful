@@ -6,9 +6,10 @@ import { Users, Video, Zap } from "lucide-react";
 export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "any" | "";
 
 interface ServiceTypeBadgeLabelProps {
-  serviceType: ServiceTypeFilter;
+  serviceType?: ServiceTypeFilter;
+  type?: ServiceTypeFilter; // Add this prop to accept both naming conventions
   includeIcon?: boolean;
-  size?: "sm" | "default";
+  size?: "sm" | "default" | "lg"; // Add 'lg' size option
 }
 
 /**
@@ -17,11 +18,15 @@ interface ServiceTypeBadgeLabelProps {
  */
 const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
   serviceType,
+  type,
   includeIcon = true,
   size = "default"
 }) => {
+  // Use type prop if serviceType is not provided
+  const actualType = serviceType || type || "";
+  
   const getServiceTypeDetails = () => {
-    switch (serviceType) {
+    switch (actualType) {
       case "in-person":
         return { 
           label: "In Person",
@@ -58,7 +63,7 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
   return (
     <Badge 
       variant={variant}
-      className={`${className} ${size === "sm" ? "text-xs py-0 px-1.5" : ""}`}
+      className={`${className} ${size === "sm" ? "text-xs py-0 px-1.5" : size === "lg" ? "text-base py-1 px-3" : ""}`}
     >
       {includeIcon && icon && <span className="mr-1">{icon}</span>}
       {label}
