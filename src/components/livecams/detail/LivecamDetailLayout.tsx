@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import LivecamDetailSidebar from './LivecamDetailSidebar';
 
 export interface LivecamDetailLayoutProps {
-  children: ReactNode;
+  children?: ReactNode; // Made children optional since we have alternative content structure
   livecamId: string;
   username: string;
   avatarUrl?: string;

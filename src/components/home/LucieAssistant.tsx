@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X, MessageSquare, Send } from 'lucide-react';
-import { useLucieAssistant, Message } from '@/hooks/useLucieAssistant';
+import { useLucieAssistant } from '@/hooks/useLucieAssistant';
 import LucieMessageList from './lucie-assistant/LucieMessageList';
 
 interface LucieAssistantProps {
@@ -12,8 +12,8 @@ interface LucieAssistantProps {
   onClose?: () => void;
 }
 
-// Extend the Message type to match LucieMessageList expectations
-interface LucieMessage {
+// Define the correct Message type that matches both LucieMessageList expectations and useLucieAssistant
+interface Message {
   id: string;
   sender: 'user' | 'assistant';
   text: string;
@@ -36,7 +36,7 @@ const LucieAssistant: React.FC<LucieAssistantProps> = ({
   } = useLucieAssistant();
 
   // Convert API messages to the format expected by LucieMessageList
-  const messages: LucieMessage[] = apiMessages.map(msg => ({
+  const messages: Message[] = apiMessages.map(msg => ({
     id: msg.id,
     sender: msg.role === 'user' ? 'user' : 'assistant',
     text: msg.content

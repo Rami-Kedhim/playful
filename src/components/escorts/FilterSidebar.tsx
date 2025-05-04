@@ -1,7 +1,7 @@
 
 import { Separator } from "@/components/ui/separator";
 import FilterSidebarHeader from "./filters/FilterSidebarHeader";
-import FilterSidebarContent, { FilterSidebarContentProps } from "./filters/FilterSidebarContent";
+import FilterSidebarContent from "./filters/FilterSidebarContent";
 
 interface FilterSidebarProps {
   searchQuery: string;
@@ -9,7 +9,7 @@ interface FilterSidebarProps {
   location: string;
   setLocation: (location: string) => void;
   priceRange: [number, number];
-  setPriceRange: (range: number[]) => void;
+  setPriceRange: (range: [number, number]) => void;  // Changed to match expected type
   verifiedOnly: boolean;
   setVerifiedOnly: (verified: boolean) => void;
   selectedServices: string[];
@@ -21,7 +21,7 @@ interface FilterSidebarProps {
   selectedOrientations: string[];
   toggleOrientation: (orientation: string) => void;
   ageRange?: [number, number];
-  setAgeRange?: (range: number[]) => void;
+  setAgeRange?: (range: [number, number]) => void;  // Changed to match expected type
   ratingMin?: number;
   setRatingMin?: (rating: number) => void;
   availableNow?: boolean;

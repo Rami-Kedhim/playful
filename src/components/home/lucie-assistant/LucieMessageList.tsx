@@ -1,6 +1,11 @@
 
 import React, { useRef, useEffect } from 'react';
-import { Message } from '@/hooks/useLucieAssistant';
+
+interface Message {
+  id: string;
+  sender: 'user' | 'assistant';
+  text: string;
+}
 
 interface LucieMessageListProps {
   messages: Message[];

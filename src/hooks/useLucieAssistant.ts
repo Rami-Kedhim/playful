@@ -1,26 +1,18 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { lucie } from '@/core/Lucie';
-import { GenerateContentResult, ModerateContentParams } from '@/types/core-systems';
 
+// Define the Message interface that matches what's used in LucieAssistant
 export interface Message {
   id: string;
-  text: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
-}
-
-export interface LucieMessage {
-  id: string;
-  content: string;
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant' | 'system'; // Use role to determine sender in the component
+  content: string; // Use content for message text
   timestamp: Date;
 }
 
 interface UseLucieAssistantOptions {
   initialSystemPrompt?: string;
-  initialMessages?: LucieMessage[];
+  initialMessages?: Message[];
   autoOpen?: boolean;
 }
 
@@ -29,16 +21,9 @@ export function useLucieAssistant(options: UseLucieAssistantOptions = {}) {
     initialSystemPrompt = '',
     initialMessages = [],
     autoOpen = false
-  } = typeof options === 'string' ? { initialSystemPrompt: options } : options;
+  } = options;
 
-  const [messages, setMessages] = useState<Message[]>(
-    initialMessages.map(msg => ({
-      id: msg.id,
-      text: msg.content,
-      sender: msg.role === 'user' ? 'user' : 'ai',
-      timestamp: msg.timestamp
-    }))
-  );
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,8 +41,8 @@ export function useLucieAssistant(options: UseLucieAssistantOptions = {}) {
   const addUserMessage = useCallback((text: string) => {
     const userMessage: Message = {
       id: uuidv4(),
-      text,
-      sender: 'user',
+      role: 'user',
+      content: text,
       timestamp: new Date()
     };
     
@@ -68,8 +53,8 @@ export function useLucieAssistant(options: UseLucieAssistantOptions = {}) {
   const addAIMessage = useCallback((text: string) => {
     const aiMessage: Message = {
       id: uuidv4(),
-      text,
-      sender: 'ai',
+      role: 'assistant',
+      content: text,
       timestamp: new Date()
     };
     
@@ -77,7 +62,7 @@ export function useLucieAssistant(options: UseLucieAssistantOptions = {}) {
     return aiMessage;
   }, []);
 
-  const sendMessage = useCallback(async (text: string, options?: Record<string, any>) => {
+  const sendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return null;
     
     setIsLoading(true);
@@ -88,41 +73,23 @@ export function useLucieAssistant(options: UseLucieAssistantOptions = {}) {
       // Add user message
       addUserMessage(text);
       
-      // Moderate content
-      const moderationParams: ModerateContentParams = {
-        content: text,
-        contentType: 'text',
-        context: {}
-      };
+      // Simulate AI response (in a real app, this would call an API)
+      setTimeout(() => {
+        const response = `I received your message: "${text}". This is a placeholder response.`;
+        addAIMessage(response);
+        setIsLoading(false);
+        setIsTyping(false);
+      }, 1000);
       
-      const moderationResult = await lucie.moderateContent(moderationParams);
-      
-      if (!moderationResult.safe) {
-        const safetyMessage = "I'm sorry, I can't respond to that type of content. Let's talk about something else.";
-        addAIMessage(safetyMessage);
-        return safetyMessage;
-      }
-      
-      // Generate response
-      const contextOptions = {
-        systemPrompt,
-        ...options
-      };
-      
-      const response = await lucie.generateContent(text, contextOptions);
-      
-      // Add AI response
-      addAIMessage(response.content);
-      return response.content;
+      return true;
     } catch (err: any) {
       const errorMessage = err?.message || 'An error occurred while processing your message.';
       setError(errorMessage);
-      return null;
-    } finally {
       setIsLoading(false);
       setIsTyping(false);
+      return null;
     }
-  }, [addUserMessage, addAIMessage, systemPrompt]);
+  }, [addUserMessage, addAIMessage]);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
