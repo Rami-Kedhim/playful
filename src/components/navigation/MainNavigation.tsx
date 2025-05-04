@@ -1,241 +1,235 @@
 
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Bell, Search, User, MessageSquare, Heart, Laptop, Video, Home, Shield, Brain, Users, Wallet } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/auth';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { 
+  Avatar, 
+  AvatarFallback, 
+  AvatarImage 
+} from '@/components/ui/avatar';
+import { 
+  Laptop, 
+  Menu, 
+  X, 
+  User, 
+  LogOut, 
+  Settings, 
+  MessageSquare,
+  Heart,
+  Wallet,
+  Brain,
+  Shield
+} from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { AppPaths } from '@/routes/routeConfig';
-import { isActivePath } from '@/utils/navigationHelpers';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { AppPaths } from '@/routes/routeConfig';
+import WalletConnect from '@/components/solana/WalletConnect';
 
-interface MainNavigationProps {
-  showFullMenu?: boolean;
-}
+const MainNavigation = () => {
+  const { user, logout, isAuthenticated } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
-const MainNavigation: React.FC<MainNavigationProps> = ({ showFullMenu = true }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const location = useLocation();
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
 
-  // In a real app, this would come from a context or auth service
-  const isLoggedIn = false;
-  const unreadMessages = 3;
-  const unreadNotifications = 2;
-
-  const navigationItems = [
-    { path: AppPaths.HOME, label: 'Home', icon: <Home className="h-4 w-4" /> },
-    { path: AppPaths.ESCORTS, label: 'Escorts', icon: <Users className="h-4 w-4" /> },
-    { path: AppPaths.SAFETY, label: 'Safety', icon: <Shield className="h-4 w-4" /> },
-    { path: AppPaths.AI_COMPANION, label: 'AI Companions', icon: <Brain className="h-4 w-4" /> },
-    { path: AppPaths.MESSAGES, label: 'Messages', icon: <MessageSquare className="h-4 w-4" /> },
-    { path: AppPaths.FAVORITES, label: 'Favorites', icon: <Heart className="h-4 w-4" /> },
-    { path: '/creators', label: 'Creators', icon: <Video className="h-4 w-4" /> },
-    { path: '/livecams', label: 'Livecams', icon: <Video className="h-4 w-4" /> }
-  ];
-
-  const NavLink = ({ path, label, icon }: { path: string; label: string; icon: React.ReactNode }) => {
-    const isActive = isActivePath(location.pathname, path);
-    
-    return (
-      <Link 
-        to={path} 
-        className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-          isActive 
-            ? 'bg-primary/10 text-primary font-medium' 
-            : 'hover:bg-accent hover:text-accent-foreground'
-        }`}
-      >
-        {icon}
-        <span>{label}</span>
-      </Link>
-    );
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (user?.name) {
+      return user.name.substring(0, 1).toUpperCase();
+    } else if (user?.email) {
+      return user.email.substring(0, 1).toUpperCase();
+    }
+    return "U";
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo and Brand */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <Laptop className="w-5 h-5 text-primary" />
-              <span className="text-xl font-bold">UberEscorts</span>
-            </Link>
-          </div>
-          
-          {/* Desktop Navigation */}
-          {showFullMenu && (
-            <nav className="mx-6 hidden md:flex md:items-center md:space-x-1 lg:space-x-2">
-              {navigationItems.slice(0, 5).map((item) => (
-                <NavLink key={item.path} {...item} />
-              ))}
-            </nav>
-          )}
-          
-          {/* Right side controls */}
-          <div className="flex items-center space-x-2">
-            {/* Search button */}
-            <Button variant="ghost" size="icon" asChild>
-              <Link to={AppPaths.SEARCH}>
-                <Search className="h-5 w-5" />
-                <span className="sr-only">Search</span>
-              </Link>
-            </Button>
-            
-            {/* Favorites */}
-            <Button variant="ghost" size="icon" asChild className="hidden sm:flex">
-              <Link to={AppPaths.FAVORITES}>
-                <Heart className="h-5 w-5" />
-                <span className="sr-only">Favorites</span>
-              </Link>
-            </Button>
-            
-            {/* Notifications */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-5 w-5" />
-                  {unreadNotifications > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]">
-                      {unreadNotifications}
-                    </Badge>
-                  )}
-                  <span className="sr-only">Notifications</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <div className="p-2 font-medium">Notifications</div>
-                <DropdownMenuSeparator />
-                <div className="p-4 text-center text-muted-foreground">
-                  No new notifications
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            {/* Messages */}
-            <Button variant="ghost" size="icon" asChild className="relative hidden sm:flex">
-              <Link to={AppPaths.MESSAGES}>
-                <MessageSquare className="h-5 w-5" />
-                {unreadMessages > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]">
-                    {unreadMessages}
-                  </Badge>
-                )}
-                <span className="sr-only">Messages</span>
-              </Link>
-            </Button>
-            
-            {/* Wallet */}
-            <Button variant="ghost" size="icon" asChild className="hidden sm:flex">
-              <Link to={AppPaths.WALLET}>
-                <Wallet className="h-5 w-5" />
-                <span className="sr-only">Wallet</span>
-              </Link>
-            </Button>
-            
-            {/* User Profile */}
-            {isLoggedIn ? (
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="flex items-center">
+          <Link to="/" className="font-bold text-xl flex items-center">
+            <Laptop className="w-5 h-5 mr-2" />
+            <span>UberEscorts</span>
+          </Link>
+        </div>
+        
+        <div className="hidden md:flex items-center space-x-6">
+          <Link to={AppPaths.ESCORTS} className="text-sm font-medium hover:text-primary transition-colors">
+            Escorts
+          </Link>
+          <Link to={AppPaths.CREATORS} className="text-sm font-medium hover:text-primary transition-colors">
+            Creators
+          </Link>
+          <Link to={AppPaths.LIVECAMS} className="text-sm font-medium hover:text-primary transition-colors">
+            Livecams
+          </Link>
+          <Link to={AppPaths.NEURAL_MONITOR} className="text-sm font-medium hover:text-primary transition-colors flex items-center">
+            <Brain className="w-3 h-3 mr-1" />
+            <span>Neural</span>
+            <Badge className="ml-2 bg-primary text-[10px] py-0 px-1.5">New</Badge>
+          </Link>
+          <Link to={AppPaths.SAFETY} className="text-sm font-medium hover:text-primary transition-colors">
+            <Shield className="w-3 h-3 inline mr-1" />
+            <span>Safety</span>
+          </Link>
+        </div>
+        
+        <div className="hidden md:flex items-center space-x-4">
+          {isAuthenticated ? (
+            <>
+              <WalletConnect />
+              
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src="https://i.pravatar.cc/300" alt="User" />
-                      <AvatarFallback>U</AvatarFallback>
+                      <AvatarImage src={user?.avatarUrl} alt={user?.name || user?.email || 'User'} />
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem asChild>
-                    <Link to={AppPaths.PROFILE}>Profile</Link>
+                    <Link to="/profile" className="flex items-center w-full">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to={AppPaths.SETTINGS}>Settings</Link>
+                    <Link to="/messages" className="flex items-center w-full">
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      Messages
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/favorites" className="flex items-center w-full">
+                      <Heart className="mr-2 h-4 w-4" />
+                      Favorites
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/wallet" className="flex items-center w-full">
+                      <Wallet className="mr-2 h-4 w-4" />
+                      Wallet
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings" className="flex items-center w-full">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Logout</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout} className="flex items-center w-full">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : (
-              <Button variant="default" size="sm" asChild>
-                <Link to="/auth">Sign In</Link>
-              </Button>
-            )}
-            
-            {/* Mobile menu */}
-            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="sm:max-w-xs">
-                <div className="px-2 py-6">
-                  <Link to="/" className="flex items-center space-x-2 mb-6" onClick={() => setIsMenuOpen(false)}>
-                    <Laptop className="w-5 h-5 text-primary" />
-                    <span className="text-xl font-bold">UberEscorts</span>
-                  </Link>
-                  <nav className="flex flex-col space-y-1">
-                    {navigationItems.map((item) => (
-                      <Link 
-                        key={item.path}
-                        to={item.path}
-                        className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-                          isActivePath(location.pathname, item.path)
-                            ? 'bg-primary/10 text-primary font-medium'
-                            : 'hover:bg-accent hover:text-accent-foreground'
-                        }`}
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {item.icon}
-                        <span>{item.label}</span>
-                        {item.label === 'Messages' && unreadMessages > 0 && (
-                          <Badge className="ml-auto">{unreadMessages}</Badge>
-                        )}
-                      </Link>
-                    ))}
-                  </nav>
-
-                  <div className="mt-6 pt-6 border-t">
-                    <div className="space-y-2">
-                      {!isLoggedIn ? (
-                        <>
-                          <Button asChild variant="outline" className="w-full justify-start">
-                            <Link to="/auth?mode=login" onClick={() => setIsMenuOpen(false)}>
-                              <User className="mr-2 h-4 w-4" /> Sign In
-                            </Link>
-                          </Button>
-                          <Button asChild variant="default" className="w-full justify-start">
-                            <Link to="/auth?mode=register" onClick={() => setIsMenuOpen(false)}>
-                              <User className="mr-2 h-4 w-4" /> Create Account
-                            </Link>
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button asChild variant="outline" className="w-full justify-start">
-                            <Link to={AppPaths.PROFILE} onClick={() => setIsMenuOpen(false)}>
-                              <User className="mr-2 h-4 w-4" /> Profile
-                            </Link>
-                          </Button>
-                          <Button asChild variant="outline" className="w-full justify-start">
-                            <Link to={AppPaths.WALLET} onClick={() => setIsMenuOpen(false)}>
-                              <Wallet className="mr-2 h-4 w-4" /> Wallet
-                            </Link>
-                          </Button>
-                          <Button variant="destructive" className="w-full justify-start">
-                            Logout
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+            </>
+          ) : (
+            <>
+              <Link to="/auth?tab=login">
+                <Button variant="ghost" size="sm">Login</Button>
+              </Link>
+              <Link to="/auth?tab=register">
+                <Button size="sm">Sign Up</Button>
+              </Link>
+            </>
+          )}
         </div>
+        
+        {/* Mobile menu */}
+        <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+          <SheetTrigger asChild className="md:hidden">
+            <Button variant="ghost" size="icon">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right">
+            <div className="flex flex-col h-full">
+              <div className="flex justify-between items-center pb-4 border-b">
+                <Link to="/" className="font-bold" onClick={() => setMenuOpen(false)}>
+                  UberEscorts
+                </Link>
+                <Button variant="ghost" size="icon" onClick={() => setMenuOpen(false)}>
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+              
+              <nav className="flex flex-col space-y-4 mt-6">
+                <Link to="/" className="text-sm" onClick={() => setMenuOpen(false)}>
+                  Home
+                </Link>
+                <Link to="/escorts" className="text-sm" onClick={() => setMenuOpen(false)}>
+                  Escorts
+                </Link>
+                <Link to="/creators" className="text-sm" onClick={() => setMenuOpen(false)}>
+                  Creators
+                </Link>
+                <Link to="/livecams" className="text-sm" onClick={() => setMenuOpen(false)}>
+                  Livecams
+                </Link>
+                <Link to="/neural/monitor" className="text-sm flex items-center" onClick={() => setMenuOpen(false)}>
+                  <Brain className="w-3 h-3 mr-1" />
+                  Neural Monitor
+                  <Badge className="ml-2 bg-primary text-[10px] py-0 px-1.5">New</Badge>
+                </Link>
+                <Link to="/brain-hub" className="text-sm" onClick={() => setMenuOpen(false)}>
+                  Brain Hub
+                </Link>
+                <Link to="/safety" className="text-sm flex items-center" onClick={() => setMenuOpen(false)}>
+                  <Shield className="w-3 h-3 mr-1" />
+                  Safety
+                </Link>
+                {isAuthenticated && (
+                  <>
+                    <Link to="/profile" className="text-sm" onClick={() => setMenuOpen(false)}>
+                      Profile
+                    </Link>
+                    <Link to="/messages" className="text-sm" onClick={() => setMenuOpen(false)}>
+                      Messages
+                    </Link>
+                    <Link to="/wallet" className="text-sm" onClick={() => setMenuOpen(false)}>
+                      Wallet
+                    </Link>
+                    <Link to="/favorites" className="text-sm" onClick={() => setMenuOpen(false)}>
+                      Favorites
+                    </Link>
+                  </>
+                )}
+              </nav>
+              
+              <div className="mt-auto pt-4 border-t">
+                {isAuthenticated ? (
+                  <Button variant="outline" className="w-full" onClick={() => { handleLogout(); setMenuOpen(false); }}>
+                    Logout
+                  </Button>
+                ) : (
+                  <div className="flex flex-col space-y-2">
+                    <Link to="/auth?tab=login" onClick={() => setMenuOpen(false)}>
+                      <Button variant="outline" className="w-full">Login</Button>
+                    </Link>
+                    <Link to="/auth?tab=register" onClick={() => setMenuOpen(false)}>
+                      <Button className="w-full">Sign Up</Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </header>
   );

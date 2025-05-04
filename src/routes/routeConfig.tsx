@@ -1,15 +1,16 @@
 
 import React, { lazy, Suspense } from 'react';
 import { RouteDefinition } from './routeConfig';
-import MainLayout from '@/layouts/MainLayout';
+import { UnifiedLayout } from '@/layouts';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { Outlet } from 'react-router-dom';
+import AuthGuard from '@/components/auth/AuthGuard';
 
 // Lazy load pages
 const HomePage = lazy(() => import('@/pages/HomePage'));
 const SafetyPage = lazy(() => import('@/pages/SafetyPage'));
 const AICompanionDemo = lazy(() => import('@/pages/ai-companion-demo'));
-const RouteSharePage = lazy(() => import('@/pages/safety/RouteSharePage'));
+const RouteSharePage = lazy(() => import('@/pages/RouteSharePage'));
 const SEOPage = lazy(() => import('@/pages/SEOPage'));
 const NeuralMonitoringPage = lazy(() => import('@/pages/NeuralMonitoringPage'));
 const NeuralAnalyticsPage = lazy(() => import('@/pages/NeuralAnalyticsPage'));
@@ -19,8 +20,9 @@ const WalletPage = lazy(() => import('@/pages/UpdatedWallet'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const EscortsPage = lazy(() => import('@/pages/EscortsPage'));
 const EscortDetailPage = lazy(() => import('@/pages/EscortDetailPage'));
-const MessagesPage = lazy(() => import('@/pages/MessagesPage'));
+const MessagesPage = lazy(() => import('@/pages/Messages'));
 const FavoritesPage = lazy(() => import('@/pages/FavoritesPage'));
+const AuthPage = lazy(() => import('@/pages/AuthPage'));
 
 // Define route configuration with elements
 export const routes: RouteDefinition[] = [
@@ -28,9 +30,9 @@ export const routes: RouteDefinition[] = [
     path: '/',
     title: 'Main',
     category: 'core',
-    element: <MainLayout>
+    element: <UnifiedLayout>
       <Outlet />
-    </MainLayout>,
+    </UnifiedLayout>,
     children: [
       {
         index: true,
@@ -40,6 +42,16 @@ export const routes: RouteDefinition[] = [
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <HomePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'auth',
+        title: 'Authentication',
+        category: 'auth',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <AuthPage />
           </Suspense>
         ),
       },
@@ -117,9 +129,12 @@ export const routes: RouteDefinition[] = [
         path: 'wallet',
         title: 'Wallet',
         category: 'wallet',
+        isAuthRequired: true,
         element: (
           <Suspense fallback={<LoadingSpinner />}>
-            <WalletPage />
+            <AuthGuard>
+              <WalletPage />
+            </AuthGuard>
           </Suspense>
         ),
       },
@@ -127,13 +142,16 @@ export const routes: RouteDefinition[] = [
         path: 'profile',
         title: 'Profile',
         category: 'core',
+        isAuthRequired: true,
         element: (
           <Suspense fallback={<LoadingSpinner />}>
-            <ProfilePage />
+            <AuthGuard>
+              <ProfilePage />
+            </AuthGuard>
           </Suspense>
         ),
       },
-      // New escort routes
+      // Escort routes
       {
         path: 'escorts',
         title: 'Escorts',
@@ -159,9 +177,12 @@ export const routes: RouteDefinition[] = [
         path: 'messages',
         title: 'Messages',
         category: 'core',
+        isAuthRequired: true,
         element: (
           <Suspense fallback={<LoadingSpinner />}>
-            <MessagesPage />
+            <AuthGuard>
+              <MessagesPage />
+            </AuthGuard>
           </Suspense>
         ),
       },
@@ -170,9 +191,12 @@ export const routes: RouteDefinition[] = [
         path: 'favorites',
         title: 'Favorites',
         category: 'core',
+        isAuthRequired: true,
         element: (
           <Suspense fallback={<LoadingSpinner />}>
-            <FavoritesPage />
+            <AuthGuard>
+              <FavoritesPage />
+            </AuthGuard>
           </Suspense>
         ),
       },

@@ -5,6 +5,7 @@ import { routes as routeConfig } from '@/routes/routeConfig.tsx';
 import { UnifiedLayout } from '@/layouts';
 import AuthPage from '@/pages/AuthPage';
 import NotFoundPage from '@/pages/NotFoundPage';
+import AuthGuard from '@/components/auth/AuthGuard';
 
 const AppRoutes = () => {
   return (
@@ -14,22 +15,46 @@ const AppRoutes = () => {
       
       {/* Main route with UnifiedLayout */}
       <Route element={<UnifiedLayout />}>
-        {routeConfig.map((route, index) => (
-          <Route
-            key={`parent-${index}`}
-            path={route.path}
-            element={route.element}
-          >
-            {route.children?.map((childRoute, childIndex) => (
-              <Route
-                key={`child-${childIndex}`}
-                index={childRoute.index}
-                path={childRoute.path}
-                element={childRoute.element}
-              />
-            ))}
-          </Route>
-        ))}
+        {routeConfig.map((route, index) => {
+          // Check if route requires authentication
+          const requireAuth = route.isAuthRequired === true;
+          const Element = route.element;
+          
+          return (
+            <Route
+              key={`parent-${index}`}
+              path={route.path}
+              element={
+                requireAuth ? (
+                  <AuthGuard requiredRoles={route.roles}>
+                    {Element}
+                  </AuthGuard>
+                ) : Element
+              }
+            >
+              {route.children?.map((childRoute, childIndex) => {
+                // Check if child route requires authentication
+                const childRequireAuth = childRoute.isAuthRequired === true;
+                const ChildElement = childRoute.element;
+                
+                return (
+                  <Route
+                    key={`child-${childIndex}`}
+                    index={childRoute.index}
+                    path={childRoute.path}
+                    element={
+                      childRequireAuth ? (
+                        <AuthGuard requiredRoles={childRoute.roles}>
+                          {ChildElement}
+                        </AuthGuard>
+                      ) : ChildElement
+                    }
+                  />
+                );
+              })}
+            </Route>
+          );
+        })}
         
         {/* Catch-all route */}
         <Route path="*" element={<NotFoundPage />} />

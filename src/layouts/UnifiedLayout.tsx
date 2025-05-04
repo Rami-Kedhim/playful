@@ -1,10 +1,12 @@
 
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import Header from '@/components/navigation/MainNavigation';
 import Footer from '@/components/navigation/Footer';
 import { cn } from '@/lib/utils';
 import Breadcrumbs from '@/components/navigation/Breadcrumbs';
+import { useAuth } from '@/hooks/auth';
+import { Button } from '@/components/ui/button';
 
 export interface UnifiedLayoutProps {
   children?: React.ReactNode;
@@ -16,6 +18,8 @@ export interface UnifiedLayoutProps {
   containerClass?: string;
   fullWidth?: boolean;
   className?: string;
+  requireAuth?: boolean;
+  showAuthButton?: boolean;
 }
 
 /**
@@ -31,8 +35,20 @@ const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
   showBreadcrumbs = false,
   containerClass = "container mx-auto px-4 py-6",
   fullWidth = false,
-  className
+  className,
+  requireAuth = false,
+  showAuthButton = true
 }) => {
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+
+  // Check if authentication is required
+  React.useEffect(() => {
+    if (requireAuth && !isAuthenticated) {
+      navigate('/auth', { replace: true });
+    }
+  }, [requireAuth, isAuthenticated, navigate]);
+
   return (
     <div className={cn("flex min-h-screen flex-col bg-background", className)}>
       {!hideHeader && <Header />}
@@ -40,9 +56,19 @@ const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
       {(title || description || showBreadcrumbs) && (
         <div className="bg-background border-b border-border">
           <div className="container mx-auto px-4 py-6">
-            {showBreadcrumbs && <Breadcrumbs className="mb-4" />}
-            {title && <h1 className="text-2xl md:text-3xl font-bold">{title}</h1>}
-            {description && <p className="text-muted-foreground mt-1">{description}</p>}
+            <div className="flex justify-between items-center">
+              <div>
+                {showBreadcrumbs && <Breadcrumbs className="mb-4" />}
+                {title && <h1 className="text-2xl md:text-3xl font-bold">{title}</h1>}
+                {description && <p className="text-muted-foreground mt-1">{description}</p>}
+              </div>
+              
+              {showAuthButton && !isAuthenticated && (
+                <Button onClick={() => navigate('/auth')} className="bg-primary">
+                  Sign In
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       )}
