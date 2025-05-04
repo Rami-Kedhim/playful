@@ -35,7 +35,10 @@ const BookingTimeSlots = ({ form }: BookingTimeSlotsProps) => {
       render={({ field }) => (
         <FormItem>
           <FormLabel>Time</FormLabel>
-          <Select onValueChange={field.onChange} value={field.value}>
+          <Select 
+            onValueChange={field.onChange} 
+            value={field.value || timeSlots[0]}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select time" />

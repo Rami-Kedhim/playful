@@ -31,7 +31,10 @@ const BookingDuration = ({ form }: BookingDurationProps) => {
       render={({ field }) => (
         <FormItem>
           <FormLabel>Duration</FormLabel>
-          <Select onValueChange={field.onChange} value={field.value}>
+          <Select 
+            onValueChange={field.onChange} 
+            value={field.value || durations[0]}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select duration" />

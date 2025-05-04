@@ -25,7 +25,7 @@ const ContentTypeFields: React.FC<ContentTypeFieldsProps> = ({
       <div className="space-y-2">
         <Label htmlFor="content_type">Content Type *</Label>
         <Select
-          value={contentType}
+          value={contentType || "image"}
           onValueChange={(value) =>
             onSelectChange("content_type", value)
           }
@@ -45,7 +45,7 @@ const ContentTypeFields: React.FC<ContentTypeFieldsProps> = ({
       <div className="space-y-2">
         <Label htmlFor="status">Status *</Label>
         <Select
-          value={status}
+          value={status || "draft"}
           onValueChange={(value) => onSelectChange("status", value)}
         >
           <SelectTrigger>

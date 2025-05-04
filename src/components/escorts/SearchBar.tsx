@@ -29,7 +29,7 @@ const SearchBar = ({ searchQuery, setSearchQuery, sortBy, setSortBy }: SearchBar
         />
       </div>
       
-      <Select value={sortBy} onValueChange={setSortBy}>
+      <Select value={sortBy || "newest"} onValueChange={setSortBy}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>

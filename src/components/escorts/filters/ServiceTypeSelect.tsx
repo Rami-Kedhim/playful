@@ -27,7 +27,10 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
       {label && (
         <Label className="mb-2 block">{label}</Label>
       )}
-      <Select value={value} onValueChange={(value) => onChange(value as ServiceTypeFilter)}>
+      <Select 
+        value={value || "any"} 
+        onValueChange={(value) => onChange(value as ServiceTypeFilter)}
+      >
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select service type">
             {value && value !== "any" && (
