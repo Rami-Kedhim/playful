@@ -1,4 +1,3 @@
-
 export interface EnhancedEscortFilters {
   location: string;
   serviceType: string[];

@@ -1,149 +1,142 @@
 
-import { useMemo } from "react";
+import { EscortFilterState } from "@/types/escortFilters";
 
-export interface Filter {
+type ActiveFilter = {
   key: string;
   label: string;
   value?: string | number;
-}
+};
 
-export const useActiveFilters = (filterState: any) => {
-  const activeFilters = useMemo(() => {
-    const filters: Filter[] = [];
-    
-    // Add search query filter
-    if (filterState.searchQuery) {
-      filters.push({
-        key: 'searchQuery',
-        label: 'Search',
-        value: filterState.searchQuery
-      });
-    }
-    
-    // Add location filter
-    if (filterState.location) {
-      filters.push({
-        key: 'location',
-        label: 'Location',
-        value: filterState.location
-      });
-    }
-    
-    // Add service type filter
-    if (filterState.serviceTypeFilter) {
-      const serviceTypeLabels: Record<string, string> = {
-        'in-person': 'In Person',
-        'virtual': 'Virtual',
-        'both': 'Both Types'
-      };
-      
-      filters.push({
-        key: 'serviceTypeFilter',
-        label: 'Service Type',
-        value: serviceTypeLabels[filterState.serviceTypeFilter] || filterState.serviceTypeFilter
-      });
-    }
-    
-    // Add verification filter
-    if (filterState.verifiedOnly) {
-      filters.push({
-        key: 'verifiedOnly',
-        label: 'Verified Only'
-      });
-    }
-    
-    // Add available now filter
-    if (filterState.availableNow) {
-      filters.push({
-        key: 'availableNow',
-        label: 'Available Now'
-      });
-    }
-    
-    // Add rating filter
-    if (filterState.ratingMin > 0) {
-      filters.push({
-        key: 'ratingMin',
-        label: 'Min Rating',
-        value: `${filterState.ratingMin}★`
-      });
-    }
-    
-    // Add price range filter if not default
-    if (filterState.priceRange && 
-        (filterState.priceRange[0] > 0 || 
-         filterState.priceRange[1] < 500)) {
-      filters.push({
-        key: 'priceRange',
-        label: 'Price',
-        value: `$${filterState.priceRange[0]}-$${filterState.priceRange[1]}`
-      });
-    }
-    
-    // Add age range filter if not default
-    if (filterState.ageRange && 
-        (filterState.ageRange[0] > 21 || 
-         filterState.ageRange[1] < 50)) {
-      filters.push({
-        key: 'ageRange',
-        label: 'Age',
-        value: `${filterState.ageRange[0]}-${filterState.ageRange[1]}`
-      });
-    }
-    
-    // Add gender filters
-    if (filterState.selectedGenders?.length) {
-      filters.push({
-        key: 'selectedGenders',
-        label: 'Genders',
-        value: filterState.selectedGenders.length === 1 
-          ? filterState.selectedGenders[0] 
-          : `${filterState.selectedGenders.length} selected`
-      });
-    }
-    
-    // Add orientation filters
-    if (filterState.selectedOrientations?.length) {
-      filters.push({
-        key: 'selectedOrientations',
-        label: 'Orientations',
-        value: filterState.selectedOrientations.length === 1 
-          ? filterState.selectedOrientations[0] 
-          : `${filterState.selectedOrientations.length} selected`
-      });
-    }
-    
-    // Add service filters
-    if (filterState.selectedServices?.length) {
-      filters.push({
-        key: 'selectedServices',
-        label: 'Services',
-        value: filterState.selectedServices.length === 1 
-          ? filterState.selectedServices[0] 
-          : `${filterState.selectedServices.length} selected`
-      });
-    }
-    
-    return filters;
-  }, [
-    filterState.searchQuery,
-    filterState.location,
-    filterState.serviceTypeFilter,
-    filterState.verifiedOnly,
-    filterState.availableNow,
-    filterState.ratingMin,
-    filterState.priceRange,
-    filterState.ageRange,
-    filterState.selectedGenders,
-    filterState.selectedOrientations,
-    filterState.selectedServices
-  ]);
+/**
+ * Hook to determine which filters are currently active
+ * @param filterState Current filter state
+ * @returns Object with activeFilters array and count
+ */
+const useActiveFilters = (filterState: EscortFilterState) => {
+  const activeFilters: ActiveFilter[] = [];
   
-  const activeFilterCount = useMemo(() => activeFilters.length, [activeFilters]);
+  // Search query filter
+  if (filterState.searchQuery) {
+    activeFilters.push({
+      key: 'searchQuery',
+      label: 'Search',
+      value: filterState.searchQuery,
+    });
+  }
   
+  // Location filter
+  if (filterState.location) {
+    activeFilters.push({
+      key: 'location',
+      label: 'Location',
+      value: filterState.location,
+    });
+  }
+  
+  // Service type filter
+  if (filterState.serviceTypeFilter && filterState.serviceTypeFilter !== 'any') {
+    let serviceTypeLabel = '';
+    
+    switch (filterState.serviceTypeFilter) {
+      case 'in-person':
+        serviceTypeLabel = 'In Person';
+        break;
+      case 'virtual':
+        serviceTypeLabel = 'Virtual';
+        break;
+      case 'both':
+        serviceTypeLabel = 'Both Types';
+        break;
+      default:
+        serviceTypeLabel = filterState.serviceTypeFilter;
+    }
+    
+    activeFilters.push({
+      key: 'serviceTypeFilter',
+      label: 'Service Type',
+      value: serviceTypeLabel,
+    });
+  }
+  
+  // Price range filter (only if not default)
+  if (filterState.priceRange[0] !== 0 || filterState.priceRange[1] !== 1000) {
+    activeFilters.push({
+      key: 'priceRange',
+      label: 'Price',
+      value: `${filterState.priceRange[0]}-${filterState.priceRange[1]}`,
+    });
+  }
+  
+  // Age range filter (only if not default)
+  if (filterState.ageRange[0] !== 21 || filterState.ageRange[1] !== 60) {
+    activeFilters.push({
+      key: 'ageRange',
+      label: 'Age',
+      value: `${filterState.ageRange[0]}-${filterState.ageRange[1]}`,
+    });
+  }
+  
+  // Verified only filter
+  if (filterState.verifiedOnly) {
+    activeFilters.push({
+      key: 'verifiedOnly',
+      label: 'Verified Only',
+    });
+  }
+  
+  // Available now filter
+  if (filterState.availableNow) {
+    activeFilters.push({
+      key: 'availableNow',
+      label: 'Available Now',
+    });
+  }
+  
+  // Rating filter
+  if (filterState.ratingMin > 0) {
+    activeFilters.push({
+      key: 'ratingMin',
+      label: 'Minimum Rating',
+      value: filterState.ratingMin,
+    });
+  }
+  
+  // Gender filters
+  if (filterState.selectedGenders && filterState.selectedGenders.length > 0) {
+    activeFilters.push({
+      key: 'selectedGenders',
+      label: 'Genders',
+      value: filterState.selectedGenders.length > 1 
+        ? `${filterState.selectedGenders.length} selected` 
+        : filterState.selectedGenders[0],
+    });
+  }
+  
+  // Orientation filters
+  if (filterState.selectedOrientations && filterState.selectedOrientations.length > 0) {
+    activeFilters.push({
+      key: 'selectedOrientations',
+      label: 'Orientations',
+      value: filterState.selectedOrientations.length > 1 
+        ? `${filterState.selectedOrientations.length} selected` 
+        : filterState.selectedOrientations[0],
+    });
+  }
+  
+  // Services filters
+  if (filterState.selectedServices && filterState.selectedServices.length > 0) {
+    activeFilters.push({
+      key: 'selectedServices',
+      label: 'Services',
+      value: filterState.selectedServices.length > 1 
+        ? `${filterState.selectedServices.length} selected` 
+        : filterState.selectedServices[0],
+    });
+  }
+
   return {
     activeFilters,
-    activeFilterCount
+    activeFilterCount: activeFilters.length
   };
 };
 
