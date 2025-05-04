@@ -1,102 +1,108 @@
+
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Badge } from '@/components/ui/badge';
 import ServiceTypeIcon from '@/components/escorts/filters/ServiceTypeIcon';
 import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
+import { Button } from '@/components/ui/button';
 
-const ServiceTypeDemo = () => {
-  const [serviceType, setServiceType] = useState<ServiceTypeFilter>('');
+const ServiceTypeDemo: React.FC = () => {
+  const [selectedType, setSelectedType] = useState<ServiceTypeFilter>("in-person");
   
-  const handleTypeChange = (type: ServiceTypeFilter) => {
-    setServiceType(type);
+  const serviceTypes: ServiceTypeFilter[] = ["in-person", "virtual", "both", "any"];
+  
+  const labels = {
+    "in-person": "In Person",
+    "virtual": "Virtual",
+    "both": "Both Types",
+    "any": "Any"
   };
   
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <h1 className="text-3xl font-bold">Service Type Components Demo</h1>
+    <div className="container py-10">
+      <h1 className="text-3xl font-bold mb-6">Service Type Components Demo</h1>
       
-      <Card>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Select Service Type</Label>
-            <RadioGroup value={serviceType} onValueChange={handleTypeChange}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="" id="all" />
-                <Label htmlFor="all">All</Label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>ServiceTypeFilter Demo</CardTitle>
+            <CardDescription>
+              Demonstrates the service type selection component
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Label className="text-sm font-medium mb-2 block">Service Type</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {serviceTypes.map((type) => (
+                <Card
+                  key={type || "any"}
+                  className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors ${
+                    selectedType === type 
+                      ? "bg-primary/10 border-primary" 
+                      : "hover:bg-accent"
+                  }`}
+                  onClick={() => setSelectedType(type)}
+                >
+                  <ServiceTypeIcon 
+                    type={type}
+                    className={selectedType === type ? "text-primary" : ""}
+                  />
+                  <span>{labels[type]}</span>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Service Type Icons Demo</CardTitle>
+            <CardDescription>
+              Demonstrates the different service type icons
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="flex items-center gap-4">
+                <ServiceTypeIcon type="in-person" size={24} />
+                <span>In Person</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="in-person" id="in-person" />
-                <Label htmlFor="in-person">In-Person</Label>
+              
+              <div className="flex items-center gap-4">
+                <ServiceTypeIcon type="virtual" size={24} />
+                <span>Virtual</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="virtual" id="virtual" />
-                <Label htmlFor="virtual">Virtual</Label>
+              
+              <div className="flex items-center gap-4">
+                <ServiceTypeIcon type="both" size={24} />
+                <span>Both</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="both" id="both" />
-                <Label htmlFor="both">Both</Label>
+              
+              <div className="flex items-center gap-4">
+                <ServiceTypeIcon type="any" size={24} />
+                <span>Any (No icon)</span>
               </div>
-            </RadioGroup>
-          </div>
-          
-          <div>
-            <Label>Selected Service Type</Label>
-            {serviceType ? (
-              <Badge>
-                {serviceType}
-              </Badge>
-            ) : (
-              <p>No service type selected</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>ServiceTypeIcon Component</CardTitle>
-          <CardDescription>Display service types as icons</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1 p-2 border rounded">
-              <ServiceTypeIcon type="in-person" size={24} />
-              <span>In Person (default)</span>
             </div>
             
-            <div className="flex items-center gap-1 p-2 border rounded">
-              <ServiceTypeIcon type="virtual" size={24} variant="colored" />
-              <span>Virtual (colored)</span>
+            <div className="mt-6">
+              <h3 className="text-lg font-medium mb-4">Colored Icons</h3>
+              <div className="flex space-x-4">
+                <Button size="sm" variant="outline" className="gap-2">
+                  <ServiceTypeIcon type="in-person" size={16} variant="colored" />
+                  In Person
+                </Button>
+                <Button size="sm" variant="outline" className="gap-2">
+                  <ServiceTypeIcon type="virtual" size={16} variant="colored" />
+                  Virtual
+                </Button>
+                <Button size="sm" variant="outline" className="gap-2">
+                  <ServiceTypeIcon type="both" size={16} variant="colored" />
+                  Both
+                </Button>
+              </div>
             </div>
-            
-            <div className="flex items-center gap-1 p-2 border rounded">
-              <ServiceTypeIcon type="both" size={24} variant="colored" />
-              <span>Both</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">Service Type Icons</h2>
-        <div className="flex items-center space-x-4">
-          <div className="flex flex-col items-center">
-            <ServiceTypeIcon type="in-person" size={32} className="text-indigo-600" />
-            <span>In-Person</span>
-          </div>
-          
-          <div className="flex flex-col items-center">
-            <ServiceTypeIcon type="virtual" size={32} className="text-purple-600" />
-            <span>Virtual</span>
-          </div>
-          
-          <div className="flex flex-col items-center">
-            <ServiceTypeIcon type="both" size={32} className="text-blue-600" />
-            <span>Both</span>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

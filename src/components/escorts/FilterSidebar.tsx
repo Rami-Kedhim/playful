@@ -26,8 +26,8 @@ interface FilterSidebarProps {
   setRatingMin?: (rating: number) => void;
   availableNow?: boolean;
   setAvailableNow?: (available: boolean) => void;
-  serviceTypeFilter: "in-person" | "virtual" | "both" | "";
-  setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "") => void;
+  serviceTypeFilter: "in-person" | "virtual" | "both" | "any" | "";
+  setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "any" | "") => void;
 }
 
 const FilterSidebar = ({

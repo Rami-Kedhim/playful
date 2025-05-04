@@ -1,93 +1,39 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { Container } from '@/components/ui/container';
 import { hermes } from '@/core/Hermes';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/hooks/auth';
 
-const HermesPage = () => {
-  const [insights, setInsights] = React.useState<any>(null);
+const HermesPage: React.FC = () => {
+  const { user } = useAuth();
+  const userId = user?.id || 'anonymous';
   
-  React.useEffect(() => {
-    // Get sample user journey insights
-    const userInsights = hermes.getUserJourneyInsights('sample-user-id');
-    setInsights(userInsights);
-  }, []);
+  useEffect(() => {
+    // Connect to Hermes when page loads
+    hermes.connect({
+      system: 'HermesSystem',
+      connectionId: `hermes-page-${Date.now()}`,
+      userId,
+      metadata: {
+        page: 'HermesPage',
+        timestamp: new Date().toISOString(),
+      }
+    });
+    
+    // Track this page view
+    hermes.trackPageView(userId, '/hermes', document.referrer);
+  }, [userId]);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Hermes Flow System</h1>
-        <p className="text-muted-foreground mt-1">
-          Flow Dynamics and User Routing
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Journey Patterns</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {insights?.patterns.map((pattern: any, index: number) => (
-              <div key={index} className="flex flex-col">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">{pattern.name}</span>
-                  <span className="text-sm">{(pattern.confidence * 100).toFixed(0)}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                  <div 
-                    className="bg-primary h-2 rounded-full" 
-                    style={{width: `${pattern.confidence * 100}%`}}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Suggested Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {insights?.suggestions.map((suggestion: string, index: number) => (
-                <li key={index} className="flex items-center">
-                  <span className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center mr-2 text-xs">
-                    {index + 1}
-                  </span>
-                  <span>{suggestion}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <button className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-md">
-                Analyze Flow
-              </button>
-              <button className="w-full bg-secondary text-secondary-foreground px-4 py-2 rounded-md">
-                Optimize Routing
-              </button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+    <Container>
+      <h1 className="text-3xl font-bold mb-6">Hermes Analytics System</h1>
       
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">Documentation</h2>
-        <p className="text-muted-foreground">
-          Hermes is the central routing and flow dynamics system of the UberEscorts ecosystem.
-          It processes user journeys, behavioral patterns, and optimizes routes through the application
-          to enhance user experience and conversion rates.
+      <div className="bg-card rounded-lg p-6 border">
+        <p className="text-lg">
+          Welcome to the Hermes Analytics system. This system powers all analytics and tracking across the platform.
         </p>
       </div>
-    </div>
+    </Container>
   );
 };
 

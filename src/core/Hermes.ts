@@ -1,139 +1,194 @@
 
 /**
- * Hermes Analytics and Tracking System
- * Core management system for UberEscorts analytics, user tracking,
- * profile visibility and feedback loops
+ * Hermes Analytics System
+ * Core analytics, tracking, and user journey insights for the UberEscorts platform
  */
 
-interface SystemStatus {
-  status: 'operational' | 'degraded' | 'offline';
-  activeConnections?: number;
-  memoryUsage?: number;
-  uptimeHours?: number;
-}
-
-interface ConnectionParams {
-  system: string;
-  connectionId: string;
-  metadata?: Record<string, any>;
-  userId: string;
-}
-
-interface RouteFlowParams {
-  source: string;
-  destination: string;
-  params?: Record<string, any>;
-}
-
-class HermesAnalytics {
-  private status: SystemStatus = {
-    status: 'operational',
-    activeConnections: 0,
-    memoryUsage: 0,
-    uptimeHours: 0
+interface UserState {
+  id: string;
+  sessionId: string;
+  lastActivity: Date;
+  location: string;
+  preferences: Record<string, any>;
+  metaverse: {
+    hasEntered: boolean;
+    lastEntryTime?: Date;
+    totalTimeSpent: number;
   };
-  
-  private initialized: boolean = false;
+  isActive: boolean;
+}
+
+interface PageViewEvent {
+  path: string;
+  referrer: string;
+  timestamp: Date;
+  metadata?: Record<string, any>;
+}
+
+export class HermesAnalytics {
+  private readonly userStates = new Map<string, UserState>();
+  private readonly pageViews = new Map<string, PageViewEvent[]>();
   
   /**
-   * Initialize the Hermes analytics system
+   * Track a user page view
    */
-  async initialize(): Promise<boolean> {
-    // Mock initialization
-    this.initialized = true;
-    this.status = {
-      status: 'operational',
-      activeConnections: 0,
-      memoryUsage: Math.floor(Math.random() * 1000),
-      uptimeHours: 0
+  trackPageView(userId: string, path: string, referrer = '', metadata?: Record<string, any>): void {
+    if (!this.pageViews.has(userId)) {
+      this.pageViews.set(userId, []);
+    }
+    
+    const pageViews = this.pageViews.get(userId);
+    if (pageViews) {
+      pageViews.push({
+        path,
+        referrer,
+        timestamp: new Date(),
+        metadata
+      });
+    }
+    
+    console.log(`[Hermes] Tracked page view for user ${userId}: ${path}`);
+  }
+  
+  /**
+   * Track a user event
+   */
+  trackEvent(userId: string, eventType: string, metadata?: Record<string, any>): void {
+    console.log(`[Hermes] Tracked event for user ${userId}: ${eventType}`, metadata);
+  }
+  
+  /**
+   * Connect user to Hermes
+   */
+  connect(params: { 
+    system: string; 
+    connectionId: string; 
+    userId: string;
+    metadata?: Record<string, any>;
+  }): void {
+    console.log(`[Hermes] Connected ${params.userId} to ${params.system}`, params);
+    
+    const userState: UserState = {
+      id: params.userId,
+      sessionId: params.connectionId,
+      lastActivity: new Date(),
+      location: 'unknown',
+      preferences: {},
+      metaverse: {
+        hasEntered: false,
+        totalTimeSpent: 0
+      },
+      isActive: true
     };
     
-    console.log('Hermes analytics initialized');
-    return true;
+    this.userStates.set(params.userId, userState);
   }
   
   /**
-   * Get the current status of the Hermes system
+   * Get user state
    */
-  getSystemStatus(): SystemStatus {
-    return this.status;
+  getUserState(userId: string): UserState | undefined {
+    return this.userStates.get(userId);
   }
   
   /**
-   * Create a new tracking connection
+   * Update user location
    */
-  connect(params: ConnectionParams): string {
-    if (!this.initialized) {
-      console.warn('Hermes not initialized when attempting connection');
-      this.initialize();
-    }
-    
-    // Mock connection creation
-    this.status.activeConnections = (this.status.activeConnections || 0) + 1;
-    
-    // Return the connection ID for reference
-    return params.connectionId;
-  }
-  
-  /**
-   * End a tracking connection
-   */
-  disconnect(connectionId?: string): void {
-    if (this.status.activeConnections && this.status.activeConnections > 0) {
-      this.status.activeConnections--;
-    }
-    
-    if (!connectionId) {
-      // If no connection ID is provided, this is a system shutdown
-      this.status.activeConnections = 0;
-      this.status.status = 'offline';
-      this.initialized = false;
+  updateUserLocation(userId: string, location: string): void {
+    const userState = this.userStates.get(userId);
+    if (userState) {
+      userState.location = location;
     }
   }
   
   /**
-   * Track user flow between routes
+   * Update user preferences
    */
-  routeFlow(params: RouteFlowParams): void {
-    if (!this.initialized) {
-      console.warn('Hermes not initialized when tracking route flow');
-      this.initialize();
+  updateUserPreferences(userId: string, preferences: Record<string, any>): void {
+    const userState = this.userStates.get(userId);
+    if (userState) {
+      userState.preferences = {
+        ...userState.preferences,
+        ...preferences
+      };
+    }
+  }
+  
+  /**
+   * Enter spatial flow (metaverse)
+   */
+  enterSpatialFlow(userId: string, spaceId: string): void {
+    const userState = this.userStates.get(userId);
+    if (userState) {
+      userState.metaverse.hasEntered = true;
+      userState.metaverse.lastEntryTime = new Date();
     }
     
-    console.log(
-      `[Hermes] Route flow: ${params.source} → ${params.destination}`, 
-      params.params
-    );
+    console.log(`[Hermes] User ${userId} entered spatial flow: ${spaceId}`);
   }
   
   /**
-   * Track interaction with a profile
+   * Exit spatial flow (metaverse)
    */
-  trackProfileInteraction(profileId: string, action: string, userId: string): void {
-    console.log(`[Hermes] Profile interaction: ${action} on ${profileId} by ${userId}`);
+  exitSpatialFlow(userId: string): void {
+    const userState = this.userStates.get(userId);
+    if (userState && userState.metaverse.lastEntryTime) {
+      const timeSpent = new Date().getTime() - userState.metaverse.lastEntryTime.getTime();
+      userState.metaverse.totalTimeSpent += timeSpent;
+      delete userState.metaverse.lastEntryTime;
+    }
   }
-  
+
   /**
-   * Calculate visibility score for a profile
+   * Get user journey insights
    */
-  calculateVisibilityScore(profileId: string): number {
-    // Mock visibility calculation
-    return Math.floor(Math.random() * 100);
-  }
-  
-  /**
-   * Get recommended next action for user
-   */
-  recommendNextAction(userId: string): string {
-    const actions = [
-      'view_popular_escorts',
-      'check_messages',
-      'update_profile',
-      'explore_creators'
-    ];
+  getUserJourneyInsights(userId: string): Record<string, any> {
+    const userState = this.userStates.get(userId);
+    const pageViews = this.pageViews.get(userId) || [];
     
-    // Mock recommendation
-    return actions[Math.floor(Math.random() * actions.length)];
+    // Mock some insights based on available data
+    return {
+      userId,
+      totalPageViews: pageViews.length,
+      mostVisitedPages: this.getMostVisitedPages(pageViews),
+      averageSessionDuration: userState ? Math.random() * 600 : 0, // mock 0-10 minutes
+      lastActive: userState?.lastActivity || new Date(),
+      metaverseEngagement: userState?.metaverse.totalTimeSpent || 0,
+      potentialInterests: this.getPotentialInterests(pageViews),
+    };
+  }
+  
+  /**
+   * Helper: Get most visited pages
+   */
+  private getMostVisitedPages(pageViews: PageViewEvent[]): Record<string, number> {
+    const pageCounts: Record<string, number> = {};
+    
+    pageViews.forEach(event => {
+      if (!pageCounts[event.path]) {
+        pageCounts[event.path] = 0;
+      }
+      pageCounts[event.path]++;
+    });
+    
+    return pageCounts;
+  }
+  
+  /**
+   * Helper: Get potential interests from page views
+   */
+  private getPotentialInterests(pageViews: PageViewEvent[]): string[] {
+    const interests = new Set<string>();
+    
+    // This is a simple mock implementation
+    pageViews.forEach(event => {
+      if (event.path.includes('escorts')) interests.add('escorts');
+      if (event.path.includes('creators')) interests.add('creators');
+      if (event.path.includes('metaverse')) interests.add('metaverse');
+      if (event.path.includes('livecams')) interests.add('livecams');
+    });
+    
+    return Array.from(interests);
   }
 }
 

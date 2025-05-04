@@ -8,13 +8,14 @@ interface UseEscortFilterProps {
 }
 
 export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
-  const [serviceTypeFilter, setServiceTypeFilter] = useState<ServiceTypeFilter>("any");
+  const [serviceTypeFilter, setServiceTypeFilter] = useState<ServiceTypeFilter>("");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [availableNow, setAvailableNow] = useState(false);
   const [location, setLocation] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [ratingMin, setRatingMin] = useState(0);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Filter escorts based on the current filter state
   const filteredEscorts = useCallback(() => {
@@ -79,7 +80,7 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
   
   // Reset all filters to their default values
   const resetFilters = useCallback(() => {
-    setServiceTypeFilter("any");
+    setServiceTypeFilter("");
     setVerifiedOnly(false);
     setAvailableNow(false);
     setLocation('');
@@ -105,5 +106,8 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
     setPriceRange,
     filteredEscorts,
     resetFilters,
+    isLoading
   };
 };
+
+export default useEscortFilter;

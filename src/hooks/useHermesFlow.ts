@@ -1,89 +1,121 @@
 
-import { useCallback, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { hermes } from '@/core/Hermes';
 import { useAuth } from '@/hooks/auth';
+import { hermes } from '@/core/Hermes';
 
-/**
- * Hook for interacting with the Hermes flow system
- * Tracks user navigation and provides insights from the journey
- */
-export function useHermesFlow() {
-  const location = useLocation();
+interface UseHermesFlowOptions {
+  trackPageView?: boolean;
+  trackEvents?: boolean;
+  spatial?: boolean;
+}
+
+export const useHermesFlow = (
+  flowName: string,
+  options: UseHermesFlowOptions = {}
+) => {
+  const { 
+    trackPageView = true,
+    trackEvents = true,
+    spatial = false
+  } = options;
+  
   const { user } = useAuth();
+  const location = useLocation();
   const userId = user?.id || 'anonymous';
-
-  // Track page views automatically
+  const [flowId, setFlowId] = useState<string>(`${flowName}-${Date.now()}`);
+  const [metadata, setMetadata] = useState<Record<string, any>>({});
+  
+  // Initialize the flow
   useEffect(() => {
-    const currentPath = location.pathname;
-    const connectionId = `page-view-${Date.now()}`;
-    
+    // Connect to Hermes
     hermes.connect({
-      system: 'WebApp',
-      connectionId,
+      system: flowName,
+      connectionId: flowId,
+      userId,
       metadata: {
-        path: currentPath,
-        timestamp: new Date().toISOString()
+        path: location.pathname,
+        flowName,
+        timestamp: new Date().toISOString(),
       },
-      userId
     });
-
-    // Don't route on first render, just connect
-  }, [location.pathname, userId]);
-
-  // Track navigation between pages
-  useEffect(() => {
-    // Skip on first render
+    
+    // Track page view if enabled
+    if (trackPageView) {
+      hermes.trackPageView(userId, location.pathname, document.referrer);
+    }
+    
+    // Track flow start event if events are enabled
+    if (trackEvents) {
+      hermes.trackEvent(userId, `${flowName}_start`, { flowId });
+    }
+    
+    // Enter spatial flow if spatial is enabled
+    if (spatial) {
+      hermes.enterSpatialFlow(userId, flowId);
+    }
+    
+    // Cleanup function
     return () => {
-      const previousPath = location.pathname;
-      const newPath = window.location.pathname;
-      
-      if (previousPath !== newPath) {
-        hermes.routeFlow({
-          source: previousPath,
-          destination: newPath,
-          params: {
-            userId,
-            timestamp: new Date().toISOString()
-          }
+      if (trackEvents) {
+        hermes.trackEvent(userId, `${flowName}_end`, { 
+          flowId, 
+          duration: Date.now() - new Date(flowId.split('-')[1]).getTime() 
         });
       }
+      
+      if (spatial) {
+        hermes.exitSpatialFlow(userId);
+      }
     };
-  }, [location.pathname, userId]);
+  }, [flowName, flowId, userId, location.pathname, trackPageView, trackEvents, spatial]);
   
-  // Manually track an event
-  const trackEvent = useCallback((eventName: string, metadata?: Record<string, any>) => {
-    const connectionId = `event-${eventName}-${Date.now()}`;
+  // Track flow step
+  const trackStep = useCallback((stepName: string, stepData?: Record<string, any>) => {
+    if (trackEvents) {
+      hermes.trackEvent(userId, `${flowName}_step`, { 
+        flowId, 
+        step: stepName,
+        ...stepData 
+      });
+    }
+  }, [flowName, flowId, userId, trackEvents]);
+  
+  // Update flow metadata
+  const updateMetadata = useCallback((newMetadata: Record<string, any>) => {
+    setMetadata(prev => ({
+      ...prev,
+      ...newMetadata
+    }));
     
-    hermes.connect({
-      system: eventName,
-      connectionId,
-      metadata,
-      userId
-    });
-  }, [userId]);
+    if (trackEvents) {
+      hermes.trackEvent(userId, `${flowName}_metadata_update`, { 
+        flowId, 
+        ...newMetadata 
+      });
+    }
+  }, [flowName, flowId, userId, trackEvents]);
   
-  // Get recommended next action based on user journey
-  const getRecommendedAction = useCallback(() => {
-    return hermes.recommendNextAction(userId);
-  }, [userId]);
+  // Complete the flow
+  const completeFlow = useCallback((completionData?: Record<string, any>) => {
+    if (trackEvents) {
+      hermes.trackEvent(userId, `${flowName}_complete`, { 
+        flowId,
+        ...completionData,
+        ...metadata
+      });
+    }
+    
+    return { flowId, metadata: { ...metadata, ...completionData } };
+  }, [flowName, flowId, metadata, userId, trackEvents]);
   
-  // Get visibility score for a profile
-  const getVisibilityScore = useCallback((profileId: string) => {
-    return hermes.calculateVisibilityScore(profileId);
-  }, []);
-  
-  // Get journey insights for current user
-  const getJourneyInsights = useCallback(() => {
-    return hermes.getUserJourneyInsights(userId);
-  }, [userId]);
-
   return {
-    trackEvent,
-    getRecommendedAction,
-    getVisibilityScore,
-    getJourneyInsights
+    flowId,
+    metadata,
+    trackStep,
+    updateMetadata,
+    completeFlow
   };
-}
+};
 
 export default useHermesFlow;

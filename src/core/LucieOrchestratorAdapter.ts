@@ -1,5 +1,5 @@
 
-import { lucie } from './Lucie';
+import { lucie, ModerateContentParams, ModerateContentResult } from './Lucie';
 
 // Define types for the adapter
 interface ContentRequest {
@@ -22,7 +22,7 @@ export class LucieOrchestratorAdapter {
   async generateAIResponse(request: ContentRequest): Promise<string> {
     try {
       // Use the renamed method
-      return await lucie.generateContent(request.prompt, request.context);
+      return await lucie.generateContent(request.prompt);
     } catch (error) {
       console.error('Error in Lucie orchestrator generating content:', error);
       return 'I encountered an error processing your request.';
@@ -46,12 +46,17 @@ export class LucieOrchestratorAdapter {
 
   async moderateContent(content: string): Promise<ModerationResult> {
     try {
-      const result = await lucie.moderateContent(content);
+      const params: ModerateContentParams = {
+        content: content,
+        contentType: 'text'
+      };
+      
+      const result: ModerateContentResult = await lucie.moderateContent(params);
       
       // Use the correct property names
       return {
         isApproved: result.safe,
-        issues: result.issues,
+        issues: result.issues || [],
         blockedCategories: result.blockedCategories || []
       };
     } catch (error) {

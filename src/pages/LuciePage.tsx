@@ -20,9 +20,8 @@ const LuciePage: React.FC = () => {
       },
     });
     
-    // Get user journey insights
-    const insights = hermes.getUserJourneyInsights(userId);
-    console.log('Lucie page - user journey insights:', insights);
+    // Track this page view
+    hermes.trackPageView(userId, '/lucie', document.referrer);
   }, [userId]);
 
   return (

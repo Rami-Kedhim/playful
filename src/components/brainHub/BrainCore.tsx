@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { neuralHub, brainHub } from '@/services/neural/HermesOxumBrainHub';
-import { lucie } from '@/core/Lucie';
+import { lucie, ModerateContentParams } from '@/core/Lucie';
 
 interface BrainCoreProps {
   initialRequestType: 'analysis' | 'generation' | 'moderation' | 'transformation';
@@ -55,7 +55,11 @@ const BrainCore: React.FC<BrainCoreProps> = ({
 
   // Also log this interaction through Lucie for AI analysis
   useEffect(() => {
-    lucie.moderateContent(`BrainCore component initialized with ${initialRequestType}`);
+    const params: ModerateContentParams = {
+      content: `BrainCore component initialized with ${initialRequestType}`,
+      contentType: 'text'
+    };
+    lucie.moderateContent(params);
   }, [initialRequestType]);
 
   if (isLoading) {

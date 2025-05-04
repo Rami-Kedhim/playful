@@ -5,26 +5,17 @@
  * handling content moderation, image generation, etc.
  */
 
-interface LucieStatus {
-  operational: boolean;
-  modules: {
-    contentModeration: 'online' | 'offline' | 'degraded';
-    imageGeneration: 'online' | 'offline' | 'degraded';
-    textGeneration: 'online' | 'offline' | 'degraded';
-    sentimentAnalysis: 'online' | 'offline' | 'degraded';
-    aiGeneration: 'online' | 'offline' | 'degraded';
-  }
-}
-
-interface ModerateContentParams {
+export interface ModerateContentParams {
   content: string;
-  contentType: 'text' | 'image' | 'video';
+  contentType?: 'text' | 'image' | 'video';
   strictness?: 'low' | 'medium' | 'high';
 }
 
-interface ModerateContentResult {
+export interface ModerateContentResult {
   safe: boolean;
   score: number;
+  issues?: string[];
+  blockedCategories?: string[];
   categories?: {
     sexual: number;
     violent: number;
@@ -34,16 +25,27 @@ interface ModerateContentResult {
   flaggedWords?: string[];
 }
 
-interface GenerateContentParams {
+export interface GenerateContentParams {
   prompt: string;
-  type: 'text' | 'image';
+  type?: 'text' | 'image';
   parameters?: Record<string, any>;
 }
 
-interface GenerateContentResult {
+export interface GenerateContentResult {
   success: boolean;
-  content?: string | Blob;
+  content?: string;
   error?: string;
+}
+
+interface LucieStatus {
+  operational: boolean;
+  modules: {
+    contentModeration: 'online' | 'offline' | 'degraded';
+    imageGeneration: 'online' | 'offline' | 'degraded';
+    textGeneration: 'online' | 'offline' | 'degraded';
+    sentimentAnalysis: 'online' | 'offline' | 'degraded';
+    aiGeneration: 'online' | 'offline' | 'degraded';
+  }
 }
 
 class LucieAISystem {
@@ -69,11 +71,22 @@ class LucieAISystem {
    * Moderate content for safety
    */
   async moderateContent(params: ModerateContentParams): Promise<ModerateContentResult> {
+    // For string content type, convert it to proper params
+    if (typeof params === 'string') {
+      params = {
+        content: params,
+        contentType: 'text',
+        strictness: 'medium'
+      };
+    }
+    
     // Check if the content moderation module is online
     if (this.status.modules.contentModeration !== 'online') {
       return {
         safe: true, // Default to safe if system is offline
         score: 0,
+        issues: [],
+        blockedCategories: [],
         categories: {
           sexual: 0,
           violent: 0,
@@ -91,6 +104,8 @@ class LucieAISystem {
     return {
       safe: isSafe,
       score: isSafe ? score : 0.9,
+      issues: isSafe ? [] : ['potentially inappropriate content'],
+      blockedCategories: isSafe ? [] : ['adult'],
       categories: {
         sexual: isSafe ? 0.1 : 0.8,
         violent: isSafe ? 0.05 : 0.2,
@@ -104,7 +119,20 @@ class LucieAISystem {
   /**
    * Generate AI content
    */
-  async generateContent(params: GenerateContentParams): Promise<GenerateContentResult> {
+  async generateContent(prompt: string, context?: Record<string, any>): Promise<string> {
+    // Check if the appropriate module is online
+    if (this.status.modules.textGeneration !== 'online') {
+      return "Text generation is currently unavailable";
+    }
+    
+    // Simple mock response based on prompt
+    return `Generated response for: ${prompt}`;
+  }
+
+  /**
+   * Generate AI content with more options (original method)
+   */
+  async generateContentWithOptions(params: GenerateContentParams): Promise<GenerateContentResult> {
     // Check if the appropriate module is online
     const moduleType = params.type === 'image' ? 'imageGeneration' : 'textGeneration';
     if (this.status.modules[moduleType] !== 'online') {
@@ -115,8 +143,7 @@ class LucieAISystem {
     }
     
     // Mock content generation
-    // In a real implementation, this would call an AI generation API like OpenAI
-    if (params.type === 'text') {
+    if (params.type === 'text' || !params.type) {
       return {
         success: true,
         content: `Generated text based on prompt: ${params.prompt}`
@@ -161,6 +188,18 @@ class LucieAISystem {
       sentiment,
       score
     };
+  }
+
+  /**
+   * Load featured users (for the featured service)
+   */
+  async loadFeaturedUsers(): Promise<any[]> {
+    // Mock featured users data
+    return [
+      { id: 'user1', name: 'Emma', type: 'escort', rating: 4.9 },
+      { id: 'user2', name: 'Alex', type: 'creator', rating: 4.8 },
+      { id: 'user3', name: 'Sophia', type: 'escort', rating: 5.0 },
+    ];
   }
 }
 

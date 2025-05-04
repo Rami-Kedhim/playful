@@ -1,88 +1,56 @@
 
-import React from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Users, Lock, Globe } from 'lucide-react';
-import { MetaverseRoom as MetaverseRoomType } from '@/types/shared';
+import React, { useEffect } from 'react';
+import { useAuth } from '@/hooks/auth';
 import { hermes } from '@/core/Hermes';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface MetaverseRoomProps {
-  room: MetaverseRoomType;
-  onJoin: (roomId: string) => void;
+  roomId: string;
+  isLoading?: boolean;
 }
 
-/**
- * MetaverseRoom component for displaying and joining metaverse rooms
- * Integrates with Hermes for flow tracking
- */
-const MetaverseRoom: React.FC<MetaverseRoomProps> = ({ room, onJoin }) => {
-  const handleJoin = () => {
-    // Track the action with Hermes
-    hermes.enterSpatialFlow('anonymous', room.id);
-    onJoin(room.id);
-  };
-  
-  const getCapacityColor = () => {
-    const ratio = room.currentUsers / room.capacity;
-    if (ratio < 0.5) return 'text-green-500';
-    if (ratio < 0.9) return 'text-yellow-500';
-    return 'text-red-500';
-  };
-  
-  return (
-    <Card className="overflow-hidden transition-all hover:shadow-md">
-      <div className="aspect-video bg-gradient-to-br from-indigo-900 to-purple-900 relative">
-        {room.thumbnailUrl ? (
-          <img
-            src={room.thumbnailUrl}
-            alt={room.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full w-full">
-            <Globe className="h-12 w-12 text-white/30" />
-          </div>
-        )}
-        
-        {room.isPrivate && (
-          <div className="absolute top-2 right-2">
-            <Badge variant="outline" className="bg-black/50 border-none text-white">
-              <Lock className="h-3 w-3 mr-1" /> Private
-            </Badge>
-          </div>
-        )}
+const MetaverseRoom: React.FC<MetaverseRoomProps> = ({
+  roomId,
+  isLoading = false
+}) => {
+  const { user } = useAuth();
+  const userId = user?.id || 'anonymous';
+
+  useEffect(() => {
+    // Track entry to the spatial flow
+    hermes.enterSpatialFlow(userId, roomId);
+    
+    // Track page view
+    hermes.trackPageView(userId, `/metaverse/room/${roomId}`, document.referrer, {
+      roomId,
+      entryMethod: 'direct',
+    });
+    
+    // Track event
+    hermes.trackEvent(userId, 'metaverse_room_entered', { roomId });
+    
+    // Cleanup on exit
+    return () => {
+      hermes.exitSpatialFlow(userId);
+      hermes.trackEvent(userId, 'metaverse_room_exited', { roomId });
+    };
+  }, [userId, roomId]);
+
+  if (isLoading) {
+    return (
+      <div className="w-full aspect-video bg-muted rounded-lg flex items-center justify-center">
+        <Skeleton className="h-full w-full rounded-lg" />
       </div>
-      
-      <CardHeader>
-        <CardTitle className="flex justify-between">
-          <span>{room.name}</span>
-          <span className={`flex items-center text-sm ${getCapacityColor()}`}>
-            <Users className="h-4 w-4 mr-1" />
-            {room.currentUsers}/{room.capacity}
-          </span>
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent>
-        {room.description && (
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-            {room.description}
-          </p>
-        )}
-      </CardContent>
-      
-      <CardFooter>
-        <Button 
-          onClick={handleJoin} 
-          className="w-full"
-          variant={room.isPrivate ? "outline" : "default"}
-          disabled={room.currentUsers >= room.capacity}
-        >
-          {room.currentUsers >= room.capacity ? 'Room Full' : 'Enter Room'}
-        </Button>
-      </CardFooter>
-    </Card>
+    );
+  }
+
+  return (
+    <div className="w-full aspect-video bg-black/10 rounded-lg flex items-center justify-center">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold">Room: {roomId}</h2>
+        <p className="text-muted-foreground">Metaverse experience loading...</p>
+      </div>
+    </div>
   );
 };
 

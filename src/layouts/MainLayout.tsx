@@ -1,62 +1,31 @@
 
-import React, { ReactNode } from 'react';
-import UnifiedHeader from '@/components/layout/UnifiedHeader';
-import UnifiedFooter from '@/components/layout/UnifiedFooter';
+import React from 'react';
+import { UnifiedHeader } from '@/components/layout';
+import { UnifiedFooter } from '@/components/layout';
 import { cn } from '@/lib/utils';
-import Breadcrumbs from '@/components/navigation/Breadcrumbs';
 
-interface MainLayoutProps {
-  children: ReactNode;
-  title?: string;
-  description?: string;
+export interface MainLayoutProps {
+  children: React.ReactNode;
   containerClass?: string;
-  hideHeader?: boolean;
+  hideNavbar?: boolean;
   hideFooter?: boolean;
-  fullWidth?: boolean;
-  className?: string;
-  showBreadcrumbs?: boolean;
-  simplified?: boolean;
 }
 
-/**
- * Main application layout component that provides consistent structure across all pages
- */
 const MainLayout: React.FC<MainLayoutProps> = ({
   children,
-  title,
-  description,
-  containerClass = "container mx-auto px-4 py-6",
-  hideHeader = false,
+  containerClass,
+  hideNavbar = false,
   hideFooter = false,
-  fullWidth = false,
-  className,
-  showBreadcrumbs = false,
-  simplified = false
 }) => {
   return (
-    <div className={cn("flex min-h-screen flex-col bg-background", className)}>
-      {!hideHeader && <UnifiedHeader />}
+    <div className="flex min-h-screen flex-col">
+      {!hideNavbar && <UnifiedHeader />}
       
-      {(title || description) && (
-        <header className="bg-background border-b border-border">
-          <div className="container mx-auto px-4 py-6">
-            {title && <h1 className="text-2xl md:text-3xl font-bold">{title}</h1>}
-            {description && <p className="text-muted-foreground mt-1">{description}</p>}
-          </div>
-        </header>
-      )}
-      
-      {showBreadcrumbs && (
-        <div className="container mx-auto px-4 py-2">
-          <Breadcrumbs />
-        </div>
-      )}
-      
-      <main className={cn("flex-grow", !fullWidth && containerClass)}>
+      <main className={cn("flex-1", containerClass)}>
         {children}
       </main>
       
-      {!hideFooter && <UnifiedFooter simplified={simplified} />}
+      {!hideFooter && <UnifiedFooter />}
     </div>
   );
 };

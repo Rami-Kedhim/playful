@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { lucie } from '@/core/Lucie';
+import { lucie, ModerateContentParams } from '@/core/Lucie';
 import { toast } from '@/components/ui/use-toast';
 
 // Export the LucieMessage type for use in other components
@@ -52,7 +52,12 @@ export function useLucieAssistant(options: UseLucieAssistantOptions = {}) {
     
     try {
       // First check content moderation
-      const moderationResult = await lucie.moderateContent(content);
+      const moderationParams: ModerateContentParams = {
+        content: content,
+        contentType: 'text'
+      };
+      
+      const moderationResult = await lucie.moderateContent(moderationParams);
       
       if (!moderationResult.safe) {
         const rejectionMessage: LucieMessage = {
@@ -72,10 +77,7 @@ export function useLucieAssistant(options: UseLucieAssistantOptions = {}) {
       }
       
       // Generate AI response
-      const response = await lucie.generateContent(content, {
-        history: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
-        ...context
-      });
+      const response = await lucie.generateContent(content);
       
       const assistantMessage: LucieMessage = {
         id: `lucie-${Date.now()}`,
@@ -96,7 +98,7 @@ export function useLucieAssistant(options: UseLucieAssistantOptions = {}) {
       setIsLoading(false);
       setIsTyping(false);
     }
-  }, [messages, context]);
+  }, []);
   
   return {
     messages,

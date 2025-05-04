@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { lucie } from '@/core/Lucie';
+import { lucie, ModerateContentParams, GenerateContentResult } from '@/core/Lucie';
 import { AICompanionChatProps } from './companion-chat/AICompanionChatProps';
 
 // Define message type with proper sender type
@@ -55,7 +55,12 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
 
     try {
       // Check content moderation
-      const moderationResult = await lucie.moderateContent(inputValue);
+      const moderationParams: ModerateContentParams = {
+        content: inputValue,
+        contentType: 'text'
+      };
+      
+      const moderationResult = await lucie.moderateContent(moderationParams);
       
       if (!moderationResult.safe) {
         // Handle inappropriate content
@@ -70,10 +75,7 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
       }
 
       // Generate AI response using the updated method name
-      const response = await lucie.generateContent(inputValue, {
-        companionId,
-        history: messages.map(m => `${m.sender}: ${m.text}`).join('\n')
-      });
+      const response = await lucie.generateContent(inputValue);
 
       setMessages(prev => [...prev, {
         id: `ai-${Date.now()}`,
