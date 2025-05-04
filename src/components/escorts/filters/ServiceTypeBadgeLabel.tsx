@@ -1,51 +1,66 @@
 
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import ServiceTypeIcon from './ServiceTypeIcon';
+import { Badge } from "@/components/ui/badge";
+import { Users, Video, Zap } from "lucide-react";
 
-// Export this type so it can be used elsewhere
-export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | 'any' | '';
+export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "any" | "";
 
 interface ServiceTypeBadgeLabelProps {
-  type: ServiceTypeFilter;
-  showIcon?: boolean;
-  color?: 'default' | 'secondary' | 'outline' | 'destructive' | 'success' | 'warning' | 'ubx';
-  size?: 'sm' | 'default' | 'lg';
+  serviceType: ServiceTypeFilter;
+  includeIcon?: boolean;
+  size?: "sm" | "default";
 }
 
+/**
+ * A badge component to display service type with icon and label
+ * Used for filtering and displaying escort service types
+ */
 const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
-  type, 
-  showIcon = true,
-  color = 'default',
-  size = 'default'
+  serviceType,
+  includeIcon = true,
+  size = "default"
 }) => {
-  const getLabel = () => {
-    switch (type) {
-      case "in-person": return "In Person";
-      case "virtual": return "Virtual";
-      case "both": return "In Person & Virtual";
-      case "any": return "Any Type";
-      default: return "Any Type";
+  const getServiceTypeDetails = () => {
+    switch (serviceType) {
+      case "in-person":
+        return { 
+          label: "In Person",
+          icon: <Users size={16} />,
+          variant: "outline" as const,
+          className: "text-blue-500 border-blue-200"
+        };
+      case "virtual":
+        return { 
+          label: "Virtual",
+          icon: <Video size={16} />,
+          variant: "outline" as const,
+          className: "text-purple-500 border-purple-200" 
+        };
+      case "both":
+        return { 
+          label: "Both Types",
+          icon: <Zap size={16} />,
+          variant: "outline" as const,
+          className: "text-green-500 border-green-200" 
+        };
+      default:
+        return { 
+          label: "Any Type",
+          icon: null,
+          variant: "outline" as const,
+          className: "text-gray-500 border-gray-200" 
+        };
     }
   };
-
-  const getSizeClasses = () => {
-    switch (size) {
-      case "sm": return "text-xs py-0 px-2";
-      case "lg": return "text-sm py-1 px-3";
-      default: return "text-xs py-0.5 px-2.5";
-    }
-  };
-
-  const label = getLabel();
-  const sizeClasses = getSizeClasses();
-
+  
+  const { label, icon, variant, className } = getServiceTypeDetails();
+  
   return (
     <Badge 
-      variant={color} 
-      className={`${sizeClasses} font-normal gap-1`}
+      variant={variant}
+      className={`${className} ${size === "sm" ? "text-xs py-0 px-1.5" : ""}`}
     >
-      {showIcon && <ServiceTypeIcon type={type} size={size === 'lg' ? 16 : 14} />}
+      {includeIcon && icon && <span className="mr-1">{icon}</span>}
       {label}
     </Badge>
   );

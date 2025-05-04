@@ -30,16 +30,15 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
       <Select value={value} onValueChange={(value) => onChange(value as ServiceTypeFilter)}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select service type">
-            {value && (
+            {value && value !== "any" && (
               <div className="flex items-center gap-2">
                 <ServiceTypeIcon type={value} size={16} className="text-primary" />
                 {value === 'in-person' ? 'In Person' : 
                  value === 'virtual' ? 'Virtual' : 
-                 value === 'both' ? 'Both Types' : 
-                 value === 'any' ? 'Any Type' : 'Any Type'}
+                 value === 'both' ? 'Both Types' : 'Any Type'}
               </div>
             )}
-            {!value && (
+            {(!value || value === "any") && (
               <div className="flex items-center gap-2">
                 Any Type
               </div>

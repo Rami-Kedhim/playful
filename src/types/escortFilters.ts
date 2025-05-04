@@ -58,7 +58,7 @@ export interface EscortFilterState {
   ageRange: [number, number];
   ratingMin: number;
   availableNow: boolean;
-  serviceTypeFilter: "" | "in-person" | "virtual" | "both";
+  serviceTypeFilter: "in-person" | "virtual" | "both" | "any" | "";
   isLoading: boolean;
 }
 
@@ -80,7 +80,7 @@ export interface EscortFilterActions {
   handleAgeRangeChange: (values: number[]) => void;
   setRatingMin: (rating: number) => void;
   setAvailableNow: (available: boolean) => void;
-  setServiceTypeFilter: (type: "" | "in-person" | "virtual" | "both") => void;
+  setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "any" | "") => void;
   setIsLoading: (loading: boolean) => void;
   clearFilters: () => void;
 }

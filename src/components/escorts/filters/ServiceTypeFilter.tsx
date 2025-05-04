@@ -20,13 +20,13 @@ const ServiceTypeFilter: React.FC<ServiceTypeFilterProps> = ({
   setServiceTypeFilter,
   className
 }) => {
-  const serviceTypes: ServiceTypeFilterType[] = ["in-person", "virtual", "both", ""];
+  const serviceTypes: ServiceTypeFilterType[] = ["in-person", "virtual", "both", "any"];
   
   const labels = {
     "in-person": "In Person",
     "virtual": "Virtual",
     "both": "Both",
-    "": "Any"
+    "any": "Any"
   };
   
   return (
@@ -35,7 +35,7 @@ const ServiceTypeFilter: React.FC<ServiceTypeFilterProps> = ({
       <div className="grid grid-cols-2 gap-2">
         {serviceTypes.map((type) => (
           <Card
-            key={type || "any"}
+            key={type}
             className={cn(
               "flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors",
               serviceTypeFilter === type 

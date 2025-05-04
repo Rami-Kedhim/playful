@@ -15,7 +15,7 @@ export const useFilterState = (): EscortFilterState & EscortFilterActions => {
   const [ageRange, setAgeRange] = useState<[number, number]>([21, 60]);
   const [ratingMin, setRatingMin] = useState(0);
   const [availableNow, setAvailableNow] = useState(false);
-  const [serviceTypeFilter, setServiceTypeFilter] = useState<"in-person" | "virtual" | "both" | "">("");
+  const [serviceTypeFilter, setServiceTypeFilter] = useState<"in-person" | "virtual" | "both" | "any" | "">("any");
   const [isLoading, setIsLoading] = useState(false);
   
   // Toggle service selection
@@ -75,7 +75,7 @@ export const useFilterState = (): EscortFilterState & EscortFilterActions => {
     setAgeRange([21, 60]);
     setRatingMin(0);
     setAvailableNow(false);
-    setServiceTypeFilter("");
+    setServiceTypeFilter("any");
   };
   
   return {
