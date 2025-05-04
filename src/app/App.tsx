@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { FavoritesProvider } from '@/contexts/FavoritesContext';
 import AppRoutes from './AppRoutes';
+import { WalletProvider } from '@/contexts/WalletContext'; 
 import { initializeSystem, shutdownSystem } from '@/core/engine';
 import { checkSystemStatus } from '@/utils/core';
 import { toast } from '@/components/ui/use-toast';
@@ -73,8 +74,10 @@ const App = () => {
     <BrowserRouter>
       <AuthProvider>
         <FavoritesProvider>
-          <AppRoutes />
-          <Toaster />
+          <WalletProvider>
+            <AppRoutes />
+            <Toaster />
+          </WalletProvider>
         </FavoritesProvider>
       </AuthProvider>
     </BrowserRouter>

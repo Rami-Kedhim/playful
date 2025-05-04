@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { useLocation, Link } from 'react-router-dom';
-import { Home, ChevronRight } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getBreadcrumbsFromPath } from '@/utils/navigationHelpers';
 
 interface BreadcrumbsProps {
   className?: string;
@@ -10,35 +11,40 @@ interface BreadcrumbsProps {
 
 const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ className }) => {
   const location = useLocation();
-  const pathnames = location.pathname.split('/').filter((x) => x);
+  const breadcrumbs = getBreadcrumbsFromPath(location.pathname);
+
+  if (breadcrumbs.length <= 1) {
+    return null;
+  }
 
   return (
-    <nav aria-label="breadcrumb" className={cn("flex items-center space-x-2 text-sm text-muted-foreground", className)}>
-      <Link to="/" className="flex items-center hover:text-foreground transition-colors">
-        <Home className="h-4 w-4 mr-1" />
-        <span className="sr-only sm:not-sr-only">Home</span>
-      </Link>
-      
-      {pathnames.map((name, index) => {
-        const routeTo = `/${pathnames.slice(0, index + 1).join('/')}`;
-        const isLast = index === pathnames.length - 1;
-        
-        return (
-          <React.Fragment key={routeTo}>
-            <ChevronRight className="h-4 w-4" />
-            <Link 
-              to={routeTo}
-              className={cn(
-                "hover:text-foreground transition-colors capitalize",
-                isLast ? "text-foreground font-medium" : ""
+    <nav className={cn('flex items-center text-sm text-muted-foreground', className)}>
+      <ol className="flex flex-wrap items-center space-x-2">
+        {breadcrumbs.map((breadcrumb, index) => {
+          const isLast = index === breadcrumbs.length - 1;
+          
+          return (
+            <li key={breadcrumb.path} className="flex items-center">
+              {index > 0 && (
+                <ChevronRight size={14} className="mx-1 text-muted-foreground" />
               )}
-              aria-current={isLast ? 'page' : undefined}
-            >
-              {name.replace(/-/g, ' ')}
-            </Link>
-          </React.Fragment>
-        );
-      })}
+              
+              {isLast ? (
+                <span className="font-medium text-foreground">
+                  {breadcrumb.label}
+                </span>
+              ) : (
+                <Link 
+                  to={breadcrumb.path} 
+                  className="hover:text-foreground transition-colors"
+                >
+                  {breadcrumb.label}
+                </Link>
+              )}
+            </li>
+          );
+        })}
+      </ol>
     </nav>
   );
 };

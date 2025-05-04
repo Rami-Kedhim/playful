@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import Header from '@/components/navigation/MainNavigation';
-import Footer from '@/components/navigation/Footer';
+import UnifiedHeader from '@/components/layout/UnifiedHeader';
+import UnifiedFooter from '@/components/layout/UnifiedFooter';
 import { cn } from '@/lib/utils';
 import Breadcrumbs from '@/components/navigation/Breadcrumbs';
 import { useAuth } from '@/hooks/auth';
@@ -20,6 +20,7 @@ export interface UnifiedLayoutProps {
   className?: string;
   requireAuth?: boolean;
   showAuthButton?: boolean;
+  simplified?: boolean;
 }
 
 /**
@@ -37,7 +38,8 @@ const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
   fullWidth = false,
   className,
   requireAuth = false,
-  showAuthButton = true
+  showAuthButton = true,
+  simplified = false
 }) => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
@@ -51,7 +53,7 @@ const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
 
   return (
     <div className={cn("flex min-h-screen flex-col bg-background", className)}>
-      {!hideHeader && <Header />}
+      {!hideHeader && <UnifiedHeader />}
       
       {(title || description || showBreadcrumbs) && (
         <div className="bg-background border-b border-border">
@@ -77,7 +79,7 @@ const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
         {children || <Outlet />}
       </main>
       
-      {!hideFooter && <Footer />}
+      {!hideFooter && <UnifiedFooter simplified={simplified} />}
     </div>
   );
 };

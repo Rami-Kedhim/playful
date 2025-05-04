@@ -3,8 +3,8 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import ServiceTypeIcon from './ServiceTypeIcon';
 
-// Update type definition to exclude "any" as a value
-export type ServiceTypeFilter = "" | "in-person" | "virtual" | "both";
+// Update type definition to include "any" as a value
+export type ServiceTypeFilter = "any" | "" | "in-person" | "virtual" | "both";
 
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
@@ -35,7 +35,8 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
       case "in-person": return "In Person";
       case "virtual": return "Virtual";
       case "both": return "Both Types";
-      default: return "";
+      case "any": return "Any Type";
+      default: return "Any Type";
     }
   };
   
@@ -44,6 +45,7 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
       case "in-person": return "blue";
       case "virtual": return "purple";
       case "both": return "green";
+      case "any": return "default";
       default: return "default";
     }
   };

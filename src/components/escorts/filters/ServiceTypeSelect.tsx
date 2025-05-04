@@ -27,7 +27,7 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
       {label && (
         <Label className="mb-2 block">{label}</Label>
       )}
-      <Select value={value || ""} onValueChange={(value) => onChange(value as ServiceTypeFilter)}>
+      <Select value={value} onValueChange={(value) => onChange(value as ServiceTypeFilter)}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select service type">
             {value && (
@@ -35,7 +35,8 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
                 <ServiceTypeIcon type={value} size={16} className="text-primary" />
                 {value === 'in-person' ? 'In Person' : 
                  value === 'virtual' ? 'Virtual' : 
-                 value === 'both' ? 'Both Types' : 'Any Type'}
+                 value === 'both' ? 'Both Types' : 
+                 value === 'any' ? 'Any Type' : 'Any Type'}
               </div>
             )}
             {!value && (
@@ -46,7 +47,7 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">
+          <SelectItem value="any">
             <div className="flex items-center gap-2">
               Any Type
             </div>

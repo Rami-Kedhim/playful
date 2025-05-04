@@ -1,115 +1,87 @@
 
-/**
- * System Health Checker Utilities
- * Used for checking the health of various UberEscorts core systems
- */
-
 import { hermes } from '@/core/Hermes';
 import { oxum } from '@/core/Oxum';
+import { orus } from '@/core/Orus';
 import { lucie } from '@/core/Lucie';
-import { uberCore } from '@/core/UberCore';
-
-export interface SystemHealthStatus {
-  operational: boolean;
-  overallHealth: number; // 0-100
-  subsystems: Record<string, SubsystemHealth>;
-  latency: number;
-  timestamp: string;
-}
-
-export interface SubsystemHealth {
-  status: 'operational' | 'degraded' | 'offline';
-  health: number; // 0-100
-  latency?: number;
-  message?: string;
-}
 
 /**
- * Check the health status of all core systems
+ * Checks the health of all UberEscorts core systems
  */
-export async function checkSystemStatus(): Promise<SystemHealthStatus> {
-  const startTime = performance.now();
-  
-  // Get status from each subsystem
-  const hermesStatus = hermes.getSystemStatus();
-  const oxumStatus = oxum.checkSystemStatus();
-  const lucieStatus = lucie.getSystemStatus();
-  const coreStatus = uberCore.checkSubsystemHealth();
-  
-  // Calculate health metrics from statuses
-  const hermesHealth = hermesStatus.status === 'operational' ? 100 : 
-                       hermesStatus.status === 'degraded' ? 50 : 0;
-  
-  const oxumHealth = oxumStatus.operational ? 100 : 50;
-  
-  const lucieHealth = Object.values(lucieStatus.modules).every(status => status === 'online') ? 100 :
-                      Object.values(lucieStatus.modules).some(status => status === 'offline') ? 20 : 60;
-  
-  const coreHealth = coreStatus.reduce((sum, item) => sum + item.health, 0) / coreStatus.length;
-  
-  // Calculate overall health score (weighted average)
-  const overallHealth = Math.round((
-    hermesHealth * 0.3 + 
-    oxumHealth * 0.3 + 
-    lucieHealth * 0.2 + 
-    coreHealth * 0.2
-  ));
-  
-  // Calculate latency
-  const endTime = performance.now();
-  const latency = Math.round(endTime - startTime);
-  
-  return {
-    operational: overallHealth > 50,
-    overallHealth,
-    subsystems: {
-      hermes: {
-        status: hermesStatus.status === 'operational' ? 'operational' : 'degraded',
-        health: hermesHealth
-      },
-      oxum: {
-        status: oxumStatus.operational ? 'operational' : 'degraded',
-        health: oxumHealth
-      },
-      lucie: {
-        status: lucieHealth > 80 ? 'operational' : lucieHealth > 30 ? 'degraded' : 'offline',
-        health: lucieHealth
-      },
-      core: {
-        status: coreHealth > 80 ? 'operational' : coreHealth > 30 ? 'degraded' : 'offline',
-        health: coreHealth
+export async function checkSystemHealth() {
+  try {
+    // Check the status of all core systems
+    const hermesStatus = hermes.getSystemStatus();
+    const oxumStatus = oxum.checkSystemStatus();
+    const orusIntegrity = orus.checkIntegrity();
+    const lucieStatus = lucie.getSystemStatus();
+    
+    // Calculate system health percentages
+    const hermesHealth = hermesStatus.status === 'operational' ? 100 : 50;
+    const oxumHealth = oxumStatus.operational ? 100 : 60;
+    const orusHealth = orusIntegrity.isValid ? 100 : 40;
+    
+    // Calculate Lucie health based on its modules
+    const lucieModules = Object.values(lucieStatus.modules);
+    const lucieOnlineModules = lucieModules.filter(status => status === 'online').length;
+    const lucieHealth = Math.round((lucieOnlineModules / lucieModules.length) * 100);
+    
+    // Calculate overall health as weighted average
+    const overallHealth = Math.round(
+      (hermesHealth * 0.3) + 
+      (oxumHealth * 0.3) + 
+      (orusHealth * 0.2) + 
+      (lucieHealth * 0.2)
+    );
+    
+    return {
+      overall: overallHealth,
+      systems: {
+        hermes: { health: hermesHealth, status: hermesStatus.status },
+        oxum: { health: oxumHealth, status: oxumStatus.operational ? 'operational' : 'degraded' },
+        orus: { health: orusHealth, status: orusIntegrity.isValid ? 'secure' : 'compromised' },
+        lucie: { 
+          health: lucieHealth, 
+          status: lucieHealth > 80 ? 'operational' : lucieHealth > 50 ? 'partially degraded' : 'offline'
+        }
       }
-    },
-    latency,
-    timestamp: new Date().toISOString()
-  };
+    };
+  } catch (error) {
+    console.error('Error checking system health:', error);
+    return {
+      overall: 0,
+      systems: {
+        hermes: { health: 0, status: 'error' },
+        oxum: { health: 0, status: 'error' },
+        orus: { health: 0, status: 'error' },
+        lucie: { health: 0, status: 'error' }
+      }
+    };
+  }
 }
 
 /**
  * Check if a specific subsystem is operational
  */
-export function isSubsystemOperational(subsystemName: string): boolean {
-  switch (subsystemName.toLowerCase()) {
-    case 'hermes':
-      return hermes.getSystemStatus().status === 'operational';
-    case 'oxum':
-      return oxum.checkSystemStatus().operational;
-    case 'lucie': 
-      return Object.values(lucie.getSystemStatus().modules).every(status => status === 'online');
-    case 'core':
-      return uberCore.getSystemStatus().status === 'operational';
-    default:
-      return false;
+export function isSubsystemOperational(subsystem: 'hermes' | 'oxum' | 'orus' | 'lucie'): boolean {
+  try {
+    switch (subsystem) {
+      case 'hermes':
+        return hermes.getSystemStatus().status === 'operational';
+      case 'oxum':
+        return oxum.checkSystemStatus().operational;
+      case 'orus':
+        return orus.checkIntegrity().isValid;
+      case 'lucie': {
+        const lucieStatus = lucie.getSystemStatus();
+        const lucieModules = Object.values(lucieStatus.modules);
+        const lucieOnlineModules = lucieModules.filter(status => status === 'online').length;
+        return (lucieOnlineModules / lucieModules.length) > 0.7; // Consider operational if >70% of modules are online
+      }
+      default:
+        return false;
+    }
+  } catch (error) {
+    console.error(`Error checking ${subsystem} status:`, error);
+    return false;
   }
-}
-
-/**
- * Format a health percentage for display
- */
-export function formatHealthPercentage(health: number): string {
-  if (health >= 90) return `${health}% (Excellent)`;
-  if (health >= 70) return `${health}% (Good)`;
-  if (health >= 50) return `${health}% (Fair)`;
-  if (health >= 30) return `${health}% (Poor)`;
-  return `${health}% (Critical)`;
 }

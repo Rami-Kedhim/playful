@@ -2,7 +2,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { routes as routeConfig } from '@/routes/routeConfig.tsx';
-import { UnifiedLayout } from '@/layouts';
+import UnifiedLayout from '@/layouts/UnifiedLayout';
 import AuthPage from '@/pages/AuthPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import AuthGuard from '@/components/auth/AuthGuard';
@@ -10,8 +10,12 @@ import AuthGuard from '@/components/auth/AuthGuard';
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Auth route outside the main layout */}
-      <Route path="/auth" element={<AuthPage />} />
+      {/* Auth route with simplified layout */}
+      <Route path="/auth" element={
+        <UnifiedLayout hideFooter simplified>
+          <AuthPage />
+        </UnifiedLayout>
+      } />
       
       {/* Main route with UnifiedLayout */}
       <Route element={<UnifiedLayout />}>

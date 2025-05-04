@@ -35,7 +35,7 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
       let filtersApplied = false;
       
       // Only apply filters that actually exist in the URL
-      if (serviceType && ['in-person', 'virtual', 'both', ''].includes(serviceType)) {
+      if (serviceType && ['any', 'in-person', 'virtual', 'both', ''].includes(serviceType)) {
         filterState.setServiceTypeFilter(serviceType);
         filtersApplied = true;
       }

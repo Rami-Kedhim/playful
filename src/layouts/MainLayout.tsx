@@ -1,7 +1,7 @@
 
 import React, { ReactNode } from 'react';
-import MainNavigation from '@/components/navigation/MainNavigation';
-import Footer from '@/components/navigation/Footer';
+import UnifiedHeader from '@/components/layout/UnifiedHeader';
+import UnifiedFooter from '@/components/layout/UnifiedFooter';
 import { cn } from '@/lib/utils';
 import Breadcrumbs from '@/components/navigation/Breadcrumbs';
 
@@ -10,11 +10,12 @@ interface MainLayoutProps {
   title?: string;
   description?: string;
   containerClass?: string;
-  hideNavbar?: boolean;
+  hideHeader?: boolean;
   hideFooter?: boolean;
   fullWidth?: boolean;
   className?: string;
   showBreadcrumbs?: boolean;
+  simplified?: boolean;
 }
 
 /**
@@ -25,15 +26,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   title,
   description,
   containerClass = "container mx-auto px-4 py-6",
-  hideNavbar = false,
+  hideHeader = false,
   hideFooter = false,
   fullWidth = false,
   className,
-  showBreadcrumbs = false
+  showBreadcrumbs = false,
+  simplified = false
 }) => {
   return (
     <div className={cn("flex min-h-screen flex-col bg-background", className)}>
-      {!hideNavbar && <MainNavigation />}
+      {!hideHeader && <UnifiedHeader />}
       
       {(title || description) && (
         <header className="bg-background border-b border-border">
@@ -54,7 +56,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         {children}
       </main>
       
-      {!hideFooter && <Footer />}
+      {!hideFooter && <UnifiedFooter simplified={simplified} />}
     </div>
   );
 };

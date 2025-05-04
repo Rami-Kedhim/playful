@@ -1,172 +1,109 @@
 
-import { useState, useEffect, useCallback, useMemo } from "react";
-import useFilterResults from "@/hooks/escort-filters/useFilterResults";
-import { Escort } from "@/types/Escort";
-import { ServiceTypeFilter } from "@/components/escorts/filters/ServiceTypeBadgeLabel";
+import { useCallback, useState } from 'react';
+import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
+import { Escort } from '@/types/Escort';
 
 interface UseEscortFilterProps {
   escorts: Escort[];
 }
 
 export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
-  // Filter state
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
-  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(false);
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<string>("featured");
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [serviceTypeFilter, setServiceTypeFilter] = useState<ServiceTypeFilter>("any");
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [availableNow, setAvailableNow] = useState(false);
+  const [location, setLocation] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [ratingMin, setRatingMin] = useState(0);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   
-  // New filter states
-  const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
-  const [selectedOrientations, setSelectedOrientations] = useState<string[]>([]);
-  const [ageRange, setAgeRange] = useState<[number, number]>([21, 50]);
-  const [ratingMin, setRatingMin] = useState<number>(0);
-  const [availableNow, setAvailableNow] = useState<boolean>(false);
-  const [serviceTypeFilter, setServiceTypeFilter] = useState<ServiceTypeFilter>("");
-  
-  // Combined filter state for useFilterResults hook - memoize to prevent recreating on each render
-  const filters = useMemo(() => ({
-    searchQuery,
-    location,
-    priceRange,
-    verifiedOnly,
-    selectedServices,
-    sortBy,
-    selectedGenders,
-    selectedOrientations,
-    ageRange,
-    ratingMin,
-    availableNow,
+  // Filter escorts based on the current filter state
+  const filteredEscorts = useCallback(() => {
+    return escorts.filter(escort => {
+      // Filter by service type
+      if (serviceTypeFilter && serviceTypeFilter !== "any" && serviceTypeFilter !== "") {
+        if (!escort.serviceType || escort.serviceType !== serviceTypeFilter) {
+          return false;
+        }
+      }
+      
+      // Filter by verified status
+      if (verifiedOnly && (!escort.isVerified && !escort.verified)) {
+        return false;
+      }
+      
+      // Filter by availability
+      if (availableNow && !escort.availableNow) {
+        return false;
+      }
+      
+      // Filter by location
+      if (location && (!escort.location || !escort.location.toLowerCase().includes(location.toLowerCase()))) {
+        return false;
+      }
+      
+      // Filter by search query (name or description)
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const nameMatch = escort.name?.toLowerCase().includes(query);
+        const descMatch = escort.description?.toLowerCase().includes(query);
+        if (!nameMatch && !descMatch) {
+          return false;
+        }
+      }
+      
+      // Filter by rating
+      if (ratingMin > 0 && (!escort.rating || escort.rating < ratingMin)) {
+        return false;
+      }
+      
+      // Filter by price range
+      if (priceRange[0] > 0 || priceRange[1] < 1000) {
+        const escortPrice = escort.price || 0;
+        if (escortPrice < priceRange[0] || escortPrice > priceRange[1]) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  }, [
+    escorts,
     serviceTypeFilter,
-    currentPage
-  }), [
-    searchQuery,
-    location,
-    priceRange,
     verifiedOnly,
-    selectedServices,
-    sortBy,
-    selectedGenders,
-    selectedOrientations,
-    ageRange,
-    ratingMin,
     availableNow,
-    serviceTypeFilter,
-    currentPage
+    location,
+    searchQuery,
+    ratingMin,
+    priceRange
   ]);
   
-  // Get filtered, sorted, and paginated escorts
-  const { 
-    filteredEscorts, 
-    sortedEscorts,
-    paginatedEscorts, 
-    totalPages,
-    isFiltering 
-  } = useFilterResults(escorts, filters, currentPage, setCurrentPage);
-  
-  // Sync loading state
-  useEffect(() => {
-    setIsLoading(isFiltering);
-  }, [isFiltering]);
-  
-  // Handler functions wrapped with useCallback
-  const handlePriceRangeChange = useCallback((values: number[]) => {
-    setPriceRange([values[0], values[1]]);
-  }, []);
-  
-  const handleAgeRangeChange = useCallback((values: number[]) => {
-    setAgeRange([values[0], values[1]]);
-  }, []);
-  
-  const toggleService = useCallback((service: string) => {
-    setSelectedServices(prev => 
-      prev.includes(service)
-        ? prev.filter(item => item !== service)
-        : [...prev, service]
-    );
-  }, []);
-  
-  const toggleGender = useCallback((gender: string) => {
-    setSelectedGenders(prev => 
-      prev.includes(gender)
-        ? prev.filter(item => item !== gender)
-        : [...prev, gender]
-    );
-  }, []);
-  
-  const toggleOrientation = useCallback((orientation: string) => {
-    setSelectedOrientations(prev => 
-      prev.includes(orientation)
-        ? prev.filter(item => item !== orientation)
-        : [...prev, orientation]
-    );
-  }, []);
-  
-  const clearFilters = useCallback(() => {
-    setSearchQuery("");
-    setLocation("");
-    setPriceRange([0, 500]);
+  // Reset all filters to their default values
+  const resetFilters = useCallback(() => {
+    setServiceTypeFilter("any");
     setVerifiedOnly(false);
-    setSelectedServices([]);
-    setSortBy("featured");
-    setCurrentPage(1);
-    setSelectedGenders([]);
-    setSelectedOrientations([]);
-    setAgeRange([21, 50]);
-    setRatingMin(0);
     setAvailableNow(false);
-    setServiceTypeFilter("");
+    setLocation('');
+    setSearchQuery('');
+    setRatingMin(0);
+    setPriceRange([0, 1000]);
   }, []);
   
-  // Return the filter state and handlers as a single object
   return {
-    // Filter state
-    searchQuery,
-    location,
-    priceRange,
-    verifiedOnly,
-    selectedServices,
-    sortBy,
-    currentPage,
-    selectedGenders,
-    selectedOrientations,
-    ageRange,
-    ratingMin,
-    availableNow,
     serviceTypeFilter,
-    isLoading,
-    
-    // Filter actions - with stable references
-    setSearchQuery: useCallback((query: string) => setSearchQuery(query), []),
-    setLocation: useCallback((loc: string) => setLocation(loc), []),
-    setPriceRange: useCallback((range: [number, number]) => setPriceRange(range), []),
-    handlePriceRangeChange,
-    setVerifiedOnly: useCallback((verified: boolean) => setVerifiedOnly(verified), []),
-    setSelectedServices: useCallback((services: string[]) => setSelectedServices(services), []),
-    toggleService,
-    setSortBy: useCallback((sort: string) => setSortBy(sort), []),
-    setCurrentPage: useCallback((page: number) => setCurrentPage(page), []),
-    setSelectedGenders: useCallback((genders: string[]) => setSelectedGenders(genders), []),
-    toggleGender,
-    setSelectedOrientations: useCallback((orientations: string[]) => setSelectedOrientations(orientations), []),
-    toggleOrientation,
-    setAgeRange: useCallback((range: [number, number]) => setAgeRange(range), []),
-    handleAgeRangeChange,
-    setRatingMin: useCallback((rating: number) => setRatingMin(rating), []),
-    setAvailableNow: useCallback((available: boolean) => setAvailableNow(available), []),
-    setServiceTypeFilter: useCallback((type: ServiceTypeFilter) => setServiceTypeFilter(type), []),
-    setIsLoading: useCallback((loading: boolean) => setIsLoading(loading), []),
-    clearFilters,
-    
-    // Filter results
+    setServiceTypeFilter,
+    verifiedOnly,
+    setVerifiedOnly,
+    availableNow,
+    setAvailableNow,
+    location,
+    setLocation,
+    searchQuery,
+    setSearchQuery,
+    ratingMin,
+    setRatingMin,
+    priceRange,
+    setPriceRange,
     filteredEscorts,
-    sortedEscorts,
-    paginatedEscorts,
-    totalPages
+    resetFilters,
   };
 };
-
-export default useEscortFilter;

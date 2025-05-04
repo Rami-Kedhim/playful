@@ -6,7 +6,5 @@ import type { UnifiedLayoutProps } from './UnifiedLayout';
 export { MainLayout, UnifiedLayout };
 export type { UnifiedLayoutProps };
 
-// Export a default Layout that aligns with MainLayout for easier imports
-export const Layout = MainLayout;
-
-export default MainLayout;
+// Export UnifiedLayout as the default layout for consistency
+export default UnifiedLayout;
