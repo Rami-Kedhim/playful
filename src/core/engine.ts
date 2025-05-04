@@ -3,12 +3,7 @@ import { hermes } from '@/core/Hermes';
 import { oxum } from '@/core/Oxum';
 import { orus } from '@/core/Orus';
 import { lucie } from '@/core/Lucie';
-
-interface SystemStatus {
-  operational: boolean;
-  messageLength?: number;
-  latency?: number;
-}
+import { SystemStatus } from '@/types/core-systems';
 
 /**
  * Initialize the UberEscorts core systems

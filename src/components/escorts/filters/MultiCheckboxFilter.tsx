@@ -2,11 +2,7 @@
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-
-interface Option {
-  value: string;
-  label: string;
-}
+import { Option } from '@/types/core-systems';
 
 interface MultiCheckboxFilterProps {
   title: string;
@@ -15,7 +11,7 @@ interface MultiCheckboxFilterProps {
   onChange: (values: string[]) => void;
 }
 
-const MultiCheckboxFilter: React.FC<MultiCheckboxFilterProps> = ({
+export const MultiCheckboxFilter: React.FC<MultiCheckboxFilterProps> = ({
   title,
   options,
   selectedValues,

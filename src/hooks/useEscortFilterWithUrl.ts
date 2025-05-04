@@ -1,20 +1,20 @@
 
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useEscortFilter } from '@/hooks/useEscortFilter';
 import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 import { Escort } from '@/types/Escort';
 
 interface UseEscortFilterWithUrlProps {
-  escorts: Escort[];
+  escorts?: Escort[];
 }
 
-export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps) => {
+export const useEscortFilterWithUrl = (props?: UseEscortFilterWithUrlProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const updatingUrlRef = useRef(false);
   const filterUpdateFromUrlRef = useRef(false);
-  const filterState = useEscortFilter({ escorts });
+  const filterState = useEscortFilter(props);
   
   // Load filters from URL on mount only once
   useEffect(() => {
@@ -95,7 +95,7 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
       params.delete('rating');
       
       // Only set parameters for active filters
-      if (filterState.serviceTypeFilter) {
+      if (filterState.serviceTypeFilter && filterState.serviceTypeFilter !== 'any') {
         params.set('serviceType', filterState.serviceTypeFilter);
       }
       
@@ -115,6 +115,7 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
         params.set('q', filterState.searchQuery);
       }
       
+      // Use ratingMin if available in the filter state
       if (filterState.ratingMin > 0) {
         params.set('rating', filterState.ratingMin.toString());
       }
@@ -132,12 +133,7 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
       updatingUrlRef.current = false;
     }
   }, [
-    filterState.serviceTypeFilter,
-    filterState.verifiedOnly,
-    filterState.availableNow,
-    filterState.location,
-    filterState.searchQuery,
-    filterState.ratingMin,
+    filterState,
     setSearchParams,
     initialLoadComplete,
     searchParams

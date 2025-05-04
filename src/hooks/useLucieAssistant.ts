@@ -1,116 +1,94 @@
 
 import { useState, useCallback } from 'react';
-import { lucie, ModerateContentParams } from '@/core/Lucie';
-import { toast } from '@/components/ui/use-toast';
+import { v4 as uuidv4 } from 'uuid';
+import { lucie } from '@/core/Lucie';
+import { GenerateContentResult, Message, ModerateContentParams } from '@/types/core-systems';
 
-// Export the LucieMessage type for use in other components
-export interface LucieMessage {
-  id: string;
-  content: string;
-  role: 'user' | 'assistant';
-  timestamp: Date;
-}
-
-interface UseLucieAssistantOptions {
-  initialMessages?: LucieMessage[];
-}
-
-export function useLucieAssistant(options: UseLucieAssistantOptions = {}) {
-  const [messages, setMessages] = useState<LucieMessage[]>(options.initialMessages || []);
+export function useLucieAssistant(initialSystemPrompt: string = '') {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const [error, setError] = useState<string>('');
-  const [isOpen, setIsOpen] = useState(true);
-  const [context, setContext] = useState<Record<string, any>>({});
-  
-  const toggleChat = useCallback(() => {
-    setIsOpen(prev => !prev);
+  const [error, setError] = useState<string | null>(null);
+  const [systemPrompt, setSystemPrompt] = useState(initialSystemPrompt);
+
+  const updateSystemPrompt = useCallback((newPrompt: string) => {
+    setSystemPrompt(newPrompt);
   }, []);
+
+  const addUserMessage = useCallback((text: string) => {
+    const userMessage: Message = {
+      id: uuidv4(),
+      text,
+      sender: 'user',
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
+    return userMessage;
+  }, []);
+
+  const addAIMessage = useCallback((text: string) => {
+    const aiMessage: Message = {
+      id: uuidv4(),
+      text,
+      sender: 'ai',
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, aiMessage]);
+    return aiMessage;
+  }, []);
+
+  const sendMessage = useCallback(async (text: string, options?: Record<string, any>) => {
+    if (!text.trim()) return null;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Add user message
+      addUserMessage(text);
+      
+      // Moderate content
+      const moderationResult = await lucie.moderateContent({
+        content: text,
+        contentType: 'text'
+      });
+      
+      if (!moderationResult.safe) {
+        const safetyMessage = "I'm sorry, I can't respond to that type of content. Let's talk about something else.";
+        addAIMessage(safetyMessage);
+        return safetyMessage;
+      }
+      
+      // Generate response
+      const response = await lucie.generateContent(text, options);
+      
+      // Add AI response
+      addAIMessage(response.content);
+      return response.content;
+    } catch (err: any) {
+      const errorMessage = err?.message || 'An error occurred while processing your message.';
+      setError(errorMessage);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [addUserMessage, addAIMessage]);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
   }, []);
 
-  const updateContext = useCallback((newContext: Record<string, any>) => {
-    setContext(prev => ({ ...prev, ...newContext }));
-  }, []);
-
-  const sendMessage = useCallback(async (content: string) => {
-    if (!content.trim()) return;
-    
-    const userMessage: LucieMessage = {
-      id: Date.now().toString(),
-      content,
-      role: 'user',
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
-    setIsLoading(true);
-    setIsTyping(true);
-    setError('');
-    
-    try {
-      // First check content moderation
-      const moderationParams: ModerateContentParams = {
-        content: content,
-        contentType: 'text'
-      };
-      
-      const moderationResult = await lucie.moderateContent(moderationParams);
-      
-      if (!moderationResult.safe) {
-        const rejectionMessage: LucieMessage = {
-          id: `lucie-${Date.now()}`,
-          content: "I'm sorry, but I cannot respond to that type of content.",
-          role: 'assistant',
-          timestamp: new Date()
-        };
-        
-        setMessages(prev => [...prev, rejectionMessage]);
-        toast({
-          variant: "destructive",
-          title: "Content moderation",
-          description: "Your message was flagged by our content filter."
-        });
-        return;
-      }
-      
-      // Generate AI response
-      const response = await lucie.generateContent(content);
-      
-      const assistantMessage: LucieMessage = {
-        id: `lucie-${Date.now()}`,
-        content: response,
-        role: 'assistant',
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (err: any) {
-      setError(err.message || 'Failed to get response');
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to get a response from the assistant."
-      });
-    } finally {
-      setIsLoading(false);
-      setIsTyping(false);
-    }
-  }, []);
-  
   return {
     messages,
     isLoading,
-    isTyping,
     error,
-    context,
-    isOpen,
-    toggleChat,
+    systemPrompt,
     sendMessage,
-    clearMessages,
-    updateContext
+    addUserMessage,
+    addAIMessage,
+    updateSystemPrompt,
+    clearMessages
   };
 }
 

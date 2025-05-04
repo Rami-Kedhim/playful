@@ -1,74 +1,59 @@
 
-import { ReactNode } from "react";
-import { Separator } from "@/components/ui/separator";
-import Layout from "@/components/layout/Layout";
-import { cn } from "@/lib/utils";
+import React, { ReactNode } from 'react';
+import { MainLayout } from '@/layouts/MainLayout';
+import { LivecamDetailSidebar } from './LivecamDetailSidebar';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-export interface LivecamDetailLayoutProps {
-  sidebar: ReactNode;
-  mainContent: ReactNode;
-  chatContent?: ReactNode;
-  title?: ReactNode;
-  fullWidth?: boolean;
-  containerClass?: string;
-  hideNavbar?: boolean;
-  hideFooter?: boolean;
+interface LivecamDetailLayoutProps {
+  children: ReactNode;
+  livecamId: string;
+  username: string;
+  avatarUrl?: string;
+  isOnline?: boolean;
+  viewerCount?: number;
+  streamTitle?: string;
 }
 
-/**
- * LivecamDetailLayout provides a specialized layout for livecam detail pages
- * with a main content area, customizable sidebar, and optional chat panel.
- * It extends the Layout for consistency with the rest of the application.
- */
-const LivecamDetailLayout = ({ 
-  sidebar, 
-  mainContent, 
-  chatContent, 
-  title,
-  fullWidth = false,
-  containerClass = "container mx-auto px-4 py-8",
-  hideNavbar = false,
-  hideFooter = false
-}: LivecamDetailLayoutProps) => {
+export const LivecamDetailLayout: React.FC<LivecamDetailLayoutProps> = ({
+  children,
+  livecamId,
+  username,
+  avatarUrl,
+  isOnline = false,
+  viewerCount = 0,
+  streamTitle,
+}) => {
   return (
-    <Layout 
-      containerClass={containerClass}
-      hideNavbar={hideNavbar}
-      hideFooter={hideFooter}
+    <MainLayout
+      containerClass="container-fluid p-0 max-w-none"
+      showNavigation={false}
     >
-      {title && <div className="mb-6">{title}</div>}
-      
-      <div className={cn(
-        "grid grid-cols-1 lg:grid-cols-12 gap-8",
-        fullWidth ? "w-full" : "max-w-full"
-      )}>
-        {/* Main content area - video stream and information */}
-        <div className="lg:col-span-6 xl:col-span-7 order-2 lg:order-1">
-          {mainContent}
-        </div>
-        
-        {/* Chat area - only visible on larger screens by default */}
-        {chatContent && (
-          <div className="lg:col-span-3 xl:col-span-3 order-3 lg:order-2 hidden lg:block">
-            {chatContent}
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] h-[calc(100vh-65px)]">
+        {/* Main content area */}
+        <div className="relative bg-black flex flex-col">
+          <div className="p-2 bg-black/60 absolute top-0 left-0 z-10">
+            <Link to="/livecams">
+              <Button variant="ghost" size="icon" className="text-white">
+                <ChevronLeft />
+              </Button>
+            </Link>
           </div>
-        )}
-        
-        {/* Sidebar - information and actions */}
-        <div className="lg:col-span-3 xl:col-span-2 order-1 lg:order-3">
-          {sidebar}
+          {children}
         </div>
-        
-        {/* Mobile chat - only visible on smaller screens */}
-        {chatContent && (
-          <div className="col-span-1 order-4 block lg:hidden">
-            {chatContent}
-          </div>
-        )}
+
+        {/* Sidebar */}
+        <LivecamDetailSidebar
+          livecamId={livecamId}
+          username={username}
+          avatarUrl={avatarUrl}
+          isOnline={isOnline}
+          viewerCount={viewerCount}
+          streamTitle={streamTitle}
+        />
       </div>
-      
-      <Separator className="my-8" />
-    </Layout>
+    </MainLayout>
   );
 };
 

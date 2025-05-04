@@ -9,7 +9,7 @@ export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | 'any' | '';
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
   showIcon?: boolean;
-  color?: 'default' | 'primary' | 'secondary' | 'outline';
+  color?: 'default' | 'secondary' | 'outline' | 'destructive' | 'success' | 'warning' | 'ubx';
   size?: 'sm' | 'default' | 'lg';
 }
 

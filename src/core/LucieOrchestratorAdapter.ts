@@ -1,95 +1,99 @@
 
-import { lucie, ModerateContentParams, ModerateContentResult, GenerateContentResult } from './Lucie';
+import { lucie } from '@/core/Lucie';
+import { 
+  GenerateContentResult, 
+  ModerateContentParams, 
+  ModerateContentResult, 
+  SentimentAnalysisResult 
+} from '@/types/core-systems';
 
-// Define types for the adapter
-interface ContentRequest {
-  prompt: string;
-  context?: {
-    userId?: string;
-    history?: string[];
-    preferences?: Record<string, any>;
-    [key: string]: any;
-  };
-}
-
-interface ModerationResult {
-  isApproved: boolean;
-  issues?: string[];
-  blockedCategories?: string[];
-}
-
+/**
+ * Adapter for the Lucie AI system to orchestrate calls and handle responses
+ */
 export class LucieOrchestratorAdapter {
-  async generateAIResponse(request: ContentRequest): Promise<string> {
+  /**
+   * Generate content with predefined error handling
+   */
+  async generateContent(prompt: string, options: Record<string, any> = {}): Promise<string> {
     try {
-      // Use the Lucie AI system to generate content
-      const result = await lucie.generateContent(request.prompt);
+      // Generate content using the Lucie system
+      const result: GenerateContentResult = await lucie.generateContent(prompt, options);
+      
+      // Extract the content string from the result
       return result.content;
-    } catch (error) {
-      console.error('Error in Lucie orchestrator generating content:', error);
-      return 'I encountered an error processing your request.';
+    } catch (error: any) {
+      console.error('Error generating content with Lucie:', error);
+      return `Sorry, I couldn't process that request. ${error.message || ''}`;
     }
   }
-
-  async analyzeSentiment(text: string): Promise<{ 
-    score: number; 
-    sentiment: 'positive' | 'negative' | 'neutral' 
-  }> {
-    try {
-      const result = await lucie.analyzeSentiment(text);
-      return {
-        score: result.score,
-        sentiment: result.sentiment
-      };
-    } catch (error) {
-      console.error('Error in Lucie sentiment analysis:', error);
-      return {
-        score: 0.5,
-        sentiment: 'neutral'
-      };
-    }
-  }
-
-  async moderateContent(content: string): Promise<ModerationResult> {
+  
+  /**
+   * Check if content passes moderation
+   */
+  async isSafeContent(content: string, contentType: 'text' | 'image' | 'video' = 'text'): Promise<boolean> {
     try {
       const params: ModerateContentParams = {
-        content: content,
-        contentType: 'text'
+        content,
+        contentType,
+        context: {}
       };
       
       const result: ModerateContentResult = await lucie.moderateContent(params);
+      return result.safe;
+    } catch (error) {
+      console.error('Error checking content safety:', error);
+      return false; // Default to unsafe if error occurs
+    }
+  }
+  
+  /**
+   * Get detailed moderation results
+   */
+  async getContentModerationDetails(content: string, contentType: 'text' | 'image' | 'video' = 'text'): Promise<ModerateContentResult> {
+    try {
+      const params: ModerateContentParams = {
+        content,
+        contentType,
+        context: {}
+      };
       
+      const result = await lucie.moderateContent(params);
+      
+      // Create a structured response with proper property access
       return {
-        isApproved: result.safe,
+        safe: result.safe,
+        score: result.score,
         issues: result.issues || [],
         blockedCategories: result.blockedCategories || []
       };
     } catch (error) {
-      console.error('Error in Lucie content moderation:', error);
+      console.error('Error in content moderation:', error);
       return {
-        isApproved: false,
-        issues: ['Moderation service unavailable'],
-        blockedCategories: ['error']
+        safe: false,
+        score: 1.0,
+        issues: ['Error processing moderation request'],
+        blockedCategories: []
       };
     }
   }
-
-  async getSystemHealth(): Promise<{
-    status: 'operational' | 'degraded' | 'offline';
-    components: Record<string, 'online' | 'offline' | 'degraded'>;
-  }> {
-    const status = lucie.getSystemStatus();
-    
-    // Calculate overall status
-    const componentArray = Object.values(status.modules);
-    const isFullyOperational = componentArray.every(s => s === 'online');
-    const isCompletelyOffline = componentArray.every(s => s === 'offline');
-    
-    return {
-      status: isFullyOperational ? 'operational' : 
-             isCompletelyOffline ? 'offline' : 'degraded',
-      components: status.modules
-    };
+  
+  /**
+   * Analyze sentiment of text
+   */
+  async analyzeSentiment(text: string): Promise<SentimentAnalysisResult> {
+    try {
+      return await lucie.analyzeSentiment(text);
+    } catch (error) {
+      console.error('Error analyzing sentiment:', error);
+      return {
+        score: 0,
+        sentiment: 'neutral',
+        confidence: 0
+      };
+    }
   }
 }
 
-export const lucieAdapter = new LucieOrchestratorAdapter();
+// Export singleton instance
+export const lucieOrchestrator = new LucieOrchestratorAdapter();
+export default lucieOrchestrator;

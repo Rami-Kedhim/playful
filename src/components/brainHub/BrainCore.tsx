@@ -1,93 +1,161 @@
 
 import React, { useState, useEffect } from 'react';
-import { neuralHub, brainHub } from '@/services/neural/HermesOxumBrainHub';
-import { lucie, ModerateContentParams } from '@/core/Lucie';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Brain, Activity, Zap, MessageCircle } from 'lucide-react';
+import { lucie } from '@/core/Lucie';
+import { ModerateContentParams } from '@/types/core-systems';
 
 interface BrainCoreProps {
-  initialRequestType: 'analysis' | 'generation' | 'moderation' | 'transformation';
-  inputData?: any;
-  onResult?: (result: any) => void;
+  onStatusUpdate?: (status: string) => void;
 }
 
-const BrainCore: React.FC<BrainCoreProps> = ({ 
-  initialRequestType, 
-  inputData = {},
-  onResult 
-}) => {
-  const [response, setResponse] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+const BrainCore: React.FC<BrainCoreProps> = ({ onStatusUpdate }) => {
+  const [systemHealth, setSystemHealth] = useState(85);
+  const [processingPower, setProcessingPower] = useState(72);
+  const [query, setQuery] = useState('');
+  const [response, setResponse] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      // Use the processRequest method with the correct structure
-      const requestData = {
-        type: initialRequestType,
-        data: inputData
+    // Simulate system health fluctuation
+    const healthInterval = setInterval(() => {
+      setSystemHealth(prevHealth => {
+        const newHealth = prevHealth + (Math.random() * 2 - 1);
+        return Math.max(70, Math.min(99, newHealth));
+      });
+    }, 5000);
+    
+    return () => clearInterval(healthInterval);
+  }, []);
+
+  const handleQuerySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+    
+    setIsProcessing(true);
+    if (onStatusUpdate) onStatusUpdate('Processing neural query...');
+    
+    try {
+      // First moderate the content
+      const moderationParams: ModerateContentParams = {
+        content: query,
+        contentType: 'text'
       };
-
-      try {
-        // Properly awaiting the Promise returned by processRequest
-        const result = await brainHub.processRequest(requestData);
-        
-        if (result.success) {
-          setResponse(JSON.stringify(result.data || "Success", null, 2));
-          if (onResult) {
-            onResult(result.data);
-          }
-        } else {
-          throw new Error(result.error || "Unknown error occurred");
-        }
-      } catch (error: any) {
-        console.error("Error processing request:", error);
-        setError(error.message || "Error processing request");
-        setResponse("Error processing request. See console for details.");
-      } finally {
-        setIsLoading(false);
+      
+      const moderation = await lucie.moderateContent(moderationParams);
+      
+      if (!moderation.safe) {
+        setResponse('Neural query rejected: Content violates system parameters.');
+        return;
       }
-    };
-
-    fetchData();
-  }, [initialRequestType, inputData, onResult]);
-
-  // Also log this interaction through Lucie for AI analysis
-  useEffect(() => {
-    const params: ModerateContentParams = {
-      content: `BrainCore component initialized with ${initialRequestType}`,
-      contentType: 'text'
-    };
-    lucie.moderateContent(params);
-  }, [initialRequestType]);
-
-  if (isLoading) {
-    return (
-      <div className="p-4 bg-muted rounded-md">
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-primary rounded-full animate-pulse"></div>
-          <p>Processing request...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 bg-destructive/10 text-destructive rounded-md">
-        <h3 className="font-medium">Error</h3>
-        <p>{error}</p>
-      </div>
-    );
-  }
+      
+      // Process the query if it passed moderation
+      const result = await lucie.generateContent(query);
+      setResponse(result.content);
+      
+      // Simulate system working hard
+      setProcessingPower(prev => Math.max(30, prev - 15));
+      setTimeout(() => {
+        setProcessingPower(prev => Math.min(95, prev + 25));
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Neural processing error:', error);
+      setResponse('Neural processing error detected. System unable to complete request.');
+    } finally {
+      setIsProcessing(false);
+      if (onStatusUpdate) onStatusUpdate('Idle');
+    }
+  };
 
   return (
-    <div className="p-4 bg-card rounded-md border">
-      <h3 className="font-medium mb-2">Response from BrainHub:</h3>
-      <pre className="bg-muted p-3 rounded text-sm overflow-auto max-h-60">
-        {response}
-      </pre>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center">
+            <Brain className="mr-2 h-5 w-5 text-primary" />
+            Neural Core Status
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div className="flex justify-between mb-1 items-center">
+                <span className="text-sm">System Health</span>
+                <Badge variant={systemHealth > 80 ? 'default' : 'destructive'}>
+                  {systemHealth.toFixed(1)}%
+                </Badge>
+              </div>
+              <Progress value={systemHealth} className="mb-4" />
+              
+              <div className="flex justify-between mb-1 items-center">
+                <span className="text-sm">Processing Power</span>
+                <Badge variant={processingPower > 50 ? 'default' : 'destructive'}>
+                  {processingPower.toFixed(1)}%
+                </Badge>
+              </div>
+              <Progress value={processingPower} className="mb-4" />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center text-sm">
+                  <Activity className="mr-2 h-4 w-4 text-green-500" />
+                  Neural Network
+                </span>
+                <Badge variant="outline">Online</Badge>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="flex items-center text-sm">
+                  <Zap className="mr-2 h-4 w-4 text-yellow-500" />
+                  Cognitive Matrix
+                </span>
+                <Badge variant="outline">Stable</Badge>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="flex items-center text-sm">
+                  <MessageCircle className="mr-2 h-4 w-4 text-blue-500" />
+                  Language Processing
+                </span>
+                <Badge variant="outline">Active</Badge>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle>Neural Interface</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleQuerySubmit} className="space-y-4">
+            <div className="flex space-x-2">
+              <Input
+                placeholder="Enter neural query..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                disabled={isProcessing}
+              />
+              <Button type="submit" disabled={isProcessing || !query.trim()}>
+                {isProcessing ? 'Processing...' : 'Process'}
+              </Button>
+            </div>
+            
+            {response && (
+              <div className="p-4 border rounded-md bg-muted/50 whitespace-pre-wrap">
+                {response}
+              </div>
+            )}
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };

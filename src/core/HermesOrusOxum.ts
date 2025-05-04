@@ -1,106 +1,117 @@
 
-/**
- * Integration layer for Hermes, Orus, and Oxum systems
- */
-
-import { hermes } from './Hermes';
-import { oxum } from './Oxum';
-import { orus } from './Orus';
+import { hermes } from '@/core/Hermes';
+import { oxum } from '@/core/Oxum';
+import { orus } from '@/core/Orus';
+import { lucie } from '@/core/Lucie';
 
 /**
- * HermesOrusOxum provides integration between core systems
+ * Initialize the UberEscorts core systems
  */
-export class HermesOrusOxumIntegration {
-  /**
-   * Run a complete ecosystem verification
-   */
-  validateEcosystem() {
-    // Verify Orus security integrity
-    const securityCheck = orus.checkIntegrity();
+export const initializeSystem = async (): Promise<boolean> => {
+  try {
+    console.info('Initializing core UberEscorts systems...');
     
-    // Check Hermes flow status
-    const flowCheck = hermes.getSystemStatus();
-    
-    // Check Oxum system status
-    const oxumCheck = oxum.checkSystemStatus();
-    
-    // Return combined status
-    return {
-      secure: securityCheck.isValid,
-      operational: flowCheck.status === 'operational' && oxumCheck.operational,
-      timestamp: new Date(),
-      details: {
-        security: securityCheck,
-        routing: flowCheck,
-        boost: oxumCheck
-      }
-    };
-  }
-  
-  /**
-   * Process user navigation with security validation
-   */
-  async processSecureNavigation(userId: string, source: string, destination: string) {
-    // Validate user session
-    const sessionValid = orus.validateSession(userId).isValid;
-    
-    if (!sessionValid) {
-      return { success: false, reason: 'Invalid session' };
+    // Stage 1: Verify security and system integrity
+    console.info('Stage 1: Verifying system integrity...');
+    const orusResult = orus.checkIntegrity();
+    if (!orusResult.isValid) {
+      console.error('Security integrity check failed:', orusResult.message);
+      return false;
     }
+    console.info('Orus security system initialized successfully');
     
-    // Track the navigation in Hermes
-    hermes.routeFlow({
-      source,
-      destination,
-      params: { userId }
-    });
+    // Stage 2: Initialize ranking and visibility systems
+    console.info('Stage 2: Initializing Oxum ranking algorithm...');
+    const oxumStatus = oxum.checkSystemStatus();
+    if (!oxumStatus.operational) {
+      console.error('Oxum initialization failed');
+      return false;
+    }
+    console.info('Oxum boost and ranking system initialized successfully');
     
-    return { success: true };
-  }
-  
-  /**
-   * Get optimal time window for visibility
-   */
-  getOptimalTimeWindow(): number {
-    // This would typically be determined by analytics
-    // Return a time (hour 0-23)
-    return 21; // 9 PM is typically a high traffic time
-  }
-  
-  /**
-   * Calculate time impact on visibility
-   */
-  calculateTimeImpact(currentHour: number, optimalHour: number): number {
-    // Calculate difference between current hour and optimal hour
-    const hourDiff = Math.min(
-      Math.abs(currentHour - optimalHour),
-      24 - Math.abs(currentHour - optimalHour)
+    // Stage 3: Initialize AI and analytics systems
+    console.info('Stage 3: Initializing Lucie AI systems...');
+    const lucieStatus = lucie.getSystemStatus();
+    const lucieOperational = Object.values(lucieStatus.modules).every(
+      status => status === 'online'
     );
     
-    // Calculate impact score (100 = perfect time, 0 = worst time)
-    return Math.max(0, Math.round(100 - (hourDiff * 10)));
+    if (!lucieOperational) {
+      console.warn('Lucie AI subsystems partially degraded:', 
+        Object.entries(lucieStatus.modules)
+          .filter(([_, status]) => status !== 'online')
+          .map(([name]) => name)
+          .join(', ')
+      );
+    } else {
+      console.info('Lucie AI systems initialized successfully');
+    }
+    
+    // Stage 4: Initialize analytics and tracking
+    console.info('Stage 4: Initializing Hermes analytics...');
+    await hermes.initialize();
+    const hermesStatus = hermes.getSystemStatus();
+    if (hermesStatus.status !== 'operational') {
+      console.warn('Hermes analytics partially degraded');
+    } else {
+      console.info('Hermes analytics initialized successfully');
+    }
+    
+    console.info('UberEscorts core systems initialized successfully');
+    return true;
+  } catch (error) {
+    console.error('Failed to initialize UberEscorts core systems:', error);
+    return false;
   }
-  
-  /**
-   * Get boost queue data
-   */
-  getBoostQueue(): any[] {
-    // Mock implementation
-    return Array(30).fill(null).map((_, i) => ({
-      profileId: `profile-${i + 1}`,
-      score: Math.floor(Math.random() * 100) + 1,
-      position: i + 1
-    }));
+};
+
+/**
+ * Gracefully shutdown the UberEscorts core systems
+ */
+export const shutdownSystem = (): void => {
+  try {
+    console.info('Shutting down UberEscorts core systems...');
+    
+    // Disconnect from Hermes analytics
+    hermes.disconnect();
+    
+    console.info('UberEscorts core systems shut down successfully');
+  } catch (error) {
+    console.error('Error during system shutdown:', error);
   }
-  
-  /**
-   * Record that a profile was viewed
-   */
-  recordProfileView(profileId: string): void {
-    console.log(`Recording profile view for ${profileId}`);
-    // In a real system, this would update analytics
-  }
+};
+
+/**
+ * Track user flow between pages
+ */
+export function trackNavigation(source: string, destination: string, userId: string) {
+  hermes.routeFlow({
+    source,
+    destination,
+    params: { userId, timestamp: new Date().toISOString() }
+  });
 }
 
-export const hermesOrusOxum = new HermesOrusOxumIntegration();
-export default hermesOrusOxum;
+/**
+ * Log an interaction in the system
+ */
+export function logInteraction(system: string, action: string, data?: any) {
+  const connectionId = `log-${Date.now()}`;
+  const timestamp = new Date().toISOString();
+  
+  hermes.connect({
+    system,
+    connectionId,
+    metadata: { action, timestamp },
+    userId: 'system'
+  });
+  
+  console.info(`[${system}] ${action}`, data);
+}
+
+export default {
+  initializeSystem,
+  shutdownSystem,
+  trackNavigation,
+  logInteraction
+};

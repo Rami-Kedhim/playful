@@ -3,8 +3,7 @@ import { hermes } from '@/core/Hermes';
 import { oxum } from '@/core/Oxum';
 import { orus } from '@/core/Orus';
 import { lucie } from '@/core/Lucie';
-// Fixing the import path to point to the correct location
-export * from '@/utils/core/systemHealthChecker';
+import { SystemStatus } from '@/types/core-systems';
 
 /**
  * Get the health status of core systems as a percentage
@@ -48,7 +47,7 @@ export function logInteraction(system: string, action: string, data?: any) {
     system,
     connectionId,
     metadata: { action, timestamp },
-    userId: 'system' // Adding required userId parameter
+    userId: 'system'
   });
   
   console.info(`[${system}] ${action}`, data);
@@ -106,3 +105,5 @@ export function calculateProfileVisibility(profileId: string) {
 export function getRecommendedAction(userId: string) {
   return hermes.recommendNextAction(userId);
 }
+
+export * from '@/utils/core/systemHealthChecker';

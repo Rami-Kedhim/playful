@@ -1,110 +1,189 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
+import ServiceTypeBadgeLabel from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 import ServiceTypeIcon from '@/components/escorts/filters/ServiceTypeIcon';
-import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
-import { Button } from '@/components/ui/button';
+import { MainLayout } from '@/layouts/MainLayout';
 
 const ServiceTypeDemo: React.FC = () => {
-  const [selectedType, setSelectedType] = useState<ServiceTypeFilter>("in-person");
-  
-  const serviceTypes: ServiceTypeFilter[] = ["in-person", "virtual", "both", "any"];
-  
-  const labels = {
-    "in-person": "In Person",
-    "virtual": "Virtual",
-    "both": "Both Types",
-    "any": "Any"
-  };
-  
   return (
-    <div className="container py-10">
-      <h1 className="text-3xl font-bold mb-6">Service Type Components Demo</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <MainLayout title="Service Type Components">
+      <div className="container mx-auto py-8 space-y-8">
         <Card>
           <CardHeader>
-            <CardTitle>ServiceTypeFilter Demo</CardTitle>
+            <CardTitle>Service Type Badge Label Component</CardTitle>
             <CardDescription>
-              Demonstrates the service type selection component
+              Used to display service type badges in various sizes and styles
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Label className="text-sm font-medium mb-2 block">Service Type</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {serviceTypes.map((type) => (
-                <Card
-                  key={type || "any"}
-                  className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors ${
-                    selectedType === type 
-                      ? "bg-primary/10 border-primary" 
-                      : "hover:bg-accent"
-                  }`}
-                  onClick={() => setSelectedType(type)}
-                >
-                  <ServiceTypeIcon 
-                    type={type}
-                    className={selectedType === type ? "text-primary" : ""}
-                  />
-                  <span>{labels[type]}</span>
-                </Card>
-              ))}
+            <div className="space-y-8">
+              <section>
+                <h3 className="text-base font-medium mb-4">Default Badges</h3>
+                <div className="flex flex-wrap gap-4">
+                  <ServiceTypeBadgeLabel type="in-person" />
+                  <ServiceTypeBadgeLabel type="virtual" />
+                  <ServiceTypeBadgeLabel type="both" />
+                  <ServiceTypeBadgeLabel type="any" />
+                </div>
+              </section>
+              
+              <section>
+                <h3 className="text-base font-medium mb-4">Size Variations</h3>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm mb-2">Small:</p>
+                    <div className="flex gap-2">
+                      <ServiceTypeBadgeLabel type="in-person" size="sm" />
+                      <ServiceTypeBadgeLabel type="virtual" size="sm" />
+                      <ServiceTypeBadgeLabel type="both" size="sm" />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm mb-2">Default:</p>
+                    <div className="flex gap-2">
+                      <ServiceTypeBadgeLabel type="in-person" />
+                      <ServiceTypeBadgeLabel type="virtual" />
+                      <ServiceTypeBadgeLabel type="both" />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm mb-2">Large:</p>
+                    <div className="flex gap-2">
+                      <ServiceTypeBadgeLabel type="in-person" size="lg" />
+                      <ServiceTypeBadgeLabel type="virtual" size="lg" />
+                      <ServiceTypeBadgeLabel type="both" size="lg" />
+                    </div>
+                  </div>
+                </div>
+              </section>
+              
+              <section>
+                <h3 className="text-base font-medium mb-4">Color Variations</h3>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm mb-2">Default:</p>
+                    <div className="flex gap-2">
+                      <ServiceTypeBadgeLabel type="in-person" />
+                      <ServiceTypeBadgeLabel type="virtual" />
+                      <ServiceTypeBadgeLabel type="both" />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm mb-2">Secondary:</p>
+                    <div className="flex gap-2">
+                      <ServiceTypeBadgeLabel type="in-person" color="secondary" />
+                      <ServiceTypeBadgeLabel type="virtual" color="secondary" />
+                      <ServiceTypeBadgeLabel type="both" color="secondary" />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm mb-2">Outline:</p>
+                    <div className="flex gap-2">
+                      <ServiceTypeBadgeLabel type="in-person" color="outline" />
+                      <ServiceTypeBadgeLabel type="virtual" color="outline" />
+                      <ServiceTypeBadgeLabel type="both" color="outline" />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm mb-2">Destructive:</p>
+                    <div className="flex gap-2">
+                      <ServiceTypeBadgeLabel type="in-person" color="destructive" />
+                      <ServiceTypeBadgeLabel type="virtual" color="destructive" />
+                      <ServiceTypeBadgeLabel type="both" color="destructive" />
+                    </div>
+                  </div>
+                </div>
+              </section>
+              
+              <section>
+                <h3 className="text-base font-medium mb-4">Without Icons</h3>
+                <div className="flex gap-2">
+                  <ServiceTypeBadgeLabel type="in-person" showIcon={false} />
+                  <ServiceTypeBadgeLabel type="virtual" showIcon={false} />
+                  <ServiceTypeBadgeLabel type="both" showIcon={false} />
+                </div>
+              </section>
             </div>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader>
-            <CardTitle>Service Type Icons Demo</CardTitle>
+            <CardTitle>Service Type Icon Component</CardTitle>
             <CardDescription>
-              Demonstrates the different service type icons
+              Individual icons representing service types
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="flex items-center gap-4">
-                <ServiceTypeIcon type="in-person" size={24} />
-                <span>In Person</span>
-              </div>
+            <div className="space-y-8">
+              <section>
+                <h3 className="text-base font-medium mb-4">Default Icons</h3>
+                <div className="flex gap-8">
+                  <div className="flex flex-col items-center gap-2">
+                    <ServiceTypeIcon type="in-person" size={24} />
+                    <span className="text-sm">In Person</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <ServiceTypeIcon type="virtual" size={24} />
+                    <span className="text-sm">Virtual</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <ServiceTypeIcon type="both" size={24} />
+                    <span className="text-sm">Both</span>
+                  </div>
+                </div>
+              </section>
               
-              <div className="flex items-center gap-4">
-                <ServiceTypeIcon type="virtual" size={24} />
-                <span>Virtual</span>
-              </div>
+              <section>
+                <h3 className="text-base font-medium mb-4">Colored Icons</h3>
+                <div className="flex gap-8">
+                  <div className="flex flex-col items-center gap-2">
+                    <ServiceTypeIcon type="in-person" size={24} variant="colored" />
+                    <span className="text-sm">In Person</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <ServiceTypeIcon type="virtual" size={24} variant="colored" />
+                    <span className="text-sm">Virtual</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <ServiceTypeIcon type="both" size={24} variant="colored" />
+                    <span className="text-sm">Both</span>
+                  </div>
+                </div>
+              </section>
               
-              <div className="flex items-center gap-4">
-                <ServiceTypeIcon type="both" size={24} />
-                <span>Both</span>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <ServiceTypeIcon type="any" size={24} />
-                <span>Any (No icon)</span>
-              </div>
-            </div>
-            
-            <div className="mt-6">
-              <h3 className="text-lg font-medium mb-4">Colored Icons</h3>
-              <div className="flex space-x-4">
-                <Button size="sm" variant="outline" className="gap-2">
-                  <ServiceTypeIcon type="in-person" size={16} variant="colored" />
-                  In Person
-                </Button>
-                <Button size="sm" variant="outline" className="gap-2">
-                  <ServiceTypeIcon type="virtual" size={16} variant="colored" />
-                  Virtual
-                </Button>
-                <Button size="sm" variant="outline" className="gap-2">
-                  <ServiceTypeIcon type="both" size={16} variant="colored" />
-                  Both
-                </Button>
-              </div>
+              <section>
+                <h3 className="text-base font-medium mb-4">Size Variations</h3>
+                <div className="flex items-center gap-8">
+                  <div className="flex flex-col items-center gap-2">
+                    <ServiceTypeIcon type="in-person" size={16} />
+                    <span className="text-xs">16px</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <ServiceTypeIcon type="in-person" size={24} />
+                    <span className="text-xs">24px</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <ServiceTypeIcon type="in-person" size={32} />
+                    <span className="text-xs">32px</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <ServiceTypeIcon type="in-person" size={48} />
+                    <span className="text-xs">48px</span>
+                  </div>
+                </div>
+              </section>
             </div>
           </CardContent>
         </Card>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

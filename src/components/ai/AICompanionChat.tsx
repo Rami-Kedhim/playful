@@ -1,9 +1,14 @@
 
-import React, { useState, useEffect } from 'react';
-import { lucie, ModerateContentParams, GenerateContentResult } from '@/core/Lucie';
-import { AICompanionChatProps } from './companion-chat/AICompanionChatProps';
+import React, { useState, useRef, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Send } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { lucie } from '@/core/Lucie';
+import { GenerateContentResult } from '@/types/core-systems';
 
-// Define message type with proper sender type
+// Update Message interface to properly handle GenerateContentResult
 interface Message {
   id: string;
   text: string;
@@ -11,149 +16,163 @@ interface Message {
   timestamp: Date;
 }
 
+interface AICompanionChatProps {
+  companionName?: string;
+  primaryColor?: string;
+  initialMessage?: string;
+}
+
 const AICompanionChat: React.FC<AICompanionChatProps> = ({
-  companionId,
-  name,
-  avatarUrl,
-  personalityType,
-  initialMessage = "Hi there! How can I assist you today?",
-  className = "",
-  userId,
-  userCredits,
-  onClose
+  companionName = 'AI Companion',
+  primaryColor = '#7c3aed',
+  initialMessage = "Hi there! I'm your AI companion. How can I assist you today?",
 }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState('');
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: uuidv4(),
+      text: initialMessage,
+      sender: 'ai',
+      timestamp: new Date(),
+    },
+  ]);
+  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Initialize chat with AI's greeting
   useEffect(() => {
-    if (initialMessage) {
-      setMessages([{
-        id: `ai-${Date.now()}`,
-        text: initialMessage,
-        sender: 'ai',
-        timestamp: new Date()
-      }]);
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
-  }, [initialMessage]);
+  }, [messages]);
 
-  // Function to handle sending messages
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+    if (!input.trim()) return;
 
+    // Add user message to chat
     const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      text: inputValue,
+      id: uuidv4(),
+      text: input.trim(),
       sender: 'user',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
+    setMessages((prev) => [...prev, userMessage]);
+    setInput('');
     setIsLoading(true);
 
     try {
-      // Check content moderation
-      const moderationParams: ModerateContentParams = {
-        content: inputValue,
-        contentType: 'text'
-      };
-      
-      const moderationResult = await lucie.moderateContent(moderationParams);
-      
+      // Moderate content before processing
+      const moderationResult = await lucie.moderateContent({
+        content: input.trim(),
+        contentType: 'text',
+      });
+
       if (!moderationResult.safe) {
-        // Handle inappropriate content
-        setMessages(prev => [...prev, {
-          id: `ai-${Date.now()}`,
-          text: "I'm sorry, but I cannot respond to that type of content.",
-          sender: 'ai',
-          timestamp: new Date()
-        }]);
+        // Handle unsafe content
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: uuidv4(),
+            text: "I'm sorry, I can't respond to that type of content. Let's talk about something else.",
+            sender: 'ai',
+            timestamp: new Date(),
+          },
+        ]);
         setIsLoading(false);
         return;
       }
 
-      // Generate AI response using the updated method name
-      const response = await lucie.generateContent(inputValue);
-
-      setMessages(prev => [...prev, {
-        id: `ai-${Date.now()}`,
-        text: response,
-        sender: 'ai',
-        timestamp: new Date()
-      }]);
+      // Generate AI response
+      const response = await lucie.generateContent(input.trim());
+      
+      // Add AI response to chat
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: uuidv4(),
+          text: response.content,
+          sender: 'ai',
+          timestamp: new Date(),
+        },
+      ]);
     } catch (error) {
       console.error('Error in AI response:', error);
-      setMessages(prev => [...prev, {
-        id: `ai-${Date.now()}`,
-        text: "I'm having trouble connecting. Please try again later.",
-        sender: 'ai',
-        timestamp: new Date()
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: uuidv4(),
+          text: "I'm sorry, I encountered an error. Please try again later.",
+          sender: 'ai',
+          timestamp: new Date(),
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className={`flex flex-col h-full border rounded-lg overflow-hidden ${className}`}>
-      <div className="bg-primary text-primary-foreground p-3">
-        <h3 className="text-lg font-medium">AI Companion Chat</h3>
+    <div className="flex flex-col h-full border rounded-lg overflow-hidden">
+      <div 
+        className="py-3 px-4 font-semibold border-b"
+        style={{ backgroundColor: primaryColor, color: 'white' }}
+      >
+        {companionName}
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map(message => (
-          <div 
-            key={message.id} 
-            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div 
-              className={`max-w-[80%] p-3 rounded-lg ${
-                message.sender === 'user' 
-                  ? 'bg-primary text-primary-foreground rounded-tr-none' 
-                  : 'bg-muted rounded-tl-none'
+      <ScrollArea className="flex-1 p-4">
+        <div ref={scrollAreaRef} className="space-y-4">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${
+                message.sender === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
-              <p>{message.text}</p>
-              <span className="text-xs opacity-70 block mt-1">
-                {message.timestamp.toLocaleTimeString()}
-              </span>
-            </div>
-          </div>
-        ))}
-        
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-muted p-3 rounded-lg rounded-tl-none">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+              <div
+                className={`max-w-[80%] rounded-lg p-3 ${
+                  message.sender === 'user'
+                    ? `bg-primary text-primary-foreground`
+                    : 'bg-muted'
+                }`}
+              >
+                {message.text}
               </div>
             </div>
-          </div>
-        )}
-      </div>
-      
-      <div className="border-t p-3">
-        <div className="flex space-x-2">
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            placeholder="Type your message..."
-            className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-          <button
-            onClick={handleSendMessage}
-            disabled={isLoading || !inputValue.trim()}
-            className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 disabled:opacity-50"
-          >
-            Send
-          </button>
+          ))}
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="max-w-[80%] rounded-lg p-3 bg-muted">
+                <div className="flex space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></div>
+                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
+      </ScrollArea>
+      
+      <div className="p-3 border-t flex gap-2">
+        <Textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a message..."
+          className="resize-none min-h-[50px]"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSendMessage();
+            }
+          }}
+        />
+        <Button
+          onClick={handleSendMessage}
+          disabled={isLoading || !input.trim()}
+          className="shrink-0"
+        >
+          <Send className="h-5 w-5" />
+        </Button>
       </div>
     </div>
   );

@@ -1,54 +1,92 @@
 
-import React, { useEffect } from 'react';
-import { useAuth } from '@/hooks/auth';
+import React, { useEffect, useState } from 'react';
 import { hermes } from '@/core/Hermes';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface MetaverseRoomProps {
   roomId: string;
-  isLoading?: boolean;
+  userId: string;
 }
 
-const MetaverseRoom: React.FC<MetaverseRoomProps> = ({
-  roomId,
-  isLoading = false
-}) => {
-  const { user } = useAuth();
-  const userId = user?.id || 'anonymous';
+const MetaverseRoom: React.FC<MetaverseRoomProps> = ({ roomId, userId }) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Track entry to the spatial flow
-    hermes.enterSpatialFlow(userId, roomId);
-    
-    // Track page view
-    hermes.trackPageView(userId, `/metaverse/room/${roomId}`, document.referrer, {
-      roomId,
-      entryMethod: 'direct',
-    });
-    
-    // Track event
-    hermes.trackEvent(userId, 'metaverse_room_entered', { roomId });
-    
-    // Cleanup on exit
-    return () => {
-      hermes.exitSpatialFlow(userId);
-      hermes.trackEvent(userId, 'metaverse_room_exited', { roomId });
+    const connectToRoom = async () => {
+      try {
+        setIsLoading(true);
+        
+        // This is a workaround since the enterSpatialFlow method doesn't exist yet
+        // We'll track it using the standard routeFlow method
+        hermes.routeFlow({
+          source: "metaverse-lobby",
+          destination: `metaverse-room-${roomId}`,
+          params: { userId, spaceId: roomId }
+        });
+        
+        // Simulate connection delay
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        setIsConnected(true);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Failed to connect to metaverse room:", error);
+        setIsConnected(false);
+        setIsLoading(false);
+      }
     };
-  }, [userId, roomId]);
+
+    connectToRoom();
+    
+    // Clean up function to track leaving the room
+    return () => {
+      hermes.routeFlow({
+        source: `metaverse-room-${roomId}`,
+        destination: "metaverse-lobby",
+        params: { userId }
+      });
+    };
+  }, [roomId, userId]);
 
   if (isLoading) {
     return (
-      <div className="w-full aspect-video bg-muted rounded-lg flex items-center justify-center">
-        <Skeleton className="h-full w-full rounded-lg" />
+      <div className="w-full h-96 flex items-center justify-center bg-muted">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4">Connecting to Metaverse Room #{roomId.substring(0, 6)}...</p>
+        </div>
       </div>
     );
   }
 
+  if (!isConnected) {
+    return (
+      <div className="w-full h-96 flex items-center justify-center bg-muted">
+        <div className="text-center">
+          <p className="text-red-500 font-semibold">Failed to connect to Metaverse Room</p>
+          <p className="mt-2 text-gray-600">Please try again later</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Placeholder for actual metaverse room rendering
   return (
-    <div className="w-full aspect-video bg-black/10 rounded-lg flex items-center justify-center">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold">Room: {roomId}</h2>
-        <p className="text-muted-foreground">Metaverse experience loading...</p>
+    <div className="w-full h-96 bg-gradient-to-b from-purple-900/40 to-indigo-900/40 rounded-lg overflow-hidden relative">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-xl font-bold mb-2">Metaverse Room #{roomId.substring(0, 6)}</h3>
+          <p>User #{userId.substring(0, 6)} connected</p>
+          <div className="mt-6 grid grid-cols-3 gap-4 max-w-md mx-auto">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <div 
+                key={i}
+                className="w-16 h-16 rounded-md bg-white/10 flex items-center justify-center"
+              >
+                <div className={`w-3 h-3 rounded-full ${i % 3 === 0 ? 'bg-green-400' : 'bg-gray-400'}`}></div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
