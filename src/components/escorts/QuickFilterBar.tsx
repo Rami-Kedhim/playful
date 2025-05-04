@@ -1,187 +1,113 @@
 
-import React, { useCallback, memo } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
-import { BadgeCheck, Clock, Map, Star, Tags } from 'lucide-react';
+import { 
+  Map, 
+  CheckCircle, 
+  Clock, 
+  SlidersHorizontal, 
+  Star
+} from 'lucide-react';
+import { Rating } from '@/components/ui/rating';
+import { ServiceTypeFilter } from './filters/ServiceTypeBadgeLabel';
+import ServiceTypeSelect from './filters/ServiceTypeSelect';
 
 interface QuickFilterBarProps {
   serviceTypeFilter: ServiceTypeFilter;
   setServiceTypeFilter: (type: ServiceTypeFilter) => void;
-  verifiedOnly?: boolean;
-  setVerifiedOnly?: (verified: boolean) => void;
-  availableNow?: boolean; 
-  setAvailableNow?: (available: boolean) => void;
-  location?: string;
-  onLocationClick?: () => void;
-  onShowMoreFilters?: () => void;
+  verifiedOnly: boolean;
+  setVerifiedOnly: (verified: boolean) => void;
+  availableNow: boolean;
+  setAvailableNow: (available: boolean) => void;
+  location: string;
+  onLocationClick: () => void;
+  onShowMoreFilters: () => void;
   className?: string;
-  ratingMin?: number;
-  setRatingMin?: (rating: number) => void;
+  ratingMin: number;
+  setRatingMin: (rating: number) => void;
 }
 
-/**
- * Horizontal scrollable bar with quick filters
- */
-const QuickFilterBar: React.FC<QuickFilterBarProps> = ({ 
+const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
   serviceTypeFilter,
   setServiceTypeFilter,
-  verifiedOnly = false,
+  verifiedOnly,
   setVerifiedOnly,
-  availableNow = false,
+  availableNow,
   setAvailableNow,
   location,
   onLocationClick,
   onShowMoreFilters,
-  className,
-  ratingMin = 0,
+  className = '',
+  ratingMin,
   setRatingMin
 }) => {
-  // Use memoized callback functions for all handlers to prevent re-renders
-  const handleTypeClick = useCallback((type: ServiceTypeFilter) => {
-    if (setServiceTypeFilter) {
-      setServiceTypeFilter(serviceTypeFilter === type ? '' : type);
-    }
-  }, [serviceTypeFilter, setServiceTypeFilter]);
-
-  // Use memoized callback for handling rating click
-  const handleRatingClick = useCallback(() => {
-    if (setRatingMin) {
-      setRatingMin(ratingMin > 0 ? 0 : 4);
-    }
-  }, [ratingMin, setRatingMin]);
-  
-  // Use memoized callback for handling verified toggle
-  const handleVerifiedClick = useCallback(() => {
-    if (setVerifiedOnly) {
-      setVerifiedOnly(!verifiedOnly);
-    }
-  }, [verifiedOnly, setVerifiedOnly]);
-  
-  // Use memoized callback for handling available toggle
-  const handleAvailableClick = useCallback(() => {
-    if (setAvailableNow) {
-      setAvailableNow(!availableNow);
-    }
-  }, [availableNow, setAvailableNow]);
-
-  // Handle location click with proper memoization
-  const handleLocationClick = useCallback(() => {
-    if (onLocationClick) {
-      onLocationClick();
-    }
-  }, [onLocationClick]);
-  
-  // Handle more filters click with proper memoization
-  const handleShowMoreFilters = useCallback(() => {
-    if (onShowMoreFilters) {
-      onShowMoreFilters();
-    }
-  }, [onShowMoreFilters]);
+  // Convert empty string to "any" for the select component
+  const displayServiceType = serviceTypeFilter || "any";
 
   return (
-    <Card className={className}>
-      <CardContent className="p-3">
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex items-center gap-3">
-            {/* Service type filters */}
-            <div className="flex gap-1">
-              <Button 
-                variant={serviceTypeFilter === 'in-person' ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleTypeClick('in-person')}
-                className="flex items-center gap-1"
-              >
-                <Map className="h-4 w-4" />
-                <span>In Person</span>
-              </Button>
-              
-              <Button 
-                variant={serviceTypeFilter === 'virtual' ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleTypeClick('virtual')}
-                className="flex items-center gap-1"
-              >
-                <Map className="h-4 w-4" />
-                <span>Virtual</span>
-              </Button>
-              
-              <Button 
-                variant={serviceTypeFilter === 'both' ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleTypeClick('both')}
-                className="flex items-center gap-1"
-              >
-                <Map className="h-4 w-4" />
-                <span>Both</span>
-              </Button>
-            </div>
-            
-            {setVerifiedOnly && (
-              <Button 
-                variant={verifiedOnly ? "default" : "outline"}
-                size="sm"
-                onClick={handleVerifiedClick}
-                className="flex items-center gap-1"
-              >
-                <BadgeCheck className="h-4 w-4" />
-                <span>Verified</span>
-              </Button>
-            )}
-            
-            {setAvailableNow && (
-              <Button
-                variant={availableNow ? "default" : "outline"}
-                size="sm"
-                onClick={handleAvailableClick}
-                className="flex items-center gap-1"
-              >
-                <Clock className="h-4 w-4" />
-                <span>Available Now</span>
-              </Button>
-            )}
-            
-            {setRatingMin && ratingMin !== undefined && (
-              <Button
-                variant={ratingMin > 0 ? "default" : "outline"}
-                size="sm"
-                onClick={handleRatingClick}
-                className="flex items-center gap-1"
-              >
-                <Star className="h-4 w-4" />
-                <span>{ratingMin > 0 ? `${ratingMin}+ Stars` : "Any Rating"}</span>
-              </Button>
-            )}
-            
-            {location && onLocationClick && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLocationClick}
-                className="flex items-center gap-1"
-              >
-                <Map className="h-4 w-4" />
-                <span>{location}</span>
-              </Button>
-            )}
-            
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1"
-              onClick={handleShowMoreFilters}
-            >
-              <Tags className="h-4 w-4" />
-              <span>More Filters</span>
-            </Button>
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </CardContent>
-    </Card>
+    <div className={`bg-background border border-border rounded-lg p-2 ${className}`}>
+      <div className="flex flex-nowrap overflow-x-auto gap-2 items-center">
+        <div className="flex-shrink-0 min-w-[180px]">
+          <ServiceTypeSelect 
+            value={displayServiceType as ServiceTypeFilter} 
+            onChange={value => setServiceTypeFilter(value === "any" ? "" : value)} 
+            label="" 
+            className="w-full"
+          />
+        </div>
+        
+        <Button 
+          variant={verifiedOnly ? "default" : "outline"} 
+          size="sm"
+          onClick={() => setVerifiedOnly(!verifiedOnly)}
+          className="flex-shrink-0"
+        >
+          <CheckCircle className="h-4 w-4 mr-2" />
+          Verified
+        </Button>
+        
+        <Button 
+          variant={availableNow ? "default" : "outline"} 
+          size="sm"
+          onClick={() => setAvailableNow(!availableNow)}
+          className="flex-shrink-0"
+        >
+          <Clock className="h-4 w-4 mr-2" />
+          Available Now
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={onLocationClick}
+          className="flex-shrink-0"
+        >
+          <Map className="h-4 w-4 mr-2" />
+          {location || "Any Location"}
+        </Button>
+        
+        <div className="flex items-center gap-1 p-1.5 border border-border rounded-md">
+          <Star className="h-4 w-4 text-yellow-400" />
+          <Rating 
+            value={ratingMin} 
+            onChange={setRatingMin} 
+            max={5} 
+            className="flex-shrink-0" 
+          />
+        </div>
+        
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={onShowMoreFilters}
+          className="flex-shrink-0 ml-auto"
+        >
+          <SlidersHorizontal className="h-4 w-4 mr-2" />
+          More Filters
+        </Button>
+      </div>
+    </div>
   );
 };
 
-// Use memo to prevent unnecessary re-renders
-export default memo(QuickFilterBar);
+export default QuickFilterBar;

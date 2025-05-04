@@ -41,7 +41,7 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">
+          <SelectItem value="any">
             <div className="flex items-center gap-2">
               Any Type
             </div>

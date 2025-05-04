@@ -1,46 +1,62 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Video, Globe } from 'lucide-react';
+import ServiceTypeIcon from './ServiceTypeIcon';
 
-export type ServiceTypeFilter = "" | "in-person" | "virtual" | "both";
+export type ServiceTypeFilter = "" | "in-person" | "virtual" | "both" | "any";
 
-export interface ServiceTypeBadgeLabelProps {
+interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
+  onRemove?: () => void;
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
-  showIcon?: boolean;
 }
 
-const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
-  type, 
-  className = '', 
-  showIcon = true 
+/**
+ * A badge component showing service type with appropriate icon and label
+ */
+const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
+  type,
+  onRemove,
+  size = 'md',
+  className
 }) => {
-  let icon = null;
-  let label = '';
+  if (!type || type === "any") return null;
   
-  switch (type) {
-    case 'in-person':
-      icon = <MapPin className="h-3.5 w-3.5 mr-1" />;
-      label = 'In-person';
-      break;
-    case 'virtual':
-      icon = <Video className="h-3.5 w-3.5 mr-1" />;
-      label = 'Virtual';
-      break;
-    case 'both':
-      icon = <Globe className="h-3.5 w-3.5 mr-1" />;
-      label = 'Both';
-      break;
-    default:
-      return null;
-  }
+  const sizeClasses = {
+    sm: 'text-xs py-0.5 px-1.5',
+    md: 'text-sm py-1 px-2.5',
+    lg: 'text-base py-1.5 px-3'
+  };
+  
+  const getLabel = () => {
+    switch (type) {
+      case "in-person": return "In Person";
+      case "virtual": return "Virtual";
+      case "both": return "Both Types";
+      default: return "";
+    }
+  };
+  
+  const getVariant = () => {
+    switch (type) {
+      case "in-person": return "blue";
+      case "virtual": return "purple";
+      case "both": return "green";
+      default: return "default";
+    }
+  };
   
   return (
-    <span className={`flex items-center text-sm ${className}`}>
-      {showIcon && icon}
-      <span>{label}</span>
-    </span>
+    <Badge 
+      variant={getVariant() as any}
+      className={`flex items-center gap-1.5 ${sizeClasses[size]} ${className}`}
+      onClick={onRemove}
+    >
+      <ServiceTypeIcon type={type} size={size === 'sm' ? 12 : size === 'md' ? 14 : 16} />
+      {getLabel()}
+      {onRemove && <span className="ml-1 cursor-pointer">×</span>}
+    </Badge>
   );
 };
 
