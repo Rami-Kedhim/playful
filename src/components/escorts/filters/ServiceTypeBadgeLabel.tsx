@@ -3,7 +3,8 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import ServiceTypeIcon from './ServiceTypeIcon';
 
-export type ServiceTypeFilter = "" | "in-person" | "virtual" | "both" | "any";
+// Update type definition to exclude "any" as a value
+export type ServiceTypeFilter = "" | "in-person" | "virtual" | "both";
 
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
@@ -21,7 +22,7 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
   size = 'md',
   className
 }) => {
-  if (!type || type === "any") return null;
+  if (!type) return null;
   
   const sizeClasses = {
     sm: 'text-xs py-0.5 px-1.5',

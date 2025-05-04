@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import useFilterResults from "@/hooks/escort-filters/useFilterResults";
 import { Escort } from "@/types/Escort";
+import { ServiceTypeFilter } from "@/components/escorts/filters/ServiceTypeBadgeLabel";
 
 interface UseEscortFilterProps {
   escorts: Escort[];
@@ -24,7 +25,7 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
   const [ageRange, setAgeRange] = useState<[number, number]>([21, 50]);
   const [ratingMin, setRatingMin] = useState<number>(0);
   const [availableNow, setAvailableNow] = useState<boolean>(false);
-  const [serviceTypeFilter, setServiceTypeFilter] = useState<"" | "in-person" | "virtual" | "both">("");
+  const [serviceTypeFilter, setServiceTypeFilter] = useState<ServiceTypeFilter>("");
   
   // Combined filter state for useFilterResults hook - memoize to prevent recreating on each render
   const filters = useMemo(() => ({
@@ -156,7 +157,7 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
     handleAgeRangeChange,
     setRatingMin: useCallback((rating: number) => setRatingMin(rating), []),
     setAvailableNow: useCallback((available: boolean) => setAvailableNow(available), []),
-    setServiceTypeFilter: useCallback((type: "" | "in-person" | "virtual" | "both") => setServiceTypeFilter(type), []),
+    setServiceTypeFilter: useCallback((type: ServiceTypeFilter) => setServiceTypeFilter(type), []),
     setIsLoading: useCallback((loading: boolean) => setIsLoading(loading), []),
     clearFilters,
     
