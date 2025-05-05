@@ -12,6 +12,7 @@ const ServiceTypeFilter = ({
   serviceTypeFilter,
   setServiceTypeFilter,
 }: ServiceTypeFilterProps) => {
+  // Ensure serviceTypeFilter is never empty string
   const safeServiceType = serviceTypeFilter || "any";
   
   return (

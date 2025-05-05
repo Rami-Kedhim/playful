@@ -34,6 +34,7 @@ const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({
         return <Users size={size} className={`${isColored ? 'text-indigo-500' : ''} ${className}`} />;
       case 'dinner':
         return <Utensils size={size} className={`${isColored ? 'text-amber-500' : ''} ${className}`} />;
+      case 'any':
       default:
         return <Mail size={size} className={`${isColored ? 'text-gray-500' : ''} ${className}`} />;
     }

@@ -15,6 +15,7 @@ export const useFilterState = (): EscortFilterState & EscortFilterActions => {
   const [ageRange, setAgeRange] = useState<[number, number]>([21, 60]);
   const [ratingMin, setRatingMin] = useState(0);
   const [availableNow, setAvailableNow] = useState(false);
+  // Changed default value from empty string to "any"
   const [serviceTypeFilter, setServiceTypeFilter] = useState<"in-person" | "virtual" | "both" | "any" | "">("any");
   const [isLoading, setIsLoading] = useState(false);
   
@@ -61,7 +62,7 @@ export const useFilterState = (): EscortFilterState & EscortFilterActions => {
     setAgeRange([values[0], values[1]] as [number, number]);
   };
   
-  // Clear all filters
+  // Modified to reset serviceTypeFilter to "any" instead of empty string
   const clearFilters = () => {
     setSearchQuery("");
     setLocation("");
@@ -76,6 +77,11 @@ export const useFilterState = (): EscortFilterState & EscortFilterActions => {
     setRatingMin(0);
     setAvailableNow(false);
     setServiceTypeFilter("any");
+  };
+
+  // Ensure serviceTypeFilter is never an empty string
+  const safeSetServiceTypeFilter = (type: "in-person" | "virtual" | "both" | "any" | "") => {
+    setServiceTypeFilter(type || "any");
   };
   
   return {
@@ -109,7 +115,7 @@ export const useFilterState = (): EscortFilterState & EscortFilterActions => {
     availableNow,
     setAvailableNow,
     serviceTypeFilter,
-    setServiceTypeFilter,
+    setServiceTypeFilter: safeSetServiceTypeFilter,
     isLoading,
     setIsLoading,
     clearFilters
