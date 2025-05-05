@@ -51,7 +51,9 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
               <ServiceTypeIcon type={safeValue} size={16} className="text-primary" />
               {safeValue === 'in-person' ? 'In Person' : 
                safeValue === 'virtual' ? 'Virtual' : 
-               safeValue === 'both' ? 'Both Types' : 'Any Type'}
+               safeValue === 'both' ? 'Both Types' : 
+               safeValue === 'massage' ? 'Massage' : 
+               safeValue === 'dinner' ? 'Dinner Date' : 'Any Type'}
             </div>
           </SelectValue>
         </SelectTrigger>
@@ -78,6 +80,18 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
             <div className="flex items-center gap-2">
               <ServiceTypeIcon type="both" size={16} className="text-green-500" />
               Both Types
+            </div>
+          </SelectItem>
+          <SelectItem value="massage">
+            <div className="flex items-center gap-2">
+              <ServiceTypeIcon type="massage" size={16} className="text-indigo-500" />
+              Massage
+            </div>
+          </SelectItem>
+          <SelectItem value="dinner">
+            <div className="flex items-center gap-2">
+              <ServiceTypeIcon type="dinner" size={16} className="text-amber-500" />
+              Dinner Date
             </div>
           </SelectItem>
         </SelectContent>

@@ -58,8 +58,8 @@ const FilterSidebar = ({
   setServiceTypeFilter
 }: FilterSidebarProps) => {
   // Ensure serviceTypeFilter is never empty
-  const safeServiceTypeFilter: ServiceTypeFilter = !serviceTypeFilter ? "any" :
-    (serviceTypeFilter === "" ? "any" : serviceTypeFilter as ServiceTypeFilter);
+  const safeServiceTypeFilter: ServiceTypeFilter = !serviceTypeFilter || serviceTypeFilter === "" ? 
+    "any" : serviceTypeFilter as ServiceTypeFilter;
 
   return (
     <div className="bg-card p-6 rounded-xl border border-border shadow">
