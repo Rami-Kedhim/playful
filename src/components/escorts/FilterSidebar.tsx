@@ -9,7 +9,7 @@ interface FilterSidebarProps {
   location: string;
   setLocation: (location: string) => void;
   priceRange: [number, number];
-  setPriceRange: (range: [number, number]) => void;  // Changed to match expected type
+  setPriceRange: (range: [number, number]) => void;  
   verifiedOnly: boolean;
   setVerifiedOnly: (verified: boolean) => void;
   selectedServices: string[];
@@ -21,7 +21,7 @@ interface FilterSidebarProps {
   selectedOrientations: string[];
   toggleOrientation: (orientation: string) => void;
   ageRange?: [number, number];
-  setAgeRange?: (range: [number, number]) => void;  // Changed to match expected type
+  setAgeRange?: (range: [number, number]) => void; 
   ratingMin?: number;
   setRatingMin?: (rating: number) => void;
   availableNow?: boolean;
@@ -53,7 +53,7 @@ const FilterSidebar = ({
   setRatingMin = () => {},
   availableNow = false,
   setAvailableNow = () => {},
-  serviceTypeFilter,
+  serviceTypeFilter = "any",
   setServiceTypeFilter
 }: FilterSidebarProps) => {
   return (

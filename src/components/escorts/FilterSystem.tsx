@@ -67,13 +67,13 @@ const FilterSystem: React.FC<FilterSystemProps> = (props) => {
     <div className="space-y-4">
       {/* Quick filter bar for desktop and mobile */}
       <QuickFilterBar
-        serviceTypeFilter={serviceTypeFilter}
+        serviceTypeFilter={serviceTypeFilter || "any"}
         setServiceTypeFilter={setServiceTypeFilter}
         verifiedOnly={verifiedOnly}
         setVerifiedOnly={setVerifiedOnly}
         availableNow={availableNow}
         setAvailableNow={setAvailableNow}
-        location={location}
+        location={location || ""}
         onLocationClick={() => setShowFilters(!showFilters)}
         onShowMoreFilters={() => setShowMobileFilters(true)}
         ratingMin={ratingMin}

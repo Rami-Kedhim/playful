@@ -1,57 +1,53 @@
 
-import React from 'react';
+import React from "react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import type { ServiceTypeFilter as ServiceTypeFilterType } from './ServiceTypeBadgeLabel';
-import ServiceTypeIcon from './ServiceTypeIcon';
-import { cn } from "@/lib/utils";
 
 interface ServiceTypeFilterProps {
-  serviceTypeFilter: ServiceTypeFilterType;
-  setServiceTypeFilter: (type: ServiceTypeFilterType) => void;
-  className?: string;
+  serviceTypeFilter: string;
+  setServiceTypeFilter: (type: string) => void;
 }
 
-/**
- * A component for filtering escorts by service type
- */
-const ServiceTypeFilter: React.FC<ServiceTypeFilterProps> = ({
+const ServiceTypeFilter = ({
   serviceTypeFilter,
   setServiceTypeFilter,
-  className
-}) => {
-  const serviceTypes: ServiceTypeFilterType[] = ["in-person", "virtual", "both", "any"];
-  
-  const labels = {
-    "in-person": "In Person",
-    "virtual": "Virtual",
-    "both": "Both",
-    "any": "Any"
-  };
-  
+}: ServiceTypeFilterProps) => {
   return (
-    <div className={className}>
-      <Label className="text-sm font-medium mb-2 block">Service Type</Label>
-      <div className="grid grid-cols-2 gap-2">
-        {serviceTypes.map((type) => (
-          <Card
-            key={type}
-            className={cn(
-              "flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors",
-              serviceTypeFilter === type 
-                ? "bg-primary/10 border-primary" 
-                : "hover:bg-accent"
-            )}
-            onClick={() => setServiceTypeFilter(type)}
-          >
-            <ServiceTypeIcon 
-              type={type} 
-              className={serviceTypeFilter === type ? "text-primary" : ""}
-            />
-            <span>{labels[type]}</span>
-          </Card>
-        ))}
-      </div>
+    <div className="space-y-2">
+      <h3 className="text-sm font-medium">Service Type</h3>
+      <RadioGroup
+        value={serviceTypeFilter || "any"}
+        onValueChange={setServiceTypeFilter}
+        className="flex flex-col space-y-1.5"
+      >
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="any" id="any-service" />
+          <Label htmlFor="any-service" className="text-sm cursor-pointer">
+            Any Service Type
+          </Label>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="in-person" id="in-person" />
+          <Label htmlFor="in-person" className="text-sm cursor-pointer">
+            In Person
+          </Label>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="virtual" id="virtual" />
+          <Label htmlFor="virtual" className="text-sm cursor-pointer">
+            Virtual
+          </Label>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="both" id="both-types" />
+          <Label htmlFor="both-types" className="text-sm cursor-pointer">
+            Both Types
+          </Label>
+        </div>
+      </RadioGroup>
     </div>
   );
 };

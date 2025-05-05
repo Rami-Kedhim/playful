@@ -11,14 +11,15 @@ interface OrientationFilterProps {
 const OrientationFilter = ({ selectedOrientations, onChange }: OrientationFilterProps) => {
   const orientationOptions = [
     { value: "straight", label: "Straight" },
-    { value: "bisexual", label: "Bisexual" },
     { value: "gay", label: "Gay" },
-    { value: "lesbian", label: "Lesbian" }
+    { value: "lesbian", label: "Lesbian" },
+    { value: "bisexual", label: "Bisexual" },
+    { value: "pansexual", label: "Pansexual" }
   ];
 
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-medium">Sexual Orientation</h3>
+      <h3 className="text-sm font-medium">Orientation</h3>
       <div className="space-y-2">
         {orientationOptions.map((orientation) => (
           <div key={orientation.value} className="flex items-center space-x-2">

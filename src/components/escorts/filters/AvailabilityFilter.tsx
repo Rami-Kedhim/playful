@@ -1,18 +1,13 @@
 
-import React from 'react';
-import { Label } from "@/components/ui/label";
+import React from "react";
 import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface AvailabilityFilterProps {
   availableNow: boolean;
-  setAvailableNow: (available: boolean) => void;
+  setAvailableNow: (value: boolean) => void;
   verifiedOnly: boolean;
-  setVerifiedOnly: (verified: boolean) => void;
-  selectedDays?: string[];
-  toggleDay?: (day: string) => void;
-  selectedHours?: string[];
-  toggleHour?: (hour: string) => void;
+  setVerifiedOnly: (value: boolean) => void;
 }
 
 const AvailabilityFilter = ({
@@ -20,70 +15,31 @@ const AvailabilityFilter = ({
   setAvailableNow,
   verifiedOnly,
   setVerifiedOnly,
-  selectedDays = [],
-  toggleDay = () => {},
-  selectedHours = [],
-  toggleHour = () => {}
 }: AvailabilityFilterProps) => {
-  const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-  const timeSlots = ["Morning", "Afternoon", "Evening", "Late Night"];
-
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="available-now" className="text-sm font-normal">Available Now</Label>
-          <Switch 
-            id="available-now" 
-            checked={availableNow}
-            onCheckedChange={setAvailableNow}
-          />
-        </div>
+      <h3 className="text-sm font-medium">Availability</h3>
+      
+      <div className="flex items-center space-x-2">
+        <Switch 
+          checked={availableNow} 
+          onCheckedChange={setAvailableNow}
+          id="available-now"
+        />
+        <Label htmlFor="available-now" className="text-sm cursor-pointer">
+          Available Now
+        </Label>
       </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="verified-only" className="text-sm font-normal">Verified Only</Label>
-          <Switch 
-            id="verified-only" 
-            checked={verifiedOnly}
-            onCheckedChange={setVerifiedOnly}
-          />
-        </div>
-      </div>
-
-      {/* Days availability */}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Available Days</Label>
-        <div className="grid grid-cols-2 gap-2">
-          {daysOfWeek.map(day => (
-            <div key={day} className="flex items-center space-x-2">
-              <Checkbox 
-                id={`day-${day.toLowerCase()}`}
-                checked={selectedDays.includes(day)} 
-                onCheckedChange={() => toggleDay(day)}
-              />
-              <Label htmlFor={`day-${day.toLowerCase()}`} className="text-sm font-normal">{day}</Label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Hours availability */}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Available Hours</Label>
-        <div className="grid grid-cols-2 gap-2">
-          {timeSlots.map(slot => (
-            <div key={slot} className="flex items-center space-x-2">
-              <Checkbox 
-                id={`time-${slot.toLowerCase().replace(' ', '-')}`}
-                checked={selectedHours.includes(slot)} 
-                onCheckedChange={() => toggleHour(slot)}
-              />
-              <Label htmlFor={`time-${slot.toLowerCase().replace(' ', '-')}`} className="text-sm font-normal">{slot}</Label>
-            </div>
-          ))}
-        </div>
+      
+      <div className="flex items-center space-x-2">
+        <Switch 
+          checked={verifiedOnly} 
+          onCheckedChange={setVerifiedOnly}
+          id="verified-only"
+        />
+        <Label htmlFor="verified-only" className="text-sm cursor-pointer">
+          Verified Escorts Only
+        </Label>
       </div>
     </div>
   );

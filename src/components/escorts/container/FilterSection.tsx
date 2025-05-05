@@ -31,7 +31,7 @@ const FilterSection = memo<FilterSectionProps>(({
         filterState.setLocation?.('');
         break;
       case 'serviceTypeFilter':
-        filterState.setServiceTypeFilter?.('');
+        filterState.setServiceTypeFilter?.('any');
         break;
       case 'verifiedOnly':
         filterState.setVerifiedOnly?.(false);
@@ -89,7 +89,7 @@ const FilterSection = memo<FilterSectionProps>(({
           setRatingMin={filterState.setRatingMin || (() => {})}
           availableNow={filterState.availableNow || false}
           setAvailableNow={filterState.setAvailableNow || (() => {})}
-          serviceTypeFilter={filterState.serviceTypeFilter || ""}
+          serviceTypeFilter={filterState.serviceTypeFilter || "any"}
           setServiceTypeFilter={filterState.setServiceTypeFilter || (() => {})}
         />
         
@@ -130,7 +130,7 @@ const FilterSection = memo<FilterSectionProps>(({
             setRatingMin={filterState.setRatingMin || (() => {})}
             availableNow={filterState.availableNow || false}
             setAvailableNow={filterState.setAvailableNow || (() => {})}
-            serviceTypeFilter={filterState.serviceTypeFilter || ""}
+            serviceTypeFilter={filterState.serviceTypeFilter || "any"}
             setServiceTypeFilter={filterState.setServiceTypeFilter || (() => {})}
           />
         </div>

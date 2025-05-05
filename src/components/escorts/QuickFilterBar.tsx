@@ -46,7 +46,7 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
       <div className="flex flex-nowrap overflow-x-auto gap-2 items-center">
         <div className="flex-shrink-0 min-w-[180px]">
           <ServiceTypeSelect 
-            value={serviceTypeFilter} 
+            value={serviceTypeFilter || "any"} 
             onChange={setServiceTypeFilter} 
             label="" 
             className="w-full"

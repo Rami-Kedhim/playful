@@ -27,8 +27,8 @@ interface MobileFilterCardProps {
   setRatingMin?: (value: number) => void;
   availableNow?: boolean;
   setAvailableNow?: (value: boolean) => void;
-  serviceTypeFilter: "in-person" | "virtual" | "both" | "";
-  setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "") => void;
+  serviceTypeFilter: "in-person" | "virtual" | "both" | "any" | "";
+  setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "any" | "") => void;
 }
 
 const MobileFilterCard = ({
@@ -55,7 +55,7 @@ const MobileFilterCard = ({
   setRatingMin = () => {},
   availableNow = false,
   setAvailableNow = () => {},
-  serviceTypeFilter,
+  serviceTypeFilter = "any",
   setServiceTypeFilter
 }: MobileFilterCardProps) => {
   // Ensure ageRange is a tuple of [number, number]
