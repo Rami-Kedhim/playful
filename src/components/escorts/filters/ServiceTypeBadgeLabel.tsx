@@ -18,6 +18,7 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
   size,
   showIcon = true
 }) => {
+  // Return null if no type is provided or it's "any"
   if (!type || type === "any") return null;
 
   let label: string;

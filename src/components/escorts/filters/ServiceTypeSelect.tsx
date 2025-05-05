@@ -22,26 +22,29 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
   className,
   label = "Service Type"
 }) => {
+  // Ensure value is never an empty string
+  const safeValue = value || "any";
+  
   return (
     <div className={className}>
       {label && (
         <Label className="mb-2 block">{label}</Label>
       )}
       <Select 
-        value={value || "any"} 
+        value={safeValue} 
         onValueChange={(value) => onChange(value as ServiceTypeFilter)}
       >
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select service type">
-            {value && value !== "any" && (
+            {safeValue && safeValue !== "any" && (
               <div className="flex items-center gap-2">
-                <ServiceTypeIcon type={value} size={16} className="text-primary" />
-                {value === 'in-person' ? 'In Person' : 
-                 value === 'virtual' ? 'Virtual' : 
-                 value === 'both' ? 'Both Types' : 'Any Type'}
+                <ServiceTypeIcon type={safeValue} size={16} className="text-primary" />
+                {safeValue === 'in-person' ? 'In Person' : 
+                 safeValue === 'virtual' ? 'Virtual' : 
+                 safeValue === 'both' ? 'Both Types' : 'Any Type'}
               </div>
             )}
-            {(!value || value === "any") && (
+            {safeValue === "any" && (
               <div className="flex items-center gap-2">
                 Any Type
               </div>

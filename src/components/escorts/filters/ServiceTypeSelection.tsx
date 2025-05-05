@@ -55,13 +55,14 @@ const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
     }
   };
   
-  // Basic service types for location-based filtering
-  const basicServiceTypes: ServiceTypeFilter[] = ["in-person", "virtual", "both", null];
+  // Basic service types for location-based filtering - changed null to "any" to ensure no empty values
+  const basicServiceTypes: ServiceTypeFilter[] = ["in-person", "virtual", "both", "any"];
   
   const labels: Record<string, string> = {
     "in-person": "In Person",
     "virtual": "Virtual",
     "both": "Both Types",
+    "any": "Any Type",
     "": "Any Type"
   };
   
@@ -74,7 +75,7 @@ const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
       <div className="grid grid-cols-2 gap-2">
         {basicServiceTypes.map((type) => (
           <Card
-            key={type || "any"}
+            key={type}
             className={cn(
               "flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors",
               serviceType === type 
@@ -88,7 +89,7 @@ const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
                 type={type} 
                 variant={serviceType === type ? "colored" : "default"} 
               />
-              <span>{type ? labels[type] : "Any Type"}</span>
+              <span>{labels[type] || "Any Type"}</span>
             </div>
             
             {serviceType === type && (
