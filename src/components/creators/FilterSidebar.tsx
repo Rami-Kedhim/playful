@@ -64,7 +64,7 @@ const FilterSidebar = ({
         
         <FilterSection title="Price Range">
           <Select 
-            value={priceMax} 
+            value={priceMax || "all"} 
             onValueChange={setPriceMax}
           >
             <SelectTrigger>
