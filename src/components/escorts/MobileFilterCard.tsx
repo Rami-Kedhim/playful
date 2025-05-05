@@ -2,6 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import MobileFilterHeader from "./filters/MobileFilterHeader";
 import MobileFilterContent from "./filters/MobileFilterContent";
+import { ServiceTypeFilter } from './filters/ServiceTypeBadgeLabel';
 
 interface MobileFilterCardProps {
   searchQuery: string;
@@ -27,8 +28,8 @@ interface MobileFilterCardProps {
   setRatingMin?: (value: number) => void;
   availableNow?: boolean;
   setAvailableNow?: (value: boolean) => void;
-  serviceTypeFilter: "in-person" | "virtual" | "both" | "any" | "";
-  setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "any" | "") => void;
+  serviceTypeFilter: ServiceTypeFilter | string;
+  setServiceTypeFilter: (type: ServiceTypeFilter) => void;
 }
 
 const MobileFilterCard = ({
@@ -63,6 +64,10 @@ const MobileFilterCard = ({
     ageRange[0] ?? 18, 
     ageRange[1] ?? 50
   ];
+
+  // Ensure serviceTypeFilter is never an empty string
+  const safeServiceTypeFilter: ServiceTypeFilter = !serviceTypeFilter ? "any" :
+    (serviceTypeFilter === "" ? "any" : serviceTypeFilter as ServiceTypeFilter);
   
   return (
     <Card className="mb-6">
@@ -92,7 +97,7 @@ const MobileFilterCard = ({
           setRatingMin={setRatingMin}
           availableNow={availableNow}
           setAvailableNow={setAvailableNow}
-          serviceTypeFilter={serviceTypeFilter}
+          serviceTypeFilter={safeServiceTypeFilter}
           setServiceTypeFilter={setServiceTypeFilter}
         />
       </CardContent>

@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/toggle-group';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import ServiceTypeQuickFilter from '@/components/escorts/filters/ServiceTypeQuickFilter';
-import { ServiceTypeFilter as ServiceTypeFilterType } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
+import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 import { useEscortServiceTypeFilter } from '@/hooks/useEscortServiceTypeFilter';
 
 interface SearchHeaderProps {
@@ -30,11 +30,11 @@ const SearchHeader = ({
   setShowAdvancedFilters = () => {},
   onSearch 
 }: SearchHeaderProps) => {
-  const [serviceType, setServiceType] = useState<ServiceTypeFilterType>("");
+  const [serviceType, setServiceType] = useState<ServiceTypeFilter>("any");
   const { setServiceType: updateServiceType } = useEscortServiceTypeFilter();
 
   // Handle service type changes
-  const handleServiceTypeChange = (type: ServiceTypeFilterType) => {
+  const handleServiceTypeChange = (type: ServiceTypeFilter) => {
     setServiceType(type);
     updateServiceType(type);
   };

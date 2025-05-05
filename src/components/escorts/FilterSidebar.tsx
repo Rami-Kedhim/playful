@@ -2,6 +2,7 @@
 import { Separator } from "@/components/ui/separator";
 import FilterSidebarHeader from "./filters/FilterSidebarHeader";
 import FilterSidebarContent from "./filters/FilterSidebarContent";
+import { ServiceTypeFilter } from './filters/ServiceTypeBadgeLabel';
 
 interface FilterSidebarProps {
   searchQuery: string;
@@ -26,8 +27,8 @@ interface FilterSidebarProps {
   setRatingMin?: (rating: number) => void;
   availableNow?: boolean;
   setAvailableNow?: (available: boolean) => void;
-  serviceTypeFilter: "in-person" | "virtual" | "both" | "any" | "";
-  setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "any" | "") => void;
+  serviceTypeFilter: ServiceTypeFilter | string;
+  setServiceTypeFilter: (type: ServiceTypeFilter) => void;
 }
 
 const FilterSidebar = ({
@@ -56,6 +57,10 @@ const FilterSidebar = ({
   serviceTypeFilter = "any",
   setServiceTypeFilter
 }: FilterSidebarProps) => {
+  // Ensure serviceTypeFilter is never empty
+  const safeServiceTypeFilter: ServiceTypeFilter = !serviceTypeFilter ? "any" :
+    (serviceTypeFilter === "" ? "any" : serviceTypeFilter as ServiceTypeFilter);
+
   return (
     <div className="bg-card p-6 rounded-xl border border-border shadow">
       <FilterSidebarHeader clearFilters={clearFilters} />
@@ -85,7 +90,7 @@ const FilterSidebar = ({
         setRatingMin={setRatingMin}
         availableNow={availableNow}
         setAvailableNow={setAvailableNow}
-        serviceTypeFilter={serviceTypeFilter}
+        serviceTypeFilter={safeServiceTypeFilter}
         setServiceTypeFilter={setServiceTypeFilter}
       />
     </div>

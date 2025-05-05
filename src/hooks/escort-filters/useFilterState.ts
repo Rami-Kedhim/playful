@@ -1,8 +1,8 @@
 
 import { useState } from "react";
-import { EscortFilterState, EscortFilterActions } from "@/types/escortFilters";
+import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
-export const useFilterState = (): EscortFilterState & EscortFilterActions => {
+export const useFilterState = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
@@ -16,7 +16,7 @@ export const useFilterState = (): EscortFilterState & EscortFilterActions => {
   const [ratingMin, setRatingMin] = useState(0);
   const [availableNow, setAvailableNow] = useState(false);
   // Always use "any" as default, never empty string
-  const [serviceTypeFilter, setServiceTypeFilter] = useState<"in-person" | "virtual" | "both" | "any" | "">("any");
+  const [serviceTypeFilter, setServiceTypeFilter] = useState<ServiceTypeFilter>("any");
   const [isLoading, setIsLoading] = useState(false);
   
   // Toggle service selection
@@ -80,8 +80,10 @@ export const useFilterState = (): EscortFilterState & EscortFilterActions => {
   };
 
   // Ensure serviceTypeFilter is never an empty string
-  const safeSetServiceTypeFilter = (type: "in-person" | "virtual" | "both" | "any" | "") => {
-    setServiceTypeFilter(type || "any");
+  const safeSetServiceTypeFilter = (type: ServiceTypeFilter | string) => {
+    const safeType: ServiceTypeFilter = !type ? "any" :
+      (type === "" ? "any" : type as ServiceTypeFilter);
+    setServiceTypeFilter(safeType);
   };
   
   return {
@@ -121,3 +123,5 @@ export const useFilterState = (): EscortFilterState & EscortFilterActions => {
     clearFilters
   };
 };
+
+export default useFilterState;
