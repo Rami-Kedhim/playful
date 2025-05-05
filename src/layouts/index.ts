@@ -1,10 +1,9 @@
 
-import MainLayout from './MainLayout';
-import UnifiedLayout from './UnifiedLayout';
-import type { UnifiedLayoutProps } from './UnifiedLayout';
+import Layout from './Layout';
+export type { LayoutProps } from './Layout';
 
-export { MainLayout, UnifiedLayout };
-export type { UnifiedLayoutProps };
+// Export the main layout component
+export { Layout };
 
-// Export UnifiedLayout as the default layout for consistency
-export default UnifiedLayout;
+// Export as default for easy importing
+export default Layout;

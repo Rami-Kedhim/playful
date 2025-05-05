@@ -2,7 +2,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { routes as routeConfig } from '@/routes/routeConfig.tsx';
-import UnifiedLayout from '@/layouts/UnifiedLayout';
+import Layout from '@/layouts/Layout';
 import AuthPage from '@/pages/AuthPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import AuthGuard from '@/components/auth/AuthGuard';
@@ -12,13 +12,13 @@ const AppRoutes = () => {
     <Routes>
       {/* Auth route with simplified layout */}
       <Route path="/auth" element={
-        <UnifiedLayout hideFooter simplified>
+        <Layout hideFooter simplified>
           <AuthPage />
-        </UnifiedLayout>
+        </Layout>
       } />
       
-      {/* Main route with UnifiedLayout */}
-      <Route element={<UnifiedLayout />}>
+      {/* Main route with Layout */}
+      <Route element={<Layout />}>
         {routeConfig.map((route, index) => {
           // Check if route requires authentication
           const requireAuth = route.isAuthRequired === true;
