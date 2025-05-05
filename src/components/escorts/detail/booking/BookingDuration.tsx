@@ -34,6 +34,7 @@ const BookingDuration = ({ form }: BookingDurationProps) => {
           <Select 
             onValueChange={field.onChange} 
             value={field.value || durations[0]}
+            defaultValue={durations[0]} // Add default value
           >
             <FormControl>
               <SelectTrigger>

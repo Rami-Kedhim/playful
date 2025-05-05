@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Users, Video, Home, Utensils, Mail } from 'lucide-react';
-import { ServiceTypeFilter } from '@/components/escorts/context/ServiceTypeContext';
+import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
 interface ServiceTypeIconProps {
   type: ServiceTypeFilter | string;
@@ -18,7 +18,7 @@ const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({
   
   // Function to render the appropriate icon based on type
   const renderIcon = () => {
-    const stringType = String(type);
+    const stringType = String(type || 'any'); // Ensure type is never empty
     
     switch (stringType) {
       case 'in-person':

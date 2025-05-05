@@ -38,6 +38,7 @@ const BookingTimeSlots = ({ form }: BookingTimeSlotsProps) => {
           <Select 
             onValueChange={field.onChange} 
             value={field.value || timeSlots[0]}
+            defaultValue={timeSlots[0]} // Add default value
           >
             <FormControl>
               <SelectTrigger>
