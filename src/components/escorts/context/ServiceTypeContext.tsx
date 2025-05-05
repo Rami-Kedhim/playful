@@ -39,8 +39,10 @@ export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({
     'couples', 'fetish', 'domination', 'submission'
   ];
   
-  // Toggle specialized type selection
+  // Toggle specialized type selection with safe handling
   const toggleSpecializedType = (type: string) => {
+    if (!type || type === "") return; // Prevent empty strings
+    
     setSelectedSpecializedTypes(prev => 
       prev.includes(type) 
         ? prev.filter(t => t !== type) 
@@ -48,10 +50,17 @@ export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({
     );
   };
 
+  // Safe setter for service type filter
+  const safeSetServiceTypeFilter = (type: ServiceTypeFilter | string) => {
+    // Default to 'all' if empty or invalid
+    const safeType = !type || type === "" ? 'all' : type as ServiceTypeFilter;
+    setServiceTypeFilter(safeType);
+  };
+
   return (
     <ServiceTypeContext.Provider value={{
       serviceTypeFilter,
-      setServiceTypeFilter,
+      setServiceTypeFilter: safeSetServiceTypeFilter,
       supportedServiceTypes,
       selectedSpecializedTypes,
       toggleSpecializedType,

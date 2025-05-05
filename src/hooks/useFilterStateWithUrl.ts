@@ -38,13 +38,12 @@ export const useFilterStateWithUrl = <T extends UrlSyncedFilterState>({
     // Handle service type filter - ensure it's never an empty string
     const serviceType = searchParams.get('service_type');
     if (serviceType !== null) {
-      if (['in-person', 'virtual', 'both', 'any'].includes(serviceType)) {
-        newFilters.serviceTypeFilter = serviceType as ServiceTypeFilter;
-        hasChanges = true;
-      } else {
+      if (serviceType === "" || !['in-person', 'virtual', 'both', 'any'].includes(serviceType)) {
         newFilters.serviceTypeFilter = "any";
-        hasChanges = true;
+      } else {
+        newFilters.serviceTypeFilter = serviceType as ServiceTypeFilter;
       }
+      hasChanges = true;
     }
 
     // Handle verified only filter
@@ -93,7 +92,7 @@ export const useFilterStateWithUrl = <T extends UrlSyncedFilterState>({
 
     // Add service type filter to URL - ensure it's never an empty string
     const serviceType = newFilters.serviceTypeFilter;
-    if (serviceType && serviceType !== "any") {
+    if (serviceType && serviceType !== "" && serviceType !== "any") {
       params.set('service_type', serviceType.toString());
     }
 

@@ -40,8 +40,9 @@ export const ServiceTypeProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   // Ensure service type is never empty
-  const handleSetServiceType = (type: ServiceTypeFilter) => {
-    setServiceType(type || 'any');
+  const handleSetServiceType = (type: ServiceTypeFilter | string) => {
+    const safeType: ServiceTypeFilter = !type || type === "" ? "any" : type as ServiceTypeFilter;
+    setServiceType(safeType);
   };
 
   return (

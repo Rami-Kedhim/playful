@@ -25,14 +25,13 @@ export const useEscortFilter = ({ escorts = [] }: UseEscortFilterProps = {}) => 
 
   // Safe setter for serviceTypeFilter that prevents empty strings
   const safeSetServiceTypeFilter = (type: ServiceTypeFilter | string) => {
-    const safeType: ServiceTypeFilter = !type ? "any" :
-      (type === "" ? "any" : type as ServiceTypeFilter);
+    const safeType: ServiceTypeFilter = !type || type === "" ? "any" : type as ServiceTypeFilter;
     setServiceTypeFilter(safeType);
   };
   
   // Toggle service selection
   const toggleService = (service: string) => {
-    if (service === "") {
+    if (!service || service === "") {
       // Special case for clearing services
       setSelectedServices([]);
       return;
@@ -47,6 +46,10 @@ export const useEscortFilter = ({ escorts = [] }: UseEscortFilterProps = {}) => 
   
   // Toggle gender selection
   const toggleGender = (gender: string) => {
+    if (!gender || gender === "") {
+      return; // Prevent empty strings
+    }
+    
     if (selectedGenders.includes(gender)) {
       setSelectedGenders(selectedGenders.filter(g => g !== gender));
     } else {
@@ -56,6 +59,10 @@ export const useEscortFilter = ({ escorts = [] }: UseEscortFilterProps = {}) => 
   
   // Toggle orientation selection
   const toggleOrientation = (orientation: string) => {
+    if (!orientation || orientation === "") {
+      return; // Prevent empty strings
+    }
+    
     if (selectedOrientations.includes(orientation)) {
       setSelectedOrientations(selectedOrientations.filter(o => o !== orientation));
     } else {
@@ -65,12 +72,16 @@ export const useEscortFilter = ({ escorts = [] }: UseEscortFilterProps = {}) => 
   
   // Handle price range change with proper typing
   const handlePriceRangeChange = (values: number[]) => {
-    setPriceRange([values[0], values[1]] as [number, number]);
+    if (values && values.length >= 2) {
+      setPriceRange([values[0], values[1]] as [number, number]);
+    }
   };
   
   // Handle age range change with proper typing
   const handleAgeRangeChange = (values: number[]) => {
-    setAgeRange([values[0], values[1]] as [number, number]);
+    if (values && values.length >= 2) {
+      setAgeRange([values[0], values[1]] as [number, number]);
+    }
   };
   
   // Always reset serviceTypeFilter to "any" - never empty string

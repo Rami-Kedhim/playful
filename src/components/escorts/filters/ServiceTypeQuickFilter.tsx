@@ -23,6 +23,8 @@ const ServiceTypeQuickFilter: React.FC<ServiceTypeQuickFilterProps> = ({
   showLabel = true
 }) => {
   // Replace empty string with "any" to avoid empty string values
+  const safeServiceTypeFilter = !serviceTypeFilter || serviceTypeFilter === "" ? "any" as ServiceTypeFilter : serviceTypeFilter;
+  
   const types: ServiceTypeFilter[] = ["in-person", "virtual", "both", "any"];
   const labels = {
     "in-person": "In Person",
@@ -31,24 +33,29 @@ const ServiceTypeQuickFilter: React.FC<ServiceTypeQuickFilterProps> = ({
     "any": "Any"
   };
   
+  // Safe handler to prevent empty strings
+  const handleSetServiceType = (type: ServiceTypeFilter) => {
+    setServiceTypeFilter(type || "any");
+  };
+  
   return (
     <Card className={cn("bg-card border shadow-sm p-1", className)}>
       <div className="flex gap-1">
         {types.map((type) => (
           <button
             key={type}
-            onClick={() => setServiceTypeFilter(type)}
+            onClick={() => handleSetServiceType(type)}
             className={cn(
               "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm transition-colors",
               "hover:bg-accent hover:text-accent-foreground",
-              serviceTypeFilter === type 
+              safeServiceTypeFilter === type 
                 ? "bg-accent text-accent-foreground" 
                 : "bg-transparent text-muted-foreground"
             )}
           >
             <ServiceTypeIcon 
               type={type} 
-              className={serviceTypeFilter === type ? "text-primary" : ""}
+              className={safeServiceTypeFilter === type ? "text-primary" : ""}
             />
             {showLabel && <span>{labels[type]}</span>}
           </button>

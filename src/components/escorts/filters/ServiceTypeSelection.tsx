@@ -45,14 +45,14 @@ const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
   
   // Use the controlled value if provided, otherwise use context
   // Ensure we never have an empty string, default to "any"
-  const serviceType = (isControlled ? value : contextServiceType) || "any";
+  const serviceType = (!isControlled ? contextServiceType : value) || "any";
   
   // Handle service type changes
-  const handleServiceTypeChange = (type: ServiceTypeFilter) => {
-    const safeType = type || "any"; // Ensure we never pass an empty string
-    if (isControlled) {
+  const handleServiceTypeChange = (type: ServiceTypeFilter | string) => {
+    const safeType: ServiceTypeFilter = !type || type === "" ? "any" : type as ServiceTypeFilter;
+    if (isControlled && onChange) {
       onChange(safeType);
-    } else {
+    } else if (contextSetServiceType) {
       contextSetServiceType(safeType);
     }
   };
@@ -64,8 +64,7 @@ const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
     "in-person": "In Person",
     "virtual": "Virtual",
     "both": "Both Types",
-    "any": "Any Type",
-    "": "Any Type"
+    "any": "Any Type"
   };
   
   return (
@@ -131,7 +130,7 @@ const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
                   "text-xs font-normal",
                   selectedSpecializedTypes?.includes(serviceType) && "bg-primary/20 hover:bg-primary/30 text-foreground"
                 )}
-                onClick={() => toggleSpecializedType?.(serviceType)}
+                onClick={() => toggleSpecializedType && serviceType && toggleSpecializedType(serviceType)}
               >
                 <span>{serviceType}</span>
                 {selectedSpecializedTypes?.includes(serviceType) && (

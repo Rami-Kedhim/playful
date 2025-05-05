@@ -30,13 +30,15 @@ const SearchHeader = ({
   setShowAdvancedFilters = () => {},
   onSearch 
 }: SearchHeaderProps) => {
+  // Initialize with "any" instead of empty string
   const [serviceType, setServiceType] = useState<ServiceTypeFilter>("any");
   const { setServiceType: updateServiceType } = useEscortServiceTypeFilter();
 
-  // Handle service type changes
-  const handleServiceTypeChange = (type: ServiceTypeFilter) => {
-    setServiceType(type);
-    updateServiceType(type);
+  // Handle service type changes - ensure we never set empty string
+  const handleServiceTypeChange = (type: ServiceTypeFilter | string) => {
+    const safeType: ServiceTypeFilter = !type || type === "" ? "any" : type as ServiceTypeFilter;
+    setServiceType(safeType);
+    updateServiceType(safeType);
   };
   
   return (

@@ -15,12 +15,17 @@ const ServiceTypeFilter = ({
   // Ensure serviceTypeFilter is never empty string
   const safeServiceType = serviceTypeFilter || "any";
   
+  // Handler to prevent empty string values
+  const handleChange = (value: string) => {
+    setServiceTypeFilter(value || "any");
+  };
+  
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-medium">Service Type</h3>
       <RadioGroup
         value={safeServiceType}
-        onValueChange={setServiceTypeFilter}
+        onValueChange={handleChange}
         className="flex flex-col space-y-1.5"
       >
         <div className="flex items-center space-x-2">

@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { useServiceType } from '@/components/escorts/context/ServiceTypeContext';
 import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
@@ -34,21 +33,26 @@ export const useEscortServiceTypeFilter = () => {
     clearFilters
   } = useEscortFilter({ escorts: [] }); // Empty array as we're not using the filtering here
   
-  // Keep context and filter state in sync
-  const updateServiceType = useCallback((type: ServiceTypeFilter) => {
-    setServiceType(type);
-    setServiceTypeFilter(type);
+  // Keep context and filter state in sync - ensure we never pass empty strings
+  const updateServiceType = useCallback((type: ServiceTypeFilter | string) => {
+    const safeType: ServiceTypeFilter = !type || type === "" ? "any" : type as ServiceTypeFilter;
+    if (setServiceType) {
+      setServiceType(safeType);
+    }
+    setServiceTypeFilter(safeType);
   }, [setServiceType, setServiceTypeFilter]);
   
   // Clear both context and filter state
   const resetServiceTypeFilters = useCallback(() => {
-    clearServiceType();
+    if (clearServiceType) {
+      clearServiceType();
+    }
     clearFilters();
   }, [clearServiceType, clearFilters]);
   
   // Filter escorts based on specialized service types
   const filterBySpecializedTypes = useCallback((escorts) => {
-    if (!selectedSpecializedTypes.length) {
+    if (!selectedSpecializedTypes || !selectedSpecializedTypes.length) {
       return escorts;
     }
     
@@ -62,8 +66,8 @@ export const useEscortServiceTypeFilter = () => {
   // Helper method to check if an escort offers metaverse experiences
   // This supports the Sacred Grid concept mentioned in the document
   const isMetaverseCompatible = useCallback((escort) => {
-    return escort.metaverse_enabled || 
-           (escort.tags && escort.tags.some(tag => 
+    return escort?.metaverse_enabled || 
+           (escort?.tags && escort.tags.some(tag => 
              tag.toLowerCase().includes('virtual') || 
              tag.toLowerCase().includes('metaverse')
            ));
