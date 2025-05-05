@@ -20,6 +20,13 @@ const ContentTypeFields: React.FC<ContentTypeFieldsProps> = ({
   status,
   onSelectChange,
 }) => {
+  // Handler to ensure we never pass empty strings
+  const handleChange = (name: string, value: string) => {
+    // Provide fallback values if empty strings are encountered
+    const safeValue = value || (name === "content_type" ? "image" : "draft");
+    onSelectChange(name, safeValue);
+  };
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div className="space-y-2">
@@ -27,7 +34,7 @@ const ContentTypeFields: React.FC<ContentTypeFieldsProps> = ({
         <Select
           value={contentType || "image"}
           onValueChange={(value) =>
-            onSelectChange("content_type", value)
+            handleChange("content_type", value)
           }
         >
           <SelectTrigger>
@@ -46,7 +53,7 @@ const ContentTypeFields: React.FC<ContentTypeFieldsProps> = ({
         <Label htmlFor="status">Status *</Label>
         <Select
           value={status || "draft"}
-          onValueChange={(value) => onSelectChange("status", value)}
+          onValueChange={(value) => handleChange("status", value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select status" />

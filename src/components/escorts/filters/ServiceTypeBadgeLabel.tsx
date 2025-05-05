@@ -3,8 +3,8 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import ServiceTypeIcon from './ServiceTypeIcon';
 
-// Update the ServiceTypeFilter type to allow empty string
-export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "any" | "";
+// Update the ServiceTypeFilter type to be more specific and not allow empty string
+export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "any";
 
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter | string;
