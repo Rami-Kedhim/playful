@@ -7,9 +7,17 @@ export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "any" | "";
 
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
+  color?: string;
+  size?: string;
+  showIcon?: boolean;
 }
 
-const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ type }) => {
+const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
+  type,
+  color,
+  size,
+  showIcon = true
+}) => {
   if (!type || type === "any") return null;
 
   let label: string;
@@ -34,7 +42,7 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ type }) =
 
   return (
     <Badge variant={variant} className="flex items-center gap-1">
-      <ServiceTypeIcon type={type} size={14} />
+      {showIcon && <ServiceTypeIcon type={type} size={14} />}
       <span>{label}</span>
     </Badge>
   );

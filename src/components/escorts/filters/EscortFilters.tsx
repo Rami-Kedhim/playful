@@ -166,7 +166,8 @@ const EscortFilters = ({
           <TabsContent value="features" className="space-y-4">
             <ServicesFilter 
               selectedServices={selectedServices} 
-              onChange={toggleService} 
+              toggleService={toggleService}
+              services={["Massage", "Dinner Date", "Event Companion", "Travel Companion", "Overnight"]} 
             />
           </TabsContent>
         </CardContent>

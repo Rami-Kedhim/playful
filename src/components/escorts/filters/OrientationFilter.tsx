@@ -8,31 +8,28 @@ interface OrientationFilterProps {
   onChange: (orientation: string) => void;
 }
 
-const OrientationFilter = ({ selectedOrientations, onChange }: OrientationFilterProps) => {
-  const orientationOptions = [
-    { value: "straight", label: "Straight" },
-    { value: "gay", label: "Gay" },
-    { value: "lesbian", label: "Lesbian" },
-    { value: "bisexual", label: "Bisexual" },
-    { value: "pansexual", label: "Pansexual" }
-  ];
+const OrientationFilter: React.FC<OrientationFilterProps> = ({
+  selectedOrientations,
+  onChange,
+}) => {
+  const orientations = ["Straight", "Gay", "Lesbian", "Bisexual", "Pansexual"];
 
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-medium">Orientation</h3>
-      <div className="space-y-2">
-        {orientationOptions.map((orientation) => (
-          <div key={orientation.value} className="flex items-center space-x-2">
-            <Checkbox 
-              id={`orientation-${orientation.value}`} 
-              checked={selectedOrientations.includes(orientation.value)}
-              onCheckedChange={() => onChange(orientation.value)}
+      <div className="grid grid-cols-2 gap-2">
+        {orientations.map((orientation) => (
+          <div key={orientation} className="flex items-center space-x-2">
+            <Checkbox
+              id={`orientation-${orientation}`}
+              checked={selectedOrientations.includes(orientation)}
+              onCheckedChange={() => onChange(orientation)}
             />
-            <Label 
-              htmlFor={`orientation-${orientation.value}`}
+            <Label
+              htmlFor={`orientation-${orientation}`}
               className="text-sm cursor-pointer"
             >
-              {orientation.label}
+              {orientation}
             </Label>
           </div>
         ))}
