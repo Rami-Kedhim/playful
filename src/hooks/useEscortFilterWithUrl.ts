@@ -38,8 +38,8 @@ export const useEscortFilterWithUrl = (props?: UseEscortFilterWithUrlProps) => {
       if (serviceType) {
         // Ensure we never pass an empty string - default to "any"
         const safeServiceType: ServiceTypeFilter = 
-          serviceType && serviceType !== "" ? 
-          (['in-person', 'virtual', 'both', 'any'].includes(serviceType) ? serviceType as ServiceTypeFilter : "any") : 
+          serviceType && ['in-person', 'virtual', 'both', 'any'].includes(serviceType) ? 
+          serviceType as ServiceTypeFilter : 
           "any";
         
         filterState.setServiceTypeFilter(safeServiceType);

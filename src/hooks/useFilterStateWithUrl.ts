@@ -38,7 +38,7 @@ export const useFilterStateWithUrl = <T extends UrlSyncedFilterState>({
     // Handle service type filter - ensure it's never an empty string
     const serviceType = searchParams.get('service_type') as ServiceTypeFilter;
     if (serviceType && ['in-person', 'virtual', 'both', 'any'].includes(serviceType)) {
-      newFilters.serviceTypeFilter = serviceType;
+      newFilters.serviceTypeFilter = serviceType as ServiceTypeFilter;
       hasChanges = true;
     } else if (serviceType === "") {
       newFilters.serviceTypeFilter = "any";
