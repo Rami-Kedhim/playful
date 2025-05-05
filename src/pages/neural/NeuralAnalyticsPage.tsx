@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Layout } from '@/components/layout';
+import { Layout } from '@/layouts';
 
 const NeuralAnalyticsPage = () => {
   return (
@@ -19,7 +19,6 @@ const NeuralAnalyticsPage = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Placeholder content */}
           <div className="bg-card rounded-lg shadow-sm p-6">
             <h3 className="text-lg font-semibold mb-2">Performance Metrics</h3>
             <div className="h-60 flex items-center justify-center bg-primary/10 rounded-md">

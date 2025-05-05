@@ -12,7 +12,7 @@ const SafetyPage = lazy(() => import('@/pages/SafetyPage'));
 const AICompanionDemo = lazy(() => import('@/pages/ai-companion-demo'));
 const RouteSharePage = lazy(() => import('@/pages/RouteSharePage'));
 const SEOPage = lazy(() => import('@/pages/SEOPage'));
-const NeuralMonitoringPage = lazy(() => import('@/pages/neural/NeuralMonitoringPage'));
+const NeuralMonitorPage = lazy(() => import('@/pages/neural/NeuralMonitorPage'));
 const NeuralAnalyticsPage = lazy(() => import('@/pages/neural/NeuralAnalyticsPage'));
 const BrainHubPage = lazy(() => import('@/pages/BrainHubPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
@@ -101,7 +101,7 @@ export const routes: RouteDefinition[] = [
         category: 'neural',
         element: (
           <Suspense fallback={<LoadingSpinner />}>
-            <NeuralMonitoringPage />
+            <NeuralMonitorPage />
           </Suspense>
         ),
       },

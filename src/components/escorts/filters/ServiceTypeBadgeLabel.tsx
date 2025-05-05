@@ -21,7 +21,7 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
 }) => {
   // Ensure type is never empty by using "any" as fallback
   const safeType: ServiceTypeFilter = 
-    (!type || typeof type !== 'string' || type === "" || type === "any") ? "any" : type as ServiceTypeFilter;
+    (!type || typeof type !== 'string' || type === "any") ? "any" : type as ServiceTypeFilter;
   
   // Return null if type is "any"
   if (safeType === "any") return null;
