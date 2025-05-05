@@ -1,108 +1,53 @@
 
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import React, { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ChevronUp } from "lucide-react";
 
-export interface FilterBlockProps extends React.HTMLAttributes<HTMLDivElement> {
-  title: string;
+interface FilterBlockProps {
+  title?: string;
   description?: string;
-  children: React.ReactNode;
   className?: string;
-  headerClassName?: string;
-  contentClassName?: string;
-  headerExtra?: React.ReactNode;
-  collapsible?: boolean;
-  defaultCollapsed?: boolean;
+  children: ReactNode;
 }
 
-export function FilterBlock({
+export const FilterBlock: React.FC<FilterBlockProps> = ({
   title,
   description,
-  children,
   className,
-  headerClassName,
-  contentClassName,
-  headerExtra,
-  collapsible = false,
-  defaultCollapsed = false,
-  ...props
-}: FilterBlockProps) {
-  const [collapsed, setCollapsed] = useState(defaultCollapsed);
-
+  children,
+}) => {
   return (
-    <Card className={cn("h-full shadow-sm border", className)} {...props}>
-      <CardHeader className={cn("pb-2", headerClassName)}>
-        <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <div
-              className={cn(
-                "flex items-center", 
-                collapsible && "cursor-pointer"
-              )}
-              onClick={collapsible ? () => setCollapsed(!collapsed) : undefined}
-            >
-              <CardTitle className="text-lg font-medium">
-                {title}
-              </CardTitle>
-              {collapsible && (
-                <div className="ml-2">
-                  {collapsed ? 
-                    <ChevronDown className="h-4 w-4" /> : 
-                    <ChevronUp className="h-4 w-4" />
-                  }
-                </div>
-              )}
-            </div>
-            {description && (
-              <CardDescription className="mt-1">{description}</CardDescription>
-            )}
-          </div>
-          {headerExtra && (
-            <div className="flex-shrink-0">
-              {headerExtra}
-            </div>
-          )}
+    <div className={cn("rounded-lg border border-border/50 bg-card/50 backdrop-blur-sm", className)}>
+      {(title || description) && (
+        <div className="border-b border-border/50 px-4 py-3">
+          {title && <h3 className="font-medium text-lg">{title}</h3>}
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </div>
-      </CardHeader>
-      
-      <AnimatePresence initial={false}>
-        {(!collapsed || !collapsible) && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <CardContent 
-              className={cn(
-                "pt-1", 
-                contentClassName
-              )}
-            >
-              {children}
-            </CardContent>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </Card>
-  );
-}
-
-export function FilterSection({
-  title,
-  children,
-  className,
-}: {
-  title: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={cn("space-y-1.5", className)}>
-      <h4 className="text-sm font-medium">{title}</h4>
-      {children}
+      )}
+      <div className="p-4">{children}</div>
     </div>
   );
+};
+
+interface FilterSectionProps {
+  title: string;
+  icon?: ReactNode;
+  className?: string;
+  children: ReactNode;
 }
+
+export const FilterSection: React.FC<FilterSectionProps> = ({
+  title,
+  icon,
+  className,
+  children,
+}) => {
+  return (
+    <div className={cn("space-y-3", className)}>
+      <div className="flex items-center gap-2">
+        {icon && <span className="text-primary">{icon}</span>}
+        <h4 className="font-medium text-sm">{title}</h4>
+      </div>
+      <div>{children}</div>
+    </div>
+  );
+};

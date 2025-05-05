@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface FilterSidebarProps {
   searchQuery: string;
@@ -152,9 +153,6 @@ const FilterSidebar = ({
       )}
     </div>
   );
-
-  // Import needed for cn() utility
-  const { cn } = require("@/lib/utils");
 
   return isMobile ? (
     <FilterBlock title="Filters" description="Refine your search" className="animate-fade-in">
