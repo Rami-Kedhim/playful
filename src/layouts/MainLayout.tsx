@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { UnifiedHeader } from '@/components/layout';
-import { UnifiedFooter } from '@/components/layout';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 import { cn } from '@/lib/utils';
 
 export interface MainLayoutProps {
@@ -29,7 +29,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 }) => {
   return (
     <div className="flex min-h-screen flex-col">
-      {!hideNavbar && <UnifiedHeader />}
+      {!hideNavbar && <Header />}
       
       {(title || description || showBreadcrumbs) && (
         <div className="bg-muted/20 border-b border-border">
@@ -49,7 +49,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         {children}
       </main>
       
-      {!hideFooter && <UnifiedFooter />}
+      {!hideFooter && <Footer />}
     </div>
   );
 };

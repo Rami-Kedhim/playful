@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { UnifiedLayout } from '@/layouts';
-import type { UnifiedLayoutProps } from '@/layouts';
+import Layout from '@/layouts/Layout';
+import type { LayoutProps } from '@/layouts/Layout';
 
 // This file exists for backward compatibility
-// Components importing from AppLayout will use the UnifiedLayout
-const AppLayout: React.FC<UnifiedLayoutProps> = (props) => {
-  return <UnifiedLayout {...props} />;
+// Components importing from AppLayout will use the Layout
+const AppLayout: React.FC<LayoutProps> = (props) => {
+  return <Layout {...props} />;
 };
 
 export default AppLayout;

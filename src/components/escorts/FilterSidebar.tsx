@@ -27,7 +27,7 @@ interface FilterSidebarProps {
   setRatingMin?: (rating: number) => void;
   availableNow?: boolean;
   setAvailableNow?: (available: boolean) => void;
-  serviceTypeFilter: ServiceTypeFilter | string;
+  serviceTypeFilter: ServiceTypeFilter;
   setServiceTypeFilter: (type: ServiceTypeFilter) => void;
 }
 

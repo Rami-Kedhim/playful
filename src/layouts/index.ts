@@ -1,4 +1,5 @@
 
+// Re-export the Layout component as the main layout
 import Layout from './Layout';
 export type { LayoutProps } from './Layout';
 

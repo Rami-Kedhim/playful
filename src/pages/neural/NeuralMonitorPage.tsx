@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { UnifiedLayout } from '@/components/layout';
+import { Layout } from '@/components/layout';
 
 const NeuralMonitorPage = () => {
   return (
-    <UnifiedLayout 
+    <Layout 
       title="Neural Monitor" 
       description="Advanced neural monitoring for UberEscorts ecosystem"
       showBreadcrumbs={true}
@@ -42,7 +42,7 @@ const NeuralMonitorPage = () => {
           </div>
         </div>
       </div>
-    </UnifiedLayout>
+    </Layout>
   );
 };
 

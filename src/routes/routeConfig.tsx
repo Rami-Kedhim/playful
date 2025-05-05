@@ -1,7 +1,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import { RouteDefinition } from './routeConfig';
-import { UnifiedLayout } from '@/layouts';
+import Layout from '@/layouts/Layout';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { Outlet } from 'react-router-dom';
 import AuthGuard from '@/components/auth/AuthGuard';
@@ -12,8 +12,8 @@ const SafetyPage = lazy(() => import('@/pages/SafetyPage'));
 const AICompanionDemo = lazy(() => import('@/pages/ai-companion-demo'));
 const RouteSharePage = lazy(() => import('@/pages/RouteSharePage'));
 const SEOPage = lazy(() => import('@/pages/SEOPage'));
-const NeuralMonitoringPage = lazy(() => import('@/pages/NeuralMonitoringPage'));
-const NeuralAnalyticsPage = lazy(() => import('@/pages/NeuralAnalyticsPage'));
+const NeuralMonitoringPage = lazy(() => import('@/pages/neural/NeuralMonitoringPage'));
+const NeuralAnalyticsPage = lazy(() => import('@/pages/neural/NeuralAnalyticsPage'));
 const BrainHubPage = lazy(() => import('@/pages/BrainHubPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const WalletPage = lazy(() => import('@/pages/UpdatedWallet'));
@@ -30,9 +30,9 @@ export const routes: RouteDefinition[] = [
     path: '/',
     title: 'Main',
     category: 'core',
-    element: <UnifiedLayout>
+    element: <Layout>
       <Outlet />
-    </UnifiedLayout>,
+    </Layout>,
     children: [
       {
         index: true,

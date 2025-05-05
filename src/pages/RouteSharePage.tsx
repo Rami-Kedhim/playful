@@ -2,7 +2,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { UnifiedLayout } from '@/layouts';
+import { Layout } from '@/layouts';
 
 const RouteSharePage = () => {
   const location = useLocation();
@@ -11,7 +11,7 @@ const RouteSharePage = () => {
   const shareType = queryParams.get('type') || 'Unknown type';
 
   return (
-    <UnifiedLayout title="Shared Content" showBreadcrumbs>
+    <Layout title="Shared Content" showBreadcrumbs>
       <div className="container mx-auto p-6">      
         <Card className="mb-6">
           <CardHeader>
@@ -37,7 +37,7 @@ const RouteSharePage = () => {
           </p>
         </div>
       </div>
-    </UnifiedLayout>
+    </Layout>
   );
 };
 
