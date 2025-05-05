@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-
-export type ServiceTypeFilter = 'all' | 'in-person' | 'virtual' | 'both';
+import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
 export interface ServiceTypeContextType {
   serviceTypeFilter: ServiceTypeFilter;
@@ -13,7 +12,7 @@ export interface ServiceTypeContextType {
 }
 
 const ServiceTypeContext = createContext<ServiceTypeContextType>({
-  serviceTypeFilter: 'all',
+  serviceTypeFilter: 'any',
   setServiceTypeFilter: () => {},
 });
 
@@ -30,7 +29,7 @@ export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({
   filterForbiddenTerms = false,
   onUnsafeTermRemap = () => {}
 }) => {
-  const [serviceTypeFilter, setServiceTypeFilter] = useState<ServiceTypeFilter>('all');
+  const [serviceTypeFilter, setServiceTypeFilter] = useState<ServiceTypeFilter>('any');
   const [selectedSpecializedTypes, setSelectedSpecializedTypes] = useState<string[]>([]);
   
   // Sample specialized service types
@@ -52,8 +51,8 @@ export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({
 
   // Safe setter for service type filter
   const safeSetServiceTypeFilter = (type: ServiceTypeFilter | string) => {
-    // Default to 'all' if empty or invalid
-    const safeType = !type || type === "" ? 'all' : type as ServiceTypeFilter;
+    // Default to 'any' if empty or invalid
+    const safeType = !type || type === "" ? 'any' as ServiceTypeFilter : type as ServiceTypeFilter;
     setServiceTypeFilter(safeType);
   };
 

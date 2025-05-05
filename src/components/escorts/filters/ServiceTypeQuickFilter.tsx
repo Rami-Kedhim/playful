@@ -23,7 +23,8 @@ const ServiceTypeQuickFilter: React.FC<ServiceTypeQuickFilterProps> = ({
   showLabel = true
 }) => {
   // Replace empty string with "any" to avoid empty string values
-  const safeServiceTypeFilter = (!serviceTypeFilter || serviceTypeFilter === "any") ? "any" as ServiceTypeFilter : serviceTypeFilter;
+  const safeServiceTypeFilter: ServiceTypeFilter = 
+    (!serviceTypeFilter || serviceTypeFilter === "") ? "any" : serviceTypeFilter;
   
   const types: ServiceTypeFilter[] = ["in-person", "virtual", "both", "any"];
   const labels = {
