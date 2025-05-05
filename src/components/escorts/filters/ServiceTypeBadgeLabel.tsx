@@ -18,13 +18,16 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
   size,
   showIcon = true
 }) => {
-  // Return null if no type is provided or it's "any"
-  if (!type || type === "any") return null;
+  // Ensure type is never empty by using "any" as fallback
+  const safeType = type || "any";
+  
+  // Return null if type is "any"
+  if (safeType === "any") return null;
 
   let label: string;
   let variant: "default" | "outline" | "secondary" | "destructive" = "outline";
   
-  switch (type) {
+  switch (safeType) {
     case "in-person":
       label = "In Person";
       variant = "default";
@@ -43,7 +46,7 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
 
   return (
     <Badge variant={variant} className="flex items-center gap-1">
-      {showIcon && <ServiceTypeIcon type={type} size={14} />}
+      {showIcon && <ServiceTypeIcon type={safeType} size={14} />}
       <span>{label}</span>
     </Badge>
   );

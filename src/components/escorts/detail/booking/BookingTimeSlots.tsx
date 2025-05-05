@@ -27,6 +27,7 @@ const BookingTimeSlots = ({ form }: BookingTimeSlotsProps) => {
     "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM",
     "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM",
   ];
+  const defaultTimeSlot = timeSlots[0];
 
   return (
     <FormField
@@ -37,8 +38,8 @@ const BookingTimeSlots = ({ form }: BookingTimeSlotsProps) => {
           <FormLabel>Time</FormLabel>
           <Select 
             onValueChange={field.onChange} 
-            value={field.value || timeSlots[0]}
-            defaultValue={timeSlots[0]} // Add default value
+            value={field.value || defaultTimeSlot}
+            defaultValue={defaultTimeSlot}
           >
             <FormControl>
               <SelectTrigger>

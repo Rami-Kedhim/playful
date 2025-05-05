@@ -23,6 +23,7 @@ interface BookingDurationProps {
 
 const BookingDuration = ({ form }: BookingDurationProps) => {
   const durations = ["1 hour", "2 hours", "3 hours", "Overnight"];
+  const defaultDuration = durations[0];
 
   return (
     <FormField
@@ -33,8 +34,8 @@ const BookingDuration = ({ form }: BookingDurationProps) => {
           <FormLabel>Duration</FormLabel>
           <Select 
             onValueChange={field.onChange} 
-            value={field.value || durations[0]}
-            defaultValue={durations[0]} // Add default value
+            value={field.value || defaultDuration}
+            defaultValue={defaultDuration}
           >
             <FormControl>
               <SelectTrigger>

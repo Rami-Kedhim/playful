@@ -19,10 +19,11 @@ const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({
   const isColored = variant === 'colored';
   
   // Function to render the appropriate icon based on type
+  // and ensure type is never an empty string
   const renderIcon = () => {
-    const stringType = String(type || 'any'); // Ensure type is never empty
+    const safeType = type || "any"; // Ensure type is never empty
     
-    switch (stringType) {
+    switch (safeType) {
       case 'in-person':
         return <Users size={size} className={`${isColored ? 'text-blue-500' : ''} ${className}`} />;
       case 'virtual':
