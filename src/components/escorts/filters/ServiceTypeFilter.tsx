@@ -12,11 +12,13 @@ const ServiceTypeFilter = ({
   serviceTypeFilter,
   setServiceTypeFilter,
 }: ServiceTypeFilterProps) => {
+  const safeServiceType = serviceTypeFilter || "any";
+  
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-medium">Service Type</h3>
       <RadioGroup
-        value={serviceTypeFilter || "any"}
+        value={safeServiceType}
         onValueChange={setServiceTypeFilter}
         className="flex flex-col space-y-1.5"
       >

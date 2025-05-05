@@ -12,7 +12,7 @@ import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadge
 import { useServiceType } from '@/contexts/ServiceTypeContext';
 
 // Simple ServiceTypeIcon component
-const ServiceTypeIcon = ({ type, variant }: { type: any, variant: 'colored' | 'default' }) => {
+const ServiceTypeIcon = ({ type, variant }: { type: string, variant: 'colored' | 'default' }) => {
   return <div className={variant === 'colored' ? 'text-primary' : 'text-muted-foreground'}>Icon</div>;
 };
 
@@ -44,14 +44,16 @@ const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
   const isControlled = value !== undefined && onChange !== undefined;
   
   // Use the controlled value if provided, otherwise use context
-  const serviceType = isControlled ? value : contextServiceType;
+  // Ensure we never have an empty string, default to "any"
+  const serviceType = (isControlled ? value : contextServiceType) || "any";
   
   // Handle service type changes
   const handleServiceTypeChange = (type: ServiceTypeFilter) => {
+    const safeType = type || "any"; // Ensure we never pass an empty string
     if (isControlled) {
-      onChange(type);
+      onChange(safeType);
     } else {
-      contextSetServiceType(type);
+      contextSetServiceType(safeType);
     }
   };
   

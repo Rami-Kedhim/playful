@@ -41,12 +41,15 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
   ratingMin,
   setRatingMin
 }) => {
+  // Ensure serviceTypeFilter is never an empty string
+  const safeServiceTypeFilter = serviceTypeFilter || "any";
+  
   return (
     <div className={`bg-background border border-border rounded-lg p-2 ${className}`}>
       <div className="flex flex-nowrap overflow-x-auto gap-2 items-center">
         <div className="flex-shrink-0 min-w-[180px]">
           <ServiceTypeSelect 
-            value={serviceTypeFilter || "any"} 
+            value={safeServiceTypeFilter} 
             onChange={setServiceTypeFilter} 
             label="" 
             className="w-full"
