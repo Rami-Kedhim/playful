@@ -7,16 +7,16 @@ import Breadcrumbs from '@/components/navigation/Breadcrumbs';
 
 export interface MainLayoutProps {
   children: React.ReactNode;
-  containerClass?: string;
-  hideNavbar?: boolean;
-  hideFooter?: boolean;
   title?: string;
   description?: string;
-  showBreadcrumbs?: boolean;
-  showNavigation?: boolean;
-  fullWidth?: boolean;
-  simplified?: boolean;
   hideHeader?: boolean;
+  hideNavbar?: boolean;
+  hideFooter?: boolean;
+  showBreadcrumbs?: boolean;
+  containerClass?: string;
+  fullWidth?: boolean;
+  className?: string;
+  simplified?: boolean;
 }
 
 /**
@@ -27,33 +27,35 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   containerClass = "container mx-auto px-4 py-6",
   hideNavbar = false,
   hideFooter = false,
+  hideHeader = false,
   title,
   description,
   showBreadcrumbs = false,
-  showNavigation = true,
   fullWidth = false,
+  className,
   simplified = false,
-  hideHeader = false,
 }) => {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className={cn("flex min-h-screen flex-col bg-background", className)}>
       {!hideNavbar && !hideHeader && <Header simplified={simplified} />}
       
       {(title || description || showBreadcrumbs) && (
-        <div className="bg-muted/20 border-b border-border">
-          <div className="container mx-auto px-4 py-4">
-            {showBreadcrumbs && (
-              <div className="mb-2 text-sm text-muted-foreground">
-                <Breadcrumbs />
-              </div>
-            )}
-            {title && <h1 className="text-2xl font-bold">{title}</h1>}
-            {description && <p className="text-muted-foreground mt-1">{description}</p>}
+        <div className="bg-gradient-to-r from-background to-background/80 border-b border-border/40 backdrop-blur-sm">
+          <div className="container mx-auto px-4 py-6">
+            <div className="space-y-2">
+              {showBreadcrumbs && (
+                <div className="mb-2 text-sm text-muted-foreground">
+                  <Breadcrumbs />
+                </div>
+              )}
+              {title && <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">{title}</h1>}
+              {description && <p className="text-muted-foreground">{description}</p>}
+            </div>
           </div>
         </div>
       )}
       
-      <main className={cn("flex-1", !fullWidth && containerClass)}>
+      <main className={cn("flex-1 animate-fade-in", !fullWidth && containerClass)}>
         {children}
       </main>
       
