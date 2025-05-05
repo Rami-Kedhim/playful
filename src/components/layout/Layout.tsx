@@ -1,11 +1,10 @@
 
 import React from 'react';
-import MainLayout from '@/layouts/MainLayout';
+import Layout from '@/layouts/Layout';
 
 // This component exists for backward compatibility
-// It should simply re-export the MainLayout from the layouts directory
-const Layout: React.FC<React.ComponentProps<typeof MainLayout>> = (props) => {
-  return <MainLayout {...props} />;
+const LegacyLayout: React.FC<React.ComponentProps<typeof Layout>> = (props) => {
+  return <Layout {...props} />;
 };
 
-export default Layout;
+export default LegacyLayout;

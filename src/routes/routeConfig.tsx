@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { RouteDefinition } from './routeConfig';
 import Layout from '@/layouts/Layout';
@@ -7,22 +6,22 @@ import { Outlet } from 'react-router-dom';
 import AuthGuard from '@/components/auth/AuthGuard';
 
 // Lazy load pages
-const HomePage = lazy(() => import('@/pages/HomePage'));
-const SafetyPage = lazy(() => import('@/pages/SafetyPage'));
-const AICompanionDemo = lazy(() => import('@/pages/ai-companion-demo'));
-const RouteSharePage = lazy(() => import('@/pages/RouteSharePage'));
-const SEOPage = lazy(() => import('@/pages/SEOPage'));
-const NeuralMonitorPage = lazy(() => import('@/pages/neural/NeuralMonitorPage'));
-const NeuralAnalyticsPage = lazy(() => import('@/pages/neural/NeuralAnalyticsPage'));
-const BrainHubPage = lazy(() => import('@/pages/BrainHubPage'));
-const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
-const WalletPage = lazy(() => import('@/pages/UpdatedWallet'));
-const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
-const EscortsPage = lazy(() => import('@/pages/EscortsPage'));
-const EscortDetailPage = lazy(() => import('@/pages/EscortDetailPage'));
-const MessagesPage = lazy(() => import('@/pages/Messages'));
-const FavoritesPage = lazy(() => import('@/pages/FavoritesPage'));
-const AuthPage = lazy(() => import('@/pages/AuthPage'));
+const HomePage = /*#__PURE__*/ lazy(() => import('@/pages/HomePage'));
+const SafetyPage = /*#__PURE__*/ lazy(() => import('@/pages/SafetyPage'));
+const AICompanionDemo = /*#__PURE__*/ lazy(() => import('@/pages/ai-companion-demo'));
+const RouteSharePage = /*#__PURE__*/ lazy(() => import('@/pages/RouteSharePage'));
+const SEOPage = /*#__PURE__*/ lazy(() => import('@/pages/SEOPage'));
+const NeuralMonitorPage = /*#__PURE__*/ lazy(() => import('@/pages/neural/NeuralMonitorPage'));
+const NeuralAnalyticsPage = /*#__PURE__*/ lazy(() => import('@/pages/neural/NeuralAnalyticsPage'));
+const BrainHubPage = /*#__PURE__*/ lazy(() => import('@/pages/BrainHubPage'));
+const NotFoundPage = /*#__PURE__*/ lazy(() => import('@/pages/NotFoundPage'));
+const WalletPage = /*#__PURE__*/ lazy(() => import('@/pages/UpdatedWallet'));
+const ProfilePage = /*#__PURE__*/ lazy(() => import('@/pages/ProfilePage'));
+const EscortsPage = /*#__PURE__*/ lazy(() => import('@/pages/EscortsPage'));
+const EscortDetailPage = /*#__PURE__*/ lazy(() => import('@/pages/EscortDetailPage'));
+const MessagesPage = /*#__PURE__*/ lazy(() => import('@/pages/Messages'));
+const FavoritesPage = /*#__PURE__*/ lazy(() => import('@/pages/FavoritesPage'));
+const AuthPage = /*#__PURE__*/ lazy(() => import('@/pages/AuthPage'));
 
 // Define route configuration with elements
 export const routes: RouteDefinition[] = [

@@ -1,10 +1,8 @@
 
-// Re-export the Layout component as the main layout
+// Central export for layout components
 import Layout from './Layout';
 export type { LayoutProps } from './Layout';
 
-// Export the main layout component
+// Export default layout for main usage
 export { Layout };
-
-// Export as default for easy importing
 export default Layout;

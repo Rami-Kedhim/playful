@@ -1,8 +1,8 @@
 
-import MainLayout from './MainLayout';
+import Layout from '@/layouts/Layout';
 
 /**
- * This is just an alias for MainLayout to maintain compatibility with any existing references
- * @deprecated Use MainLayout directly instead
+ * This is just an alias for Layout to maintain compatibility with any existing references
+ * @deprecated Use Layout directly instead
  */
-export default MainLayout;
+export default Layout;
