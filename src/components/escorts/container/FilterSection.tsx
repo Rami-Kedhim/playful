@@ -1,9 +1,10 @@
 
-import { memo } from "react";
+import { memo, useState } from "react";
 import FilterSidebar from "@/components/escorts/FilterSidebar";
 import MobileFilterCard from "@/components/escorts/MobileFilterCard";
 import ActiveFiltersDisplay from "./ActiveFiltersDisplay";
 import useActiveFilters from "@/hooks/escort-filters/useActiveFilters";
+import { ServiceTypeFilter } from "@/components/escorts/filters/ServiceTypeBadgeLabel";
 
 interface FilterSectionProps {
   showFilters: boolean;
@@ -20,6 +21,9 @@ const FilterSection = memo<FilterSectionProps>(({
 }) => {
   // Get active filters using our hook
   const { activeFilters, activeFilterCount } = useActiveFilters(filterState);
+  
+  // State for managing the sidebar visibility
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Handler for filter removal
   const handleRemoveFilter = (filter: { key: string; label: string; value?: string | number }) => {
@@ -62,35 +66,31 @@ const FilterSection = memo<FilterSectionProps>(({
     }
   };
 
+  // Handlers for the FilterSidebar component
+  const handleServiceTypeChange = (type: ServiceTypeFilter) => {
+    filterState.setServiceTypeFilter?.(type);
+  };
+
+  const handleApplyFilters = () => {
+    // Additional logic when applying filters can go here
+    console.log("Filters applied");
+  };
+
+  const handleResetFilters = () => {
+    filterState.clearFilters?.();
+  };
+
   return (
     <>
       {/* Desktop filter sidebar - only show on large screens */}
       <div className="hidden lg:block lg:col-span-1">
         <FilterSidebar 
-          searchQuery={filterState.searchQuery || ""}
-          setSearchQuery={filterState.setSearchQuery || (() => {})}
-          location={filterState.location || ""}
-          setLocation={filterState.setLocation || (() => {})}
-          priceRange={filterState.priceRange || [0, 500]}
-          setPriceRange={filterState.setPriceRange || (() => {})}
-          verifiedOnly={filterState.verifiedOnly || false}
-          setVerifiedOnly={filterState.setVerifiedOnly || (() => {})}
-          selectedServices={filterState.selectedServices || []}
-          toggleService={filterState.toggleService || (() => {})}
-          services={services || []}
-          clearFilters={filterState.clearFilters || (() => {})}
-          selectedGenders={filterState.selectedGenders || []}
-          toggleGender={filterState.toggleGender || (() => {})}
-          selectedOrientations={filterState.selectedOrientations || []}
-          toggleOrientation={filterState.toggleOrientation || (() => {})}
-          ageRange={filterState.ageRange || [21, 50]}
-          setAgeRange={filterState.setAgeRange || (() => {})}
-          ratingMin={filterState.ratingMin || 0}
-          setRatingMin={filterState.setRatingMin || (() => {})}
-          availableNow={filterState.availableNow || false}
-          setAvailableNow={filterState.setAvailableNow || (() => {})}
-          serviceTypeFilter={filterState.serviceTypeFilter || "any"}
-          setServiceTypeFilter={filterState.setServiceTypeFilter || (() => {})}
+          open={sidebarOpen}
+          onOpenChange={setSidebarOpen}
+          selectedServiceType={filterState.serviceTypeFilter || "any"}
+          onServiceTypeChange={handleServiceTypeChange}
+          onApplyFilters={handleApplyFilters}
+          onResetFilters={handleResetFilters}
         />
         
         {/* Desktop active filters display */}
