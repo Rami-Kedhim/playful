@@ -35,8 +35,12 @@ export const useEscortFilterWithUrl = (props?: UseEscortFilterWithUrlProps) => {
       let filtersApplied = false;
       
       // Only apply filters that actually exist in the URL
-      if (serviceType && ['any', 'in-person', 'virtual', 'both', ''].includes(serviceType)) {
-        filterState.setServiceTypeFilter(serviceType);
+      if (serviceType) {
+        // Ensure we never pass an empty string - default to "any"
+        const safeServiceType = serviceType === "" ? "any" : 
+                               ['in-person', 'virtual', 'both', 'any'].includes(serviceType) ? 
+                               serviceType : "any";
+        filterState.setServiceTypeFilter(safeServiceType);
         filtersApplied = true;
       }
       
@@ -94,7 +98,7 @@ export const useEscortFilterWithUrl = (props?: UseEscortFilterWithUrlProps) => {
       params.delete('q');
       params.delete('rating');
       
-      // Only set parameters for active filters
+      // Only set parameters for active filters - ensure serviceType is never empty
       if (filterState.serviceTypeFilter && filterState.serviceTypeFilter !== 'any') {
         params.set('serviceType', filterState.serviceTypeFilter);
       }

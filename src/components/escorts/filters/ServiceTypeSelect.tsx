@@ -23,7 +23,7 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
   label = "Service Type"
 }) => {
   // Make extra sure that value is never an empty string
-  const safeValue: ServiceTypeFilter = value === "" ? "any" : value;
+  const safeValue: ServiceTypeFilter = value === "" ? "any" : value || "any";
   
   return (
     <div className={className}>
@@ -32,7 +32,7 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
       )}
       <Select 
         value={safeValue} 
-        onValueChange={(value) => onChange(value as ServiceTypeFilter)}
+        onValueChange={(value) => onChange(value as ServiceTypeFilter || "any")}
         defaultValue="any"
       >
         <SelectTrigger className="w-full">

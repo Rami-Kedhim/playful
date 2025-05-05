@@ -11,12 +11,12 @@ export interface ServiceTypeContextType {
 }
 
 const ServiceTypeContext = createContext<ServiceTypeContextType>({
-  serviceType: 'any', // Use 'any' instead of empty string
+  serviceType: 'any',
   setServiceType: () => {}
 });
 
 export const ServiceTypeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [serviceType, setServiceType] = useState<ServiceTypeFilter>('any'); // Use 'any' instead of empty string
+  const [serviceType, setServiceType] = useState<ServiceTypeFilter>('any');
   const [selectedSpecializedTypes, setSelectedSpecializedTypes] = useState<string[]>([]);
   
   // Sample specialized service types
