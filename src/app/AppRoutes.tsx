@@ -10,14 +10,10 @@ import AuthGuard from '@/components/auth/AuthGuard';
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Auth route with simplified layout */}
-      <Route path="/auth" element={
-        <Layout hideFooter simplified>
-          <AuthPage />
-        </Layout>
-      } />
+      {/* Auth page with dedicated route */}
+      <Route path="/auth" element={<AuthPage />} />
       
-      {/* Main route with Layout */}
+      {/* Main routes with Layout */}
       <Route element={<Layout />}>
         {routeConfig.map((route, index) => {
           // Check if route requires authentication

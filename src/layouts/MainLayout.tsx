@@ -3,6 +3,7 @@ import React from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { cn } from '@/lib/utils';
+import Breadcrumbs from '@/components/navigation/Breadcrumbs';
 
 export interface MainLayoutProps {
   children: React.ReactNode;
@@ -15,6 +16,7 @@ export interface MainLayoutProps {
   showNavigation?: boolean;
   fullWidth?: boolean;
   simplified?: boolean;
+  hideHeader?: boolean;
 }
 
 /**
@@ -31,17 +33,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   showNavigation = true,
   fullWidth = false,
   simplified = false,
+  hideHeader = false,
 }) => {
   return (
     <div className="flex min-h-screen flex-col">
-      {!hideNavbar && <Header simplified={simplified} />}
+      {!hideNavbar && !hideHeader && <Header simplified={simplified} />}
       
       {(title || description || showBreadcrumbs) && (
         <div className="bg-muted/20 border-b border-border">
           <div className="container mx-auto px-4 py-4">
             {showBreadcrumbs && (
               <div className="mb-2 text-sm text-muted-foreground">
-                {/* Breadcrumbs would be rendered here */}
+                <Breadcrumbs />
               </div>
             )}
             {title && <h1 className="text-2xl font-bold">{title}</h1>}

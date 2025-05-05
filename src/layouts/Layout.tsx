@@ -3,7 +3,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import MainLayout, { MainLayoutProps } from './MainLayout';
 
-export interface LayoutProps extends MainLayoutProps {
+export interface LayoutProps extends Omit<MainLayoutProps, 'children'> {
   children?: React.ReactNode;
 }
 

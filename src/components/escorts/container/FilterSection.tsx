@@ -1,144 +1,98 @@
 
-import { memo, useState } from "react";
-import FilterSidebar from "@/components/escorts/FilterSidebar";
-import MobileFilterCard from "@/components/escorts/MobileFilterCard";
-import ActiveFiltersDisplay from "./ActiveFiltersDisplay";
-import useActiveFilters from "@/hooks/escort-filters/useActiveFilters";
-import { ServiceTypeFilter } from "@/components/escorts/filters/ServiceTypeBadgeLabel";
+import React, { useState } from 'react';
+import FilterSidebar from '../FilterSidebar';
+import QuickFilterBar from '../QuickFilterBar';
+import { ServiceTypeFilter } from '../filters/ServiceTypeBadgeLabel';
 
 interface FilterSectionProps {
-  showFilters: boolean;
-  setShowFilters: (show: boolean) => void;
-  filterState: any;
+  // Filters state
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
+  location: string;
+  setLocation: (value: string) => void;
+  priceRange: [number, number];
+  setPriceRange: (value: [number, number]) => void;
+  verifiedOnly: boolean;
+  setVerifiedOnly: (value: boolean) => void;
+  selectedServices: string[];
+  toggleService: (service: string) => void;
   services: string[];
+  selectedGenders: string[];
+  toggleGender: (gender: string) => void;
+  selectedOrientations: string[];
+  toggleOrientation: (orientation: string) => void;
+  ageRange: [number, number];
+  setAgeRange: (value: [number, number]) => void;
+  ratingMin: number;
+  setRatingMin: (value: number) => void;
+  availableNow: boolean;
+  setAvailableNow: (value: boolean) => void;
+  serviceTypeFilter: ServiceTypeFilter;
+  setServiceTypeFilter: (type: ServiceTypeFilter) => void;
+  clearFilters: () => void;
 }
 
-const FilterSection = memo<FilterSectionProps>(({ 
-  showFilters, 
-  setShowFilters, 
-  filterState,
-  services
+const FilterSection: React.FC<FilterSectionProps> = ({
+  searchQuery,
+  setSearchQuery,
+  location,
+  setLocation,
+  priceRange,
+  setPriceRange,
+  verifiedOnly,
+  setVerifiedOnly,
+  selectedServices,
+  toggleService,
+  services,
+  selectedGenders,
+  toggleGender,
+  selectedOrientations,
+  toggleOrientation,
+  ageRange,
+  setAgeRange,
+  ratingMin,
+  setRatingMin,
+  availableNow,
+  setAvailableNow,
+  serviceTypeFilter,
+  setServiceTypeFilter,
+  clearFilters
 }) => {
-  // Get active filters using our hook
-  const { activeFilters, activeFilterCount } = useActiveFilters(filterState);
-  
-  // State for managing the sidebar visibility
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
-  // Handler for filter removal
-  const handleRemoveFilter = (filter: { key: string; label: string; value?: string | number }) => {
-    switch (filter.key) {
-      case 'searchQuery':
-        filterState.setSearchQuery?.('');
-        break;
-      case 'location':
-        filterState.setLocation?.('');
-        break;
-      case 'serviceTypeFilter':
-        filterState.setServiceTypeFilter?.('any');
-        break;
-      case 'verifiedOnly':
-        filterState.setVerifiedOnly?.(false);
-        break;
-      case 'availableNow':
-        filterState.setAvailableNow?.(false);
-        break;
-      case 'ratingMin':
-        filterState.setRatingMin?.(0);
-        break;
-      case 'priceRange':
-        filterState.setPriceRange?.([0, 500]);
-        break;
-      case 'ageRange':
-        filterState.setAgeRange?.([21, 50]);
-        break;
-      case 'selectedGenders':
-        filterState.setSelectedGenders?.([]);
-        break;
-      case 'selectedOrientations':
-        filterState.setSelectedOrientations?.([]);
-        break;
-      case 'selectedServices':
-        filterState.setSelectedServices?.([]);
-        break;
-      default:
-        break;
-    }
-  };
-
-  // Handlers for the FilterSidebar component
-  const handleServiceTypeChange = (type: ServiceTypeFilter) => {
-    filterState.setServiceTypeFilter?.(type);
-  };
-
   const handleApplyFilters = () => {
-    // Additional logic when applying filters can go here
-    console.log("Filters applied");
+    // Apply filters logic here
+    setSidebarOpen(false);
   };
-
+  
   const handleResetFilters = () => {
-    filterState.clearFilters?.();
+    clearFilters();
   };
-
+  
   return (
-    <>
-      {/* Desktop filter sidebar - only show on large screens */}
-      <div className="hidden lg:block lg:col-span-1">
-        <FilterSidebar 
-          open={sidebarOpen}
-          onOpenChange={setSidebarOpen}
-          selectedServiceType={filterState.serviceTypeFilter || "any"}
-          onServiceTypeChange={handleServiceTypeChange}
-          onApplyFilters={handleApplyFilters}
-          onResetFilters={handleResetFilters}
-        />
-        
-        {/* Desktop active filters display */}
-        <div className="mt-6">
-          <ActiveFiltersDisplay 
-            activeFilters={activeFilters}
-            onRemoveFilter={handleRemoveFilter}
-            onClearAllFilters={filterState.clearFilters || (() => {})}
-          />
-        </div>
-      </div>
+    <div className="space-y-4">
+      <QuickFilterBar
+        serviceTypeFilter={serviceTypeFilter}
+        setServiceTypeFilter={setServiceTypeFilter}
+        verifiedOnly={verifiedOnly}
+        setVerifiedOnly={setVerifiedOnly}
+        availableNow={availableNow}
+        setAvailableNow={setAvailableNow}
+        location={location}
+        onLocationClick={() => setSidebarOpen(true)}
+        onShowMoreFilters={() => setSidebarOpen(true)}
+        ratingMin={ratingMin}
+        setRatingMin={setRatingMin}
+      />
       
-      {/* Mobile filter card - only show when filters are toggled */}
-      {showFilters && (
-        <div className="lg:hidden col-span-1 mb-6">
-          <MobileFilterCard
-            searchQuery={filterState.searchQuery || ""}
-            setSearchQuery={filterState.setSearchQuery || (() => {})}
-            location={filterState.location || ""}
-            setLocation={filterState.setLocation || (() => {})}
-            priceRange={filterState.priceRange || [0, 500]}
-            setPriceRange={filterState.setPriceRange || (() => {})}
-            verifiedOnly={filterState.verifiedOnly || false}
-            setVerifiedOnly={filterState.setVerifiedOnly || (() => {})}
-            selectedServices={filterState.selectedServices || []}
-            toggleService={filterState.toggleService || (() => {})}
-            services={services || []}
-            clearFilters={filterState.clearFilters || (() => {})}
-            setShowFilters={setShowFilters}
-            selectedGenders={filterState.selectedGenders || []}
-            toggleGender={filterState.toggleGender || (() => {})}
-            selectedOrientations={filterState.selectedOrientations || []}
-            toggleOrientation={filterState.toggleOrientation || (() => {})}
-            ageRange={filterState.ageRange || [21, 50]}
-            setAgeRange={filterState.setAgeRange || (() => {})}
-            ratingMin={filterState.ratingMin || 0}
-            setRatingMin={filterState.setRatingMin || (() => {})}
-            availableNow={filterState.availableNow || false}
-            setAvailableNow={filterState.setAvailableNow || (() => {})}
-            serviceTypeFilter={filterState.serviceTypeFilter || "any"}
-            setServiceTypeFilter={filterState.setServiceTypeFilter || (() => {})}
-          />
-        </div>
-      )}
-    </>
+      <FilterSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        onApplyFilters={handleApplyFilters}
+        onResetFilters={handleResetFilters}
+      />
+    </div>
   );
-});
-
-FilterSection.displayName = 'FilterSection';
+};
 
 export default FilterSection;

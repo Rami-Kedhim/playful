@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Layout } from '@/layouts';
+import Layout from '@/layouts/Layout';
 
 const AuthPage = () => {
   return (
-    <Layout hideHeader hideFooter>
+    <Layout hideNavbar={true} hideFooter={true}>
       <div className="min-h-screen flex justify-center items-center">
         <div className="w-full max-w-md p-8 space-y-8 bg-card rounded-xl shadow-md">
           <div className="text-center">
