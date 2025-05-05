@@ -38,7 +38,7 @@ export const useEscortFilterWithUrl = (props?: UseEscortFilterWithUrlProps) => {
       if (serviceType !== null) {
         // Ensure we never pass an empty string - default to "any"
         const safeServiceType: ServiceTypeFilter = 
-          serviceType && serviceType !== "" && ['in-person', 'virtual', 'both', 'any'].includes(serviceType) ? 
+          serviceType && ['in-person', 'virtual', 'both', 'any'].includes(serviceType) ? 
           serviceType as ServiceTypeFilter : 
           "any";
         
@@ -101,7 +101,7 @@ export const useEscortFilterWithUrl = (props?: UseEscortFilterWithUrlProps) => {
       params.delete('rating');
       
       // Only set parameters for active filters - ensure serviceType is never empty
-      if (filterState.serviceTypeFilter && filterState.serviceTypeFilter !== 'any' && filterState.serviceTypeFilter !== '') {
+      if (filterState.serviceTypeFilter && filterState.serviceTypeFilter !== 'any') {
         params.set('serviceType', filterState.serviceTypeFilter);
       }
       
