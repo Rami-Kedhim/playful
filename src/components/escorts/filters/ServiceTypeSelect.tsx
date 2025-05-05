@@ -6,7 +6,7 @@ import ServiceTypeIcon from './ServiceTypeIcon';
 import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
 
 interface ServiceTypeSelectProps {
-  value: ServiceTypeFilter;
+  value: ServiceTypeFilter | string;
   onChange: (value: ServiceTypeFilter) => void;
   className?: string;
   label?: string;
@@ -23,7 +23,8 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
   label = "Service Type"
 }) => {
   // Make extra sure that value is never an empty string
-  const safeValue: ServiceTypeFilter = !value || value === "" ? "any" : value;
+  const safeValue: ServiceTypeFilter = !value ? "any" : 
+    (value === "" ? "any" : value as ServiceTypeFilter);
   
   // Define handler to prevent empty strings being passed back
   const handleValueChange = (val: string) => {

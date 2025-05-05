@@ -24,7 +24,7 @@ export const useEscortFilterWithUrl = (props?: UseEscortFilterWithUrlProps) => {
     
     try {
       // Get filter values from URL parameters
-      const serviceType = searchParams.get('serviceType') as ServiceTypeFilter;
+      const serviceType = searchParams.get('serviceType');
       const verified = searchParams.get('verified') === 'true';
       const available = searchParams.get('available') === 'true';
       const location = searchParams.get('location') || '';
@@ -35,7 +35,7 @@ export const useEscortFilterWithUrl = (props?: UseEscortFilterWithUrlProps) => {
       let filtersApplied = false;
       
       // Only apply filters that actually exist in the URL
-      if (serviceType) {
+      if (serviceType !== null) {
         // Ensure we never pass an empty string - default to "any"
         const safeServiceType: ServiceTypeFilter = 
           serviceType && ['in-person', 'virtual', 'both', 'any'].includes(serviceType) ? 

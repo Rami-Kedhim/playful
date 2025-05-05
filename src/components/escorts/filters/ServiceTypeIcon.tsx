@@ -22,7 +22,7 @@ const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({
   // and ensure type is never an empty string
   const renderIcon = () => {
     // Ensure we never pass an empty string - default to "any"
-    const safeType = type || "any";
+    const safeType = !type || type === "" ? "any" : type;
     
     switch (safeType) {
       case 'in-person':

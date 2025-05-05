@@ -7,7 +7,7 @@ import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadge
  * Interface for filter fields that can be synchronized with URL parameters
  */
 export interface UrlSyncedFilterState {
-  serviceTypeFilter?: ServiceTypeFilter;
+  serviceTypeFilter?: ServiceTypeFilter | string;
   verifiedOnly?: boolean;
   availableNow?: boolean;
   location?: string;
@@ -36,13 +36,15 @@ export const useFilterStateWithUrl = <T extends UrlSyncedFilterState>({
     let hasChanges = false;
 
     // Handle service type filter - ensure it's never an empty string
-    const serviceType = searchParams.get('service_type') as ServiceTypeFilter;
-    if (serviceType && ['in-person', 'virtual', 'both', 'any'].includes(serviceType)) {
-      newFilters.serviceTypeFilter = serviceType as ServiceTypeFilter;
-      hasChanges = true;
-    } else if (serviceType === "") {
-      newFilters.serviceTypeFilter = "any";
-      hasChanges = true;
+    const serviceType = searchParams.get('service_type');
+    if (serviceType !== null) {
+      if (['in-person', 'virtual', 'both', 'any'].includes(serviceType)) {
+        newFilters.serviceTypeFilter = serviceType as ServiceTypeFilter;
+        hasChanges = true;
+      } else {
+        newFilters.serviceTypeFilter = "any";
+        hasChanges = true;
+      }
     }
 
     // Handle verified only filter
@@ -90,8 +92,9 @@ export const useFilterStateWithUrl = <T extends UrlSyncedFilterState>({
     const params = new URLSearchParams();
 
     // Add service type filter to URL - ensure it's never an empty string
-    if (newFilters.serviceTypeFilter && newFilters.serviceTypeFilter !== "any") {
-      params.set('service_type', newFilters.serviceTypeFilter);
+    const serviceType = newFilters.serviceTypeFilter;
+    if (serviceType && serviceType !== "any") {
+      params.set('service_type', serviceType.toString());
     }
 
     // Add verified only filter to URL
