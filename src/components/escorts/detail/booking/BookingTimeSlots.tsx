@@ -37,7 +37,7 @@ const BookingTimeSlots = ({ form }: BookingTimeSlotsProps) => {
         <FormItem>
           <FormLabel>Time</FormLabel>
           <Select 
-            onValueChange={field.onChange} 
+            onValueChange={(value) => field.onChange(value || defaultTimeSlot)} 
             value={field.value || defaultTimeSlot}
             defaultValue={defaultTimeSlot}
           >
@@ -48,7 +48,7 @@ const BookingTimeSlots = ({ form }: BookingTimeSlotsProps) => {
             </FormControl>
             <SelectContent>
               {timeSlots.map((time) => (
-                <SelectItem key={time} value={time || defaultTimeSlot}>
+                <SelectItem key={time} value={time}>
                   {time}
                 </SelectItem>
               ))}
