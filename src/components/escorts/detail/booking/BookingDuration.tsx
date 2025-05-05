@@ -44,7 +44,7 @@ const BookingDuration = ({ form }: BookingDurationProps) => {
             </FormControl>
             <SelectContent>
               {durations.map((duration) => (
-                <SelectItem key={duration} value={duration}>
+                <SelectItem key={duration} value={duration || defaultDuration}>
                   {duration}
                 </SelectItem>
               ))}

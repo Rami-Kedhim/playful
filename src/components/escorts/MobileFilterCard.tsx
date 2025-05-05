@@ -66,8 +66,8 @@ const MobileFilterCard = ({
   ];
 
   // Ensure serviceTypeFilter is never an empty string
-  const safeServiceTypeFilter: ServiceTypeFilter = !serviceTypeFilter ? "any" :
-    (serviceTypeFilter === "" ? "any" : serviceTypeFilter as ServiceTypeFilter);
+  const safeServiceTypeFilter: ServiceTypeFilter = !serviceTypeFilter || serviceTypeFilter === "" ? 
+    "any" : serviceTypeFilter as ServiceTypeFilter;
   
   return (
     <Card className="mb-6">
