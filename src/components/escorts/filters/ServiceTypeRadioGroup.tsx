@@ -138,7 +138,7 @@ const ServiceTypeRadioGroup: React.FC<ServiceTypeRadioGroupProps> = ({
           className={cn(
             "flex items-center gap-2 justify-center border rounded-md cursor-pointer transition-colors",
             "hover:bg-accent hover:border-primary",
-            (safeServiceTypeFilter === 'any' || safeServiceTypeFilter === '') ? "bg-accent border-primary" : "border-muted",
+            safeServiceTypeFilter === 'any' ? "bg-accent border-primary" : "border-muted",
             buttonSizeClasses[size]
           )}
         >
@@ -146,14 +146,14 @@ const ServiceTypeRadioGroup: React.FC<ServiceTypeRadioGroupProps> = ({
             type="radio" 
             id="service-type-any" 
             value="any"
-            checked={safeServiceTypeFilter === 'any' || safeServiceTypeFilter === ''}
+            checked={safeServiceTypeFilter === 'any'}
             onChange={() => setServiceTypeFilter('any')}
             className="sr-only" 
           />
           <ServiceTypeIcon 
             type="any" 
             size={iconSize} 
-            className={(safeServiceTypeFilter === 'any' || safeServiceTypeFilter === '') ? "text-primary" : ""}
+            className={safeServiceTypeFilter === 'any' ? "text-primary" : ""}
           />
           {showLabels && <span className={cn(size === 'sm' && "text-xs")}>Any</span>}
         </Label>

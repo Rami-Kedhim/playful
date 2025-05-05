@@ -37,7 +37,7 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
       >
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select service type">
-            {safeValue && safeValue !== "any" && (
+            {safeValue && (
               <div className="flex items-center gap-2">
                 <ServiceTypeIcon type={safeValue} size={16} className="text-primary" />
                 {safeValue === 'in-person' ? 'In Person' : 
@@ -45,16 +45,12 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
                  safeValue === 'both' ? 'Both Types' : 'Any Type'}
               </div>
             )}
-            {safeValue === "any" && (
-              <div className="flex items-center gap-2">
-                Any Type
-              </div>
-            )}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="any">
             <div className="flex items-center gap-2">
+              <ServiceTypeIcon type="any" size={16} className="text-gray-500" />
               Any Type
             </div>
           </SelectItem>

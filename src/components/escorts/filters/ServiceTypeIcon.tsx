@@ -21,7 +21,8 @@ const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({
   // Function to render the appropriate icon based on type
   // and ensure type is never an empty string
   const renderIcon = () => {
-    const safeType = type || "any"; // Ensure type is never empty
+    // Ensure we never pass an empty string - default to "any"
+    const safeType = type || "any";
     
     switch (safeType) {
       case 'in-person':
