@@ -54,7 +54,10 @@ const FilterSidebar = ({
   
   const FilterContent = () => (
     <div className="space-y-5 animate-fade-in">
-      <FilterSection title="Search" icon={<Search size={16} className="text-primary" />}>
+      <FilterSection 
+        title="Search" 
+        icon={<Search size={16} className="text-primary" />}
+      >
         <div className="relative">
           <Input
             placeholder="Search by name or username"
@@ -66,7 +69,10 @@ const FilterSidebar = ({
         </div>
       </FilterSection>
       
-      <FilterSection title="Price Range" icon={<Filter size={16} className="text-primary" />}>
+      <FilterSection 
+        title="Price Range" 
+        icon={<Filter size={16} className="text-primary" />}
+      >
         <Select 
           value={priceMax || "all"} 
           onValueChange={(value) => setPriceMax(value === "all" ? "" : value)}
@@ -84,7 +90,10 @@ const FilterSidebar = ({
         </Select>
       </FilterSection>
       
-      <FilterSection title="Content Types" icon={<Sparkles size={16} className="text-primary" />}>
+      <FilterSection 
+        title="Content Types" 
+        icon={<Sparkles size={16} className="text-primary" />}
+      >
         <div className="flex flex-wrap gap-2">
           {contentTypes.map((type) => (
             <Badge
