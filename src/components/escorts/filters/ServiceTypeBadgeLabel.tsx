@@ -3,8 +3,8 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import ServiceTypeIcon from './ServiceTypeIcon';
 
-// Update the ServiceTypeFilter type to be more specific and not allow empty string
-export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "any";
+// Update the ServiceTypeFilter type to include all needed service types
+export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "any" | "massage" | "dinner";
 
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
@@ -21,7 +21,7 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
 }) => {
   // Ensure type is never empty by using "any" as fallback
   const safeType: ServiceTypeFilter = 
-    (!type || typeof type !== 'string' || type === "") ? "any" : type as ServiceTypeFilter;
+    (!type) ? "any" : type;
   
   // Return null if type is "any"
   if (safeType === "any") return null;
@@ -40,6 +40,14 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
       break;
     case "both":
       label = "Both Types";
+      variant = "outline";
+      break;
+    case "massage":
+      label = "Massage";
+      variant = "outline";
+      break;
+    case "dinner":
+      label = "Dinner Date";
       variant = "outline";
       break;
     default:

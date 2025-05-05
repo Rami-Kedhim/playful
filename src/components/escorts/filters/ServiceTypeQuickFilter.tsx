@@ -33,7 +33,9 @@ const ServiceTypeQuickFilter: React.FC<ServiceTypeQuickFilterProps> = ({
     "in-person": "In Person",
     "virtual": "Virtual",
     "both": "Both",
-    "any": "Any"
+    "any": "Any",
+    "massage": "Massage",
+    "dinner": "Dinner Date"
   };
   
   // Safe handler to prevent empty strings
