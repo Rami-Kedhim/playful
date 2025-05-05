@@ -7,7 +7,7 @@ import ServiceTypeIcon from './ServiceTypeIcon';
 import { cn } from "@/lib/utils";
 
 interface ServiceTypeQuickFilterProps {
-  serviceTypeFilter: ServiceTypeFilter;
+  serviceTypeFilter: ServiceTypeFilter | string;
   setServiceTypeFilter: (type: ServiceTypeFilter) => void;
   className?: string;
   showLabel?: boolean;
@@ -24,7 +24,9 @@ const ServiceTypeQuickFilter: React.FC<ServiceTypeQuickFilterProps> = ({
 }) => {
   // Replace empty string with "any" to avoid empty string values
   const safeServiceTypeFilter: ServiceTypeFilter = 
-    (!serviceTypeFilter || serviceTypeFilter === "") ? "any" : serviceTypeFilter as ServiceTypeFilter;
+    (!serviceTypeFilter || typeof serviceTypeFilter !== 'string' || serviceTypeFilter === '') 
+      ? "any" 
+      : serviceTypeFilter as ServiceTypeFilter;
   
   const types: ServiceTypeFilter[] = ["in-person", "virtual", "both", "any"];
   const labels = {
@@ -36,7 +38,7 @@ const ServiceTypeQuickFilter: React.FC<ServiceTypeQuickFilterProps> = ({
   
   // Safe handler to prevent empty strings
   const handleSetServiceType = (type: ServiceTypeFilter) => {
-    if (!type || type === "") {
+    if (!type) {
       setServiceTypeFilter("any");
     } else {
       setServiceTypeFilter(type);
