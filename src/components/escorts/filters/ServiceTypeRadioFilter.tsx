@@ -22,7 +22,7 @@ const ServiceTypeRadioFilter: React.FC<ServiceTypeRadioFilterProps> = ({
       className="space-y-3"
     >
       <div className="flex items-center space-x-2">
-        <RadioGroupItem value="" id="service-all" />
+        <RadioGroupItem value="any" id="service-all" />
         <Label htmlFor="service-all" className="cursor-pointer">All services</Label>
       </div>
       

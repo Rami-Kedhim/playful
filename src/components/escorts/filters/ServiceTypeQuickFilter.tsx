@@ -22,12 +22,13 @@ const ServiceTypeQuickFilter: React.FC<ServiceTypeQuickFilterProps> = ({
   className,
   showLabel = true
 }) => {
-  const types: ServiceTypeFilter[] = ["in-person", "virtual", "both", ""];
+  // Replace empty string with "any" to avoid empty string values
+  const types: ServiceTypeFilter[] = ["in-person", "virtual", "both", "any"];
   const labels = {
     "in-person": "In Person",
     "virtual": "Virtual",
     "both": "Both",
-    "": "Any"
+    "any": "Any"
   };
   
   return (
@@ -46,7 +47,7 @@ const ServiceTypeQuickFilter: React.FC<ServiceTypeQuickFilterProps> = ({
             )}
           >
             <ServiceTypeIcon 
-              type={type || ""} 
+              type={type} 
               className={serviceTypeFilter === type ? "text-primary" : ""}
             />
             {showLabel && <span>{labels[type]}</span>}

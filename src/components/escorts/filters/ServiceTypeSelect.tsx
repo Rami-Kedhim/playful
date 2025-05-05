@@ -33,6 +33,7 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
       <Select 
         value={safeValue} 
         onValueChange={(value) => onChange(value as ServiceTypeFilter)}
+        defaultValue="any"
       >
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select service type">

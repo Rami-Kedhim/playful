@@ -10,7 +10,7 @@ interface UseEscortServiceTypeFilterResult {
 }
 
 export const useEscortServiceTypeFilter = (
-  initialValue: ServiceTypeFilter = ''
+  initialValue: ServiceTypeFilter = 'any'
 ): UseEscortServiceTypeFilterResult => {
   const [serviceType, setServiceType] = useState<ServiceTypeFilter>(initialValue);
   
@@ -19,7 +19,7 @@ export const useEscortServiceTypeFilter = (
   }, [serviceType]);
   
   const clearServiceType = useCallback(() => {
-    setServiceType('');
+    setServiceType('any');
   }, []);
   
   return {
