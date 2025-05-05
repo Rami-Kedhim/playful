@@ -8,7 +8,7 @@ export interface LayoutProps extends Omit<MainLayoutProps, 'children'> {
 }
 
 /**
- * Unified Layout component that serves as the main layout across the platform.
+ * Unified Layout component that serves as the main layout across the UberEscorts platform.
  * This component wraps MainLayout for compatibility with both direct children and Outlet usage.
  */
 const Layout: React.FC<LayoutProps> = (props) => {
