@@ -23,7 +23,7 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
   label = "Service Type"
 }) => {
   // Make extra sure that value is never an empty string
-  const safeValue: ServiceTypeFilter = value === "" ? "any" : value || "any";
+  const safeValue: ServiceTypeFilter = value === "" ? "any" : (value || "any");
   
   return (
     <div className={className}>
