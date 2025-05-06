@@ -1,47 +1,37 @@
+
 import { useState, useEffect, useCallback } from 'react';
-import { SystemHealthMetrics } from '@/services/neural/types/NeuralService';
+import type { SystemHealthMetrics } from '@/services/neural/types/NeuralService';
 
-interface MetricsData {
-  overallHealth: number;
-  cpu: number;
-  memory: number;
-  network: number;
-  errorRate: number;
-  requestsPerSecond: number;
-  systemHealth: SystemHealthMetrics;
-}
-
+// Define types
 interface ActivityLog {
-  id: string;
-  timestamp: Date;
-  system: string;
-  action: string;
-  status: 'success' | 'warning' | 'error';
-  details?: string;
-}
-
-interface CoreMetrics {
-  cpuUsage: number;
-  memoryUsage: number;
-  networkLatency: number;
-  errorRate: number;
-  requestsPerSecond: number;
+  timestamp: string;
+  message: string;
+  level: 'info' | 'warning' | 'error' | 'success';
+  source?: string;
+  details?: any;
 }
 
 interface UberCoreMonitoringState {
   isLoading: boolean;
+  metrics: {
+    overallHealth: number;
+    cpu: number;
+    memory: number;
+    network: number;
+    errorRate: number;
+    requestsPerSecond: number;
+    systemHealth: SystemHealthMetrics;
+  };
   isMonitoring: boolean;
-  error: string | null;
-  metrics: MetricsData;
+  error: string;
   logs: ActivityLog[];
   refreshInterval: number;
 }
 
+// Example monitoring hook for UberCore
 export function useUberCoreMonitoring() {
   const [state, setState] = useState<UberCoreMonitoringState>({
     isLoading: false,
-    isMonitoring: false,
-    error: null,
     metrics: {
       overallHealth: 0,
       cpu: 0,
@@ -56,163 +46,126 @@ export function useUberCoreMonitoring() {
         errorRate: 0,
         averageResponseTime: 0,
         cpuUsage: 0,
-        memoryUsage: 0
+        memoryUsage: 0,
+        systemLoad: 0
       }
     },
+    isMonitoring: false,
+    error: '',
     logs: [],
     refreshInterval: 5000
   });
 
-  // Start monitoring
-  const startMonitoring = useCallback(() => {
-    setState(prev => ({ ...prev, isMonitoring: true }));
-  }, []);
-
-  // Stop monitoring
-  const stopMonitoring = useCallback(() => {
-    setState(prev => ({ ...prev, isMonitoring: false }));
-  }, []);
-
-  // Set refresh interval
-  const setRefreshInterval = useCallback((interval: number) => {
-    setState(prev => ({ ...prev, refreshInterval: interval }));
-  }, []);
-
-  // Fetch metrics
-  const fetchMetrics = useCallback(async () => {
-    setState(prev => ({ ...prev, isLoading: true }));
-    
+  const fetchSystemHealth = useCallback(async () => {
     try {
-      // In a real application, this would call an API
-      // Here we'll generate mock data
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Generate random metrics within realistic ranges
-      const cpuUsage = Math.random() * 50 + 20; // 20-70%
-      const memoryUsage = Math.random() * 40 + 30; // 30-70%
-      const networkLatency = Math.random() * 100 + 50; // 50-150ms
-      const errorRate = Math.random() * 0.05; // 0-5%
-      const requestsPerSecond = Math.random() * 50 + 10; // 10-60 RPS
-      
-      // Calculate overall health score (0-100)
-      // Lower values for CPU, memory, network latency, and error rate are better
-      const overallHealth = 100 - (
-        (cpuUsage / 100 * 25) +
-        (memoryUsage / 100 * 25) +
-        (networkLatency / 200 * 25) +
-        (errorRate / 0.1 * 25)
-      );
+      // Simulate API call
+      const response = await mockFetchSystemHealth();
       
       // Update state with new metrics
       setState(prev => ({
         ...prev,
         isLoading: false,
         metrics: {
-          overallHealth,
-          cpu: cpuUsage,
-          memory: memoryUsage,
-          network: networkLatency,
-          errorRate,
-          requestsPerSecond,
-          systemHealth: {
-            load: cpuUsage / 100,
-            memory: memoryUsage,
-            latency: networkLatency,
-            errorRate,
-            averageResponseTime: networkLatency * 1.2,
-            cpuUsage,
-            memoryUsage
-          }
+          ...prev.metrics,
+          overallHealth: response.overallHealth,
+          cpu: response.cpu, 
+          memory: response.memory,
+          network: response.network,
+          errorRate: response.errorRate,
+          requestsPerSecond: response.requestsPerSecond,
+          systemHealth: response.systemHealth
         }
       }));
-    } catch (error) {
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: 'Failed to fetch UberCore metrics'
-      }));
+      
+      // Log successful metric update
+      addLog('System metrics updated', 'info');
+    } catch (error: any) {
+      addLog(`Failed to fetch metrics: ${error.message}`, 'error');
+      setState(prev => ({ ...prev, isLoading: false, error: error.message }));
     }
   }, []);
-
-  // Fetch activity logs
-  const fetchActivityLogs = useCallback(async () => {
-    setState(prev => ({ ...prev, isLoading: true }));
+  
+  // Mock fetch function that would normally call an API
+  const mockFetchSystemHealth = async () => {
+    await new Promise(resolve => setTimeout(resolve, 500));
     
-    try {
-      // In a real application, this would call an API
-      // Here we'll generate mock logs
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Generate random status weighted towards success
-      const getRandomStatus = (): 'success' | 'warning' | 'error' => {
-        const r = Math.random();
-        if (r > 0.9) return 'error';
-        if (r > 0.75) return 'warning';
-        return 'success';
-      };
-      
-      // Generate a new log entry
-      const newLog: ActivityLog = {
-        id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-        timestamp: new Date(),
-        system: ['UberCore', 'Oxum', 'Hermes', 'Lucie', 'Orus'][Math.floor(Math.random() * 5)],
-        action: ['user.authenticate', 'profile.update', 'boost.apply', 'content.moderate', 'transaction.process'][Math.floor(Math.random() * 5)],
-        status: getRandomStatus(),
-        details: `Transaction ID: ${Math.floor(Math.random() * 1000000)}`
-      };
-      
-      // Add to existing logs, keeping only the latest 100
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        logs: [newLog, ...prev.logs].slice(0, 100)
-      }));
-    } catch (error) {
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: 'Failed to fetch activity logs'
-      }));
-    }
+    // Random values for simulation
+    const load = Math.random() * 100;
+    const memory = Math.random() * 100;
+    const cpu = Math.random() * 100;
+    
+    return {
+      overallHealth: Math.min(100, Math.max(0, 85 + (Math.random() * 30 - 15))),
+      cpu: cpu,
+      memory: memory,
+      network: Math.random() * 100,
+      errorRate: Math.random() * 0.05,
+      requestsPerSecond: Math.floor(Math.random() * 1000),
+      systemHealth: {
+        load: load,
+        memory: memory,
+        latency: Math.random() * 500,
+        errorRate: Math.random() * 0.05,
+        averageResponseTime: Math.random() * 200,
+        cpuUsage: cpu,
+        memoryUsage: memory,
+        systemLoad: load
+      }
+    };
+  };
+  
+  const addLog = (message: string, level: ActivityLog['level'] = 'info') => {
+    const log: ActivityLog = {
+      timestamp: new Date().toISOString(),
+      message,
+      level
+    };
+    
+    setState(prev => ({
+      ...prev,
+      logs: [log, ...prev.logs].slice(0, 100)
+    }));
+  };
+  
+  const startMonitoring = useCallback(() => {
+    setState(prev => ({ ...prev, isMonitoring: true }));
+    addLog('System monitoring started', 'success');
   }, []);
-
-  // Reset error state
-  const clearError = useCallback(() => {
-    setState(prev => ({ ...prev, error: null }));
+  
+  const stopMonitoring = useCallback(() => {
+    setState(prev => ({ ...prev, isMonitoring: false }));
+    addLog('System monitoring stopped', 'info');
   }, []);
-
-  // Set up polling for metrics and logs when monitoring is active
+  
+  const clearLogs = useCallback(() => {
+    setState(prev => ({ ...prev, logs: [] }));
+  }, []);
+  
+  const setRefreshInterval = useCallback((interval: number) => {
+    setState(prev => ({ ...prev, refreshInterval: interval }));
+    addLog(`Refresh interval set to ${interval}ms`, 'info');
+  }, []);
+  
+  // Effect to periodically fetch metrics when monitoring is active
   useEffect(() => {
     if (!state.isMonitoring) return;
     
-    // Fetch initial data
-    fetchMetrics();
-    fetchActivityLogs();
+    // Initial fetch
+    fetchSystemHealth();
     
-    // Set up interval for metrics
-    const metricsInterval = setInterval(fetchMetrics, state.refreshInterval);
+    // Set up interval
+    const intervalId = setInterval(fetchSystemHealth, state.refreshInterval);
     
-    // Set up interval for logs (slightly offset to avoid simultaneous requests)
-    const logsInterval = setInterval(fetchActivityLogs, state.refreshInterval + 1000);
-    
-    return () => {
-      clearInterval(metricsInterval);
-      clearInterval(logsInterval);
-    };
-  }, [state.isMonitoring, state.refreshInterval, fetchMetrics, fetchActivityLogs]);
-
+    return () => clearInterval(intervalId);
+  }, [state.isMonitoring, state.refreshInterval, fetchSystemHealth]);
+  
   return {
     ...state,
     startMonitoring,
     stopMonitoring,
+    clearLogs,
     setRefreshInterval,
-    fetchMetrics,
-    fetchActivityLogs,
-    clearError
+    refreshMetrics: fetchSystemHealth
   };
 }
 

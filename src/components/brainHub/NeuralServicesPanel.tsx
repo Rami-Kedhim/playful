@@ -7,6 +7,7 @@ import NeuralServiceCard from './NeuralServiceCard';
 import EmptyServiceState from './EmptyServiceState';
 import { useNeuralServices } from '@/hooks/useNeuralServices';
 import { BaseBrainService } from '@/services/neural/modules/BaseNeuralService';
+import { ModuleType } from '@/services/neural/types/NeuralService'; // Added import for ModuleType
 
 interface NeuralServicesPanelProps {
   title?: string;

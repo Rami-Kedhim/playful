@@ -1,39 +1,30 @@
 
-import React, { useEffect } from 'react';
 import { BaseBrainService } from '@/services/neural/modules/BaseNeuralService';
 import { ModuleType } from '@/services/neural/types/NeuralService';
 
-const EscortConsumer: React.FC = () => {
-  useEffect(() => {
-    // Mock service creation
-    const createMockService = () => {
-      const service = new BaseBrainService({
-        moduleId: 'escort-consumer',
-        name: 'Escort Consumer',
-        description: 'Consumer service for escorts',
-        moduleType: ModuleType.NEURAL,
-        version: '1.0.0'
-      });
-      
-      // Update config with allowed properties
-      service.updateConfig({
-        enabled: true,
-        priority: 'high',
-        resources: {
-          cpu: 2,
-          memory: 1024
-        },
-        autonomyLevel: 80,
-        resourceAllocation: 60
-      });
-      
-      return service;
-    };
+export class EscortConsumer extends BaseBrainService {
+  constructor() {
+    super({
+      moduleId: 'escort-consumer',
+      name: 'Escort Consumer',
+      description: 'Consumes Escort neural service events',
+      moduleType: ModuleType.ESCORTS,
+      version: '1.0.0'
+    });
     
-    createMockService();
-  }, []);
+    this.configure({
+      enabled: true,
+      priority: 'normal',
+      moduleOptions: {
+        maxConnections: 100,
+        responseTimeout: 5000
+      },
+      resourceAllocation: 30
+    });
+  }
   
-  return null; // This component doesn't render anything
-};
-
-export default EscortConsumer;
+  async processRequest(request: any): Promise<any> {
+    console.log(`Escort Consumer processing request:`, request);
+    return { success: true, data: { processed: true } };
+  }
+}

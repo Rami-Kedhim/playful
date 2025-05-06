@@ -17,9 +17,9 @@ const ContentOptimizer: React.FC = () => {
   const [contentType, setContentType] = useState('article');
   const [analyzing, setAnalyzing] = useState(false);
   const { 
-    optimizeContent,  // Using the correct property names according to the error
+    optimizeContent,  
     optimizationResult, 
-    isOptimizing  // Using isOptimizing instead of isLoading
+    isOptimizing  
   } = useHermesSeo();
 
   const handleOptimize = async () => {
@@ -27,7 +27,7 @@ const ContentOptimizer: React.FC = () => {
 
     setAnalyzing(true);
     try {
-      // Use the optimizeContent function instead of enhanceContentSeo
+      // Use the optimizeContent function 
       await optimizeContent(content);
     } catch (error) {
       console.error('Error optimizing content:', error);

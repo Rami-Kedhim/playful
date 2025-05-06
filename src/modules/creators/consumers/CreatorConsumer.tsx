@@ -1,39 +1,30 @@
 
-import React, { useEffect } from 'react';
 import { BaseBrainService } from '@/services/neural/modules/BaseNeuralService';
 import { ModuleType } from '@/services/neural/types/NeuralService';
 
-const CreatorConsumer: React.FC = () => {
-  useEffect(() => {
-    // Mock service creation
-    const createMockService = () => {
-      const service = new BaseBrainService({
-        moduleId: 'creator-consumer',
-        name: 'Creator Consumer',
-        description: 'Consumer service for creators',
-        moduleType: ModuleType.NEURAL,
-        version: '1.0.0'
-      });
-      
-      // Update config with allowed properties
-      service.updateConfig({
-        enabled: true,
-        priority: 'high',
-        resources: {
-          cpu: 2,
-          memory: 1024
-        },
-        autonomyLevel: 80,
-        resourceAllocation: 60
-      });
-      
-      return service;
-    };
+export class CreatorConsumer extends BaseBrainService {
+  constructor() {
+    super({
+      moduleId: 'creator-consumer',
+      name: 'Creator Consumer',
+      description: 'Consumes Creator neural service events',
+      moduleType: ModuleType.CREATORS,
+      version: '1.0.0'
+    });
     
-    createMockService();
-  }, []);
+    this.configure({
+      enabled: true,
+      priority: 'normal',
+      moduleOptions: {
+        maxConnections: 100,
+        responseTimeout: 5000
+      },
+      resourceAllocation: 30
+    });
+  }
   
-  return null; // This component doesn't render anything
-};
-
-export default CreatorConsumer;
+  async processRequest(request: any): Promise<any> {
+    console.log(`Creator Consumer processing request:`, request);
+    return { success: true, data: { processed: true } };
+  }
+}

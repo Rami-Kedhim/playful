@@ -1,39 +1,30 @@
 
-import React, { useEffect } from 'react';
 import { BaseBrainService } from '@/services/neural/modules/BaseNeuralService';
 import { ModuleType } from '@/services/neural/types/NeuralService';
 
-const LivecamConsumer: React.FC = () => {
-  useEffect(() => {
-    // Mock service creation
-    const createMockService = () => {
-      const service = new BaseBrainService({
-        moduleId: 'livecam-consumer',
-        name: 'Livecam Consumer',
-        description: 'Consumer service for livecams',
-        moduleType: ModuleType.STREAMING,
-        version: '1.0.0'
-      });
-      
-      // Update config with allowed properties
-      service.updateConfig({
-        enabled: true,
-        priority: 'high',
-        resources: {
-          cpu: 2,
-          memory: 1024
-        },
-        autonomyLevel: 80,
-        resourceAllocation: 60
-      });
-      
-      return service;
-    };
+export class LivecamConsumer extends BaseBrainService {
+  constructor() {
+    super({
+      moduleId: 'livecam-consumer',
+      name: 'Livecam Consumer',
+      description: 'Consumes Livecam neural service events',
+      moduleType: ModuleType.LIVECAMS,
+      version: '1.0.0'
+    });
     
-    createMockService();
-  }, []);
+    this.configure({
+      enabled: true,
+      priority: 'normal',
+      moduleOptions: {
+        maxConnections: 100,
+        responseTimeout: 5000
+      },
+      resourceAllocation: 30
+    });
+  }
   
-  return null; // This component doesn't render anything
-};
-
-export default LivecamConsumer;
+  async processRequest(request: any): Promise<any> {
+    console.log(`Livecam Consumer processing request:`, request);
+    return { success: true, data: { processed: true } };
+  }
+}

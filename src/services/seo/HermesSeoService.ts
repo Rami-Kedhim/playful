@@ -1,15 +1,23 @@
 
 export interface SeoOptimizationResult {
+  pageUrl: string;
+  title: string;
+  metaDescription: string;
+  h1: string;
+  contentScore: number;
+  visibilityScore: number;
+  priorityKeywords: string[];
+  recommendations: string[];
   originalContent: string;
   optimizedContent: string;
-  seoScore: number;
-  recommendations: string[];
-  keywordDensity: Record<string, number>;
   readabilityScore: number;
-  visibilityScore?: number; // Added
-  priorityKeywords?: string[]; // Added
-  metaDescription?: string;
+  keywordDensity: Record<string, number>;
   metaTags?: string[];
+  seoScore?: number;
+  mobileCompatibility?: number;
+  pageSpeed?: number;
+  backlinks?: number;
+  lastUpdated?: string;
 }
 
 export interface SeoOptimizationRequest {
@@ -33,7 +41,15 @@ const hermesSeoService = {
       visibilityScore: 80,
       priorityKeywords: ['escort', 'premium', 'booking'],
       metaDescription: 'Optimized content for better search visibility',
-      metaTags: ['escort', 'premium', 'booking']
+      metaTags: ['escort', 'premium', 'booking'],
+      pageUrl: '/content/dummy-page',
+      title: 'Dummy Content',
+      h1: 'Dummy Heading',
+      contentScore: 70,
+      mobileCompatibility: 90,
+      pageSpeed: 85,
+      backlinks: 10,
+      lastUpdated: new Date().toISOString()
     };
   },
 
@@ -55,7 +71,15 @@ const hermesSeoService = {
       visibilityScore: 75,
       priorityKeywords: keywords,
       metaDescription: title,
-      metaTags: keywords
+      metaTags: keywords,
+      pageUrl: `/content/${contentId}`,
+      title: title,
+      h1: title.split(' ').slice(0, 3).join(' '),
+      contentScore: 75,
+      mobileCompatibility: 85,
+      pageSpeed: 80,
+      backlinks: 5,
+      lastUpdated: new Date().toISOString()
     };
   },
 

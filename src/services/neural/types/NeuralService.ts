@@ -18,15 +18,24 @@ export interface BaseNeuralService {
   moduleType: ModuleType;
   version: string;
   config: NeuralServiceConfig;
+  id?: string;
+  status?: 'active' | 'inactive' | 'error' | 'maintenance';
   
   // Methods
-  isRunning: () => boolean;  // Changed from boolean to function
+  isRunning: () => boolean;
   start: () => Promise<boolean>;
   stop: () => Promise<boolean>;
   configure: (config: Partial<NeuralServiceConfig>) => void;
   processWithNeuralCore: (input: any) => Promise<any>;
-  getCapabilities?: () => string[];  // Added as optional method
-  initialize?: () => Promise<boolean>;  // Added as optional method
+  getCapabilities?: () => string[];
+  initialize?: () => Promise<boolean>;
+  
+  // Added required methods that were missing
+  getMetrics?: () => any;
+  updateConfig?: (config: Partial<NeuralServiceConfig>) => void;
+  processRequest?: (request: any) => Promise<any>;
+  canHandleRequestType?: (requestType: string) => boolean;
+  reset?: () => Promise<boolean>;
 }
 
 export interface NeuralServiceConfig {
@@ -36,6 +45,7 @@ export interface NeuralServiceConfig {
   moduleOptions?: Record<string, any>;
   autonomyLevel?: number; // 0-100
   resourceAllocation?: number; // 0-100
+  resources?: Record<string, any>; // Adding resources field that was missing
 }
 
 export interface SystemHealthMetrics {
@@ -44,8 +54,8 @@ export interface SystemHealthMetrics {
   latency: number;
   errorRate: number;
   averageResponseTime: number;
-  cpuUsage: number;  // Added this property
-  memoryUsage: number;  // Added this property
-  systemLoad: number;
+  cpuUsage: number;
+  memoryUsage: number;
+  systemLoad?: number; // Changed to optional since some places don't use it
   requestRate?: number; // Optional field
 }
