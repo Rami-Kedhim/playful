@@ -73,7 +73,7 @@ export const useHermesSeoHistory = (contentId?: string) => {
         result: {
           pageUrl: '/livecams/amanda-love',
           title: 'Amanda Love Live Stream - Premium Adult Entertainment',
-          metaDescription: 'Join Amanda Love's exclusive live stream for premium adult entertainment and unique experiences',
+          metaDescription: "Join Amanda Love's exclusive live stream for premium adult entertainment and unique experiences",
           h1: 'Amanda Love - Premium Live Stream',
           contentScore: 80,
           visibilityScore: 72,
