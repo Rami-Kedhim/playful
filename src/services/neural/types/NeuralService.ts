@@ -1,7 +1,6 @@
 
-import { NeuralServiceConfig as Config } from './neuralHub';
-
-export interface NeuralServiceConfig extends Config {
+// Define NeuralServiceConfig directly rather than importing it
+export interface NeuralServiceConfig {
   enabled: boolean;
   priority?: number | 'low' | 'normal' | 'high' | 'critical';
   description?: string;
@@ -39,6 +38,7 @@ export interface BaseNeuralService {
   reset?: () => Promise<boolean>;
 }
 
+// Expanded ModuleType enum to include all referenced string values
 export enum ModuleType {
   COMPANION = 'companion',
   CREATORS = 'creators', 
@@ -49,7 +49,8 @@ export enum ModuleType {
   CORE = 'core',
   NEURAL = 'neural',
   AUTOMATION = 'automation',
-  STREAMING = 'streaming'
+  STREAMING = 'streaming',
+  AI_COMPANION = 'ai-companion'
 }
 
 // Add the SystemHealthMetrics interface that's referenced in several places
@@ -62,4 +63,5 @@ export interface SystemHealthMetrics {
   systemLoad?: number;
   cpuUsage?: number;
   memoryUsage?: number;
+  requestRate?: number;
 }

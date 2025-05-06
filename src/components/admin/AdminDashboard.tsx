@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,16 +9,12 @@ import FinanceManagement from './FinanceManagement';
 import ConfigSettings from './ConfigSettings';
 import ContentModeration from './ContentModeration';
 import SystemStatus from './SystemStatus';
-import uberCore from '@/core/UberCore';
+import { uberCore } from '@/core/UberCore';
 
 const AdminDashboard: React.FC = () => {
   useEffect(() => {
-    // Initialize core systems if needed
-    const initSystems = async () => {
-      await uberCore.initialize();
-    };
-    
-    initSystems();
+    // Initialize SEO automation
+    uberCore.initializeAutomaticSeo();
   }, []);
   
   return (

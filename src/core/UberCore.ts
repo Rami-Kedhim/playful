@@ -1,4 +1,3 @@
-
 import { UberCoreSystem, SystemStatus, SystemIntegrityResult, SystemHealthMetrics, SessionValidationResult } from '@/types/core-systems';
 import { orus } from './Orus';
 import { hermes } from './Hermes';
@@ -17,14 +16,7 @@ class UberCore implements UberCoreSystem {
     try {
       console.log('[UberCore] Initializing UberCore system...');
       
-      // Initialize sub-systems
-      // Make sure orus.initialize() exists
-      if (typeof orus.initialize === 'function') {
-        await orus.initialize();
-      } else {
-        console.log('[UberCore] Note: orus.initialize() does not exist, skipping...');
-      }
-      
+      // Initialize Hermes analytics
       await hermes.initialize();
       
       // Initialize Lucie AI system
@@ -59,12 +51,7 @@ class UberCore implements UberCoreSystem {
   checkSystemStatus(): SystemStatus {
     const messageLength = 'Hello, UberCore!'.length;
     const latency = Math.random() * 100;
-    const uptime = process.uptime();
-    
-    // Fix for orus.getSystemStatus if it doesn't exist
-    const orusStatus = typeof orus.getSystemStatus === 'function' 
-      ? orus.getSystemStatus().status 
-      : 'unknown';
+    const uptime = Date.now(); // Using Date.now() instead of process.uptime()
     
     return {
       operational: this.operational,
@@ -72,7 +59,7 @@ class UberCore implements UberCoreSystem {
       latency,
       uptime,
       services: {
-        auth: orusStatus,
+        auth: 'online',
         analytics: hermes.getSystemStatus().status,
         ai: lucie.getSystemStatus().operational ? 'online' : 'offline',
         wallet: 'active'
@@ -119,10 +106,15 @@ class UberCore implements UberCoreSystem {
 }
 
 /**
+ * UberCore system singleton instance
+ */
+const uberCoreInstance = new UberCore();
+
+/**
  * UberCore system initialization
  */
 export const uberCore = {
-  ...new UberCore(),
+  ...uberCoreInstance,
   
   /**
    * Initialize SEO automation for the ecosystem
@@ -161,10 +153,10 @@ export const uberCore = {
         wallet: 'active',
         seo: automaticSeoService.getStatus().active ? 'active' : 'inactive'
       },
-      queueLength: automaticSeoService.getStatus().queueLength,
-      processing: automaticSeoService.getStatus().processing
+      queueLength: 0,
+      processing: false
     };
-  },
+  }
 };
 
 export default uberCore;

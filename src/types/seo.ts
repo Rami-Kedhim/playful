@@ -1,4 +1,7 @@
 
+/**
+ * Result of SEO optimization for a specific piece of content
+ */
 export interface SeoOptimizationResult {
   pageUrl: string;
   title: string;
@@ -14,14 +17,24 @@ export interface SeoOptimizationResult {
   lastUpdated: string;
 }
 
-export interface HermesInsight {
-  id: string;
-  type: string;
+/**
+ * Request format for SEO optimization
+ */
+export interface SeoOptimizationRequest {
+  contentId: string;
+  contentType: 'profile' | 'content' | 'livecam' | 'event';
   title: string;
   description: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  created: string;
-  status: 'new' | 'viewed' | 'actioned' | 'dismissed';
-  data: any;
-  source: string;
+  keywords: string[];
+}
+
+/**
+ * SEO metrics for tracked content
+ */
+export interface SeoMetrics {
+  pageUrl: string;
+  score: number;
+  visibility: number;
+  ranking: number;
+  lastChecked: string;
 }

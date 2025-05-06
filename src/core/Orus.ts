@@ -45,7 +45,6 @@ class OrusSystem {
     return token !== undefined && token !== '';
   }
 
-  // Add the missing method that is being used across the application
   validateSession(userId: string): SessionValidationResult {
     // Mock implementation
     if (!userId || userId === '') {

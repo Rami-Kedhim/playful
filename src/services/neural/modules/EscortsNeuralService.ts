@@ -1,28 +1,22 @@
 
 import { BaseBrainService } from './BaseNeuralService';
+import { ModuleType } from '../types/NeuralService';
 
 export class EscortsNeuralService extends BaseBrainService {
   constructor() {
     super({
-      moduleId: 'escorts-neural',
+      moduleId: 'escorts-neural-service',
       name: 'Escorts Neural Service',
-      description: 'Neural processing for escort profiles and matching',
-      moduleType: 'escorts',
-      version: '1.2.0'
+      description: 'Neural service for escorts platform functionality',
+      moduleType: ModuleType.ESCORTS,
+      version: '1.0.0',
+      config: {
+        enabled: true,
+        priority: 'normal',
+        dependencies: ['hermes']
+      }
     });
   }
-  
-  async initialize(): Promise<boolean> {
-    console.log(`Initializing Escorts Neural Service...`);
-    // Mock initialization
-    return true;
-  }
-  
-  getMetrics() {
-    return {
-      ...super.getMetrics(),
-      matchAccuracy: 0.85 + Math.random() * 0.15,
-      profileQualityScore: 0.7 + Math.random() * 0.3
-    };
-  }
 }
+
+export const escortsNeuralService = new EscortsNeuralService();

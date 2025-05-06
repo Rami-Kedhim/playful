@@ -1,28 +1,22 @@
 
 import { BaseBrainService } from './BaseNeuralService';
+import { ModuleType } from '../types/NeuralService';
 
 export class CreatorsNeuralService extends BaseBrainService {
   constructor() {
     super({
-      moduleId: 'creators-neural',
+      moduleId: 'creators-neural-service',
       name: 'Creators Neural Service',
-      description: 'Neural processing for creator content and engagement',
-      moduleType: 'creators',
-      version: '1.3.5'
+      description: 'Neural service for creators platform functionality',
+      moduleType: ModuleType.CREATORS,
+      version: '1.0.0',
+      config: {
+        enabled: true,
+        priority: 'normal',
+        dependencies: ['hermes']
+      }
     });
   }
-  
-  async initialize(): Promise<boolean> {
-    console.log(`Initializing Creators Neural Service...`);
-    // Mock initialization
-    return true;
-  }
-  
-  getMetrics() {
-    return {
-      ...super.getMetrics(),
-      engagementScore: 0.75 + Math.random() * 0.25,
-      contentQualityIndex: 0.8 + Math.random() * 0.2
-    };
-  }
 }
+
+export const creatorsNeuralService = new CreatorsNeuralService();
