@@ -1,214 +1,218 @@
-
 import { useState, useEffect, useCallback } from 'react';
-import { uberCore } from '@/core/UberCore';
-import { SystemHealthMetrics } from '@/types/neural-system';
+import { SystemHealthMetrics } from '@/services/neural/types/NeuralService';
+
+interface MetricsData {
+  overallHealth: number;
+  cpu: number;
+  memory: number;
+  network: number;
+  errorRate: number;
+  requestsPerSecond: number;
+  systemHealth: SystemHealthMetrics;
+}
+
+interface ActivityLog {
+  id: string;
+  timestamp: Date;
+  system: string;
+  action: string;
+  status: 'success' | 'warning' | 'error';
+  details?: string;
+}
+
+interface CoreMetrics {
+  cpuUsage: number;
+  memoryUsage: number;
+  networkLatency: number;
+  errorRate: number;
+  requestsPerSecond: number;
+}
+
+interface UberCoreMonitoringState {
+  isLoading: boolean;
+  isMonitoring: boolean;
+  error: string | null;
+  metrics: MetricsData;
+  logs: ActivityLog[];
+  refreshInterval: number;
+}
 
 export function useUberCoreMonitoring() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isMonitoring, setIsMonitoring] = useState(false);
-  const [monitoringInterval, setMonitoringInterval] = useState<number | null>(null);
-  
-  const [systemMetrics, setSystemMetrics] = useState({
-    cpuUsage: 45,
-    memoryUsage: 32,
-    systemLoad: 38,
-    memoryAllocation: 420,
-    networkThroughput: 32,
-    requestRate: 65,
-    averageResponseTime: 124,
-    errorRate: 0.5,
-    processingEfficiency: 82,
-    processingTrend: 'up' as 'up' | 'down',
-    accuracyRate: 95,
-    accuracyTrend: 'up' as 'up' | 'down',
-    responseTime: 124
+  const [state, setState] = useState<UberCoreMonitoringState>({
+    isLoading: false,
+    isMonitoring: false,
+    error: null,
+    metrics: {
+      overallHealth: 0,
+      cpu: 0,
+      memory: 0,
+      network: 0,
+      errorRate: 0,
+      requestsPerSecond: 0,
+      systemHealth: {
+        load: 0,
+        memory: 0,
+        latency: 0,
+        errorRate: 0,
+        averageResponseTime: 0,
+        cpuUsage: 0,
+        memoryUsage: 0
+      }
+    },
+    logs: [],
+    refreshInterval: 5000
   });
 
-  const [systemStatus, setSystemStatus] = useState({
-    integrity: 95,
-    neuralEfficiency: 87,
-    uptime: 99.8,
-    lastUpdated: new Date(),
-    status: 'operational',
-    alerts: [],
-    recommendations: [
-      'Increase memory allocation for neural processing',
-      'Optimize CPU utilization for core processing units',
-      'Update neural network models to improve accuracy'
-    ]
-  });
-  
-  const [systemActivity, setSystemActivity] = useState([
-    {
-      timestamp: '10:45:33',
-      operation: 'Neural Training',
-      details: 'Completed training of sentiment analysis model with 95% accuracy'
-    },
-    {
-      timestamp: '10:32:17',
-      operation: 'System Optimization',
-      details: 'Reallocated resources for improved processing efficiency'
-    },
-    {
-      timestamp: '10:15:05',
-      operation: 'Error Detection',
-      details: 'Identified and resolved memory allocation issue in module NM-7'
-    }
-  ]);
-  
-  const [healthMetrics, setHealthMetrics] = useState<SystemHealthMetrics>({
-    systemLoad: 0,
-    memoryAllocation: 0,
-    networkThroughput: 0,
-    requestRate: 0,
-    averageResponseTime: 0,
-    errorRate: 0,
-    modelCount: 0,
-    activeConnections: 0,
-    requestsPerMinute: 0,
-    cpuUtilization: 0,
-    memoryUtilization: 0,
-    errorFrequency: 0,
-    systemUptime: 0,
-    networkLatency: 0,
-    responseTime: 0,
-    userSatisfactionScore: 0,
-    load: 0,
-    memory: 0,
-    latency: 0,
-    cpuUsage: 0,
-    memoryUsage: 0,
-    uptime: 0,
-    models: []
-  });
-  
-  const refreshMetrics = useCallback(() => {
-    setIsLoading(true);
+  // Start monitoring
+  const startMonitoring = useCallback(() => {
+    setState(prev => ({ ...prev, isMonitoring: true }));
+  }, []);
+
+  // Stop monitoring
+  const stopMonitoring = useCallback(() => {
+    setState(prev => ({ ...prev, isMonitoring: false }));
+  }, []);
+
+  // Set refresh interval
+  const setRefreshInterval = useCallback((interval: number) => {
+    setState(prev => ({ ...prev, refreshInterval: interval }));
+  }, []);
+
+  // Fetch metrics
+  const fetchMetrics = useCallback(async () => {
+    setState(prev => ({ ...prev, isLoading: true }));
     
     try {
-      // Get system status from UberCore
-      const status = uberCore.getSystemStatus();
+      // In a real application, this would call an API
+      // Here we'll generate mock data
       
-      // Get health metrics from UberCore subsystems
-      const healthData = uberCore.checkSubsystemHealth();
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Update system metrics based on collected data
-      setSystemMetrics(prev => ({
+      // Generate random metrics within realistic ranges
+      const cpuUsage = Math.random() * 50 + 20; // 20-70%
+      const memoryUsage = Math.random() * 40 + 30; // 30-70%
+      const networkLatency = Math.random() * 100 + 50; // 50-150ms
+      const errorRate = Math.random() * 0.05; // 0-5%
+      const requestsPerSecond = Math.random() * 50 + 10; // 10-60 RPS
+      
+      // Calculate overall health score (0-100)
+      // Lower values for CPU, memory, network latency, and error rate are better
+      const overallHealth = 100 - (
+        (cpuUsage / 100 * 25) +
+        (memoryUsage / 100 * 25) +
+        (networkLatency / 200 * 25) +
+        (errorRate / 0.1 * 25)
+      );
+      
+      // Update state with new metrics
+      setState(prev => ({
         ...prev,
-        cpuUsage: Math.floor(Math.random() * 30) + 40, // Simulate varying CPU load
-        memoryUsage: Math.floor(Math.random() * 20) + 30,
-        systemLoad: Math.floor(Math.random() * 20) + 30,
-        networkThroughput: Math.floor(Math.random() * 50) + 10,
-        requestRate: Math.floor(Math.random() * 30) + 50,
-        processingEfficiency: Math.floor(Math.random() * 10) + 80,
-        accuracyRate: Math.floor(Math.random() * 5) + 90
+        isLoading: false,
+        metrics: {
+          overallHealth,
+          cpu: cpuUsage,
+          memory: memoryUsage,
+          network: networkLatency,
+          errorRate,
+          requestsPerSecond,
+          systemHealth: {
+            load: cpuUsage / 100,
+            memory: memoryUsage,
+            latency: networkLatency,
+            errorRate,
+            averageResponseTime: networkLatency * 1.2,
+            cpuUsage,
+            memoryUsage
+          }
+        }
       }));
-      
-      // Update the health metrics
-      const updatedHealthMetrics: SystemHealthMetrics = {
-        systemLoad: Math.floor(Math.random() * 30) + 40,
-        memoryAllocation: Math.floor(Math.random() * 500) + 300,
-        networkThroughput: Math.floor(Math.random() * 50) + 10,
-        requestRate: Math.floor(Math.random() * 30) + 50,
-        averageResponseTime: Math.floor(Math.random() * 100) + 50,
-        errorRate: parseFloat((Math.random() * 2).toFixed(2)),
-        cpuUsage: Math.floor(Math.random() * 30) + 40,
-        memoryUsage: Math.floor(Math.random() * 20) + 30,
-        uptime: 99.8,
-        modelCount: 5,
-        activeConnections: Math.floor(Math.random() * 100) + 50,
-        requestsPerMinute: Math.floor(Math.random() * 100) + 100,
-        cpuUtilization: Math.floor(Math.random() * 30) + 40,
-        memoryUtilization: Math.floor(Math.random() * 20) + 30,
-        errorFrequency: Math.floor(Math.random() * 10),
-        systemUptime: Math.floor(Math.random() * 500) + 1000,
-        networkLatency: Math.floor(Math.random() * 50) + 20,
-        responseTime: Math.floor(Math.random() * 100) + 50,
-        userSatisfactionScore: Math.floor(Math.random() * 10) + 85,
-        load: Math.floor(Math.random() * 30) + 40,
-        memory: Math.floor(Math.random() * 20) + 30,
-        latency: Math.floor(Math.random() * 50) + 20,
-        models: []
-      };
-      
-      setHealthMetrics(updatedHealthMetrics);
-      
-      // Generate random system activity entries
-      const activities = [
-        'Neural Training',
-        'System Optimization',
-        'Error Detection',
-        'Model Evaluation',
-        'Resource Allocation'
-      ];
-      
-      const details = [
-        'Completed training of sentiment analysis model with 95% accuracy',
-        'Reallocated resources for improved processing efficiency',
-        'Identified and resolved memory allocation issue in module NM-7',
-        'Evaluated recommendation model performance at 92% precision',
-        'Adjusted neural weightings for better prediction accuracy'
-      ];
-      
-      // Add a new random activity entry
-      const currentTime = new Date();
-      const timeString = currentTime.toLocaleTimeString();
-      
-      const randomActivity = {
-        timestamp: timeString,
-        operation: activities[Math.floor(Math.random() * activities.length)],
-        details: details[Math.floor(Math.random() * details.length)]
-      };
-      
-      setSystemActivity(prev => [randomActivity, ...prev.slice(0, 9)]);
-      
     } catch (error) {
-      console.error('Error fetching system metrics:', error);
-    } finally {
-      setIsLoading(false);
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: 'Failed to fetch UberCore metrics'
+      }));
     }
   }, []);
-  
-  const startMonitoring = useCallback(() => {
-    if (isMonitoring) return;
+
+  // Fetch activity logs
+  const fetchActivityLogs = useCallback(async () => {
+    setState(prev => ({ ...prev, isLoading: true }));
     
-    refreshMetrics(); // Initial refresh
-    
-    const intervalId = window.setInterval(() => {
-      refreshMetrics();
-    }, 30000); // Refresh every 30 seconds
-    
-    setMonitoringInterval(intervalId);
-    setIsMonitoring(true);
-  }, [isMonitoring, refreshMetrics]);
-  
-  const stopMonitoring = useCallback(() => {
-    if (monitoringInterval) {
-      clearInterval(monitoringInterval);
-      setMonitoringInterval(null);
+    try {
+      // In a real application, this would call an API
+      // Here we'll generate mock logs
+      
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Generate random status weighted towards success
+      const getRandomStatus = (): 'success' | 'warning' | 'error' => {
+        const r = Math.random();
+        if (r > 0.9) return 'error';
+        if (r > 0.75) return 'warning';
+        return 'success';
+      };
+      
+      // Generate a new log entry
+      const newLog: ActivityLog = {
+        id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        timestamp: new Date(),
+        system: ['UberCore', 'Oxum', 'Hermes', 'Lucie', 'Orus'][Math.floor(Math.random() * 5)],
+        action: ['user.authenticate', 'profile.update', 'boost.apply', 'content.moderate', 'transaction.process'][Math.floor(Math.random() * 5)],
+        status: getRandomStatus(),
+        details: `Transaction ID: ${Math.floor(Math.random() * 1000000)}`
+      };
+      
+      // Add to existing logs, keeping only the latest 100
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        logs: [newLog, ...prev.logs].slice(0, 100)
+      }));
+    } catch (error) {
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: 'Failed to fetch activity logs'
+      }));
     }
-    setIsMonitoring(false);
-  }, [monitoringInterval]);
-  
-  // Start monitoring on component mount
+  }, []);
+
+  // Reset error state
+  const clearError = useCallback(() => {
+    setState(prev => ({ ...prev, error: null }));
+  }, []);
+
+  // Set up polling for metrics and logs when monitoring is active
   useEffect(() => {
-    startMonitoring();
+    if (!state.isMonitoring) return;
+    
+    // Fetch initial data
+    fetchMetrics();
+    fetchActivityLogs();
+    
+    // Set up interval for metrics
+    const metricsInterval = setInterval(fetchMetrics, state.refreshInterval);
+    
+    // Set up interval for logs (slightly offset to avoid simultaneous requests)
+    const logsInterval = setInterval(fetchActivityLogs, state.refreshInterval + 1000);
     
     return () => {
-      stopMonitoring();
+      clearInterval(metricsInterval);
+      clearInterval(logsInterval);
     };
-  }, [startMonitoring, stopMonitoring]);
-  
+  }, [state.isMonitoring, state.refreshInterval, fetchMetrics, fetchActivityLogs]);
+
   return {
-    systemMetrics,
-    systemStatus,
-    systemActivity,
-    healthMetrics,
-    isLoading,
-    isMonitoring,
-    refreshMetrics,
+    ...state,
     startMonitoring,
-    stopMonitoring
+    stopMonitoring,
+    setRefreshInterval,
+    fetchMetrics,
+    fetchActivityLogs,
+    clearError
   };
 }
 

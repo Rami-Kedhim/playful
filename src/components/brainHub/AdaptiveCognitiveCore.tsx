@@ -1,115 +1,104 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import { Brain, Zap } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 
-interface AdaptiveCognitiveProps {
-  moduleId: string;
+interface AdaptiveCognitiveCoreProp {
+  systemName?: string;
+  intelligenceLevel?: number;
+  isActive?: boolean;
+  adaptivityLevel?: number;
 }
 
-const AdaptiveCognitiveCore: React.FC<AdaptiveCognitiveProps> = ({ moduleId }) => {
-  const [metrics, setMetrics] = useState({
-    neuralDensity: 78,
-    algorithmEfficiency: 65,
-    adaptationRate: 92,
-  });
-  
-  const [config, setConfig] = useState({
-    enabled: true,
-    autonomyLevel: 65,
-    priority: 'high' as 'low' | 'normal' | 'high' | 'critical',
-    adaptiveElements: true,
-    selfOptimizing: true
-  });
-  
-  const toggleEnabled = () => {
-    setConfig(prev => ({ ...prev, enabled: !prev.enabled }));
+const AdaptiveCognitiveCore: React.FC<AdaptiveCognitiveCoreProp> = ({
+  systemName = "Adaptive Cognitive Core",
+  intelligenceLevel = 72,
+  isActive = true,
+  adaptivityLevel = 85
+}) => {
+  const [active, setActive] = useState(isActive);
+  const [neuralMode, setNeuralMode] = useState(true);
+
+  // Calculate the intelligence level color based on the value
+  const getIntelligenceLevelColor = (level: number) => {
+    if (level < 30) return "text-red-500";
+    if (level < 60) return "text-amber-500";
+    if (level < 80) return "text-emerald-500";
+    return "text-indigo-500";
   };
-  
-  const updateMetrics = () => {
-    // Simulate metric updates
-    setMetrics({
-      neuralDensity: Math.floor(Math.random() * 20) + 70,
-      algorithmEfficiency: Math.floor(Math.random() * 30) + 60,
-      adaptationRate: Math.floor(Math.random() * 15) + 80,
-    });
+
+  // Calculate the adaptivity level color based on the value
+  const getAdaptivityLevelColor = (level: number) => {
+    if (level < 30) return "text-red-500";
+    if (level < 60) return "text-amber-500";
+    if (level < 80) return "text-emerald-500";
+    return "text-blue-500";
   };
-  
-  useEffect(() => {
-    updateMetrics();
-    const interval = setInterval(updateMetrics, 30000);
-    return () => clearInterval(interval);
-  }, []);
-  
+
   return (
-    <Card>
-      <CardHeader className="pb-2">
+    <Card className="shadow-lg border-t-4 border-t-indigo-500/80">
+      <CardHeader className="pb-3">
         <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <Brain className="h-5 w-5 mr-2 text-primary" />
-            <CardTitle>Adaptive Cognitive Core</CardTitle>
+          <div>
+            <CardTitle className="text-xl font-semibold">{systemName}</CardTitle>
+            <CardDescription>
+              Neural Processing Infrastructure
+            </CardDescription>
           </div>
-          <Switch
-            checked={config.enabled}
-            onCheckedChange={toggleEnabled}
-          />
-        </div>
-        <div className="text-sm text-muted-foreground">
-          Module ID: {moduleId}
+          <div className="flex items-center space-x-2 bg-muted/50 p-1 rounded-lg">
+            <div className={`h-2.5 w-2.5 rounded-full ${active ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <span className="text-xs font-medium">{active ? 'Active' : 'Inactive'}</span>
+          </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm mb-1">
-            <span>Neural Density</span>
-            <span>{metrics.neuralDensity}%</span>
-          </div>
-          <Progress value={metrics.neuralDensity} className="h-1.5" />
-        </div>
-        
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm mb-1">
-            <span>Algorithm Efficiency</span>
-            <span>{metrics.algorithmEfficiency}%</span>
-          </div>
-          <Progress value={metrics.algorithmEfficiency} className="h-1.5" />
-        </div>
-        
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm mb-1">
-            <span>Adaptation Rate</span>
-            <span>{metrics.adaptationRate}%</span>
-          </div>
-          <Progress value={metrics.adaptationRate} className="h-1.5" />
-        </div>
-        
-        <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t">
-          <div className="flex items-center justify-between">
-            <span className="text-sm">Self-Optimizing</span>
-            <Switch 
-              checked={config.selfOptimizing} 
-              onCheckedChange={() => setConfig(prev => ({...prev, selfOptimizing: !prev.selfOptimizing}))}
-              size="sm"
-            />
+      <CardContent>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-sm font-medium">Intelligence Level</span>
+              <span className={`text-sm font-bold ${getIntelligenceLevelColor(intelligenceLevel)}`}>
+                {intelligenceLevel}%
+              </span>
+            </div>
+            <Progress value={intelligenceLevel} className="h-2" />
           </div>
           
-          <div className="flex items-center justify-between">
-            <span className="text-sm">Adaptive Elements</span>
-            <Switch 
-              checked={config.adaptiveElements} 
-              onCheckedChange={() => setConfig(prev => ({...prev, adaptiveElements: !prev.adaptiveElements}))}
-              size="sm"
-            />
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-sm font-medium">Adaptivity</span>
+              <span className={`text-sm font-bold ${getAdaptivityLevelColor(adaptivityLevel)}`}>
+                {adaptivityLevel}%
+              </span>
+            </div>
+            <Progress value={adaptivityLevel} className="h-2" />
+          </div>
+          
+          <div className="pt-2 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="core-status">Core Status</Label>
+                <div className="text-xs text-muted-foreground">Enable or disable the system</div>
+              </div>
+              <Switch
+                checked={active}
+                onCheckedChange={() => setActive(!active)}
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="neural-mode">Neural Mode</Label>
+                <div className="text-xs text-muted-foreground">Advanced neural processing</div>
+              </div>
+              <Switch
+                checked={neuralMode}
+                onCheckedChange={() => setNeuralMode(!neuralMode)}
+              />
+            </div>
           </div>
         </div>
-        
-        <Button size="sm" variant="outline" className="w-full mt-2">
-          <Zap className="h-4 w-4 mr-2" />
-          Optimize Core
-        </Button>
       </CardContent>
     </Card>
   );

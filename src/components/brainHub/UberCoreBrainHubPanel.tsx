@@ -2,148 +2,147 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { RefreshCw, Activity, Brain, Zap, Server } from 'lucide-react';
-import { useUberCoreBrainHub } from '@/hooks/useUberCoreBrainHub';
+import { SystemHealthMetrics } from '@/services/neural/types/NeuralService';
+import { Brain, Cpu, Memory, Network } from 'lucide-react';
 
-const UberCoreBrainHubPanel: React.FC = () => {
-  const { 
-    systemStatus, 
-    metrics, 
-    neuralActivities, 
-    isLoading, 
-    isConnected,
-    refreshData,
-    runDiagnostics
-  } = useUberCoreBrainHub();
-
-  const handleRefresh = () => {
-    refreshData();
+interface UberCoreBrainHubPanelProps {
+  status?: {
+    uberCore?: {
+      status: string;
+      uptime: number;
+    };
+    brainHub?: {
+      status: string;
+      activeModules: any[];
+    };
   };
+  metrics?: SystemHealthMetrics;
+  isConnected?: boolean;
+  isLoading?: boolean;
+}
 
-  const handleDiagnostics = () => {
-    runDiagnostics();
+const UberCoreBrainHubPanel: React.FC<UberCoreBrainHubPanelProps> = ({
+  status = {
+    uberCore: {
+      status: 'operational',
+      uptime: 99.9
+    },
+    brainHub: {
+      status: 'operational',
+      activeModules: []
+    }
+  },
+  metrics = {
+    load: 45,
+    memory: 32,
+    latency: 120,
+    errorRate: 0.05,
+    averageResponseTime: 150,
+    cpuUsage: 45,
+    memoryUsage: 32
+  },
+  isConnected = true,
+  isLoading = false
+}) => {
+  // Function to get color based on metric value
+  const getMetricColor = (value: number, inverse = false) => {
+    if (inverse) {
+      if (value > 70) return 'text-red-500';
+      if (value > 50) return 'text-amber-500';
+      return 'text-green-500';
+    } else {
+      if (value < 30) return 'text-red-500';
+      if (value < 60) return 'text-amber-500';
+      return 'text-green-500';
+    }
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-xl flex items-center">
-            <div className="mr-2 p-1 bg-primary/10 rounded">
-              <Brain className="h-5 w-5 text-primary" />
-            </div>
-            UberCore-BrainHub Connection
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* CPU Utilization Card */}
+      <Card className="shadow-md">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium flex items-center">
+            <Cpu className="h-4 w-4 mr-2 text-blue-500" />
+            CPU Utilization
           </CardTitle>
-          <div className="flex items-center gap-2">
-            <Badge variant={isConnected ? "success" : "destructive"}>
-              {isConnected ? "Connected" : "Disconnected"}
-            </Badge>
-            <Button size="sm" variant="outline" onClick={handleRefresh} disabled={isLoading}>
-              <RefreshCw className="h-4 w-4 mr-1" />
-              Refresh
-            </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-xs text-muted-foreground">Current Usage</span>
+              <span className={`text-xs font-semibold ${getMetricColor(metrics.cpuUsage || 0, true)}`}>
+                {metrics.cpuUsage || 0}%
+              </span>
+            </div>
+            <Progress value={metrics.cpuUsage || 0} className="h-1.5" />
           </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2 p-3 bg-muted/30 rounded-lg">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center">
-                <Zap className="h-4 w-4 mr-2 text-amber-500" />
-                <h3 className="text-sm font-medium">UberCore</h3>
-              </div>
-              <Badge variant={systemStatus.uberCore.status === 'operational' ? "success" : "warning"}>
-                {systemStatus.uberCore.status}
-              </Badge>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Uptime: {systemStatus.uberCore.uptime.toFixed(1)}%
-            </div>
-            <div className="mt-2">
-              <div className="flex justify-between text-xs mb-1">
-                <span>CPU Load</span>
-                <span>{metrics.cpuUsage}%</span>
-              </div>
-              <Progress value={metrics.cpuUsage} className="h-1" />
-            </div>
-          </div>
+        </CardContent>
+      </Card>
 
-          <div className="space-y-2 p-3 bg-muted/30 rounded-lg">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center">
-                <Server className="h-4 w-4 mr-2 text-blue-500" />
-                <h3 className="text-sm font-medium">BrainHub</h3>
-              </div>
-              <Badge variant={systemStatus.brainHub.status === 'operational' ? "success" : "warning"}>
-                {systemStatus.brainHub.status}
-              </Badge>
+      {/* Memory Usage Card */}
+      <Card className="shadow-md">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium flex items-center">
+            <Memory className="h-4 w-4 mr-2 text-purple-500" />
+            Memory Usage
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-xs text-muted-foreground">Current Usage</span>
+              <span className={`text-xs font-semibold ${getMetricColor(metrics.memoryUsage || 0, true)}`}>
+                {metrics.memoryUsage || 0}%
+              </span>
             </div>
-            <div className="text-xs text-muted-foreground">
-              Active Modules: {systemStatus.brainHub.activeModules.length}
-            </div>
-            <div className="mt-2">
-              <div className="flex justify-between text-xs mb-1">
-                <span>Memory Usage</span>
-                <span>{metrics.memoryUsage}%</span>
-              </div>
-              <Progress value={metrics.memoryUsage} className="h-1" />
-            </div>
+            <Progress value={metrics.memoryUsage || 0} className="h-1.5" />
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        <div className="mt-4">
-          <h3 className="text-sm font-medium mb-2">System Performance</h3>
-          <div className="grid grid-cols-4 gap-2">
-            <div className="bg-background p-2 rounded border">
-              <div className="text-xs text-muted-foreground">Requests/min</div>
-              <div className="font-semibold">{metrics.requestsPerMinute}</div>
+      {/* Network Latency Card */}
+      <Card className="shadow-md">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium flex items-center">
+            <Network className="h-4 w-4 mr-2 text-emerald-500" />
+            Network Latency
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-xs text-muted-foreground">Response Time</span>
+              <span className={`text-xs font-semibold ${getMetricColor(Math.min(100, (metrics.latency || 0) / 2), true)}`}>
+                {metrics.latency || 0} ms
+              </span>
             </div>
-            <div className="bg-background p-2 rounded border">
-              <div className="text-xs text-muted-foreground">Response Time</div>
-              <div className="font-semibold">{metrics.averageResponseTime} ms</div>
-            </div>
-            <div className="bg-background p-2 rounded border">
-              <div className="text-xs text-muted-foreground">Error Rate</div>
-              <div className="font-semibold">{metrics.errorRate}%</div>
-            </div>
-            <div className="bg-background p-2 rounded border">
-              <div className="text-xs text-muted-foreground">Active Models</div>
-              <div className="font-semibold">{metrics.modelCount}</div>
-            </div>
+            <Progress value={Math.min(100, (metrics.latency || 0) / 2)} className="h-1.5" />
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        <div className="border-t pt-4 mt-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium">Neural Activity Feed</h3>
-            <Button size="sm" variant="ghost" onClick={handleDiagnostics} disabled={isLoading}>
-              <Activity className="h-3.5 w-3.5 mr-1" />
-              Run Diagnostics
-            </Button>
+      {/* Neural Activity Card */}
+      <Card className="shadow-md">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium flex items-center">
+            <Brain className="h-4 w-4 mr-2 text-indigo-500" />
+            Neural Activity
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-xs text-muted-foreground">Processing Efficiency</span>
+              <span className={`text-xs font-semibold ${getMetricColor(100 - (metrics.errorRate || 0) * 100)}`}>
+                {(100 - (metrics.errorRate || 0) * 100).toFixed(1)}%
+              </span>
+            </div>
+            <Progress value={100 - (metrics.errorRate || 0) * 100} className="h-1.5" />
           </div>
-          <div className="max-h-40 overflow-y-auto space-y-1 bg-muted/20 p-2 rounded">
-            {neuralActivities.length > 0 ? (
-              neuralActivities.slice(0, 5).map(activity => (
-                <div key={activity.id} className="flex gap-2 text-xs p-1 border-b border-muted">
-                  <div className="text-muted-foreground whitespace-nowrap">
-                    {new Date(activity.timestamp).toLocaleTimeString()}
-                  </div>
-                  <div className="font-medium whitespace-nowrap">[{activity.type}]</div>
-                  <div className="truncate">{activity.details}</div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center text-sm py-2 text-muted-foreground">
-                No recent neural activity
-              </div>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

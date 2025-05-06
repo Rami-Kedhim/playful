@@ -20,6 +20,18 @@ export interface NeuralServiceConfig {
   sensitivity?: number;
 }
 
+export interface SystemHealthMetrics {
+  load: number;
+  memory: number;
+  latency: number;
+  errorRate: number;
+  averageResponseTime: number;
+  cpuUsage?: number;
+  memoryUsage?: number;
+  systemLoad?: number;
+  requestRate?: number;
+}
+
 export interface BaseNeuralService {
   id: string;
   moduleId: string;

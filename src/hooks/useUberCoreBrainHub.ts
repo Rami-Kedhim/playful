@@ -1,12 +1,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { uberCore } from '@/core/UberCore';
-import { brainHub } from '@/services/neural/HermesOxumBrainHub';
-import { SystemHealthMetrics } from '@/types/neural-system';
+import { SystemHealthMetrics } from '@/services/neural/types/NeuralService';
 
-export interface UberCoreBrainHubState {
-  isConnected: boolean;
+interface UberCoreBrainHubState {
   isLoading: boolean;
+  isConnected: boolean;
   error: string | null;
   systemStatus: {
     uberCore: {
@@ -15,221 +13,184 @@ export interface UberCoreBrainHubState {
     };
     brainHub: {
       status: string;
-      activeModules: string[];
+      activeModules: any[];
     };
   };
   metrics: SystemHealthMetrics;
-  neuralActivities: Array<{
-    id: string;
-    type: string;
-    timestamp: Date;
-    details: string;
-  }>;
+  neuralActivities: any[];
 }
 
 export function useUberCoreBrainHub() {
   const [state, setState] = useState<UberCoreBrainHubState>({
-    isConnected: false,
     isLoading: true,
+    isConnected: false,
     error: null,
     systemStatus: {
       uberCore: {
         status: 'initializing',
-        uptime: 0,
+        uptime: 0
       },
       brainHub: {
         status: 'initializing',
-        activeModules: [],
+        activeModules: []
       }
     },
     metrics: {
+      load: 0,
+      memory: 0,
+      latency: 0,
+      errorRate: 0,
+      averageResponseTime: 0,
       cpuUsage: 0,
       memoryUsage: 0,
-      activeConnections: 0,
-      requestsPerMinute: 0,
-      averageResponseTime: 0,
-      errorRate: 0,
-      uptime: 0,
       systemLoad: 0,
-      memoryAllocation: 0,
-      networkThroughput: 0,
-      requestRate: 0,
-      modelCount: 0,
-      gpuUsage: 0,
-      errorFrequency: 0,
-      systemUptime: 0,
-      networkLatency: 0,
-      responseTime: 0,
-      userSatisfactionScore: 0,
-      models: []
+      requestRate: 0
     },
     neuralActivities: []
   });
 
-  const fetchData = useCallback(async () => {
+  // Connect to UberCore and BrainHub
+  const connect = useCallback(async () => {
+    setState(prev => ({ ...prev, isLoading: true }));
+    
     try {
-      setState(prev => ({ ...prev, isLoading: true }));
+      // This would be a real connection in a production app
+      // Simulate connection success after a short delay
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Get UberCore status
-      const uberStatus = uberCore.getSystemStatus();
-      
-      // Get BrainHub status
-      const brainStatus = await brainHub.processRequest({
-        type: 'system_status',
-        data: {}
-      });
-      
-      // Get health metrics from UberCore
-      const healthMetrics = uberCore.checkSubsystemHealth().reduce((acc, item) => {
-        acc[item.status.toLowerCase()] = item.health;
-        return acc;
-      }, {} as Record<string, number>);
-      
-      // Get neural activities
-      const activities = await brainHub.getDecisionLogs();
-      
+      // Mock connection success
       setState(prev => ({
         ...prev,
         isLoading: false,
         isConnected: true,
-        error: null,
         systemStatus: {
           uberCore: {
-            status: uberStatus.status,
-            uptime: uberStatus.uptime,
+            status: 'operational',
+            uptime: 99.9
           },
           brainHub: {
-            status: brainStatus.success ? 'operational' : 'error',
-            activeModules: brainStatus.data?.activeModules || []
+            status: 'operational',
+            activeModules: ['nlp', 'vision', 'reasoning']
           }
         },
         metrics: {
-          ...prev.metrics,
-          cpuUsage: healthMetrics.cpu || 65,
-          memoryUsage: healthMetrics.memory || 42,
-          activeConnections: healthMetrics.api || 89,
-          requestsPerMinute: Math.floor(Math.random() * 100) + 50,
-          averageResponseTime: Math.floor(Math.random() * 200) + 50,
-          errorRate: (Math.random() * 2).toFixed(2),
-          systemLoad: healthMetrics.system || 50,
-          modelCount: 5,
-          models: []
-        },
-        neuralActivities: activities.map((log: any) => ({
-          id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-          type: log.module || 'core',
-          timestamp: new Date(log.timestamp),
-          details: log.message
-        }))
-      }));
-    } catch (error) {
-      console.error('Error connecting UberCore and BrainHub:', error);
-      setState(prev => ({
-        ...prev, 
-        isLoading: false, 
-        error: error instanceof Error ? error.message : 'Unknown error'
-      }));
-    }
-  }, []);
-
-  const initializeConnection = useCallback(async () => {
-    try {
-      // Initialize UberCore
-      uberCore.initialize();
-      
-      // Initialize BrainHub
-      await brainHub.initialize();
-      
-      // Register UberCore with BrainHub
-      await brainHub.processRequest({
-        type: 'register_core_system',
-        data: {
-          systemId: 'uber-core',
-          systemType: 'core',
-          capabilities: ['neural_processing', 'prediction', 'system_monitoring']
+          load: 45,
+          memory: 32,
+          latency: 120,
+          errorRate: 0.05,
+          averageResponseTime: 150,
+          cpuUsage: 45,
+          memoryUsage: 32,
+          systemLoad: 0.45,
+          requestRate: 42
         }
-      });
-      
-      await fetchData();
-    } catch (error) {
-      console.error('Error initializing UberCore-BrainHub connection:', error);
-      setState(prev => ({
-        ...prev, 
-        isLoading: false, 
-        error: error instanceof Error ? error.message : 'Failed to initialize'
       }));
-    }
-  }, [fetchData]);
-
-  useEffect(() => {
-    initializeConnection();
-    
-    const intervalId = setInterval(fetchData, 30000);
-    
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [initializeConnection, fetchData]);
-
-  const refreshData = useCallback(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const runDiagnostics = useCallback(async () => {
-    try {
-      setState(prev => ({ ...prev, isLoading: true }));
       
-      // Run UberCore diagnostics
-      const integrityCheck = uberCore.checkSystemIntegrity();
-      
-      // Run BrainHub diagnostics
-      await brainHub.processRequest({
-        type: 'run_diagnostics',
-        data: {
-          depth: 'full',
-          includeSubsystems: true
-        }
-      });
-      
+      return true;
+    } catch (error) {
       setState(prev => ({
         ...prev,
         isLoading: false,
-        systemStatus: {
-          ...prev.systemStatus,
-          uberCore: {
-            ...prev.systemStatus.uberCore,
-            integrity: integrityCheck.isValid ? 'valid' : 'compromised',
-            message: integrityCheck.message
-          }
-        }
+        isConnected: false,
+        error: 'Failed to connect to UberCore and BrainHub'
       }));
-      
-      // Refresh data after diagnostics
-      fetchData();
-      
-      return {
-        success: true,
-        message: 'Diagnostics completed successfully'
-      };
-    } catch (error) {
-      console.error('Error running diagnostics:', error);
-      setState(prev => ({
-        ...prev, 
-        isLoading: false, 
-        error: error instanceof Error ? error.message : 'Diagnostics failed'
-      }));
-      
-      return {
-        success: false,
-        message: 'Diagnostics failed'
-      };
+      return false;
     }
-  }, [fetchData]);
+  }, []);
+
+  // Fetch activity logs
+  const fetchActivities = useCallback(async () => {
+    if (!state.isConnected) return;
+    
+    setState(prev => ({ ...prev, isLoading: true }));
+    
+    try {
+      // This would fetch actual logs in a production app
+      // Mock some activity data
+      const mockActivities = [
+        {
+          id: 'act-1',
+          timestamp: new Date().toISOString(),
+          type: 'inference',
+          status: 'completed',
+          duration: 245,
+          module: 'text-processor'
+        },
+        {
+          id: 'act-2',
+          timestamp: new Date(Date.now() - 120000).toISOString(),
+          type: 'training',
+          status: 'in-progress',
+          duration: 3600,
+          module: 'image-classifier'
+        },
+        {
+          id: 'act-3',
+          timestamp: new Date(Date.now() - 300000).toISOString(),
+          type: 'inference',
+          status: 'completed',
+          duration: 78,
+          module: 'recommendation-engine'
+        }
+      ];
+      
+      // Instead of using getDecisionLogs which doesn't exist
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        neuralActivities: mockActivities
+      }));
+      
+    } catch (error) {
+      console.error("Error fetching activities:", error);
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: 'Failed to fetch neural activities'
+      }));
+    }
+  }, [state.isConnected]);
+
+  // Initialize connection on mount
+  useEffect(() => {
+    connect();
+    
+    // Set up periodic metrics refresh
+    const intervalId = setInterval(() => {
+      if (state.isConnected) {
+        // Simulate metrics update
+        setState(prev => ({
+          ...prev,
+          metrics: {
+            ...prev.metrics,
+            load: Math.min(95, prev.metrics.load + (Math.random() > 0.5 ? 1 : -1) * Math.random() * 5),
+            cpuUsage: Math.min(95, prev.metrics.cpuUsage + (Math.random() > 0.5 ? 1 : -1) * Math.random() * 5),
+            memoryUsage: Math.min(95, prev.metrics.memoryUsage + (Math.random() > 0.5 ? 1 : -1) * Math.random() * 3),
+            latency: Math.max(20, prev.metrics.latency + (Math.random() > 0.5 ? 1 : -1) * Math.random() * 10),
+            errorRate: Math.max(0, Math.min(1, prev.metrics.errorRate + (Math.random() > 0.7 ? 0.01 : -0.01) * Math.random())),
+            memory: Math.min(95, prev.metrics.memory + (Math.random() > 0.5 ? 1 : -1) * Math.random() * 3),
+            averageResponseTime: Math.max(50, prev.metrics.averageResponseTime + (Math.random() > 0.5 ? 1 : -1) * Math.random() * 10),
+            systemLoad: Math.min(1, prev.metrics.systemLoad + (Math.random() > 0.5 ? 0.01 : -0.01) * Math.random()),
+            requestRate: Math.max(0, prev.metrics.requestRate + (Math.random() > 0.5 ? 1 : -1) * Math.random() * 3)
+          }
+        }));
+      }
+    }, 3000);
+    
+    return () => clearInterval(intervalId);
+  }, [connect, state.isConnected]);
+
+  // Fetch activities when connected
+  useEffect(() => {
+    if (state.isConnected) {
+      fetchActivities();
+    }
+  }, [state.isConnected, fetchActivities]);
 
   return {
     ...state,
-    refreshData,
-    runDiagnostics
+    connect,
+    fetchActivities
   };
 }
 
