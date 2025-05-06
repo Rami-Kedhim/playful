@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 
 /**
@@ -20,6 +21,11 @@ export function useUberCoreNeuralMonitor() {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isMonitoring, setIsMonitoring] = useState(false);
+  const [performanceReport, setPerformanceReport] = useState(null);
+  const [systemStatus, setSystemStatus] = useState(null);
+  const [systemMetrics, setSystemMetrics] = useState(null);
+  const [subsystemHealth, setSubsystemHealth] = useState([]);
   
   const performHealthCheck = useCallback(() => {
     try {
@@ -68,22 +74,106 @@ export function useUberCoreNeuralMonitor() {
       setLoading(false);
     }
   }, [performHealthCheck]);
+
+  const startMonitoring = useCallback(() => {
+    setIsMonitoring(true);
+    refreshHealth();
+    
+    // Generate some mock data for the other state variables
+    setPerformanceReport({
+      timestamp: new Date().toISOString(),
+      overallHealth: 'good',
+      metrics: {
+        cpuUsage: Math.random() * 100,
+        memoryUsage: Math.random() * 100
+      }
+    });
+    
+    setSystemStatus({
+      operational: true,
+      services: {
+        auth: 'online',
+        analytics: 'online',
+        ai: 'online'
+      }
+    });
+    
+    setSystemMetrics({
+      load: Math.random() * 100,
+      memory: Math.random() * 100,
+      latency: Math.random() * 100,
+      cpuUsage: Math.random() * 100,
+      memoryUsage: Math.random() * 100,
+      errorRate: Math.random() * 0.05,
+      averageResponseTime: Math.random() * 200
+    });
+    
+    setSubsystemHealth([
+      { name: 'escorts', status: 'operational', health: 95 },
+      { name: 'creators', status: 'operational', health: 92 },
+      { name: 'livecams', status: 'operational', health: 88 },
+      { name: 'companion', status: 'operational', health: 90 },
+      { name: 'seo', status: 'operational', health: 85 },
+      { name: 'wallet', status: 'operational', health: 97 }
+    ]);
+  }, [refreshHealth]);
+  
+  const stopMonitoring = useCallback(() => {
+    setIsMonitoring(false);
+  }, []);
+  
+  const refreshData = useCallback(() => {
+    refreshHealth();
+    
+    // Refresh mock data
+    if (isMonitoring) {
+      setPerformanceReport({
+        timestamp: new Date().toISOString(),
+        overallHealth: 'good',
+        metrics: {
+          cpuUsage: Math.random() * 100,
+          memoryUsage: Math.random() * 100
+        }
+      });
+      
+      setSystemMetrics({
+        load: Math.random() * 100,
+        memory: Math.random() * 100,
+        latency: Math.random() * 100,
+        cpuUsage: Math.random() * 100,
+        memoryUsage: Math.random() * 100,
+        errorRate: Math.random() * 0.05,
+        averageResponseTime: Math.random() * 200
+      });
+    }
+  }, [refreshHealth, isMonitoring]);
   
   useEffect(() => {
     refreshHealth();
     
     const intervalId = setInterval(() => {
-      refreshHealth();
+      if (isMonitoring) {
+        refreshHealth();
+      }
     }, 30000);
     
     return () => clearInterval(intervalId);
-  }, [refreshHealth]);
+  }, [refreshHealth, isMonitoring]);
   
   return {
     health,
     loading,
     error,
-    refreshHealth
+    refreshHealth,
+    isMonitoring,
+    performanceReport,
+    systemStatus,
+    systemMetrics,
+    subsystemHealth,
+    isLoading: loading,
+    startMonitoring,
+    stopMonitoring,
+    refreshData
   };
 }
 
