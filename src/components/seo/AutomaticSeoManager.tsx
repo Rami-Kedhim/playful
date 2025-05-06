@@ -29,7 +29,13 @@ const AutomaticSeoManager: React.FC = () => {
   useEffect(() => {
     const updateStatus = () => {
       const currentStatus = automaticSeoService.getStatus();
-      setStatus(currentStatus);
+      setStatus({
+        active: currentStatus.active,
+        queueLength: currentStatus.queueLength,
+        processing: currentStatus.processing,
+        lastScan: currentStatus.lastScan,
+        optimizedPages: currentStatus.optimizedPages
+      });
     };
     
     updateStatus(); // Initial update
@@ -47,14 +53,28 @@ const AutomaticSeoManager: React.FC = () => {
     }
     
     // Update status immediately after toggle
-    setStatus(automaticSeoService.getStatus());
+    const currentStatus = automaticSeoService.getStatus();
+    setStatus({
+      active: currentStatus.active,
+      queueLength: currentStatus.queueLength,
+      processing: currentStatus.processing,
+      lastScan: currentStatus.lastScan,
+      optimizedPages: currentStatus.optimizedPages
+    });
   };
   
   // Trigger a manual scan
   const triggerManualScan = () => {
     automaticSeoService.performScan();
     // Update status immediately
-    setStatus(automaticSeoService.getStatus());
+    const currentStatus = automaticSeoService.getStatus();
+    setStatus({
+      active: currentStatus.active,
+      queueLength: currentStatus.queueLength,
+      processing: currentStatus.processing,
+      lastScan: currentStatus.lastScan,
+      optimizedPages: currentStatus.optimizedPages
+    });
   };
   
   return (

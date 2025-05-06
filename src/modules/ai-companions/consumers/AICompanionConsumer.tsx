@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { BaseBrainService } from '@/services/neural/modules/BaseNeuralService';
-import { BaseNeuralService, NeuralServiceConfig } from '@/services/neural/types/NeuralService';
+import { BaseNeuralService, ModuleType } from '@/services/neural/types/NeuralService';
 
 const AICompanionConsumer: React.FC = () => {
   useEffect(() => {
@@ -11,7 +11,7 @@ const AICompanionConsumer: React.FC = () => {
         moduleId: 'ai-companion-consumer',
         name: 'AI Companion Consumer',
         description: 'Consumer service for AI companions',
-        moduleType: 'neural',
+        moduleType: ModuleType.NEURAL,
         version: '1.0.0'
       });
       
@@ -23,8 +23,8 @@ const AICompanionConsumer: React.FC = () => {
           cpu: 2,
           memory: 1024
         },
-        autonomyLevel: 75,
-        resourceAllocation: 50
+        autonomyLevel: 80,
+        resourceAllocation: 60
       });
       
       return service;

@@ -1,6 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { BaseBrainService } from '@/services/neural/modules/BaseNeuralService';
+import { BaseNeuralService, ModuleType } from '@/services/neural/types/NeuralService';
 
 const CreatorConsumer: React.FC = () => {
   useEffect(() => {
@@ -10,20 +11,20 @@ const CreatorConsumer: React.FC = () => {
         moduleId: 'creator-consumer',
         name: 'Creator Consumer',
         description: 'Consumer service for creators',
-        moduleType: 'neural',
+        moduleType: ModuleType.NEURAL,
         version: '1.0.0'
       });
       
-      // Update config with correct priority
+      // Update config with allowed properties
       service.updateConfig({
         enabled: true,
-        priority: 'normal',
+        priority: 'high',
         resources: {
-          cpu: 1,
-          memory: 512
+          cpu: 2,
+          memory: 1024
         },
-        autonomyLevel: 65,
-        resourceAllocation: 40
+        autonomyLevel: 80,
+        resourceAllocation: 60
       });
       
       return service;

@@ -38,3 +38,38 @@ export interface SeoMetrics {
   ranking: number;
   lastChecked: string;
 }
+
+/**
+ * HERMES insight definitions for SEO and other metrics
+ */
+export interface HermesInsight {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high';
+  created: string;
+  status: 'new' | 'viewed' | 'actioned';
+  data?: {
+    boostOffer?: {
+      profileId?: string;
+      recommendation?: string;
+      potentialIncrease?: string;
+      cost?: string;
+      duration?: string;
+      value?: string;
+      expires?: string;
+      category?: string;
+    };
+    profileId?: string;
+    affectedPages?: number;
+    potentialImpact?: string;
+    increase?: string;
+    source?: string;
+    value?: string;
+    recommendedProfileId?: string;
+    popularCategory?: string;
+    trendingTag?: string;
+  };
+  source: string;
+}

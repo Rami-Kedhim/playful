@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { BaseBrainService } from '@/services/neural/modules/BaseNeuralService';
-import { BaseNeuralService, NeuralServiceConfig } from '@/services/neural/types/NeuralService';
+import { BaseNeuralService, ModuleType } from '@/services/neural/types/NeuralService';
 
 const LivecamConsumer: React.FC = () => {
   useEffect(() => {
@@ -11,7 +11,7 @@ const LivecamConsumer: React.FC = () => {
         moduleId: 'livecam-consumer',
         name: 'Livecam Consumer',
         description: 'Consumer service for livecams',
-        moduleType: 'streaming',
+        moduleType: ModuleType.STREAMING,
         version: '1.0.0'
       });
       

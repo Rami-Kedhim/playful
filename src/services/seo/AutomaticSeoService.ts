@@ -9,6 +9,8 @@ class AutomaticSeoService {
   private monitoringInterval: number | null = null;
   private optimizationQueue: string[] = [];
   private scanning: boolean = false;
+  private optimizedPages: number = 0;
+  private lastScan: Date | null = null;
 
   /**
    * Start automatic monitoring of content for SEO optimization
@@ -80,6 +82,7 @@ class AutomaticSeoService {
       
       // Process queue
       await this.processOptimizationQueue();
+      this.lastScan = new Date();
       
     } finally {
       this.scanning = false;
@@ -104,9 +107,17 @@ class AutomaticSeoService {
       
       // In real implementation, we'd save the optimized content
       console.log(`[AutoSEO] Optimized ${url} - new score: 85`);
+      this.optimizedPages++;
     }
     
     this.optimizationQueue = [];
+  }
+  
+  /**
+   * Manually trigger a scan 
+   */
+  performScan(): void {
+    this.scanContent();
   }
   
   /**
@@ -117,7 +128,9 @@ class AutomaticSeoService {
       active: this.isActive,
       scanning: this.scanning,
       queueLength: this.optimizationQueue.length,
-      lastScan: new Date()
+      lastScan: this.lastScan,
+      processing: this.scanning,
+      optimizedPages: this.optimizedPages
     };
   }
 }

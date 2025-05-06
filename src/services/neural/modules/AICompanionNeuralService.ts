@@ -8,12 +8,12 @@ export class AICompanionNeuralService extends BaseBrainService {
       moduleId: 'ai-companion-neural-service',
       name: 'AI Companion Neural Service',
       description: 'Neural service for AI companion functionality',
-      moduleType: ModuleType.COMPANION,
+      moduleType: ModuleType.AI_COMPANION,
       version: '1.0.0',
       config: {
         enabled: true,
-        priority: 'high',
-        dependencies: ['hermes', 'orus']
+        priority: 'normal',
+        dependencies: ['hermes']
       }
     });
   }

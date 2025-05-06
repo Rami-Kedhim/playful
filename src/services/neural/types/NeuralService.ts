@@ -50,7 +50,8 @@ export enum ModuleType {
   NEURAL = 'neural',
   AUTOMATION = 'automation',
   STREAMING = 'streaming',
-  AI_COMPANION = 'ai-companion'
+  AI_COMPANION = 'ai-companion',
+  AI_COMPANIONS = 'ai_companions'
 }
 
 // Add the SystemHealthMetrics interface that's referenced in several places

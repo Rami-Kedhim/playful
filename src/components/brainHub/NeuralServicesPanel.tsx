@@ -49,7 +49,7 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ systemId }) =
         <CardTitle>Neural Services</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {registry.isLoading ? (
+        {registry.loading ? (
           <div className="flex items-center justify-center p-4">
             <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
           </div>

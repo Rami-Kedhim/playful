@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { BaseBrainService } from '@/services/neural/modules/BaseNeuralService';
-import { BaseNeuralService, NeuralServiceConfig } from '@/services/neural/types/NeuralService';
+import { BaseNeuralService, ModuleType } from '@/services/neural/types/NeuralService';
 
 const EscortConsumer: React.FC = () => {
   useEffect(() => {
@@ -11,7 +11,7 @@ const EscortConsumer: React.FC = () => {
         moduleId: 'escort-consumer',
         name: 'Escort Consumer',
         description: 'Consumer service for escorts',
-        moduleType: 'neural',
+        moduleType: ModuleType.NEURAL,
         version: '1.0.0'
       });
       

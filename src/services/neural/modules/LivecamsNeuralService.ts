@@ -7,7 +7,7 @@ export class LivecamsNeuralService extends BaseBrainService {
     super({
       moduleId: 'livecams-neural-service',
       name: 'Livecams Neural Service',
-      description: 'Neural service for livestreaming functionality',
+      description: 'Neural service for livecams platform functionality',
       moduleType: ModuleType.LIVECAMS,
       version: '1.0.0',
       config: {

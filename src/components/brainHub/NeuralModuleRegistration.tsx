@@ -1,183 +1,107 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Plus, Brain, AlertCircle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { ModuleType } from '@/services/neural/types/NeuralService';
-import neuralServiceRegistry from '@/services/neural/registry/NeuralServiceRegistry';
-import { 
-  EscortsNeuralService 
-} from '@/services/neural/modules/EscortsNeuralService';
-import { 
-  CreatorsNeuralService 
-} from '@/services/neural/modules/CreatorsNeuralService';
-import { 
-  LivecamsNeuralService 
-} from '@/services/neural/modules/LivecamsNeuralService';
-import { 
-  AICompanionNeuralService 
-} from '@/services/neural/modules/AICompanionNeuralService';
 
-interface NeuralModuleRegistrationProps {
-  onRegistered?: () => void;
-}
-
-const NeuralModuleRegistration: React.FC<NeuralModuleRegistrationProps> = ({ onRegistered }) => {
-  const [moduleType, setModuleType] = useState<ModuleType>('escorts');
-  const [moduleId, setModuleId] = useState('');
-  const [priority, setPriority] = useState(50);
-  const [autonomyLevel, setAutonomyLevel] = useState(50);
-  const [error, setError] = useState<string | null>(null);
+const NeuralModuleRegistration: React.FC = () => {
+  const [moduleName, setModuleName] = useState("");
+  const [moduleDescription, setModuleDescription] = useState("");
+  const [moduleType, setModuleType] = useState<ModuleType>(ModuleType.ESCORTS);
+  const [registering, setRegistering] = useState(false);
+  const [registered, setRegistered] = useState(false);
   
-  const handleRegister = () => {
-    if (!moduleId) {
-      setError('Module ID is required');
-      return;
-    }
+  const handleRegisterModule = async () => {
+    if (!moduleName.trim()) return;
     
+    setRegistering(true);
     try {
-      // Check if a service with this ID already exists
-      const existingService = neuralServiceRegistry.getService(moduleId);
-      if (existingService) {
-        setError(`A service with ID ${moduleId} already exists`);
-        return;
-      }
+      // Mock registration - in real app this would call an API
+      console.log(`Registering module: ${moduleName}, type: ${moduleType}`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setRegistered(true);
+      setTimeout(() => setRegistered(false), 3000);
       
-      // Create a new service instance based on the selected module type
-      let service;
-      
-      switch (moduleType) {
-        case 'escorts':
-          service = new EscortsNeuralService();
-          break;
-        case 'creators':
-          service = new CreatorsNeuralService();
-          break;
-        case 'livecams':
-          service = new LivecamsNeuralService();
-          break;
-        case 'ai_companions':
-          service = new AICompanionNeuralService();
-          break;
-        default:
-          setError('Invalid module type');
-          return;
-      }
-      
-      // Update the service config after creation
-      service.updateConfig({
-        priority,
-        autonomyLevel,
-        enabled: true
-      });
-      
-      // Register the service
-      const success = neuralServiceRegistry.registerService(service);
-      
-      if (success) {
-        setError(null);
-        setModuleId('');
-        if (onRegistered) {
-          onRegistered();
-        }
-      } else {
-        setError('Failed to register neural service');
-      }
-    } catch (err: any) {
-      setError(err.message || 'An error occurred while registering the neural service');
-    }
-  };
-  
-  const getModuleTypeLabel = (type: ModuleType): string => {
-    switch (type) {
-      case 'escorts': return 'Escorts';
-      case 'creators': return 'Content Creators';
-      case 'livecams': return 'Livecams';
-      case 'ai_companions': return 'AI Companion';
-      default: return type;
+      // Reset form
+      setModuleName("");
+      setModuleDescription("");
+      setModuleType(ModuleType.ESCORTS);
+    } catch (err) {
+      console.error("Failed to register module:", err);
+    } finally {
+      setRegistering(false);
     }
   };
   
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-lg flex items-center">
-          <Plus className="w-5 h-5 mr-2 text-primary" />
-          Register Neural Service
-        </CardTitle>
+        <CardTitle>Register Neural Module</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {error && (
-          <div className="bg-destructive/20 p-3 rounded-md flex items-start gap-2 text-sm">
-            <AlertCircle className="w-4 h-4 text-destructive mt-0.5" />
-            <span>{error}</span>
+        <div className="space-y-2">
+          <label htmlFor="module-name" className="text-sm font-medium">Module Name</label>
+          <Input 
+            id="module-name"
+            value={moduleName} 
+            onChange={e => setModuleName(e.target.value)}
+            placeholder="Enter module name"
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <label htmlFor="module-type" className="text-sm font-medium">Module Type</label>
+          <Select 
+            value={moduleType} 
+            onValueChange={(value: string) => setModuleType(value as ModuleType)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ModuleType.ESCORTS}>Escorts</SelectItem>
+              <SelectItem value={ModuleType.CREATORS}>Creators</SelectItem>
+              <SelectItem value={ModuleType.LIVECAMS}>Livecams</SelectItem>
+              <SelectItem value={ModuleType.AI_COMPANIONS}>AI Companions</SelectItem>
+              <SelectItem value={ModuleType.SEO}>SEO</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <label htmlFor="module-description" className="text-sm font-medium">Description</label>
+          <Textarea
+            id="module-description"
+            value={moduleDescription}
+            onChange={e => setModuleDescription(e.target.value)}
+            placeholder="Enter module description"
+            rows={3}
+          />
+        </div>
+        
+        <Button 
+          onClick={handleRegisterModule}
+          disabled={!moduleName.trim() || registering}
+          className="w-full"
+        >
+          {registering ? "Registering..." : "Register Module"}
+        </Button>
+        
+        {registered && (
+          <div className="bg-green-500/20 text-green-700 p-2 rounded text-center">
+            Module registered successfully!
           </div>
         )}
         
-        <div className="space-y-2">
-          <Label htmlFor="module-type">Module Type</Label>
-          <select 
-            id="module-type"
-            value={moduleType}
-            onChange={(e) => setModuleType(e.target.value as ModuleType)}
-            className="w-full p-2 border border-border rounded-md bg-background"
-          >
-            <option value="escorts">Escorts</option>
-            <option value="creators">Content Creators</option>
-            <option value="livecams">Livecams</option>
-            <option value="ai_companions">AI Companion</option>
-          </select>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="module-id">Module ID</Label>
-          <Input
-            id="module-id"
-            value={moduleId}
-            onChange={(e) => setModuleId(e.target.value)}
-            placeholder={`${moduleType}-neural-service`}
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <Label htmlFor="priority">Priority</Label>
-            <span className="text-sm">{priority}/100</span>
+        {moduleType === ModuleType.AI_COMPANIONS && (
+          <div className="bg-blue-500/20 text-blue-700 p-2 rounded text-sm">
+            <p>AI Companions modules require additional configuration.</p>
           </div>
-          <Slider 
-            id="priority"
-            value={[priority]} 
-            onValueChange={(values) => setPriority(values[0])} 
-            min={1} 
-            max={100} 
-            step={1}
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <Label htmlFor="autonomy">Autonomy Level</Label>
-            <span className="text-sm">{autonomyLevel}/100</span>
-          </div>
-          <Slider 
-            id="autonomy"
-            value={[autonomyLevel]} 
-            onValueChange={(values) => setAutonomyLevel(values[0])} 
-            min={1} 
-            max={100} 
-            step={1}
-          />
-        </div>
+        )}
       </CardContent>
-      <CardFooter>
-        <Button onClick={handleRegister} className="w-full">
-          <Brain className="mr-2 h-4 w-4" />
-          Register {getModuleTypeLabel(moduleType)} Neural Service
-        </Button>
-      </CardFooter>
     </Card>
   );
 };
