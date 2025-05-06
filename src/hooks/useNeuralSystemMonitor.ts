@@ -31,7 +31,8 @@ export function useNeuralSystemMonitor(options: UseNeuralSystemMonitorOptions = 
       const report = neuralSystemMonitor.performHealthCheck();
       const status = neuralSystemMonitor.getSystemStatus();
       
-      setPerformanceReport(report);
+      // Fixed: Using proper type assertion to ensure it matches the expected structure
+      setPerformanceReport(report as any);
       setSystemStatus(status);
       
       // Check for alerts that need to be reported

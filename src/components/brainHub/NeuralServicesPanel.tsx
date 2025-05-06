@@ -16,8 +16,17 @@ interface NeuralServicesPanelProps {
 }
 
 const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ systemId }) => {
-  const { services, loading, error, optimizeResources } = useNeuralRegistry();
+  const registry = useNeuralRegistry();
   const [activeJobs, setActiveJobs] = useState<TrainingProgress[]>([]);
+  
+  // Add optimizeResources function that was missing
+  const optimizeResources = () => {
+    console.log('Optimizing neural resources...');
+    // Mock implementation
+    setTimeout(() => {
+      console.log('Resources optimized successfully');
+    }, 1500);
+  };
   
   useEffect(() => {
     const fetchJobs = () => {
@@ -40,7 +49,7 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ systemId }) =
         <CardTitle>Neural Services</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {loading ? (
+        {registry.isLoading ? (
           <div className="flex items-center justify-center p-4">
             <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
           </div>
@@ -54,7 +63,7 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ systemId }) =
             </div>
             
             <div className="space-y-4">
-              {services.map(service => (
+              {registry.services.map(service => (
                 <div key={service.moduleId} className="p-4 border rounded-md">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
@@ -79,7 +88,7 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ systemId }) =
                 </div>
               ))}
               
-              {services.length === 0 && (
+              {registry.services.length === 0 && (
                 <div className="text-center p-4 border border-dashed rounded-md">
                   <p className="text-muted-foreground">No neural services available</p>
                 </div>

@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { SystemHealthMetrics } from '@/services/neural/types/NeuralService';
-import { Brain, Cpu, Memory, Network } from 'lucide-react';
+import { Brain, Cpu, Network, CircuitBoard } from 'lucide-react';
 
 interface UberCoreBrainHubPanelProps {
   status?: {
@@ -84,7 +84,7 @@ const UberCoreBrainHubPanel: React.FC<UberCoreBrainHubPanelProps> = ({
       <Card className="shadow-md">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium flex items-center">
-            <Memory className="h-4 w-4 mr-2 text-purple-500" />
+            <CircuitBoard className="h-4 w-4 mr-2 text-purple-500" />
             Memory Usage
           </CardTitle>
         </CardHeader>

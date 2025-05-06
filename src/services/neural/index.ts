@@ -11,5 +11,7 @@ export * from './registry/NeuralServiceRegistry';
 export type { BaseNeuralService, NeuralServiceConfig, ModuleType } from './types/NeuralService';
 
 // Export the unified neural hub instance and aliases for backward compatibility
-export { neuralHub, brainHub, default as unifiedNeuralHub } from './UnifiedNeuralHub';
+import { default as unifiedNeuralHub } from './UnifiedNeuralHub';
+export { unifiedNeuralHub };
+export { neuralHub, brainHub } from './HermesOxumNeuralHub';
 export type { INeuralHub as NeuralHub } from './types/neuralHub';
