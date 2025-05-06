@@ -23,7 +23,38 @@ const MessagesPage = /*#__PURE__*/ lazy(() => import('@/pages/Messages'));
 const FavoritesPage = /*#__PURE__*/ lazy(() => import('@/pages/FavoritesPage'));
 const AuthPage = /*#__PURE__*/ lazy(() => import('@/pages/AuthPage'));
 
-// Define route configuration with elements
+// Define app paths as constants for reuse
+export enum AppPaths {
+  HOME = '/',
+  LOGIN = '/login',
+  REGISTER = '/register',
+  DASHBOARD = '/dashboard',
+  PROFILE = '/profile',
+  SETTINGS = '/settings',
+  ABOUT = '/about',
+  CONTACT = '/contact',
+  TERMS = '/terms',
+  PRIVACY = '/privacy',
+  NEURAL_MONITOR = '/neural/monitor',
+  NEURAL_ANALYTICS = '/neural/analytics',
+  NOT_FOUND = '*'
+}
+
+// Define route category definitions
+export enum RouteCategory {
+  CORE = 'core',
+  AUTH = 'auth',
+  SAFETY = 'safety',
+  AI = 'ai',
+  NEURAL = 'neural',
+  WALLET = 'wallet',
+  ESCORT = 'escort',
+  MESSAGE = 'message',
+  FAVORITES = 'favorites',
+  NOT_FOUND = 'not-found'
+}
+
+// Define the routes with their elements
 export const routes: RouteDefinition[] = [
   {
     path: '/',
