@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -7,20 +7,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Activity, Brain, Clock, FileBarChart, Settings, RefreshCw, Database, Shield, ArrowUpRight } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { Activity, Brain, Clock, FileBarChart, Settings, RefreshCw } from 'lucide-react';
 import useUberCoreNeuralMonitor from '@/hooks/useUberCoreNeuralMonitor';
 import UberCoreBrainHubPanel from '@/components/brainHub/UberCoreBrainHubPanel';
 import NeuralServicesPanel from '@/components/brainHub/NeuralServicesPanel';
-import { orus } from '@/core/Orus';
-import { SystemIntegrityResult } from '@/types/core-systems';
 
 const NeuralMonitoringPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const { toast } = useToast();
-  const [systemIntegrity, setSystemIntegrity] = useState<SystemIntegrityResult | null>(null);
-  
-  // Use the UberCore neural monitor hook
   const {
     isMonitoring,
     performanceReport,
@@ -36,42 +29,10 @@ const NeuralMonitoringPage: React.FC = () => {
     autoStart: true,
     monitorInterval: 60000,
     onAlert: (alerts) => {
-      alerts.forEach(alert => {
-        toast({
-          title: "Neural Alert",
-          description: alert,
-          variant: "destructive"
-        });
-      });
+      console.log('Neural system alerts:', alerts);
+      // Could display these alerts in a toast or notification
     }
   });
-
-  // Check system integrity on component mount
-  useEffect(() => {
-    const checkIntegrity = () => {
-      try {
-        const result = orus.checkIntegrity();
-        setSystemIntegrity(result);
-        
-        if (!result.isValid) {
-          toast({
-            title: "System Integrity Warning",
-            description: result.message,
-            variant: "destructive"
-          });
-        }
-      } catch (err) {
-        console.error('Failed to check system integrity:', err);
-        toast({
-          title: "System Error",
-          description: "Failed to verify system integrity.",
-          variant: "destructive"
-        });
-      }
-    };
-    
-    checkIntegrity();
-  }, [toast]);
 
   const handleRefresh = async () => {
     await refreshData();
@@ -96,34 +57,24 @@ const NeuralMonitoringPage: React.FC = () => {
             <Switch 
               checked={isMonitoring} 
               onCheckedChange={(checked) => checked ? startMonitoring() : stopMonitoring()} 
-              id="auto-refresh"
             />
-            <Label htmlFor="auto-refresh">Auto-refresh</Label>
+            <Label>Auto-refresh</Label>
           </div>
           
           <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
         </div>
       </div>
       
-      {/* System integrity alert */}
-      {systemIntegrity && !systemIntegrity.isValid && (
-        <Alert variant="destructive">
-          <Shield className="h-4 w-4" />
-          <AlertTitle>Security Warning</AlertTitle>
-          <AlertDescription>{systemIntegrity.message}</AlertDescription>
-        </Alert>
-      )}
-      
-      {/* Error alert */}
-      {error && (
+      {/* System status overview */}
+      {error ? (
         <Alert variant="destructive">
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
-      )}
+      ) : null}
       
       {/* Main content */}
       <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
@@ -145,8 +96,8 @@ const NeuralMonitoringPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center">
-                  <div className={`h-3 w-3 rounded-full mr-2 ${!isLoading && systemStatus?.isActive ? 'bg-green-500' : 'bg-amber-500'}`} />
-                  <span className="font-medium">{!isLoading && systemStatus?.isActive ? 'Operational' : 'Connecting...'}</span>
+                  <div className={`h-3 w-3 rounded-full mr-2 ${!isLoading && systemStatus?.operational ? 'bg-green-500' : 'bg-amber-500'}`} />
+                  <span className="font-medium">{!isLoading && systemStatus?.operational ? 'Operational' : 'Connecting...'}</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
                   Last updated: {performanceReport?.timestamp ? new Date(performanceReport.timestamp).toLocaleTimeString() : '-'}
@@ -179,7 +130,7 @@ const NeuralMonitoringPage: React.FC = () => {
               <CardContent>
                 <div className="flex items-center">
                   <Activity className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-2xl font-bold">{((systemMetrics?.errorRate || 0) * 100).toFixed(2)}</span>
+                  <span className="text-2xl font-bold">{(systemMetrics?.errorRate || 0) * 100}</span>
                   <span className="text-xs ml-1 text-muted-foreground">%</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
@@ -240,7 +191,7 @@ const NeuralMonitoringPage: React.FC = () => {
           {/* Performance Overview */}
           <UberCoreBrainHubPanel
             metrics={systemMetrics || undefined}
-            isConnected={!isLoading && !!systemStatus?.isActive}
+            isConnected={!isLoading && !!systemStatus?.operational}
             isLoading={isLoading}
           />
         </TabsContent>
@@ -252,176 +203,78 @@ const NeuralMonitoringPage: React.FC = () => {
               <CardTitle>UberCore Neural Systems</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <p className="text-muted-foreground">
-                  UberCore provides the central neural infrastructure for all escort and companion AI services.
-                </p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                  <div className="border rounded-lg p-4">
-                    <h3 className="text-sm font-semibold mb-2">Core Neural Systems</h3>
-                    <ul className="space-y-2 text-sm">
-                      {['Persona Generator', 'Chat Companion', 'Image Processing', 'Content Moderation'].map((system, i) => (
-                        <li key={i} className="flex justify-between items-center">
-                          <span>{system}</span>
-                          <Badge variant="outline" className="bg-green-50">Active</Badge>
-                        </li>
-                      ))}
-                    </ul>
+              <p className="text-muted-foreground mb-4">
+                UberCore provides the neural foundation for all AI services across the platform.
+              </p>
+              
+              {systemStatus && (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Operational Status</span>
+                    <Badge variant={systemStatus.operational ? "default" : "destructive"}>
+                      {systemStatus.operational ? "Online" : "Offline"}
+                    </Badge>
                   </div>
                   
-                  <div className="border rounded-lg p-4">
-                    <h3 className="text-sm font-semibold mb-2">Latest Operations</h3>
-                    <ul className="space-y-2 text-sm">
-                      {['Profile Analysis', 'Moderation Check', 'Content Generation', 'Persona Match'].map((op, i) => (
-                        <li key={i} className="flex justify-between items-center">
-                          <span>{op}</span>
-                          <span className="text-xs text-muted-foreground">{new Date(Date.now() - i * 1000 * 60 * 5).toLocaleTimeString()}</span>
-                        </li>
-                      ))}
-                    </ul>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">System Uptime</span>
+                    <span>{systemStatus.uptime}%</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Active Services</span>
+                    <span>{systemStatus.services?.length || 0}</span>
                   </div>
                 </div>
-
-                <div className="mt-4">
-                  <Button variant="outline" className="w-full" size="sm">
-                    <Database className="h-4 w-4 mr-2" /> View Detailed Logs
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>System Integration Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {['UberWallet', 'Oxum Engine', 'Lucie AI', 'Hermes Analytics'].map((system, i) => (
-                  <div key={i} className="flex items-center justify-between border-b pb-2 last:border-0">
-                    <div className="flex items-center">
-                      <div className="h-2 w-2 rounded-full mr-2 bg-green-500" />
-                      <span>{system}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="text-xs text-muted-foreground mr-2">Connected</span>
-                      <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
         
         {/* Services Tab Content */}
-        <TabsContent value="services">
+        <TabsContent value="services" className="space-y-4">
           <NeuralServicesPanel />
         </TabsContent>
         
         {/* Analytics Tab Content */}
-        <TabsContent value="analytics">
+        <TabsContent value="analytics" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Neural Performance Analytics</CardTitle>
+              <CardTitle>Neural Analytics</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Performance metrics and usage analytics for the UberCore neural infrastructure.
+              <p className="text-center text-muted-foreground p-4">
+                Analytics visualization is loading...
               </p>
-              
-              <div className="h-[300px] flex items-center justify-center border rounded-md">
-                <p className="text-muted-foreground">Analytics charts will render here</p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div className="border rounded-lg p-4">
-                  <h3 className="text-sm font-semibold mb-2">Response Time (ms)</h3>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-2xl font-bold">{systemMetrics?.averageResponseTime || '-'}</p>
-                      <p className="text-xs text-muted-foreground">7-day average</p>
-                    </div>
-                    <div className="h-10 flex items-end space-x-1">
-                      {[40, 65, 30, 85, 60, 70, 40].map((h, i) => (
-                        <div 
-                          key={i} 
-                          className="w-2 bg-primary" 
-                          style={{ height: `${h}%` }}
-                        ></div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border rounded-lg p-4">
-                  <h3 className="text-sm font-semibold mb-2">Error Rate (%)</h3>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-2xl font-bold">{((systemMetrics?.errorRate || 0) * 100).toFixed(2)}</p>
-                      <p className="text-xs text-muted-foreground">7-day average</p>
-                    </div>
-                    <div className="h-10 flex items-end space-x-1">
-                      {[10, 5, 15, 8, 12, 7, 5].map((h, i) => (
-                        <div 
-                          key={i} 
-                          className="w-2 bg-destructive" 
-                          style={{ height: `${h * 5}%` }}
-                        ></div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
         
         {/* Settings Tab Content */}
-        <TabsContent value="settings">
+        <TabsContent value="settings" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Neural Monitor Settings</CardTitle>
+              <CardTitle>Monitor Settings</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="auto-refresh-interval">Auto-Refresh Interval</Label>
-                    <p className="text-sm text-muted-foreground">How often to check system status</p>
-                  </div>
-                  <div className="w-[180px]">
-                    <select 
-                      id="auto-refresh-interval" 
-                      className="w-full p-2 border rounded-md"
-                    >
-                      <option value="30000">30 seconds</option>
-                      <option value="60000" selected>1 minute</option>
-                      <option value="300000">5 minutes</option>
-                      <option value="600000">10 minutes</option>
-                    </select>
-                  </div>
+                  <Label htmlFor="auto-refresh">Auto Refresh</Label>
+                  <Switch 
+                    id="auto-refresh" 
+                    checked={isMonitoring} 
+                    onCheckedChange={(checked) => checked ? startMonitoring() : stopMonitoring()} 
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="notifications">Alert Notifications</Label>
-                    <p className="text-sm text-muted-foreground">Get notified about critical issues</p>
-                  </div>
-                  <Switch id="notifications" defaultChecked />
+                  <Label htmlFor="alerts">System Alerts</Label>
+                  <Switch id="alerts" defaultChecked />
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="detailed-logs">Detailed Logging</Label>
-                    <p className="text-sm text-muted-foreground">Collect verbose system logs</p>
-                  </div>
+                  <Label htmlFor="detailed-logs">Detailed Logs</Label>
                   <Switch id="detailed-logs" />
-                </div>
-                
-                <div className="pt-4">
-                  <Button>Save Settings</Button>
                 </div>
               </div>
             </CardContent>

@@ -1,260 +1,242 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { uberCore } from '@/core/UberCore';
-import { neuralHub, brainHub } from '@/services/neural/HermesOxumNeuralHub';
-import { SystemHealthMetrics } from '@/services/neural/types/NeuralService';
+import { PerformanceReport } from '@/types/neuralMetrics';
+import { SystemHealthMetrics } from '@/types/core-systems';
 
-export interface PerformanceReport {
-  systemMetrics: SystemHealthMetrics;
-  recommendations: string[];
-  services: {
-    [key: string]: {
-      status: string;
-      metrics: Record<string, number>;
-      warnings: string[];
-    }
-  }
+interface UseUberCoreNeuralMonitorOptions {
+  autoStart?: boolean;
+  monitorInterval?: number;
+  onAlert?: (alerts: string[]) => void;
 }
 
-export interface SystemActivity {
-  id: string;
-  timestamp: string;
-  type: string;
+// Define proper types for our components
+interface SubsystemHealth {
+  name: string;
   status: string;
-  duration: number;
-  module: string;
-  details?: any;
+  health: number;
 }
 
-export interface SystemStatus {
-  uberCore: {
-    status: string;
-    uptime: number;
-    subsystems: Array<{
-      name: string;
-      status: string;
-      health: number;
-    }>;
-  };
-  brainHub: {
-    status: string;
-    activeModules: string[];
-    lastActivity: string;
-  };
+interface SystemStatus {
+  operational: boolean;
+  services?: { name: string; status: string }[];
+  uptime?: number;
 }
 
 /**
- * Hook for unified monitoring of UberCore and Neural systems
+ * Hook for monitoring UberCore neural system health and performance in React components
  */
-export function useUberCoreNeuralMonitor() {
+export function useUberCoreNeuralMonitor(options: UseUberCoreNeuralMonitorOptions = {}) {
+  const { autoStart = true, monitorInterval = 30000, onAlert } = options;
+  
   const [isMonitoring, setIsMonitoring] = useState(false);
+  const [performanceReport, setPerformanceReport] = useState<PerformanceReport | null>(null);
+  const [systemStatus, setSystemStatus] = useState<SystemStatus>({
+    operational: false,
+    services: [],
+    uptime: 0
+  });
+  const [systemMetrics, setSystemMetrics] = useState<SystemHealthMetrics | null>(null);
+  const [subsystemHealth, setSubsystemHealth] = useState<SubsystemHealth[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [refreshInterval, setRefreshInterval] = useState(30000);
-  
-  const [systemStatus, setSystemStatus] = useState<SystemStatus>({
-    uberCore: {
-      status: 'initializing',
-      uptime: 0,
-      subsystems: []
-    },
-    brainHub: {
-      status: 'initializing',
-      activeModules: [],
-      lastActivity: new Date().toISOString()
-    }
-  });
-  
-  const [systemMetrics, setSystemMetrics] = useState<SystemHealthMetrics>({
-    load: 0,
-    memory: 0,
-    latency: 0,
-    errorRate: 0,
-    averageResponseTime: 0,
-    cpuUsage: 0,
-    memoryUsage: 0
-  });
-  
-  const [systemActivity, setSystemActivity] = useState<SystemActivity[]>([]);
-  const [performanceReport, setPerformanceReport] = useState<PerformanceReport>({
-    systemMetrics: {
-      load: 0,
-      memory: 0,
-      latency: 0,
-      errorRate: 0,
-      averageResponseTime: 0
-    },
-    recommendations: [],
-    services: {}
-  });
 
-  // Fetch all system metrics
-  const fetchMetrics = useCallback(async () => {
+  // Fetch the latest report and status
+  const refreshData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     
     try {
-      // Get UberCore status
-      const uberCoreStatus = uberCore.getSystemStatus();
-      const subsystemHealth = uberCore.checkSubsystemHealth();
+      // Get system status from UberCore
+      const status = uberCore.getSystemStatus();
       
-      // Get BrainHub metrics
-      const brainHubStatus = brainHub.getSystemStatus();
-      const neuralHubMetrics = await neuralHub.getDecisionLogs();
+      // Get subsystem health from UberCore and ensure it has the correct shape
+      const healthData = uberCore.checkSubsystemHealth().map(item => ({
+        name: item.status,
+        status: item.status,
+        health: item.health
+      }));
       
-      // Update system status
-      setSystemStatus({
-        uberCore: {
-          status: uberCoreStatus.status,
-          uptime: uberCoreStatus.uptime,
-          subsystems: subsystemHealth
+      // Create a performance report (mock data)
+      const report: PerformanceReport = {
+        timestamp: new Date(),
+        overallHealth: 'healthy',
+        services: {
+          companion: {
+            status: 'healthy',
+            metrics: {
+              requestsProcessed: 120,
+              errorCount: 1,
+              responseTime: 140,
+              errorRate: 0.01,
+              successRate: 0.99,
+              processingSpeed: 10,
+              accuracy: 0.95,
+              uptime: 99.9,
+              operationsCount: 150,
+              errors: 1,
+              latency: 140
+            }
+          },
+          creators: {
+            status: 'healthy',
+            metrics: {
+              requestsProcessed: 85,
+              errorCount: 0,
+              responseTime: 120,
+              errorRate: 0,
+              successRate: 1.0,
+              processingSpeed: 12,
+              accuracy: 0.98,
+              uptime: 99.9,
+              operationsCount: 100,
+              errors: 0,
+              latency: 120
+            }
+          },
+          escorts: {
+            status: 'healthy',
+            metrics: {
+              requestsProcessed: 230,
+              errorCount: 3,
+              responseTime: 160,
+              errorRate: 0.013,
+              successRate: 0.987,
+              processingSpeed: 9,
+              accuracy: 0.93,
+              uptime: 99.8,
+              operationsCount: 250,
+              errors: 3,
+              latency: 160
+            }
+          },
+          livecams: {
+            status: 'healthy',
+            metrics: {
+              requestsProcessed: 45,
+              errorCount: 0,
+              responseTime: 180,
+              errorRate: 0,
+              successRate: 1.0,
+              processingSpeed: 8,
+              accuracy: 0.97,
+              uptime: 99.9,
+              operationsCount: 50,
+              errors: 0,
+              latency: 180
+            }
+          }
         },
-        brainHub: {
-          status: brainHubStatus.status || 'operational',
-          activeModules: neuralHubMetrics.map(log => log.module).filter((v, i, a) => a.indexOf(v) === i),
-          lastActivity: neuralHubMetrics[0]?.timestamp || new Date().toISOString()
-        }
-      });
-      
-      // Update system metrics
-      setSystemMetrics({
-        load: Math.random() * 100,
-        memory: Math.random() * 100,
-        latency: Math.random() * 200,
-        errorRate: Math.random() * 0.1,
-        averageResponseTime: Math.random() * 300,
-        cpuUsage: Math.random() * 100,
-        memoryUsage: Math.random() * 100
-      });
-      
-      // Create performance report
-      setPerformanceReport({
         systemMetrics: {
-          load: Math.random() * 100,
-          memory: Math.random() * 100,
-          latency: Math.random() * 200,
-          errorRate: Math.random() * 0.1,
-          averageResponseTime: Math.random() * 300
+          cpuUsage: 45,
+          memoryUsage: 32,
+          responseTime: 150,
+          operationsPerSecond: 10,
+          errorRate: 0.01
         },
         recommendations: [
-          'Optimize neural pathways for improved response time',
-          'Consider scaling memory allocation for high-traffic periods',
-          'Update model parameters for better accuracy'
-        ],
-        services: {
-          'core': {
-            status: 'operational',
-            metrics: {
-              requestsProcessed: 1240,
-              errorRate: 0.02,
-              responseTime: 120
-            },
-            warnings: []
-          },
-          'neural': {
-            status: 'operational',
-            metrics: {
-              modelAccuracy: 0.95,
-              inferenceTime: 180,
-              cacheMisses: 23
-            },
-            warnings: ['Consider model retraining']
-          }
-        }
-      });
+          "System is operating within normal parameters",
+          "Consider optimizing memory usage for livecams service"
+        ]
+      };
       
-      return true;
+      // System metrics (mock data based on UberCore structure)
+      const metrics: SystemHealthMetrics = {
+        load: 45,
+        memory: 32,
+        latency: 120,
+        errorRate: 0.01,
+        averageResponseTime: 150,
+      };
+      
+      // Update state with fetched data
+      setPerformanceReport(report);
+      setSystemStatus({
+        operational: true,
+        services: Object.keys(report.services).map(key => ({
+          name: key,
+          status: report.services[key].status
+        })),
+        uptime: 99.8
+      });
+      setSystemMetrics(metrics);
+      setSubsystemHealth(healthData);
+      
+      // Check for alerts that need to be reported
+      if (onAlert && report) {
+        const alerts: string[] = [];
+        
+        // Collect critical alerts and warnings
+        Object.entries(report.services).forEach(([name, service]) => {
+          if (service.status === 'error' || service.status === 'critical') {
+            alerts.push(`Service ${name} ${service.status}: ${service.metrics.errorCount} errors`);
+          }
+        });
+        
+        if (alerts.length > 0) {
+          onAlert(alerts);
+        }
+      }
+      
+      return { report, status };
     } catch (err) {
-      console.error('Error fetching metrics:', err);
-      setError('Failed to fetch system metrics');
-      return false;
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch neural system data';
+      setError(errorMessage);
+      console.error('Neural system monitoring error:', err);
+      return null;
     } finally {
       setIsLoading(false);
     }
-  }, []);
-
-  // Fetch activity logs
-  const fetchActivityLogs = useCallback(async () => {
-    try {
-      // Mock activity data
-      const mockActivities: SystemActivity[] = [
-        {
-          id: 'act-1',
-          timestamp: new Date().toISOString(),
-          type: 'inference',
-          status: 'completed',
-          duration: 245,
-          module: 'text-processor'
-        },
-        {
-          id: 'act-2',
-          timestamp: new Date(Date.now() - 120000).toISOString(),
-          type: 'training',
-          status: 'in-progress',
-          duration: 3600,
-          module: 'image-classifier'
-        },
-        {
-          id: 'act-3',
-          timestamp: new Date(Date.now() - 300000).toISOString(),
-          type: 'inference',
-          status: 'completed',
-          duration: 78,
-          module: 'recommendation-engine'
-        }
-      ];
-      
-      setSystemActivity(mockActivities);
-      return mockActivities;
-    } catch (err) {
-      console.error('Error fetching activity logs:', err);
-      return [];
-    }
-  }, []);
+  }, [onAlert]);
 
   // Start monitoring
   const startMonitoring = useCallback(() => {
     setIsMonitoring(true);
-    fetchMetrics();
-    fetchActivityLogs();
-  }, [fetchMetrics, fetchActivityLogs]);
+    refreshData();
+  }, [refreshData]);
 
   // Stop monitoring
   const stopMonitoring = useCallback(() => {
     setIsMonitoring(false);
   }, []);
 
-  // Refresh metrics on a regular interval when monitoring is active
+  // Start monitoring on mount if autoStart is true
   useEffect(() => {
-    if (!isMonitoring) return;
+    if (autoStart) {
+      startMonitoring();
+    } else {
+      // Just fetch data once without starting the monitor
+      refreshData();
+    }
     
-    const intervalId = setInterval(() => {
-      fetchMetrics();
-      fetchActivityLogs();
-    }, refreshInterval);
+    // Set up interval for continuous monitoring
+    let intervalId: NodeJS.Timeout | null = null;
     
-    return () => clearInterval(intervalId);
-  }, [isMonitoring, refreshInterval, fetchMetrics, fetchActivityLogs]);
+    if (autoStart && monitorInterval > 0) {
+      intervalId = setInterval(() => {
+        refreshData();
+      }, monitorInterval);
+    }
+    
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+      setIsMonitoring(false);
+    };
+  }, [autoStart, startMonitoring, refreshData, monitorInterval]);
 
   return {
-    // Status and state
     isMonitoring,
-    isLoading,
-    error,
-    refreshInterval,
-    
-    // Data
+    performanceReport,
     systemStatus,
     systemMetrics,
-    systemActivity,
-    performanceReport,
-    
-    // Functions
+    subsystemHealth,
+    isLoading,
+    error,
     startMonitoring,
     stopMonitoring,
-    setRefreshInterval,
-    fetchMetrics,
-    fetchActivityLogs,
+    refreshData
   };
 }
 
