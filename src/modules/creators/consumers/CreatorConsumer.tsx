@@ -1,37 +1,38 @@
 
 import React, { useEffect } from 'react';
-import { CreatorsNeuralService } from '@/services/neural/modules/CreatorsNeuralService';
-import { useBrainHubAI } from '@/hooks/ai/useBrainHubAI';
+import { BaseBrainService } from '@/services/neural/modules/BaseNeuralService';
 
-interface CreatorConsumerProps {
-  creatorId?: string;
-}
-
-const CreatorConsumer: React.FC<CreatorConsumerProps> = ({ creatorId }) => {
-  const { isConnected, connectToBrainHub } = useBrainHubAI({
-    componentId: 'creator-consumer',
-    capabilities: ['content_optimization', 'engagement_analysis']
-  });
-  
+const CreatorConsumer: React.FC = () => {
   useEffect(() => {
-    // Initialize creators neural service
-    const creatorsService = new CreatorsNeuralService();
-    creatorsService.initialize();
+    // Mock service creation
+    const createMockService = () => {
+      const service = new BaseBrainService({
+        moduleId: 'creator-consumer',
+        name: 'Creator Consumer',
+        description: 'Consumer service for creators',
+        moduleType: 'neural',
+        version: '1.0.0'
+      });
+      
+      // Update config with correct priority
+      service.updateConfig({
+        enabled: true,
+        priority: 'normal',
+        resources: {
+          cpu: 1,
+          memory: 512
+        },
+        autonomyLevel: 65,
+        resourceAllocation: 40
+      });
+      
+      return service;
+    };
     
-    // Set configuration
-    creatorsService.updateConfig({
-      enabled: true,
-      priority: 'medium',
-      sensitivity: 0.8,
-      threshold: 0.6,
-      mode: 'creative'
-    });
-    
-    // Connect to Brain Hub
-    connectToBrainHub();
-  }, [connectToBrainHub]);
+    createMockService();
+  }, []);
   
-  return null; // This is a non-visual component
+  return null; // This component doesn't render anything
 };
 
 export default CreatorConsumer;

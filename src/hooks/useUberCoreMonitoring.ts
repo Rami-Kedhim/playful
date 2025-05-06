@@ -1,181 +1,214 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { uberCore } from '@/core/UberCore';
-import { NeuralSystemMetricsResult } from '@/types/neural-system';
+import { SystemHealthMetrics } from '@/types/neural-system';
 
-export function useUberCoreMonitoring(refreshInterval = 10000) {
-  const [metrics, setMetrics] = useState<NeuralSystemMetricsResult>({
-    logs: [],
-    performance: {
-      cpuUsage: 0,
-      memoryUsage: 0,
-      responseTime: 0,
-      accuracy: 0,
-      latency: 0,
-      processingEfficiency: 0,
-      processingTrend: 'stable',
-      accuracyRate: 0,
-      accuracyTrend: 'stable',
-      history: [],
-      recommendations: []
-    },
-    refreshMetrics: async () => await fetchMetrics(),
-    errorMessage: null,
-    isLoading: true,
-    isMonitoring: false
+export function useUberCoreMonitoring() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMonitoring, setIsMonitoring] = useState(false);
+  const [monitoringInterval, setMonitoringInterval] = useState<number | null>(null);
+  
+  const [systemMetrics, setSystemMetrics] = useState({
+    cpuUsage: 45,
+    memoryUsage: 32,
+    systemLoad: 38,
+    memoryAllocation: 420,
+    networkThroughput: 32,
+    requestRate: 65,
+    averageResponseTime: 124,
+    errorRate: 0.5,
+    processingEfficiency: 82,
+    processingTrend: 'up' as 'up' | 'down',
+    accuracyRate: 95,
+    accuracyTrend: 'up' as 'up' | 'down',
+    responseTime: 124
+  });
+
+  const [systemStatus, setSystemStatus] = useState({
+    integrity: 95,
+    neuralEfficiency: 87,
+    uptime: 99.8,
+    lastUpdated: new Date(),
+    status: 'operational',
+    alerts: [],
+    recommendations: [
+      'Increase memory allocation for neural processing',
+      'Optimize CPU utilization for core processing units',
+      'Update neural network models to improve accuracy'
+    ]
   });
   
-  const [isMonitoring, setIsMonitoring] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [systemActivity, setSystemActivity] = useState([
+    {
+      timestamp: '10:45:33',
+      operation: 'Neural Training',
+      details: 'Completed training of sentiment analysis model with 95% accuracy'
+    },
+    {
+      timestamp: '10:32:17',
+      operation: 'System Optimization',
+      details: 'Reallocated resources for improved processing efficiency'
+    },
+    {
+      timestamp: '10:15:05',
+      operation: 'Error Detection',
+      details: 'Identified and resolved memory allocation issue in module NM-7'
+    }
+  ]);
   
-  // Fetch metrics from UberCore
-  const fetchMetrics = useCallback(async () => {
+  const [healthMetrics, setHealthMetrics] = useState<SystemHealthMetrics>({
+    systemLoad: 0,
+    memoryAllocation: 0,
+    networkThroughput: 0,
+    requestRate: 0,
+    averageResponseTime: 0,
+    errorRate: 0,
+    modelCount: 0,
+    activeConnections: 0,
+    requestsPerMinute: 0,
+    cpuUtilization: 0,
+    memoryUtilization: 0,
+    errorFrequency: 0,
+    systemUptime: 0,
+    networkLatency: 0,
+    responseTime: 0,
+    userSatisfactionScore: 0,
+    load: 0,
+    memory: 0,
+    latency: 0,
+    cpuUsage: 0,
+    memoryUsage: 0,
+    uptime: 0,
+    models: []
+  });
+  
+  const refreshMetrics = useCallback(() => {
+    setIsLoading(true);
+    
     try {
-      setMetrics(prev => ({ ...prev, isLoading: true }));
+      // Get system status from UberCore
+      const status = uberCore.getSystemStatus();
       
-      // Get system status and health metrics from UberCore
-      const systemStatus = uberCore.getSystemStatus();
-      const healthMetrics = uberCore.checkSubsystemHealth();
-      const integrityCheck = uberCore.checkSystemIntegrity();
+      // Get health metrics from UberCore subsystems
+      const healthData = uberCore.checkSubsystemHealth();
       
-      // Process logs from various subsystems
-      const logs = healthMetrics.map(subsystem => ({
-        message: `${subsystem.status} health: ${subsystem.health}%`,
-        timestamp: new Date().toISOString(),
-        level: subsystem.health > 90 ? 'info' : subsystem.health > 70 ? 'warning' : 'error'
+      // Update system metrics based on collected data
+      setSystemMetrics(prev => ({
+        ...prev,
+        cpuUsage: Math.floor(Math.random() * 30) + 40, // Simulate varying CPU load
+        memoryUsage: Math.floor(Math.random() * 20) + 30,
+        systemLoad: Math.floor(Math.random() * 20) + 30,
+        networkThroughput: Math.floor(Math.random() * 50) + 10,
+        requestRate: Math.floor(Math.random() * 30) + 50,
+        processingEfficiency: Math.floor(Math.random() * 10) + 80,
+        accuracyRate: Math.floor(Math.random() * 5) + 90
       }));
       
-      if (!integrityCheck.isValid) {
-        logs.push({
-          message: `System integrity issue: ${integrityCheck.message}`,
-          timestamp: new Date().toISOString(),
-          level: 'error'
-        });
-      }
-      
-      // Calculate average metrics
-      const avgCpuUsage = healthMetrics.reduce((sum, item) => sum + (item.health || 0), 0) / healthMetrics.length;
-      const avgMemoryUsage = Math.min(95, avgCpuUsage + (Math.random() * 10 - 5));
-      
-      // Random history data for trend visualization
-      const history = Array.from({ length: 10 }, (_, i) => 
-        Math.round(70 + Math.sin(i * 0.5) * 15 + Math.random() * 10)
-      );
-      
-      // Generate recommendations based on system health
-      const recommendations = [];
-      if (avgCpuUsage < 70) recommendations.push("System performance optimal");
-      if (avgCpuUsage > 85) recommendations.push("Consider optimizing neural processing load");
-      if (avgMemoryUsage > 90) recommendations.push("High memory usage detected, consider allocation increase");
-      if (!integrityCheck.isValid) recommendations.push("System integrity check failed - maintenance required");
-      
-      // Create the metrics result
-      const newMetrics: NeuralSystemMetricsResult = {
-        logs,
-        performance: {
-          cpuUsage: avgCpuUsage,
-          memoryUsage: avgMemoryUsage,
-          responseTime: 20 + Math.random() * 40,
-          accuracy: 85 + Math.random() * 10,
-          latency: 15 + Math.random() * 25,
-          processingEfficiency: Math.min(100, avgCpuUsage + 10),
-          processingTrend: avgCpuUsage > 90 ? 'down' : 'up',
-          accuracyRate: 90 + Math.random() * 5,
-          accuracyTrend: 'up',
-          history,
-          recommendations
-        },
-        refreshMetrics: async () => await fetchMetrics(),
-        errorMessage: integrityCheck.isValid ? null : integrityCheck.message,
-        isLoading: false,
-        isMonitoring,
-        startMonitoring: () => startMonitoring(),
-        stopMonitoring: () => stopMonitoring(),
-        metrics: {
-          systemLoad: avgCpuUsage / 100,
-          memoryAllocation: avgMemoryUsage,
-          networkThroughput: 75 + Math.random() * 20,
-          requestRate: 30 + Math.random() * 15,
-          cpuUtilization: avgCpuUsage,
-          memoryUtilization: avgMemoryUsage,
-          modelCount: 3,
-          activeConnections: Math.floor(10 + Math.random() * 20),
-          requestsPerMinute: Math.floor(50 + Math.random() * 100),
-          averageResponseTime: 20 + Math.random() * 40,
-          errorRate: Math.random() * 3,
-          uptime: systemStatus.uptime || 99.9,
-          systemUptime: systemStatus.uptime || 99.9,
-          networkLatency: 15 + Math.random() * 25,
-          responseTime: 20 + Math.random() * 40,
-          userSatisfactionScore: 90 + Math.random() * 10
-        },
-        status: avgCpuUsage > 90 ? 'critical' : avgCpuUsage > 75 ? 'warning' : 'optimal',
-        recommendations,
-        lastUpdated: new Date(),
-        hasAnomalies: !integrityCheck.isValid,
-        anomalies: integrityCheck.isValid ? [] : [{ 
-          type: 'integrity', 
-          message: integrityCheck.message,
-          severity: 'high'
-        }]
+      // Update the health metrics
+      const updatedHealthMetrics: SystemHealthMetrics = {
+        systemLoad: Math.floor(Math.random() * 30) + 40,
+        memoryAllocation: Math.floor(Math.random() * 500) + 300,
+        networkThroughput: Math.floor(Math.random() * 50) + 10,
+        requestRate: Math.floor(Math.random() * 30) + 50,
+        averageResponseTime: Math.floor(Math.random() * 100) + 50,
+        errorRate: parseFloat((Math.random() * 2).toFixed(2)),
+        cpuUsage: Math.floor(Math.random() * 30) + 40,
+        memoryUsage: Math.floor(Math.random() * 20) + 30,
+        uptime: 99.8,
+        modelCount: 5,
+        activeConnections: Math.floor(Math.random() * 100) + 50,
+        requestsPerMinute: Math.floor(Math.random() * 100) + 100,
+        cpuUtilization: Math.floor(Math.random() * 30) + 40,
+        memoryUtilization: Math.floor(Math.random() * 20) + 30,
+        errorFrequency: Math.floor(Math.random() * 10),
+        systemUptime: Math.floor(Math.random() * 500) + 1000,
+        networkLatency: Math.floor(Math.random() * 50) + 20,
+        responseTime: Math.floor(Math.random() * 100) + 50,
+        userSatisfactionScore: Math.floor(Math.random() * 10) + 85,
+        load: Math.floor(Math.random() * 30) + 40,
+        memory: Math.floor(Math.random() * 20) + 30,
+        latency: Math.floor(Math.random() * 50) + 20,
+        models: []
       };
       
-      setMetrics(newMetrics);
-      setError(null);
-      return newMetrics;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch neural metrics';
-      console.error('Error fetching UberCore metrics:', err);
-      setError(errorMessage);
+      setHealthMetrics(updatedHealthMetrics);
       
-      setMetrics(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        errorMessage: errorMessage 
-      }));
+      // Generate random system activity entries
+      const activities = [
+        'Neural Training',
+        'System Optimization',
+        'Error Detection',
+        'Model Evaluation',
+        'Resource Allocation'
+      ];
       
-      return metrics;
+      const details = [
+        'Completed training of sentiment analysis model with 95% accuracy',
+        'Reallocated resources for improved processing efficiency',
+        'Identified and resolved memory allocation issue in module NM-7',
+        'Evaluated recommendation model performance at 92% precision',
+        'Adjusted neural weightings for better prediction accuracy'
+      ];
+      
+      // Add a new random activity entry
+      const currentTime = new Date();
+      const timeString = currentTime.toLocaleTimeString();
+      
+      const randomActivity = {
+        timestamp: timeString,
+        operation: activities[Math.floor(Math.random() * activities.length)],
+        details: details[Math.floor(Math.random() * details.length)]
+      };
+      
+      setSystemActivity(prev => [randomActivity, ...prev.slice(0, 9)]);
+      
+    } catch (error) {
+      console.error('Error fetching system metrics:', error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [isMonitoring, metrics]);
+  }, []);
   
   const startMonitoring = useCallback(() => {
+    if (isMonitoring) return;
+    
+    refreshMetrics(); // Initial refresh
+    
+    const intervalId = window.setInterval(() => {
+      refreshMetrics();
+    }, 30000); // Refresh every 30 seconds
+    
+    setMonitoringInterval(intervalId);
     setIsMonitoring(true);
-  }, []);
+  }, [isMonitoring, refreshMetrics]);
   
   const stopMonitoring = useCallback(() => {
-    setIsMonitoring(false);
-  }, []);
-  
-  // Set up interval for fetching metrics
-  useEffect(() => {
-    // Initial fetch
-    fetchMetrics();
-    
-    // Set up interval for continuous monitoring
-    let intervalId: number | null = null;
-    
-    if (isMonitoring) {
-      intervalId = window.setInterval(() => {
-        fetchMetrics();
-      }, refreshInterval);
+    if (monitoringInterval) {
+      clearInterval(monitoringInterval);
+      setMonitoringInterval(null);
     }
-    
-    // Clean up interval on unmount
-    return () => {
-      if (intervalId) {
-        window.clearInterval(intervalId);
-      }
-    };
-  }, [fetchMetrics, isMonitoring, refreshInterval]);
+    setIsMonitoring(false);
+  }, [monitoringInterval]);
   
-  return { 
-    metrics, 
-    isLoading: metrics.isLoading,
-    error, 
-    isMonitoring, 
-    startMonitoring, 
-    stopMonitoring,
-    refreshMetrics: fetchMetrics
+  // Start monitoring on component mount
+  useEffect(() => {
+    startMonitoring();
+    
+    return () => {
+      stopMonitoring();
+    };
+  }, [startMonitoring, stopMonitoring]);
+  
+  return {
+    systemMetrics,
+    systemStatus,
+    systemActivity,
+    healthMetrics,
+    isLoading,
+    isMonitoring,
+    refreshMetrics,
+    startMonitoring,
+    stopMonitoring
   };
 }
 

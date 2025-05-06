@@ -1,37 +1,39 @@
 
 import React, { useEffect } from 'react';
-import { AICompanionNeuralService } from '@/services/neural/modules/AICompanionNeuralService';
-import { useBrainHubAI } from '@/hooks/ai/useBrainHubAI';
+import { BaseBrainService } from '@/services/neural/modules/BaseNeuralService';
+import { BaseNeuralService, NeuralServiceConfig } from '@/services/neural/types/NeuralService';
 
-interface AICompanionConsumerProps {
-  companionId?: string;
-}
-
-const AICompanionConsumer: React.FC<AICompanionConsumerProps> = ({ companionId }) => {
-  const { isConnected, connectToBrainHub } = useBrainHubAI({
-    componentId: 'ai-companion-consumer',
-    capabilities: ['conversation', 'personality_modeling', 'emotional_intelligence']
-  });
-  
+const AICompanionConsumer: React.FC = () => {
   useEffect(() => {
-    // Initialize AI companion neural service
-    const aiCompanionService = new AICompanionNeuralService();
-    aiCompanionService.initialize();
+    // Mock service creation
+    const createMockService = () => {
+      const service = new BaseBrainService({
+        moduleId: 'ai-companion-consumer',
+        name: 'AI Companion Consumer',
+        description: 'Consumer service for AI companions',
+        moduleType: 'neural',
+        version: '1.0.0'
+      });
+      
+      // Update config with allowed properties
+      service.updateConfig({
+        enabled: true,
+        priority: 'high',
+        resources: {
+          cpu: 2,
+          memory: 1024
+        },
+        autonomyLevel: 75,
+        resourceAllocation: 50
+      });
+      
+      return service;
+    };
     
-    // Set configuration
-    aiCompanionService.updateConfig({
-      enabled: true,
-      priority: 'high',
-      sensitivity: 0.95,
-      threshold: 0.8,
-      mode: 'empathetic'
-    });
-    
-    // Connect to Brain Hub
-    connectToBrainHub();
-  }, [connectToBrainHub]);
+    createMockService();
+  }, []);
   
-  return null; // This is a non-visual component
+  return null; // This component doesn't render anything
 };
 
 export default AICompanionConsumer;

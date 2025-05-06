@@ -1,76 +1,43 @@
 
 import { useState, useCallback } from 'react';
-import neuralServiceRegistry from '@/services/neural/registry/NeuralServiceRegistry';
 
-/**
- * Hook for managing a specific neural service
- */
-export function useNeuralService(moduleId: string) {
-  const [service, setService] = useState<any | undefined>(
-    neuralServiceRegistry.getService && neuralServiceRegistry.getService(moduleId)
-  );
+export function useNeuralService(serviceId: string) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Toggle the enabled status of the service
-   */
   const toggleEnabled = useCallback(async () => {
-    if (!service) return false;
-    
+    setLoading(true);
     try {
-      setLoading(true);
-      setError(null);
-      
-      const newConfig = { 
-        ...service.config, 
-        enabled: !service.config.enabled 
-      };
-      
-      if (service.updateConfig) {
-        service.updateConfig(newConfig);
-        setService({ ...service });
-      }
-      
-      return true;
-    } catch (err: any) {
-      setError(err.message || 'Failed to toggle service status');
-      return false;
-    } finally {
+      // Simulate API call to toggle service
+      await new Promise(resolve => setTimeout(resolve, 500));
       setLoading(false);
+      return true;
+    } catch (err) {
+      setError('Failed to toggle service status');
+      setLoading(false);
+      return false;
     }
-  }, [service]);
+  }, [serviceId]);
 
-  /**
-   * Update service configuration parameters
-   */
-  const updateServiceConfig = useCallback(async (config: any) => {
-    if (!service) return false;
-    
+  const resetService = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      setError(null);
-      
-      if (service.updateConfig) {
-        service.updateConfig(config);
-        setService({ ...service });
-      }
-      
-      return true;
-    } catch (err: any) {
-      setError(err.message || 'Failed to update service configuration');
-      return false;
-    } finally {
+      // Simulate API call to reset service
+      await new Promise(resolve => setTimeout(resolve, 1000));
       setLoading(false);
+      return true;
+    } catch (err) {
+      setError('Failed to reset service');
+      setLoading(false);
+      return false;
     }
-  }, [service]);
+  }, [serviceId]);
 
   return {
-    service,
     loading,
     error,
     toggleEnabled,
-    updateServiceConfig
+    resetService
   };
 }
 

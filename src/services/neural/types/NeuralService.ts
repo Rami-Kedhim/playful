@@ -15,6 +15,9 @@ export interface NeuralServiceConfig {
     cpu: number;
     memory: number;
   };
+  autonomyLevel?: number;
+  resourceAllocation?: number;
+  sensitivity?: number;
 }
 
 export interface BaseNeuralService {

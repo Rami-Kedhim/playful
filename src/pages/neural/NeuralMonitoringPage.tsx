@@ -1,366 +1,337 @@
 
 import React, { useState } from 'react';
-import Layout from '@/layouts/Layout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Activity, BarChart3, Cpu, RefreshCw, Play, Pause, Gauge } from 'lucide-react';
+import { AlertCircle, Brain, RefreshCw, Activity, Settings, Server, Zap } from 'lucide-react';
+import NeuralServicesPanel from '@/components/brainHub/NeuralServicesPanel';
+import NeuralAnalyticsPanel from '@/components/brainHub/NeuralAnalyticsPanel';
+import UberCoreBrainHubPanel from '@/components/brainHub/UberCoreBrainHubPanel';
 import { useUberCoreMonitoring } from '@/hooks/useUberCoreMonitoring';
 import { Progress } from '@/components/ui/progress';
-import { cn } from '@/lib/utils';
 
-const NeuralMonitoringPage = () => {
-  const [activeTab, setActiveTab] = useState('status');
+const NeuralMonitoringPage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('overview');
   const { 
-    metrics, 
+    systemMetrics, 
+    systemStatus, 
+    systemActivity,
     isLoading, 
-    error, 
-    isMonitoring, 
-    startMonitoring, 
-    stopMonitoring, 
-    refreshMetrics 
-  } = useUberCoreMonitoring(5000);
-
-  const handleRefresh = async () => {
-    await refreshMetrics();
+    refreshMetrics,
+    isMonitoring,
+    startMonitoring,
+    stopMonitoring
+  } = useUberCoreMonitoring();
+  
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
   };
 
-  const handleToggleMonitoring = () => {
-    if (isMonitoring) {
-      stopMonitoring();
-    } else {
-      startMonitoring();
-    }
-  };
-
-  // Helper to get color based on value
-  const getHealthColor = (value: number) => {
-    if (value >= 90) return 'text-green-500';
-    if (value >= 70) return 'text-yellow-500';
-    return 'text-red-500';
-  };
-
-  // Helper to get progress bar color
-  const getProgressColor = (value: number) => {
-    if (value >= 90) return 'bg-green-500';
-    if (value >= 70) return 'bg-yellow-500';
-    return 'bg-red-500';
+  const handleRefresh = () => {
+    refreshMetrics();
   };
 
   return (
-    <Layout 
-      title="Neural Monitoring" 
-      description="Advanced neural monitoring for UberEscorts ecosystem"
-      showBreadcrumbs={true}
-    >
-      <div className="space-y-6">
-        {/* Control panel */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Button 
-              onClick={handleRefresh}
-              variant="outline"
-              disabled={isLoading}
-              size="sm"
-            >
-              <RefreshCw className={cn("h-4 w-4 mr-1", isLoading && "animate-spin")} />
-              Refresh
-            </Button>
-            <Button 
-              onClick={handleToggleMonitoring}
-              variant={isMonitoring ? "destructive" : "default"}
-              size="sm"
-            >
-              {isMonitoring ? (
-                <>
-                  <Pause className="h-4 w-4 mr-1" />
-                  Stop Monitoring
-                </>
-              ) : (
-                <>
-                  <Play className="h-4 w-4 mr-1" />
-                  Start Monitoring
-                </>
-              )}
-            </Button>
+    <div className="container py-6">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-full bg-primary/10">
+            <Brain className="h-8 w-8 text-primary" />
           </div>
-          {metrics.status && (
-            <div className="flex items-center gap-3 px-3 py-1.5 rounded-md bg-background border">
-              <span className="text-sm font-medium">System Status:</span>
-              <span className={cn(
-                "text-sm font-bold uppercase",
-                metrics.status === "optimal" ? "text-green-500" : 
-                metrics.status === "warning" ? "text-yellow-500" : 
-                "text-red-500"
-              )}>
-                {metrics.status}
-              </span>
-              {isMonitoring && <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />}
-            </div>
-          )}
+          <div>
+            <h1 className="text-2xl font-bold">Neural Monitoring System</h1>
+            <p className="text-muted-foreground">
+              UberCore and BrainHub integrated neural network monitoring
+            </p>
+          </div>
         </div>
-
-        {/* Error message */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded flex items-center gap-2">
-            <AlertCircle className="h-5 w-5" />
-            <span>{error}</span>
-          </div>
-        )}
         
-        {/* Tabs interface */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <TabsTrigger value="status">
-              <Gauge className="h-4 w-4 mr-2" />
-              System Status
-            </TabsTrigger>
-            <TabsTrigger value="metrics">
-              <Cpu className="h-4 w-4 mr-2" />
-              Core Metrics
-            </TabsTrigger>
-            <TabsTrigger value="analytics">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Analytics
-            </TabsTrigger>
-            <TabsTrigger value="activity">
-              <Activity className="h-4 w-4 mr-2" />
-              Activity
-            </TabsTrigger>
-          </TabsList>
-          
-          {/* Status Tab Content */}
-          <TabsContent value="status" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">CPU Usage</CardTitle>
-                  <CardDescription>Current processor utilization</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold mb-2 flex items-center gap-2">
-                    <span className={getHealthColor(metrics.performance.cpuUsage)}>
-                      {metrics.performance.cpuUsage.toFixed(1)}%
-                    </span>
-                  </div>
-                  <Progress 
-                    value={metrics.performance.cpuUsage} 
-                    className={cn("h-2", getProgressColor(metrics.performance.cpuUsage))}
-                  />
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Memory Usage</CardTitle>
-                  <CardDescription>Current memory allocation</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold mb-2">
-                    <span className={getHealthColor(metrics.performance.memoryUsage)}>
-                      {metrics.performance.memoryUsage.toFixed(1)}%
-                    </span>
-                  </div>
-                  <Progress 
-                    value={metrics.performance.memoryUsage} 
-                    className={cn("h-2", getProgressColor(metrics.performance.memoryUsage))}
-                  />
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Accuracy Rate</CardTitle>
-                  <CardDescription>Neural processing accuracy</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold mb-2 flex items-center gap-2">
-                    <span className={getHealthColor(metrics.performance.accuracyRate || 0)}>
-                      {(metrics.performance.accuracyRate || 0).toFixed(1)}%
-                    </span>
-                    {metrics.performance.accuracyTrend === "up" && (
-                      <span className="text-green-500 text-sm">↑</span>
-                    )}
-                    {metrics.performance.accuracyTrend === "down" && (
-                      <span className="text-red-500 text-sm">↓</span>
-                    )}
-                  </div>
-                  <Progress 
-                    value={metrics.performance.accuracyRate || 0} 
-                    className={cn("h-2", getProgressColor(metrics.performance.accuracyRate || 0))}
-                  />
-                </CardContent>
-              </Card>
-            </div>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={isMonitoring ? stopMonitoring : startMonitoring}
+          >
+            {isMonitoring ? 'Stop Monitoring' : 'Start Monitoring'}
+          </Button>
+          <Button variant="default" size="sm" onClick={handleRefresh} disabled={isLoading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
+      </div>
+      
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
+        <TabsList className="grid grid-cols-5 w-full">
+          <TabsTrigger value="overview">
+            <Brain className="h-4 w-4 mr-2" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="ubercore">
+            <Zap className="h-4 w-4 mr-2" />
+            UberCore
+          </TabsTrigger>
+          <TabsTrigger value="services">
+            <Server className="h-4 w-4 mr-2" />
+            Neural Services
+          </TabsTrigger>
+          <TabsTrigger value="analytics">
+            <Activity className="h-4 w-4 mr-2" />
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger value="settings">
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            <UberCoreBrainHubPanel />
             
-            {/* System Status Panel */}
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <Card>
-                <CardHeader>
-                  <CardTitle>System Health</CardTitle>
-                  <CardDescription>Current health status of core systems</CardDescription>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">System Status</CardTitle>
+                  <CardDescription>Overall neural system health</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {metrics.metrics?.systemHealth && (
-                      Object.entries(metrics.metrics.systemHealth).map(([key, value], idx) => (
-                        <div key={idx} className="flex flex-col">
-                          <span className="text-sm text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                          <span className="font-medium">{typeof value === 'number' ? 
-                            value % 1 === 0 ? value : value.toFixed(2) : 
-                            value instanceof Date ? value.toLocaleString() : 
-                            String(value)}
-                          </span>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                  
-                  {metrics.performance?.recommendations && metrics.performance.recommendations.length > 0 && (
-                    <div className="mt-6">
-                      <h3 className="text-sm font-semibold mb-2">Recommendations</h3>
-                      <ul className="list-disc pl-5 space-y-1">
-                        {metrics.performance.recommendations.map((rec, idx) => (
-                          <li key={idx} className="text-sm">{rec}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </CardContent>
-                <CardFooter className="text-xs text-muted-foreground">
-                  Last updated: {metrics.lastUpdated ? new Date(metrics.lastUpdated).toLocaleString() : 'Never'}
-                </CardFooter>
-              </Card>
-            </div>
-          </TabsContent>
-          
-          {/* Metrics Tab Content */}
-          <TabsContent value="metrics" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Core Performance Metrics</CardTitle>
-                <CardDescription>Detailed metrics from neural core systems</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  {metrics.metrics && Object.entries(metrics.metrics).map(([key, value]) => {
-                    // Skip complex objects or arrays
-                    if (typeof value === 'object') return null;
-                    
-                    return (
-                      <div key={key} className="flex flex-col">
-                        <span className="text-sm text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                        <span className="font-medium">
-                          {typeof value === 'number' ? 
-                            value % 1 === 0 ? value : value.toFixed(2) : 
-                            String(value)
-                          }
-                        </span>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm">System Integrity</span>
+                        <span className="text-sm font-medium">{systemStatus.integrity}%</span>
                       </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          {/* Analytics Tab Content */}
-          <TabsContent value="analytics" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Processing Efficiency</CardTitle>
-                  <CardDescription>Neural processing performance over time</CardDescription>
-                </CardHeader>
-                <CardContent className="h-[300px] flex items-center justify-center">
-                  <div className="text-center text-muted-foreground">
-                    <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>Processing efficiency analytics visualization</p>
-                    <p className="text-sm">{metrics.performance.processingEfficiency?.toFixed(1)}% efficiency</p>
+                      <Progress value={systemStatus.integrity} className="h-2" />
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm">Neural Efficiency</span>
+                        <span className="text-sm font-medium">{systemStatus.neuralEfficiency}%</span>
+                      </div>
+                      <Progress value={systemStatus.neuralEfficiency} className="h-2" />
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm">Response Time</span>
+                        <span className="text-sm font-medium">{systemMetrics.responseTime} ms</span>
+                      </div>
+                      <Progress 
+                        value={Math.max(0, 100 - systemMetrics.responseTime / 3)} 
+                        className="h-2" 
+                      />
+                    </div>
+                    
+                    {systemStatus.alerts.length > 0 && (
+                      <div className="mt-2 p-2 border rounded bg-amber-50 border-amber-200">
+                        <div className="flex items-center gap-2 text-amber-800">
+                          <AlertCircle className="h-4 w-4" />
+                          <span className="text-sm font-medium">System Alerts</span>
+                        </div>
+                        <ul className="mt-1 text-xs text-amber-700 pl-6 list-disc">
+                          {systemStatus.alerts.map((alert, index) => (
+                            <li key={index}>{alert}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
               
               <Card>
-                <CardHeader>
-                  <CardTitle>Neural Activity</CardTitle>
-                  <CardDescription>Historical neural activity patterns</CardDescription>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Recent Activity</CardTitle>
+                  <CardDescription>Latest neural operations</CardDescription>
                 </CardHeader>
-                <CardContent className="h-[300px] flex items-center justify-center">
-                  <div className="text-center text-muted-foreground">
-                    <Activity className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>Neural activity pattern visualization</p>
-                    <p className="text-sm">Based on {metrics.performance.history?.length || 0} data points</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          
-          {/* Activity Tab Content */}
-          <TabsContent value="activity" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>System Logs</CardTitle>
-                <CardDescription>Recent neural system activities</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {metrics.logs && metrics.logs.length > 0 ? (
-                  <div className="space-y-2">
-                    {metrics.logs.map((log, idx) => (
-                      <div key={idx} className={cn(
-                        "p-2 border rounded-md text-sm flex items-start gap-3",
-                        log.level === 'error' && "bg-red-50 border-red-200",
-                        log.level === 'warning' && "bg-yellow-50 border-yellow-200",
-                        log.level === 'info' && "bg-blue-50 border-blue-200"
-                      )}>
-                        <span className={cn(
-                          "capitalize font-medium w-16",
-                          log.level === 'error' && "text-red-600",
-                          log.level === 'warning' && "text-yellow-600",
-                          log.level === 'info' && "text-blue-600"
-                        )}>
-                          {log.level}:
+                <CardContent>
+                  <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                    {systemActivity.map((activity, index) => (
+                      <div 
+                        key={index} 
+                        className="text-xs p-2 border-b flex items-start gap-2"
+                      >
+                        <span className="text-muted-foreground whitespace-nowrap">
+                          {activity.timestamp}
                         </span>
-                        <div className="flex-1">
-                          <p>{log.message}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(log.timestamp).toLocaleString()}
-                          </p>
+                        <div>
+                          <div className="font-medium">{activity.operation}</div>
+                          <div className="text-muted-foreground">{activity.details}</div>
                         </div>
                       </div>
                     ))}
+                    
+                    {systemActivity.length === 0 && (
+                      <div className="text-center p-4 text-muted-foreground">
+                        No recent activity to display
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="py-8 text-center text-muted-foreground">
-                    <p>No logs available</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            {metrics.anomalies && metrics.anomalies.length > 0 && (
-              <Card className="border-yellow-200">
-                <CardHeader className="bg-yellow-50 text-yellow-800">
-                  <CardTitle className="text-lg">System Anomalies Detected</CardTitle>
-                  <CardDescription className="text-yellow-700">
-                    The following anomalies require attention
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  {metrics.anomalies.map((anomaly, idx) => (
-                    <div key={idx} className="mb-4 last:mb-0">
-                      <div className="font-semibold">{anomaly.type || 'Unknown'}</div>
-                      <p className="text-sm mt-1">{anomaly.message}</p>
-                    </div>
-                  ))}
                 </CardContent>
               </Card>
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
-    </Layout>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="ubercore">
+          <Card>
+            <CardHeader>
+              <CardTitle>UberCore Neural System</CardTitle>
+              <CardDescription>
+                Core neural processing architecture and metrics
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h3 className="font-medium">Neural Processing Metrics</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between mb-1 text-sm">
+                        <span>Processing Efficiency</span>
+                        <span>{systemMetrics.processingEfficiency}%</span>
+                      </div>
+                      <Progress value={systemMetrics.processingEfficiency} className="h-2" />
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1 text-sm">
+                        <span>Accuracy Rate</span>
+                        <span>{systemMetrics.accuracyRate}%</span>
+                      </div>
+                      <Progress value={systemMetrics.accuracyRate} className="h-2" />
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1 text-sm">
+                        <span>Network Throughput</span>
+                        <span>{systemMetrics.networkThroughput} MB/s</span>
+                      </div>
+                      <Progress 
+                        value={systemMetrics.networkThroughput / 2} 
+                        className="h-2"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="font-medium">System Resources</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between mb-1 text-sm">
+                        <span>CPU Utilization</span>
+                        <span>{systemMetrics.cpuUsage}%</span>
+                      </div>
+                      <Progress value={systemMetrics.cpuUsage} className="h-2" />
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1 text-sm">
+                        <span>Memory Allocation</span>
+                        <span>{systemMetrics.memoryAllocation} MB</span>
+                      </div>
+                      <Progress 
+                        value={systemMetrics.memoryAllocation / 10} 
+                        className="h-2"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1 text-sm">
+                        <span>Request Rate</span>
+                        <span>{systemMetrics.requestRate} req/s</span>
+                      </div>
+                      <Progress value={systemMetrics.requestRate} className="h-2" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 pt-4 border-t">
+                <h3 className="font-medium mb-3">System Recommendations</h3>
+                {systemStatus.recommendations.length > 0 ? (
+                  <ul className="space-y-1 list-disc pl-5">
+                    {systemStatus.recommendations.map((rec, index) => (
+                      <li key={index} className="text-sm">{rec}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No system recommendations at this time.
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="services">
+          <NeuralServicesPanel />
+        </TabsContent>
+        
+        <TabsContent value="analytics">
+          <NeuralAnalyticsPanel />
+        </TabsContent>
+        
+        <TabsContent value="settings">
+          <Card>
+            <CardHeader>
+              <CardTitle>Neural System Settings</CardTitle>
+              <CardDescription>
+                Configure neural monitoring and system parameters
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Monitoring Interval (seconds)</label>
+                    <input 
+                      type="number" 
+                      className="w-full rounded-md border p-2"
+                      value={30}
+                      onChange={() => {}}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Alert Threshold (%)</label>
+                    <input 
+                      type="number" 
+                      className="w-full rounded-md border p-2"
+                      value={90}
+                      onChange={() => {}}
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <input type="checkbox" id="enableAlerts" checked onChange={() => {}} />
+                    <label htmlFor="enableAlerts" className="text-sm">Enable System Alerts</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input type="checkbox" id="enableAutomation" checked onChange={() => {}} />
+                    <label htmlFor="enableAutomation" className="text-sm">Enable Automated Optimization</label>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <input type="checkbox" id="enableLogging" checked onChange={() => {}} />
+                    <label htmlFor="enableLogging" className="text-sm">Enable Enhanced Logging</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input type="checkbox" id="enablePrediction" checked onChange={() => {}} />
+                    <label htmlFor="enablePrediction" className="text-sm">Enable Predictive Analytics</label>
+                  </div>
+                </div>
+                
+                <Button className="mt-2">Save Settings</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

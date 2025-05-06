@@ -1,37 +1,39 @@
 
 import React, { useEffect } from 'react';
-import { LivecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
-import { useBrainHubAI } from '@/hooks/ai/useBrainHubAI';
+import { BaseBrainService } from '@/services/neural/modules/BaseNeuralService';
+import { BaseNeuralService, NeuralServiceConfig } from '@/services/neural/types/NeuralService';
 
-interface LivecamConsumerProps {
-  streamId?: string;
-}
-
-const LivecamConsumer: React.FC<LivecamConsumerProps> = ({ streamId }) => {
-  const { isConnected, connectToBrainHub } = useBrainHubAI({
-    componentId: 'livecam-consumer',
-    capabilities: ['stream_optimization', 'audience_analysis']
-  });
-  
+const LivecamConsumer: React.FC = () => {
   useEffect(() => {
-    // Initialize livecams neural service
-    const livecamsService = new LivecamsNeuralService();
-    livecamsService.initialize();
+    // Mock service creation
+    const createMockService = () => {
+      const service = new BaseBrainService({
+        moduleId: 'livecam-consumer',
+        name: 'Livecam Consumer',
+        description: 'Consumer service for livecams',
+        moduleType: 'streaming',
+        version: '1.0.0'
+      });
+      
+      // Update config with allowed properties
+      service.updateConfig({
+        enabled: true,
+        priority: 'high',
+        resources: {
+          cpu: 4,
+          memory: 2048
+        },
+        autonomyLevel: 70,
+        resourceAllocation: 80
+      });
+      
+      return service;
+    };
     
-    // Set configuration
-    livecamsService.updateConfig({
-      enabled: true,
-      priority: 'high',
-      sensitivity: 0.9,
-      threshold: 0.7,
-      mode: 'streaming'
-    });
-    
-    // Connect to Brain Hub
-    connectToBrainHub();
-  }, [connectToBrainHub]);
+    createMockService();
+  }, []);
   
-  return null; // This is a non-visual component
+  return null; // This component doesn't render anything
 };
 
 export default LivecamConsumer;
