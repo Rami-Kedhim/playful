@@ -1,4 +1,3 @@
-
 /**
  * Core Systems Type Definitions
  * Centralized type system for UberCore, UberWallet, UberBoost and Oxum
@@ -35,6 +34,8 @@ export interface SystemHealthMetrics {
   errorRate: number;
   averageResponseTime: number;
   systemLoad?: number;
+  cpuUsage: number;
+  memoryUsage: number;
 }
 
 export interface SessionValidationResult {
