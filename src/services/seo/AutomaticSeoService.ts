@@ -1,304 +1,167 @@
 
-import { SeoNeuralService } from '@/services/neural/modules/SeoNeuralService';
-import { SeoOptimizationResult } from '@/types/seo';
-import { unifiedNeuralHub } from '@/services/neural';
-import { Pulse } from '@/core/Pulse';
+import { seoNeuralService } from '../neural/modules/SeoNeuralService';
+
+interface SeoServiceStatus {
+  active: boolean;
+  queueLength: number;
+  processing: boolean;
+  lastScan: Date | null;
+  optimizedPages: number;
+}
 
 /**
- * Automatic SEO service that continuously monitors and optimizes content
- * across the UberEscorts ecosystem, inspired by Semalt software approach.
+ * Automatic SEO service that scans and optimizes content periodically
  */
-export class AutomaticSeoService {
-  private seoNeuralService: SeoNeuralService;
-  private monitoringInterval: number = 3600000; // 1 hour by default
-  private monitoringActive: boolean = false;
-  private timerId: NodeJS.Timeout | null = null;
-  private optimizationQueue: string[] = [];
-  private currentlyOptimizing: boolean = false;
+class AutomaticSeoService {
+  private status: SeoServiceStatus = {
+    active: false,
+    queueLength: 0,
+    processing: false,
+    lastScan: null,
+    optimizedPages: 0
+  };
   
-  constructor() {
-    // Get or create the SEO neural service from the hub
-    const seoService = unifiedNeuralHub.getServiceByType('seo');
-    this.seoNeuralService = seoService as SeoNeuralService || new SeoNeuralService();
+  private monitoringInterval: number | null = null;
+  private urlsToOptimize: string[] = [];
+  
+  /**
+   * Start automatic content monitoring for SEO optimization
+   * @param interval Interval in ms between scans
+   */
+  startAutoMonitoring(interval: number = 3600000): void {
+    if (this.monitoringInterval !== null) {
+      console.log('[AutoSEO] Monitoring already active, resetting interval');
+      clearInterval(this.monitoringInterval);
+    }
     
-    // Register with neural hub if not already registered
-    if (!seoService) {
-      unifiedNeuralHub.registerService(this.seoNeuralService);
+    console.log(`[AutoSEO] Starting monitoring with ${interval}ms interval`);
+    this.status.active = true;
+    
+    // Initial scan
+    this.performScan();
+    
+    // Set up recurring scans
+    this.monitoringInterval = window.setInterval(() => {
+      this.performScan();
+    }, interval);
+  }
+  
+  /**
+   * Stop automatic monitoring
+   */
+  stopAutoMonitoring(): void {
+    if (this.monitoringInterval !== null) {
+      console.log('[AutoSEO] Stopping monitoring');
+      clearInterval(this.monitoringInterval);
+      this.monitoringInterval = null;
+      this.status.active = false;
     }
   }
   
   /**
-   * Start automatic SEO monitoring and optimization
+   * Perform a scan of the site content
    */
-  public startAutoMonitoring(intervalMs: number = 3600000): void {
-    if (this.monitoringActive) {
-      console.log('[AutoSEO] Monitoring already active');
+  async performScan(): Promise<void> {
+    if (this.status.processing) {
+      console.log('[AutoSEO] Scan already in progress, skipping');
       return;
     }
     
-    this.monitoringInterval = intervalMs;
-    this.monitoringActive = true;
-    
-    // Run initial scan
-    this.performSiteScan();
-    
-    // Set up interval for continuous monitoring
-    this.timerId = setInterval(() => {
-      this.performSiteScan();
-    }, this.monitoringInterval);
-    
-    console.log(`[AutoSEO] Automatic monitoring started with interval of ${intervalMs}ms`);
-    Pulse.track('system', 'auto_seo_monitoring_started', { interval: intervalMs });
-  }
-  
-  /**
-   * Stop automatic SEO monitoring
-   */
-  public stopAutoMonitoring(): void {
-    if (this.timerId) {
-      clearInterval(this.timerId);
-      this.timerId = null;
-    }
-    this.monitoringActive = false;
-    console.log('[AutoSEO] Automatic monitoring stopped');
-    Pulse.track('system', 'auto_seo_monitoring_stopped');
-  }
-  
-  /**
-   * Perform a full site scan for SEO opportunities
-   */
-  public async performSiteScan(): Promise<void> {
-    console.log('[AutoSEO] Performing site-wide SEO scan');
-    Pulse.track('system', 'auto_seo_site_scan_started');
-    
     try {
-      // Get all content URLs that need to be scanned
-      const contentUrls = await this.getContentUrlsForOptimization();
+      console.log('[AutoSEO] Starting content scan');
+      this.status.processing = true;
       
-      // Add to optimization queue
-      this.optimizationQueue = [...new Set([...this.optimizationQueue, ...contentUrls])];
+      // In a real implementation, this would discover all URLs on the site
+      const urls = [
+        'https://uberescorts.com/',
+        'https://uberescorts.com/escorts',
+        'https://uberescorts.com/creators',
+        'https://uberescorts.com/livecams',
+        'https://uberescorts.com/about',
+        'https://uberescorts.com/faq'
+      ];
       
-      // Start processing queue if not already processing
-      if (!this.currentlyOptimizing) {
-        this.processOptimizationQueue();
+      // Queue URLs that need optimization
+      for (const url of urls) {
+        const score = await seoNeuralService.checkContentScore(url);
+        if (score < 80) {
+          console.log(`[AutoSEO] Adding ${url} to optimization queue (score: ${score})`);
+          this.urlsToOptimize.push(url);
+        }
       }
       
-      Pulse.track('system', 'auto_seo_site_scan_completed', { urlsFound: contentUrls.length });
-    } catch (error) {
-      console.error('[AutoSEO] Error during site scan:', error);
-      Pulse.track('system', 'auto_seo_site_scan_error', { error: String(error) });
-    }
-  }
-  
-  /**
-   * Process the queue of content URLs for optimization
-   */
-  private async processOptimizationQueue(): Promise<void> {
-    if (this.optimizationQueue.length === 0 || this.currentlyOptimizing) {
-      return;
-    }
-    
-    this.currentlyOptimizing = true;
-    
-    try {
-      while (this.optimizationQueue.length > 0) {
-        const url = this.optimizationQueue.shift()!;
-        await this.optimizeContentByUrl(url);
-        
-        // Small delay to prevent API throttling
-        await new Promise(resolve => setTimeout(resolve, 2000));
+      this.status.queueLength = this.urlsToOptimize.length;
+      this.status.lastScan = new Date();
+      
+      // Process the queue
+      if (this.urlsToOptimize.length > 0) {
+        await this.processQueue();
       }
     } catch (error) {
-      console.error('[AutoSEO] Error processing optimization queue:', error);
+      console.error('[AutoSEO] Error during scan:', error);
     } finally {
-      this.currentlyOptimizing = false;
+      this.status.processing = false;
     }
   }
   
   /**
-   * Get all content URLs that need SEO optimization
+   * Process the optimization queue
    */
-  private async getContentUrlsForOptimization(): Promise<string[]> {
-    // This would be implemented to connect to various content sources:
-    // 1. Escort profiles
-    // 2. Creator profiles and content
-    // 3. Blog posts
-    // 4. Landing pages
-    // etc.
+  private async processQueue(): Promise<void> {
+    console.log(`[AutoSEO] Processing queue of ${this.urlsToOptimize.length} URLs`);
     
-    // For now, returning sample URLs
-    return [
-      '/profiles/escorts',
-      '/profiles/creators',
-      '/content/blogs',
-      '/landing/main',
-      '/landing/escort-services',
-      '/landing/premium-content'
-    ];
-  }
-  
-  /**
-   * Optimize content at a specific URL
-   */
-  private async optimizeContentByUrl(url: string): Promise<SeoOptimizationResult | null> {
-    console.log(`[AutoSEO] Optimizing content at URL: ${url}`);
+    // Process one URL at a time
+    const url = this.urlsToOptimize.shift();
+    if (!url) return;
     
     try {
-      // 1. Fetch content from URL
-      const { content, contentType } = await this.fetchContentFromUrl(url);
+      // In a real implementation, this would fetch and analyze the content
+      const content = "Sample content for optimization";
+      const keywords = ["escort", "premium", "booking"];
       
-      // 2. Extract keywords from content or use predefined ones
-      const keywords = this.extractKeywords(content, url);
+      // Optimize content using neural service
+      const result = await seoNeuralService.optimizeContent(content, keywords);
       
-      // 3. Use neural service to optimize
-      const { optimizedContent, optimizationResult } = await this.seoNeuralService.autoOptimizeContent(
-        content,
-        contentType,
-        keywords
-      );
+      console.log(`[AutoSEO] Optimized ${url} - new score: ${result.contentScore}`);
+      this.status.optimizedPages++;
       
-      // 4. Apply optimizations if they improve the score
-      if (optimizationResult.contentScore > 70) {
-        await this.applyOptimizedContent(url, optimizedContent);
-        Pulse.track('system', 'auto_seo_optimization_applied', { 
-          url, 
-          score: optimizationResult.contentScore 
-        });
+      // Update queue length
+      this.status.queueLength = this.urlsToOptimize.length;
+      
+      // Process next item with a slight delay
+      if (this.urlsToOptimize.length > 0) {
+        setTimeout(() => this.processQueue(), 1000);
       }
-      
-      return optimizationResult;
     } catch (error) {
-      console.error(`[AutoSEO] Error optimizing content at ${url}:`, error);
-      Pulse.track('system', 'auto_seo_optimization_error', { 
-        url, 
-        error: String(error) 
-      });
-      return null;
+      console.error(`[AutoSEO] Error optimizing ${url}:`, error);
+      // Put back in queue for retry
+      this.urlsToOptimize.push(url);
     }
   }
   
   /**
-   * Fetch content from a specific URL
+   * Get the current status of the automatic SEO system
    */
-  private async fetchContentFromUrl(url: string): Promise<{ content: string; contentType: string }> {
-    // This would be implemented to fetch content from:
-    // - API endpoints for dynamic content
-    // - Database for stored content
-    // - Direct HTTP requests for static pages
-    
-    // For demonstration, return mock content
-    const contentMap: Record<string, { content: string, type: string }> = {
-      '/profiles/escorts': { 
-        content: 'Professional escort services available in your area. Find the perfect companion for your evening.', 
-        type: 'profile' 
-      },
-      '/profiles/creators': { 
-        content: 'Premium content creators offering exclusive adult entertainment experiences.', 
-        type: 'profile' 
-      },
-      '/content/blogs': { 
-        content: 'Latest updates and articles from the UberEscorts community and lifestyle experts.', 
-        type: 'content' 
-      },
-      '/landing/main': { 
-        content: 'UberEscorts - Premium Web3 Adult Platform with verified escorts and content creators.', 
-        type: 'landing' 
-      },
-    };
-    
-    const defaultContent = { 
-      content: 'Default content for pages without specific optimization templates.', 
-      type: 'content' 
-    };
-    
-    const result = contentMap[url] || defaultContent;
-    return { content: result.content, contentType: result.type };
+  getStatus(): SeoServiceStatus {
+    return { ...this.status };
   }
   
   /**
-   * Extract keywords based on URL and content
+   * Manually request optimization for a specific URL
    */
-  private extractKeywords(content: string, url: string): string[] {
-    // Base keywords for all content
-    const baseKeywords = ['adult services', 'escorts', 'premium content', 'web3'];
-    
-    // URL-specific keywords
-    if (url.includes('escorts')) {
-      return [...baseKeywords, 'escort service', 'companion', 'luxury escort', 'vip escort', 'dating'];
-    } else if (url.includes('creators')) {
-      return [...baseKeywords, 'content creator', 'adult content', 'premium content', 'exclusive', 'subscription'];
-    } else if (url.includes('blogs')) {
-      return [...baseKeywords, 'adult lifestyle', 'dating advice', 'entertainment', 'adult industry'];
-    }
-    
-    return baseKeywords;
-  }
-  
-  /**
-   * Apply optimized content to the URL
-   */
-  private async applyOptimizedContent(url: string, content: string): Promise<boolean> {
-    // This would update content in database, API or files
-    console.log(`[AutoSEO] Applying optimized content to URL: ${url}`);
-    
-    // Mock implementation - in real app this would update the actual content
-    return true;
-  }
-  
-  /**
-   * Run one-time optimization for specific content
-   */
-  public async optimizeSpecificContent(
-    content: string, 
-    contentType: string, 
-    contentId: string, 
-    keywords: string[] = []
-  ): Promise<SeoOptimizationResult> {
-    console.log(`[AutoSEO] Optimizing specific content with ID: ${contentId}`);
-    
-    try {
-      const { optimizedContent, optimizationResult } = await this.seoNeuralService.autoOptimizeContent(
-        content,
-        contentType,
-        keywords
-      );
+  requestOptimization(url: string): void {
+    if (!this.urlsToOptimize.includes(url)) {
+      console.log(`[AutoSEO] Manually adding ${url} to optimization queue`);
+      this.urlsToOptimize.push(url);
+      this.status.queueLength = this.urlsToOptimize.length;
       
-      // Store optimization result
-      await this.storeOptimizationResult(contentId, optimizationResult);
-      
-      return optimizationResult;
-    } catch (error) {
-      console.error(`[AutoSEO] Error optimizing specific content:`, error);
-      throw error;
+      // Start processing if not already
+      if (!this.status.processing) {
+        this.processQueue();
+      }
     }
-  }
-  
-  /**
-   * Store optimization result for future reference
-   */
-  private async storeOptimizationResult(contentId: string, result: SeoOptimizationResult): Promise<void> {
-    // This would store the result in database or cache
-    console.log(`[AutoSEO] Storing optimization result for content ID: ${contentId}`);
-  }
-  
-  /**
-   * Get optimization status
-   */
-  public getStatus(): {
-    active: boolean;
-    queueLength: number;
-    interval: number;
-    processing: boolean;
-  } {
-    return {
-      active: this.monitoringActive,
-      queueLength: this.optimizationQueue.length,
-      interval: this.monitoringInterval,
-      processing: this.currentlyOptimizing
-    };
   }
 }
 
-// Export singleton
+// Export singleton instance
 export const automaticSeoService = new AutomaticSeoService();
-export default automaticSeoService;

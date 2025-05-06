@@ -1,3 +1,4 @@
+
 import { UberCoreSystem, SystemStatus, SystemIntegrityResult, SystemHealthMetrics, SessionValidationResult } from '@/types/core-systems';
 import { orus } from './Orus';
 import { hermes } from './Hermes';
@@ -104,48 +105,7 @@ class UberCore implements UberCoreSystem {
   validateUserSession(token: string): SessionValidationResult {
     return orus.validateSession(token);
   }
-  
-  /**
-   * Initialize SEO automation for the ecosystem
-   */
-  initializeAutomaticSeo: () => {
-    console.log('[UberCore] Initializing automatic SEO system');
-    
-    // Start automatic SEO monitoring with 1-hour interval
-    automaticSeoService.startAutoMonitoring(3600000);
-    
-    return true;
-  },
-  
-  /**
-   * Check subsystem health
-   */
-  checkSubsystemHealth: () => {
-    return [
-      { status: 'escorts', health: 95 },
-      { status: 'creators', health: 92 },
-      { status: 'livecams', health: 88 },
-      { status: 'companion', health: 90 },
-      { status: 'seo', health: 85 },
-      { status: 'wallet', health: 97 }
-    ];
-  },
-  
-  getSystemStatus: () => {
-    return {
-      operational: true,
-      services: {
-        auth: 'online',
-        analytics: 'active',
-        ai: 'active',
-        wallet: 'active',
-        seo: automaticSeoService.getStatus().active ? 'active' : 'inactive'
-      },
-      queueLength: automaticSeoService.getStatus().queueLength,
-      processing: automaticSeoService.getStatus().processing
-    };
-  },
-};
+}
 
 /**
  * UberCore system initialization
@@ -170,18 +130,19 @@ export const uberCore = {
    */
   checkSubsystemHealth: () => {
     return [
-      { status: 'escorts', health: 95 },
-      { status: 'creators', health: 92 },
-      { status: 'livecams', health: 88 },
-      { status: 'companion', health: 90 },
-      { status: 'seo', health: 85 },
-      { status: 'wallet', health: 97 }
+      { name: 'escorts', status: 'operational', health: 95 },
+      { name: 'creators', status: 'operational', health: 92 },
+      { name: 'livecams', status: 'operational', health: 88 },
+      { name: 'companion', status: 'operational', health: 90 },
+      { name: 'seo', status: 'operational', health: 85 },
+      { name: 'wallet', status: 'operational', health: 97 }
     ];
   },
   
   getSystemStatus: () => {
     return {
       operational: true,
+      isActive: true,
       services: {
         auth: 'online',
         analytics: 'active',

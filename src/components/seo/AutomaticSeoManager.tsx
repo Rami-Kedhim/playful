@@ -1,196 +1,131 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Activity, CheckCircle2, Clock, RefreshCw, Settings } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { automaticSeoService } from '@/services/seo/AutomaticSeoService';
-import { useToast } from '@/components/ui/use-toast';
+import { Progress } from '@/components/ui/progress';
+import { RefreshCw, PauseCircle, PlayCircle } from 'lucide-react';
 
-interface AutomaticSeoManagerProps {
-  onSettingsClick?: () => void;
+interface AutomaticSeoStatus {
+  active: boolean;
+  queueLength: number;
+  processing: boolean;
+  lastScan: Date | null;
+  optimizedPages: number;
 }
 
-/**
- * Automatic SEO Manager component that provides controls and status 
- * for the automated SEO optimization service
- */
-const AutomaticSeoManager: React.FC<AutomaticSeoManagerProps> = ({ onSettingsClick }) => {
-  const { toast } = useToast();
-  const [isActive, setIsActive] = useState(false);
-  const [queueLength, setQueueLength] = useState(0);
-  const [interval, setInterval] = useState(3600000); // 1 hour default
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [lastScanTime, setLastScanTime] = useState<Date | null>(null);
-  
-  // Load status on mount
+const AutomaticSeoManager: React.FC = () => {
+  const [status, setStatus] = useState<AutomaticSeoStatus>({
+    active: false,
+    queueLength: 0,
+    processing: false,
+    lastScan: null,
+    optimizedPages: 0
+  });
+
+  // Update status periodically
   useEffect(() => {
-    const status = automaticSeoService.getStatus();
-    setIsActive(status.active);
-    setQueueLength(status.queueLength);
-    setInterval(status.interval);
-    setIsProcessing(status.processing);
-  }, []);
-  
-  // Update status every 5 seconds
-  useEffect(() => {
-    const statusTimer = setInterval(() => {
-      const status = automaticSeoService.getStatus();
-      setQueueLength(status.queueLength);
-      setIsProcessing(status.processing);
-    }, 5000);
+    const updateStatus = () => {
+      const currentStatus = automaticSeoService.getStatus();
+      setStatus(currentStatus);
+    };
     
-    return () => clearInterval(statusTimer);
+    updateStatus(); // Initial update
+    
+    const interval = setInterval(updateStatus, 5000); // Update every 5 seconds
+    return () => clearInterval(interval);
   }, []);
   
-  // Toggle automatic SEO
-  const handleToggleAutoSeo = () => {
-    if (isActive) {
+  // Toggle automatic SEO monitoring
+  const toggleMonitoring = () => {
+    if (status.active) {
       automaticSeoService.stopAutoMonitoring();
-      setIsActive(false);
-      toast({
-        title: "Automatic SEO Disabled",
-        description: "SEO monitoring and optimization has been disabled",
-      });
     } else {
-      automaticSeoService.startAutoMonitoring(interval);
-      setIsActive(true);
-      setLastScanTime(new Date());
-      toast({
-        title: "Automatic SEO Enabled",
-        description: "SEO monitoring and optimization has started",
-        variant: "success",
-      });
+      automaticSeoService.startAutoMonitoring();
     }
+    
+    // Update status immediately after toggle
+    setStatus(automaticSeoService.getStatus());
   };
   
-  // Run manual scan
-  const handleRunScan = async () => {
-    toast({
-      title: "SEO Scan Started",
-      description: "Scanning site for SEO optimization opportunities...",
-    });
-    
-    try {
-      setLastScanTime(new Date());
-      await automaticSeoService.performSiteScan();
-      
-      toast({
-        title: "SEO Scan Complete",
-        description: `Found ${queueLength} items to optimize`,
-        variant: "success",
-      });
-    } catch (error) {
-      toast({
-        title: "SEO Scan Failed",
-        description: "There was an error performing the SEO scan",
-        variant: "destructive",
-      });
-    }
+  // Trigger a manual scan
+  const triggerManualScan = () => {
+    automaticSeoService.performScan();
+    // Update status immediately
+    setStatus(automaticSeoService.getStatus());
   };
   
   return (
-    <Card>
+    <Card className="shadow-md">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Activity className="h-5 w-5 mr-2 text-primary" />
-            Automatic SEO Manager
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle>Automatic SEO Optimization</CardTitle>
+            <CardDescription>Neural-powered SEO monitoring and optimization</CardDescription>
           </div>
-          {isActive && (
-            <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
-              Active
-            </Badge>
-          )}
-        </CardTitle>
-        <CardDescription>
-          Continuously monitor and optimize SEO across the entire ecosystem
-        </CardDescription>
+          <Badge variant={status.active ? "default" : "outline"}>
+            {status.active ? "Active" : "Inactive"}
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Switch 
-              id="auto-seo"
-              checked={isActive}
-              onCheckedChange={handleToggleAutoSeo}
-            />
-            <Label htmlFor="auto-seo">Enable automatic SEO optimization</Label>
-          </div>
-          
-          <Button variant="outline" size="sm" onClick={onSettingsClick}>
-            <Settings className="h-4 w-4 mr-2" />
-            Settings
-          </Button>
+          <span className="font-medium">Automatic monitoring</span>
+          <Switch 
+            checked={status.active}
+            onCheckedChange={toggleMonitoring}
+          />
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Status Card */}
-          <div className="bg-muted/50 p-3 rounded-lg flex flex-col justify-between">
-            <span className="text-xs text-muted-foreground">Status</span>
-            <div className="flex items-center mt-2">
-              <div className={`h-2 w-2 rounded-full mr-2 ${isActive ? 'bg-green-500' : 'bg-amber-500'}`} />
-              <span className="font-medium">{isActive ? 'Active' : 'Disabled'}</span>
-            </div>
-          </div>
-          
-          {/* Processing Status */}
-          <div className="bg-muted/50 p-3 rounded-lg flex flex-col justify-between">
-            <span className="text-xs text-muted-foreground">Queue</span>
-            <div className="flex items-center mt-2">
-              {isProcessing ? (
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin text-primary" />
-              ) : (
-                <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
-              )}
-              <span className="font-medium">
-                {isProcessing 
-                  ? `Processing (${queueLength} left)`
-                  : queueLength > 0 
-                    ? `${queueLength} waiting` 
-                    : 'All processed'
-                }
-              </span>
-            </div>
-          </div>
-          
-          {/* Last Scan */}
-          <div className="bg-muted/50 p-3 rounded-lg flex flex-col justify-between">
-            <span className="text-xs text-muted-foreground">Last Scan</span>
-            <div className="flex items-center mt-2">
-              <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span className="font-medium">
-                {lastScanTime 
-                  ? lastScanTime.toLocaleTimeString() 
-                  : 'Never'
-                }
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col space-y-2">
+        <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span>System-wide SEO health</span>
-            <span className="font-medium">78%</span>
+            <span>Queue status</span>
+            <span>{status.queueLength} pages waiting</span>
           </div>
-          <Progress value={78} className="h-2" />
+          <Progress value={(1 - status.queueLength / 10) * 100} max={100} />
         </div>
         
-        <Button onClick={handleRunScan} disabled={isProcessing} className="w-full">
-          {isProcessing ? (
-            <>
-              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-              Processing...
-            </>
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="border rounded-md p-3">
+            <div className="text-sm text-muted-foreground">Last scan</div>
+            <div className="font-medium">
+              {status.lastScan ? new Date(status.lastScan).toLocaleString() : 'Never'}
+            </div>
+          </div>
+          <div className="border rounded-md p-3">
+            <div className="text-sm text-muted-foreground">Pages optimized</div>
+            <div className="font-medium">{status.optimizedPages}</div>
+          </div>
+        </div>
+        
+        {status.processing && (
+          <div className="flex items-center gap-2 text-amber-600 mt-2">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            <span>Processing queue...</span>
+          </div>
+        )}
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Button 
+          variant="outline" 
+          onClick={triggerManualScan}
+          disabled={status.processing}
+        >
+          Run Manual Scan
+        </Button>
+        <Button 
+          variant={status.active ? "destructive" : "default"} 
+          onClick={toggleMonitoring}
+        >
+          {status.active ? (
+            <><PauseCircle className="mr-1 h-4 w-4" /> Pause Monitoring</>
           ) : (
-            "Run SEO Scan Now"
+            <><PlayCircle className="mr-1 h-4 w-4" /> Start Monitoring</>
           )}
         </Button>
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 };
