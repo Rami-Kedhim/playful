@@ -6,18 +6,18 @@ export interface SeoOptimizationResult {
   h1: string;
   contentScore: number;
   visibilityScore: number;
+  mobileCompatibility: number;
+  pageSpeed: number;
+  backlinks: number;
   priorityKeywords: string[];
   recommendations: string[];
-  originalContent: string;
-  optimizedContent: string;
-  readabilityScore: number;
-  keywordDensity: Record<string, number>;
+  lastUpdated: string;
+  originalContent?: string;
+  optimizedContent?: string;
+  readabilityScore?: number;
+  keywordDensity?: Record<string, number>;
   metaTags?: string[];
   seoScore?: number;
-  mobileCompatibility?: number;
-  pageSpeed?: number;
-  backlinks?: number;
-  lastUpdated?: string;
 }
 
 export interface SeoOptimizationRequest {

@@ -1,4 +1,3 @@
-
 export interface NeuralSystemMetricsResult {
   logs: any[];
   performance: {
@@ -66,29 +65,37 @@ export interface NeuralModel {
 }
 
 export interface SystemHealthMetrics {
-  modelCount: number;
-  activeConnections: number;
-  requestsPerMinute: number;
-  averageResponseTime: number;
+  // Basic metrics
+  load: number;
+  memory: number;
+  latency: number;
   errorRate: number;
-  uptime: number;
-  models: NeuralModel[];
-  cpuUtilization: number;
-  memoryUtilization: number;
-  errorFrequency: number;
-  systemUptime: number;
-  networkLatency: number;
-  responseTime: number;
-  userSatisfactionScore: number;
+  averageResponseTime: number;
+  systemLoad: number;
+  
+  // Additional required properties that were causing errors
+  cpuUsage: number;
+  memoryUsage: number;
+  
+  // Other properties
+  memoryAllocation?: number;
+  networkThroughput?: number;
+  requestRate?: number;
+  modelCount?: number;
+  activeConnections?: number;
+  requestsPerMinute?: number;
+  uptime?: number;
+  models?: NeuralModel[];
+  cpuUtilization?: number;
+  memoryUtilization?: number;
+  errorFrequency?: number;
+  systemUptime?: number;
+  networkLatency?: number;
+  responseTime?: number;
+  userSatisfactionScore?: number;
   algorithmEfficiency?: number;
   dataPrecision?: number;
   lastMaintenanceDate?: Date;
-  load?: number;
   userEngagement?: number;
   lastUpdated?: number;
-  // Add properties needed for NeuralMonitorPanel
-  systemLoad: number;
-  memoryAllocation: number;
-  networkThroughput: number;
-  requestRate: number;
 }
