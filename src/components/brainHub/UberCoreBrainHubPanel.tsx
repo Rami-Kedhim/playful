@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -38,7 +39,9 @@ const UberCoreBrainHubPanel: React.FC<UberCoreBrainHubPanelProps> = ({
     errorRate: 0.05,
     averageResponseTime: 150,
     cpuUsage: 45,
-    memoryUsage: 32
+    memoryUsage: 32,
+    systemLoad: 0.5,
+    requestRate: 10
   },
   isConnected = true,
   isLoading = false

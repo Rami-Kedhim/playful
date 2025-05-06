@@ -20,11 +20,13 @@ export interface BaseNeuralService {
   config: NeuralServiceConfig;
   
   // Methods
-  isRunning: boolean;
+  isRunning: () => boolean;  // Changed from boolean to function
   start: () => Promise<boolean>;
   stop: () => Promise<boolean>;
   configure: (config: Partial<NeuralServiceConfig>) => void;
   processWithNeuralCore: (input: any) => Promise<any>;
+  getCapabilities?: () => string[];  // Added as optional method
+  initialize?: () => Promise<boolean>;  // Added as optional method
 }
 
 export interface NeuralServiceConfig {
@@ -42,6 +44,8 @@ export interface SystemHealthMetrics {
   latency: number;
   errorRate: number;
   averageResponseTime: number;
+  cpuUsage: number;  // Added this property
+  memoryUsage: number;  // Added this property
   systemLoad: number;
   requestRate?: number; // Optional field
 }

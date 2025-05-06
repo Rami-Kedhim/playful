@@ -6,7 +6,6 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Brain, Power } from "lucide-react";
 import { BaseNeuralService } from '@/services/neural/types/NeuralService';
-import { useNeuralService } from '@/hooks/useNeuralService';
 
 interface NeuralServiceCardProps {
   service: BaseNeuralService;
@@ -14,11 +13,20 @@ interface NeuralServiceCardProps {
 }
 
 const NeuralServiceCard: React.FC<NeuralServiceCardProps> = ({ service, onRefresh }) => {
-  const { toggleEnabled, loading } = useNeuralService(service.moduleId);
+  const [loading, setLoading] = React.useState(false);
 
   const handleToggleService = async () => {
-    await toggleEnabled();
-    if (onRefresh) onRefresh();
+    setLoading(true);
+    try {
+      if (service.isRunning()) {
+        await service.stop();
+      } else {
+        await service.start();
+      }
+      if (onRefresh) onRefresh();
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Convert string or number priorities to numbers for Progress component
@@ -37,7 +45,7 @@ const NeuralServiceCard: React.FC<NeuralServiceCardProps> = ({ service, onRefres
   };
 
   // Safe access to capabilities with fallback
-  const getCapabilities = () => {
+  const getCapabilities = (): string[] => {
     if (service.getCapabilities && typeof service.getCapabilities === 'function') {
       return service.getCapabilities();
     }

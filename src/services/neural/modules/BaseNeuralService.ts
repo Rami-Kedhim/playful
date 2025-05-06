@@ -87,12 +87,14 @@ export class BaseBrainService implements BaseNeuralService {
     return this.status === 'active';
   }
   
-  async start(): Promise<void> {
+  async start(): Promise<boolean> {
     this.status = 'active';
+    return true;
   }
   
-  async stop(): Promise<void> {
+  async stop(): Promise<boolean> {
     this.status = 'inactive';
+    return true;
   }
   
   async configure(config: NeuralServiceConfig): Promise<void> {

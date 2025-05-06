@@ -25,10 +25,16 @@ export function useNeuralServices(service: BaseNeuralService) {
       setIsLoading(true);
       setError(null);
       
-      const success = await service.initialize();
-      setIsInitialized(success);
-      
-      return success;
+      // Check if the service has an initialize method
+      if (service.initialize && typeof service.initialize === 'function') {
+        const success = await service.initialize();
+        setIsInitialized(success);
+        return success;
+      } else {
+        // If no initialize method, just assume it's ready
+        setIsInitialized(true);
+        return true;
+      }
     } catch (err: any) {
       console.error(`Failed to reinitialize neural service:`, err);
       setError(err?.message || 'Failed to reinitialize neural service');
@@ -50,11 +56,20 @@ export function useNeuralServices(service: BaseNeuralService) {
           throw new Error('Neural service not provided');
         }
         
-        const success = await service.initialize();
-        
-        if (mounted) {
-          setIsInitialized(success);
-          setError(null);
+        // Check if the service has an initialize method
+        if (service.initialize && typeof service.initialize === 'function') {
+          const success = await service.initialize();
+          
+          if (mounted) {
+            setIsInitialized(success);
+            setError(null);
+          }
+        } else {
+          // If no initialize method, just assume it's ready
+          if (mounted) {
+            setIsInitialized(true);
+            setError(null);
+          }
         }
       } catch (err: any) {
         if (mounted) {

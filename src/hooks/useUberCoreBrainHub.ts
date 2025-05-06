@@ -134,7 +134,6 @@ export function useUberCoreBrainHub() {
         }
       ];
       
-      // Instead of using getDecisionLogs which doesn't exist
       setState(prev => ({
         ...prev,
         isLoading: false,

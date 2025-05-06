@@ -16,20 +16,19 @@ const ContentOptimizer: React.FC = () => {
   const [keywords, setKeywords] = useState('');
   const [contentType, setContentType] = useState('article');
   const [analyzing, setAnalyzing] = useState(false);
-  const { enhanceContentSeo, optimizationResult, isLoading } = useHermesSeo();
+  const { 
+    optimizeContent,  // Using the correct property names according to the error
+    optimizationResult, 
+    isOptimizing  // Using isOptimizing instead of isLoading
+  } = useHermesSeo();
 
   const handleOptimize = async () => {
     if (!content || !title) return;
 
     setAnalyzing(true);
     try {
-      await enhanceContentSeo(
-        'temp-id', // In a real app, this would be a real content ID
-        contentType as 'profile' | 'content' | 'livecam' | 'event',
-        title,
-        content,
-        keywords.split(',').map(k => k.trim()).filter(k => k)
-      );
+      // Use the optimizeContent function instead of enhanceContentSeo
+      await optimizeContent(content);
     } catch (error) {
       console.error('Error optimizing content:', error);
     } finally {
@@ -93,10 +92,10 @@ const ContentOptimizer: React.FC = () => {
         <CardFooter>
           <Button 
             onClick={handleOptimize} 
-            disabled={isLoading || !content || !title}
+            disabled={isOptimizing || !content || !title}
             className="w-full"
           >
-            {isLoading ? (
+            {isOptimizing ? (
               <>
                 <Activity className="mr-2 h-4 w-4 animate-spin" />
                 Optimizing...

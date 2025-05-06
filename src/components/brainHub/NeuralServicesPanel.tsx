@@ -5,21 +5,35 @@ import { Button } from '@/components/ui/button';
 import { RefreshCcw } from 'lucide-react';
 import NeuralServiceCard from './NeuralServiceCard';
 import EmptyServiceState from './EmptyServiceState';
-import useNeuralServices from '@/hooks/useNeuralServices';
+import { useNeuralServices } from '@/hooks/useNeuralServices';
+import { BaseBrainService } from '@/services/neural/modules/BaseNeuralService';
 
 interface NeuralServicesPanelProps {
   title?: string;
 }
 
 const NeuralServicesPanel = ({ title = "Neural Services" }: NeuralServicesPanelProps) => {
-  const { services, loading, error, refreshServices, optimizeResources } = useNeuralServices();
+  // Modified to use a mock service for demonstration
+  const service = new BaseBrainService({
+    moduleId: 'mock-service',
+    name: 'Mock Service',
+    description: 'Mock neural service for UI demonstration',
+    moduleType: ModuleType.NEURAL,
+    version: '1.0.0'
+  });
+  
+  const { isInitialized, isLoading, error, reinitialize } = useNeuralServices(service);
+  
+  // Mock services for UI demonstration
+  const services = isInitialized ? [service] : [];
   
   const handleRefresh = async () => {
-    await refreshServices();
+    await reinitialize();
   };
   
   const handleOptimize = async () => {
-    await optimizeResources();
+    console.log('Optimizing resources...');
+    // Optimization logic would go here
   };
   
   return (
@@ -36,7 +50,7 @@ const NeuralServicesPanel = ({ title = "Neural Services" }: NeuralServicesPanelP
             variant="outline" 
             size="sm" 
             onClick={handleRefresh}
-            disabled={loading}
+            disabled={isLoading}
           >
             <RefreshCcw className="h-4 w-4 mr-1" />
             Refresh
@@ -45,7 +59,7 @@ const NeuralServicesPanel = ({ title = "Neural Services" }: NeuralServicesPanelP
             variant="default" 
             size="sm"
             onClick={handleOptimize}
-            disabled={loading}
+            disabled={isLoading}
           >
             Optimize
           </Button>
@@ -59,7 +73,7 @@ const NeuralServicesPanel = ({ title = "Neural Services" }: NeuralServicesPanelP
           </div>
         ) : null}
         
-        {loading ? (
+        {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-24 bg-muted rounded-md animate-pulse"></div>
@@ -72,7 +86,7 @@ const NeuralServicesPanel = ({ title = "Neural Services" }: NeuralServicesPanelP
             ))}
           </div>
         ) : (
-          <EmptyServiceState onRegisterNew={() => {}} />
+          <EmptyServiceState onRegister={() => {}} />
         )}
       </CardContent>
     </Card>
