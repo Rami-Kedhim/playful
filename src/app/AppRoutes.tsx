@@ -22,7 +22,7 @@ const AppRoutes = () => {
           
           return (
             <Route
-              key={`parent-${index}`}
+              key={`route-${route.path}-${index}`}
               path={route.path}
               element={
                 requireAuth ? (
@@ -39,7 +39,7 @@ const AppRoutes = () => {
                 
                 return (
                   <Route
-                    key={`child-${childIndex}`}
+                    key={`child-${childRoute.path || 'index'}-${childIndex}`}
                     index={childRoute.index}
                     path={childRoute.path}
                     element={

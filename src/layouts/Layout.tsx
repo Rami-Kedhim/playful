@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import Header from '@/components/navigation/Header';
+import Footer from '@/components/navigation/Footer';
 import { cn } from '@/lib/utils';
 import Breadcrumbs from '@/components/navigation/Breadcrumbs';
 

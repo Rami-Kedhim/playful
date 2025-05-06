@@ -1,12 +1,10 @@
 
-// Re-export from layout components
-export { default as Header } from './Header';
-export { default as Footer } from './Footer';
-export { default as Layout } from '@/layouts/Layout';
-export type { LayoutProps } from '@/layouts/Layout';
+// Re-export navigation components
+export * from '@/components/navigation';
 
-// Helper components
-export { default as MobileMenu } from '@/components/navigation/MobileMenu';
+// Re-export layout from main layout
+export { Layout, MainLayout } from '@/layouts';
+export type { LayoutProps } from '@/layouts/Layout';
 
 // For backward compatibility
 export { default as UnifiedLayout } from './UnifiedLayout';
