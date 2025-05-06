@@ -20,11 +20,34 @@ import { AppPaths } from '@/routes/routeConfig';
 
 interface FooterProps {
   className?: string;
+  simplified?: boolean;
 }
 
-const Footer: React.FC<FooterProps> = ({ className }) => {
+const Footer: React.FC<FooterProps> = ({ className, simplified = false }) => {
   const currentYear = new Date().getFullYear();
   
+  // If simplified is true, show a simplified footer
+  if (simplified) {
+    return (
+      <footer className={cn("border-t border-border/40 bg-background", className)}>
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <p className="text-sm text-muted-foreground">
+              &copy; {currentYear} UberEscorts. All rights reserved.
+            </p>
+            <div className="flex items-center space-x-4 mt-4 md:mt-0">
+              <Link to={AppPaths.ABOUT} className="text-muted-foreground hover:text-foreground">About</Link>
+              <Link to={AppPaths.CONTACT} className="text-muted-foreground hover:text-foreground">Contact</Link>
+              <Link to={AppPaths.TERMS} className="text-muted-foreground hover:text-foreground">Terms</Link>
+              <Link to={AppPaths.PRIVACY} className="text-muted-foreground hover:text-foreground">Privacy</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
+    );
+  }
+  
+  // Original full footer
   return (
     <footer className={cn("border-t border-border/40 bg-background", className)}>
       <div className="container mx-auto px-4 py-8">
