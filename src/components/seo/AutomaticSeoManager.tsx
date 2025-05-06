@@ -65,7 +65,7 @@ const AutomaticSeoManager: React.FC = () => {
   
   // Trigger a manual scan
   const triggerManualScan = () => {
-    automaticSeoService.performScan();
+    automaticSeoService.scanContent();
     // Update status immediately
     const currentStatus = automaticSeoService.getStatus();
     setStatus({

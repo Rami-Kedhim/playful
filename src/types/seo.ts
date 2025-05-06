@@ -15,6 +15,12 @@ export interface SeoOptimizationResult {
   priorityKeywords: string[];
   recommendations: string[];
   lastUpdated: string;
+  originalContent?: string;
+  optimizedContent?: string;
+  readabilityScore?: number;
+  keywordDensity?: Record<string, number>;
+  metaTags?: string[];
+  seoScore?: number;
 }
 
 /**

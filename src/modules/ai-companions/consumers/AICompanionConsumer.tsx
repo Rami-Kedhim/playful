@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { BaseBrainService } from '@/services/neural/modules/BaseNeuralService';
-import { BaseNeuralService, ModuleType } from '@/services/neural/types/NeuralService';
+import { ModuleType } from '@/services/neural/types/NeuralService';
 
 const AICompanionConsumer: React.FC = () => {
   useEffect(() => {

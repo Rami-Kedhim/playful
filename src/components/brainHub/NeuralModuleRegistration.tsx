@@ -1,106 +1,105 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { ModuleType } from '@/services/neural/types/NeuralService';
 
 const NeuralModuleRegistration: React.FC = () => {
-  const [moduleName, setModuleName] = useState("");
-  const [moduleDescription, setModuleDescription] = useState("");
-  const [moduleType, setModuleType] = useState<ModuleType>(ModuleType.ESCORTS);
-  const [registering, setRegistering] = useState(false);
-  const [registered, setRegistered] = useState(false);
-  
-  const handleRegisterModule = async () => {
-    if (!moduleName.trim()) return;
+  const [moduleName, setModuleName] = useState('');
+  const [moduleType, setModuleType] = useState<ModuleType>(ModuleType.NEURAL);
+  const [priority, setPriority] = useState('normal');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleRegister = async () => {
+    if (!moduleName) return;
     
-    setRegistering(true);
+    setIsLoading(true);
+    
     try {
-      // Mock registration - in real app this would call an API
-      console.log(`Registering module: ${moduleName}, type: ${moduleType}`);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setRegistered(true);
-      setTimeout(() => setRegistered(false), 3000);
+      // Mock API call
+      console.log('Registering module:', {
+        name: moduleName,
+        type: moduleType,
+        priority
+      });
       
-      // Reset form
-      setModuleName("");
-      setModuleDescription("");
-      setModuleType(ModuleType.ESCORTS);
-    } catch (err) {
-      console.error("Failed to register module:", err);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Clear form
+      setModuleName('');
+    } catch (error) {
+      console.error('Failed to register module:', error);
     } finally {
-      setRegistering(false);
+      setIsLoading(false);
     }
   };
-  
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Register Neural Module</CardTitle>
+        <CardDescription>
+          Add a new neural module to the ecosystem
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <label htmlFor="module-name" className="text-sm font-medium">Module Name</label>
-          <Input 
-            id="module-name"
-            value={moduleName} 
-            onChange={e => setModuleName(e.target.value)}
-            placeholder="Enter module name"
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <label htmlFor="module-type" className="text-sm font-medium">Module Type</label>
-          <Select 
-            value={moduleType} 
-            onValueChange={(value: string) => setModuleType(value as ModuleType)}
+      <CardContent>
+        <form className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="module-name">Module Name</Label>
+            <Input 
+              id="module-name" 
+              placeholder="e.g. Content Analysis Engine" 
+              value={moduleName}
+              onChange={(e) => setModuleName(e.target.value)}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="module-type">Module Type</Label>
+            <Select value={moduleType} onValueChange={(value) => setModuleType(value as ModuleType)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select module type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ModuleType.NEURAL}>Neural Core</SelectItem>
+                <SelectItem value={ModuleType.ESCORTS}>Escorts</SelectItem>
+                <SelectItem value={ModuleType.CREATORS}>Creators</SelectItem>
+                <SelectItem value={ModuleType.LIVECAMS}>LiveCams</SelectItem>
+                <SelectItem value={ModuleType.COMPANION}>AI Companions</SelectItem>
+                <SelectItem value={ModuleType.SEO}>SEO</SelectItem>
+                <SelectItem value={ModuleType.AUTOMATION}>Automation</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="priority">Priority</Label>
+            <Select value={priority} onValueChange={setPriority}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="normal">Normal</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="critical">Critical</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <Button 
+            type="button" 
+            onClick={handleRegister} 
+            className="w-full"
+            disabled={isLoading || !moduleName}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Select type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ModuleType.ESCORTS}>Escorts</SelectItem>
-              <SelectItem value={ModuleType.CREATORS}>Creators</SelectItem>
-              <SelectItem value={ModuleType.LIVECAMS}>Livecams</SelectItem>
-              <SelectItem value={ModuleType.AI_COMPANIONS}>AI Companions</SelectItem>
-              <SelectItem value={ModuleType.SEO}>SEO</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="space-y-2">
-          <label htmlFor="module-description" className="text-sm font-medium">Description</label>
-          <Textarea
-            id="module-description"
-            value={moduleDescription}
-            onChange={e => setModuleDescription(e.target.value)}
-            placeholder="Enter module description"
-            rows={3}
-          />
-        </div>
-        
-        <Button 
-          onClick={handleRegisterModule}
-          disabled={!moduleName.trim() || registering}
-          className="w-full"
-        >
-          {registering ? "Registering..." : "Register Module"}
-        </Button>
-        
-        {registered && (
-          <div className="bg-green-500/20 text-green-700 p-2 rounded text-center">
-            Module registered successfully!
-          </div>
-        )}
-        
-        {moduleType === ModuleType.AI_COMPANIONS && (
-          <div className="bg-blue-500/20 text-blue-700 p-2 rounded text-sm">
-            <p>AI Companions modules require additional configuration.</p>
-          </div>
-        )}
+            {isLoading ? 'Registering...' : 'Register Module'}
+          </Button>
+        </form>
       </CardContent>
     </Card>
   );

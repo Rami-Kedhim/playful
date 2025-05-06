@@ -15,8 +15,7 @@ import {
 
 const HermesSeoNavigation: React.FC = () => {
   const location = useLocation();
-  const isCurrent = (path: string) => location.pathname === path;
-
+  
   const navItems = [
     {
       title: 'Dashboard',

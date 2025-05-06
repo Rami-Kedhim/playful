@@ -1,118 +1,78 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Activity, CheckCircle, Settings } from 'lucide-react';
-import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
-import { TrainingProgress } from '@/services/neural/types/neuralHub';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import useNeuralRegistry from '@/hooks/useNeuralRegistry';
+import { RefreshCcw } from 'lucide-react';
+import NeuralServiceCard from './NeuralServiceCard';
+import EmptyServiceState from './EmptyServiceState';
+import useNeuralServices from '@/hooks/useNeuralServices';
 
 interface NeuralServicesPanelProps {
-  systemId?: string;
+  title?: string;
 }
 
-const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ systemId }) => {
-  const registry = useNeuralRegistry();
-  const [activeJobs, setActiveJobs] = useState<TrainingProgress[]>([]);
+const NeuralServicesPanel = ({ title = "Neural Services" }: NeuralServicesPanelProps) => {
+  const { services, loading, error, refreshServices, optimizeResources } = useNeuralServices();
   
-  // Add optimizeResources function that was missing
-  const optimizeResources = () => {
-    console.log('Optimizing neural resources...');
-    // Mock implementation
-    setTimeout(() => {
-      console.log('Resources optimized successfully');
-    }, 1500);
+  const handleRefresh = async () => {
+    await refreshServices();
   };
   
-  useEffect(() => {
-    const fetchJobs = () => {
-      try {
-        const jobs = neuralHub.getActiveTrainingJobs();
-        setActiveJobs(jobs);
-      } catch (err) {
-        console.error('Failed to fetch training jobs:', err);
-      }
-    };
-    
-    fetchJobs();
-    const intervalId = setInterval(fetchJobs, 30000);
-    return () => clearInterval(intervalId);
-  }, []);
+  const handleOptimize = async () => {
+    await optimizeResources();
+  };
   
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Neural Services</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <div>
+          <CardTitle className="text-xl font-bold">{title}</CardTitle>
+          <CardDescription>
+            Active neural service modules and their status
+          </CardDescription>
+        </div>
+        <div className="flex space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={loading}
+          >
+            <RefreshCcw className="h-4 w-4 mr-1" />
+            Refresh
+          </Button>
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={handleOptimize}
+            disabled={loading}
+          >
+            Optimize
+          </Button>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {registry.loading ? (
-          <div className="flex items-center justify-center p-4">
-            <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
+      <CardContent>
+        {error ? (
+          <div className="bg-red-50 p-4 rounded-md text-red-800 mb-4">
+            <p className="font-medium">Error loading neural services</p>
+            <p className="text-sm">{error}</p>
+          </div>
+        ) : null}
+        
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-24 bg-muted rounded-md animate-pulse"></div>
+            ))}
+          </div>
+        ) : services.length > 0 ? (
+          <div className="space-y-3">
+            {services.map((service, index) => (
+              <NeuralServiceCard key={index} service={service} />
+            ))}
           </div>
         ) : (
-          <>
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">Active Services</h3>
-              <Button variant="outline" size="sm" onClick={optimizeResources}>
-                <Settings className="h-4 w-4 mr-2" /> Optimize Resources
-              </Button>
-            </div>
-            
-            <div className="space-y-4">
-              {registry.services.map(service => (
-                <div key={service.moduleId} className="p-4 border rounded-md">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <Badge variant={service.config.enabled ? 'default' : 'secondary'}>
-                        {service.config.enabled ? 'Active' : 'Inactive'}
-                      </Badge>
-                      <h4 className="font-medium">{service.name}</h4>
-                    </div>
-                    <Switch checked={service.config.enabled} />
-                  </div>
-                  
-                  <div className="mt-2">
-                    <p className="text-sm text-muted-foreground">{service.moduleType}</p>
-                    <div className="mt-2 space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span>Usage</span>
-                        <span>78%</span>
-                      </div>
-                      <Progress value={78} className="h-1" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-              
-              {registry.services.length === 0 && (
-                <div className="text-center p-4 border border-dashed rounded-md">
-                  <p className="text-muted-foreground">No neural services available</p>
-                </div>
-              )}
-            </div>
-            
-            {activeJobs.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-lg font-medium mb-2">Active Training Jobs</h3>
-                {activeJobs.map(job => (
-                  <div key={job.id} className="p-3 bg-secondary/20 rounded-md mt-2">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h4 className="font-medium text-sm">{job.type} Training</h4>
-                        <p className="text-xs text-muted-foreground">Progress: {job.progress.toFixed(1)}%</p>
-                      </div>
-                      <Activity className="h-4 w-4 text-primary animate-pulse" />
-                    </div>
-                    <Progress value={job.progress} className="h-1 mt-2" />
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
+          <EmptyServiceState onRegisterNew={() => {}} />
         )}
       </CardContent>
     </Card>

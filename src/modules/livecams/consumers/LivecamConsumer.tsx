@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { BaseBrainService } from '@/services/neural/modules/BaseNeuralService';
-import { BaseNeuralService, ModuleType } from '@/services/neural/types/NeuralService';
+import { ModuleType } from '@/services/neural/types/NeuralService';
 
 const LivecamConsumer: React.FC = () => {
   useEffect(() => {
@@ -20,11 +20,11 @@ const LivecamConsumer: React.FC = () => {
         enabled: true,
         priority: 'high',
         resources: {
-          cpu: 4,
-          memory: 2048
+          cpu: 2,
+          memory: 1024
         },
-        autonomyLevel: 70,
-        resourceAllocation: 80
+        autonomyLevel: 80,
+        resourceAllocation: 60
       });
       
       return service;
