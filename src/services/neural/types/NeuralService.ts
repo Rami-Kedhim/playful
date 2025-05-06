@@ -1,20 +1,20 @@
 
-export type ModuleType = 'core' | 'transformer' | 'analytics' | 'interface' | 'connector' | 'scheduler' | string;
+export type ModuleType = 
+  | 'core'
+  | 'neural'
+  | 'boost'
+  | 'analytics'
+  | 'security'
+  | 'personalization'
+  | string;
 
 export interface NeuralServiceConfig {
   enabled: boolean;
-  priority: string | number; // Allow both string and number for priority
-  resources?: {
+  priority: 'low' | 'normal' | 'high' | 'critical';
+  resources: {
     cpu: number;
     memory: number;
-    [key: string]: any;
   };
-  sensitivity?: number;
-  threshold?: number;
-  mode?: string;
-  autonomyLevel?: number;
-  resourceAllocation?: number;
-  [key: string]: any;
 }
 
 export interface BaseNeuralService {
@@ -23,15 +23,15 @@ export interface BaseNeuralService {
   name: string;
   description: string;
   version: string;
-  status: 'active' | 'inactive' | 'error' | 'maintenance' | string;
+  status: 'active' | 'inactive' | 'error' | 'maintenance';
   moduleType: ModuleType;
   config: NeuralServiceConfig;
-  getMetrics: () => any;
-  initialize?: () => Promise<boolean>;
-  updateConfig?: (config: Partial<NeuralServiceConfig>) => void;
-  getCapabilities?: () => string[];
-  processRequest?: (request: any) => Promise<any>;
-  canHandleRequestType?: (requestType: string) => boolean;
-  reset?: () => Promise<boolean>; // Add the reset method
-  [key: string]: any;
+  
+  getMetrics: () => Record<string, number>;
+  initialize: () => Promise<boolean>;
+  updateConfig: (config: Partial<NeuralServiceConfig>) => void;
+  getCapabilities: () => string[];
+  processRequest: (request: any) => Promise<any>;
+  canHandleRequestType: (requestType: string) => boolean;
+  reset?: () => Promise<boolean>;
 }
