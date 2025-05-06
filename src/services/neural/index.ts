@@ -7,6 +7,7 @@ export * from './modules/AICompanionNeuralService';
 export * from './modules/EscortsNeuralService';
 export * from './modules/CreatorsNeuralService';
 export * from './modules/LivecamsNeuralService';
+export * from './modules/SeoNeuralService'; // Add the new SeoNeuralService
 export * from './registry/NeuralServiceRegistry';
 export type { BaseNeuralService, NeuralServiceConfig, ModuleType } from './types/NeuralService';
 

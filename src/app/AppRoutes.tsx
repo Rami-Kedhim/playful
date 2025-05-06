@@ -6,12 +6,16 @@ import Layout from '@/layouts/Layout';
 import AuthPage from '@/pages/AuthPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import AuthGuard from '@/components/auth/AuthGuard';
+import SEODashboard from '@/pages/SEODashboard'; // Import the SEO Dashboard
 
 const AppRoutes = () => {
   return (
     <Routes>
       {/* Auth page with dedicated route */}
       <Route path="/auth" element={<AuthPage />} />
+      
+      {/* SEO Dashboard Route */}
+      <Route path="/seo" element={<SEODashboard />} />
       
       {/* Main routes with Layout */}
       <Route element={<Layout />}>

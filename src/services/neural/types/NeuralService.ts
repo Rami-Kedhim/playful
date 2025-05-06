@@ -1,52 +1,31 @@
+import { NeuralServiceConfig as Config } from './neuralHub';
 
-export type ModuleType = 
-  | 'core'
-  | 'neural'
-  | 'boost'
-  | 'analytics'
-  | 'security'
-  | 'personalization'
-  | string;
-
-export interface NeuralServiceConfig {
+export interface NeuralServiceConfig extends Config {
   enabled: boolean;
-  priority: 'low' | 'normal' | 'high' | 'critical';
-  resources: {
-    cpu: number;
-    memory: number;
-  };
-  autonomyLevel?: number;
-  resourceAllocation?: number;
-  sensitivity?: number;
-}
-
-export interface SystemHealthMetrics {
-  load: number;
-  memory: number;
-  latency: number;
-  errorRate: number;
-  averageResponseTime: number;
-  cpuUsage?: number;
-  memoryUsage?: number;
-  systemLoad?: number;
-  requestRate?: number;
+  priority?: number;
+  description?: string;
+  dependencies?: string[];
+  moduleOptions?: Record<string, any>;
+  optimizationLevel?: 'basic' | 'standard' | 'advanced';
 }
 
 export interface BaseNeuralService {
-  id: string;
   moduleId: string;
   name: string;
-  description: string;
-  version: string;
-  status: 'active' | 'inactive' | 'error' | 'maintenance';
   moduleType: ModuleType;
   config: NeuralServiceConfig;
-  
-  getMetrics: () => Record<string, number>;
-  initialize: () => Promise<boolean>;
-  updateConfig: (config: Partial<NeuralServiceConfig>) => void;
-  getCapabilities: () => string[];
-  processRequest: (request: any) => Promise<any>;
-  canHandleRequestType: (requestType: string) => boolean;
-  reset?: () => Promise<boolean>;
+  isRunning: () => boolean;
+  start: () => Promise<void>;
+  stop: () => Promise<void>;
+  configure: (config: NeuralServiceConfig) => Promise<void>;
+  processWithNeuralCore: (input: string, options?: any) => Promise<any>;
+}
+
+export enum ModuleType {
+  COMPANION = 'companion',
+  CREATORS = 'creators', 
+  ESCORTS = 'escorts',
+  LIVECAMS = 'livecams',
+  SEO = 'seo', // Add the new SEO module type
+  GENERIC = 'generic'
 }

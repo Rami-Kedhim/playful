@@ -5,6 +5,7 @@ import NeuralMonitoringPage from '@/pages/neural/NeuralMonitoringPage';
 import { orus } from '@/core/Orus';
 import { useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
+import { uberCore } from '@/core/UberCore';
 
 const UberCoreNeuralMonitor: React.FC = () => {
   const { toast } = useToast();
@@ -24,6 +25,9 @@ const UberCoreNeuralMonitor: React.FC = () => {
             variant: "destructive"
           });
         }
+        
+        // Initialize automatic SEO if it's not already running
+        uberCore.initializeAutomaticSeo();
       } catch (err) {
         console.error('Session validation error:', err);
       }
