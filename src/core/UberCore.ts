@@ -89,6 +89,8 @@ class UberCore implements UberCoreSystem {
     const errorRate = Math.random() * 5;
     const averageResponseTime = Math.random() * 200;
     const systemLoad = Math.random() * 100;
+    const cpuUsage = Math.random() * 100;
+    const memoryUsage = Math.random() * 100;
     
     return {
       load,
@@ -96,7 +98,9 @@ class UberCore implements UberCoreSystem {
       latency,
       errorRate,
       averageResponseTime,
-      systemLoad
+      systemLoad,
+      cpuUsage,
+      memoryUsage
     };
   }
 
