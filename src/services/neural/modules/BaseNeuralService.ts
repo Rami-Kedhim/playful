@@ -31,10 +31,7 @@ export class BaseBrainService implements BaseNeuralService {
     this.config = params.config || {
       enabled: true,
       priority: 'normal',
-      resources: {
-        cpu: 1,
-        memory: 512
-      }
+      dependencies: []
     };
   }
   
@@ -83,6 +80,30 @@ export class BaseBrainService implements BaseNeuralService {
   canHandleRequestType(requestType: string): boolean {
     // By default, a service can handle requests that match its module type
     return this.moduleType === requestType;
+  }
+  
+  // Implementation of BaseNeuralService interface methods
+  isRunning(): boolean {
+    return this.status === 'active';
+  }
+  
+  async start(): Promise<void> {
+    this.status = 'active';
+  }
+  
+  async stop(): Promise<void> {
+    this.status = 'inactive';
+  }
+  
+  async configure(config: NeuralServiceConfig): Promise<void> {
+    this.config = config;
+  }
+  
+  async processWithNeuralCore(input: string, options?: any): Promise<any> {
+    return {
+      result: `Processed: ${input}`,
+      options
+    };
   }
   
   // Add the reset method to the BaseBrainService class

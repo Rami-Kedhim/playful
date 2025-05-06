@@ -18,7 +18,13 @@ class UberCore implements UberCoreSystem {
       console.log('[UberCore] Initializing UberCore system...');
       
       // Initialize sub-systems
-      await orus.initialize();
+      // Make sure orus.initialize() exists
+      if (typeof orus.initialize === 'function') {
+        await orus.initialize();
+      } else {
+        console.log('[UberCore] Note: orus.initialize() does not exist, skipping...');
+      }
+      
       await hermes.initialize();
       
       // Initialize Lucie AI system
@@ -55,13 +61,18 @@ class UberCore implements UberCoreSystem {
     const latency = Math.random() * 100;
     const uptime = process.uptime();
     
+    // Fix for orus.getSystemStatus if it doesn't exist
+    const orusStatus = typeof orus.getSystemStatus === 'function' 
+      ? orus.getSystemStatus().status 
+      : 'unknown';
+    
     return {
       operational: this.operational,
       messageLength,
       latency,
       uptime,
       services: {
-        auth: orus.getSystemStatus().status,
+        auth: orusStatus,
         analytics: hermes.getSystemStatus().status,
         ai: lucie.getSystemStatus().operational ? 'online' : 'offline',
         wallet: 'active'

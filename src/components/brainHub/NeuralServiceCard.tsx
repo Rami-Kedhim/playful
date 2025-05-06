@@ -21,8 +21,12 @@ const NeuralServiceCard: React.FC<NeuralServiceCardProps> = ({ service, onRefres
     if (onRefresh) onRefresh();
   };
 
-  // Convert string priorities to numbers for Progress component
-  const getPriorityValue = (priority: 'low' | 'normal' | 'high' | 'critical'): number => {
+  // Convert string or number priorities to numbers for Progress component
+  const getPriorityValue = (priority: number | 'low' | 'normal' | 'high' | 'critical' | undefined): number => {
+    if (typeof priority === 'number') {
+      return Math.min(100, Math.max(0, priority));
+    }
+    
     switch (priority) {
       case 'critical': return 100;
       case 'high': return 75;
@@ -31,6 +35,20 @@ const NeuralServiceCard: React.FC<NeuralServiceCardProps> = ({ service, onRefres
       default: return 50;
     }
   };
+
+  // Safe access to capabilities with fallback
+  const getCapabilities = () => {
+    if (service.getCapabilities && typeof service.getCapabilities === 'function') {
+      return service.getCapabilities();
+    }
+    return ['basic'];
+  };
+
+  // Default value for autonomy level
+  const autonomyLevel = service.config.autonomyLevel ?? 50;
+  
+  // Default value for resource allocation
+  const resourceAllocation = service.config.resourceAllocation ?? 30;
 
   return (
     <Card className="mb-4">
@@ -56,9 +74,9 @@ const NeuralServiceCard: React.FC<NeuralServiceCardProps> = ({ service, onRefres
         <div>
           <div className="flex items-center justify-between text-sm mb-1">
             <span>Autonomy Level</span>
-            <span>{service.config.autonomyLevel ?? 50}%</span>
+            <span>{autonomyLevel}%</span>
           </div>
-          <Progress value={service.config.autonomyLevel ?? 50} className="h-2" />
+          <Progress value={autonomyLevel} className="h-2" />
         </div>
         
         <div>
@@ -72,15 +90,15 @@ const NeuralServiceCard: React.FC<NeuralServiceCardProps> = ({ service, onRefres
         <div>
           <div className="flex items-center justify-between text-sm mb-1">
             <span>Resource Allocation</span>
-            <span>{service.config.resourceAllocation ?? 30}%</span>
+            <span>{resourceAllocation}%</span>
           </div>
-          <Progress value={service.config.resourceAllocation ?? 30} className="h-2" />
+          <Progress value={resourceAllocation} className="h-2" />
         </div>
         
         <div className="pt-2">
           <h4 className="text-sm font-medium mb-2">Capabilities:</h4>
           <div className="flex flex-wrap gap-1">
-            {service.getCapabilities().map((cap: string) => (
+            {getCapabilities().map((cap: string) => (
               <Badge key={cap} variant="secondary" className="text-xs">
                 {cap}
               </Badge>
