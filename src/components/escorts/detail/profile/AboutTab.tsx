@@ -18,10 +18,10 @@ const AboutTab: React.FC<AboutTabProps> = ({ escort }) => {
         <div>
           <h3 className="text-lg font-medium mb-2">Stats</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {escort.stats.age && (
+            {escort.age && (
               <div>
                 <p className="text-sm font-medium">Age</p>
-                <p className="text-muted-foreground">{escort.stats.age}</p>
+                <p className="text-muted-foreground">{escort.age}</p>
               </div>
             )}
             

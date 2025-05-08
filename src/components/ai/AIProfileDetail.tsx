@@ -1,7 +1,6 @@
 
 import React from 'react';
 import AICompanionChat from './AICompanionChat';
-import { AICompanionChatProps } from './companion-chat/AICompanionChatProps';
 
 interface AIProfileDetailProps {
   profile: {

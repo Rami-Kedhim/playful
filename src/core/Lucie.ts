@@ -27,13 +27,15 @@ class LucieAI implements LucieAISystem {
     console.log(`Lucie: Moderating content of length ${params.content.length}`);
     
     // Simple mock implementation
-    const isSafe = params.content.length < 1000;
+    const isSafe = params.content.length < 1000 && 
+      !params.content.toLowerCase().includes('vulgar') &&
+      !params.content.toLowerCase().includes('offensive');
     
     return {
       safe: isSafe,
       score: isSafe ? 0.2 : 0.8,
-      issues: isSafe ? [] : ['Content too long'],
-      blockedCategories: []
+      issues: isSafe ? [] : ['Content too long or contains inappropriate language'],
+      blockedCategories: isSafe ? [] : ['inappropriate_content']
     };
   }
   

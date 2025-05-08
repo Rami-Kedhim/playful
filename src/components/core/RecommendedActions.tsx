@@ -31,7 +31,9 @@ const RecommendedActions: React.FC<RecommendedActionsProps> = ({
         );
         
         // Sort by priority (highest first)
-        const sortedActions = [...actions].sort((a, b) => b.priority - a.priority);
+        const sortedActions = [...actions].sort((a, b) => 
+          b.priority === 'high' ? 1 : (a.priority === 'high' ? -1 : 0)
+        );
         
         setRecommendations(sortedActions);
       } catch (error) {
@@ -81,7 +83,7 @@ const RecommendedActions: React.FC<RecommendedActionsProps> = ({
           {recommendations.map((action, index) => (
             <Link 
               key={index} 
-              to={action.destination || '#'}
+              to={action.actionUrl || '#'}
               className="block"
             >
               <Button 
@@ -90,10 +92,10 @@ const RecommendedActions: React.FC<RecommendedActionsProps> = ({
               >
                 <div className="flex flex-col items-start">
                   <span className="font-medium">
-                    {actionToTitle(action.action)}
+                    {actionToTitle(action.type)}
                   </span>
                   <span className="text-xs text-muted-foreground mt-1">
-                    {action.reason}
+                    {action.description}
                   </span>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />

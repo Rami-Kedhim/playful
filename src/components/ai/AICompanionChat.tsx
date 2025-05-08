@@ -3,35 +3,27 @@ import React, { useState, useCallback, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { lucieAI } from '@/core/Lucie';
-import { ModerateContentParams } from '@/types/core-systems';
 import { AIMessage } from '@/types/ai-messages';
-
-interface AICompanionChatProps {
-  aiName: string;
-  aiAvatar?: string;
-  userAvatar?: string;
-  initialMessages?: AIMessage[];
-  onMessageSent?: (message: AIMessage) => void;
-}
+import { AICompanionChatProps } from './companion-chat/AICompanionChatProps';
 
 const AICompanionChat: React.FC<AICompanionChatProps> = ({
-  aiName,
-  aiAvatar,
-  userAvatar,
-  initialMessages = [],
-  onMessageSent
+  companionId,
+  name = "AI Companion", 
+  avatarUrl,
+  personalityType,
+  initialMessage,
+  onClose
 }) => {
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<AIMessage[]>(initialMessages.length > 0 
-    ? initialMessages 
-    : [{
-        id: 'welcome',
-        role: 'assistant',
-        content: `Hi there! I'm ${aiName}. How can I help you today?`,
-        timestamp: new Date(),
-        is_ai: true
-      }]
-  );
+  const [messages, setMessages] = useState<AIMessage[]>(initialMessage ? [
+    {
+      id: 'welcome',
+      role: 'assistant',
+      content: initialMessage,
+      timestamp: new Date(),
+      is_ai: true
+    }
+  ] : []);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -59,14 +51,12 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
       setMessage('');
       
       // Moderate content
-      const moderationParams: ModerateContentParams = {
+      const moderationResult = await lucieAI.moderateContent({
         content: message,
         contentType: 'text'
-      };
+      });
       
-      const moderation = await lucieAI.moderateContent(moderationParams);
-      
-      if (!moderation.safe) {
+      if (!moderationResult.safe) {
         // Handle filtered content
         const rejectionMessage: AIMessage = {
           id: Date.now().toString() + '-rejection',
@@ -94,11 +84,6 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
       
       // Add AI message to chat
       setMessages(prev => [...prev, aiMessage]);
-      
-      // Notify parent component if callback provided
-      if (onMessageSent) {
-        onMessageSent(aiMessage);
-      }
       
     } catch (error) {
       console.error('Error in AI chat:', error);
@@ -133,9 +118,9 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
             key={msg.id}
             className={`flex ${msg.is_ai ? 'justify-start' : 'justify-end'}`}
           >
-            {msg.is_ai && aiAvatar && (
+            {msg.is_ai && avatarUrl && (
               <div className="h-8 w-8 rounded-full overflow-hidden mr-2 flex-shrink-0">
-                <img src={aiAvatar} alt={aiName} className="h-full w-full object-cover" />
+                <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
               </div>
             )}
             <div
@@ -147,11 +132,6 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
             >
               {msg.content}
             </div>
-            {!msg.is_ai && userAvatar && (
-              <div className="h-8 w-8 rounded-full overflow-hidden ml-2 flex-shrink-0">
-                <img src={userAvatar} alt="You" className="h-full w-full object-cover" />
-              </div>
-            )}
           </div>
         ))}
         <div ref={messagesEndRef} />

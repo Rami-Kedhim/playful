@@ -9,6 +9,7 @@ export interface LucieAISystem {
   getSystemStatus(): { operational: boolean; modules: Record<string, string> };
   configure(options: Record<string, any>): void;
   analyzeSentiment(text: string): Promise<SentimentAnalysisResult>;
+  generateContent(prompt: string, options?: Record<string, any>): Promise<GenerateContentResult>;
 }
 
 // Parameters for content moderation
@@ -16,8 +17,8 @@ export interface ModerateContentParams {
   content: string;
   strictness?: 'low' | 'medium' | 'high';
   categories?: string[];
-  contentType?: 'text' | 'image' | 'video'; // Added contentType
-  context?: Record<string, any>;            // Added context
+  contentType?: 'text' | 'image' | 'video';
+  context?: Record<string, any>;
 }
 
 // Result of content moderation

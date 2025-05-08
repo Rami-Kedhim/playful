@@ -1,76 +1,41 @@
 
-import { useState } from "react";
-import { Escort } from "@/types/escort";
-import { BookingForm, BookingFormData } from "../booking";
-import MessageForm from "../MessageForm";
-import { ShareProfileModal } from "../share";
-import { format } from "date-fns";
-import { useToast } from "@/hooks/use-toast";
+import React from 'react';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Escort } from '@/types/Escort';
 
 interface DialogManagerProps {
   escort: Escort;
-  onBookNow: () => void;
-  bookingOpen: boolean;
-  messageOpen: boolean;
-  shareOpen: boolean;
-  onBookingClose: () => void;
-  onMessageClose: () => void;
-  onShareClose: () => void;
+  open: boolean;
+  type: 'booking' | 'contact' | 'share';
+  onClose: () => void;
 }
 
-const DialogManager = ({ 
-  escort, 
-  onBookNow,
-  bookingOpen,
-  messageOpen,
-  shareOpen,
-  onBookingClose,
-  onMessageClose,
-  onShareClose
-}: DialogManagerProps) => {
-  const { toast } = useToast();
-
-  const handleBookingSubmit = (data: BookingFormData) => {
-    console.log("Booking data:", data);
-    toast({
-      title: "Booking Request Sent",
-      description: `Your booking with ${escort.name} for ${format(data.date, "MMMM d, yyyy")} at ${data.time} has been sent.`,
-    });
-    onBookNow();
-    onBookingClose();
-  };
-
-  const handleMessageSubmit = (message: string) => {
-    console.log("Message sent:", message);
-    toast({
-      title: "Message Sent",
-      description: `Your message has been sent to ${escort.name}.`,
-    });
-    onMessageClose();
+const DialogManager: React.FC<DialogManagerProps> = ({
+  escort,
+  open,
+  type,
+  onClose
+}) => {
+  // Import components dynamically based on type
+  const renderDialogContent = () => {
+    switch (type) {
+      case 'booking':
+        return <div>Booking dialog content for {escort.name}</div>;
+      case 'contact':
+        return <div>Contact dialog content for {escort.name}</div>;
+      case 'share':
+        return <div>Share dialog content for {escort.name}</div>;
+      default:
+        return <div>Unknown dialog type</div>;
+    }
   };
 
   return (
-    <>
-      <BookingForm
-        escort={escort}
-        isOpen={bookingOpen}
-        onClose={onBookingClose}
-        onSubmit={handleBookingSubmit}
-      />
-
-      <MessageForm
-        escort={escort}
-        isOpen={messageOpen}
-        onClose={onMessageClose}
-        onSubmit={handleMessageSubmit}
-      />
-      
-      <ShareProfileModal
-        escort={escort}
-        isOpen={shareOpen}
-        onClose={onShareClose}
-      />
-    </>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        {renderDialogContent()}
+      </DialogContent>
+    </Dialog>
   );
 };
 
