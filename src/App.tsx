@@ -1,12 +1,12 @@
 
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import { UberEcosystemProvider } from '@/contexts/UberEcosystemContext';
 import { ServiceTypeProvider } from '@/contexts/ServiceTypeContext';
 import { FavoritesProvider } from '@/contexts/FavoritesContext';
-import routes from '@/app/routes';
+import AppRoutes from '@/app/AppRoutes';
 import { initializeSystem, shutdownSystem } from '@/core/engine';
 import { toast } from '@/components/ui/use-toast';
 
@@ -52,11 +52,9 @@ function App() {
         <ServiceTypeProvider>
           <FavoritesProvider>
             <BrowserRouter>
-              <Routes>
-                {routes}
-              </Routes>
+              <AppRoutes />
+              <Toaster />
             </BrowserRouter>
-            <Toaster />
           </FavoritesProvider>
         </ServiceTypeProvider>
       </UberEcosystemProvider>

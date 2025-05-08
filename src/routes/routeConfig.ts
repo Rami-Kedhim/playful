@@ -36,7 +36,12 @@ export const AppPaths = {
   NEURAL_MONITOR: '/neural/monitor',
   NEURAL_ANALYTICS: '/neural/analytics',
   SEO: '/seo',
-  GUIDELINES: '/guidelines'
+  GUIDELINES: '/guidelines',
+  
+  // Fix for missing paths in navigation components
+  FAVORITES: '/favorites',
+  USER_PROFILE: '/user-profile',
+  BOOKINGS: '/bookings'
 };
 
 // Export AppPaths as APP_PATHS for backward compatibility

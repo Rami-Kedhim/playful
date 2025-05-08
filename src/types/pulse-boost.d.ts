@@ -1,114 +1,47 @@
 
-export interface BoostPackage {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  price_ubx?: number;
-  duration: string;
-  durationMinutes: number;
-  features: string[];
-  visibility: number | string;
-  visibility_increase: number;
-  color?: string;
-  badgeColor?: string;
-  boost_power?: number;
-  boostMultiplier?: number;
-  isMostPopular?: boolean;
-  isRecommended?: boolean;
-  is_active?: boolean;
-  boostLevel?: number;
-}
-
 export interface PulseBoost {
   id: string;
   name: string;
-  description: string;
-  duration: string;
-  durationMinutes: number;
+  description?: string;
+  duration: string; // e.g., "1d", "7d", "30d"
   price: number;
   price_ubx?: number;
-  features: string[];
-  visibility: number | string;
-  visibility_increase: number;
+  features?: string[];
+  visibility?: string | number;
+  visibility_increase?: number;
   color?: string;
   badgeColor?: string;
+  durationMinutes?: number;
   boost_power?: number;
-  boostMultiplier?: number;
   isMostPopular?: boolean;
+  isPopular?: boolean;
   isRecommended?: boolean;
-  profileId?: string;
-  packageId?: string;
-  startTime?: Date | string;
-  endTime?: Date | string;
-  status?: string;
-  boostLevel?: number;
+  isActive?: boolean;
 }
 
-export interface BoostPurchaseRequest {
-  profileId: string;
-  packageId: string;
-}
-
-export interface BoostPurchaseResult {
-  success: boolean;
-  boostId?: string;
-  error?: string | null;
-  message?: string;
-  transactionId?: string;
-}
-
-export interface BoostAnalytics {
-  totalBoosts: number;
-  activeBoosts: number;
-  averageBoostScore: number;
-  boostHistory: Array<{
-    date: Date;
-    score: number;
-  }>;
-  views?: number;
-  impressions?: {
-    value: number;
-    change?: number;
-    withBoost?: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-  interactions?: {
-    value: number;
-    change?: number;
-    withBoost?: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-}
-
-export interface BoostHistory {
-  items: Array<{
-    id: string;
-    packageId: string;
-    startDate: Date;
-    endDate: Date;
-    price: number;
-    status: string;
-  }>;
-  userId?: string;
-  startTime?: Date | string;
-  endTime?: Date | string;
-  boostType?: string;
-  price?: number;
-  status?: string;
-}
-
-export interface EnhancedBoostStatus {
+export interface PulseBoostStatus {
   isActive: boolean;
-  remainingTime: string;  // in "1h 30m" format
-  timeRemaining: string;  // Same as remainingTime for backward compatibility
-  percentRemaining: number;
-  expiresAt: Date | null;
-  startedAt: Date | null;
-  isExpired: boolean;
-  remainingMinutes?: number; // in minutes
+  isExpiring?: boolean;
+  expiresAt?: string | Date;
+  remainingTime?: number | string; // in seconds or formatted time
+  boostLevel?: number;
+  boostType?: string;
+  modifiers?: Record<string, number>;
   packageName?: string;
+  packageId?: string;
+  startedAt?: Date | string;
   progress?: number;
+  timeRemaining?: string;
+}
+
+export interface PulseBoostManager {
+  boostStatus: PulseBoostStatus | null;
+  loading: boolean;
+  error: string | null;
+  packages: PulseBoost[];
+  activateBoost: (packageId: string) => Promise<boolean>;
+  cancelBoost: () => Promise<boolean>;
+  isEligible: boolean;
+  eligibilityReason?: string;
+  refreshStatus: () => void;
 }

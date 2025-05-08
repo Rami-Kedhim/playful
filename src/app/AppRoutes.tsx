@@ -1,6 +1,6 @@
 
 import React, { Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes } from 'react-router-dom';
 import { AppPaths } from '@/routes/routeConfig';
 import routes from '@/app/routes'; // Import the routes React element
 

@@ -36,6 +36,13 @@ export interface VerificationRequest {
   updatedAt?: string;
   rejectionReason?: string;
   verifiedDate?: string;
+  
+  // Additional properties needed by admin components
+  profile_id?: string;
+  created_at?: string;
+  reviewed_at?: string;
+  requested_level?: string;
+  requestedLevel?: string;
 }
 
 export interface VerificationStats {
