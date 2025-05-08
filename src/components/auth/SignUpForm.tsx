@@ -1,135 +1,125 @@
 
-import React from 'react';
-import { Input } from '@/components/ui/input';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useAuth } from '@/hooks/auth';
 import { RegisterCredentials } from '@/types/user';
 
-export interface SignUpFormProps {
-  onSubmit?: (credentials: RegisterCredentials) => Promise<void>;
-  loading?: boolean;
-  error?: string | null;
-}
+const formSchema = z.object({
+  email: z.string().email({ message: 'Please enter a valid email address' }),
+  username: z.string().min(3, { message: 'Username must be at least 3 characters long' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters long' }),
+  confirmPassword: z.string()
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
+});
 
-const SignUpForm: React.FC<SignUpFormProps> = ({ 
-  onSubmit,
-  loading = false,
-  error = null
-}) => {
-  const [username, setUsername] = React.useState('');
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [confirmPassword, setConfirmPassword] = React.useState('');
-  const [acceptTerms, setAcceptTerms] = React.useState(false);
-  const [passwordsMatch, setPasswordsMatch] = React.useState(true);
-  
-  React.useEffect(() => {
-    setPasswordsMatch(password === confirmPassword || confirmPassword === '');
-  }, [password, confirmPassword]);
-  
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (password !== confirmPassword) {
-      setPasswordsMatch(false);
-      return;
-    }
-    
-    if (onSubmit) {
-      await onSubmit({
-        username,
-        email,
-        password,
-        confirmPassword
-      });
+type FormData = z.infer<typeof formSchema>;
+
+const SignUpForm = () => {
+  const { register } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+      username: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
+
+  const onSubmit = async (data: FormData) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Only include the fields that exist in RegisterCredentials
+      const credentials: RegisterCredentials = {
+        email: data.email,
+        password: data.password,
+        username: data.username
+      };
+      await register(credentials);
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong during registration');
+    } finally {
+      setIsLoading(false);
     }
   };
-  
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      
-      <div>
-        <Input
-          placeholder="Username"
-          required
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          disabled={loading}
-          className="bg-background"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {error && <div className="p-3 text-sm bg-red-100 text-red-600 rounded">{error}</div>}
+        
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter your email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      
-      <div>
-        <Input
-          type="email"
-          placeholder="Email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={loading}
-          className="bg-background"
+        
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Username</FormLabel>
+              <FormControl>
+                <Input placeholder="Choose a username" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      
-      <div>
-        <Input
-          type="password"
-          placeholder="Password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          disabled={loading}
-          className="bg-background"
+        
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Choose a password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      
-      <div>
-        <Input
-          type="password"
-          placeholder="Confirm password"
-          required
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          disabled={loading}
-          className={`bg-background ${!passwordsMatch ? 'border-red-500' : ''}`}
+        
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Confirm your password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        {!passwordsMatch && (
-          <p className="text-red-500 text-xs mt-1">Passwords do not match</p>
-        )}
-      </div>
-      
-      <div className="flex items-center space-x-2">
-        <Checkbox 
-          id="terms" 
-          checked={acceptTerms}
-          onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
-          disabled={loading}
-          required
-        />
-        <label
-          htmlFor="terms"
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          I agree to the terms of service and privacy policy
-        </label>
-      </div>
-      
-      <Button 
-        type="submit" 
-        className="w-full" 
-        disabled={loading || !acceptTerms || !passwordsMatch}
-      >
-        {loading ? 'Creating Account...' : 'Create Account'}
-      </Button>
-    </form>
+        
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? 'Signing up...' : 'Sign Up'}
+        </Button>
+      </form>
+    </Form>
   );
 };
 

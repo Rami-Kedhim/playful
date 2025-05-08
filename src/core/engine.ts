@@ -1,100 +1,77 @@
 
-import { oxum } from "./Oxum";
-import { UberWallet } from './UberWallet';
+import { uberCore } from './UberCore';
+import { lucieAI } from './Lucie';
+import { Hermes } from './Hermes';
+import { Pulse } from './Pulse';
 import { automaticSeo } from './AutomaticSEO';
 
-// Initialize core system components
-const wallet = new UberWallet();
-const uberCore = {
-  initializeAutomaticSeo: automaticSeo.initialize,
-  checkSubsystemHealth: () => {
-    return [
-      { name: 'auth', status: 'operational', health: 98 },
-      { name: 'wallet', status: 'operational', health: 100 },
-      { name: 'boost', status: 'operational', health: 95 },
-      { name: 'hermes', status: 'operational', health: 92 },
-      { name: 'ai', status: 'operational', health: 99 }
-    ];
-  },
-  getSystemStatus: () => {
-    return {
-      operational: true,
-      isActive: true,
-      services: {
-        auth: 'operational',
-        analytics: 'operational',
-        ai: 'operational',
-        wallet: 'operational',
-        seo: 'operational'
-      },
-      queueLength: 0,
-      processing: false,
-      lastUpdate: new Date()
-    };
-  },
-  shutdown: async () => {
-    console.log('Shutting down UberEscorts system...');
-    try {
-      await wallet.shutdown();
-      await automaticSeo.shutdown();
-      return true;
-    } catch (error) {
-      console.error('Error during shutdown:', error);
-      return false;
-    }
-  }
-};
-
-// Export functions for system initialization and shutdown
-export const initializeSystem = async () => {
-  console.log('Initializing UberEscorts system...');
-  
+/**
+ * Initializes the entire UberEscorts ecosystem
+ */
+export const initializeSystem = async (): Promise<boolean> => {
   try {
-    // Initialize wallet with initial balance
-    if (!wallet.isInitialized()) {
-      await wallet.initialize(1000);
-      console.log('Wallet initialized with 1000 initial balance');
+    console.log('Initializing UberEscorts ecosystem...');
+    
+    // Initialize UberCore (this initializes most core systems)
+    const coreInitialized = await uberCore.initialize();
+    if (!coreInitialized) {
+      throw new Error('Failed to initialize UberCore system');
     }
     
-    // Initialize Oxum system
-    await oxum.initialize();
-    
-    // Initialize automatic SEO
-    const seoInitialized = uberCore.initializeAutomaticSeo();
-    if (seoInitialized) {
-      console.log('Automatic SEO initialized');
+    // Initialize AutomaticSEO system
+    const seoInitialized = automaticSeo.initialize();
+    if (!seoInitialized) {
+      console.warn('Failed to initialize AutomaticSEO system');
     }
     
-    // Check overall system status
-    const status = uberCore.getSystemStatus();
-    console.log('System status:', status.operational ? 'Operational' : 'Degraded');
+    // Track system initialization in Pulse
+    Pulse.track('system', 'ecosystem_initialized');
     
-    // Return initialization success
     return true;
   } catch (error) {
-    console.error('Failed to initialize UberEscorts system:', error);
+    console.error('Error initializing UberEscorts ecosystem:', error);
     return false;
   }
 };
 
-export const shutdownSystem = async () => {
-  console.log('Shutting down UberEscorts system...');
-  
+/**
+ * Shuts down the entire UberEscorts ecosystem
+ */
+export const shutdownSystem = async (): Promise<void> => {
   try {
-    // Transfer remaining funds to safe storage
-    const balance = await wallet.getBalance();
-    if (balance > 0) {
-      await wallet.transfer('safe-storage', balance);
-    }
+    console.log('Shutting down UberEscorts ecosystem...');
     
-    // Shut down core systems
+    // Shutdown UberCore
     await uberCore.shutdown();
     
-    return true;
+    // Shutdown AutomaticSEO
+    await automaticSeo.shutdown();
+    
+    // Track system shutdown in Pulse
+    Pulse.track('system', 'ecosystem_shutdown');
   } catch (error) {
-    console.error('Error during system shutdown:', error);
-    return false;
+    console.error('Error shutting down UberEscorts ecosystem:', error);
   }
 };
 
-export default uberCore;
+/**
+ * Checks the health of the entire UberEscorts ecosystem
+ */
+export const checkEcosystemHealth = async (): Promise<number> => {
+  // Getting health metrics from various systems
+  const coreHealth = uberCore.getSystemHealth();
+  const subsystemsHealth = uberCore.checkSubsystemHealth();
+  
+  // Calculate average health score
+  const totalHealth = subsystemsHealth.reduce((sum, system) => sum + system.health, 0);
+  return totalHealth / subsystemsHealth.length; // This returns a number directly, not a Promise
+};
+
+/**
+ * Exports a default object with all the functions
+ */
+export default {
+  initializeSystem,
+  shutdownSystem,
+  checkEcosystemHealth
+};

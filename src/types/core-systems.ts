@@ -1,108 +1,107 @@
 
-/**
- * Core Systems Types - Shared types for core platform functionalities
- */
-
-export interface RecommendedAction {
-  id: string;
-  title: string;
-  description?: string;
-  priority: number;
-  action: string | (() => void);
-  type?: string;
-  dismissible?: boolean;
-  expiresAt?: Date;
-}
-
-// Add AnalyticsData type for boostService
-export interface AnalyticsData {
-  impressions: number;
-  clicks: number;
-  conversion: number;
-  position: number;
-  additionalViews?: number;
-}
-
-// Add ModerateContentParams interface
 export interface ModerateContentParams {
   content: string;
   contentType: string;
-  strictness?: number;
-  userId?: string;
+  // Remove context property that's causing issues
 }
 
 export interface ModerateContentResult {
-  isApproved: boolean;
+  isSafe: boolean; // Changed from 'safe' to 'isSafe' to match implementation
   score: number;
-  flags: string[];
-  message?: string;
+  issues: string[];
+  blockedCategories: string[];
 }
 
 export interface GenerateContentResult {
   content: string;
-  metadata: {
-    tokens: number;
-    processingTime: number;
-  };
+  // Remove moderated property that's causing issues
+  originalLength: number;
+  moderatedLength: number;
+  warnings: string[];
 }
 
 export interface SentimentAnalysisResult {
-  sentiment: 'positive' | 'negative' | 'neutral';
   score: number;
-  entities?: {
-    name: string;
-    sentiment: string;
-    confidence: number;
-  }[];
+  sentiment: 'positive' | 'negative' | 'neutral';
+  // Remove confidence property that's causing issues
 }
 
 export interface LucieAISystem {
-  moderateContent: (params: ModerateContentParams) => Promise<ModerateContentResult>;
-  generateResponse: (prompt: string) => Promise<string>;
-  analyzeSentiment: (text: string) => Promise<SentimentAnalysisResult>;
+  initialize(): Promise<boolean>;
+  generateText(prompt: string): Promise<string>;
+  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
+  generateContent(prompt: string, options?: Record<string, any>): Promise<GenerateContentResult>;
+  analyzeSentiment(text: string): Promise<SentimentAnalysisResult>;
+  getSystemStatus(): { operational: boolean; modules: Record<string, string> };
+  configure(options: Record<string, any>): void;
+  // Add the missing method that's required by the interface
+  generateResponse(input: string): Promise<string>;
 }
 
 export interface SystemStatus {
   operational: boolean;
+  latency: number;
+  uptime: number;
+  // Remove messageLength property that's causing issues
   services: {
-    [key: string]: string;
+    auth: string;
+    analytics: string;
+    ai: string;
+    wallet: string;
   };
 }
 
 export interface SystemIntegrityResult {
-  passed: boolean;
-  issues: string[];
+  // Changed from 'isValid' to match implementation
+  valid: boolean; 
+  message: string;
+  details: {
+    database: string;
+    fileSystem: string;
+    network: string;
+  };
 }
 
 export interface SystemHealthMetrics {
-  cpu: number;
+  // Remove 'load' property that's causing issues
   memory: number;
-  storage: number;
-  network: number;
+  latency: number;
+  errorRate: number;
+  averageResponseTime: number;
+  systemLoad: number;
+  cpuUsage: number;
+  memoryUsage: number;
 }
 
 export interface SessionValidationResult {
   valid: boolean;
   userId?: string;
-  error?: string;
+  sessionId?: string;
+  expiresAt?: Date;
 }
 
 export interface UberCoreSystem {
-  initializeAutomaticSeo: () => boolean;
-  checkSubsystemHealth: () => Array<{name: string; status: string; health: number}>;
-  getSystemStatus: () => {
-    operational: boolean;
-    isActive: boolean;
-    services: {
-      auth: string;
-      analytics: string;
-      ai: string;
-      wallet: string;
-      seo: string;
-    };
-    queueLength: number;
-    processing: boolean;
-    lastUpdate: Date;
-  };
-  shutdown: () => Promise<boolean>;
+  initialize(): Promise<boolean>;
+  shutdown(): Promise<void>;
+  checkSystemStatus(): SystemStatus;
+  checkSystemIntegrity(): SystemIntegrityResult;
+  getSystemHealth(): SystemHealthMetrics;
+  validateUserSession(token: string): SessionValidationResult;
+}
+
+export interface RecommendedAction {
+  id: string; // Add missing property
+  title: string;
+  description: string;
+  action: string; // Add missing property
+  priority: 'high' | 'medium' | 'low';
+  target?: string;
+  icon?: string;
+}
+
+export interface OxumSystem {
+  checkSystemStatus(): Promise<any>; // Add missing method
+  boostAllocationEigen(): Promise<any>; // Add missing method
+  calculateBoostScore(): Promise<any>; // Add missing method
+  configure(): Promise<any>; // Add missing method
 }

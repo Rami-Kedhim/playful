@@ -3,7 +3,7 @@ import { SystemStatus, SystemIntegrityResult, SystemHealthMetrics, SessionValida
 import { orus } from './Orus';
 import { hermes } from './Hermes';
 import { lucieAI } from './Lucie';
-import { uberWallet } from './UberWallet';
+import { UberWallet } from './UberWallet'; // Fixed import
 import { Pulse } from './Pulse';
 import { automaticSeoService } from '@/services/seo/AutomaticSeoService';
 
@@ -21,9 +21,10 @@ class UberCore {
       await hermes.initialize();
       
       // Initialize Lucie AI system
-      lucieAI.getSystemStatus();
+      lucieAI.initialize(); // Fixed method call
       
       // Initialize UberWallet
+      const uberWallet = new UberWallet(); // Create instance
       uberWallet.getBalance('demo-user');
       
       this.operational = true;
@@ -50,13 +51,11 @@ class UberCore {
   }
 
   checkSystemStatus(): SystemStatus {
-    const messageLength = 'Hello, UberCore!'.length;
     const latency = Math.random() * 100;
     const uptime = Date.now(); // Using Date.now() instead of process.uptime()
     
     return {
       operational: this.operational,
-      messageLength,
       latency,
       uptime,
       services: {
@@ -69,11 +68,11 @@ class UberCore {
   }
 
   checkSystemIntegrity(): SystemIntegrityResult {
-    const isValid = Math.random() > 0.1;
-    const message = isValid ? 'System integrity check passed.' : 'System integrity check failed.';
+    const valid = Math.random() > 0.1; // Changed from isValid
+    const message = valid ? 'System integrity check passed.' : 'System integrity check failed.';
     
     return {
-      isValid,
+      valid, // Changed from isValid
       message,
       details: {
         database: 'ok',
@@ -84,7 +83,6 @@ class UberCore {
   }
 
   getSystemHealth(): SystemHealthMetrics {
-    const load = Math.random() * 100;
     const memory = Math.random() * 100;
     const latency = Math.random() * 50;
     const errorRate = Math.random() * 5;
@@ -94,7 +92,6 @@ class UberCore {
     const memoryUsage = Math.random() * 100;
     
     return {
-      load,
       memory,
       latency,
       errorRate,
@@ -106,7 +103,14 @@ class UberCore {
   }
 
   validateUserSession(token: string): SessionValidationResult {
-    return orus.validateSession(token);
+    const orusResult = orus.validateSession(token);
+    // Ensure the result matches the expected type
+    return {
+      valid: orusResult.valid || false,
+      userId: orusResult.userId,
+      sessionId: orusResult.sessionId,
+      expiresAt: orusResult.expiresAt
+    };
   }
 }
 
@@ -170,20 +174,7 @@ export const uberCore = {
    * Add the shutdown method to the uberCore object
    */
   shutdown: async (): Promise<void> => {
-    try {
-      console.log('[UberCore] Shutting down UberCore system...');
-      
-      // Disconnect Hermes analytics
-      await hermes.disconnect();
-      
-      // Update the operational status
-      uberCoreInstance['operational'] = false;
-      
-      console.log('[UberCore] UberCore system shutdown complete.');
-      Pulse.track('system', 'core_shutdown');
-    } catch (error) {
-      console.error('[UberCore] Error shutting down UberCore system:', error);
-    }
+    await uberCoreInstance.shutdown();
   }
 };
 

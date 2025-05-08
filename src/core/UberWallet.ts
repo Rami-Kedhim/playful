@@ -1,113 +1,51 @@
 
+/**
+ * UberWallet system implementation
+ */
 export class UberWallet {
-  private balance: number = 0;
-  private initialized: boolean = false;
-  private transactions: Array<{
-    id: string;
-    type: 'deposit' | 'withdrawal' | 'transfer';
-    amount: number;
-    timestamp: Date;
-    from?: string;
-    to?: string;
-  }> = [];
+  private balances: Map<string, number> = new Map();
 
   constructor() {
-    this.balance = 0;
-    this.initialized = false;
+    // Initialize with some sample balances for testing
+    this.balances.set('demo-user', 1000);
   }
 
-  public async initialize(initialBalance: number): Promise<boolean> {
-    if (this.initialized) {
-      return true;
-    }
+  getBalance(userId: string): number {
+    return this.balances.get(userId) || 0;
+  }
+
+  deposit(userId: string, amount: number): boolean {
+    if (amount <= 0) return false;
     
-    this.balance = initialBalance;
-    this.initialized = true;
-    
-    this.transactions.push({
-      id: `init-${Date.now()}`,
-      type: 'deposit',
-      amount: initialBalance,
-      timestamp: new Date()
-    });
-    
+    const currentBalance = this.getBalance(userId);
+    this.balances.set(userId, currentBalance + amount);
     return true;
   }
 
-  public isInitialized(): boolean {
-    return this.initialized;
-  }
-
-  public async getBalance(): Promise<number> {
-    return this.balance;
-  }
-
-  public async transfer(destination: string, amount: number): Promise<boolean> {
-    if (amount <= 0) {
-      throw new Error('Transfer amount must be positive');
-    }
+  withdraw(userId: string, amount: number): boolean {
+    if (amount <= 0) return false;
     
-    if (amount > this.balance) {
-      throw new Error('Insufficient funds for transfer');
-    }
+    const currentBalance = this.getBalance(userId);
+    if (currentBalance < amount) return false;
     
-    this.balance -= amount;
-    
-    this.transactions.push({
-      id: `transfer-${Date.now()}`,
-      type: 'transfer',
-      amount: amount,
-      timestamp: new Date(),
-      to: destination
-    });
-    
+    this.balances.set(userId, currentBalance - amount);
     return true;
   }
 
-  public async deposit(amount: number): Promise<boolean> {
-    if (amount <= 0) {
-      throw new Error('Deposit amount must be positive');
-    }
+  transfer(fromUserId: string, toUserId: string, amount: number): boolean {
+    if (amount <= 0) return false;
     
-    this.balance += amount;
+    const fromBalance = this.getBalance(fromUserId);
+    if (fromBalance < amount) return false;
     
-    this.transactions.push({
-      id: `deposit-${Date.now()}`,
-      type: 'deposit',
-      amount: amount,
-      timestamp: new Date()
-    });
+    this.balances.set(fromUserId, fromBalance - amount);
+    const toBalance = this.getBalance(toUserId);
+    this.balances.set(toUserId, toBalance + amount);
     
-    return true;
-  }
-
-  public async withdraw(amount: number): Promise<boolean> {
-    if (amount <= 0) {
-      throw new Error('Withdrawal amount must be positive');
-    }
-    
-    if (amount > this.balance) {
-      throw new Error('Insufficient funds for withdrawal');
-    }
-    
-    this.balance -= amount;
-    
-    this.transactions.push({
-      id: `withdraw-${Date.now()}`,
-      type: 'withdrawal',
-      amount: amount,
-      timestamp: new Date()
-    });
-    
-    return true;
-  }
-
-  public async getTransactionHistory(): Promise<any[]> {
-    return [...this.transactions];
-  }
-
-  public async shutdown(): Promise<boolean> {
-    console.log('UberWallet system shutting down...');
     return true;
   }
 }
+
+// Export a singleton instance for easy access
+export const uberWallet = new UberWallet();
+export default uberWallet;

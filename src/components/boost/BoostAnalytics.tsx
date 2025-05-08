@@ -1,72 +1,62 @@
 
 import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BarChart, TrendingUp } from 'lucide-react';
 
 interface BoostAnalyticsProps {
   analytics: {
-    views?: number;
-    impressions?: {
-      value: number;
-      change?: number;
-      today?: number;
-      withBoost?: number;
-    };
-    interactions?: {
-      value: number;
-      change?: number;
-      today?: number;
-      withBoost?: number;
-    };
-    totalBoosts?: number;
-    activeBoosts?: number;
-    averageBoostScore?: number;
+    additionalViews?: number;
+    engagementIncrease?: number;
+    rankingPosition?: number;
   };
+  loading?: boolean;
 }
 
-const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({ analytics }) => {
+const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({ analytics, loading = false }) => {
+  const { additionalViews, engagementIncrease, rankingPosition } = analytics;
+  
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Analytics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center p-6">
+            Loading analytics...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-medium">Boost Analytics</h3>
-      
-      <div className="grid grid-cols-2 gap-3">
-        <div className="bg-muted rounded-md p-4">
-          <div className="text-sm text-muted-foreground">Impressions</div>
-          <div className="text-2xl font-bold mt-1">
-            {analytics.impressions?.value || 0}
+    <Card>
+      <CardHeader>
+        <CardTitle>Boost Performance</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 bg-primary/10 rounded-md flex flex-col items-center">
+            <TrendingUp className="h-8 w-8 mb-2 text-primary" />
+            <div className="text-2xl font-bold">{additionalViews || 0}</div>
+            <div className="text-sm text-muted-foreground">Additional Views</div>
           </div>
-          {analytics.impressions?.change !== undefined && (
-            <div className={`text-xs ${analytics.impressions.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-              {analytics.impressions.change >= 0 ? '+' : ''}{analytics.impressions.change}%
-            </div>
-          )}
-        </div>
-        
-        <div className="bg-muted rounded-md p-4">
-          <div className="text-sm text-muted-foreground">Interactions</div>
-          <div className="text-2xl font-bold mt-1">
-            {analytics.interactions?.value || 0}
+          
+          <div className="p-4 bg-primary/10 rounded-md flex flex-col items-center">
+            <BarChart className="h-8 w-8 mb-2 text-primary" />
+            <div className="text-2xl font-bold">{engagementIncrease ? `${engagementIncrease}%` : '0%'}</div>
+            <div className="text-sm text-muted-foreground">Engagement Increase</div>
           </div>
-          {analytics.interactions?.change !== undefined && (
-            <div className={`text-xs ${analytics.interactions.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-              {analytics.interactions.change >= 0 ? '+' : ''}{analytics.interactions.change}%
-            </div>
-          )}
-        </div>
-      </div>
-      
-      <div className="bg-muted/50 rounded-md p-4">
-        <div className="text-sm font-medium">Boost Impact</div>
-        <div className="mt-2 text-sm">
-          <div className="flex justify-between">
-            <span>Active Boosts:</span>
-            <span className="font-medium">{analytics.activeBoosts || 0}</span>
-          </div>
-          <div className="flex justify-between mt-1">
-            <span>Total Boosts:</span>
-            <span className="font-medium">{analytics.totalBoosts || 0}</span>
+          
+          <div className="p-4 bg-primary/10 rounded-md flex flex-col items-center">
+            <div className="h-8 w-8 mb-2 text-primary font-bold text-xl flex items-center justify-center">#</div>
+            <div className="text-2xl font-bold">{rankingPosition || 'N/A'}</div>
+            <div className="text-sm text-muted-foreground">Ranking Position</div>
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -16,7 +16,7 @@ export class LucieOrchestratorAdapter {
    */
   async generateContent(prompt: string, options: Record<string, any> = {}): Promise<string> {
     try {
-      // Generate content using the Lucie system
+      // Use generateContent from lucieAI
       const result: GenerateContentResult = await lucieAI.generateContent(prompt, options);
       
       // Extract the content string from the result
@@ -35,11 +35,10 @@ export class LucieOrchestratorAdapter {
       const params: ModerateContentParams = {
         content,
         contentType,
-        context: {}
       };
       
       const result: ModerateContentResult = await lucieAI.moderateContent(params);
-      return result.safe;
+      return result.isSafe; // Changed from 'safe' to 'isSafe'
     } catch (error) {
       console.error('Error checking content safety:', error);
       return false; // Default to unsafe if error occurs
@@ -54,14 +53,13 @@ export class LucieOrchestratorAdapter {
       const params: ModerateContentParams = {
         content,
         contentType,
-        context: {}
       };
       
       const result = await lucieAI.moderateContent(params);
       
       // Create a structured response with proper property access
       return {
-        safe: result.safe,
+        isSafe: result.isSafe, // Changed from 'safe' to 'isSafe'
         score: result.score,
         issues: result.issues || [],
         blockedCategories: result.blockedCategories || []
@@ -69,7 +67,7 @@ export class LucieOrchestratorAdapter {
     } catch (error) {
       console.error('Error in content moderation:', error);
       return {
-        safe: false,
+        isSafe: false, // Changed from 'safe' to 'isSafe'
         score: 1.0,
         issues: ['Error processing moderation request'],
         blockedCategories: []
@@ -87,8 +85,7 @@ export class LucieOrchestratorAdapter {
       console.error('Error analyzing sentiment:', error);
       return {
         score: 0,
-        sentiment: 'neutral',
-        confidence: 0
+        sentiment: 'neutral'
       };
     }
   }

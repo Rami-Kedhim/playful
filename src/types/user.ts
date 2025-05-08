@@ -13,7 +13,6 @@ export interface User {
   name?: string;
   email: string;
   role: UserRole;
-  // Add missing properties
   username?: string;
   avatarUrl?: string;
   profileImageUrl?: string;
@@ -29,6 +28,10 @@ export interface User {
       theme?: string;
     };
     username?: string;
+    region?: string; // Add missing property
+    lastAiInteraction?: string; // Add missing property
+    aiConversationCount?: number; // Add missing property
+    verification_request?: any; // Add missing property
   };
 }
 
@@ -41,11 +44,13 @@ export interface UserProfile {
   avatar?: string;
   createdAt: Date;
   updatedAt: Date;
-  // Add missing properties
   phone?: string;
   website?: string;
   verification_level?: string;
   rates?: any;
+  services?: string[]; // Add missing property
+  languages?: string[]; // Add missing property
+  availability?: string[]; // Add missing property
 }
 
 export interface LoginCredentials {
@@ -57,4 +62,5 @@ export interface RegisterCredentials {
   email: string;
   password: string;
   username?: string;
+  confirmPassword?: string; // Add missing property
 }

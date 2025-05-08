@@ -4,20 +4,20 @@ import MainLayout from '@/layouts/MainLayout';
 
 interface LivecamDetailLayoutProps {
   children: React.ReactNode;
-  containerClass?: string;
+  containerClassName?: string; // Renamed to match MainLayout props
   hideNavbar?: boolean;
   hideFooter?: boolean;
 }
 
 const LivecamDetailLayout: React.FC<LivecamDetailLayoutProps> = ({
   children,
-  containerClass,
+  containerClassName, // Renamed to match MainLayout props
   hideNavbar = false,
   hideFooter = false
 }) => {
   return (
     <MainLayout 
-      containerClassName={containerClass} 
+      containerClassName={containerClassName} 
       showNavigationBar={!hideNavbar} 
       showFooter={!hideFooter}
       showSidebar={false}

@@ -22,6 +22,11 @@ class LucieAI implements LucieAISystem {
     console.log(`Lucie: Generating text for prompt: ${prompt.substring(0, 50)}...`);
     return `Generated response for: ${prompt.substring(0, 30)}...`;
   }
+
+  // Add the missing method required by the interface
+  async generateResponse(input: string): Promise<string> {
+    return this.generateText(input);
+  }
   
   async moderateContent(params: ModerateContentParams): Promise<ModerateContentResult> {
     console.log(`Lucie: Moderating content of length ${params.content.length}`);
@@ -32,7 +37,7 @@ class LucieAI implements LucieAISystem {
       !params.content.toLowerCase().includes('offensive');
     
     return {
-      safe: isSafe,
+      isSafe: isSafe, // Changed from 'safe' to 'isSafe'
       score: isSafe ? 0.2 : 0.8,
       issues: isSafe ? [] : ['Content too long or contains inappropriate language'],
       blockedCategories: isSafe ? [] : ['inappropriate_content']
@@ -44,7 +49,6 @@ class LucieAI implements LucieAISystem {
     
     return {
       content: text,
-      moderated: false,
       originalLength: prompt.length,
       moderatedLength: text.length,
       warnings: []
@@ -66,8 +70,7 @@ class LucieAI implements LucieAISystem {
     
     return {
       score,
-      sentiment,
-      confidence: 0.75
+      sentiment
     };
   }
   

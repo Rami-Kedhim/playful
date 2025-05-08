@@ -1,5 +1,5 @@
 
-class AutomaticSeoService {
+export class AutomaticSeoService {
   private status = {
     active: false,
     lastRun: new Date(),
@@ -37,6 +37,13 @@ class AutomaticSeoService {
       this.status.processing = false;
       return false;
     }
+  }
+
+  public async startAutoMonitoring(interval: number): Promise<void> {
+    // Start automatic monitoring with the specified interval
+    setInterval(async () => {
+      await this.scanContent();
+    }, interval);
   }
 
   public async shutdown(): Promise<boolean> {
