@@ -1,57 +1,33 @@
 
-import React, { ReactNode } from 'react';
-import MainLayout from '@/layouts/MainLayout';
+import React from 'react';
+import { MainLayout } from '@/layouts';
 
-export interface LivecamDetailLayoutProps {
-  children: ReactNode;
-  title?: ReactNode;
-  mainContent: ReactNode;
-  sidebar: ReactNode;
-  chatContent: ReactNode;
-  livecamId?: string;
-  username?: string;
-  isOnline?: boolean;
-  viewerCount?: number;
+interface LivecamDetailLayoutProps {
+  children: React.ReactNode;
+  containerClassName?: string;
+  fullWidth?: boolean;
+  showNavigation?: boolean;
+  hideNavbar?: boolean;
+  hideFooter?: boolean;
 }
 
 const LivecamDetailLayout: React.FC<LivecamDetailLayoutProps> = ({
   children,
-  title,
-  mainContent,
-  sidebar,
-  chatContent,
-  livecamId,
-  username,
-  isOnline,
-  viewerCount
+  containerClassName = '',
+  fullWidth = false,
+  showNavigation = true,
+  hideNavbar = false,
+  hideFooter = false
 }) => {
   return (
-    <MainLayout
-      containerClass="container mx-auto px-0 lg:px-4 py-0"
-      fullWidth={true}
-      showNavigation={false}
-      hideNavbar={false}
-      hideFooter={false}
+    <MainLayout 
+      containerClassName={containerClassName}
+      fullWidth={fullWidth}
+      showNavigation={showNavigation}
+      hideNavbar={hideNavbar}
+      hideFooter={hideFooter}
     >
-      <div>
-        {title && <div className="mb-4">{title}</div>}
-        
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div className="lg:col-span-8">
-            {mainContent}
-          </div>
-          
-          <div className="lg:col-span-4 space-y-4">
-            {sidebar}
-            
-            <div className="rounded-lg overflow-hidden">
-              {chatContent}
-            </div>
-          </div>
-        </div>
-        
-        {children}
-      </div>
+      {children}
     </MainLayout>
   );
 };

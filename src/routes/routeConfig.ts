@@ -2,6 +2,7 @@
 export const AppPaths = {
   HOME: '/',
   ESCORT_SEARCH: '/escorts',
+  ESCORTS: '/escorts', // Adding this for backward compatibility
   ESCORT_DETAIL: '/escort/:id',
   CREATORS: '/creators',
   CREATOR_DETAIL: '/creator/:id',
@@ -10,6 +11,7 @@ export const AppPaths = {
   MESSAGES: '/messages',
   WALLET: '/wallet',
   PROFILE: '/profile',
+  USER_PROFILE: '/profile', // Adding this for backward compatibility
   SETTINGS: '/settings',
   VERIFICATION: '/verification',
   PULSE_BOOST: '/pulse-boost',
@@ -34,6 +36,7 @@ export const AppPaths = {
   DASHBOARD: '/dashboard',
   GUIDELINES: '/guidelines',
   FAVORITES: '/favorites',
+  BOOKINGS: '/bookings' // Adding this for backward compatibility
 }
 
 // Export AppPaths as APP_PATHS as well for backward compatibility

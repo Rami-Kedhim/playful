@@ -1,3 +1,4 @@
+
 export interface BoostPackage {
   id: string;
   name: string;
@@ -6,15 +7,23 @@ export interface BoostPackage {
   price_ubx: number;
   duration: string;
   durationMinutes: number;
+  features: string[];
   visibility: string;
   visibility_increase: number;
-  features: string[];
+  color?: string;
+  badgeColor?: string;
+  boost_power?: number;
+  boostMultiplier?: number;
+  isMostPopular?: boolean;
+  isRecommended?: boolean;
 }
 
 export interface BoostPurchaseResult {
   success: boolean;
-  boostId: string;
+  boostId?: string;
+  error?: string | null;
   message?: string;
+  transactionId?: string;
 }
 
 export interface PulseBoost {
@@ -28,11 +37,16 @@ export interface PulseBoost {
   visibility: string;
   visibility_increase: number;
   features: string[];
+  color?: string;
+  badgeColor?: string;
+  boost_power?: number;
+  boostMultiplier?: number;
   profileId?: string;
   packageId?: string;
   startTime?: string;
   endTime?: string;
   status?: string;
+  isMostPopular?: boolean;
 }
 
 export interface BoostStatus {
@@ -40,6 +54,14 @@ export interface BoostStatus {
   packageId?: string;
   expiresAt?: Date;
   timeRemaining: string;
+}
+
+export interface EnhancedBoostStatus extends BoostStatus {
+  packageName?: string;
+  startedAt?: Date;
+  progress?: number;
+  boostPackage?: BoostPackage;
+  remainingTime?: string;
 }
 
 export interface UserProfile {
@@ -66,6 +88,40 @@ export interface UserProfile {
 export interface UserCredentials {
   email: string;
   password: string;
+}
+
+export interface BoostAnalytics {
+  totalBoosts: number;
+  activeBoosts: number;
+  averageBoostScore: number;
+  boostHistory: Array<{
+    date: Date;
+    score: number;
+  }>;
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  views?: number;
+  impressions?: {
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+    increase?: number;
+    change?: number;
+    value?: number;
+  };
+  interactions?: {
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+    increase?: number;
+    change?: number;
+    value?: number;
+  };
 }
 
 export const PULSE_BOOSTS: PulseBoost[] = [
