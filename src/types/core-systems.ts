@@ -5,7 +5,7 @@
 export interface LucieAISystem {
   initialize(): Promise<boolean>;
   generateText(prompt: string): Promise<string>;
-  moderateContent(content: ModerateContentParams): Promise<ModerateContentResult>;
+  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
   getSystemStatus(): { operational: boolean; modules: Record<string, string> };
   configure(options: Record<string, any>): void;
   analyzeSentiment(text: string): Promise<SentimentAnalysisResult>;
@@ -52,6 +52,9 @@ export interface RecommendedAction {
   description: string;
   priority: 'low' | 'medium' | 'high';
   actionUrl?: string;
+  destination?: string;
+  action?: string;
+  reason?: string;
 }
 
 // Hermes Analytics System
@@ -62,6 +65,7 @@ export interface HermesSystem {
   calculateConversionRate(stats: any): number;
   getSystemStatus(): { operational: boolean; services: Record<string, string> };
   configure(options: Record<string, any>): void;
+  routeFlow(from: string, to: string, metadata?: Record<string, any>): void;
 }
 
 // Oxum System for blockchain and payments

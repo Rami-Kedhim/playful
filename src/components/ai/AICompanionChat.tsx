@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { lucieAI } from '@/core/Lucie';
 import { AIMessage } from '@/types/ai-messages';
 import { AICompanionChatProps } from './companion-chat/AICompanionChatProps';
+import { ModerateContentParams } from '@/types/core-systems';
 
 const AICompanionChat: React.FC<AICompanionChatProps> = ({
   companionId,
@@ -51,10 +52,12 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
       setMessage('');
       
       // Moderate content
-      const moderationResult = await lucieAI.moderateContent({
+      const moderationParams: ModerateContentParams = {
         content: message,
         contentType: 'text'
-      });
+      };
+      
+      const moderationResult = await lucieAI.moderateContent(moderationParams);
       
       if (!moderationResult.safe) {
         // Handle filtered content

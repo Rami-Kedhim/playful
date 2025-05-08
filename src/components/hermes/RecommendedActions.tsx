@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { CircleAlert, CheckCircle, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import useHermesFlow, { RecommendedAction, UseHermesFlowOptions } from '@/hooks/useHermesFlow';
+import useHermesFlow, { UseHermesFlowOptions } from '@/hooks/useHermesFlow';
+import { RecommendedAction } from '@/types/core-systems';
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface RecommendedActionsProps {
@@ -90,7 +91,7 @@ export const RecommendedActions: React.FC<RecommendedActionsProps> = ({ timeRang
           {action.title}
         </CardTitle>
         <CardDescription>
-          Recommended action to improve your metrics
+          {action.reason || "Recommended action to improve your metrics"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -98,11 +99,11 @@ export const RecommendedActions: React.FC<RecommendedActionsProps> = ({ timeRang
           {action.description}
         </p>
       </CardContent>
-      {action.actionUrl && (
+      {(action.actionUrl || action.destination) && (
         <CardFooter>
           <Button asChild onClick={handleActionClick}>
-            <Link to={action.actionUrl}>
-              Take Action
+            <Link to={action.actionUrl || action.destination || "#"}>
+              {action.action || "Take Action"}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

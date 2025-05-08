@@ -9,11 +9,13 @@ interface RatesTabProps {
 
 const RatesTab: React.FC<RatesTabProps> = ({ escort }) => {
   const rates = escort.rates || {};
+  
+  // Check if rates has incall and outcall properties
   const incallRates = rates.incall || {};
   const outcallRates = rates.outcall || {};
   
-  const hasIncall = Object.keys(incallRates).length > 0;
-  const hasOutcall = Object.keys(outcallRates).length > 0;
+  const hasIncall = Object.keys(rates.incall || {}).length > 0;
+  const hasOutcall = Object.keys(rates.outcall || {}).length > 0;
   
   return (
     <div className="space-y-6">
@@ -31,7 +33,7 @@ const RatesTab: React.FC<RatesTabProps> = ({ escort }) => {
                   {Object.entries(incallRates).map(([duration, price]) => (
                     <div key={duration} className="flex justify-between">
                       <span className="font-medium">{duration}</span>
-                      <span className="text-muted-foreground">{price}</span>
+                      <span className="text-muted-foreground">{String(price)}</span>
                     </div>
                   ))}
                 </div>
@@ -49,7 +51,7 @@ const RatesTab: React.FC<RatesTabProps> = ({ escort }) => {
                   {Object.entries(outcallRates).map(([duration, price]) => (
                     <div key={duration} className="flex justify-between">
                       <span className="font-medium">{duration}</span>
-                      <span className="text-muted-foreground">{price}</span>
+                      <span className="text-muted-foreground">{String(price)}</span>
                     </div>
                   ))}
                 </div>

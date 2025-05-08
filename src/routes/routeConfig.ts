@@ -5,10 +5,10 @@ export interface RouteConfig {
   path: string;
   label: string;
   title: string;
-  icon: ElementType; // Updated to ElementType for React components
+  icon: ElementType;
   requireAuth?: boolean;
   roles?: string[];
-  category?: string; // Added category property
+  category?: string;
 }
 
 export interface AppPaths {
@@ -23,6 +23,7 @@ export interface AppPaths {
   SETTINGS: string;
   AUTH: string;
   PROFILE: string;
+  USER_PROFILE: string;
   WALLET: string;
   ADMIN: string;
   DASHBOARD: string;
@@ -32,7 +33,7 @@ export interface AppPaths {
   FAVORITES: string;
   MESSAGES: string;
   PULSE_BOOST: string;
-  GUIDELINES: string; // Added GUIDELINES route
+  GUIDELINES: string;
   SEO: string;
   SAFETY: string;
   TERMS: string;
@@ -40,6 +41,8 @@ export interface AppPaths {
   CONTACT: string;
   METAVERSE: string;
   BRAIN_HUB: string;
+  AI_COMPANION: string;
+  COMPLIANCE: string;
 }
 
 export const APP_PATHS: AppPaths = {
@@ -54,6 +57,7 @@ export const APP_PATHS: AppPaths = {
   SETTINGS: '/settings',
   AUTH: '/auth',
   PROFILE: '/profile',
+  USER_PROFILE: '/user-profile',
   WALLET: '/wallet',
   ADMIN: '/admin',
   DASHBOARD: '/dashboard',
@@ -63,7 +67,7 @@ export const APP_PATHS: AppPaths = {
   FAVORITES: '/favorites',
   MESSAGES: '/messages',
   PULSE_BOOST: '/boost',
-  GUIDELINES: '/guidelines', // Added GUIDELINES route
+  GUIDELINES: '/guidelines',
   SEO: '/seo',
   SAFETY: '/safety',
   TERMS: '/terms',
@@ -71,6 +75,8 @@ export const APP_PATHS: AppPaths = {
   CONTACT: '/contact',
   METAVERSE: '/metaverse',
   BRAIN_HUB: '/brain-hub',
+  AI_COMPANION: '/ai-companions',
+  COMPLIANCE: '/compliance'
 };
 
 // Export both the interface and the constant

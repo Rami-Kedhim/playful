@@ -28,35 +28,35 @@ const AboutTab: React.FC<AboutTabProps> = ({ escort }) => {
             {escort.stats.height && (
               <div>
                 <p className="text-sm font-medium">Height</p>
-                <p className="text-muted-foreground">{escort.stats.height}</p>
+                <p className="text-muted-foreground">{String(escort.stats.height)}</p>
               </div>
             )}
             
             {escort.stats.weight && (
               <div>
                 <p className="text-sm font-medium">Weight</p>
-                <p className="text-muted-foreground">{escort.stats.weight}</p>
+                <p className="text-muted-foreground">{String(escort.stats.weight)}</p>
               </div>
             )}
             
             {escort.stats.bust && (
               <div>
                 <p className="text-sm font-medium">Bust</p>
-                <p className="text-muted-foreground">{escort.stats.bust}</p>
+                <p className="text-muted-foreground">{String(escort.stats.bust)}</p>
               </div>
             )}
             
             {escort.stats.waist && (
               <div>
                 <p className="text-sm font-medium">Waist</p>
-                <p className="text-muted-foreground">{escort.stats.waist}</p>
+                <p className="text-muted-foreground">{String(escort.stats.waist)}</p>
               </div>
             )}
             
             {escort.stats.hips && (
               <div>
                 <p className="text-sm font-medium">Hips</p>
-                <p className="text-muted-foreground">{escort.stats.hips}</p>
+                <p className="text-muted-foreground">{String(escort.stats.hips)}</p>
               </div>
             )}
           </div>

@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { lucieAI } from '@/core/Lucie';
+import { ModerateContentParams } from '@/types/core-systems';
 
 const LucieAIAssistant: React.FC = () => {
   const [message, setMessage] = useState('');
@@ -16,10 +17,12 @@ const LucieAIAssistant: React.FC = () => {
     
     try {
       // Check content moderation
-      const moderationResult = await lucieAI.moderateContent({
+      const moderationParams: ModerateContentParams = {
         content: message,
         contentType: 'text'
-      });
+      };
+      
+      const moderationResult = await lucieAI.moderateContent(moderationParams);
       
       // Update moderation state
       setIsModerated(moderationResult.safe);
