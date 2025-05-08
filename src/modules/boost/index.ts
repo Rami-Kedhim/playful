@@ -1,3 +1,4 @@
+
 // Export boost-related types and functions without duplicates
 export * from '@/types/pulse-boost';
 
@@ -10,8 +11,8 @@ export * from '@/hooks/boost/usePulseBoostAdapter';
 
 // Explicitly export single functions to avoid ambiguity
 export { calculateBoostScore } from '@/utils/boost/boostCalculation';
-export { optimizeBoostPerformance } from '@/utils/boost/boostPerformance';
-export { evaluateBoostValue } from '@/utils/boost/boostValue';
+export { optimizeBoostPerformance } from '@/utils/boost/index';
+export { evaluateBoostValue } from '@/utils/boost/index';
 
 // Export components
 export { default as BoostAnalytics } from '@/components/boost/BoostAnalytics';

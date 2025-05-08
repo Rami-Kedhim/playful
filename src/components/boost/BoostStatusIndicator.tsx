@@ -1,61 +1,66 @@
 
 import React from 'react';
-import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Zap, Clock } from "lucide-react";
-import { BoostStatus } from "@/types/boost";
+import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { EnhancedBoostStatus } from '@/types/pulse-boost';
+import { Zap, Clock } from 'lucide-react';
 
 interface BoostStatusIndicatorProps {
-  status: BoostStatus;
-  size?: 'sm' | 'md' | 'lg';
-  showTooltip?: boolean;
-  className?: string;
+  status: EnhancedBoostStatus;
 }
 
-const BoostStatusIndicator: React.FC<BoostStatusIndicatorProps> = ({
-  status,
-  size = 'md',
-  showTooltip = true,
-  className = ''
-}) => {
-  if (!status.isActive) return null;
-
-  const sizeClasses = {
-    sm: 'text-xs py-0.5 px-1.5',
-    md: 'text-sm py-1 px-2',
-    lg: 'py-1 px-3'
-  };
-  
-  const badgeContent = (
-    <Badge 
-      variant="outline" 
-      className={`gap-1 bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20 border-yellow-500/20 ${sizeClasses[size]} ${className}`}
-    >
-      <Zap className={`${size === 'sm' ? 'h-2.5 w-2.5' : size === 'md' ? 'h-3 w-3' : 'h-4 w-4'} fill-current`} />
-      Boosted
-    </Badge>
-  );
-  
-  if (!showTooltip) return badgeContent;
+const BoostStatusIndicator: React.FC<BoostStatusIndicatorProps> = ({ status }) => {
+  if (!status.isActive) {
+    return (
+      <Card className="bg-muted/30">
+        <CardContent className="p-4 flex items-center gap-3">
+          <Badge variant="outline" className="bg-muted/50">
+            Not Boosted
+          </Badge>
+          <span className="text-sm text-muted-foreground">Your profile is not currently boosted</span>
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          {badgeContent}
-        </TooltipTrigger>
-        <TooltipContent className="flex flex-col gap-1">
-          <p className="font-medium">Profile is boosted</p>
-          {status.packageName && <p className="text-xs">{status.packageName}</p>}
-          {status.timeRemaining && (
-            <div className="flex items-center text-xs gap-1 mt-1">
-              <Clock className="h-3 w-3" />
-              <span>{status.timeRemaining} remaining</span>
-            </div>
-          )}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Card className="border-primary/20 bg-primary/5">
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Badge variant="default" className="bg-gradient-to-r from-primary to-purple-600">
+              <Zap className="mr-1 h-3 w-3" />
+              Boost Active
+            </Badge>
+            <span className="text-sm font-medium">{status.packageName}</span>
+          </div>
+          
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Clock className="mr-1 h-3 w-3" />
+            {status.timeRemaining} remaining
+          </div>
+        </div>
+        
+        <div className="space-y-1">
+          <div className="flex justify-between text-xs">
+            <span>Progress</span>
+            <span>{Math.round(status.progress || 0)}%</span>
+          </div>
+          <Progress value={status.progress} className="h-2" />
+        </div>
+        
+        <div className="text-xs text-muted-foreground">
+          Started: {status.startedAt ? 
+            new Date(status.startedAt).toLocaleString(undefined, {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }) : 'N/A'}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

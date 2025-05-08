@@ -1,105 +1,76 @@
 
-import { UserRole } from '@/types/pulse-boost';
+import { UserRole } from '@/types/user';
+import { UserCredentials, UserProfile } from '@/types/pulse-boost';
 
-export interface User {
-  id: string;
-  email: string;
-  username: string;
-  role: UserRole;
-  ubxBalance: number;
-  isVerified: boolean;
-}
-
-export interface AuthResult {
-  success: boolean;
-  user?: User;
-  message?: string;
-}
-
-class AuthService {
-  private currentUser: User | null = null;
+// Mock authentication service
+export const login = async (credentials: UserCredentials) => {
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 800));
   
-  constructor() {
-    // Mock initialization
-    this.currentUser = {
-      id: 'user-123',
-      email: 'user@example.com',
-      username: 'exampleUser',
-      role: 'USER',
-      ubxBalance: 1000,
-      isVerified: true
-    };
-  }
-  
-  async login(email: string, password: string): Promise<AuthResult> {
-    // Mock implementation
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    if (email && password) {
-      this.currentUser = {
-        id: 'user-123',
-        email,
-        username: email.split('@')[0],
-        role: 'USER',
-        ubxBalance: 1000,
-        isVerified: true
-      };
-      
-      return {
-        success: true,
-        user: this.currentUser
-      };
-    }
-    
+  // Simulate success for demo user
+  if (credentials.email === 'demo@example.com' && credentials.password === 'password') {
     return {
-      success: false,
-      message: 'Invalid credentials'
+      success: true,
+      user: {
+        id: 'user-1',
+        email: credentials.email,
+        name: 'Demo User',
+        role: UserRole.USER
+      }
     };
   }
   
-  async logout(): Promise<void> {
-    // Mock implementation
-    this.currentUser = null;
-  }
-  
-  async getCurrentUser(): Promise<User | null> {
-    return this.currentUser;
-  }
-  
-  isAuthenticated(): boolean {
-    return !!this.currentUser;
-  }
+  // Simulate failure
+  return {
+    success: false,
+    error: 'Invalid credentials'
+  };
+};
 
-  async validateToken(token: string): Promise<boolean> {
-    // Mock implementation
-    return token.startsWith('mock_token_');
-  }
-
-  async register(userData: Partial<User>): Promise<AuthResult> {
-    // Mock implementation
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    if (userData.email) {
-      this.currentUser = {
-        id: 'user-' + Date.now(),
-        email: userData.email,
-        username: userData.username || userData.email.split('@')[0],
-        role: 'USER',
-        ubxBalance: 0,
-        isVerified: false
-      };
-      
-      return {
-        success: true,
-        user: this.currentUser
-      };
+export const register = async (credentials: UserCredentials) => {
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  return {
+    success: true,
+    user: {
+      id: `user-${Date.now()}`,
+      email: credentials.email,
+      name: 'New User',
+      role: UserRole.USER
     }
-    
-    return {
-      success: false,
-      message: 'Invalid user data'
-    };
-  }
-}
+  };
+};
 
-export const authService = new AuthService();
+export const logout = async () => {
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 300));
+  return { success: true };
+};
+
+export const getCurrentUser = async () => {
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  // Simulate a logged-in user
+  return {
+    id: 'user-1',
+    email: 'demo@example.com',
+    name: 'Demo User',
+    role: UserRole.USER
+  };
+};
+
+export const updateUserProfile = async (userId: string, profileData: Partial<UserProfile>) => {
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 700));
+  
+  return {
+    success: true,
+    profile: {
+      ...profileData,
+      id: userId,
+      updatedAt: new Date()
+    }
+  };
+};

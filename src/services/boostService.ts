@@ -1,147 +1,90 @@
 
-import { BoostStatus, BoostEligibility, AnalyticsData, BoostPackage } from '@/types/boost';
+import { BoostPackage, BoostStatus, BoostPurchaseRequest, BoostPurchaseResult } from '@/types/pulse-boost';
+import { AnalyticsData } from '@/types/core-systems';
 
-export class BoostService {
-  async getBoostStatus(profileId: string): Promise<BoostStatus> {
-    // Mock data - simulate 30% chance of having an active boost
-    const isActive = Math.random() < 0.3;
-    
-    if (isActive) {
-      return {
-        isActive: true,
-        packageId: 'boost-package-1',
-        startedAt: new Date(Date.now() - 8 * 60 * 60 * 1000), // 8 hours ago
-        expiresAt: new Date(Date.now() + 16 * 60 * 60 * 1000), // 16 hours remaining
-        startTime: new Date(Date.now() - 8 * 60 * 60 * 1000),
-        endTime: new Date(Date.now() + 16 * 60 * 60 * 1000),
-        remainingTime: '16:00:00',
-        packageName: '24 Hour Boost',
-        progress: 33, // 33% complete
-        activeBoostId: `boost-${profileId}-${Date.now()}`
-      };
-    } else {
-      return {
-        isActive: false
-      };
+// Simulate API calls with mock data for development
+export const getBoostPackages = async (): Promise<BoostPackage[]> => {
+  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+  
+  return [
+    {
+      id: 'basic',
+      name: 'Basic Boost',
+      description: 'Increase your visibility for 24 hours',
+      price: 9.99,
+      price_ubx: 99,
+      duration: '24h',
+      durationMinutes: 1440,
+      features: ['Boosted in search results', '+20% profile views'],
+      visibility: 'Medium',
+      visibility_increase: 20,
+      color: '#3b82f6',
+      badgeColor: 'blue'
+    },
+    {
+      id: 'premium',
+      name: 'Premium Boost',
+      description: 'Maximum visibility for 3 days',
+      price: 24.99,
+      price_ubx: 249,
+      duration: '3d',
+      durationMinutes: 4320,
+      features: ['Top of search results', '+50% profile views', 'Featured on homepage'],
+      visibility: 'High',
+      visibility_increase: 50,
+      color: '#8b5cf6',
+      badgeColor: 'purple',
+      isMostPopular: true
     }
-  }
+  ];
+};
 
-  async getBoostAnalytics(profileId: string): Promise<AnalyticsData> {
-    // Mock data
+export const getAnalyticsData = async (profileId: string): Promise<AnalyticsData> => {
+  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+  
+  // Simulate analytics data
+  return {
+    impressions: Math.floor(Math.random() * 1000) + 200,
+    clicks: Math.floor(Math.random() * 100) + 20,
+    conversion: Math.random() * 10,
+    position: Math.floor(Math.random() * 10) + 1,
+    additionalViews: Math.floor(Math.random() * 200) + 50
+  };
+};
+
+export const purchaseBoost = async (request: BoostPurchaseRequest): Promise<BoostPurchaseResult> => {
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+  
+  // Simulate successful purchase
+  return {
+    success: true,
+    boostId: `boost-${Date.now()}`,
+    message: 'Boost purchase successful',
+    transactionId: `txn-${Date.now()}`
+  };
+};
+
+export const cancelBoost = async (boostId: string): Promise<boolean> => {
+  await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
+  return true; // Simulate successful cancellation
+};
+
+export const getBoostStatus = async (profileId: string): Promise<BoostStatus> => {
+  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+  
+  // Randomly return active or inactive boost for demo purposes
+  const isActive = Math.random() > 0.5;
+  
+  if (isActive) {
     return {
-      additionalViews: 145,
-      engagementIncrease: 32,
-      rankingPosition: 8,
-      views: 300,
-      impressions: {
-        today: 180,
-        yesterday: 150,
-        weeklyAverage: 145,
-        withBoost: 180
-      },
-      interactions: {
-        today: 45,
-        yesterday: 32,
-        weeklyAverage: 30,
-        withBoost: 45
-      },
-      rank: {
-        current: 8,
-        previous: 24,
-        change: 16
-      }
+      isActive: true,
+      packageId: Math.random() > 0.5 ? 'basic' : 'premium',
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+      startedAt: new Date()
+    };
+  } else {
+    return {
+      isActive: false
     };
   }
-
-  async getBoostEligibility(profileId: string): Promise<BoostEligibility> {
-    // Mock data - simulate 80% chance of being eligible
-    const isEligible = Math.random() < 0.8;
-    
-    if (isEligible) {
-      return {
-        isEligible: true,
-        remainingBoosts: 3,
-        maxBoostsPerDay: 3
-      };
-    } else {
-      return {
-        isEligible: false,
-        reason: 'You have used all your boosts for today',
-        reasons: ['Daily boost limit reached'],
-        nextEligibleTime: '12:00:00',
-        remainingBoosts: 0,
-        maxBoostsPerDay: 3
-      };
-    }
-  }
-
-  async getBoostPackages(): Promise<BoostPackage[]> {
-    // Mock data
-    return [
-      {
-        id: 'boost-1',
-        name: '24 Hour Boost',
-        description: 'Boost your profile for 24 hours',
-        duration: '24:00:00',
-        price: 29.99,
-        price_ubx: 300,
-        features: ['Top search results', 'Featured profile'],
-        isMostPopular: true,
-        visibility: 'high',
-        visibility_increase: 50,
-        boost_power: 50,
-        color: '#4CAF50',
-        badgeColor: '#388E3C',
-        durationMinutes: 1440,
-        isRecommended: false
-      },
-      {
-        id: 'boost-2',
-        name: 'Weekend Boost',
-        description: 'Boost your profile for the entire weekend',
-        duration: '72:00:00',
-        price: 69.99,
-        price_ubx: 700,
-        features: ['Top search results', 'Featured profile', 'Homepage feature'],
-        visibility: 'premium',
-        visibility_increase: 75,
-        boost_power: 75,
-        color: '#2196F3',
-        badgeColor: '#1976D2',
-        durationMinutes: 4320,
-        isRecommended: true
-      },
-      {
-        id: 'boost-3',
-        name: 'Full Week Spotlight',
-        description: 'Maximum visibility for a full week',
-        duration: '168:00:00',
-        price: 129.99,
-        price_ubx: 1200,
-        features: ['Top of all searches', 'Featured everywhere', 'Priority matching', 'Analytics dashboard'],
-        visibility: 'ultimate',
-        visibility_increase: 100,
-        boost_power: 100,
-        color: '#9C27B0',
-        badgeColor: '#7B1FA2',
-        durationMinutes: 10080,
-        isRecommended: false
-      }
-    ];
-  }
-
-  async activateBoost(profileId: string, packageId: string): Promise<{success: boolean, boostId?: string}> {
-    // Mock successful activation
-    return {
-      success: true,
-      boostId: `boost-${profileId}-${packageId}-${Date.now()}`
-    };
-  }
-
-  async cancelBoost(profileId: string, boostId?: string): Promise<boolean> {
-    // Mock successful cancellation
-    return true;
-  }
-}
-
-export const boostService = new BoostService();
+};

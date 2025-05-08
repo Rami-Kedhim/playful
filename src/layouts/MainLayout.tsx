@@ -12,10 +12,13 @@ export interface MainLayoutProps {
   showSidebar?: boolean;
   showFooter?: boolean;
   className?: string;
-  title?: string; // Add missing property
-  description?: string; // Add missing property
+  title?: string;
+  description?: string;
   containerClassName?: string;
   contentClassName?: string;
+  containerClass?: string; // For backward compatibility
+  hideNavbar?: boolean; // For backward compatibility
+  hideFooter?: boolean; // For backward compatibility
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({
@@ -28,13 +31,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   title,
   description,
   containerClassName = '',
-  contentClassName = ''
+  contentClassName = '',
+  containerClass = '', // For backward compatibility
+  hideNavbar = false, // For backward compatibility
+  hideFooter = false // For backward compatibility
 }) => {
+  // Convert legacy props to new format
+  const shouldShowNav = showNavigationBar && !hideNavbar;
+  const shouldShowFooter = showFooter && !hideFooter;
+  const finalContainerClassName = containerClassName || containerClass || '';
+
   return (
     <div className={`min-h-screen flex flex-col ${className}`}>
-      {showNavigationBar && <NavigationBar />}
+      {shouldShowNav && <NavigationBar />}
 
-      <div className={`flex flex-1 ${containerClassName}`}>
+      <div className={`flex flex-1 ${finalContainerClassName}`}>
         {showSidebar && <Sidebar />}
 
         <main className={`flex-1 p-4 md:p-6 ${contentClassName}`}>
@@ -51,7 +62,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         </main>
       </div>
 
-      {showFooter && <Footer />}
+      {shouldShowFooter && <Footer />}
     </div>
   );
 };

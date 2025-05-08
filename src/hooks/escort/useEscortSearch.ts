@@ -1,68 +1,47 @@
 
 import { useState, useEffect } from 'react';
 import { Escort } from '@/types/Escort';
-import { escortService } from '@/services/escorts/escortService';
+import escortService from '@/services/escorts/escortService';
 
-interface SearchParams {
-  query?: string;
-  location?: string;
-  services?: string[];
-  gender?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  minAge?: number;
-  maxAge?: number;
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortDirection?: 'asc' | 'desc';
-}
-
-export const useEscortSearch = (initialParams: SearchParams = {}) => {
+export const useEscortSearch = (searchQuery: string = '') => {
   const [escorts, setEscorts] = useState<Escort[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [totalCount, setTotalCount] = useState<number>(0);
-  const [params, setParams] = useState<SearchParams>(initialParams);
-  
-  const search = async (searchParams: SearchParams = params) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const { results, total } = await escortService.searchEscorts(searchParams);
-      setEscorts(results);
-      setTotalCount(total);
-    } catch (err: any) {
-      console.error('Error searching escorts:', err);
-      setError(err.message || 'Failed to search escorts');
-    } finally {
-      setLoading(false);
-    }
-  };
   
   useEffect(() => {
-    search();
-  }, []);
-  
-  const updateParams = (newParams: Partial<SearchParams>) => {
-    const updatedParams = {
-      ...params,
-      ...newParams,
-      page: newParams.page || 1 // Reset to first page when filters change
+    const fetchEscorts = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const allEscorts = await escortService.getEscorts();
+        
+        // Simple filtering based on the search query
+        if (searchQuery) {
+          const filtered = allEscorts.filter(escort => 
+            escort.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            escort.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            escort.location?.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+          setEscorts(filtered);
+        } else {
+          setEscorts(allEscorts);
+        }
+      } catch (err: any) {
+        console.error('Error searching escorts:', err);
+        setError(err.message || 'Failed to search escorts');
+      } finally {
+        setLoading(false);
+      }
     };
-    setParams(updatedParams);
-    search(updatedParams);
-  };
+    
+    fetchEscorts();
+  }, [searchQuery]);
   
   return {
     escorts,
     loading,
-    error,
-    totalCount,
-    params,
-    updateParams,
-    search
+    error
   };
 };
 

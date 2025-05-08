@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Escort } from '@/types/Escort';
-import { escortService } from '@/services/escorts/escortService';
+import escortService from '@/services/escorts/escortService';
 
 export const useEscortDetail = (escortId?: string) => {
   const [escort, setEscort] = useState<Escort | null>(null);

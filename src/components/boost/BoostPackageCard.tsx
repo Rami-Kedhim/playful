@@ -1,95 +1,78 @@
 
 import React from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Check, Zap } from "lucide-react";
-import { BoostPackage } from "@/types/boost";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Check } from 'lucide-react';
+import { BoostPackage } from '@/types/pulse-boost';
 
 interface BoostPackageCardProps {
-  package: BoostPackage;
-  selected?: boolean;
-  onClick?: () => void;
-  onSelect?: () => void;
-  disabled?: boolean;
-  isPopular?: boolean;
+  boostPackage: BoostPackage;
+  selected: boolean;
+  onSelect: (id: string) => void;
+  isActive?: boolean;
 }
 
-const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
-  package: pkg,
-  selected = false,
-  onClick,
+const BoostPackageCard: React.FC<BoostPackageCardProps> = ({ 
+  boostPackage, 
+  selected, 
   onSelect,
-  disabled = false,
-  isPopular = false
+  isActive = false
 }) => {
-  const isPackagePopular = isPopular || pkg.isPopular || pkg.isMostPopular;
-  
   return (
     <Card 
-      className={`relative ${selected ? 'border-primary' : ''} ${disabled ? 'opacity-60' : ''}`}
-      onClick={disabled ? undefined : onClick}
+      className={`relative transition-all ${
+        selected ? 'border-primary ring-2 ring-primary/20' : ''
+      } ${isActive ? 'border-green-500 ring-2 ring-green-500/20' : ''}`}
     >
-      {isPackagePopular && (
-        <div className="absolute -top-3 left-0 right-0 flex justify-center">
-          <Badge className="bg-yellow-500 text-white hover:bg-yellow-600">
-            Most Popular
-          </Badge>
-        </div>
+      {boostPackage.isMostPopular && (
+        <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-pink-500 to-purple-500">
+          Most Popular
+        </Badge>
       )}
       
-      <CardHeader className={isPackagePopular ? 'pt-6' : ''}>
-        <CardTitle className="flex items-center justify-between">
-          <span>{pkg.name}</span>
-          <Badge variant="outline">{pkg.price_ubx} UBX</Badge>
+      {isActive && (
+        <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-green-500 to-emerald-600">
+          Currently Active
+        </Badge>
+      )}
+
+      <CardHeader>
+        <CardTitle className="flex justify-between items-start">
+          <span>{boostPackage.name}</span>
+          <span className="text-xl font-bold">${boostPackage.price}</span>
         </CardTitle>
+        <CardDescription className="font-medium">
+          {boostPackage.description}
+        </CardDescription>
       </CardHeader>
       
-      <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">{pkg.description}</p>
+      <CardContent>
+        <p className="mb-2 text-sm font-medium text-muted-foreground">
+          Duration: <span className="text-foreground">{boostPackage.duration}</span>
+        </p>
         
-        <div>
-          <p className="text-sm font-medium mb-2">Features:</p>
-          <ul className="space-y-1">
-            {pkg.features?.map((feature, index) => (
-              <li key={index} className="text-sm flex items-start">
-                <Check className="h-4 w-4 mr-2 text-green-500 shrink-0 mt-0.5" />
-                <span>{feature}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <p className="mb-4 text-sm font-medium text-muted-foreground">
+          Visibility: <span className={`text-foreground`}>{boostPackage.visibility}</span>
+        </p>
         
-        <div className="grid grid-cols-2 gap-2 text-center text-sm">
-          <div className="border rounded-md p-2">
-            <p className="font-medium">{pkg.visibility || '50%'}</p>
-            <p className="text-xs text-muted-foreground">Visibility</p>
-          </div>
-          <div className="border rounded-md p-2">
-            <p className="font-medium">{pkg.duration}</p>
-            <p className="text-xs text-muted-foreground">Duration</p>
-          </div>
+        <div className="space-y-2 mt-4">
+          {boostPackage.features.map((feature, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <Check className="h-4 w-4 text-green-500" />
+              <span className="text-sm">{feature}</span>
+            </div>
+          ))}
         </div>
       </CardContent>
       
       <CardFooter>
-        <Button 
+        <Button
           className="w-full"
-          onClick={onSelect}
-          disabled={disabled}
           variant={selected ? "default" : "outline"}
+          onClick={() => onSelect(boostPackage.id)}
         >
-          {selected ? (
-            <>
-              <Check className="h-4 w-4 mr-2" />
-              Selected
-            </>
-          ) : (
-            <>
-              <Zap className="h-4 w-4 mr-2" />
-              Select
-            </>
-          )}
+          {selected ? "Selected" : isActive ? "Current Plan" : "Select"}
         </Button>
       </CardFooter>
     </Card>

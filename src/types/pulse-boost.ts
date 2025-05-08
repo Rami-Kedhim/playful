@@ -1,4 +1,3 @@
-
 export interface BoostPackage {
   id: string;
   name: string;
@@ -38,15 +37,18 @@ export interface BoostAnalytics {
     date: Date;
     score: number;
   }>;
-  // Add these properties to fix the errors in useBoostOperations.ts
   views?: number;
   impressions?: {
     value: number;
     change?: number;
+    withBoost?: number;
+    today?: number;
   };
   interactions?: {
     value: number;
     change?: number;
+    withBoost?: number;
+    today?: number;
   };
   additionalViews?: number;
   engagementIncrease?: number;
@@ -79,4 +81,14 @@ export interface EnhancedBoostStatus {
   timeRemaining?: string;
   progress?: number;
   boostPackage?: BoostPackage;
+}
+
+// Add UserRole type which is missing in authService
+export enum UserRole {
+  USER = 'user',
+  ADMIN = 'admin',
+  ESCORT = 'escort',
+  CREATOR = 'creator',
+  MODERATOR = 'moderator',
+  AI = 'ai'
 }

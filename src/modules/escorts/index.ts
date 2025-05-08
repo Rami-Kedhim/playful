@@ -2,7 +2,7 @@
 // Export escort-related types 
 // Avoid re-exporting with explicit imports to prevent duplicate exports
 import { Escort } from '@/types/Escort';
-export { Escort };
+export type { Escort };
 
 // Export hooks - use relative paths to prevent conflicts
 export { useEscortDetail } from '../../hooks/escort/useEscortDetail';
