@@ -27,6 +27,8 @@ export interface BoostPurchaseResult {
   success: boolean;
   boostId?: string;
   error?: string | null;
+  message?: string;
+  transactionId?: string;
 }
 
 export interface BoostAnalytics {
@@ -76,25 +78,24 @@ export interface BoostHistory {
 
 export interface PulseBoost {
   id: string;
-  profileId: string;
-  packageId: string;
-  startTime: Date;
-  endTime: Date;
-  status: 'active' | 'expired' | 'cancelled';
-  // Add these properties to fix PulseBoostCard.tsx errors
-  name?: string;
-  description?: string;
-  price?: number;
-  price_ubx?: number;
-  durationMinutes?: number;
-  features?: string[];
-  visibility?: string;
-  visibility_increase?: number;
+  profileId?: string;
+  packageId?: string;
+  startTime?: Date;
+  endTime?: Date;
+  status?: 'active' | 'expired' | 'cancelled';
+  name: string;
+  description: string;
+  price: number;
+  price_ubx: number;
+  durationMinutes: number;
+  features: string[];
+  visibility: string;
+  visibility_increase: number;
   color?: string;
   badgeColor?: string;
   boost_power?: number;
   boostMultiplier?: number;
-  duration?: string;
+  duration: string;
   isMostPopular?: boolean;
 }
 
@@ -110,3 +111,52 @@ export interface EnhancedBoostStatus {
   boostPackage?: BoostPackage;
 }
 
+export interface BoostStatus {
+  isActive: boolean;
+  packageId?: string;
+  expiresAt?: Date;
+  timeRemaining?: string;
+  packageName?: string;
+  startedAt?: Date;
+  activeBoostId?: string;
+  startTime?: Date;
+  endTime?: Date;
+  progress?: number;
+  remainingTime?: string;
+  boostPackage?: BoostPackage;
+}
+
+export interface UserCredentials {
+  email: string;
+  password: string;
+}
+
+// For authService.ts
+export interface UserProfile {
+  id: string;
+  email?: string;
+  username?: string;
+  fullName?: string;
+  name?: string;
+  avatar_url?: string;
+  avatarUrl?: string;
+  bio?: string;
+  location?: string;
+  phone?: string;
+  website?: string;
+  isVerified?: boolean;
+  verified?: boolean;
+  role?: string;
+  roles?: string[];
+  user_metadata?: Record<string, any>;
+  verification_level?: string;
+  sexual_orientation?: string;
+  services?: string[];
+  languages?: string[];
+  rates?: Record<string, any>;
+  availability?: Record<string, any>;
+  isBoosted?: boolean;
+  is_boosted?: boolean;
+  userId?: string;
+  createdAt?: Date;
+}

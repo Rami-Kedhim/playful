@@ -1,3 +1,4 @@
+
 import { OxumSystem, SystemStatus } from '@/types/core-systems';
 
 export class Oxum implements OxumSystem {

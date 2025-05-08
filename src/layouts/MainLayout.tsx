@@ -1,38 +1,33 @@
 
-import React from 'react';
-import { cn } from '@/lib/utils';
-import NavigationBar from '@/components/navigation/NavigationBar';
-import Sidebar from '@/components/navigation/Sidebar';
-import Footer from '@/components/layout/Footer';
+import React, { ReactNode } from 'react';
 
 export interface MainLayoutProps {
-  children: React.ReactNode;
-  containerClassName?: string;
-  showNavigationBar?: boolean;
-  showSidebar?: boolean;
-  showFooter?: boolean;
+  children: ReactNode;
+  title?: string;
+  description?: string;
+  showBreadcrumbs?: boolean;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({
   children,
-  containerClassName,
-  showNavigationBar = true,
-  showSidebar = false,
-  showFooter = true
+  title,
+  description,
+  showBreadcrumbs = false
 }) => {
   return (
-    <div className="min-h-screen flex flex-col">
-      {showNavigationBar && <NavigationBar />}
-      
-      <div className="flex-1 flex">
-        {showSidebar && <Sidebar />}
-        
-        <main className={cn("flex-1", containerClassName)}>
-          {children}
-        </main>
-      </div>
-      
-      {showFooter && <Footer />}
+    <div className="container mx-auto p-4">
+      {title && (
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold">{title}</h1>
+          {description && <p className="text-muted-foreground mt-1">{description}</p>}
+        </div>
+      )}
+      {showBreadcrumbs && (
+        <div className="mb-4">
+          {/* Breadcrumbs component would go here */}
+        </div>
+      )}
+      <main>{children}</main>
     </div>
   );
 };

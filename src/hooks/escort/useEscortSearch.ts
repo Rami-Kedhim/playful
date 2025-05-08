@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Escort } from '@/types/Escort'; // Using the correct casing
-import { escortService } from '@/services/escortService';
+import escortService from '@/services/escorts/escortService'; // Fix import to use default export
 
 export const useEscortSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,7 +21,7 @@ export const useEscortSearch = () => {
   }, [searchTerm]);
 
   // Replace searchEscorts with a compatible approach
-  const searchResults = async (query: string) => {
+  const searchEscorts = async (query: string): Promise<Escort[]> => {
     setLoading(true);
     try {
       // Instead of escortService.searchEscorts, use getEscorts and filter locally
@@ -45,7 +45,7 @@ export const useEscortSearch = () => {
         setLoading(true);
         setError(null);
         try {
-          const results = await searchResults(debouncedSearchTerm);
+          const results = await searchEscorts(debouncedSearchTerm);
           setSearchResults(results);
         } catch (err: any) {
           setError(err.message || 'Failed to fetch search results');

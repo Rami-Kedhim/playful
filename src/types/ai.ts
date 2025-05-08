@@ -27,6 +27,17 @@ export interface AIModelPreference {
   settings?: Record<string, any>;
   model?: string;             // Add this for useNSFWAIChat
   systemPrompt?: string;      // Add this for useNSFWAIChat
+  temperature?: number;       // Add this for useNSFWAIChat
+}
+
+export interface AIProvider {
+  id: string;
+  name: string;
+  models: AIModelPreference[];
+  apiKey?: string;
+  baseUrl?: string;
+  isEnabled?: boolean;
+  defaultModel?: string;
 }
 
 // Add any other AI-related types here
