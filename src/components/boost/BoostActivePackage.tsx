@@ -1,46 +1,51 @@
 
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
-import { BoostStatus } from "@/types/boost";
+import { BoostStatus, HermesStatus } from "@/types/boost";
 import { Clock, Zap } from "lucide-react";
 
 interface BoostActivePackageProps {
   boostStatus: BoostStatus;
+  hermesData?: HermesStatus;
   formatDuration?: (duration: string) => string;
   onCancel?: () => Promise<boolean>;
 }
 
-const BoostActivePackage = ({
+const BoostActivePackage: React.FC<BoostActivePackageProps> = ({
   boostStatus,
+  hermesData,
   formatDuration = (d) => d,
   onCancel
-}: BoostActivePackageProps) => {
+}) => {
   if (!boostStatus || !boostStatus.isActive) return null;
 
-  const pkg = boostStatus.boostPackage || {
-    name: boostStatus.packageName || "Unknown",
-    boost_power: 0,
-    visibility_increase: 0
-  };
-
+  // Safely extract package details
+  const packageName = boostStatus.packageName || "Unknown";
+  const visibilityIncrease = boostStatus.boostPackage?.visibility_increase || 0;
+  
   // Calculate progress as a percentage
   const calculateProgress = (): number => {
-    if (!boostStatus.startTime && !boostStatus.startedAt) return 0;
-    if (!boostStatus.expiresAt && !boostStatus.endTime) return 0;
-    
     // Use either startedAt/expiresAt or startTime/endTime
-    const start = boostStatus.startTime ? 
-      new Date(boostStatus.startTime as string).getTime() : 
-      new Date((boostStatus.startedAt as Date)).getTime();
-      
-    const end = boostStatus.expiresAt ? 
-      new Date(boostStatus.expiresAt).getTime() : 
-      new Date(boostStatus.endTime as string).getTime();
-      
-    const now = Date.now();
+    let startDate: Date | null = null;
+    let endDate: Date | null = null;
     
-    const total = end - start;
-    const elapsed = now - start;
+    if (boostStatus.startedAt) {
+      startDate = new Date(boostStatus.startedAt);
+    } else if (boostStatus.startTime) {
+      startDate = new Date(boostStatus.startTime);
+    }
+    
+    if (boostStatus.expiresAt) {
+      endDate = new Date(boostStatus.expiresAt);
+    } else if (boostStatus.endTime) {
+      endDate = new Date(boostStatus.endTime);
+    }
+    
+    if (!startDate || !endDate) return 0;
+    
+    const now = Date.now();
+    const total = endDate.getTime() - startDate.getTime();
+    const elapsed = now - startDate.getTime();
     
     const progress = Math.floor((elapsed / total) * 100);
     return Math.min(Math.max(progress, 0), 100); // Clamp between 0-100
@@ -49,11 +54,27 @@ const BoostActivePackage = ({
   const progress = boostStatus.progress || calculateProgress();
   const remainingFormatted = boostStatus.remainingTime || boostStatus.timeRemaining || "Unknown";
 
+  // Format dates for display
+  const formatDate = (date: Date | string | undefined): string => {
+    if (!date) return "Unknown";
+    try {
+      if (typeof date === 'string') {
+        return new Date(date).toLocaleString();
+      }
+      return date.toLocaleString();
+    } catch (e) {
+      return "Invalid Date";
+    }
+  };
+
+  const startDateDisplay = formatDate(boostStatus.startedAt || boostStatus.startTime);
+  const endDateDisplay = formatDate(boostStatus.expiresAt || boostStatus.endTime);
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-start">
         <div>
-          <div className="text-xl font-semibold">{pkg.name}</div>
+          <div className="text-xl font-semibold">{packageName}</div>
           <div className="text-sm text-muted-foreground">
             Boosting your profile visibility
           </div>
@@ -72,16 +93,8 @@ const BoostActivePackage = ({
           ></div>
         </div>
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>
-            Started: {(boostStatus.startTime || boostStatus.startedAt) ? 
-              new Date(boostStatus.startTime as string || (boostStatus.startedAt as Date)).toLocaleString() : 
-              "Unknown"}
-          </span>
-          <span>
-            Expires: {(boostStatus.expiresAt || boostStatus.endTime) ? 
-              new Date(boostStatus.expiresAt as Date || boostStatus.endTime as string).toLocaleString() : 
-              "Unknown"}
-          </span>
+          <span>Started: {startDateDisplay}</span>
+          <span>Expires: {endDateDisplay}</span>
         </div>
       </div>
 
@@ -99,7 +112,7 @@ const BoostActivePackage = ({
           <Zap className="h-5 w-5 text-yellow-500 mr-3" />
           <div>
             <div className="text-sm font-medium">Visibility Boost</div>
-            <div className="font-semibold">+{pkg.visibility_increase || 0}%</div>
+            <div className="font-semibold">+{visibilityIncrease}%</div>
           </div>
         </div>
       </div>

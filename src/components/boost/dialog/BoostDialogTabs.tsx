@@ -54,7 +54,7 @@ const BoostDialogTabs: React.FC<DialogTabsProps> = ({
   formatBoostDuration = (d) => d
 }) => {
   // Don't show tabs if not eligible or if there's an active boost
-  const shouldShowTabs = eligibility.isEligible && !boostStatus.isActive;
+  const shouldShowTabs = (eligibility.eligible || eligibility.isEligible) && !boostStatus.isActive;
 
   return (
     <div className="space-y-4">
@@ -79,7 +79,7 @@ const BoostDialogTabs: React.FC<DialogTabsProps> = ({
       )}
 
       {/* Eligibility Check */}
-      {!boostStatus.isActive && !eligibility.isEligible && (
+      {!boostStatus.isActive && !(eligibility.eligible || eligibility.isEligible) && (
         <BoostEligibilityCheck 
           eligibility={eligibility} 
           onClose={handleDialogClose}

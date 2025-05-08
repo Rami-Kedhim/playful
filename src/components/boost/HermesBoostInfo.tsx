@@ -28,16 +28,22 @@ const HermesBoostInfo = ({ hermesStatus, isActive = false }: HermesBoostInfoProp
     return "bg-red-500";
   };
 
+  // Extract with default values to avoid null/undefined errors
+  const position = hermesStatus.position || 0;
+  const activeUsers = hermesStatus.activeUsers || 0;
+  const estimatedVisibility = hermesStatus.estimatedVisibility || 0;
+  const lastUpdateTime = hermesStatus.lastUpdateTime || new Date().toISOString();
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-secondary/20 p-3 rounded-md">
           <div className="flex justify-between items-center mb-1">
             <span className="text-sm font-medium">Position</span>
-            <span className="text-sm font-bold">#{hermesStatus.position}</span>
+            <span className="text-sm font-bold">#{position}</span>
           </div>
           <Progress 
-            value={100 - Math.min(hermesStatus.position, 100)} 
+            value={100 - Math.min(position, 100)} 
             className="h-1" 
           />
           <div className="flex justify-between text-xs text-muted-foreground mt-1">
@@ -49,7 +55,7 @@ const HermesBoostInfo = ({ hermesStatus, isActive = false }: HermesBoostInfoProp
         <div className="bg-secondary/20 p-3 rounded-md">
           <div className="flex justify-between items-center mb-1">
             <span className="text-sm font-medium">Active Users</span>
-            <span className="text-sm font-bold">{hermesStatus.activeUsers}</span>
+            <span className="text-sm font-bold">{activeUsers}</span>
           </div>
           <div className="flex items-center justify-center h-4">
             <Users className="h-4 w-4 text-blue-500" />
@@ -60,11 +66,11 @@ const HermesBoostInfo = ({ hermesStatus, isActive = false }: HermesBoostInfoProp
       <div className="bg-secondary/20 p-3 rounded-md">
         <div className="flex justify-between items-center mb-1">
           <span className="text-sm font-medium">Visibility Score</span>
-          <span className="text-sm font-bold">{hermesStatus.estimatedVisibility}%</span>
+          <span className="text-sm font-bold">{estimatedVisibility}%</span>
         </div>
         <Progress 
-          value={hermesStatus.estimatedVisibility} 
-          className={`h-2 ${calculateProgressColor(hermesStatus.estimatedVisibility)}`} 
+          value={estimatedVisibility} 
+          className={`h-2 ${calculateProgressColor(estimatedVisibility)}`} 
         />
         <div className="grid grid-cols-3 gap-1 mt-2">
           <div className="flex items-center text-xs">
@@ -85,7 +91,7 @@ const HermesBoostInfo = ({ hermesStatus, isActive = false }: HermesBoostInfoProp
       <div className="flex justify-between items-center text-xs text-muted-foreground">
         <span className="flex items-center">
           <RefreshCw className="h-3 w-3 mr-1" />
-          Last updated: {new Date(hermesStatus.lastUpdateTime).toLocaleTimeString()}
+          Last updated: {new Date(lastUpdateTime).toLocaleTimeString()}
         </span>
         
         <span className="flex items-center">

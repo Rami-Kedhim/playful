@@ -33,7 +33,7 @@ const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
           {formatDuration(boostPackage.duration)}
         </div>
         <div className="mt-2 font-bold text-lg">
-          {boostPackage.price_ubx} UBX
+          {boostPackage.price_ubx || boostPackage.price} UBX
         </div>
         {boostPackage.features && boostPackage.features.length > 0 && (
           <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-muted-foreground">

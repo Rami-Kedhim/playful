@@ -35,8 +35,8 @@ const BoostPackages: React.FC<BoostPackagesProps> = ({
 
       <RadioGroup value={selectedId} onValueChange={onSelect}>
         {packages.map((pkg) => (
-          <Card key={pkg.id} className={`mb-3 overflow-hidden ${pkg.isMostPopular ? 'border-primary' : ''}`}>
-            {pkg.isMostPopular && (
+          <Card key={pkg.id} className={`mb-3 overflow-hidden ${pkg.isPopular ? 'border-primary' : ''}`}>
+            {pkg.isPopular && (
               <div className="bg-primary text-primary-foreground text-xs px-3 py-1 text-center">
                 Most Popular
               </div>
@@ -53,7 +53,7 @@ const BoostPackages: React.FC<BoostPackagesProps> = ({
                       </label>
                       <p className="text-sm text-muted-foreground mt-1">{pkg.description}</p>
                     </div>
-                    <span className="text-lg font-bold">{pkg.price_ubx} UBX</span>
+                    <span className="text-lg font-bold">{pkg.price_ubx || pkg.price} UBX</span>
                   </div>
                   
                   <div className="flex flex-wrap gap-2 mt-3">
@@ -61,10 +61,12 @@ const BoostPackages: React.FC<BoostPackagesProps> = ({
                       <Clock className="h-3 w-3 mr-1" />
                       {formatDuration(pkg.duration)}
                     </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Zap className="h-3 w-3 mr-1" />
-                      {pkg.boost_power}% Boost Power
-                    </div>
+                    {pkg.boost_power && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Zap className="h-3 w-3 mr-1" />
+                        {pkg.boost_power}% Boost Power
+                      </div>
+                    )}
                   </div>
                   
                   <div className="flex flex-wrap gap-1 mt-2">

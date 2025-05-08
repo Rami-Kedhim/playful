@@ -112,8 +112,6 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
     activeUsers: 0,
     estimatedVisibility: 0,
     lastUpdateTime: '',
-    boostScore: 0,
-    effectivenessScore: 0
   };
 
   return (
@@ -133,7 +131,7 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
           setActiveTab={setActiveTab}
           loading={isLoading}
           boostStatus={boostStatus || { isActive: false }}
-          eligibility={{ isEligible: true }}
+          eligibility={{ eligible: true }}
           boostPackages={boostPackages || []}
           selectedPackage={selectedPackage}
           setSelectedPackage={setSelectedPackage}
@@ -143,7 +141,7 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
           dailyBoostLimit={boostContext.dailyBoostLimit || 5}
           handleDialogClose={handleDialogClose}
           getBoostPrice={getBoostPrice}
-          hermesStatus={hermesStatusData}
+          hermesStatus={boostContext.hermesStatus || hermesStatusData}
           formatBoostDuration={(duration) => `${duration}`}
         />
       </DialogContent>

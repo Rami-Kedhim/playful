@@ -21,6 +21,9 @@ const BoostActivePackage: React.FC<BoostActivePackageProps> = ({
   
   const progress = boostStatus.progress || 0;
   const remainingTime = boostStatus.remainingTime || '00:00:00';
+  const packageName = boostStatus.packageName || 'Active Boost';
+  const estimatedVisibility = hermesData?.estimatedVisibility || 0;
+  const position = hermesData?.position || 0;
   
   return (
     <Card>
@@ -29,7 +32,7 @@ const BoostActivePackage: React.FC<BoostActivePackageProps> = ({
           <div>
             <h3 className="font-medium flex items-center">
               <Zap className="h-4 w-4 mr-1 text-yellow-500" />
-              {boostStatus.packageName || 'Active Boost'}
+              {packageName}
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
               Your profile is currently being boosted
@@ -53,11 +56,11 @@ const BoostActivePackage: React.FC<BoostActivePackageProps> = ({
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Visibility</p>
-            <p className="font-medium">{hermesData.estimatedVisibility}%</p>
+            <p className="font-medium">{estimatedVisibility}%</p>
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Position</p>
-            <p className="font-medium">{hermesData.position > 0 ? `#${hermesData.position}` : 'Top'}</p>
+            <p className="font-medium">{position > 0 ? `#${position}` : 'Top'}</p>
           </div>
         </div>
       </CardContent>

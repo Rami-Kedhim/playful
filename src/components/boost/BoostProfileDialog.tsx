@@ -80,7 +80,7 @@ const BoostProfileDialog: React.FC<BoostProfileDialogProps> = ({
                   </div>
                   <div className="text-right">
                     <div className="font-bold">${pkg.price}</div>
-                    {pkg.price_ubx && (
+                    {(pkg.price_ubx !== undefined) && (
                       <div className="text-xs text-muted-foreground">
                         or {pkg.price_ubx} UBX
                       </div>

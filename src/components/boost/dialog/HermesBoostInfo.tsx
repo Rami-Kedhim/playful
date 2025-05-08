@@ -10,7 +10,11 @@ interface HermesBoostInfoProps {
 }
 
 const HermesBoostInfo: React.FC<HermesBoostInfoProps> = ({ hermesStatus }) => {
-  const { position, activeUsers, estimatedVisibility, lastUpdateTime } = hermesStatus;
+  // Default values if not provided
+  const position = hermesStatus.position || 0;
+  const activeUsers = hermesStatus.activeUsers || 0;
+  const estimatedVisibility = hermesStatus.estimatedVisibility || 0;
+  const lastUpdateTime = hermesStatus.lastUpdateTime || new Date().toISOString();
   
   // Calculate visibility level indicator (0-100)
   const visibilityLevel = Math.min(100, Math.max(0, estimatedVisibility));
