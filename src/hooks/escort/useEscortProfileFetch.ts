@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Escort } from "@/types/escort";
+import { Escort } from "@/types/Escort";
 import { toast } from "@/components/ui/use-toast";
 import { updateEscortBoostScore } from "@/utils/boostScoreSystem";
 

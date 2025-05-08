@@ -1,13 +1,12 @@
 
 import React from 'react';
-import Layout from '@/layouts/Layout';
-import type { LayoutProps } from '@/layouts/Layout';
+import Layout, { AppLayoutProps } from '@/layouts/AppLayout';
 
 /**
  * This component exists for backward compatibility
  * It forwards all props to the main Layout component
  */
-const AppLayout: React.FC<LayoutProps> = (props) => {
+const AppLayout: React.FC<AppLayoutProps> = (props) => {
   return <Layout {...props} />;
 };
 

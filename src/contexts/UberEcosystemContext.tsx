@@ -32,6 +32,9 @@ interface UberEcosystemContextType {
   reset: () => void;
   configure: (moduleId: string, config: Record<string, any>) => Promise<boolean>;
   recordEvent: (eventType: string, data: Record<string, any>) => void;
+  // Add user and loading properties for backward compatibility
+  user: any | null;
+  loading: boolean;
 }
 
 // Create the context with default values
@@ -55,10 +58,16 @@ export const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ childre
       pulse: false,
     }
   });
+  
+  // Add user and loading states for backward compatibility
+  const [user, setUser] = useState<any | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Initialize the ecosystem
   const initialize = async (): Promise<boolean> => {
     if (state.initialized) return true;
+    
+    setLoading(true);
     
     try {
       // Initialize Oxum system
@@ -110,6 +119,10 @@ export const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ childre
         initialized: true,
       }));
       
+      // Simulate user login for backward compatibility
+      setUser({ id: 'simulated-user', role: 'user' });
+      setLoading(false);
+      
       console.log('UberEcosystem initialized successfully');
       return true;
     } catch (error) {
@@ -120,6 +133,7 @@ export const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ childre
         error: 'Ecosystem initialization failed',
       }));
       
+      setLoading(false);
       return false;
     }
   };
@@ -139,6 +153,9 @@ export const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ childre
         pulse: false,
       }
     });
+    
+    setUser(null);
+    setLoading(true);
   };
 
   // Record events using available modules
@@ -171,6 +188,7 @@ export const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ childre
           break;
         case 'hermes':
           if (state.modules.hermes) {
+            // Added configure method to hermes in a previous step
             hermes.configure(config);
             return true;
           }
@@ -199,6 +217,8 @@ export const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ childre
     reset,
     configure,
     recordEvent,
+    user, // Add user for backward compatibility
+    loading, // Add loading for backward compatibility
   };
 
   return (

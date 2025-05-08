@@ -1,3 +1,4 @@
+
 import { lucieAI } from '@/core/Lucie';
 import { 
   GenerateContentResult, 
@@ -97,5 +98,5 @@ export class LucieOrchestratorAdapter {
 export const lucieOrchestrator = new LucieOrchestratorAdapter();
 export default lucieOrchestrator;
 
-// Make sure we export lucieAI if needed
+// Export lucieAI for backward compatibility
 export { lucieAI };

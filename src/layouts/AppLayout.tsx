@@ -4,17 +4,28 @@ import { Outlet } from 'react-router-dom';
 import { useUberEcosystem } from '@/contexts/UberEcosystemContext';
 
 // Define what we'll use from the context
-interface AppLayoutProps {
+export interface AppLayoutProps {
   children?: React.ReactNode;
+  title?: string;
+  requireAuth?: boolean;
 }
 
-const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+const AppLayout: React.FC<AppLayoutProps> = ({ children, title }) => {
   // Use the context but access only properties that are definitely available
   const ecosystem = useUberEcosystem();
   
   // Create local variables for authenticated state if they don't exist in the context
   const isAuthenticated = ecosystem.user !== undefined && ecosystem.user !== null;
   const isLoading = ecosystem.loading !== undefined ? ecosystem.loading : false;
+
+  // Update document title if provided
+  React.useEffect(() => {
+    if (title) {
+      document.title = `${title} | UberEscorts`;
+    } else {
+      document.title = 'UberEscorts';
+    }
+  }, [title]);
   
   return (
     <div className="min-h-screen flex flex-col">
