@@ -1,27 +1,30 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
 import Layout from '@/layouts/Layout';
 import { Button } from '@/components/ui/button';
-import { Home } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { AppPaths } from '@/routes/routeConfig';
+import { useTitle } from '@/hooks/useTitle';
 
-const NotFoundPage = () => {
+const NotFoundPage: React.FC = () => {
+  useTitle("Page Not Found | UberEscorts");
+  
   return (
-    <Layout 
-      hideNavbar
-      className="flex items-center justify-center"
-    >
-      <div className="text-center py-20">
+    <Layout>
+      <div className="container mx-auto py-16 px-4 text-center">
         <h1 className="text-6xl font-bold mb-6">404</h1>
-        <h2 className="text-2xl font-semibold mb-4">Page Not Found</h2>
-        <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+        <h2 className="text-3xl font-semibold mb-4">Page Not Found</h2>
+        <p className="text-xl text-muted-foreground mb-8 max-w-md mx-auto">
           Sorry, the page you are looking for doesn't exist or has been moved.
         </p>
-        <Button asChild>
-          <Link to="/">
-            <Home className="w-4 h-4 mr-2" /> Go Home
-          </Link>
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button asChild size="lg">
+            <Link to={AppPaths.HOME}>Go Home</Link>
+          </Button>
+          <Button variant="outline" size="lg" asChild>
+            <Link to={AppPaths.ESCORTS}>Browse Escorts</Link>
+          </Button>
+        </div>
       </div>
     </Layout>
   );

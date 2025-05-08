@@ -1,37 +1,35 @@
 
-/**
- * Helper function to get a human-readable label for document types
- * @param documentType Raw document type string
- * @returns Human-readable document type label
- */
 export const getDocumentTypeLabel = (documentType: string): string => {
-  const labels: Record<string, string> = {
-    id_card: 'ID Card',
-    passport: 'Passport',
-    drivers_license: 'Driver\'s License',
-    residence_permit: 'Residence Permit',
-    selfie: 'Selfie Photo',
-  };
-  
-  return labels[documentType] || documentType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  switch (documentType) {
+    case 'id':
+      return 'ID Document';
+    case 'selfie':
+      return 'Selfie Photo';
+    case 'address_proof':
+      return 'Proof of Address';
+    default:
+      return 'Document';
+  }
 };
 
-/**
- * Check if a document needs a back side image
- * @param documentType Document type to check
- * @returns Boolean indicating if document needs back side
- */
-export const documentRequiresBackSide = (documentType: string): boolean => {
-  const singleSideDocuments = ['passport', 'selfie'];
-  return !singleSideDocuments.includes(documentType);
+// Export enums as objects to fix errors in components using them as values
+import { VerificationLevel, VerificationStatus } from '@/types/verification';
+
+export const VerificationLevels = {
+  NONE: 'none' as VerificationLevel,
+  BASIC: 'basic' as VerificationLevel,
+  VERIFIED: 'verified' as VerificationLevel,
+  PREMIUM: 'premium' as VerificationLevel,
+  ENHANCED: 'enhanced' as VerificationLevel
 };
 
-/**
- * Check if the verification level requires selfie
- * @param level Verification level to check
- * @returns Boolean indicating if level requires selfie
- */
-export const verificationLevelRequiresSelfie = (level: string): boolean => {
-  // Most verification levels require selfie for identity confirmation
-  return ['basic', 'enhanced', 'premium'].includes(level.toLowerCase());
+export const VerificationStatuses = {
+  PENDING: VerificationStatus.PENDING,
+  APPROVED: VerificationStatus.APPROVED,
+  REJECTED: VerificationStatus.REJECTED,
+  IN_REVIEW: VerificationStatus.IN_REVIEW,
+  EXPIRED: VerificationStatus.EXPIRED,
+  NONE: VerificationStatus.NONE
 };
+
+export { type VerificationLevel, VerificationStatus };

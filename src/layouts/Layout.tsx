@@ -11,6 +11,7 @@ export interface LayoutProps {
   fullWidth?: boolean;
   hideHeader?: boolean;
   hideFooter?: boolean;
+  hideNavbar?: boolean; // Add this property to fix the error
   className?: string;
   containerClass?: string;
 }
@@ -20,12 +21,13 @@ const Layout: React.FC<LayoutProps> = ({
   fullWidth = false, 
   hideHeader = false,
   hideFooter = false,
+  hideNavbar = false, // Add the new property
   className,
   containerClass
 }) => {
   return (
     <div className="min-h-screen flex flex-col">
-      {!hideHeader && <Navigation />}
+      {!hideHeader && !hideNavbar && <Navigation />}
       
       <main className={cn(
         "flex-1",
