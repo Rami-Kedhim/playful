@@ -24,7 +24,7 @@ export interface Anomaly {
   description?: string;
   timestamp?: string;
   relatedComponentId?: string;
-  message?: string; // Added message property to match AnomalyDetails requirements
+  message?: string;
 }
 
 export interface DetailedMetricViewProps {
@@ -56,7 +56,7 @@ export interface AnalyticsData {
   engagementIncrease?: number;
   rankingPosition?: number;
   views?: number;
-  impressions?: {
+  impressions: {
     today: number;
     yesterday: number;
     weeklyAverage: number;
@@ -65,7 +65,7 @@ export interface AnalyticsData {
     increase: number;
     change: number;
   };
-  interactions?: {
+  interactions: {
     today: number;
     yesterday: number;
     weeklyAverage: number;
@@ -84,9 +84,9 @@ export interface AnalyticsData {
   boostEfficiency?: number;
   trending?: boolean;
   roi?: number;
-  conversionRate?: number;
-  messageRate?: number;
-  bookingRate?: number;
+  conversionRate: number;
+  messageRate: number;
+  bookingRate: number;
   clicks?: {
     today: number;
     yesterday: number;

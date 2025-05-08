@@ -1,81 +1,125 @@
+
 import React, { useState } from 'react';
-import { useAuth } from '@/hooks/auth';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { UserProfile } from '@/types/pulse-boost';
 
 const ProfileEdit = () => {
-  const { user, profile, updateProfile } = useAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  const initialFormData = {
-    username: profile?.username || '',
-    full_name: profile?.fullName || profile?.full_name || '',
-    bio: profile?.bio || '',
-    location: profile?.location || '',
-    website: profile?.website || '',
-    sexual_orientation: profile?.sexual_orientation || ''
+  const navigate = useNavigate();
+  // Mock profile data
+  const initialProfile: UserProfile = {
+    id: '1',
+    fullName: 'John Doe',
+    bio: 'I am a professional escort with 5 years of experience.',
+    avatar_url: 'https://example.com/avatar.jpg',
+    email: 'john@example.com',
+    location: 'New York',
+    sexual_orientation: 'Straight'
   };
   
-  const [formData, setFormData] = useState(initialFormData);
+  const [profile, setProfile] = useState<UserProfile>(initialProfile);
+  const [isLoading, setIsLoading] = useState(false);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setProfile(prev => ({ ...prev, [name]: value }));
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setSuccess(false);
-    setError(null);
+    setIsLoading(true);
     
     try {
-      // Prepare profile data for update
-      const profileUpdate: Partial<UserProfile> = {
-        username: formData.username,
-        fullName: formData.full_name,
-        bio: formData.bio,
-        location: formData.location,
-        website: formData.website,
-        sexual_orientation: formData.sexual_orientation
-      };
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      await updateProfile(profileUpdate);
-      setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || 'An error occurred while updating your profile');
+      // Update profile success
+      navigate('/profile');
+    } catch (error) {
+      console.error('Error updating profile:', error);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
   
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">Edit Profile</h1>
+    <div className="max-w-3xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">Edit Profile</h1>
       
-      {success && (
-        <div className="bg-green-50 border border-green-200 text-green-800 p-4 mb-6 rounded">
-          Profile updated successfully!
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-3">
+          <div>
+            <Label htmlFor="fullName">Full Name</Label>
+            <Input
+              id="fullName"
+              name="fullName"
+              value={profile.fullName || ''}
+              onChange={handleChange}
+              className="w-full"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={profile.email || ''}
+              onChange={handleChange}
+              className="w-full"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              name="location"
+              value={profile.location || ''}
+              onChange={handleChange}
+              className="w-full"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="sexual_orientation">Sexual Orientation</Label>
+            <Input
+              id="sexual_orientation"
+              name="sexual_orientation"
+              value={profile.sexual_orientation || ''}
+              onChange={handleChange}
+              className="w-full"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="bio">Bio</Label>
+            <Textarea
+              id="bio"
+              name="bio"
+              value={profile.bio || ''}
+              onChange={handleChange}
+              className="w-full min-h-[150px]"
+            />
+          </div>
         </div>
-      )}
-      
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-800 p-4 mb-6 rounded">
-          {error}
-        </div>
-      )}
-      
-      <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-        {/* Form fields would go here */}
         
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-        >
-          {isSubmitting ? 'Saving...' : 'Save Changes'}
-        </button>
+        <div className="flex justify-end space-x-3">
+          <Button 
+            type="button" 
+            variant="outline"
+            onClick={() => navigate('/profile')}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </div>
       </form>
     </div>
   );

@@ -3,7 +3,7 @@ export interface ModerateContentParams {
   content: string;
   userId?: string;
   strictness?: 'low' | 'medium' | 'high';
-  contentType?: string; // Add this to fix BrainCore errors
+  contentType?: string;
   type?: string;
 }
 
@@ -25,9 +25,9 @@ export interface AIModelPreference {
   provider?: string;
   capabilities?: string[];
   settings?: Record<string, any>;
-  model?: string;             // Add this for useNSFWAIChat
-  systemPrompt?: string;      // Add this for useNSFWAIChat
-  temperature?: number;       // Add this for useNSFWAIChat
+  model?: string;
+  systemPrompt?: string;
+  temperature?: number;
 }
 
 export interface AIProvider {
@@ -45,5 +45,3 @@ export interface AIProvider {
     audio?: boolean;
   };
 }
-
-// Add any other AI-related types here

@@ -1,128 +1,280 @@
 
-import React, { useEffect, useState } from 'react';
-import { Container } from '@/components/ui/container';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UberWallet, UbxTransaction } from '@/core/UberWallet';
-import { useAuth } from '@/hooks/auth';
 
-const WalletPage: React.FC = () => {
-  const { user, profile } = useAuth();
-  const [uberWallet] = useState(new UberWallet()); // Create an instance
-  
+const Wallet = () => {
+  const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<UbxTransaction[]>([]);
-  const [balance, setBalance] = useState({
-    available: 0,
-    pending: 0,
-    reserved: 0,
-    total: 0
-  });
-
-  const loadData = async () => {
-    try {
-      // Get balance
-      const balanceAmount = await uberWallet.getBalance();
-      
-      // Create a structured balance object
-      setBalance({
-        available: balanceAmount * 0.8,
-        pending: balanceAmount * 0.1,
-        reserved: balanceAmount * 0.1,
-        total: balanceAmount
-      });
-      
-      // Get transaction history
-      const history = await uberWallet.getTransactions();
-      setTransactions(history);
-    } catch (error) {
-      console.error('Error loading wallet data:', error);
-    }
-  };
-
-  const handleAddFunds = async () => {
-    try {
-      // In a real app, this would open a payment flow
-      // For demo, just add 100 UBX
-      const amount = 100;
-      
-      const result = await uberWallet.addFunds(amount);
-      
-      if (result) {
-        // Update balance (in a real app, we would fetch the new balance)
-        const newTotal = balance.total + amount;
-        setBalance({
-          available: newTotal * 0.8,
-          pending: newTotal * 0.1,
-          reserved: newTotal * 0.1,
-          total: newTotal
-        });
-        
-        // Refresh transaction history
-        const history = await uberWallet.getTransactions();
-        setTransactions(history);
-      }
-    } catch (error) {
-      console.error('Error adding funds:', error);
-    }
-  };
-
+  const [amount, setAmount] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Create an instance of UberWallet
+  const uberWallet = new UberWallet();
+  
+  // Fetch wallet data on component mount
   useEffect(() => {
-    loadData();
+    const fetchWalletData = async () => {
+      try {
+        // Get balance
+        const walletBalance = uberWallet.getBalance();
+        setBalance(walletBalance);
+        
+        // Get transactions
+        const walletTransactions = await uberWallet.getTransactions();
+        setTransactions(walletTransactions);
+      } catch (err: any) {
+        console.error('Error fetching wallet data:', err);
+        setError(err.message || 'Failed to load wallet data');
+      }
+    };
+    
+    fetchWalletData();
   }, []);
-
-  // Check for boosted status with fallbacks
-  const isBoostedProfile = profile?.isBoosted || profile?.is_boosted;
-
-  return (
-    <Container>
-      <h1 className="text-3xl font-bold mb-6">Wallet</h1>
+  
+  // Handle adding funds
+  const handleAddFunds = async () => {
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+      setError('Please enter a valid amount');
+      return;
+    }
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Add funds to wallet
+      const success = await uberWallet.addFunds(Number(amount));
       
-      <div className="grid gap-6">
-        <Card>
+      if (success) {
+        // Update balance
+        const updatedBalance = uberWallet.getBalance();
+        setBalance(updatedBalance);
+        
+        // Update transactions
+        const updatedTransactions = await uberWallet.getTransactions();
+        setTransactions(updatedTransactions);
+        
+        // Reset amount
+        setAmount('');
+      }
+    } catch (err: any) {
+      console.error('Error adding funds:', err);
+      setError(err.message || 'Failed to add funds');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Handle purchasing UBX
+  const handlePurchaseUbx = async () => {
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+      setError('Please enter a valid amount');
+      return;
+    }
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Purchase UBX
+      const result = await uberWallet.purchaseUbx('user-123', Number(amount));
+      
+      if (result.success) {
+        // Update balance
+        const updatedBalance = uberWallet.getBalance();
+        setBalance(updatedBalance);
+        
+        // Update transactions
+        const updatedTransactions = await uberWallet.getTransactions();
+        setTransactions(updatedTransactions);
+        
+        // Reset amount
+        setAmount('');
+      }
+    } catch (err: any) {
+      console.error('Error purchasing UBX:', err);
+      setError(err.message || 'Failed to purchase UBX');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  return (
+    <div className="container mx-auto py-8 max-w-5xl">
+      <h1 className="text-3xl font-bold mb-6">UBX Wallet</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle>Balance</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{balance.total} UBX</div>
-            <div className="text-sm text-muted-foreground mt-2">
-              Available: {balance.available.toFixed(2)} UBX
+            <div className="flex items-baseline">
+              <span className="text-4xl font-bold">{balance.toLocaleString()}</span>
+              <span className="ml-2 text-muted-foreground">UBX</span>
             </div>
-            
-            <Button className="mt-4" onClick={handleAddFunds}>
-              Add Funds
-            </Button>
+            <p className="text-sm text-muted-foreground mt-2">
+              Equivalent to approximately ${(balance * 0.1).toFixed(2)} USD
+            </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader>
-            <CardTitle>Transaction History</CardTitle>
+            <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent>
-            {transactions.length === 0 ? (
-              <p className="text-muted-foreground">No transactions yet</p>
-            ) : (
-              <div className="space-y-4">
-                {transactions.map((tx) => (
-                  <div key={tx.id} className="flex justify-between items-center border-b pb-2">
-                    <div>
-                      <div className="font-medium">{tx.description || tx.type}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {tx.timestamp instanceof Date ? tx.timestamp.toLocaleString() : new Date(tx.timestamp).toLocaleString()}
-                      </div>
-                    </div>
-                    <div className={tx.amount > 0 ? 'text-green-500' : ''}>
-                      {tx.amount > 0 ? '+' : ''}{tx.amount} UBX
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full justify-start" onClick={() => setAmount('100')}>
+                + 100 UBX
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => setAmount('500')}>
+                + 500 UBX
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => setAmount('1000')}>
+                + 1000 UBX
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
-    </Container>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-1 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Add Funds</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {error && (
+                <div className="bg-red-50 text-red-800 p-3 rounded-md mb-4 text-sm">
+                  {error}
+                </div>
+              )}
+              
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="amount" className="block text-sm font-medium mb-1">
+                    Amount (UBX)
+                  </label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="Enter amount"
+                  />
+                </div>
+                
+                <Button
+                  className="w-full"
+                  onClick={handleAddFunds}
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Processing...' : 'Add Funds'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Boost Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center p-6">
+                <div className="text-muted-foreground mb-4">
+                  You currently don't have any active boosts
+                </div>
+                <Button>Boost Profile</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="md:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Transaction History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="all">
+                <TabsList className="grid w-full grid-cols-3 mb-4">
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="in">In</TabsTrigger>
+                  <TabsTrigger value="out">Out</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="all">
+                  <TransactionList transactions={transactions} />
+                </TabsContent>
+                
+                <TabsContent value="in">
+                  <TransactionList transactions={transactions.filter(t => t.type === 'purchase')} />
+                </TabsContent>
+                
+                <TabsContent value="out">
+                  <TransactionList transactions={transactions.filter(t => t.type === 'spend')} />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default WalletPage;
+interface TransactionListProps {
+  transactions: UbxTransaction[];
+}
+
+const TransactionList: React.FC<TransactionListProps> = ({ transactions }) => {
+  if (transactions.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        No transactions found
+      </div>
+    );
+  }
+  
+  return (
+    <div className="space-y-4">
+      {transactions.map((transaction) => (
+        <div key={transaction.id} className="flex items-center justify-between p-3 border-b border-border">
+          <div className="flex items-center space-x-4">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+              transaction.type === 'purchase' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+            }`}>
+              {transaction.type === 'purchase' ? '+' : '-'}
+            </div>
+            
+            <div>
+              <div className="font-medium">{transaction.description}</div>
+              <div className="text-sm text-muted-foreground">
+                {transaction.transactionType || transaction.type} • {
+                  (transaction.createdAt ? new Date(transaction.createdAt) : transaction.timestamp).toLocaleDateString()
+                }
+              </div>
+            </div>
+          </div>
+          
+          <div className={`font-medium ${
+            transaction.type === 'purchase' ? 'text-green-600' : 'text-red-600'
+          }`}>
+            {transaction.type === 'purchase' ? '+' : '-'}{transaction.amount} UBX
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default Wallet;

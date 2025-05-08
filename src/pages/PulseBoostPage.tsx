@@ -1,351 +1,171 @@
 
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Zap, BarChart, Clock, Wallet, TrendingUp } from 'lucide-react';
-import { ScrollRevealGroup } from '@/components/ui/scroll-reveal-group';
-import { RevealChild } from '@/components/ui/scroll-reveal-group';
-import PulseBoostErrorBoundary from '@/components/boost/PulseBoostErrorBoundary';
-import PageLayout from '@/components/layout/PageLayout';
-import { useBoostStatus } from '@/hooks/boost/useBoostStatus';
-import { boostService } from '@/services/boostService';
-import { logInteraction } from '@/utils/uberCore';
-import { useNeuralOptimization } from '@/hooks/useNeuralOptimization';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { boostService } from '@/services/boostService';
+import { BoostPackage } from '@/types/boost';
+import { getPulsePackages } from '@/services/boost/pulseService';
 
 const PulseBoostPage = () => {
-  const { user, profile } = useAuth();
+  const [packages, setPackages] = useState<BoostPackage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [boostPackages, setBoostPackages] = useState([]);
-  const [analytics, setAnalytics] = useState(null);
-  const { status: boostStatus, loading: statusLoading } = useBoostStatus(user?.id);
-  const { metrics: neuralMetrics, refreshMetrics } = useNeuralOptimization();
-  
-  // Log page access with Hermes
-  useEffect(() => {
-    logInteraction('PulseBoost', 'page-view', { 
-      userId: user?.id,
-      timestamp: new Date().toISOString()
-    });
-  }, [user?.id]);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch boost packages and analytics
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchBoostPackages = async () => {
       try {
-        if (user?.id) {
-          const packages = await boostService.getBoostPackages();
-          setBoostPackages(packages);
-          
-          if (boostStatus?.isActive) {
-            const analyticsData = await boostService.getBoostAnalytics(user.id);
-            setAnalytics(analyticsData);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching boost data:', error);
+        setIsLoading(true);
+        const boostPackages = await getPulsePackages();
+        setPackages(boostPackages);
+      } catch (err: any) {
+        console.error('Error fetching boost packages:', err);
+        setError(err.message || 'Failed to load boost packages');
       } finally {
         setIsLoading(false);
       }
     };
-
-    fetchData();
-  }, [user?.id, boostStatus?.isActive]);
-
-  // Get profile information
-  const profileId = user?.id;
-  const subscriptionTier = (profile as any)?.subscription_tier || 'free';
-  const isVerified = subscriptionTier !== 'free';
-  
-  // Format remaining time for active boost
-  const formatRemainingTime = (timeString) => {
-    if (!timeString) return '--:--:--';
-    return timeString;
-  };
-
-  // Render active boost card
-  const renderActiveBoost = () => {
-    if (!boostStatus?.isActive) return null;
     
-    const progress = boostStatus.progress || 0;
-    const packageName = boostStatus.packageName || 'Boost';
-    const remainingTime = formatRemainingTime(boostStatus.remainingTime);
-    
-    return (
-      <Card className="border-gradient-boost">
-        <CardHeader className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 rounded-t-lg">
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-yellow-500" />
-            Active PULSE Boost
-          </CardTitle>
-          <CardDescription>
-            Your profile is currently boosted
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <div className="space-y-4">
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Package</span>
-              <span className="font-medium">{packageName}</span>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Progress</span>
-                <span className="text-sm font-medium">{progress}%</span>
-              </div>
-              <Progress value={progress} className="h-2" />
-            </div>
-            
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Remaining time</span>
-              <span className="font-medium font-mono">{remainingTime}</span>
-            </div>
-            
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Start time</span>
-              <span className="text-sm">{boostStatus.startedAt?.toLocaleString()}</span>
-            </div>
-            
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Expiry time</span>
-              <span className="text-sm">{boostStatus.expiresAt?.toLocaleString()}</span>
-            </div>
-            
-            <Button 
-              variant="destructive" 
-              className="w-full mt-4"
-              onClick={() => cancelActiveBoost()}
-            >
-              Cancel Boost
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-  
-  // Handle canceling active boost
-  const cancelActiveBoost = async () => {
-    try {
-      if (!user?.id) return;
-      
-      const success = await boostService.cancelBoost(user.id);
-      
-      if (success) {
-        // Refresh status
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error('Failed to cancel boost:', error);
-    }
-  };
-
-  // Show loading state
-  if (isLoading || statusLoading) {
-    return (
-      <PageLayout title="PULSE Boost System">
-        <div className="container mx-auto py-10">
-          <Card>
-            <CardHeader>
-              <CardTitle>Loading PULSE Boost</CardTitle>
-              <CardDescription>Please wait while we retrieve your boost information...</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-40 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </PageLayout>
-    );
-  }
+    fetchBoostPackages();
+  }, []);
 
   return (
-    <PageLayout 
-      title="PULSE Boost System" 
-      subtitle="Enhance your visibility with the Precision Upgrade Layer for Scalable Exposure"
-    >
-      <Tabs defaultValue="boost" className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="boost" className="flex items-center">
-            <Zap className="mr-2 h-4 w-4" />
-            Boost Manager
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center">
-            <BarChart className="mr-2 h-4 w-4" />
-            Analytics
-          </TabsTrigger>
-          <TabsTrigger value="neural" className="flex items-center">
-            <TrendingUp className="mr-2 h-4 w-4" />
-            Neural Insights
-          </TabsTrigger>
+    <div className="container mx-auto py-8 max-w-5xl">
+      <h1 className="text-3xl font-bold mb-2">Pulse Boost</h1>
+      <p className="text-muted-foreground mb-6">
+        Supercharge your visibility and reach more potential clients with Pulse Boost
+      </p>
+      
+      <Tabs defaultValue="packages">
+        <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsTrigger value="packages">Boost Packages</TabsTrigger>
+          <TabsTrigger value="current">Current Boost</TabsTrigger>
+          <TabsTrigger value="history">Boost History</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="boost" className="space-y-6">
-          <ScrollRevealGroup
-            animation="fade-up"
-            staggerDelay={0.1}
-            containerClassName="space-y-6"
-          >
-            <RevealChild>
-              {boostStatus?.isActive ? renderActiveBoost() : (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Boost Your Profile</CardTitle>
-                    <CardDescription>
-                      Increase your visibility and attract more attention by activating a PULSE boost
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <PulseBoostErrorBoundary>
-                      <p className="mb-4">Select a boost package below to enhance your visibility:</p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {/* Boost packages would be rendered here */}
-                        {boostPackages.length === 0 && (
-                          <p>No boost packages available at the moment.</p>
-                        )}
-                      </div>
-                    </PulseBoostErrorBoundary>
-                  </CardContent>
-                </Card>
-              )}
-            </RevealChild>
-            
-            <RevealChild>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Clock className="mr-2 h-5 w-5" />
-                    Boost History
-                  </CardTitle>
-                  <CardDescription>
-                    Your previous PULSE boost activations
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-center text-muted-foreground py-6">
-                    You have no boost history yet. Activate your first boost to get started.
-                  </p>
-                </CardContent>
-              </Card>
-            </RevealChild>
-          </ScrollRevealGroup>
+        <TabsContent value="packages">
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p>Loading boost packages...</p>
+            </div>
+          ) : error ? (
+            <div className="bg-red-50 text-red-800 p-6 rounded-md text-center">
+              {error}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {packages.map((pkg) => (
+                <BoostPackageCard key={pkg.id} package={pkg} />
+              ))}
+            </div>
+          )}
         </TabsContent>
         
-        <TabsContent value="analytics" className="space-y-6">
-          <ScrollRevealGroup
-            animation="fade-up"
-            staggerDelay={0.1}
-            containerClassName="space-y-6"
-          >
-            <RevealChild>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Analytics Overview</CardTitle>
-                  <CardDescription>
-                    Performance metrics and visibility statistics
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {analytics ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="p-4 rounded-md bg-background border">
-                        <p className="text-sm text-muted-foreground">Additional Views</p>
-                        <p className="text-2xl font-bold">{analytics.additionalViews || 0}</p>
-                      </div>
-                      <div className="p-4 rounded-md bg-background border">
-                        <p className="text-sm text-muted-foreground">Engagement Increase</p>
-                        <p className="text-2xl font-bold">{analytics.engagementIncrease || 0}%</p>
-                      </div>
-                      <div className="p-4 rounded-md bg-background border">
-                        <p className="text-sm text-muted-foreground">Ranking Position</p>
-                        <p className="text-2xl font-bold">{analytics.rankingPosition || '--'}</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-center text-muted-foreground py-6">
-                      No analytics data available. Activate a boost to start collecting insights.
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            </RevealChild>
-            
-            <RevealChild>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Wallet className="mr-2 h-5 w-5" />
-                    UBX Usage
-                  </CardTitle>
-                  <CardDescription>
-                    Your UBX spending on boosts
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-center text-muted-foreground py-6">
-                    No UBX spending data available yet.
-                  </p>
-                </CardContent>
-              </Card>
-            </RevealChild>
-          </ScrollRevealGroup>
+        <TabsContent value="current">
+          <CurrentBoostStatus />
         </TabsContent>
         
-        <TabsContent value="neural" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Neural Optimization</CardTitle>
-              <CardDescription>
-                AI-powered insights powered by Hermes, Oxum and Lucie
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="p-4 rounded-md bg-background border">
-                    <p className="text-sm text-muted-foreground">System Load</p>
-                    <p className="text-2xl font-bold">{neuralMetrics.systemLoad}%</p>
-                  </div>
-                  <div className="p-4 rounded-md bg-background border">
-                    <p className="text-sm text-muted-foreground">Hermes Efficiency</p>
-                    <p className="text-2xl font-bold">{neuralMetrics.hermesEfficiency}%</p>
-                  </div>
-                  <div className="p-4 rounded-md bg-background border">
-                    <p className="text-sm text-muted-foreground">Oxum Precision</p>
-                    <p className="text-2xl font-bold">{neuralMetrics.oxumPrecision}%</p>
-                  </div>
-                  <div className="p-4 rounded-md bg-background border">
-                    <p className="text-sm text-muted-foreground">Optimization Gain</p>
-                    <p className="text-2xl font-bold">{neuralMetrics.optimizationGain}%</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <p className="font-medium">Recommended Actions</p>
-                  <ul className="list-disc pl-5 space-y-1">
-                    {neuralMetrics.recommendedActions.map((action, index) => (
-                      <li key={index} className="text-sm">{action}</li>
-                    ))}
-                  </ul>
-                </div>
-                
-                <Button 
-                  onClick={() => refreshMetrics()}
-                  className="w-full mt-4"
-                >
-                  Refresh Neural Metrics
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="history">
+          <BoostHistory />
         </TabsContent>
       </Tabs>
-    </PageLayout>
+    </div>
+  );
+};
+
+interface BoostPackageCardProps {
+  package: BoostPackage;
+}
+
+const BoostPackageCard: React.FC<BoostPackageCardProps> = ({ package: pkg }) => {
+  return (
+    <Card className="overflow-hidden border-2 hover:border-primary transition-colors">
+      <div className="bg-primary/10 p-4">
+        <h3 className="text-xl font-bold">{pkg.name}</h3>
+        <p className="text-muted-foreground">{pkg.description}</p>
+      </div>
+      
+      <CardContent className="p-6">
+        <div className="mb-6">
+          <div className="text-3xl font-bold mb-1">{pkg.price_ubx} UBX</div>
+          <div className="text-sm text-muted-foreground">or ${pkg.price.toFixed(2)} USD</div>
+        </div>
+        
+        <div className="space-y-3 mb-6">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Duration: {pkg.duration}</span>
+          </div>
+          
+          <div className="flex items-center">
+            <svg className="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+            <span>Visibility: {pkg.visibility}</span>
+          </div>
+          
+          <div className="flex items-center">
+            <svg className="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+            </svg>
+            <span>Increase visibility by {pkg.visibility_increase}%</span>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Button className="w-full">Purchase with UBX</Button>
+          <Button variant="outline" className="w-full">Purchase with USD</Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const CurrentBoostStatus = () => {
+  return (
+    <Card>
+      <CardContent className="p-8 text-center">
+        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+        </div>
+        
+        <h3 className="text-xl font-bold mb-2">No Active Boost</h3>
+        <p className="text-muted-foreground mb-6">
+          You don't have any active boosts at the moment.
+          Purchase a boost to increase your profile visibility!
+        </p>
+        
+        <Button>Purchase Boost</Button>
+      </CardContent>
+    </Card>
+  );
+};
+
+const BoostHistory = () => {
+  return (
+    <Card>
+      <CardContent className="p-8 text-center">
+        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        
+        <h3 className="text-xl font-bold mb-2">No Boost History</h3>
+        <p className="text-muted-foreground mb-6">
+          You haven't purchased any boosts yet.
+          Try your first boost to see how it can increase your visibility!
+        </p>
+        
+        <Button>Try Your First Boost</Button>
+      </CardContent>
+    </Card>
   );
 };
 

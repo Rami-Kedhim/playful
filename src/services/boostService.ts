@@ -67,6 +67,11 @@ class BoostService {
     
     return true;
   }
+  
+  async getBoostPackages() {
+    // Implement this method to return boost packages
+    return [];
+  }
 }
 
 export const boostService = new BoostService();

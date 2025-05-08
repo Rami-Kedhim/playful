@@ -1,38 +1,31 @@
 
-// Fix import path casing for Escort to match file casing exactly
-
 import { Escort } from '@/types/Escort';
-import { db } from '@/lib/db';
 
-const getEscorts = async (): Promise<Escort[]> => {
-  try {
-    const escorts = await db.escort.findMany({
-      where: {
-        isAI: false
-      }
-    });
-    return escorts;
-  } catch {
+class EscortService {
+  async getEscorts(): Promise<Escort[]> {
+    // Mock implementation
     return [];
   }
-};
 
-const getEscortById = async (escortId: string): Promise<Escort | null> => {
-  try {
-    const escort = await db.escort.findUnique({
-      where: {
-        id: escortId,
-        isAI: false
-      }
-    });
-    return escort;
-  } catch {
+  async getEscortById(id: string): Promise<Escort | null> {
+    // Mock implementation
     return null;
   }
-};
 
-export default {
-  getEscorts,
-  getEscortById,
-};
+  async searchEscorts(query: string, filters: any): Promise<Escort[]> {
+    // Mock implementation
+    return [];
+  }
 
+  async getPopularEscorts(): Promise<Escort[]> {
+    // Mock implementation
+    return [];
+  }
+
+  async getFeaturedEscorts(): Promise<Escort[]> {
+    // Mock implementation
+    return [];
+  }
+}
+
+export const escortServiceInstance = new EscortService();

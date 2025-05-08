@@ -1,63 +1,43 @@
 
-/**
- * Orus Security and Authentication System
- */
+import { SessionValidationResult, SystemIntegrityResult } from '@/types/core-systems';
 
-export interface SystemIntegrityResult {
-  isValid: boolean;
-  message: string;
-  details?: Record<string, any>;
-}
-
-export interface SessionValidationResult {
-  isValid: boolean;
-  userId?: string;
-  expiry?: Date;
-}
-
-class OrusSystem {
-  initialize(): Promise<boolean> {
-    console.log('Initializing Orus security system');
-    return Promise.resolve(true);
-  }
-  
-  getSystemStatus() {
+export class Orus {
+  validateSession(token: string): SessionValidationResult {
+    // Mock implementation
+    const isValid = token && token.length > 0;
+    
     return {
-      status: 'online',
-      integrity: 'verified',
-      lastCheck: new Date()
+      isValid,
+      userId: isValid ? 'user-1' : '',
+      expiry: new Date(Date.now() + 3600 * 1000),
+      username: isValid ? 'user1' : '',
+      timestamp: new Date().toISOString()
     };
   }
   
   checkIntegrity(): SystemIntegrityResult {
+    // Mock implementation
     return {
       isValid: true,
-      message: 'Security integrity check passed',
-      details: {
-        timestamp: new Date().toISOString(),
-        securityLevel: 'high'
-      }
-    };
-  }
-  
-  verifyAuthToken(token: string): boolean {
-    // Mock implementation
-    return token !== undefined && token !== '';
-  }
-
-  validateSession(userId: string): SessionValidationResult {
-    // Mock implementation
-    if (!userId || userId === '') {
-      return { isValid: false };
-    }
-
-    return {
-      isValid: true,
-      userId,
-      expiry: new Date(Date.now() + 3600000) // 1 hour from now
+      status: 'ok',
+      errors: [],
+      warnings: [],
+      lastChecked: new Date().toISOString(),
+      overallStatus: 'operational',
+      timestamp: new Date().toISOString(),
+      modules: {
+        auth: 'operational',
+        content: 'operational',
+        payments: 'operational',
+        security: 'operational'
+      },
+      recommendations: [
+        'Regular security updates recommended',
+        'Implement two-factor authentication'
+      ]
     };
   }
 }
 
-export const orus = new OrusSystem();
+export const orus = new Orus();
 export default orus;

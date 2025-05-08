@@ -1,6 +1,4 @@
 
-// Fix usage of PulseBoost properties and correct property names
-
 import { BoostPackage } from '@/types/boost';
 import { PulseBoost } from '@/types/pulse-boost';
 import { PULSE_BOOSTS } from '@/constants/pulseBoostConfig';

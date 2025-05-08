@@ -11,6 +11,9 @@ export interface UberEcosystemContextType {
 }
 
 const UberEcosystemContext = createContext<UberEcosystemContextType>({
+  user: null,
+  loading: false,
+  error: null,
   lucieAI: {},
   state: {}
 });

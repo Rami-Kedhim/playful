@@ -1,71 +1,51 @@
 
 import { useState, useEffect } from 'react';
-import { Escort } from '@/types/escort.d'; // Match the case
-import escortService from '@/services/escorts/escortService'; // Fix import to use default export
+import { Escort } from '@/types/Escort';
+import { escortServiceInstance } from '@/services/escorts/escortService';
 
 export const useEscortSearch = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<Escort[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [query, setQuery] = useState('');
+  const [filters, setFilters] = useState<any>({});
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState<Escort[]>([]);
 
   useEffect(() => {
-    const timerId = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
+    const search = async () => {
+      if (!query && Object.keys(filters).length === 0) {
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const results = await escortServiceInstance.searchEscorts(query, filters);
+        setSearchResults(results);
+      } catch (err: any) {
+        console.error('Error searching escorts:', err);
+        setError(err.message || 'Failed to search escorts');
+        setSearchResults([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Debounce search
+    const timer = setTimeout(() => {
+      search();
     }, 500);
 
-    return () => {
-      clearTimeout(timerId);
-    };
-  }, [searchTerm]);
-
-  // Function to search escorts
-  const searchEscorts = async (query: string): Promise<Escort[]> => {
-    setLoading(true);
-    try {
-      // Instead of escortService.searchEscorts, use getEscorts and filter locally
-      const allEscorts = await escortService.getEscorts();
-      const filtered = allEscorts.filter(escort => 
-        escort.name.toLowerCase().includes(query.toLowerCase()) || 
-        (escort.location && escort.location.toLowerCase().includes(query.toLowerCase()))
-      );
-      return filtered;
-    } catch (error) {
-      console.error('Error searching escorts:', error);
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (debouncedSearchTerm) {
-      const fetchSearchResults = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-          const results = await searchEscorts(debouncedSearchTerm);
-          setSearchResults(results);
-        } catch (err: any) {
-          setError(err.message || 'Failed to fetch search results');
-          setSearchResults([]);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchSearchResults();
-    } else {
-      setSearchResults([]);
-    }
-  }, [debouncedSearchTerm]);
+    return () => clearTimeout(timer);
+  }, [query, filters]);
 
   return {
-    searchTerm,
-    setSearchTerm,
-    searchResults,
-    loading,
-    error
+    query,
+    setQuery,
+    filters,
+    setFilters,
+    isLoading,
+    error,
+    searchResults
   };
 };

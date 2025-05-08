@@ -1,26 +1,41 @@
+
+import { OxumSystem } from '@/types/core-systems';
+
 export interface SystemStatus {
   operational: boolean;
   isActive: boolean;
   services: {
-    auth: 'active' | 'inactive' | 'degraded';
-    analytics: 'active' | 'inactive' | 'degraded';
-    ai: 'active' | 'inactive' | 'degraded';
-    wallet: 'active' | 'inactive' | 'degraded';
-    seo: 'active' | 'inactive' | 'degraded';
+    auth: string;
+    analytics: string;
+    ai: string;
+    wallet: string;
+    seo: string;
   };
   queueLength: number;
   processing: boolean;
   uptime: number;
   lastReboot: string;
-  messageLength?: number; // Add this for UberCore
+  modules?: Record<string, string>;
+}
+
+export interface SessionValidationResult {
+  isValid: boolean;
+  userId: string;
+  expiry: Date;
+  username: string;
+  timestamp: string;
 }
 
 export interface SystemIntegrityResult {
   isValid: boolean;
-  status: 'ok' | 'warning' | 'error';
+  status: string;
   errors: string[];
   warnings: string[];
   lastChecked: string;
+  overallStatus?: string;
+  timestamp?: string;
+  modules?: Record<string, string>;
+  recommendations?: string[];
 }
 
 export interface SystemHealthMetrics {
@@ -31,161 +46,71 @@ export interface SystemHealthMetrics {
   load: number;
 }
 
-export interface SessionValidationResult {
-  isValid: boolean;
-  userId: string;
-  expiry: Date;
-  username: string;
-  timestamp: string;
-  sessionId?: string; // Add this for UberCore
-}
-
 export interface UberCoreSystem {
   getSystemStatus(): SystemStatus;
   checkSystemIntegrity(): SystemIntegrityResult;
   getSystemHealthMetrics(): SystemHealthMetrics;
   validateSession(sessionId: string): SessionValidationResult;
+  initializeAutomaticSeo(): boolean;
+  checkSubsystemHealth(): { name: string, status: string, health: number }[];
 }
 
-export interface OxumSystem {
-  getSystemStatus(): {
-    isOperational: boolean;
-    performance: number;
-    lastUpdate: string;
-  };
-  processPayment(amount: number, currency: string): Promise<boolean>;
-  validateTransaction(transactionId: string): Promise<{
-    isValid: boolean;
-    amount: number;
-    currency: string;
-    timestamp: string;
-  }>;
-  getExchangeRate(from: string, to: string): number;
+export interface LucieAISystem {
+  initialize(): Promise<boolean>;
+  getSystemStatus(): SystemStatus;
+  generateText(prompt: string): Promise<string>;
+  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
+  generateContent(prompt: string, options?: Record<string, any>): Promise<GenerateContentResult>;
+  analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult>;
+  configure(options: Record<string, any>): void;
+  generateResponse(params: GenerateContentParams): Promise<GenerateContentResult>;
 }
 
-// Add missing types
 export interface ModerateContentParams {
   content: string;
   userId?: string;
   strictness?: 'low' | 'medium' | 'high';
-  contentType?: string;
   type?: string;
 }
 
 export interface ModerateContentResult {
   isSafe: boolean;
-  safe?: boolean; // For backward compatibility
+  safe?: boolean;
   score: number;
   issues: string[];
   blockedCategories: string[];
   category: string;
-  action: 'allow' | 'block';
+  action: string;
 }
 
 export interface GenerateContentParams {
   prompt: string;
   options?: Record<string, any>;
-  userId?: string;
-  maxLength?: number;
 }
 
 export interface GenerateContentResult {
   content: string;
-  warnings: string[];
   moderated?: boolean;
+  warnings: any[];
 }
 
 export interface SentimentAnalysisParams {
   text: string;
-  options?: Record<string, any>;
 }
 
 export interface SentimentAnalysisResult {
   score: number;
-  sentiment: string;
+  sentiment: 'positive' | 'negative' | 'neutral';
   confidence?: number;
 }
 
-export interface LucieAISystem {
-  initialize(): Promise<boolean>;
-  generateText(prompt: string): Promise<string>;
-  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
-  generateContent(prompt: string, options?: Record<string, any>): Promise<GenerateContentResult>;
-  analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult>;
+export interface OxumSystem {
+  calculateBoostScore(profileId: string): number;
+  calculateScore(profileId: string): number;
+  checkSystemStatus(): {operational: boolean};
   getSystemStatus(): SystemStatus;
-  configure(options: Record<string, any>): void;
-  generateResponse(params: GenerateContentParams): Promise<GenerateContentResult>;
 }
 
-export interface RecommendedAction {
-  id: string;
-  title: string;
-  description: string;
-  priority: 'high' | 'medium' | 'low';
-  type: string;
-  actionUrl?: string;
-  action?: string;
-  icon?: string;
-  completed?: boolean;
-}
-
-// Add analytics types
-export interface AnalyticsData {
-  views: number;
-  additionalViews: number;
-  engagementIncrease: number;
-  rankingPosition: number;
-  conversionRate: number;
-  messageRate: number;
-  bookingRate: number;
-  change?: number;
-  withBoost?: number;
-  withoutBoost?: number;
-  today?: number;
-}
-
-// Boost related types
-export interface BoostAnalytics extends AnalyticsData {
-  // Include AnalyticsData properties plus any additional ones
-  boostEfficiency?: number;
-  remainingTime?: string;
-}
-
-export interface BoostStatus {
-  isActive: boolean;
-  remainingTime: string;
-  packageId?: string;
-  expiresAt?: Date;
-  startedAt?: Date;
-  startTime?: Date;
-  endTime?: Date;
-  packageName?: string;
-  activeBoostId?: string;
-  progress?: number;
-}
-
-export interface BoostPackage {
-  id: string;
-  price: number;
-  duration: number;
-  boostMultiplier?: number;
-  features?: string[];
-}
-
-export interface PulseBoost {
-  id: string;
-  price: number;
-  price_ubx: number;
-  duration: number;
-  durationMinutes: number;
-  name: string;
-  description: string;
-  features: string[];
-  badgeColor?: string;
-  isMostPopular?: boolean;
-  boostPackage?: BoostPackage;
-}
-
-export interface EnhancedBoostStatus extends BoostStatus {
-  boostPackage?: BoostPackage;
+export interface AutomaticSEO {
+  initialize(): boolean;
 }
