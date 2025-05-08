@@ -35,8 +35,9 @@ const BoostManagerContainer = ({ profileId }: { profileId?: string }) => {
 
     // Use Oxum's boost allocation algorithm
     try {
-      // Use the new boostAllocationEigen method instead
-      const allocationVector = oxum.boostAllocationEigen(matrix);
+      // Use the new boostAllocationEigen method with proper arguments
+      const boostLevel = 2; // Default boost level
+      const allocationVector = await oxum.boostAllocationEigen(activeProfileId, boostLevel);
       console.log("Boost allocation vector:", allocationVector);
     } catch (e) {
       console.error("Failed to calculate boost allocation:", e);

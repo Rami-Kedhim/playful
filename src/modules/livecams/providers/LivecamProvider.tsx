@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Livecam } from '@/types/livecams';
+import { Livecam, LivecamModel } from '@/types/livecams';
 
 interface LivecamContextType {
   livecams: Livecam[];
@@ -36,7 +36,7 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Mock data with properly typed Livecam objects, removed 'region' properties
+      // Mock data with properly typed Livecam objects
       const mockLivecams: Livecam[] = [
         {
           id: '1',
@@ -53,6 +53,7 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
           price: 55,
           category: 'Dance',
           language: 'English',
+          country: 'US',
           description: 'Join my livestream for dance and fitness routines!'
         },
         {
@@ -70,6 +71,7 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
           price: 45,
           category: 'Gaming',
           language: 'English',
+          country: 'CA',
           description: 'RPG gaming streams every evening'
         },
         {
@@ -87,6 +89,7 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
           price: 50,
           category: 'Music',
           language: 'English',
+          country: 'UK',
           description: 'Piano performances and music theory'
         }
       ];
@@ -124,4 +127,3 @@ export const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) =>
     </LivecamContext.Provider>
   );
 };
-

@@ -1,179 +1,166 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import PerformanceChart from './PerformanceChart';
-
-// CPU/Memory mock data
-const cpuMemoryData = [
-  { time: '00:00', cpu: 45, memory: 62 },
-  { time: '02:00', cpu: 53, memory: 65 },
-  { time: '04:00', cpu: 58, memory: 64 },
-  { time: '06:00', cpu: 42, memory: 63 },
-  { time: '08:00', cpu: 60, memory: 70 },
-  { time: '10:00', cpu: 75, memory: 72 },
-  { time: '12:00', cpu: 80, memory: 78 },
-  { time: '14:00', cpu: 65, memory: 82 },
-  { time: '16:00', cpu: 70, memory: 76 },
-  { time: '18:00', cpu: 63, memory: 72 },
-  { time: '20:00', cpu: 55, memory: 68 },
-  { time: '22:00', cpu: 48, memory: 65 }
-];
-
-// Operations/Errors mock data
-const operationsData = [
-  { time: '00:00', ops: 120, error: 0.5 },
-  { time: '02:00', ops: 90, error: 0.3 },
-  { time: '04:00', ops: 75, error: 0.2 },
-  { time: '06:00', ops: 85, error: 0.4 },
-  { time: '08:00', ops: 150, error: 0.6 },
-  { time: '10:00', ops: 230, error: 0.8 },
-  { time: '12:00', ops: 310, error: 1.2 },
-  { time: '14:00', ops: 280, error: 1.0 },
-  { time: '16:00', ops: 260, error: 0.9 },
-  { time: '18:00', ops: 240, error: 0.7 },
-  { time: '20:00', ops: 170, error: 0.5 },
-  { time: '22:00', ops: 130, error: 0.4 }
-];
+import { PerformanceChart } from '@/components/neural/PerformanceChart';
+import { MetricCard } from '@/components/neural/MetricCard';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 
 interface NeuralMetricsDisplayProps {
-  title?: string;
-  refreshInterval?: number;
+  neuralNetworkId: string;
 }
 
-interface ChartConfig {
-  title: string;
-  description: string;
-  dataKey: string;
-  color: string;
-  yAxisLabel: string;
-}
+const NeuralMetricsDisplay: React.FC<NeuralMetricsDisplayProps> = ({ neuralNetworkId }) => {
+  const [performanceMetrics, setPerformanceMetrics] = useState<{
+    averageResponseTime: number;
+    errorRate: number;
+    expectedLoad: number;
+    predictedResponseTime: number;
+    predictedErrorRate: number;
+    loadPredictionData: Array<{ date: string; value: number }>;
+    responsePredictionData: Array<{ date: string; value: number }>;
+    errorPredictionData: Array<{ date: string; value: number }>;
+  }>({
+    averageResponseTime: 0,
+    errorRate: 0,
+    expectedLoad: 0,
+    predictedResponseTime: 0,
+    predictedErrorRate: 0,
+    loadPredictionData: [],
+    responsePredictionData: [],
+    errorPredictionData: []
+  });
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-const NeuralMetricsDisplay: React.FC<NeuralMetricsDisplayProps> = ({
-  title = 'Neural System Metrics',
-  refreshInterval = 30000
-}) => {
-  const [activeTab, setActiveTab] = useState<string>('resources');
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  
-  // Auto-refresh mock data
   useEffect(() => {
-    const interval = setInterval(() => {
-      // In a real app, we would fetch new data here
-      setLastUpdated(new Date());
-    }, refreshInterval);
-    
-    return () => clearInterval(interval);
-  }, [refreshInterval]);
-  
-  // Helper function to format time for display
-  const formatUpdateTime = (date: Date): string => {
-    return date.toLocaleTimeString(undefined, {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
+    refreshMetrics();
+  }, [neuralNetworkId]);
+
+  const refreshMetrics = async () => {
+    setLoading(true);
+    try {
+      // Simulate fetching metrics from an API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const mockMetrics = {
+        averageResponseTime: Math.random() * 150 + 50,
+        errorRate: Math.random() * 0.05,
+        expectedLoad: Math.random() * 1000,
+        predictedResponseTime: Math.random() * 160 + 40,
+        predictedErrorRate: Math.random() * 0.06,
+        loadPredictionData: generateMockData(7),
+        responsePredictionData: generateMockData(7),
+        errorPredictionData: generateMockData(7)
+      };
+
+      setPerformanceMetrics(mockMetrics);
+    } catch (error: any) {
+      console.error('Error fetching metrics:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to fetch performance metrics',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
-  
-  // Convert the CPU/Memory data to the format expected by PerformanceChart
-  const cpuChartData = cpuMemoryData.map(entry => ({
-    date: entry.time,
-    value: entry.cpu
-  }));
-  
-  const memoryChartData = cpuMemoryData.map(entry => ({
-    date: entry.time,
-    value: entry.memory
-  }));
-  
-  // Convert the Operations/Errors data to the format expected by PerformanceChart
-  const operationsChartData = operationsData.map(entry => ({
-    date: entry.time,
-    value: entry.ops
-  }));
-  
-  const errorRateChartData = operationsData.map(entry => ({
-    date: entry.time,
-    value: entry.error
-  }));
-  
+
+  const generateMockData = (days: number) => {
+    const data = [];
+    const today = new Date();
+    for (let i = 0; i < days; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      data.push({
+        date: date.toLocaleDateString(),
+        value: Math.random() * 100
+      });
+    }
+    return data.reverse();
+  };
+
+  const {
+    averageResponseTime,
+    errorRate,
+    expectedLoad,
+    predictedResponseTime,
+    predictedErrorRate,
+    loadPredictionData,
+    responsePredictionData,
+    errorPredictionData
+  } = performanceMetrics;
+
+  // In mapDataForChart function, transform the date property to name
+  const mapDataForChart = (data: Array<{ date: string; value: number }>) => {
+    return data.map(item => ({
+      name: item.date,
+      value: item.value
+    }));
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">{title}</h2>
-        <div className="text-sm text-muted-foreground">
-          Updated: {formatUpdateTime(lastUpdated)}
+    <Card>
+      <CardHeader>
+        <CardTitle>Neural Network Performance</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <MetricCard title="Average Response Time" value={averageResponseTime} unit="ms" />
+          <MetricCard title="Error Rate" value={errorRate * 100} unit="%" />
+          <MetricCard title="Expected Load" value={expectedLoad} />
         </div>
-      </div>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-2 mb-4">
-          <TabsTrigger value="resources">Resource Utilization</TabsTrigger>
-          <TabsTrigger value="operations">Operations & Errors</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="resources" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">CPU Utilization</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <PerformanceChart 
-                  data={cpuChartData}
-                  dataKey="cpu"
-                  title="CPU Usage"
-                />
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Memory Utilization</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <PerformanceChart 
-                  data={memoryChartData}
-                  dataKey="memory"
-                  title="Memory Usage"
-                />
-              </CardContent>
-            </Card>
+
+        <div className="grid gap-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Load Predictions</h3>
+            <Button variant="outline" size="sm" onClick={refreshMetrics}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
           </div>
-        </TabsContent>
-        
-        <TabsContent value="operations" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Operations per Hour</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <PerformanceChart 
-                  data={operationsChartData}
-                  dataKey="operations"
-                  title="Operations"
-                />
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Error Rate (%)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <PerformanceChart 
-                  data={errorRateChartData}
-                  dataKey="errorRate"
-                  title="Error Rate"
-                />
-              </CardContent>
-            </Card>
+          <PerformanceChart
+            data={mapDataForChart(loadPredictionData)}
+            dataKey="expectedLoad"
+            title="Load Predictions"
+            onRefresh={refreshMetrics}
+          />
+        </div>
+
+        <div className="grid gap-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Response Time Predictions</h3>
+            <Button variant="outline" size="sm" onClick={refreshMetrics}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
           </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+          <PerformanceChart
+            data={mapDataForChart(responsePredictionData)}
+            dataKey="predictedResponseTime"
+            title="Response Time Predictions"
+            onRefresh={refreshMetrics}
+          />
+        </div>
+
+        <div className="grid gap-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Error Rate Predictions</h3>
+            <Button variant="outline" size="sm" onClick={refreshMetrics}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
+          <PerformanceChart
+            data={mapDataForChart(errorPredictionData)}
+            dataKey="predictedErrorRate"
+            title="Error Rate Predictions"
+            onRefresh={refreshMetrics}
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

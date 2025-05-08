@@ -1,13 +1,6 @@
 
 import React from 'react';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
   LineChart,
   Line,
   XAxis,
@@ -47,7 +40,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis
-            dataKey="date"
+            dataKey="name"
             tick={{ fontSize: 12 }}
             tickFormatter={(value) => value}
           />

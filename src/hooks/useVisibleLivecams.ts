@@ -13,7 +13,7 @@ const useVisibleLivecams = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Create mock data with correct Livecam type, removed non-existing properties including 'region'
+      // Create mock data with correct Livecam type
       const mockLivecams: Livecam[] = [
         {
           id: '1',
@@ -30,6 +30,7 @@ const useVisibleLivecams = () => {
           price: 50,
           category: 'Dance',
           language: 'English',
+          country: 'US',
           description: 'Join my dance party livestream!'
         },
         {
@@ -47,6 +48,7 @@ const useVisibleLivecams = () => {
           price: 40,
           category: 'Gaming',
           language: 'English',
+          country: 'UK',
           description: 'Gaming streams every evening'
         }
       ];
@@ -69,4 +71,3 @@ const useVisibleLivecams = () => {
 };
 
 export default useVisibleLivecams;
-

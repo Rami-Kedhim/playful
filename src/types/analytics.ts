@@ -40,6 +40,7 @@ export interface AnalyticsData {
     score: number;
   }>;
   conversionRate?: number;
+  conversions?: number;
   messageRate?: number;
   bookingRate?: number;
 }
@@ -71,6 +72,7 @@ export interface PerformanceChartProps {
   dataKey: string;
   title?: string;
   height?: number;
+  onRefresh?: () => void;
   colors?: {
     stroke?: string;
     fill?: string;

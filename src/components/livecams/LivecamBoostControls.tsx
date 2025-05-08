@@ -5,12 +5,12 @@ import { Zap, X, Settings } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Slider } from "@/components/ui/slider";
-import { Livecam } from '@/types/livecams';
+import { LivecamModel } from '@/types/livecams';
 import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 import UBXPriceDisplay from '@/components/oxum/UBXPriceDisplay';
 
 interface LivecamBoostControlsProps {
-  livecam: Livecam;
+  livecam: LivecamModel;
   isBoosted: boolean;
   onBoost: (livecamId: string, intensity: number, durationHours: number) => boolean;
   onCancel: (livecamId: string) => boolean;

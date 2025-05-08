@@ -20,7 +20,7 @@ const useEscortSearch = (initialQuery: string = '') => {
       setError(null);
 
       try {
-        // Updated to only use one parameter
+        // Using only one parameter
         const searchResults = await escortServiceInstance.searchEscorts(query);
         setResults(searchResults);
       } catch (err) {
@@ -44,3 +44,4 @@ const useEscortSearch = (initialQuery: string = '') => {
 };
 
 export default useEscortSearch;
+export { useEscortSearch };

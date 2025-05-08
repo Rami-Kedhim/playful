@@ -63,6 +63,7 @@ export interface AnalyticsData {
   rankingPosition?: number;
   views?: number;
   conversionRate?: number;
+  conversions?: number;
   messageRate?: number;
   bookingRate?: number;
   impressions?: {
@@ -114,6 +115,12 @@ export interface SystemStatus {
   processing?: boolean;
   uptime?: number;
   lastReboot?: string;
+  payments?: string;
+  neural?: string;
+  security?: string;
+  isOperational?: boolean;
+  performance?: number;
+  lastUpdate?: string;
 }
 
 export interface LucieAISystem {
@@ -135,5 +142,7 @@ export interface OxumSystem {
   processPayment(amount: number, currency: string): Promise<boolean>;
   validateTransaction(transactionId: string): Promise<boolean>;
   getExchangeRate(from: string, to: string): Promise<number>;
+  calculateVisibilityScore?(profileId: string): Promise<number>;
   boostAllocationEigen?(profileId: string, boostLevel: number): Promise<number>;
+  boostAllocationEigen?(matrix: number[][]): Promise<number[]>;
 }

@@ -32,7 +32,10 @@ class Oxum implements OxumSystem {
         neural: 'active',
         security: 'active'
       },
-      queueLength: 0
+      queueLength: 0,
+      isOperational: this.isInitialized,
+      performance: 0.95,
+      lastUpdate: new Date().toISOString()
     };
   }
 
@@ -63,12 +66,20 @@ class Oxum implements OxumSystem {
     return Math.random() * 100;
   }
   
-  async boostAllocationEigen(profileId: string, boostLevel: number): Promise<number> {
-    // Calculate boost allocation using eigenvalue algorithm
-    console.log(`Calculating boost allocation for ${profileId} at level ${boostLevel}`);
-    const baseScore = 50;
-    const boostMultiplier = boostLevel * 1.5;
-    return baseScore * boostMultiplier;
+  async boostAllocationEigen(profileId: string | number[][], boostLevel?: number): Promise<number | number[]> {
+    if (Array.isArray(profileId)) {
+      // Matrix calculation mode
+      const matrix = profileId;
+      const result = matrix.map(row => row.reduce((sum, val) => sum + val, 0));
+      console.log(`Calculating boost allocation for matrix`);
+      return result;
+    } else {
+      // Profile ID mode
+      console.log(`Calculating boost allocation for ${profileId} at level ${boostLevel}`);
+      const baseScore = 50;
+      const boostMultiplier = (boostLevel || 1) * 1.5;
+      return baseScore * boostMultiplier;
+    }
   }
 }
 

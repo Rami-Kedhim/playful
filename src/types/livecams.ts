@@ -6,8 +6,8 @@ export interface LivecamModel {
   isLive: boolean;
   viewerCount: number;
   tags: string[];
-  location: string;
-  age: number;
+  location?: string;
+  age?: number;
   description?: string;
   imageUrl: string;
   thumbnailUrl: string;
@@ -16,6 +16,26 @@ export interface LivecamModel {
   rating?: number;
   reviewCount?: number;
   boostScore?: number;
+  name: string;
+  country?: string;
+  categories?: string[];
+  category?: string;
+  isStreaming?: boolean;
+  streamUrl?: string;
+  profileUrl?: string;
+  boosted?: boolean;
+  isPopular?: boolean;
+  region?: string;
+  price?: number;
+  language?: string;
+  isBoosted?: boolean;
+}
+
+export interface Livecam extends LivecamModel {
+  // Any additional properties specific to Livecam instances
+  title?: string;
+  startTime?: Date | string;
+  quality?: string;
 }
 
 export interface LivecamCategory {
@@ -37,3 +57,13 @@ export interface LivecamFilter {
   onlyVerified?: boolean;
   sortBy?: 'popularity' | 'newest' | 'rating' | 'price_low' | 'price_high';
 }
+
+export interface LivecamContextType {
+  livecams: Livecam[];
+  loadingLivecams: boolean;
+  error: string | null;
+  fetchLivecams: () => Promise<void>;
+  getLivecamById?: (id: string) => Livecam | undefined;
+}
+
+export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "massage" | "dinner" | "";

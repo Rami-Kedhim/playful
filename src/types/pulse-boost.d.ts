@@ -1,124 +1,39 @@
 
-export interface BoostPackage {
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-  price_sol?: number;
-  price_ubx?: number;
-  duration: string | number; // in hours or as interval string
-  boost_level: number;
-  features?: string[];
-  is_featured?: boolean;
-  is_active?: boolean;
-  color?: string; // Added color property
-  badgeColor?: string; // Added badgeColor property
-  visibility_increase?: number;
-  isMostPopular?: boolean;
-}
-
-export type PulseBoost = BoostPackage;
-
-export interface BoostStatus {
+export interface EnhancedBoostStatus {
   isActive: boolean;
   packageId?: string;
-  expiresAt?: Date | string;
-  timeRemaining?: string;
-}
-
-export interface EnhancedBoostStatus extends BoostStatus {
-  boostLevel?: number;
-  isExpired: boolean;
+  expiresAt?: Date;
+  timeRemaining: string;
   percentRemaining: number;
-  timeRemaining: string;  // Make this required to fix the issue
-  durationInfo?: {
-    hours: number;
-    minutes: number;
-    seconds: number;
-  };
-  packageName?: string;
-  startedAt?: Date;
-  progress?: number;
+  isExpired?: boolean;
   boostPackage?: BoostPackage;
 }
 
-export interface BoostEligibility {
-  isEligible: boolean;
-  reason?: string;
-  requirements?: string[];
+export interface BoostPackage {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  price_ubx: number;
+  duration: string;
+  features: string[];
+  is_active: boolean;
+  is_featured: boolean;
+  visibility_increase: number;
+  color: string;
+  badgeColor: string;
+  boost_level?: number;
+  isMostPopular?: boolean;
 }
 
-export interface HermesStatus {
-  position: number;
-  activeUsers: number;
-  estimatedVisibility: number;
-  lastUpdateTime: string;
-  boostScore: number;
-  effectivenessScore: number;
+export interface PulseBoost extends BoostPackage {
+  durationMinutes: number;
+  visibility: string;
 }
 
 export interface BoostPurchaseResult {
   success: boolean;
+  orderId?: string;
+  transactionId?: string;
   message?: string;
-  boostId?: string;
-  transactionId?: string; // Added this property
-}
-
-export interface PulseBoostConfig {
-  maxDailyBoosts: number;
-  cooldownPeriod: number; // in minutes
-  hermesIntegration: boolean;
-}
-
-export interface BoostAnalytics {
-  views: {
-    withBoost: number;
-    withoutBoost: number;
-    increase: number;
-    percentageIncrease: number;
-  };
-  messages: {
-    withBoost: number;
-    withoutBoost: number;
-    increase: number;
-    percentageIncrease: number;
-  };
-  bookings: {
-    withBoost: number;
-    withoutBoost: number;
-    increase: number;
-    percentageIncrease: number;
-  };
-  ranking: {
-    withBoost: number;
-    withoutBoost: number;
-    improvement: number;
-  };
-  totalBoosts?: number;
-  activeBoosts?: number;
-  averageBoostScore?: number;
-  boostHistory?: Array<{
-    date: Date;
-    score: number;
-  }>;
-  views?: number;
-  impressions?: {
-    value: number;
-    change?: number;
-  };
-  interactions?: {
-    value: number;
-    change?: number;
-  };
-}
-
-export interface BoostHistory {
-  items: Array<{
-    id: string;
-    packageId: string;
-    startDate: Date;
-    endDate: Date;
-    price: number;
-    status: string;
-  }>;
 }
