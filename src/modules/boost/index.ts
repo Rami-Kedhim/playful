@@ -1,22 +1,21 @@
 
-// Export all boost-related components, hooks, and utilities from here
-export { useBoost } from '@/hooks/boost/useBoost';
-export { useBoostContext } from '@/hooks/boost/useBoostContext';
-export { BoostProvider } from '@/contexts/BoostContext';
-export * from '@/types/boost';
-export * from '@/utils/boost/boostCalculation';
-export * from '@/utils/boost/profileCompletion';
-export * from '@/utils/boost/interactionScore';
-export * from '@/utils/boost/index';
+// Export boost-related types and functions without duplicates
+export * from '@/types/pulse-boost';
 
-// Export all boost components
-export { default as BoostPackage } from '@/components/boost/BoostPackage';
-export { default as BoostPackages } from '@/components/boost/BoostPackages';
-export { default as BoostActivePackage } from '@/components/boost/BoostActivePackage';
-export { default as BoostDialogContainer } from '@/components/boost/BoostDialogContainer';
-export { default as BoostDialogTabs } from '@/components/boost/BoostDialogTabs';
-export { default as HermesBoostInfo } from '@/components/boost/HermesBoostInfo';
-export { default as BoostProfileDialog } from '@/components/boost/BoostProfileDialog';
-export { default as BoostEligibilityCheck } from '@/components/boost/BoostEligibilityCheck';
+// Export boost-related hooks
+export * from '@/hooks/boost/useBoostAnalytics';
+export * from '@/hooks/boost/useBoostManager';
+export * from '@/hooks/boost/useBoostStatus';
+export * from '@/hooks/boost/usePulseBoost';
+export * from '@/hooks/boost/usePulseBoostAdapter';
 
-// Add additional exports as needed for a complete boost module
+// Explicitly export single functions to avoid ambiguity
+export { calculateBoostScore } from '@/utils/boost/boostCalculation';
+export { optimizeBoostPerformance } from '@/utils/boost/boostPerformance';
+export { evaluateBoostValue } from '@/utils/boost/boostValue';
+
+// Export components
+export { default as BoostAnalytics } from '@/components/boost/BoostAnalytics';
+export { default as BoostManager } from '@/components/boost/BoostManager';
+export { default as BoostPackageCard } from '@/components/boost/BoostPackageCard';
+export { default as BoostStatusIndicator } from '@/components/boost/BoostStatusIndicator';

@@ -1,4 +1,6 @@
 
+// Add missing interfaces for Lucie AI System
+
 export interface ModerateContentParams {
   content: string;
   contentType: string;

@@ -1,6 +1,22 @@
 
-// Export all core system related components, hooks, and utilities
-export * from '@/types/core-systems';
+// Export core system types without creating ambiguity
+export type { 
+  ModerateContentParams, 
+  ModerateContentResult, 
+  GenerateContentResult,
+  SentimentAnalysisResult, 
+  LucieAISystem,
+  SystemStatus,
+  SystemIntegrityResult,
+  SystemHealthMetrics,
+  SessionValidationResult,
+  UberCoreSystem,
+  RecommendedAction
+} from '@/types/core-systems';
+
+// Explicitly don't re-export BoostAnalytics to avoid ambiguity
+// export type { BoostAnalytics } from '@/types/core-systems';
+
 export * from '@/types/uber-core';
 export * from '@/utils/boost/escortBoostScore';
 export * from '@/utils/boost/livecamBoostScore';

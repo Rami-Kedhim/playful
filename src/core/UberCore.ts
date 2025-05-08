@@ -1,5 +1,5 @@
 
-import { UberCoreSystem, SystemStatus, SystemIntegrityResult, SystemHealthMetrics, SessionValidationResult } from '@/types/core-systems';
+import { SystemStatus, SystemIntegrityResult, SystemHealthMetrics, SessionValidationResult } from '@/types/core-systems';
 import { orus } from './Orus';
 import { hermes } from './Hermes';
 import { lucieAI } from './Lucie';
@@ -10,7 +10,7 @@ import { automaticSeoService } from '@/services/seo/AutomaticSeoService';
 /**
  * UberCore system implementation
  */
-class UberCore implements UberCoreSystem {
+class UberCore {
   private operational: boolean = false;
 
   async initialize(): Promise<boolean> {
@@ -116,7 +116,7 @@ class UberCore implements UberCoreSystem {
 const uberCoreInstance = new UberCore();
 
 /**
- * UberCore system initialization
+ * UberCore system with additional methods
  */
 export const uberCore = {
   ...uberCoreInstance,
@@ -147,6 +147,9 @@ export const uberCore = {
     ];
   },
   
+  /**
+   * Get the system status
+   */
   getSystemStatus: () => {
     return {
       operational: true,

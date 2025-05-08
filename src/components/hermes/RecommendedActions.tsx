@@ -12,6 +12,15 @@ interface RecommendedActionsProps {
   timeRange?: string;
 }
 
+// Define the type for the useHermesFlow recommendedAction
+interface HermesFlowAction {
+  title?: string;
+  description?: string;
+  priority?: number;
+  action?: string;
+  type?: string;
+}
+
 export const RecommendedActions: React.FC<RecommendedActionsProps> = ({ timeRange = '7d' }) => {
   const [currentAction, setCurrentAction] = useState<RecommendedAction | null>(null);
   
@@ -28,7 +37,7 @@ export const RecommendedActions: React.FC<RecommendedActionsProps> = ({ timeRang
       if (recommendedAction) {
         // Convert from hook's RecommendedAction to our core-systems RecommendedAction
         setCurrentAction({
-          id: recommendedAction.id || `action-${Date.now()}`,
+          id: recommendedAction.type || `action-${Date.now()}`,
           title: recommendedAction.title || '',
           description: recommendedAction.description || '',
           priority: typeof recommendedAction.priority === 'number' ? recommendedAction.priority : 0,

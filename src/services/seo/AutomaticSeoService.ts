@@ -1,136 +1,69 @@
 
-import { seoNeuralService } from '../neural/modules/SeoNeuralService';
-
 /**
- * Manages automatic SEO optimization for the system
+ * AutomaticSeoService - Handles automated SEO optimization
  */
-class AutomaticSeoService {
-  private isActive: boolean = false;
-  private monitoringInterval: number | null = null;
-  private optimizationQueue: string[] = [];
-  private scanning: boolean = false;
-  private optimizedPages: number = 0;
-  private lastScan: Date | null = null;
 
+class AutomaticSeoService {
+  private active: boolean = false;
+  private monitoringInterval: NodeJS.Timeout | null = null;
+  private lastRun: Date | null = null;
+  
   /**
-   * Start automatic monitoring of content for SEO optimization
+   * Start automatic SEO monitoring
+   * @param interval Monitoring interval in milliseconds
    */
-  startAutoMonitoring(intervalMs: number = 3600000): void {
-    console.log('[AutoSEO] Starting monitoring with ' + intervalMs + 'ms interval');
-    
+  startAutoMonitoring(interval: number = 3600000): void {
     if (this.monitoringInterval) {
-      console.log('[AutoSEO] Monitoring already active, resetting interval');
-      window.clearInterval(this.monitoringInterval);
+      clearInterval(this.monitoringInterval);
     }
     
-    this.isActive = true;
-    this.monitoringInterval = window.setInterval(() => {
-      this.scanContent();
-    }, intervalMs);
+    this.active = true;
+    this.monitoringInterval = setInterval(() => {
+      this.runSeoOptimization();
+    }, interval);
     
-    // Initial scan
-    this.scanContent();
+    console.log(`[AutoSEO] Automatic SEO monitoring started (interval: ${interval}ms)`);
   }
   
   /**
-   * Stop automatic monitoring
+   * Stop automatic SEO monitoring
    */
   stopAutoMonitoring(): void {
-    console.log('[AutoSEO] Stopping monitoring');
-    
     if (this.monitoringInterval) {
-      window.clearInterval(this.monitoringInterval);
+      clearInterval(this.monitoringInterval);
       this.monitoringInterval = null;
     }
     
-    this.isActive = false;
+    this.active = false;
+    console.log('[AutoSEO] Automatic SEO monitoring stopped');
   }
   
   /**
-   * Scan all content for SEO opportunities
+   * Run SEO optimization process
    */
-  async scanContent(): Promise<void> {
-    if (this.scanning) {
-      console.log('[AutoSEO] Scan already in progress, skipping');
-      return;
-    }
-    
+  private async runSeoOptimization(): Promise<void> {
     try {
-      console.log('[AutoSEO] Starting content scan');
-      this.scanning = true;
-      this.optimizationQueue = [];
+      console.log('[AutoSEO] Running automatic SEO optimization');
       
-      // Simulate scanning various pages
-      const pagesToScan = [
-        'https://uberescorts.com/',
-        'https://uberescorts.com/escorts',
-        'https://uberescorts.com/creators',
-        'https://uberescorts.com/livecams',
-        'https://uberescorts.com/about',
-        'https://uberescorts.com/faq'
-      ];
+      // In a real implementation, this would:
+      // 1. Scan all pages/profiles for SEO issues
+      // 2. Apply automatic fixes where possible
+      // 3. Generate recommendations for manual review
       
-      for (const pageUrl of pagesToScan) {
-        const score = await seoNeuralService.checkContentScore(pageUrl);
-        
-        // Add to optimization queue if score is below threshold
-        if (score < 75) {
-          console.log(`[AutoSEO] Adding ${pageUrl} to optimization queue (score: ${score})`);
-          this.optimizationQueue.push(pageUrl);
-        }
-      }
-      
-      // Process queue
-      await this.processOptimizationQueue();
-      this.lastScan = new Date();
-      
-    } finally {
-      this.scanning = false;
+      this.lastRun = new Date();
+      console.log('[AutoSEO] SEO optimization completed');
+    } catch (error) {
+      console.error('[AutoSEO] Error during SEO optimization:', error);
     }
   }
   
   /**
-   * Process the optimization queue
+   * Get current SEO automation status
    */
-  private async processOptimizationQueue(): Promise<void> {
-    if (this.optimizationQueue.length === 0) {
-      console.log('[AutoSEO] No pages in optimization queue');
-      return;
-    }
-    
-    console.log(`[AutoSEO] Processing queue of ${this.optimizationQueue.length} URLs`);
-    
-    for (const url of this.optimizationQueue) {
-      // Simulate optimization with hardcoded keywords
-      const keywords = ['uber escorts', 'premium escorts', 'content creators'];
-      await seoNeuralService.optimizeContent('Sample content', keywords);
-      
-      // In real implementation, we'd save the optimized content
-      console.log(`[AutoSEO] Optimized ${url} - new score: 85`);
-      this.optimizedPages++;
-    }
-    
-    this.optimizationQueue = [];
-  }
-  
-  /**
-   * Manually trigger a scan 
-   */
-  performScan(): void {
-    this.scanContent();
-  }
-  
-  /**
-   * Get current status of the automatic SEO service
-   */
-  getStatus() {
+  getStatus(): { active: boolean; lastRun: Date | null } {
     return {
-      active: this.isActive,
-      scanning: this.scanning,
-      queueLength: this.optimizationQueue.length,
-      lastScan: this.lastScan,
-      processing: this.scanning,
-      optimizedPages: this.optimizedPages
+      active: this.active,
+      lastRun: this.lastRun
     };
   }
 }

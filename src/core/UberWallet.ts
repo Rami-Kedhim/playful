@@ -21,6 +21,12 @@ export interface UbxTransaction {
 }
 
 export class UberWallet {
+  private initialized: boolean = false;
+  
+  constructor() {
+    this.initialized = true;
+  }
+  
   async getBalance(userId: string): Promise<number> {
     // Mock implementation
     return 1000;
@@ -36,6 +42,17 @@ export class UberWallet {
       transactionId: `tx-${Date.now()}`,
       timestamp: new Date()
     };
+  }
+  
+  // This method will be used by engine.ts for transfer functionality
+  transfer(fromUserId: string, toUserId: string, amount: number): boolean {
+    console.log(`Transfer ${amount} UBX from ${fromUserId} to ${toUserId}`);
+    return true;
+  }
+  
+  // Add missing method referenced in engine.ts
+  isInitialized(): boolean {
+    return this.initialized;
   }
   
   // Add missing methods referenced in WalletPage

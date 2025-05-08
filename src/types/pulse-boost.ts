@@ -1,51 +1,18 @@
 
-// User role types
-export type UserRole = 'USER' | 'ADMIN' | 'MODERATOR' | 'ESCORT' | 'CLIENT';
-
-export const UserRoleEnum = {
-  USER: 'USER' as UserRole,
-  ADMIN: 'ADMIN' as UserRole,
-  MODERATOR: 'MODERATOR' as UserRole,
-  ESCORT: 'ESCORT' as UserRole,
-  CLIENT: 'CLIENT' as UserRole
-};
-
-// Define the PulseBoost type
-export interface PulseBoost {
-  id: string;
-  name: string;
-  description: string;
-  duration: string;
-  durationMinutes?: number;
-  price: number;
-  price_ubx?: number;
-  visibility?: string;
-  visibility_increase?: number;
-  features?: string[];
-  color?: string;
-  badgeColor?: string;
-  boost_power?: number;
-  boostMultiplier?: number;
-  isMostPopular?: boolean;
-}
-
-// Define types for the Boost Package and related operations
 export interface BoostPackage {
   id: string;
   name: string;
   description: string;
   price: number;
-  price_ubx?: number;
+  price_ubx: number;
   duration: string;
-  durationMinutes?: number;
-  features?: string[];
-  visibility?: string;
-  visibility_increase?: number;
-  boost_power?: number;
+  durationMinutes: number;
+  features: string[];
+  visibility: string;
+  visibility_increase: number;
   color?: string;
   badgeColor?: string;
-  boostMultiplier?: number;
-  isMostPopular?: boolean;
+  boost_power?: number;
 }
 
 export interface BoostPurchaseRequest {
@@ -69,9 +36,24 @@ export interface BoostAnalytics {
     date: Date;
     score: number;
   }>;
+  // Add these properties to fix the errors in useBoostOperations.ts
+  views?: number;
+  impressions?: {
+    value: number;
+    change?: number;
+  };
+  interactions?: {
+    value: number;
+    change?: number;
+  };
   additionalViews?: number;
   engagementIncrease?: number;
   rankingPosition?: number;
+}
+
+export interface PulseBoost extends BoostPackage {
+  // Any additional fields specific to PulseBoost
+  boostMultiplier?: number;
 }
 
 export interface BoostHistory {
@@ -90,9 +72,6 @@ export interface EnhancedBoostStatus {
   packageId?: string;
   expiresAt?: Date;
   timeRemaining?: string;
-  boostPackage?: BoostPackage;
   progress?: number;
-  // Add the missing properties
-  packageName?: string;
-  startedAt?: Date;
+  boostPackage?: BoostPackage;
 }

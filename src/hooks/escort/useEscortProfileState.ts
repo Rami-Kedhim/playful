@@ -1,7 +1,5 @@
 
 import { useState } from 'react';
-
-// Import the correctly cased Escort type
 import { Escort } from '@/types/Escort';
 
 /**

@@ -7,3 +7,4 @@ export { default as MainLayout } from './MainLayout';
 export * from './Layout';
 export * from './AppLayout';
 export * from './UnifiedLayout';
+export * from './MainLayout';
