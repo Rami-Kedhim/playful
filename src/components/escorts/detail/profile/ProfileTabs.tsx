@@ -1,6 +1,6 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Escort } from "@/types/Escort";
+import { Escort } from "@/types/escort";
 import { VerificationLevel } from "@/types/verification";
 import AboutTab from "./AboutTab";
 import ServicesTab from "./ServicesTab";
@@ -21,15 +21,19 @@ const ProfileTabs = ({ escort }: ProfileTabsProps) => {
     // Map string verification levels to enum values
     switch(escort.verificationLevel) {
       case "basic":
+      case VerificationLevel.BASIC:
         verificationLevel = VerificationLevel.BASIC;
         break;
       case "verified":
+        // Map "verified" to VERIFIED enum value
         verificationLevel = VerificationLevel.VERIFIED;
         break;
       case "premium":
+      case VerificationLevel.PREMIUM:
         verificationLevel = VerificationLevel.PREMIUM;
         break;
       case "enhanced":
+      case VerificationLevel.ENHANCED:
         verificationLevel = VerificationLevel.ENHANCED;
         break;
       default:

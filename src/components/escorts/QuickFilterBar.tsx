@@ -9,7 +9,7 @@ import {
   Star
 } from 'lucide-react';
 import { Rating } from '@/components/ui/rating';
-import { ServiceTypeFilter } from './filters/ServiceTypeBadgeLabel';
+import { ServiceTypeFilter } from '@/types/serviceType';
 import ServiceTypeSelect from './filters/ServiceTypeSelect';
 
 interface QuickFilterBarProps {
@@ -42,7 +42,7 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
   setRatingMin
 }) => {
   // Ensure serviceTypeFilter is never an empty string
-  const safeServiceTypeFilter = serviceTypeFilter || "any";
+  const safeServiceTypeFilter = serviceTypeFilter || "any" as ServiceTypeFilter;
   
   return (
     <div className={`bg-background border border-border rounded-lg p-2 ${className}`}>

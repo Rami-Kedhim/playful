@@ -19,7 +19,8 @@ const ServiceTypeBadge: React.FC<ServiceTypeBadgeProps> = ({ service, className 
     'out-call': 'Out-call',
     'massage': 'Massage',
     'dinner': 'Dinner',
-    'any': 'Any'
+    'any': 'Any',
+    'all': 'All Services'
   };
 
   // Map service types to variant styles
@@ -31,7 +32,8 @@ const ServiceTypeBadge: React.FC<ServiceTypeBadgeProps> = ({ service, className 
     'out-call': 'bg-green-100 text-green-800',
     'massage': 'bg-indigo-100 text-indigo-800',
     'dinner': 'bg-amber-100 text-amber-800',
-    'any': 'bg-gray-100 text-gray-800'
+    'any': 'bg-gray-100 text-gray-800',
+    'all': 'bg-gray-100 text-gray-800'
   };
 
   return (

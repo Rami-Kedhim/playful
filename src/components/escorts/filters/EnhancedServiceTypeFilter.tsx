@@ -3,9 +3,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Check, X } from 'lucide-react';
-import { ServiceType } from './ServiceTypeFilterRules';
 import ServiceTypeSelect from './ServiceTypeSelect';
-import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
+import { ServiceTypeFilter } from '@/types/serviceType';
 import { useServiceType } from '../context/ServiceTypeContext';
 
 interface EnhancedServiceTypeFilterProps {

@@ -2,7 +2,7 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { getRoutesByCategory, RouteCategory, AppPaths } from '@/routes/routeConfig';
+import { AppPaths } from '@/routes/routeConfig';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { useRole } from '@/hooks/auth/useRole';
 import { 
@@ -37,11 +37,57 @@ const iconMap: Record<string, React.ReactNode> = {
   '/share': <Shield className="w-4 h-4" />
 };
 
+export type RouteCategory = 
+  'core' | 
+  'escort' | 
+  'client' | 
+  'creator' | 
+  'metaverse' | 
+  'neural' | 
+  'admin' | 
+  'auth' | 
+  'safety' | 
+  'wallet' | 
+  'settings';
+
+interface RouteType {
+  path: string;
+  title: string;
+  requireAuth?: boolean;
+  roles?: string[];
+}
+
 interface AppNavigationProps {
   showCategories?: RouteCategory[];
   className?: string;
   onItemClick?: () => void;
 }
+
+// Simple implementation of getRoutesByCategory function
+const getRoutesByCategory = (category: RouteCategory): RouteType[] => {
+  // This is a simplified implementation - in a real app, you'd probably have more complex logic
+  switch (category) {
+    case 'core':
+      return [
+        { path: '/', title: 'Home' },
+        { path: '/escorts', title: 'Escorts' }
+      ];
+    case 'escort':
+      return [{ path: '/escorts', title: 'Escorts' }];
+    case 'neural':
+      return [
+        { path: '/neural/monitor', title: 'Neural Monitor' },
+        { path: '/neural/analytics', title: 'Neural Analytics' },
+        { path: '/brain-hub', title: 'Brain Hub' }
+      ];
+    case 'safety':
+      return [{ path: '/safety', title: 'Safety Center' }];
+    case 'admin':
+      return [{ path: '/admin', title: 'Admin Dashboard', requireAuth: true, roles: ['admin'] }];
+    default:
+      return [];
+  }
+};
 
 const AppNavigation: React.FC<AppNavigationProps> = ({ 
   showCategories = ['core', 'escort', 'neural', 'safety'],
@@ -64,7 +110,7 @@ const AppNavigation: React.FC<AppNavigationProps> = ({
   const routesToShow = showCategories.flatMap(category => 
     getRoutesByCategory(category)
       // Filter out auth-required routes if not authenticated
-      .filter(route => !route.isAuthRequired || isAuthenticated)
+      .filter(route => !route.requireAuth || isAuthenticated)
       // Filter out role-restricted routes
       .filter(route => {
         if (!route.roles) return true;

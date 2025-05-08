@@ -22,7 +22,7 @@ export const AppPaths = {
   MESSAGES: '/messages',
   BOOKINGS: '/bookings',
   DASHBOARD: '/dashboard',
-  // Add missing routes
+  // Add all missing routes
   NEURAL_MONITOR: '/neural/monitor',
   NEURAL_ANALYTICS: '/neural/analytics',
   BRAIN_HUB: '/brain-hub',
@@ -40,41 +40,43 @@ export const AppPaths = {
 export interface RouteConfig {
   path: string;
   label: string;
+  title: string;
   icon?: string;
   requireAuth?: boolean;
   roles?: string[];
+  isAuthRequired?: boolean;
 }
 
 /**
  * Main navigation routes for the application
  */
 export const mainRoutes: RouteConfig[] = [
-  { path: AppPaths.HOME, label: 'Home' },
-  { path: AppPaths.ESCORTS, label: 'Escorts' },
-  { path: AppPaths.CREATORS, label: 'Creators' },
-  { path: AppPaths.LIVECAMS, label: 'Livecams' },
-  { path: AppPaths.VERIFICATION, label: 'Verification', requireAuth: true }
+  { path: AppPaths.HOME, label: 'Home', title: 'Home' },
+  { path: AppPaths.ESCORTS, label: 'Escorts', title: 'Escorts' },
+  { path: AppPaths.CREATORS, label: 'Creators', title: 'Creators' },
+  { path: AppPaths.LIVECAMS, label: 'Livecams', title: 'Livecams' },
+  { path: AppPaths.VERIFICATION, label: 'Verification', title: 'Verification', requireAuth: true, isAuthRequired: true }
 ];
 
 /**
  * User account routes
  */
 export const accountRoutes: RouteConfig[] = [
-  { path: AppPaths.USER_PROFILE, label: 'Profile', requireAuth: true },
-  { path: AppPaths.WALLET, label: 'Wallet', requireAuth: true },
-  { path: AppPaths.SETTINGS, label: 'Settings', requireAuth: true },
-  { path: AppPaths.FAVORITES, label: 'Favorites', requireAuth: true },
-  { path: AppPaths.BOOKINGS, label: 'Bookings', requireAuth: true }
+  { path: AppPaths.USER_PROFILE, label: 'Profile', title: 'Profile', requireAuth: true, isAuthRequired: true },
+  { path: AppPaths.WALLET, label: 'Wallet', title: 'Wallet', requireAuth: true, isAuthRequired: true },
+  { path: AppPaths.SETTINGS, label: 'Settings', title: 'Settings', requireAuth: true, isAuthRequired: true },
+  { path: AppPaths.FAVORITES, label: 'Favorites', title: 'Favorites', requireAuth: true, isAuthRequired: true },
+  { path: AppPaths.BOOKINGS, label: 'Bookings', title: 'Bookings', requireAuth: true, isAuthRequired: true }
 ];
 
 /**
  * Dashboard routes for creators and providers
  */
 export const dashboardRoutes: RouteConfig[] = [
-  { path: AppPaths.DASHBOARD, label: 'Dashboard', requireAuth: true, roles: ['creator', 'escort', 'provider'] },
-  { path: '/analytics', label: 'Analytics', requireAuth: true, roles: ['creator', 'escort', 'provider'] },
-  { path: '/earnings', label: 'Earnings', requireAuth: true, roles: ['creator', 'escort', 'provider'] },
-  { path: '/schedule', label: 'Schedule', requireAuth: true, roles: ['creator', 'escort', 'provider'] }
+  { path: AppPaths.DASHBOARD, label: 'Dashboard', title: 'Dashboard', requireAuth: true, isAuthRequired: true, roles: ['creator', 'escort', 'provider'] },
+  { path: '/analytics', label: 'Analytics', title: 'Analytics', requireAuth: true, isAuthRequired: true, roles: ['creator', 'escort', 'provider'] },
+  { path: '/earnings', label: 'Earnings', title: 'Earnings', requireAuth: true, isAuthRequired: true, roles: ['creator', 'escort', 'provider'] },
+  { path: '/schedule', label: 'Schedule', title: 'Schedule', requireAuth: true, isAuthRequired: true, roles: ['creator', 'escort', 'provider'] }
 ];
 
 // Add these exports to match what's being imported in AppNavigation.tsx
@@ -91,6 +93,8 @@ export type RouteCategory =
   'wallet' | 
   'settings';
 
+export type RouteDefinition = RouteConfig;
+
 export function getRoutesByCategory(category: RouteCategory): RouteConfig[] {
   // Simple implementation that returns routes based on category
   switch (category) {
@@ -102,17 +106,17 @@ export function getRoutesByCategory(category: RouteCategory): RouteConfig[] {
       return mainRoutes.filter(route => route.path.includes('escort'));
     case 'neural':
       return [
-        { path: AppPaths.NEURAL_MONITOR, label: 'Neural Monitor' },
-        { path: AppPaths.NEURAL_ANALYTICS, label: 'Neural Analytics' },
-        { path: AppPaths.BRAIN_HUB, label: 'Brain Hub' }
+        { path: AppPaths.NEURAL_MONITOR, label: 'Neural Monitor', title: 'Neural Monitor' },
+        { path: AppPaths.NEURAL_ANALYTICS, label: 'Neural Analytics', title: 'Neural Analytics' },
+        { path: AppPaths.BRAIN_HUB, label: 'Brain Hub', title: 'Brain Hub' }
       ];
     case 'safety':
       return [
-        { path: AppPaths.SAFETY, label: 'Safety Center' }
+        { path: AppPaths.SAFETY, label: 'Safety Center', title: 'Safety Center' }
       ];
     case 'admin':
       return [
-        { path: AppPaths.ADMIN, label: 'Admin Dashboard', requireAuth: true, roles: ['admin'] }
+        { path: AppPaths.ADMIN, label: 'Admin Dashboard', title: 'Admin Dashboard', requireAuth: true, isAuthRequired: true, roles: ['admin'] }
       ];
     default:
       return [];

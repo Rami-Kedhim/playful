@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ServiceTypeFilter } from '@/contexts/ServiceTypeContext';
+import { ServiceTypeFilter } from '@/types/serviceType';
 import {
   Select,
   SelectContent,
@@ -25,12 +25,12 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
 }) => {
   // Map service types to readable labels
   const serviceOptions: { value: ServiceTypeFilter; label: string }[] = [
-    { value: 'any', label: 'Any Service' },
-    { value: 'in-call', label: 'In-call' },
-    { value: 'out-call', label: 'Out-call' },
-    { value: 'virtual', label: 'Virtual' },
-    { value: 'massage', label: 'Massage' },
-    { value: 'dinner', label: 'Dinner' }
+    { value: "any", label: 'Any Service' },
+    { value: "in-call", label: 'In-call' },
+    { value: "out-call", label: 'Out-call' },
+    { value: "virtual", label: 'Virtual' },
+    { value: "massage", label: 'Massage' },
+    { value: "dinner", label: 'Dinner' }
   ];
   
   return (

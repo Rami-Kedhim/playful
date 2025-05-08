@@ -25,6 +25,8 @@ const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({ type, className, size
       return <MapPin className={className} size={size} />;
     case 'both':
       return <Globe className={className} size={size} />;
+    case 'all':
+      return <Globe className={className} size={size} />;
     case 'any':
     default:
       return <Home className={className} size={size} />;
