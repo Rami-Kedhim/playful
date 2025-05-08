@@ -2,25 +2,19 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { VerificationRequest, VerificationStatus as VerificationStatusEnum, VERIFICATION_LEVELS } from '@/types/verification';
+import { VerificationStatus as VerificationStatusEnum, VERIFICATION_LEVELS } from '@/types/verification';
 import { useVerificationStatus } from './hooks/useVerificationStatus';
 import { Clock, CheckCircle, XCircle, AlertCircle, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/utils/date-utils';
 
-interface VerificationStatusComponentProps {
-  onRequestVerification?: () => void;
-}
-
-const VerificationStatusComponent: React.FC<VerificationStatusComponentProps> = ({
-  onRequestVerification
-}) => {
+const VerificationStatus = ({ onRequestVerification }) => {
   const { status, verificationRequest, loading, error } = useVerificationStatus();
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-40">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
   }
@@ -33,7 +27,9 @@ const VerificationStatusComponent: React.FC<VerificationStatusComponentProps> = 
             <AlertCircle className="mr-2 h-5 w-5" />
             Error
           </CardTitle>
-          <CardDescription>There was an error loading your verification status</CardDescription>
+          <CardDescription>
+            There was an error loading your verification status
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">{error}</p>
@@ -72,7 +68,7 @@ const VerificationStatusComponent: React.FC<VerificationStatusComponentProps> = 
             <CardTitle>Verification Status</CardTitle>
             <CardDescription>
               {verificationRequest.requested_level ? 
-                `You requested ${verificationRequest.requested_level} verification` :
+                `You requested ${verificationRequest.requested_level} verification` : 
                 `You requested ${VERIFICATION_LEVELS.BASIC} verification`}
             </CardDescription>
           </div>
@@ -87,12 +83,12 @@ const VerificationStatusComponent: React.FC<VerificationStatusComponentProps> = 
               {formatDate(verificationRequest.submittedAt || verificationRequest.created_at || new Date().toISOString())}
             </p>
           </div>
-          
+
           {verificationRequest.documents && verificationRequest.documents.length > 0 && (
             <div>
               <h4 className="text-sm font-medium mb-1">Documents</h4>
               <div className="flex flex-wrap gap-2">
-                {verificationRequest.documents.map(doc => (
+                {verificationRequest.documents.map((doc) => (
                   <Badge key={doc.id} variant="outline" className="flex items-center">
                     <FileText className="h-3 w-3 mr-1" />
                     {doc.type || doc.documentType || "Document"}
@@ -121,14 +117,14 @@ const VerificationStatusComponent: React.FC<VerificationStatusComponentProps> = 
   );
 };
 
-const StatusBadge = ({ status }: { status: string }) => {
+const StatusBadge = ({ status }) => {
   switch (status) {
     case VerificationStatusEnum.PENDING:
       return <Badge variant="outline" className="flex items-center"><Clock className="h-3 w-3 mr-1" /> Pending</Badge>;
     case VerificationStatusEnum.IN_REVIEW:
       return <Badge variant="secondary" className="flex items-center"><Clock className="h-3 w-3 mr-1" /> In Review</Badge>;
     case VerificationStatusEnum.APPROVED:
-      return <Badge variant="success" className="flex items-center bg-green-500"><CheckCircle className="h-3 w-3 mr-1" /> Approved</Badge>;
+      return <Badge variant="success" className="flex items-center"><CheckCircle className="h-3 w-3 mr-1" /> Approved</Badge>;
     case VerificationStatusEnum.REJECTED:
       return <Badge variant="destructive" className="flex items-center"><XCircle className="h-3 w-3 mr-1" /> Rejected</Badge>;
     default:
@@ -136,4 +132,4 @@ const StatusBadge = ({ status }: { status: string }) => {
   }
 };
 
-export default VerificationStatusComponent;
+export default VerificationStatus;

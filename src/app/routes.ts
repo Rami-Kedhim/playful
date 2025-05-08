@@ -1,123 +1,136 @@
 
 import { lazy } from 'react';
 
+// Lazy load pages
 const HomePage = lazy(() => import('@/pages/HomePage'));
-const AboutPage = lazy(() => import('@/pages/AboutPage'));
-const SearchPage = lazy(() => import('@/pages/SearchPage'));
-const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
-const PreferencesPage = lazy(() => import('@/pages/PreferencesPage'));
-const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
-const AdminDashboardPage = lazy(() => import('@/pages/AdminDashboardPage'));
-const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
-const PasswordResetPage = lazy(() => import('@/pages/PasswordResetPage'));
-const VerificationPage = lazy(() => import('@/pages/VerificationPage'));
-const UserProfilePage = lazy(() => import('@/pages/UserProfilePage'));
-const GeneratePage = lazy(() => import('@/pages/GeneratePage'));
+const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
+const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
+const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
+const EscortsPage = lazy(() => import('@/pages/EscortsPage'));
 const EscortDetailPage = lazy(() => import('@/pages/EscortDetailPage'));
-const EscortSearchPage = lazy(() => import('@/pages/EscortSearchPage'));
-const LivecamsPage = lazy(() => import('@/pages/LivecamsPage'));
+const CreatorsPage = lazy(() => import('@/pages/CreatorsPage'));
 const CreatorDetailPage = lazy(() => import('@/pages/CreatorDetailPage'));
-const WalletPage = lazy(() => import('@/pages/WalletPage'));
-const BookingsPage = lazy(() => import('@/pages/BookingsPage'));
-const NSFWAPIsDemoPage = lazy(() => import('@/pages/NSFWAPIsDemo'));
-const MediaGenerationPage = lazy(() => import('@/pages/MediaGenerationPage'));
-const NSFWImageGeneratorPage = lazy(() => import('@/pages/NSFWImageGeneratorPage'));
+const AdminPage = lazy(() => import('@/pages/AdminPage'));
+const LivecamsPage = lazy(() => import('@/pages/LivecamsPage'));
+const MetaversePage = lazy(() => import('@/pages/MetaversePage'));
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const SearchPage = lazy(() => import('@/pages/SearchPage'));
+const AICompanionsPage = lazy(() => import('@/pages/AICompanionsPage'));
+const AICompanionDetailPage = lazy(() => import('@/pages/AICompanionDetailPage'));
+const VerificationPage = lazy(() => import('@/pages/VerificationPage'));
 
+// Define routes
 export const routes = [
   {
     path: '/',
-    element: <HomePage />,
-  },
-  {
-    path: '/about',
-    element: <AboutPage />,
-  },
-  {
-    path: '/search',
-    element: <SearchPage />,
-  },
-  {
-    path: '/settings',
-    element: <SettingsPage />,
-  },
-  {
-    path: '/preferences',
-    element: <PreferencesPage />,
-  },
-  {
-    path: '/profile',
-    element: <ProfilePage />,
+    element: HomePage,
+    protected: false,
+    roles: []
   },
   {
     path: '/login',
-    element: <LoginPage />,
+    element: LoginPage,
+    protected: false,
+    roles: []
   },
   {
     path: '/register',
-    element: <RegisterPage />,
+    element: RegisterPage,
+    protected: false,
+    roles: []
   },
   {
-    path: '/password-reset',
-    element: <PasswordResetPage />,
+    path: '/dashboard',
+    element: DashboardPage,
+    protected: true,
+    roles: ['user', 'admin', 'escort', 'creator']
   },
   {
-    path: '/verify',
-    element: <VerificationPage />,
+    path: '/profile',
+    element: ProfilePage,
+    protected: true,
+    roles: ['user', 'escort', 'creator']
   },
   {
-    path: '/admin',
-    element: <AdminDashboardPage />,
-  },
-  {
-    path: '/users/:userId',
-    element: <UserProfilePage />,
-  },
-  {
-    path: '/generate',
-    element: <GeneratePage />,
-  },
-  {
-    path: '/escorts/:id',
-    element: <EscortDetailPage />,
+    path: '/settings',
+    element: SettingsPage,
+    protected: true,
+    roles: ['user', 'escort', 'creator', 'admin']
   },
   {
     path: '/escorts',
-    element: <EscortSearchPage />,
+    element: EscortsPage,
+    protected: false,
+    roles: []
   },
   {
-    path: '/livecams',
-    element: <LivecamsPage />,
+    path: '/escorts/:id',
+    element: EscortDetailPage,
+    protected: false,
+    roles: []
+  },
+  {
+    path: '/creators',
+    element: CreatorsPage,
+    protected: false,
+    roles: []
   },
   {
     path: '/creators/:id',
-    element: <CreatorDetailPage />,
+    element: CreatorDetailPage,
+    protected: false,
+    roles: []
   },
   {
-    path: '/wallet',
-    element: <WalletPage />,
+    path: '/admin/*',
+    element: AdminPage,
+    protected: true,
+    roles: ['admin']
   },
   {
-    path: '/bookings',
-    element: <BookingsPage />,
+    path: '/livecams',
+    element: LivecamsPage,
+    protected: false,
+    roles: []
   },
   {
-    path: '/nsfw-apis',
-    element: <NSFWAPIsDemoPage />,
+    path: '/metaverse',
+    element: MetaversePage,
+    protected: false,
+    roles: []
   },
   {
-    path: '/media-generation',
-    element: <MediaGenerationPage />,
+    path: '/search',
+    element: SearchPage,
+    protected: false,
+    roles: []
   },
   {
-    path: '/nsfw-image-generator',
-    element: <NSFWImageGeneratorPage />,
+    path: '/companions',
+    element: AICompanionsPage,
+    protected: false,
+    roles: []
+  },
+  {
+    path: '/companions/:id',
+    element: AICompanionDetailPage,
+    protected: false,
+    roles: []
+  },
+  {
+    path: '/verification',
+    element: VerificationPage,
+    protected: true,
+    roles: ['user', 'escort', 'creator']
   },
   {
     path: '*',
-    element: <NotFoundPage />,
-  },
+    element: NotFoundPage,
+    protected: false,
+    roles: []
+  }
 ];
 
 export default routes;
