@@ -1,4 +1,3 @@
-
 /**
  * Application route configuration
  * All routes should be defined here for consistency
@@ -34,7 +33,8 @@ export const AppPaths = {
   COMPLIANCE: '/compliance',
   CONTACT: '/contact',
   AI_COMPANION: '/ai-companions',
-  PULSE_BOOST: '/pulse-boost'
+  PULSE_BOOST: '/pulse-boost',
+  GUIDELINES: '/guidelines' // Added the missing GUIDELINES route
 };
 
 export interface RouteConfig {
@@ -45,6 +45,7 @@ export interface RouteConfig {
   requireAuth?: boolean;
   roles?: string[];
   isAuthRequired?: boolean;
+  category?: string; // Added category property to interface
 }
 
 /**

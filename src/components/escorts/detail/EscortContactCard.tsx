@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, MessageSquare, Heart } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort'; // Fixed casing to match the most commonly used import
 import { formatCurrency } from '@/lib/utils';
 import { useFavorites } from '@/contexts/FavoritesContext';
 
