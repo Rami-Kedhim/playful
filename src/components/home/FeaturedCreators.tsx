@@ -1,128 +1,117 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { User, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, MessageSquare, Zap } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { AppPaths } from '@/routes/routeConfig';
+import { Badge } from '@/components/ui/badge';
 
-const FeaturedCreators: React.FC = () => {
-  const navigate = useNavigate();
-  
-  const featuredCreators = [
-    {
-      id: 'creator-1',
-      name: 'Sophia Rose',
-      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=256',
-      location: 'Los Angeles, CA',
-      tags: ['Videos', 'Photos', 'Live Shows'],
-      subscriberCount: '12.5k',
-      price: 19.99,
-      isBoosted: true
-    },
-    {
-      id: 'creator-2',
-      name: 'Elena Star',
-      avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=256',
-      location: 'Miami, FL',
-      tags: ['Photos', 'Personalized'],
-      subscriberCount: '8.7k',
-      price: 14.99,
-      isBoosted: false
-    },
-    {
-      id: 'creator-3',
-      name: 'Jessica Taylor',
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256',
-      location: 'New York, NY',
-      tags: ['Videos', 'Live Shows'],
-      subscriberCount: '21.3k',
-      price: 24.99,
-      isBoosted: true
-    },
-    {
-      id: 'creator-4',
-      name: 'Mia Rivera',
-      avatarUrl: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=256',
-      location: 'Chicago, IL',
-      tags: ['Photos', 'Videos'],
-      subscriberCount: '5.2k',
-      price: 12.99,
-      isBoosted: false
-    }
-  ];
-  
+// Mock data for creators
+const mockCreators = [
+  {
+    id: 'creator-1',
+    name: 'Sophia',
+    imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=256',
+    rating: 4.9,
+    followers: 12500,
+    contentCount: 78,
+    tags: ['Photos', 'Videos'],
+    price: 9.99,
+    isVerified: true
+  },
+  {
+    id: 'creator-2',
+    name: 'Emma',
+    imageUrl: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=256',
+    rating: 4.7,
+    followers: 8200,
+    contentCount: 56,
+    tags: ['Photos', 'Audio'],
+    price: 7.99,
+    isVerified: true
+  },
+  {
+    id: 'creator-3',
+    name: 'Olivia',
+    imageUrl: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=256',
+    rating: 4.8,
+    followers: 9800,
+    contentCount: 65,
+    tags: ['Videos', 'Live'],
+    price: 8.99,
+    isVerified: true
+  },
+  {
+    id: 'creator-4',
+    name: 'Ava',
+    imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=256',
+    rating: 4.6,
+    followers: 7400,
+    contentCount: 48,
+    tags: ['Photos', 'Exclusive'],
+    price: 6.99,
+    isVerified: false
+  }
+];
+
+const FeaturedCreators = () => {
   return (
-    <div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {featuredCreators.map((creator) => (
-          <Card key={creator.id} className="overflow-hidden hover:shadow-md transition-all group">
-            <div className="relative">
-              <div className="aspect-[3/4] bg-gradient-to-b from-transparent to-black/50 relative overflow-hidden">
-                <img 
-                  src={creator.avatarUrl} 
-                  alt={creator.name} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                {creator.isBoosted && (
-                  <div className="absolute top-2 right-2">
-                    <Badge className="bg-primary text-primary-foreground flex items-center gap-1">
-                      <Zap className="h-3 w-3" /> Boosted
-                    </Badge>
-                  </div>
-                )}
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-white font-medium">{creator.name}</span>
-                  </div>
-                  <p className="text-white/80 text-sm">{creator.location}</p>
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {creator.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs bg-black/40 text-white">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {mockCreators.map((creator) => (
+        <Link 
+          key={creator.id} 
+          to={`/creator/${creator.id}`}
+          className="group"
+        >
+          <Card className="overflow-hidden border border-border transition-all hover:shadow-md hover:border-primary/20">
+            <div className="aspect-[2/3] relative">
+              <img 
+                src={creator.imageUrl} 
+                alt={creator.name} 
+                className="w-full h-full object-cover"
+              />
+              {creator.isVerified && (
+                <Badge className="absolute top-2 right-2 bg-primary text-white">
+                  Verified
+                </Badge>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                <Button variant="default" className="w-full">
+                  View Profile
+                </Button>
               </div>
             </div>
             <CardContent className="p-4">
-              <div className="flex justify-between items-center mb-3">
-                <div className="text-sm text-muted-foreground">
-                  <span className="font-medium text-foreground">{creator.subscriberCount}</span> subscribers
-                </div>
-                <div className="text-sm font-medium">
-                  ${creator.price}/month
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-semibold text-base">{creator.name}</h3>
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  <span className="text-sm">{creator.rating}</span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" className="flex gap-1" onClick={() => navigate(`/creators/${creator.id}`)}>
-                  <Heart className="h-4 w-4" />
-                  Subscribe
-                </Button>
-                <Button size="sm" className="flex gap-1" onClick={() => navigate(`/messages/new?recipient=${creator.id}`)}>
-                  <MessageSquare className="h-4 w-4" />
-                  Message
-                </Button>
+              <div className="flex flex-wrap gap-1 mt-1 mb-2">
+                {creator.tags.map((tag) => (
+                  <Badge key={tag} variant="outline" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <User className="w-3 h-3" /> {(creator.followers / 1000).toFixed(1)}k
+                  </span>
+                </div>
+                <div className="text-primary font-medium">
+                  ${creator.price}/mo
+                </div>
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
-      
-      <div className="mt-6 flex justify-center">
-        <Button className="gap-2" onClick={() => navigate(AppPaths.CREATORS || '/creators')}>
-          Browse All Creators
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
+        </Link>
+      ))}
     </div>
   );
 };
-
-// Import ChevronRight
-import { ChevronRight } from 'lucide-react';
 
 export default FeaturedCreators;

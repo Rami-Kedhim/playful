@@ -1,97 +1,85 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import FeaturedEscorts from '@/components/escorts/FeaturedEscorts';
+import { Heart, Star } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
-import { escortServiceInstance } from '@/services/escorts/escortService';
+import { Badge } from '@/components/ui/badge';
+import { useEscorts } from '@/hooks/useEscorts';
+import { formatCurrency } from '@/lib/utils';
 
-const HomeFeaturedEscorts: React.FC = () => {
-  // Mock data for featured escorts
-  const mockEscorts = [
-    {
-      id: 'escort-1',
-      name: 'Sophia',
-      age: 25,
-      gender: 'Female',
-      location: 'New York, NY',
-      rating: 4.9,
-      reviewCount: 124,
-      tags: ['GFE', 'Dinner Date', 'Travel Companion'],
-      imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=256',
-      price: 300,
-      isVerified: true,
-      availableNow: true,
-      featured: true,
-      sexualOrientation: 'Straight'
-    },
-    {
-      id: 'escort-2',
-      name: 'Isabella',
-      age: 23,
-      gender: 'Female',
-      location: 'Miami, FL',
-      rating: 4.7,
-      reviewCount: 89,
-      tags: ['Massage', 'Role Play', 'Couple Friendly'],
-      imageUrl: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=256',
-      price: 250,
-      isVerified: true,
-      availableNow: false,
-      featured: true,
-      sexualOrientation: 'Bisexual'
-    },
-    {
-      id: 'escort-3',
-      name: 'Emma',
-      age: 27,
-      gender: 'Female',
-      location: 'Los Angeles, CA',
-      rating: 4.8,
-      reviewCount: 156,
-      tags: ['Fetish', 'BDSM', 'Overnight'],
-      imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256',
-      price: 350,
-      isVerified: true,
-      availableNow: true,
-      featured: true,
-      sexualOrientation: 'Straight'
-    },
-    {
-      id: 'escort-4',
-      name: 'Olivia',
-      age: 24,
-      gender: 'Female',
-      location: 'Chicago, IL',
-      rating: 4.6,
-      reviewCount: 72,
-      tags: ['Dinner Date', 'Massage', 'Travel Companion'],
-      imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=256',
-      price: 280,
-      isVerified: true,
-      availableNow: false,
-      featured: true,
-      sexualOrientation: 'Bisexual'
-    }
-  ];
+const FeaturedEscorts = () => {
+  const { escorts, loading } = useEscorts();
+  
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i} className="overflow-hidden border border-border">
+            <div className="aspect-[2/3] bg-zinc-900/30 animate-pulse" />
+            <CardContent className="p-4 space-y-2">
+              <div className="h-4 bg-zinc-900/30 rounded animate-pulse" />
+              <div className="h-4 w-3/4 bg-zinc-900/30 rounded animate-pulse" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <FeaturedEscorts 
-        escorts={mockEscorts} 
-        loading={false} 
-        limit={4} 
-      />
-      
-      <div className="flex justify-center mt-8">
-        <Button asChild>
-          <Link to="/escorts">
-            Browse All Escorts <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {escorts.slice(0, 4).map((escort) => (
+        <Link 
+          key={escort.id} 
+          to={`/escort/${escort.id}`}
+          className="group"
+        >
+          <Card className="overflow-hidden border border-border transition-all hover:shadow-md hover:border-primary/20">
+            <div className="aspect-[2/3] relative">
+              <img 
+                src={escort.imageUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256'} 
+                alt={escort.name} 
+                className="w-full h-full object-cover"
+              />
+              {escort.isVerified && (
+                <Badge className="absolute top-2 right-2 bg-primary text-white">
+                  Verified
+                </Badge>
+              )}
+              {escort.availableNow && (
+                <Badge className="absolute top-2 left-2 bg-green-500 text-white">
+                  Available Now
+                </Badge>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                <Button variant="default" className="w-full">
+                  View Profile
+                </Button>
+              </div>
+            </div>
+            <CardContent className="p-4">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-semibold text-base">{escort.name}</h3>
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  <span className="text-sm">{escort.rating}</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  {escort.age} • {escort.location?.split(',')[0]}
+                </div>
+                <div className="text-primary font-medium">
+                  {formatCurrency(escort.price)}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      ))}
     </div>
   );
 };
 
-export default HomeFeaturedEscorts;
+export default FeaturedEscorts;
