@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Dialog,
@@ -21,7 +22,7 @@ import {
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Escort } from "@/types/escort";
+import { Escort } from "@/types/Escort";
 
 interface MessageFormProps {
   escort: Escort;

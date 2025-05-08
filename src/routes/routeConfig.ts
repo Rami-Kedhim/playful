@@ -1,3 +1,4 @@
+
 /**
  * Application route configuration
  * All routes should be defined here for consistency
@@ -34,14 +35,14 @@ export const AppPaths = {
   CONTACT: '/contact',
   AI_COMPANION: '/ai-companions',
   PULSE_BOOST: '/pulse-boost',
-  GUIDELINES: '/guidelines' // Added the missing GUIDELINES route
+  GUIDELINES: '/guidelines' // Added the GUIDELINES route
 };
 
 export interface RouteConfig {
   path: string;
   label: string;
   title: string;
-  icon?: string;
+  icon?: React.ComponentType<any> | string; // Updated to support React components
   requireAuth?: boolean;
   roles?: string[];
   isAuthRequired?: boolean;
