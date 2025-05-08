@@ -14,6 +14,7 @@ const MetaversePage: React.FC = () => {
       system: 'MetaverseSystem',
       connectionId: `metaverse-page-${Date.now()}`,
       userId,
+      metadata: { page: 'metaverse', timestamp: new Date().toISOString() }
     });
   }, [userId]);
 

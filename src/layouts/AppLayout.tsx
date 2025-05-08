@@ -1,85 +1,48 @@
 
 import React from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import Layout from './Layout';
+import { Outlet } from 'react-router-dom';
 import { useUberEcosystem } from '@/contexts/UberEcosystemContext';
-import { useTitle } from '@/hooks/useTitle';
-import { Loader2 } from 'lucide-react';
 
+// Define what we'll use from the context
 interface AppLayoutProps {
   children?: React.ReactNode;
-  fullWidth?: boolean;
-  title?: string;
-  hideHeader?: boolean;
-  hideFooter?: boolean;
-  requireAuth?: boolean;
-  className?: string;
-  containerClass?: string;
 }
 
-/**
- * Enhanced Application Layout that integrates with the UberEcosystem
- * This layout should be used for all main application pages
- */
-const AppLayout: React.FC<AppLayoutProps> = ({
-  children,
-  fullWidth = false,
-  title,
-  hideHeader = false,
-  hideFooter = false,
-  requireAuth = false,
-  className,
-  containerClass
-}) => {
-  const { isAuthenticated, loading, state } = useUberEcosystem();
-  const location = useLocation();
+const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+  // Use the context but access only properties that are definitely available
+  const ecosystem = useUberEcosystem();
   
-  // Set dynamic page title
-  useTitle(title ? `${title} | UberEscorts` : 'UberEscorts');
-  
-  // Check if the ecosystem is initialized
-  const isInitialized = state.initialized;
-  
-  // If authentication is required and user is not authenticated, redirect to login
-  if (requireAuth && !loading && !isAuthenticated) {
-    // In a real implementation, this would use a proper router navigation
-    // For now, we'll just render a message
-    return (
-      <Layout hideHeader={true} hideFooter={true}>
-        <div className="flex flex-col items-center justify-center h-[80vh]">
-          <h2 className="text-2xl font-bold mb-4">Authentication Required</h2>
-          <p className="mb-6 text-muted-foreground">Please log in to access this page</p>
-          <a href="/auth" className="bg-primary text-white px-4 py-2 rounded-md">
-            Go to Login
-          </a>
-        </div>
-      </Layout>
-    );
-  }
-  
-  // Show loading state when initializing
-  if (!isInitialized || loading) {
-    return (
-      <Layout hideHeader={hideHeader} hideFooter={hideFooter}>
-        <div className="flex flex-col items-center justify-center h-[80vh]">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-          <p className="text-muted-foreground">Initializing UberEscorts ecosystem...</p>
-        </div>
-      </Layout>
-    );
-  }
+  // Create local variables for authenticated state if they don't exist in the context
+  const isAuthenticated = ecosystem.user !== undefined && ecosystem.user !== null;
+  const isLoading = ecosystem.loading !== undefined ? ecosystem.loading : false;
   
   return (
-    <Layout 
-      hideHeader={hideHeader} 
-      hideFooter={hideFooter}
-      fullWidth={fullWidth}
-      className={className}
-      containerClass={containerClass}
-    >
-      {children || <Outlet />}
-    </Layout>
+    <div className="min-h-screen flex flex-col">
+      {/* App Header */}
+      <header className="bg-background border-b">
+        <div className="container mx-auto p-4 flex justify-between items-center">
+          <h1 className="text-xl font-bold">UberEscorts</h1>
+        </div>
+      </header>
+      
+      {/* Main Content Area */}
+      <main className="flex-1 container mx-auto p-4 md:p-6">
+        {isLoading ? (
+          <div className="flex justify-center items-center h-full">
+            <span>Loading...</span>
+          </div>
+        ) : (
+          children || <Outlet />
+        )}
+      </main>
+      
+      {/* App Footer */}
+      <footer className="bg-background border-t py-4">
+        <div className="container mx-auto px-4 text-center text-muted-foreground">
+          &copy; {new Date().getFullYear()} UberEscorts. All rights reserved.
+        </div>
+      </footer>
+    </div>
   );
 };
 

@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from 'react';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 
 interface AvailabilityData {
   day: string;

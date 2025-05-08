@@ -15,6 +15,7 @@ const SearchPage: React.FC = () => {
       system: 'SearchSystem',
       connectionId: `search-page-${Date.now()}`,
       userId,
+      metadata: { page: 'search', timestamp: new Date().toISOString() }
     });
     
     // Calculate some boost scores for demo profiles

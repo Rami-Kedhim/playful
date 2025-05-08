@@ -1,102 +1,85 @@
 
 import { hermes } from '@/core/Hermes';
 import { oxum } from '@/core/Oxum';
-import { lucie } from '@/core/Lucie';
 import { orus } from '@/core/Orus';
+import { lucieAI } from '@/core/Lucie';
 
 /**
- * Check and report on the health of all UberEscorts core systems
+ * Check the health of all core systems
  */
-export async function checkAllSystemsHealth() {
-  // Check Hermes Analytics
+export function checkSystemHealth() {
   const hermesStatus = hermes.getSystemStatus();
-  const hermesHealth = hermesStatus.status === 'operational' ? 'healthy' : 'degraded';
-
-  // Check Oxum Boost Engine  
   const oxumStatus = oxum.checkSystemStatus();
-  const oxumHealth = oxumStatus.operational ? 'healthy' : 'degraded';
-  
-  // Check Lucie AI System
-  const lucieStatus = lucie.getSystemStatus();
-  const lucieModulesHealth = Object.entries(lucieStatus.modules).map(([name, status]) => ({
-    name,
-    status
-  }));
-  const lucieHealth = lucieModulesHealth.every(m => m.status === 'online') ? 'healthy' : 'degraded';
-  
-  // Check Orus Security
-  const orusResult = orus.checkIntegrity();
-  const orusHealth = orusResult.isValid ? 'healthy' : 'compromised';
-  
-  // Calculate overall health
-  const systemsHealthy = [
-    hermesHealth === 'healthy',
-    oxumHealth === 'healthy', 
-    lucieHealth === 'healthy',
-    orusHealth === 'healthy'
-  ];
-  
-  const healthyCount = systemsHealthy.filter(Boolean).length;
-  const overallHealth = healthyCount === systemsHealthy.length ? 'healthy' : 
-                        healthyCount >= systemsHealthy.length / 2 ? 'degraded' : 
-                        'critical';
+  const orusIntegrity = orus.checkIntegrity();
+  const lucieStatus = lucieAI.getSystemStatus();
   
   return {
-    timestamp: new Date(),
-    overallStatus: overallHealth,
-    systems: {
-      hermes: {
-        status: hermesHealth,
-        details: hermesStatus
-      },
-      oxum: {
-        status: oxumHealth,
-        details: oxumStatus
-      },
-      lucie: {
-        status: lucieHealth,
-        details: lucieModulesHealth
-      },
-      orus: {
-        status: orusHealth,
-        details: orusResult
-      }
+    hermes: {
+      operational: hermesStatus.status === 'operational',
+      services: hermesStatus.services
     },
-    healthySystemsCount: healthyCount,
-    totalSystems: systemsHealthy.length
+    oxum: {
+      operational: oxumStatus.operational,
+      traffic: oxumStatus.traffic,
+      loadFactor: oxumStatus.loadFactor
+    },
+    orus: {
+      integrity: orusIntegrity.isValid,
+      message: orusIntegrity.message
+    },
+    lucie: {
+      operational: lucieStatus.operational,
+      modules: lucieStatus.modules
+    }
   };
 }
 
 /**
- * Get a simple health status as a percentage
+ * Get overall system health percentage
  */
-export function getSystemHealthPercentage() {
-  let total = 0;
+export function getSystemHealthPercentage(): number {
+  const health = checkSystemHealth();
   
-  // Check Hermes
-  const hermesStatus = hermes.getSystemStatus();
-  total += hermesStatus.status === 'operational' ? 100 : 50;
+  let totalScore = 0;
+  let totalSystems = 0;
   
-  // Check Oxum
-  const oxumStatus = oxum.checkSystemStatus();
-  total += oxumStatus.operational ? 100 : 50;
+  // Score Hermes
+  if (health.hermes.operational) {
+    totalScore += 100;
+  } else {
+    totalScore += 50; // Partially operational
+  }
+  totalSystems += 1;
   
-  // Check Lucie
-  const lucieStatus = lucie.getSystemStatus();
-  const lucieModulesOnline = Object.values(lucieStatus.modules)
-    .filter(status => status === 'online').length;
-  const lucieModulesTotal = Object.values(lucieStatus.modules).length;
-  total += (lucieModulesOnline / lucieModulesTotal) * 100;
+  // Score Oxum
+  if (health.oxum.operational) {
+    totalScore += 100;
+  } else {
+    totalScore += 0;
+  }
+  totalSystems += 1;
   
-  // Check Orus
-  const orusResult = orus.checkIntegrity();
-  total += orusResult.isValid ? 100 : 0;
+  // Score Orus
+  if (health.orus.integrity) {
+    totalScore += 100;
+  } else {
+    totalScore += 25; // Severe issue
+  }
+  totalSystems += 1;
   
-  // Calculate average
-  return Math.round(total / 4);
+  // Score Lucie
+  if (health.lucie.operational) {
+    totalScore += 100;
+  } else {
+    // Check if any modules are online
+    const moduleCount = Object.keys(health.lucie.modules).length;
+    const onlineModules = Object.values(health.lucie.modules).filter(
+      status => status === 'online'
+    ).length;
+    
+    totalScore += Math.round((onlineModules / moduleCount) * 100);
+  }
+  totalSystems += 1;
+  
+  return Math.round(totalScore / totalSystems);
 }
-
-export default {
-  checkAllSystemsHealth,
-  getSystemHealthPercentage
-};
