@@ -17,5 +17,6 @@ export { default as BoostDialogContainer } from '@/components/boost/BoostDialogC
 export { default as BoostDialogTabs } from '@/components/boost/BoostDialogTabs';
 export { default as HermesBoostInfo } from '@/components/boost/HermesBoostInfo';
 export { default as BoostProfileDialog } from '@/components/boost/BoostProfileDialog';
+export { default as BoostEligibilityCheck } from '@/components/boost/BoostEligibilityCheck';
 
 // Add additional exports as needed for a complete boost module

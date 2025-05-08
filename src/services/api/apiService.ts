@@ -1,6 +1,7 @@
 
 import { toast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
+import { apiConfig } from '@/config/apiConfig';
 
 // Common HTTP headers for API requests
 const defaultHeaders = {
@@ -31,7 +32,8 @@ export class ApiService {
   }
   
   /**
-   * Generate an AI image using Hugging Face API via Supabase Edge Function
+   * Generate an AI image using free-tier or edge function
+   * Using Hugging Face's free tier or Replicate's affordable options
    */
   static async generateImage(prompt: string, options: {
     modelId?: string;
@@ -39,22 +41,48 @@ export class ApiService {
     height?: number;
   } = {}): Promise<string | null> {
     try {
-      const { data, error } = await supabase.functions.invoke('generate-media', {
-        body: {
-          type: 'image',
-          prompt,
-          user_id: 'anonymous',
-          options: {
-            width: options.width || 512,
-            height: options.height || 512,
-          },
-          modelId: options.modelId || 'black-forest-labs/FLUX.1-schnell'
+      // First try using Supabase Edge Function (preferred method for security)
+      try {
+        const { data, error } = await supabase.functions.invoke('generate-media', {
+          body: {
+            type: 'image',
+            prompt,
+            user_id: 'anonymous',
+            options: {
+              width: options.width || 512,
+              height: options.height || 512,
+            },
+            modelId: options.modelId || 'black-forest-labs/FLUX.1-schnell'
+          }
+        });
+        
+        if (error) throw new Error(error.message);
+        return data?.url || data;
+      } catch (supabaseError) {
+        console.log('Failed to use edge function, falling back to direct API', supabaseError);
+        
+        // Fallback to direct HuggingFace API (if we have a token in localStorage for development)
+        const hfToken = localStorage.getItem('hf_api_token');
+        if (hfToken) {
+          const response = await fetch(
+            `${apiConfig.imageGeneration.url}/models/stabilityai/stable-diffusion-xl-base-1.0`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${hfToken}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ inputs: prompt })
+            }
+          );
+          
+          if (!response.ok) throw new Error('Image generation failed');
+          const blob = await response.blob();
+          return URL.createObjectURL(blob);
         }
-      });
-      
-      if (error) throw new Error(error.message);
-      
-      return data?.url || data;
+        
+        throw new Error('No image generation method available');
+      }
     } catch (error) {
       console.error('Image generation failed:', error);
       toast({
@@ -67,7 +95,7 @@ export class ApiService {
   }
   
   /**
-   * Get location data from a free geolocation API
+   * Get location data from a free geolocation API (ipapi.co)
    */
   static async getLocationData(ipAddress?: string): Promise<any> {
     try {
@@ -79,12 +107,21 @@ export class ApiService {
       return await this.request(url);
     } catch (error) {
       console.error('Location lookup failed:', error);
-      return null;
+      
+      // Fallback to backup free service
+      try {
+        const backupUrl = 'https://freeipapi.com/api/json';
+        return await this.request(backupUrl);
+      } catch (backupError) {
+        console.error('Backup location lookup failed:', backupError);
+        return null;
+      }
     }
   }
   
   /**
    * Get exchange rates for currency conversion
+   * Using ExchangeRate-API's free tier
    */
   static async getExchangeRates(baseCurrency = 'USD'): Promise<any> {
     try {
@@ -92,19 +129,27 @@ export class ApiService {
       return await this.request(`https://open.er-api.com/v6/latest/${baseCurrency}`);
     } catch (error) {
       console.error('Exchange rate lookup failed:', error);
-      return null;
+      
+      // Fallback to backup free service
+      try {
+        const backupUrl = `https://api.exchangerate.host/latest?base=${baseCurrency}`;
+        return await this.request(backupUrl);
+      } catch (backupError) {
+        console.error('Backup exchange rate lookup failed:', backupError);
+        return null;
+      }
     }
   }
   
   /**
-   * Moderate content using free content moderation API
+   * Moderate content using OpenAI's free moderation API
    */
   static async moderateContent(text: string): Promise<{
     isSafe: boolean;
     categories: Record<string, number>;
   }> {
     try {
-      // Call our edge function which will use OpenAI's moderation API
+      // Call our edge function which will use OpenAI's moderation API (free)
       const { data, error } = await supabase.functions.invoke('moderate-content', {
         body: { text }
       });
@@ -118,6 +163,57 @@ export class ApiService {
         isSafe: false,
         categories: {}
       };
+    }
+  }
+  
+  /**
+   * Text to speech using ElevenLabs free tier
+   * 10,000 characters per month free
+   */
+  static async textToSpeech(text: string, voice: string = 'default'): Promise<string | null> {
+    try {
+      // Use edge function for security
+      const { data, error } = await supabase.functions.invoke('text-to-speech', {
+        body: { text, voice }
+      });
+      
+      if (error) throw new Error(error.message);
+      return data?.audioUrl || null;
+    } catch (error) {
+      console.error('Text to speech failed:', error);
+      return null;
+    }
+  }
+  
+  /**
+   * Free translation service using LibreTranslate
+   */
+  static async translateText(
+    text: string, 
+    sourceLang: string = 'auto', 
+    targetLang: string = 'en'
+  ): Promise<string | null> {
+    try {
+      const response = await fetch("https://libretranslate.de/translate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          q: text,
+          source: sourceLang,
+          target: targetLang,
+          format: "text"
+        })
+      });
+      
+      if (!response.ok) throw new Error('Translation failed');
+      
+      const result = await response.json();
+      return result.translatedText || null;
+    } catch (error) {
+      console.error('Translation failed:', error);
+      return null;
     }
   }
   

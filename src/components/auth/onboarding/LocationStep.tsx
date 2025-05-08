@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin, Globe } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { freeMapService } from '@/services/maps/FreeMapService';
 
 interface LocationStepProps {
   onNext: (data: any) => void;
@@ -18,16 +19,36 @@ export const LocationStep: React.FC<LocationStepProps> = ({ onNext, userRole }) 
   const [country, setCountry] = useState('United States');
   const [travelAvailable, setTravelAvailable] = useState(false);
   const [serviceAreas, setServiceAreas] = useState<string[]>([]);
+  const [coordinates, setCoordinates] = useState<{lat: number, lng: number} | null>(null);
   
   // Mock list of states - would be expanded in real implementation
   const states = ['California', 'New York', 'Florida', 'Texas', 'Nevada', 'Illinois'];
   
-  const handleContinue = () => {
-    onNext({
-      location: `${city}, ${state}, ${country}`,
-      travelAvailable,
-      serviceAreas
-    });
+  const handleContinue = async () => {
+    // Try to geocode the location for better data
+    try {
+      const locationString = `${city}, ${state}, ${country}`;
+      const geocodeResult = await freeMapService.geocode(locationString);
+      
+      onNext({
+        location: locationString,
+        travelAvailable,
+        serviceAreas,
+        coordinates: geocodeResult ? { 
+          lat: geocodeResult.lat, 
+          lng: geocodeResult.lng 
+        } : null
+      });
+    } catch (error) {
+      console.error("Geocoding failed:", error);
+      // Fall back to just the text location if geocoding fails
+      onNext({
+        location: `${city}, ${state}, ${country}`,
+        travelAvailable,
+        serviceAreas,
+        coordinates: null
+      });
+    }
   };
 
   return (
