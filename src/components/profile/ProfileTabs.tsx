@@ -29,11 +29,28 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
   };
 
   // Convert the string verification level to the proper enum type
-  const verificationLevel = 
-    profile.verification_level && 
-    Object.values(VerificationLevel).includes(profile.verification_level as any)
-      ? (profile.verification_level as VerificationLevel)
-      : VerificationLevel.NONE;
+  let verificationLevel = VerificationLevel.NONE;
+  
+  if (profile.verification_level) {
+    switch (profile.verification_level) {
+      case "basic":
+        verificationLevel = VerificationLevel.BASIC;
+        break;
+      case "verified":
+        verificationLevel = VerificationLevel.VERIFIED;
+        break;
+      case "enhanced":
+        verificationLevel = VerificationLevel.ENHANCED;
+        break;
+      case "premium":
+        verificationLevel = VerificationLevel.PREMIUM;
+        break;
+      case "none":
+      default:
+        verificationLevel = VerificationLevel.NONE;
+        break;
+    }
+  }
 
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange}>

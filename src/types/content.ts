@@ -1,32 +1,52 @@
 
-export type ContentItemType = "escort" | "creator" | "livecam";
-
+// Define missing content types
 export interface ContentItem {
   id: string;
   title: string;
-  image: string;
-  type: ContentItemType;
-  rating: number;
-  price: string | number;
-  location?: string;
-  featured?: boolean;
-}
-
-export interface MediaResource {
-  id: string;
-  url: string;
-  type: 'image' | 'video';
-  thumbnail?: string;
-  title?: string;
   description?: string;
+  type: string;
+  url?: string;
+  thumbnailUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+  authorId: string;
+  authorName?: string;
+  isPublic: boolean;
+  price?: number;
+  viewCount?: number;
+  likeCount?: number;
 }
 
-export interface SearchFilters {
-  query?: string;
-  location?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  services?: string[];
-  sortBy?: 'price' | 'rating' | 'distance' | 'popularity';
-  sortDir?: 'asc' | 'desc';
+export enum ContentType {
+  VIDEO = 'video',
+  IMAGE = 'image',
+  AUDIO = 'audio',
+  TEXT = 'text',
+  PDF = 'pdf',
+  LIVESTREAM = 'livestream'
+}
+
+export interface ContentUnlockOptions {
+  price?: number;
+  subscription?: boolean;
+  freePreview?: boolean;
+  expiryDate?: string;
+  allowedViews?: number;
+}
+
+export interface VirtualContent {
+  id: string;
+  type: ContentType;
+  title: string;
+  description: string;
+  thumbnailUrl?: string;
+  url?: string;
+  price?: number;
+  isLocked: boolean;
+  unlockOptions?: ContentUnlockOptions;
+  creatorId: string;
+  creatorName?: string;
+  createdAt: string;
+  tags?: string[];
+  metadata?: Record<string, any>;
 }

@@ -36,11 +36,14 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
   return (
     <div className={className}>
       {label && <div className="text-sm font-medium mb-2">{label}</div>}
-      <Select value={value} onValueChange={(val) => onChange(val as ServiceTypeFilter)}>
+      <Select 
+        value={value} 
+        onValueChange={(val) => onChange(val as ServiceTypeFilter)}
+      >
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select service type">
             <div className="flex items-center gap-2">
-              <ServiceTypeIcon type={value} className="h-4 w-4" />
+              <ServiceTypeIcon type={value as any} className="h-4 w-4" />
               <span>{serviceOptions.find(opt => opt.value === value)?.label || 'Any Service'}</span>
             </div>
           </SelectValue>
@@ -49,7 +52,7 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
           {serviceOptions.map(option => (
             <SelectItem key={option.value} value={option.value}>
               <div className="flex items-center gap-2">
-                <ServiceTypeIcon type={option.value} className="h-4 w-4" />
+                <ServiceTypeIcon type={option.value as any} className="h-4 w-4" />
                 <span>{option.label}</span>
               </div>
             </SelectItem>

@@ -22,9 +22,9 @@ const CreatorHeader: React.FC<CreatorHeaderProps> = ({
   
   const handleFavoriteToggle = () => {
     if (isFavorite) {
-      favorites.removeFavorite('creators', creator.id);
+      favorites.removeFavorite(creator.id);
     } else {
-      favorites.addFavorite('creators', creator);
+      favorites.addFavorite(creator);
     }
   };
   

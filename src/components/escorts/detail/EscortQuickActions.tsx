@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Escort } from "@/types/escort";
+import { Escort } from "@/types/Escort";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageSquare, Calendar, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -23,9 +23,9 @@ const EscortQuickActions: React.FC<EscortQuickActionsProps> = ({
   
   const handleFavoriteToggle = () => {
     if (isFavorite) {
-      removeFavorite('escorts', escort.id);
+      removeFavorite(escort.id);
     } else {
-      addFavorite('escorts', escort);
+      addFavorite(escort);
     }
   };
   

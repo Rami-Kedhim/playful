@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 
 interface FavoritesContextType {
   favorites: Escort[];

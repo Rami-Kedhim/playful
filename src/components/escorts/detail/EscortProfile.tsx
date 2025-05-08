@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Escort, ServiceType } from "@/types/escort";
+import { Escort } from "@/types/Escort";
 import { Button } from '@/components/ui/button';
 import { Heart, MessageSquare, Share2, Calendar } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -36,15 +36,15 @@ const EscortProfile: React.FC<EscortProfileProps> = ({ escort }) => {
   };
 
   const handleFavoriteClick = () => {
-    if (isFavorite('escorts', escort.id)) {
-      removeFavorite('escorts', escort.id);
+    if (isFavorite(escort.id)) {
+      removeFavorite(escort.id);
     } else {
-      addFavorite('escorts', escort);
+      addFavorite(escort);
     }
   };
 
   // Check if this escort is in favorites
-  const isFav = isFavorite('escorts', escort.id);
+  const isFav = isFavorite(escort.id);
 
   return (
     <div className="flex flex-col md:flex-row gap-8">

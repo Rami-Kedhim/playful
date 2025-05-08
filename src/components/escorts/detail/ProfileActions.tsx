@@ -4,7 +4,7 @@ import { EnhancedButton } from "@/components/ui/enhanced-button";
 import { Heart, Calendar, MessageSquare, Share2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { useFavorites } from "@/contexts/FavoritesContext";
-import { Escort } from "@/types/escort";
+import { Escort } from "@/types/Escort";
 
 interface ProfileActionsProps {
   escort: Escort;
@@ -25,14 +25,14 @@ const ProfileActions = ({
   const handleFavoriteToggle = async () => {
     setIsLoadingFavorite(true);
     
-    if (isFavorite('escorts', escort.id)) {
-      removeFavorite('escorts', escort.id);
+    if (isFavorite(escort.id)) {
+      removeFavorite(escort.id);
       toast({
         title: "Removed from favorites",
         description: `${escort.name} has been removed from your favorites.`,
       });
     } else {
-      addFavorite('escorts', escort);
+      addFavorite(escort);
       toast({
         title: "Added to favorites",
         description: `${escort.name} has been added to your favorites.`,
@@ -66,9 +66,9 @@ const ProfileActions = ({
       >
         <Heart 
           size={16} 
-          className={`mr-2 ${isFavorite('escorts', escort.id) ? "fill-red-500 text-red-500" : ""}`} 
+          className={`mr-2 ${isFavorite(escort.id) ? "fill-red-500 text-red-500" : ""}`} 
         />
-        {isFavorite('escorts', escort.id) ? "Favorited" : "Favorite"}
+        {isFavorite(escort.id) ? "Favorited" : "Favorite"}
       </EnhancedButton>
       
       <EnhancedButton 

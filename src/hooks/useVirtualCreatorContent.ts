@@ -1,6 +1,5 @@
-
-import { useState } from 'react';
-import { ContentType } from '@/types/content';
+import { useState, useEffect } from 'react';
+import { ContentType, ContentItem } from '@/types/content';
 
 interface VirtualCreatorContent {
   id: string;

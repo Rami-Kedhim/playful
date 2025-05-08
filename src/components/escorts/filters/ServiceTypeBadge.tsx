@@ -11,7 +11,7 @@ interface ServiceTypeBadgeProps {
 
 const ServiceTypeBadge: React.FC<ServiceTypeBadgeProps> = ({ service, className }) => {
   // Map service types to readable labels
-  const serviceLabels: Record<ServiceTypeFilter, string> = {
+  const serviceLabels: Record<string, string> = {
     'in-person': 'In-Person',
     'virtual': 'Virtual',
     'both': 'Both',
@@ -24,7 +24,7 @@ const ServiceTypeBadge: React.FC<ServiceTypeBadgeProps> = ({ service, className 
   };
 
   // Map service types to variant styles
-  const variantMap: Record<ServiceTypeFilter, string> = {
+  const variantMap: Record<string, string> = {
     'in-person': 'bg-blue-100 text-blue-800',
     'virtual': 'bg-purple-100 text-purple-800',
     'both': 'bg-green-100 text-green-800',
@@ -36,13 +36,17 @@ const ServiceTypeBadge: React.FC<ServiceTypeBadgeProps> = ({ service, className 
     'all': 'bg-gray-100 text-gray-800'
   };
 
+  // Get label with fallback
+  const label = serviceLabels[service] || 'Service';
+  const variantClass = variantMap[service] || 'bg-gray-100 text-gray-800';
+
   return (
     <Badge 
-      className={`flex items-center gap-1 font-normal ${variantMap[service]} ${className || ''}`}
+      className={`flex items-center gap-1 font-normal ${variantClass} ${className || ''}`}
       variant="outline"
     >
-      <ServiceTypeIcon type={service} className="h-3 w-3" />
-      <span>{serviceLabels[service]}</span>
+      <ServiceTypeIcon type={service as any} className="h-3 w-3" />
+      <span>{label}</span>
     </Badge>
   );
 };

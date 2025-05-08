@@ -2,7 +2,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useServiceType } from '@/contexts/ServiceTypeContext';
-import { ServiceTypeFilter } from '@/contexts/ServiceTypeContext';
+import { ServiceTypeFilter } from '@/types/serviceType';
 import ServiceTypeIcon from './ServiceTypeIcon';
 import { Badge } from '@/components/ui/badge';
 import { Check } from 'lucide-react';

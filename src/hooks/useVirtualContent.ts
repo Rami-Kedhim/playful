@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ContentType, ContentUnlockOptions, VirtualContent } from '@/types/content';
 import { useAuth } from '@/hooks/auth';
 

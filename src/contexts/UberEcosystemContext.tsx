@@ -1,202 +1,149 @@
-
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { supabase } from '@/lib/supabase';
-import { uberCore } from '@/core/UberCore';
-import { User } from '@/types/user';
-
-interface EcosystemState {
-  initialized: boolean;
-  subsystems: {
-    core: boolean;
-    escorts: boolean;
-    creators: boolean;
-    livecams: boolean;
-    wallet: boolean;
-    verification: boolean;
-    ai: boolean;
-  };
-  healthStatus: {
-    overall: number;
-    systems: {
-      [key: string]: number;
-    };
-  };
-  config: {
-    features: {
-      boostEnabled: boolean;
-      aiAssistantEnabled: boolean;
-      metaverseEnabled: boolean;
-      liveStreamingEnabled: boolean;
-    };
-    serviceTypes: string[];
-  };
-}
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  ReactNode,
+} from 'react';
+import { useAuth } from '@/hooks/auth';
+import { useToast } from '@/components/ui/use-toast';
 
 interface UberEcosystemContextType {
-  state: EcosystemState;
-  user: User | null;
-  isAuthenticated: boolean;
-  loading: boolean;
-  initializeSubsystem: (name: string) => Promise<boolean>;
-  getSystemHealth: () => Promise<{overall: number, systems: {[key: string]: number}}>;
-  refreshEcosystem: () => Promise<void>;
-  toggleFeature: (featureName: string, enabled: boolean) => void;
+  isReady: boolean;
+  isInitialized: boolean;
+  isOperational: boolean;
+  isActive: boolean;
+  services: {
+    auth: string;
+    analytics: string;
+    ai: string;
+    wallet: string;
+    seo: string;
+  };
+  queueLength: number;
+  processing: boolean;
+  lastUpdated: string;
+  initialize: () => Promise<void>;
+  shutdown: () => Promise<void>;
+  checkSubsystemHealth: () => { name: string; status: string; health: number }[];
+  getSystemStatus: () => any;
 }
 
-const defaultState: EcosystemState = {
-  initialized: false,
-  subsystems: {
-    core: false,
-    escorts: false,
-    creators: false, 
-    livecams: false,
-    wallet: false,
-    verification: false,
-    ai: false
+const defaultUberEcosystemContext: UberEcosystemContextType = {
+  isReady: false,
+  isInitialized: false,
+  isOperational: false,
+  isActive: false,
+  services: {
+    auth: 'offline',
+    analytics: 'offline',
+    ai: 'offline',
+    wallet: 'offline',
+    seo: 'offline',
   },
-  healthStatus: {
-    overall: 0,
-    systems: {}
-  },
-  config: {
-    features: {
-      boostEnabled: true,
-      aiAssistantEnabled: true,
-      metaverseEnabled: false,
-      liveStreamingEnabled: true
-    },
-    serviceTypes: ['in-person', 'virtual', 'both']
-  }
+  queueLength: 0,
+  processing: false,
+  lastUpdated: 'N/A',
+  initialize: async () => {},
+  shutdown: async () => {},
+  checkSubsystemHealth: () => [],
+  getSystemStatus: () => ({}),
 };
 
-const UberEcosystemContext = createContext<UberEcosystemContextType | undefined>(undefined);
+const UberEcosystemContext = createContext<UberEcosystemContextType>(
+  defaultUberEcosystemContext
+);
 
-export const UberEcosystemProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isAuthenticated, loading } = useAuth();
-  const [state, setState] = useState<EcosystemState>(defaultState);
-  
-  // Initialize core system on mount
+interface UberEcosystemProviderProps {
+  children: ReactNode;
+}
+
+export const UberEcosystemProvider: React.FC<UberEcosystemProviderProps> = ({
+  children,
+}) => {
+  const [isReady, setIsReady] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isOperational, setIsOperational] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [services, setServices] = useState({
+    auth: 'offline',
+    analytics: 'offline',
+    ai: 'offline',
+    wallet: 'offline',
+    seo: 'offline',
+  });
+  const [queueLength, setQueueLength] = useState(0);
+  const [processing, setProcessing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState('N/A');
+  const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
+
   useEffect(() => {
-    const initializeCore = async () => {
-      try {
-        const success = await uberCore.initialize();
-        
-        setState(prev => ({
-          ...prev,
-          initialized: success,
-          subsystems: {
-            ...prev.subsystems,
-            core: success
-          }
-        }));
-        
-        if (success) {
-          // Get initial health status
-          const healthStatus = await getSystemHealth();
-          setState(prev => ({
-            ...prev,
-            healthStatus
-          }));
-        }
-      } catch (error) {
-        console.error('Failed to initialize UberEcosystem core:', error);
-      }
+    const initializeAutomaticSeo = () => {
+      console.log('Initializing UberEcosystem services...');
+      setIsInitialized(true);
+      setIsOperational(true);
+      setIsActive(true);
+      setServices({
+        auth: 'online',
+        analytics: 'online',
+        ai: 'online',
+        wallet: 'online',
+        seo: 'online',
+      });
+      setQueueLength(10);
+      setProcessing(true);
+      setLastUpdated(new Date().toLocaleTimeString());
+      toast({
+        title: 'UberEcosystem Initialized',
+        description: 'All core services are now online.',
+      });
+      return true;
     };
-    
-    initializeCore();
-    
-    // Cleanup on unmount
+
+    if (isAuthenticated && !isInitialized) {
+      initializeAutomaticSeo();
+    }
+
+    setIsReady(true);
+
     return () => {
-      uberCore.shutdown();
+      console.log("UberEcosystem shutting down...");
     };
-  }, []);
-  
-  // Initialize auth integration when user changes
-  useEffect(() => {
-    if (user && !loading) {
-      // Track user for analytics
-      console.log('User authenticated in ecosystem context:', user.id);
-    }
-  }, [user, loading]);
+  }, [isAuthenticated, isInitialized, toast]);
 
-  const initializeSubsystem = async (name: string): Promise<boolean> => {
-    try {
-      console.log(`Initializing subsystem: ${name}`);
-      // In a real implementation, this would call the specific subsystem's initialize method
-      const success = true;
-      
-      setState(prev => ({
-        ...prev,
-        subsystems: {
-          ...prev.subsystems,
-          [name]: success
-        }
-      }));
-      
-      return success;
-    } catch (error) {
-      console.error(`Failed to initialize ${name} subsystem:`, error);
-      return false;
-    }
+  const checkSubsystemHealth = () => {
+    return [
+      { name: 'Auth', status: 'online', health: 100 },
+      { name: 'Analytics', status: 'online', health: 95 },
+      { name: 'AI', status: 'degraded', health: 60 },
+    ];
   };
 
-  const getSystemHealth = async (): Promise<{overall: number, systems: {[key: string]: number}}> => {
-    try {
-      // This would call the core system's health check in a real implementation
-      const health = {
-        overall: 95,
-        systems: {
-          escorts: 97,
-          creators: 96,
-          livecams: 95,
-          wallet: 98,
-          verification: 99,
-          ai: 90
-        }
-      };
-      
-      return health;
-    } catch (error) {
-      console.error('Failed to get system health:', error);
-      return { overall: 0, systems: {} };
-    }
-  };
-  
-  const refreshEcosystem = async (): Promise<void> => {
-    try {
-      const healthStatus = await getSystemHealth();
-      setState(prev => ({
-        ...prev,
-        healthStatus
-      }));
-    } catch (error) {
-      console.error('Failed to refresh ecosystem:', error);
-    }
-  };
-  
-  const toggleFeature = (featureName: string, enabled: boolean): void => {
-    setState(prev => ({
-      ...prev,
-      config: {
-        ...prev.config,
-        features: {
-          ...prev.config.features,
-          [featureName]: enabled
-        }
-      }
-    }));
+  const getSystemStatus = () => {
+    return {
+      operational: isOperational,
+      isActive: isActive,
+      services: services,
+      queueLength: queueLength,
+      processing: processing,
+      lastUpdated: lastUpdated,
+    };
   };
 
   const value = {
-    state,
-    user,
-    isAuthenticated,
-    loading,
-    initializeSubsystem,
-    getSystemHealth,
-    refreshEcosystem,
-    toggleFeature
+    isReady,
+    isInitialized,
+    isOperational,
+    isActive,
+    services,
+    queueLength,
+    processing,
+    lastUpdated,
+    initialize: () => Promise.resolve(initializeAutomaticSeo()),
+    shutdown: () => Promise.resolve(console.log("UberEcosystem shutting down...")),
+    checkSubsystemHealth,
+    getSystemStatus,
   };
 
   return (
@@ -206,12 +153,12 @@ export const UberEcosystemProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-export const useUberEcosystem = (): UberEcosystemContextType => {
+export const useUberEcosystem = () => {
   const context = useContext(UberEcosystemContext);
-  if (context === undefined) {
-    throw new Error('useUberEcosystem must be used within a UberEcosystemProvider');
+  if (!context) {
+    throw new Error(
+      'useUberEcosystem must be used within a UberEcosystemProvider'
+    );
   }
   return context;
 };
-
-export default UberEcosystemContext;

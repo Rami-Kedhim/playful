@@ -1,6 +1,6 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Escort } from "@/types/escort";
+import { Escort } from "@/types/Escort";
 import { VerificationLevel } from "@/types/verification";
 import AboutTab from "./AboutTab";
 import ServicesTab from "./ServicesTab";
@@ -14,30 +14,35 @@ interface ProfileTabsProps {
 }
 
 const ProfileTabs = ({ escort }: ProfileTabsProps) => {
-  // Normalize the verificationLevel prop to strict VerificationLevel enum
-  let verificationLevel: VerificationLevel = VerificationLevel.NONE;
+  // Normalize the verificationLevel prop to a string type compatible with VerificationBadge
+  let verificationLevel: "none" | "basic" | "enhanced" | "premium" = "none";
   
   if (escort.verificationLevel) {
-    // Map string verification levels to enum values
-    switch(escort.verificationLevel) {
+    // Convert to string if it's an enum value
+    const level = typeof escort.verificationLevel === 'string' 
+      ? escort.verificationLevel 
+      : VerificationLevel[escort.verificationLevel];
+    
+    // Map verification levels to expected values
+    switch(level) {
       case "basic":
       case VerificationLevel.BASIC:
-        verificationLevel = VerificationLevel.BASIC;
+        verificationLevel = "basic";
         break;
       case "verified":
-        // Map "verified" to VERIFIED enum value
-        verificationLevel = VerificationLevel.VERIFIED;
+      case VerificationLevel.VERIFIED:
+        verificationLevel = "basic"; // Map verified to basic for now
         break;
       case "premium":
       case VerificationLevel.PREMIUM:
-        verificationLevel = VerificationLevel.PREMIUM;
+        verificationLevel = "premium";
         break;
       case "enhanced":
       case VerificationLevel.ENHANCED:
-        verificationLevel = VerificationLevel.ENHANCED;
+        verificationLevel = "enhanced";
         break;
       default:
-        verificationLevel = VerificationLevel.NONE;
+        verificationLevel = "none";
     }
   }
 

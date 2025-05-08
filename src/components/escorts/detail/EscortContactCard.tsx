@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, MessageSquare, Heart } from 'lucide-react';
@@ -24,9 +23,9 @@ const EscortContactCard: React.FC<EscortContactCardProps> = ({
   
   const handleFavoriteClick = () => {
     if (isFavorite) {
-      removeFavorite('escorts', escort.id);
+      removeFavorite(escort.id);
     } else {
-      addFavorite('escorts', escort);
+      addFavorite(escort);
     }
   };
   

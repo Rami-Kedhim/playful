@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import UnifiedHeader from '@/components/layout/UnifiedHeader';
@@ -79,7 +78,7 @@ const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
         {children || <Outlet />}
       </main>
       
-      {!hideFooter && <UnifiedFooter simplified={simplified} />}
+      {!hideFooter && <UnifiedFooter />}
     </div>
   );
 };
