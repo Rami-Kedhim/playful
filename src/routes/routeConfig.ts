@@ -21,7 +21,18 @@ export const AppPaths = {
   FAVORITES: '/favorites',
   MESSAGES: '/messages',
   BOOKINGS: '/bookings',
-  DASHBOARD: '/dashboard'
+  DASHBOARD: '/dashboard',
+  // Add missing routes
+  NEURAL_MONITOR: '/neural/monitor',
+  NEURAL_ANALYTICS: '/neural/analytics',
+  ADMIN: '/admin',
+  SEO: '/seo',
+  SAFETY: '/safety',
+  PRIVACY: '/privacy',
+  TERMS: '/terms',
+  COMPLIANCE: '/compliance',
+  CONTACT: '/contact',
+  AI_COMPANION: '/ai-companions'
 };
 
 export interface RouteConfig {

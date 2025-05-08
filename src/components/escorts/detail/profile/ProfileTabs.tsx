@@ -13,21 +13,13 @@ interface ProfileTabsProps {
   escort: Escort;
 }
 
-// Create an enum for verification levels
-const VerificationLevelEnum = {
-  NONE: "none" as VerificationLevel,
-  BASIC: "basic" as VerificationLevel,
-  VERIFIED: "verified" as VerificationLevel,
-  PREMIUM: "premium" as VerificationLevel
-};
-
 const ProfileTabs = ({ escort }: ProfileTabsProps) => {
   // Normalize the verificationLevel prop to strict VerificationLevel union and fallback to 'none'
   let verificationLevel: VerificationLevel = "none";
   
   if (escort.verificationLevel && 
       typeof escort.verificationLevel === "string" &&
-      ["none", "basic", "verified", "premium"].includes(escort.verificationLevel as string)) {
+      ["none", "basic", "verified", "premium", "enhanced"].includes(escort.verificationLevel as string)) {
     verificationLevel = escort.verificationLevel as VerificationLevel;
   }
 

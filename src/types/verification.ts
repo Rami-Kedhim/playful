@@ -8,7 +8,7 @@ export enum VerificationStatus {
   REJECTED = "rejected",
   IN_REVIEW = "in_review",
   EXPIRED = "expired",
-  NONE = "none" // Add NONE to fix errors
+  NONE = "none"
 }
 
 export interface VerificationRequest {
@@ -21,13 +21,12 @@ export interface VerificationRequest {
   reviewerId?: string;
   documents: VerificationDocument[];
   rejectionReason?: string;
-  created_at?: Date; // For backward compatibility
-  reviewer_notes?: string; // For backward compatibility 
-  profile_id?: string; // For backward compatibility
-  // Add these properties to fix errors
-  requested_level?: VerificationLevel; // For backward compatibility
-  reviewed_at?: Date; // For backward compatibility
-  verificationLevel?: VerificationLevel; // For backward compatibility
+  created_at?: Date;
+  reviewer_notes?: string;
+  profile_id?: string;
+  requested_level?: VerificationLevel;
+  reviewed_at?: Date;
+  verificationLevel?: VerificationLevel;
 }
 
 export interface VerificationDocument {
@@ -37,12 +36,11 @@ export interface VerificationDocument {
   uploadedAt: Date;
   status: VerificationStatus;
   notes?: string;
-  // Add compatibility fields for components that use these properties
   filePath?: string;
   documentType?: string;
 }
 
-// Add VerificationLevel as an enumeration (as some components use it this way)
+// Define constants for verification levels
 export const VerificationLevels = {
   NONE: "none" as VerificationLevel,
   BASIC: "basic" as VerificationLevel,

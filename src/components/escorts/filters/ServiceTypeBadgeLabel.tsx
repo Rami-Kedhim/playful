@@ -1,16 +1,13 @@
 
 import React from 'react';
-import { ServiceType } from '@/types/serviceType';
+import { ServiceTypeFilter } from '@/types/serviceType';
 import { Badge } from '@/components/ui/badge';
 
-// Export this type to fix imports in other files
-export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "all";
-
 export interface ServiceTypeBadgeLabelProps {
-  type?: ServiceType; // Make the type optional to fix TypeScript errors
+  type?: ServiceTypeFilter;
 }
 
-const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ type = "all" }) => {
+const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ type = "any" }) => {
   let label: string;
   let variant: "default" | "outline" | "secondary" | "destructive" | null = null;
 
@@ -27,11 +24,11 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ type = "a
       label = "In-Person & Virtual";
       variant = "outline";
       break;
-    case "incall":
+    case "in-call":
       label = "Incall";
       variant = "default";
       break;
-    case "outcall":
+    case "out-call":
       label = "Outcall";
       variant = "default";
       break;

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Home, MapPin, Video, Users, Utensils, Globe } from 'lucide-react';
-import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
+import { ServiceTypeFilter } from '@/types/serviceType';
 
 interface ServiceTypeIconProps {
   type: ServiceTypeFilter;
