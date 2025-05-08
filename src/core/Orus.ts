@@ -10,7 +10,6 @@ export class Orus {
       isValid,
       userId: isValid ? 'user-1' : '',
       expiresAt: new Date(Date.now() + 3600 * 1000).toISOString(),
-      username: isValid ? 'user1' : '',
       timestamp: new Date().toISOString()
     };
   }
@@ -19,7 +18,6 @@ export class Orus {
     // Mock implementation
     return {
       valid: true,
-      status: 'ok',
       errors: [],
       warnings: [],
       lastChecked: new Date().toISOString(),
