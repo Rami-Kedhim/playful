@@ -1,18 +1,18 @@
 
-import { LucieAISystem, SystemStatus, SystemIntegrityResult, SystemHealthMetrics, SessionValidationResult } from '@/types/core-systems';
+import { SystemStatus, SessionValidationResult, UberCoreSystem, SystemIntegrityResult, SystemHealthMetrics } from '@/types/core-systems';
 import { UberWallet } from './UberWallet';
-import { OxumSystem } from '@/types/oxum';
+import { OxumSystem } from '@/types/core-systems';
 import { AutomaticSEO } from './AutomaticSEO';
 
-export class UberCore {
-  private lucieAI: LucieAISystem;
+export class UberCore implements UberCoreSystem {
+  private lucieAI: any; // Using any since we don't have the actual implementation
   private oxumSystem: OxumSystem;
   private wallet: UberWallet;
   private automaticSeo: AutomaticSEO;
   
-  constructor(lucieAI: LucieAISystem, oxumSystem: OxumSystem) {
+  constructor(lucieAI?: any, oxumSystem?: OxumSystem) {
     this.lucieAI = lucieAI;
-    this.oxumSystem = oxumSystem;
+    this.oxumSystem = oxumSystem || {} as OxumSystem;
     this.wallet = new UberWallet();
     this.automaticSeo = new AutomaticSEO();
   }
@@ -32,15 +32,14 @@ export class UberCore {
       queueLength: 0,
       processing: false,
       uptime: 100,
-      lastReboot: new Date().toISOString(),
-      messageLength: 10 // Added for compatibility
+      lastReboot: new Date().toISOString()
     };
   }
   
   public checkSystemIntegrity(): SystemIntegrityResult {
     // Mock system integrity check
     return {
-      isValid: true, // Added for compatibility
+      isValid: true,
       status: 'ok',
       errors: [],
       warnings: [],
@@ -55,17 +54,16 @@ export class UberCore {
       memory: 20,
       disk: 5,
       network: 15,
-      load: 12 // Added for compatibility
+      load: 12
     };
   }
   
   public validateSession(sessionId: string): SessionValidationResult {
     // Mock session validation
     return {
-      isValid: true, // Changed from valid to isValid
-      sessionId: sessionId, // Added for compatibility
-      expiresAt: new Date(Date.now() + 3600 * 1000).toISOString(), // Added for compatibility
+      isValid: true,
       userId: 'user-1',
+      expiry: new Date(Date.now() + 3600 * 1000),
       username: 'user1',
       timestamp: new Date().toISOString()
     };
@@ -87,3 +85,6 @@ export class UberCore {
     ];
   }
 }
+
+// Export an instance for easy import
+export const uberCore = new UberCore();

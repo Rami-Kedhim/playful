@@ -33,15 +33,16 @@ export const useBoost = () => {
   return {
     isActive: boostStatus.isActive || false,
     packages: context.packages || [],
-    boostProfile: context.boostProfile || (async () => false),
-    cancelBoost: context.cancelBoost || (async () => false),
+    boostProfile: context.boostProfile,
+    cancelBoost: context.cancelBoost,
     loading: context.loading || false,
     error: context.error || null,
+    remainingTime: context.remainingTime || boostStatus.remainingTime,
+    boostScore: context.boostScore,
     boostStatus,
-    hermesStatus,
     eligibility,
-    remainingTime: boostStatus.remainingTime || '',
-    getBoostAnalytics: context.getBoostAnalytics || (async () => ({}))
+    hermesStatus,
+    getBoostAnalytics: context.getBoostAnalytics
   };
 };
 

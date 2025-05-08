@@ -8,7 +8,7 @@ import { BoostPackage } from "@/types/boost";
 
 interface BoostPackagesProps {
   packages: BoostPackage[];
-  selectedId: string | null;
+  selected: string | null; // Changed from selectedId to selected
   onSelect: (id: string) => void;
   formatDuration?: (duration: string) => string;
   disabled?: boolean;
@@ -19,7 +19,7 @@ interface BoostPackagesProps {
 
 const BoostPackages = ({ 
   packages, 
-  selectedId, 
+  selected, // Changed parameter name from selectedId to selected
   onSelect,
   formatDuration = (duration) => duration,
   disabled = false,
@@ -40,7 +40,7 @@ const BoostPackages = ({
         </div>
       )}
       
-      <RadioGroup value={selectedId || undefined} onValueChange={onSelect}>
+      <RadioGroup value={selected || undefined} onValueChange={onSelect}>
         <div className="space-y-3">
           {packages.map((pkg) => (
             <div key={pkg.id} className="relative">
@@ -54,7 +54,7 @@ const BoostPackages = ({
                 htmlFor={pkg.id}
                 className={`
                   flex cursor-pointer rounded-lg border border-muted p-4
-                  ${selectedId === pkg.id ? "bg-primary/5 border-primary" : "hover:bg-accent"}
+                  ${selected === pkg.id ? "bg-primary/5 border-primary" : "hover:bg-accent"}
                   ${disabled ? "opacity-50 cursor-not-allowed" : ""}
                 `}
               >

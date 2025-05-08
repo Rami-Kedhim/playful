@@ -41,6 +41,10 @@ export interface AnalyticsData {
     thisWeek: number;
     change: number;
     total: number;
+    weeklyAverage?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+    increase?: number;
   };
 }
 
@@ -99,7 +103,11 @@ export const useBoostAnalytics = (profileId?: string) => {
             lastWeek: 210,
             thisWeek: 275,
             change: 31,
-            total: 1200
+            total: 1200,
+            weeklyAverage: 145,
+            withBoost: 275,
+            withoutBoost: 210,
+            increase: 30
           }
         };
 
@@ -118,3 +126,6 @@ export const useBoostAnalytics = (profileId?: string) => {
 };
 
 export default useBoostAnalytics;
+
+// Export class for backward compatibility
+export class BoostAnalytics {}

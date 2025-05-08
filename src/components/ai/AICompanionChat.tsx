@@ -64,7 +64,7 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
       // Check content moderation
       const params: ModerateContentParams = {
         content: input,
-        contentType: "text"
+        type: "text"
       };
       
       const isSafe = await lucieOrchestrator.isSafeContent(input);

@@ -10,8 +10,7 @@ export const useHermesStatusAdapter = (initialStatus?: Partial<HermesStatus>) =>
     estimatedVisibility: initialStatus?.estimatedVisibility || 0,
     lastUpdateTime: initialStatus?.lastUpdateTime || new Date().toISOString(),
     boostScore: initialStatus?.boostScore || 0,
-    effectivenessScore: initialStatus?.effectivenessScore || 0,
-    isActive: initialStatus?.isActive || false
+    effectivenessScore: initialStatus?.effectivenessScore || 0
   });
 
   const updateStatus = (newStatus: Partial<HermesStatus>) => {
@@ -48,7 +47,8 @@ export const useHermesStatusAdapter = (initialStatus?: Partial<HermesStatus>) =>
 
 export const useBoostStatusAdapter = () => {
   const [boostStatus, setBoostStatus] = useState<BoostStatus>({
-    isActive: false
+    isActive: false,
+    remainingTime: '0:00:00'
   });
 
   const updateBoostStatus = (newStatus: Partial<BoostStatus>) => {
@@ -73,7 +73,8 @@ export const useBoostStatusAdapter = () => {
 
   const setInactive = () => {
     setBoostStatus({
-      isActive: false
+      isActive: false,
+      remainingTime: '0:00:00'
     });
   };
 

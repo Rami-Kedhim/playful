@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Zap, BarChart2, Clock, XCircle } from "lucide-react";
 import { BoostStatus, BoostEligibility, BoostPackage, HermesStatus } from "@/types/boost";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import BoostPackages from "./dialog/BoostPackages";
+import BoostPackages from "./BoostPackages";
 import BoostActivePackage from "./dialog/BoostActivePackage";
 import BoostEligibilityCheck from "./dialog/BoostEligibilityCheck";
 import HermesBoostInfo from "./dialog/HermesBoostInfo";
@@ -98,7 +98,7 @@ const BoostDialogTabs: React.FC<DialogTabsProps> = ({
             <ScrollArea className="max-h-[400px] pr-4">
               <BoostPackages 
                 packages={boostPackages}
-                selectedId={selectedPackage}
+                selected={selectedPackage}
                 onSelect={setSelectedPackage}
                 formatDuration={formatBoostDuration}
                 dailyUsage={dailyBoostUsage}

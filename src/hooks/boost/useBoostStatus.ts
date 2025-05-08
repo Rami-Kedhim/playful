@@ -18,12 +18,15 @@ export const useBoostStatus = (profileId?: string) => {
     
     setLoading(true);
     try {
-      // Mock data
+      // Mock data - note: we're creating proper Date objects
+      const now = new Date();
+      const endTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
+      
       setStatus({
         isActive: Math.random() > 0.5, // Randomly active for demo
         packageName: '24 Hour Boost',
-        startTime: new Date().toISOString(),
-        endTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        startTime: now,
+        endTime: endTime,
         remainingTime: '18:45:30',
         packageId: 'boost-1',
         progress: 25

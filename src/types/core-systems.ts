@@ -15,6 +15,23 @@ export interface SystemStatus {
   processing: boolean;
   uptime: number;
   lastReboot: string;
+  messageLength?: number; // Added for backward compatibility
+}
+
+export interface SystemIntegrityResult {
+  isValid: boolean;
+  status: string;
+  errors: string[];
+  warnings: string[];
+  lastChecked: string;
+}
+
+export interface SystemHealthMetrics {
+  cpu: number;
+  memory: number;
+  disk: number;
+  network: number;
+  load: number;
 }
 
 export interface LucieAISystem {
@@ -73,12 +90,25 @@ export interface OxumSystem {
   boostAllocationEigen(matrix: number[][]): number[];
   getSystemStatus(): SystemStatus;
   configure?(options: Record<string, any>): void;
+  checkSystemHealth?(): { name: string, status: string, health: number }[];
+}
+
+export interface UberCoreSystem {
+  getSystemStatus(): SystemStatus;
+  checkSystemIntegrity(): SystemIntegrityResult;
+  getSystemHealthMetrics(): SystemHealthMetrics;
+  validateSession(sessionId: string): SessionValidationResult;
+  checkSubsystemHealth(): { name: string, status: string, health: number }[];
 }
 
 export interface SessionValidationResult {
   isValid: boolean;
   userId?: string;
   expiry?: Date;
+  username?: string;
+  timestamp?: string;
+  sessionId?: string; // Added for backward compatibility
+  expiresAt?: string; // Added for backward compatibility
 }
 
 export interface RecommendedAction {

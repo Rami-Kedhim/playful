@@ -29,8 +29,8 @@ export interface BoostStatus {
   activeBoostId?: string;
   boostPackage?: BoostPackage;
   // For compatibility with different component usages
-  startTime?: Date;
-  endTime?: Date;
+  startTime?: Date | string;
+  endTime?: Date | string;
   timeRemaining?: string;
 }
 
@@ -47,6 +47,7 @@ export interface HermesStatus {
   lastUpdateTime: string;
   boostScore: number;
   effectivenessScore: number;
+  isActive?: boolean; // Added for compatibility
 }
 
 export interface BoostAnalytics {
@@ -61,10 +62,16 @@ export interface BoostAnalytics {
   impressions?: {
     value: number;
     change?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+    increase?: number;
   };
   interactions?: {
     value: number;
     change?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+    increase?: number;
   };
 }
 
@@ -93,4 +100,8 @@ export interface PulseBoost {
   startTime: Date;
   endTime: Date;
   status: 'active' | 'expired' | 'cancelled';
+}
+
+export interface EnhancedBoostStatus extends BoostStatus {
+  timeRemaining?: string;
 }

@@ -34,14 +34,19 @@ export interface BoostAnalytics {
     date: Date;
     score: number;
   }>;
+  // Add these properties to fix the errors in useBoostOperations.ts
   views?: number;
   impressions?: {
     value: number;
     change?: number;
+    withBoost?: number;
+    withoutBoost?: number;
   };
   interactions?: {
     value: number;
     change?: number;
+    withBoost?: number;
+    withoutBoost?: number;
   };
 }
 
@@ -56,30 +61,22 @@ export interface BoostHistory {
   }>;
 }
 
-export interface UserCredentials {
-  email: string;
-  password: string;
-  username?: string;
-}
-
-export interface UserProfile {
+export interface PulseBoost {
   id: string;
-  userId: string;
-  username?: string;
-  displayName?: string;
-  bio?: string;
-  avatarUrl?: string;
-  email?: string;
-  createdAt: Date;
+  profileId: string;
+  packageId: string;
+  startTime: Date;
+  endTime: Date;
+  status: 'active' | 'expired' | 'cancelled';
 }
 
 export interface EnhancedBoostStatus {
   isActive: boolean;
+  remainingTime?: string;
   packageId?: string;
-  expiresAt?: Date;
-  startedAt?: Date;
-  timeRemaining?: string;
   packageName?: string;
+  startedAt?: Date;
+  expiresAt?: Date;
   progress?: number;
-  boostPackage?: BoostPackage;
+  timeRemaining?: string;
 }

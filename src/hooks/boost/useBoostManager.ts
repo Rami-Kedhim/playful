@@ -36,23 +36,29 @@ export const useBoostManager = (profileId?: string) => {
             name: '24 Hour Boost',
             description: 'Boost your profile for 24 hours',
             duration: '24:00:00',
+            durationMinutes: 1440, // 24 hours in minutes
             price: 29.99,
             price_ubx: 300,
             boostMultiplier: 1.5,
             features: ['Top search results', 'Featured profile'],
             isMostPopular: true,
-            boost_power: 50
+            boost_power: 50,
+            visibility: 'High',
+            visibility_increase: 50
           },
           {
             id: 'boost-2',
             name: 'Weekend Boost',
             description: 'Boost your profile for the entire weekend',
             duration: '72:00:00',
+            durationMinutes: 4320, // 72 hours in minutes
             price: 69.99,
             price_ubx: 700,
             boostMultiplier: 2,
             features: ['Top search results', 'Featured profile', 'Homepage feature'],
-            boost_power: 75
+            boost_power: 75,
+            visibility: 'Very High',
+            visibility_increase: 75
           }
         ]);
         
@@ -137,17 +143,36 @@ export const useBoostManager = (profileId?: string) => {
         yesterday: 150,
         weeklyAverage: 145,
         withBoost: 180,
+        withoutBoost: 120,
+        increase: 50,
+        change: 20
       },
       interactions: {
         today: 45,
         yesterday: 32,
         weeklyAverage: 30,
         withBoost: 45,
+        withoutBoost: 25,
+        increase: 80,
+        change: 40
       },
       rank: {
         current: 8,
         previous: 24,
         change: 16
+      },
+      conversions: 12,
+      timeActive: '5 days',
+      boostEfficiency: 87,
+      trending: true,
+      roi: 2.4,
+      clicks: {
+        today: 45,
+        yesterday: 32,
+        lastWeek: 210,
+        thisWeek: 275,
+        change: 31,
+        total: 1200
       }
     };
   };
