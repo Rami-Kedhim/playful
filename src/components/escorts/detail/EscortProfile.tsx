@@ -26,7 +26,11 @@ const EscortProfile: React.FC<EscortProfileProps> = ({ escort }) => {
     location: escort.location || 'Unknown',
     rating: escort.rating || 0,
     reviewCount: escort.reviewCount || 0,
-    verificationLevel: (escort.verificationLevel || 'none') as VerificationLevel,
+    verificationLevel: (escort.verificationLevel 
+      ? typeof escort.verificationLevel === 'string' 
+        ? escort.verificationLevel as VerificationLevel 
+        : escort.verificationLevel
+      : VerificationLevel.NONE),
     tags: escort.tags || [],
     price: escort.price || 0,
     services: escort.services || [],
@@ -35,7 +39,7 @@ const EscortProfile: React.FC<EscortProfileProps> = ({ escort }) => {
     languages: escort.languages || ['English'],
   };
 
-  const handleFavoriteClick = () => {
+  const handleFavoriteToggle = () => {
     if (isFavorite(escort.id)) {
       removeFavorite(escort.id);
     } else {

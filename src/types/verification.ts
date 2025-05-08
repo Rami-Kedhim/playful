@@ -7,20 +7,51 @@ export enum VerificationLevel {
   PREMIUM = "premium"
 }
 
+// Make VerificationStatus an enum so it can be used as a value
+export enum VerificationStatus {
+  PENDING = "pending",
+  IN_REVIEW = "in_review",
+  APPROVED = "approved",
+  REJECTED = "rejected"
+}
+
+export interface VerificationDocument {
+  id: string;
+  type: string;
+  documentType?: string;
+  fileUrl: string;
+  filePath?: string;
+  uploadedAt: Date | string;
+  status: string | VerificationStatus;
+  notes?: string;
+  verification_request_id?: string;
+  reviewer_notes?: string;
+  reviewed_at?: Date | string;
+  reviewed_by?: string;
+}
+
 export interface VerificationRequest {
   id: string;
   userId: string;
-  documentType: string;
+  profile_id?: string;
+  documentType?: string;
   frontImageUrl?: string;
   backImageUrl?: string;
   selfieImageUrl?: string;
-  status: "pending" | "approved" | "rejected";
-  requestedLevel: VerificationLevel;
+  status: string | VerificationStatus;
+  requestedLevel: VerificationLevel | string;
+  requested_level?: VerificationLevel | string;
   verificationLevel?: VerificationLevel;
-  submittedAt: string;
+  submittedAt: string | Date;
+  created_at?: string;
   processedAt?: string;
   notes?: string;
+  reviewer_notes?: string;
   rejectionReason?: string;
+  reviewed_at?: string | Date;
+  reviewed_by?: string;
+  documents?: VerificationDocument[];
+  expires_at?: string | Date;
 }
 
 export interface VerificationStatus {
@@ -30,4 +61,5 @@ export interface VerificationStatus {
   lastUpdated: string;
   expiresAt?: string;
   pendingRequests: number;
+  status?: string | VerificationStatus;
 }

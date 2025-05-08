@@ -23,11 +23,16 @@ export enum ContentType {
   AUDIO = 'audio',
   TEXT = 'text',
   PDF = 'pdf',
-  LIVESTREAM = 'livestream'
+  LIVESTREAM = 'livestream',
+  PHOTO = 'photo', // Added to support existing code
+  MESSAGE = 'message' // Added to support existing code
 }
 
 export interface ContentUnlockOptions {
+  contentId: string, // Added to support existing components
   price?: number;
+  contentType?: ContentType; // Added to support existing components
+  creatorId?: string; // Added to support existing components
   subscription?: boolean;
   freePreview?: boolean;
   expiryDate?: string;

@@ -21,28 +21,19 @@ const ProfileTabs = ({ escort }: ProfileTabsProps) => {
     // Convert to string if it's an enum value
     const level = typeof escort.verificationLevel === 'string' 
       ? escort.verificationLevel 
-      : VerificationLevel[escort.verificationLevel];
+      : String(escort.verificationLevel);
     
     // Map verification levels to expected values
-    switch(level) {
-      case "basic":
-      case VerificationLevel.BASIC:
-        verificationLevel = "basic";
-        break;
-      case "verified":
-      case VerificationLevel.VERIFIED:
-        verificationLevel = "basic"; // Map verified to basic for now
-        break;
-      case "premium":
-      case VerificationLevel.PREMIUM:
-        verificationLevel = "premium";
-        break;
-      case "enhanced":
-      case VerificationLevel.ENHANCED:
-        verificationLevel = "enhanced";
-        break;
-      default:
-        verificationLevel = "none";
+    if (level === VerificationLevel.NONE || level === "none") {
+      verificationLevel = "none";
+    } else if (level === VerificationLevel.BASIC || level === "basic") {
+      verificationLevel = "basic";
+    } else if (level === VerificationLevel.VERIFIED || level === "verified") {
+      verificationLevel = "basic"; // Map verified to basic for now
+    } else if (level === VerificationLevel.PREMIUM || level === "premium") {
+      verificationLevel = "premium";
+    } else if (level === VerificationLevel.ENHANCED || level === "enhanced") {
+      verificationLevel = "enhanced";
     }
   }
 

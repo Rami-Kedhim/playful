@@ -5,11 +5,11 @@ import { VerificationLevel } from "@/types/verification";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface VerificationBadgeProps {
-  level: VerificationLevel;
+  level: VerificationLevel | string;
 }
 
 const VerificationBadge: React.FC<VerificationBadgeProps> = ({ level }) => {
-  if (level === VerificationLevel.NONE) {
+  if (level === VerificationLevel.NONE || level === "none") {
     return (
       <TooltipProvider>
         <Tooltip>
@@ -51,10 +51,34 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({ level }) => {
       icon: <Shield className="h-4 w-4 mr-1" />,
       label: "Premium Verification",
       description: "Full verification with video interview"
+    },
+    "basic": {
+      color: "text-blue-500",
+      icon: <Shield className="h-4 w-4 mr-1" />,
+      label: "Basic Verification",
+      description: "Identity has been verified"
+    },
+    "verified": {
+      color: "text-green-500",
+      icon: <Shield className="h-4 w-4 mr-1" />,
+      label: "Verified",
+      description: "Identity is fully verified"
+    },
+    "enhanced": {
+      color: "text-green-500",
+      icon: <Shield className="h-4 w-4 mr-1" />,
+      label: "Enhanced Verification",
+      description: "Identity and address verified"
+    },
+    "premium": {
+      color: "text-purple-500",
+      icon: <Shield className="h-4 w-4 mr-1" />,
+      label: "Premium Verification",
+      description: "Full verification with video interview"
     }
   };
 
-  const badge = badges[level] || badges[VerificationLevel.BASIC];
+  const badge = badges[level as any] || badges[VerificationLevel.BASIC];
 
   return (
     <TooltipProvider>

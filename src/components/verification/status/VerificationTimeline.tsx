@@ -28,7 +28,14 @@ const VerificationTimeline: React.FC<VerificationTimelineProps> = ({
         description: 'Your submission is in the queue awaiting review.',
         icon: <Clock className="h-5 w-5 text-amber-500" />,
         date: '',
-        completed: [VerificationStatus.PENDING, VerificationStatus.IN_REVIEW, VerificationStatus.APPROVED].includes(verificationRequest.status as VerificationStatus)
+        completed: [
+          VerificationStatus.PENDING,
+          VerificationStatus.IN_REVIEW,
+          VerificationStatus.APPROVED,
+          "pending",
+          "in_review",
+          "approved"
+        ].includes(verificationRequest.status as any)
       },
       {
         id: 'review',
@@ -36,17 +43,24 @@ const VerificationTimeline: React.FC<VerificationTimelineProps> = ({
         description: 'Our team is currently reviewing your submission.',
         icon: <AlertTriangle className="h-5 w-5 text-amber-500" />,
         date: '',
-        completed: [VerificationStatus.IN_REVIEW, VerificationStatus.APPROVED].includes(verificationRequest.status as VerificationStatus)
+        completed: [
+          VerificationStatus.IN_REVIEW,
+          VerificationStatus.APPROVED,
+          "in_review",
+          "approved"
+        ].includes(verificationRequest.status as any)
       },
       {
         id: 'decision',
-        title: verificationRequest.status === VerificationStatus.APPROVED ? 'Verification Approved' : 'Verification Decision',
-        description: verificationRequest.status === VerificationStatus.APPROVED 
+        title: verificationRequest.status === VerificationStatus.APPROVED || verificationRequest.status === "approved" 
+          ? 'Verification Approved' 
+          : 'Verification Decision',
+        description: (verificationRequest.status === VerificationStatus.APPROVED || verificationRequest.status === "approved")
           ? 'Congratulations! Your verification has been approved.' 
           : 'Awaiting final decision on your verification.',
         icon: <CheckCircle className="h-5 w-5 text-green-500" />,
         date: '',
-        completed: verificationRequest.status === VerificationStatus.APPROVED
+        completed: verificationRequest.status === VerificationStatus.APPROVED || verificationRequest.status === "approved"
       }
     ];
 

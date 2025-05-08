@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { Escort } from '@/types/Escort';
+import { Escort } from '@/types/Escort'; // Using uppercase E to match actual file name
 
 interface FavoritesContextType {
   favorites: Escort[];

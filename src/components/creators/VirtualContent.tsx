@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { LockIcon, UnlockIcon, Image as ImageIcon, Film, MessageSquare, AlertCircle } from "lucide-react";
@@ -10,7 +11,7 @@ import { logContentAction, logContentFlow } from "@/utils/debugUtils";
 interface VirtualContentProps {
   creatorId: string;
   contentId: string;
-  contentType: ContentType;
+  contentType: string;
   price: number;
   thumbnailUrl?: string;
   title?: string;
@@ -38,10 +39,10 @@ const VirtualContent: React.FC<VirtualContentProps> = ({
     
     logContentFlow('Unlock button clicked', contentId);
     await unlockContent({
-      creatorId,
       contentId,
-      contentType,
-      price
+      contentType: contentType as any,
+      price,
+      creatorId
     });
   };
   
@@ -56,10 +57,13 @@ const VirtualContent: React.FC<VirtualContentProps> = ({
   
   const getContentTypeIcon = () => {
     switch (contentType) {
+      case ContentType.PHOTO:
       case "photo":
         return <ImageIcon className="w-4 h-4" />;
+      case ContentType.VIDEO:
       case "video":
         return <Film className="w-4 h-4" />;
+      case ContentType.MESSAGE:
       case "message":
         return <MessageSquare className="w-4 h-4" />;
       default:
