@@ -8,13 +8,17 @@ import { Clock, CheckCircle, XCircle, AlertCircle, FileText } from 'lucide-react
 import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/utils/date-utils';
 
-const VerificationStatus = ({ onRequestVerification }) => {
+interface VerificationStatusProps {
+  onRequestVerification: () => void;
+}
+
+const VerificationStatusComponent = ({ onRequestVerification }: VerificationStatusProps) => {
   const { status, verificationRequest, loading, error } = useVerificationStatus();
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-40">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -54,7 +58,9 @@ const VerificationStatus = ({ onRequestVerification }) => {
           </p>
         </CardContent>
         <CardFooter>
-          <Button onClick={onRequestVerification}>Request Verification</Button>
+          <Button onClick={onRequestVerification}>
+            Request Verification
+          </Button>
         </CardFooter>
       </Card>
     );
@@ -67,12 +73,10 @@ const VerificationStatus = ({ onRequestVerification }) => {
           <div>
             <CardTitle>Verification Status</CardTitle>
             <CardDescription>
-              {verificationRequest.requested_level ? 
-                `You requested ${verificationRequest.requested_level} verification` : 
-                `You requested ${VERIFICATION_LEVELS.BASIC} verification`}
+              {verificationRequest.requested_level ? `You requested ${verificationRequest.requested_level} verification` : `You requested ${VERIFICATION_LEVELS.BASIC} verification`}
             </CardDescription>
           </div>
-          <StatusBadge status={status} />
+          <StatusBadge status={status.status || 'pending'} />
         </div>
       </CardHeader>
       <CardContent>
@@ -109,27 +113,37 @@ const VerificationStatus = ({ onRequestVerification }) => {
         </div>
       </CardContent>
       <CardFooter className="flex justify-end">
-        {status === "rejected" && (
-          <Button onClick={onRequestVerification}>Submit Again</Button>
+        {status.status === "rejected" && (
+          <Button onClick={onRequestVerification}>
+            Submit Again
+          </Button>
         )}
       </CardFooter>
     </Card>
   );
 };
 
-const StatusBadge = ({ status }) => {
+interface StatusBadgeProps {
+  status: string;
+}
+
+const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   switch (status) {
     case VerificationStatusEnum.PENDING:
+    case 'pending':
       return <Badge variant="outline" className="flex items-center"><Clock className="h-3 w-3 mr-1" /> Pending</Badge>;
     case VerificationStatusEnum.IN_REVIEW:
+    case 'in_review':
       return <Badge variant="secondary" className="flex items-center"><Clock className="h-3 w-3 mr-1" /> In Review</Badge>;
     case VerificationStatusEnum.APPROVED:
-      return <Badge variant="success" className="flex items-center"><CheckCircle className="h-3 w-3 mr-1" /> Approved</Badge>;
+    case 'approved':
+      return <Badge variant="success" className="flex items-center bg-green-500"><CheckCircle className="h-3 w-3 mr-1" /> Approved</Badge>;
     case VerificationStatusEnum.REJECTED:
+    case 'rejected':
       return <Badge variant="destructive" className="flex items-center"><XCircle className="h-3 w-3 mr-1" /> Rejected</Badge>;
     default:
       return <Badge variant="outline">Unknown</Badge>;
   }
 };
 
-export default VerificationStatus;
+export default VerificationStatusComponent;

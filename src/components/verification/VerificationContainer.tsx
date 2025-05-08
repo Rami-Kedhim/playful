@@ -18,6 +18,10 @@ const VerificationContainer = () => {
     setSelectedType(type);
   };
 
+  const handleRequestVerification = () => {
+    setActiveTab('verify');
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -40,7 +44,7 @@ const VerificationContainer = () => {
             ) : error ? (
               <div className="text-destructive">Error: {error}</div>
             ) : (
-              <VerificationStatus />
+              <VerificationStatus onRequestVerification={handleRequestVerification} />
             )}
           </TabsContent>
 

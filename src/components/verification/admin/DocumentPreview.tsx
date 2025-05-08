@@ -1,67 +1,50 @@
+
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Eye } from 'lucide-react';
 import { VerificationDocument } from '@/types/verification';
 
-interface DocumentPreviewProps {
+export interface DocumentPreviewProps {
   document: VerificationDocument;
   onView: (url: string) => void;
 }
 
-const DocumentPreview = ({ document, onView }: DocumentPreviewProps) => {
-  const [isViewerOpen, setIsViewerOpen] = React.useState(false);
+const DocumentPreview: React.FC<DocumentPreviewProps> = ({ document, onView }) => {
+  const { type, fileUrl, documentType, status } = document;
 
-  const documentType = document.documentType ?? 'Unknown';
-  const documentUrl = document.fileUrl ?? '';
-  const uploadDate = document.uploadedAt ?? '';
+  const displayType = documentType || type || 'Document';
+  const fileLink = fileUrl || document.filePath; // Support both fileUrl and filePath
+
+  const statusClasses = {
+    pending: 'bg-yellow-100 text-yellow-800',
+    approved: 'bg-green-100 text-green-800',
+    rejected: 'bg-red-100 text-red-800'
+  };
 
   return (
-    <>
-      <Card className="w-full">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">
-            {documentType}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="aspect-[3/2] relative rounded-md overflow-hidden bg-muted">
-            <img 
-              src={documentUrl} 
-              alt={documentType.toString()}
-              className="object-cover absolute inset-0 w-full h-full"
-            />
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsViewerOpen(true)}
-                className="gap-2"
-              >
-                <Eye className="h-4 w-4" />
-                View Full Size
-              </Button>
-            </div>
-          </div>
-          <div className="mt-2 text-xs text-muted-foreground">
-            Uploaded: {uploadDate ? new Date(uploadDate).toLocaleDateString() : 'Unknown'}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Dialog open={isViewerOpen} onOpenChange={setIsViewerOpen}>
-        <DialogContent className="max-w-4xl h-[80vh]">
-          <div className="w-full h-full flex items-center justify-center">
-            <img 
-              src={documentUrl}
-              alt={documentType.toString()}
-              className="max-w-full max-h-full object-contain"
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+    <Card className="overflow-hidden">
+      <CardContent className="p-4">
+        <div className="flex justify-between items-center mb-2">
+          <h4 className="text-sm font-medium">{displayType}</h4>
+          <span className={`text-xs px-2 py-1 rounded ${statusClasses[status] || ''}`}>
+            {status?.charAt(0).toUpperCase() + status?.slice(1)}
+          </span>
+        </div>
+        
+        <div className="mt-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full"
+            onClick={() => onView(fileLink)}
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            View Document
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

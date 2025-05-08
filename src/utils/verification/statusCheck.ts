@@ -42,21 +42,21 @@ export const checkVerificationStatus = async (userId: string): Promise<{
  */
 export const getVerificationRequirements = (targetLevel: VerificationLevel) => {
   switch (targetLevel) {
-    case 'basic':
+    case VerificationLevel.BASIC:
       return {
         documents: ['id_card', 'passport', 'drivers_license'],
         needsSelfie: true,
         needsAddress: false,
         fee: 0
       };
-    case 'enhanced':
+    case VerificationLevel.ENHANCED:
       return {
         documents: ['id_card', 'passport', 'drivers_license'],
         needsSelfie: true,
         needsAddress: true,
         fee: 5
       };
-    case 'premium':
+    case VerificationLevel.PREMIUM:
       return {
         documents: ['passport', 'drivers_license'],
         needsSelfie: true,

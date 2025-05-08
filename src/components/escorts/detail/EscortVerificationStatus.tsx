@@ -13,10 +13,10 @@ import {
   ShieldQuestion, 
   Star 
 } from 'lucide-react';
-import { VerificationLevel, VERIFICATION_LEVELS } from '@/types/verification';
+import { VerificationLevel } from '@/types/verification';
 
 interface EscortVerificationStatusProps {
-  level: VerificationLevel;
+  level: string;
   verifiedDate?: string;
   size?: 'sm' | 'md' | 'lg';
   showDate?: boolean;
@@ -25,51 +25,51 @@ interface EscortVerificationStatusProps {
   className?: string;
 }
 
-const verificationLabelMap: Record<VerificationLevel, string> = {
-  unverified: 'Unverified',
-  none: 'Unverified', // Added for compatibility
-  basic: 'Verified',
-  enhanced: 'Premium Verified',
-  premium: 'Gold Verified'
+// Define label map that matches the enum values
+const verificationLabelMap: Record<string, string> = {
+  [VerificationLevel.NONE]: 'Unverified',
+  [VerificationLevel.BASIC]: 'Verified',
+  [VerificationLevel.ENHANCED]: 'Premium Verified',
+  [VerificationLevel.PREMIUM]: 'Gold Verified',
+  [VerificationLevel.VERIFIED]: 'Verified'
 };
 
-const verificationDescriptionMap: Record<VerificationLevel, string> = {
-  unverified: 'This profile has not been verified yet.',
-  none: 'This profile has not been verified yet.', // Added for compatibility
-  basic: 'Identity verified through official documents.',
-  enhanced: 'Enhanced verification including live video verification.',
-  premium: 'Highest level of verification with physical meeting.'
+// Define description map that matches the enum values
+const verificationDescriptionMap: Record<string, string> = {
+  [VerificationLevel.NONE]: 'This profile has not been verified yet.',
+  [VerificationLevel.BASIC]: 'Identity verified through official documents.',
+  [VerificationLevel.ENHANCED]: 'Enhanced verification including live video verification.',
+  [VerificationLevel.PREMIUM]: 'Highest level of verification with physical meeting.',
+  [VerificationLevel.VERIFIED]: 'Identity verified through official documents.'
 };
 
-const getVerificationIcon = (level: VerificationLevel, size: 'sm' | 'md' | 'lg') => {
+const getVerificationIcon = (level: string, size: 'sm' | 'md' | 'lg') => {
   const iconSize = size === 'sm' ? 'h-3 w-3' : size === 'md' ? 'h-4 w-4' : 'h-5 w-5';
   
   switch (level) {
-    case 'unverified':
-    case 'none':
+    case VerificationLevel.NONE:
       return <ShieldX className={`${iconSize} text-destructive`} />;
-    case 'basic':
+    case VerificationLevel.BASIC:
       return <ShieldCheck className={`${iconSize} text-green-500`} />;
-    case 'enhanced':
+    case VerificationLevel.ENHANCED:
       return <ShieldCheck className={`${iconSize} text-blue-500`} />;
-    case 'premium':
+    case VerificationLevel.PREMIUM:
       return <Star className={`${iconSize} text-amber-500`} />;
     default:
       return <ShieldQuestion className={`${iconSize} text-muted-foreground`} />;
   }
 };
 
-const getVerificationBadgeVariant = (level: VerificationLevel) => {
+const getVerificationBadgeVariant = (level: string) => {
   switch (level) {
-    case 'unverified':
-    case 'none':
+    case VerificationLevel.NONE:
       return 'destructive';
-    case 'basic':
+    case VerificationLevel.BASIC:
       return 'success';
-    case 'enhanced':
+    case VerificationLevel.ENHANCED:
       return 'secondary';
-    case 'premium':
-      return 'default'; // Instead of 'gold' which doesn't exist in the Badge component
+    case VerificationLevel.PREMIUM:
+      return 'default';
     default:
       return 'outline';
   }
@@ -88,6 +88,7 @@ const EscortVerificationStatus: React.FC<EscortVerificationStatusProps> = ({
     ? new Date(verifiedDate).toLocaleDateString() 
     : undefined;
 
+  // Get label and description using our maps
   const label = verificationLabelMap[level] || 'Unknown';
   const description = verificationDescriptionMap[level] || 'Verification status unknown';
   const icon = getVerificationIcon(level, size);
