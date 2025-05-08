@@ -2,8 +2,11 @@
 export interface UserProfile {
   id: string;
   name: string;
-  avatar_url?: string;  // Make this optional to avoid errors
-  email?: string;       // Make this optional to avoid errors
+  avatar_url?: string;
+  avatarUrl?: string;      // Alternative naming
+  profileImageUrl?: string; // Alternative naming
+  email?: string;
+  phone?: string;
   phone_number?: string;
   location?: string;
   bio?: string;
@@ -12,9 +15,22 @@ export interface UserProfile {
   verified?: boolean;
   created_at?: string;
   updated_at?: string;
-  username?: string;    // Add this for EscortDashboard
-  ubx_balance?: number; // Add this for useBoostPurchase
-  ubxBalance?: number;  // Add this for useBoostPurchase (alternative naming)
+  username?: string;
+  ubx_balance?: number;
+  ubxBalance?: number;
+  role?: string;
+  roles?: string[];
+  website?: string;
+  verification_level?: string;
+  verification_status?: string;
+  verification_submitted?: boolean;
+  rates?: Record<string, any>;
+  availability?: Record<string, any>;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
 }
 
 export interface AuthContextType {
@@ -27,5 +43,34 @@ export interface AuthContextType {
   signUp: (email: string, password: string, userData?: any) => Promise<boolean>;
   resetPassword: (email: string) => Promise<boolean>;
   updateProfile: (data: Partial<UserProfile>) => Promise<boolean>;
-  setUser?: (user: UserProfile | null) => void; // Add this for useAuthContext
+  setUser?: (user: UserProfile | null) => void;
+  // Add these additional methods to match component expectations
+  login: (email: string, password: string) => Promise<{ success: boolean; user?: any; error?: string; }>;
+  logout: () => Promise<boolean>;
+  register: (email: string, password: string, confirmPassword?: string) => Promise<{ success: boolean; user?: any; error?: string; }>;
+  sendPasswordResetEmail: (email: string) => Promise<boolean>;
+  checkRole: (role: string) => boolean;
+  refreshProfile?: () => Promise<void>;
+}
+
+export interface User {
+  id: string;
+  email?: string;
+  name?: string;
+  username?: string;
+  avatarUrl?: string;
+  avatar_url?: string;
+  role?: string;
+  roles?: string[];
+  profileImageUrl?: string;
+  user_metadata?: Record<string, any>;
+}
+
+export enum UserRole {
+  ADMIN = "admin",
+  MODERATOR = "moderator",
+  USER = "user",
+  ESCORT = "escort",
+  CLIENT = "client",
+  CREATOR = "creator"
 }

@@ -1,5 +1,4 @@
-
-import { useAuth } from './useAuthContext';
+import { useAuth } from '@/hooks/auth';
 import { UserRole } from '@/types/auth';
 
 export function useRole() {
@@ -50,7 +49,7 @@ export function useRole() {
 
   // Get the highest priority role (admin > moderator > creator > escort > client > user)
   const getHighestRole = (): string => {
-    const roles = getUserRoles();
+    const roles = user?.roles || (user?.role ? [user.role] : ['user']);
     if (roles.includes('admin')) return 'admin';
     if (roles.includes('moderator')) return 'moderator';
     if (roles.includes('creator')) return 'creator';
