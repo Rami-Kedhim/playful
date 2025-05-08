@@ -73,6 +73,51 @@ export interface ModerateContentParams {
   type?: string;
 }
 
+export interface ModerateContentResult {
+  isSafe: boolean;
+  safe?: boolean; // For backward compatibility
+  score: number;
+  issues: string[];
+  blockedCategories: string[];
+  category: string;
+  action: 'allow' | 'block';
+}
+
+export interface GenerateContentParams {
+  prompt: string;
+  options?: Record<string, any>;
+  userId?: string;
+  maxLength?: number;
+}
+
+export interface GenerateContentResult {
+  content: string;
+  warnings: string[];
+  moderated?: boolean;
+}
+
+export interface SentimentAnalysisParams {
+  text: string;
+  options?: Record<string, any>;
+}
+
+export interface SentimentAnalysisResult {
+  score: number;
+  sentiment: string;
+  confidence?: number;
+}
+
+export interface LucieAISystem {
+  initialize(): Promise<boolean>;
+  generateText(prompt: string): Promise<string>;
+  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
+  generateContent(prompt: string, options?: Record<string, any>): Promise<GenerateContentResult>;
+  analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult>;
+  getSystemStatus(): SystemStatus;
+  configure(options: Record<string, any>): void;
+  generateResponse(params: GenerateContentParams): Promise<GenerateContentResult>;
+}
+
 export interface RecommendedAction {
   id: string;
   title: string;
@@ -80,6 +125,7 @@ export interface RecommendedAction {
   priority: 'high' | 'medium' | 'low';
   type: string;
   actionUrl?: string;
+  action?: string;
   icon?: string;
   completed?: boolean;
 }

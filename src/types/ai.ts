@@ -4,6 +4,7 @@ export interface ModerateContentParams {
   userId?: string;
   strictness?: 'low' | 'medium' | 'high';
   contentType?: string; // Add this to fix BrainCore errors
+  type?: string;
 }
 
 export interface ModerationResult {
@@ -13,6 +14,17 @@ export interface ModerationResult {
     [key: string]: number;
   };
   message?: string;
+}
+
+export interface AIModelPreference {
+  id: string;
+  name: string;
+  description?: string;
+  isDefault?: boolean;
+  contextLength?: number;
+  provider?: string;
+  capabilities?: string[];
+  settings?: Record<string, any>;
 }
 
 // Add any other AI-related types here
