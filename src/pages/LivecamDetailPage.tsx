@@ -58,7 +58,7 @@ const LivecamDetailPage: React.FC = () => {
           viewerCount: 284,
           isLive: true,
           tags: ['verified', 'featured', 'trending'],
-          bio: 'Hello everyone! I'm Sophia, your next-door dream girl with a wild side. Join my stream for fun conversations, music, and unforgettable moments.',
+          bio: "Hello everyone! I'm Sophia, your next-door dream girl with a wild side. Join my stream for fun conversations, music, and unforgettable moments.",
           country: 'United States',
           language: 'English, Spanish',
           categories: ['chat', 'dance', 'music'],
