@@ -12,9 +12,10 @@ interface DocumentReviewProps {
   verification?: any;
   onApprove?: () => Promise<void>;
   onReject?: (reason: any) => Promise<void>;
+  onView?: (url: string) => void; // Add this prop
 }
 
-const DocumentReview = ({ document }: DocumentReviewProps) => {
+const DocumentReview = ({ document, onView }: DocumentReviewProps) => {
   const formatDocumentType = (type: string) => {
     return type
       .replace(/_/g, ' ')
@@ -23,8 +24,15 @@ const DocumentReview = ({ document }: DocumentReviewProps) => {
 
   // Use fallbacks for potentially missing properties
   const documentType = document.type || document.documentType || 'Unknown';
-  const imageUrl = document.fileUrl || document.filePath || '';
+  const imageUrl = document.fileUrl || '';
   const uploadDate = document.uploadedAt ? document.uploadedAt.toString() : '';
+
+  // Add onClick handler to call onView when image is clicked
+  const handleImageClick = () => {
+    if (onView && imageUrl) {
+      onView(imageUrl);
+    }
+  };
 
   return (
     <Card>
@@ -41,7 +49,10 @@ const DocumentReview = ({ document }: DocumentReviewProps) => {
       </CardHeader>
       <CardContent>
         {imageUrl ? (
-          <div className="rounded-md overflow-hidden border">
+          <div 
+            className="rounded-md overflow-hidden border cursor-pointer"
+            onClick={handleImageClick}
+          >
             <img
               src={imageUrl}
               alt={`${formatDocumentType(documentType)} document`}

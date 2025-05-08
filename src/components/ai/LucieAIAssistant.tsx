@@ -22,7 +22,7 @@ const LucieAIAssistant: React.FC<LucieAIAssistantProps> = ({
     
     setIsLoading(true);
     try {
-      // Check content moderation
+      // Check content moderation - use type instead of contentType
       const params = {
         content: prompt,
         type: "text" // Using type instead of contentType

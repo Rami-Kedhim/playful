@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Send } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -63,7 +62,7 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
       // Check content moderation
       const params = {
         content: input,
-        type: "text"
+        type: "text" // Changed from contentType to type
       };
       
       const isSafe = await lucieOrchestrator.isSafeContent(input);

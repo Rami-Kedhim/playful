@@ -1,144 +1,91 @@
-
 import { BoostPackage, EnhancedBoostStatus } from '@/types/pulse-boost';
 
-/**
- * Service for handling pulse boost functionality
- */
-export const pulseService = {
+// Mock implementation of the Pulse Boost Service
+export class PulseService {
   getPackages(): BoostPackage[] {
-    // Mock data for boost packages
     return [
       {
-        id: 'boost-basic',
+        id: 'basic',
         name: 'Basic Boost',
-        description: '24 hour visibility boost',
-        duration: '24 hours',
-        durationMinutes: 1440, // 24 hours in minutes
-        price: 45,
-        price_ubx: 45,
-        visibility: 150,
-        visibility_increase: 50, 
-        features: [
-          '50% higher visibility in search results',
-          'Featured in recommended profiles',
-          '24 hour duration'
-        ],
-        is_active: true
+        description: 'Enhance your profile visibility for 24 hours',
+        duration: '24:00:00',
+        price: 29.99,
+        price_ubx: 300,
+        features: ['Top search positions', 'Featured section placement'],
+        visibility_increase: 50,
+        visibility: '50%',
+        durationMinutes: 1440, // Use number for durationMinutes
+        color: '#4CAF50',
+        badgeColor: '#4CAF50',
+        boostMultiplier: 1.5
       },
       {
-        id: 'boost-premium',
+        id: 'premium',
         name: 'Premium Boost',
-        description: '3 day visibility boost with premium features',
-        duration: '3 days',
-        durationMinutes: 4320, // 3 days in minutes
-        price: 99,
-        price_ubx: 99,
-        visibility: 250,
-        visibility_increase: 150,
-        features: [
-          '150% higher visibility in search results',
-          'Top placement in recommended profiles',
-          'Featured tag on your profile',
-          '3 day duration'
-        ],
-        is_active: true
-      },
-      {
-        id: 'boost-max',
-        name: 'Maximum Boost',
-        description: '7 day visibility boost with all premium features',
-        duration: '7 days',
-        durationMinutes: 10080, // 7 days in minutes
-        price: 199,
-        price_ubx: 199,
-        visibility: 500,
-        visibility_increase: 400,
-        features: [
-          '400% higher visibility in search results',
-          'Top placement in recommended profiles',
-          'Featured tag on your profile',
-          'Priority in messaging',
-          '7 day duration'
-        ],
-        is_active: true
+        description: 'Maximum visibility for 3 days',
+        duration: '72:00:00',
+        price: 69.99,
+        price_ubx: 700,
+        features: ['Top search positions', 'Featured section', 'Highlighted profile'],
+        visibility_increase: 100,
+        visibility: '100%',
+        durationMinutes: 4320, // Use number for durationMinutes
+        color: '#2196F3',
+        badgeColor: '#2196F3',
+        boostMultiplier: 2
       }
     ];
-  },
-
-  /**
-   * Calculate boost status from a start time
-   */
-  calculateBoostStatus(startTime?: string, duration?: number): EnhancedBoostStatus {
-    if (!startTime || !duration) {
-      return {
-        active: false,
-        isActive: false,
-        remainingMinutes: 0,
-        timeRemaining: "0",
-        percentRemaining: 0,
-        expiresAt: null,
-        startedAt: null,
-        isExpired: true
-      };
-    }
-
-    const startDate = new Date(startTime);
-    const now = new Date();
-    const endDate = new Date(startDate.getTime() + (duration * 60 * 1000));
-    
-    const isActive = now < endDate && now >= startDate;
-    const isExpired = now >= endDate;
-    
-    // Calculate remaining time
-    let remainingMinutes = 0;
-    if (isActive) {
-      remainingMinutes = Math.max(0, Math.floor((endDate.getTime() - now.getTime()) / (1000 * 60)));
-    }
-    
-    // Calculate percentage remaining
-    const totalDuration = duration;
-    const percentRemaining = isActive ? (remainingMinutes / totalDuration) * 100 : 0;
-    
-    return {
-      active: isActive,
-      isActive: isActive,
-      remainingMinutes: remainingMinutes,
-      timeRemaining: remainingMinutes.toString(),
-      percentRemaining: percentRemaining,
-      expiresAt: isActive ? endDate.toISOString() : null,
-      startedAt: startDate.toISOString(),
-      isExpired: isExpired
-    };
-  },
+  }
   
-  /**
-   * Get a mock boost purchase for a user
-   */
   getMockBoostPurchase(userId: string) {
-    // For demo purposes, simulate a 50% chance the user has an active boost
-    const hasActivePurchase = Math.random() > 0.5;
-    
-    if (!hasActivePurchase) {
-      return null;
-    }
-    
-    // Randomly select one of the packages
-    const packages = this.getPackages();
-    const randomPackage = packages[Math.floor(Math.random() * packages.length)];
-    
-    // Set start time between 0-70% through the duration
-    const now = new Date();
-    const maxStartOffset = randomPackage.durationMinutes * 0.7;
-    const startOffset = Math.floor(Math.random() * maxStartOffset);
-    const startTime = new Date(now.getTime() - (startOffset * 60 * 1000));
-    const endTime = new Date(startTime.getTime() + (randomPackage.durationMinutes * 60 * 1000));
-    
+    // Simulate API call
     return {
       userId: userId,
-      packageId: randomPackage.id,
-      startTime: startTime.toISOString(),
-      endTime: endTime.toISOString(),
+      packageId: 'basic',
+      startTime: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+      endTime: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
       status: 'active'
     };
   }
-};
+
+  calculateBoostStatus(startTime: string | Date, durationMinutes: number): EnhancedBoostStatus {
+    const start = typeof startTime === 'string' ? new Date(startTime) : startTime;
+    const now = new Date();
+    const endTime = new Date(start.getTime() + durationMinutes * 60 * 1000);
+    
+    const isActive = now < endTime;
+    const totalDurationMs = durationMinutes * 60 * 1000;
+    const remainingMs = Math.max(0, endTime.getTime() - now.getTime());
+    const percentRemaining = Math.round((remainingMs / totalDurationMs) * 100);
+    const remainingMinutes = Math.ceil(remainingMs / (60 * 1000));
+    
+    const hours = Math.floor(remainingMinutes / 60);
+    const minutes = remainingMinutes % 60;
+    const formattedTime = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+    
+    return {
+      isActive,
+      remainingMinutes,
+      remainingTime: formattedTime,
+      timeRemaining: formattedTime,
+      percentRemaining,
+      expiresAt: isActive ? endTime : null,
+      startedAt: isActive ? start : null,
+      isExpired: !isActive
+    };
+  }
+
+  getMockPurchaseHistory(userId: string) {
+    return [
+      {
+        id: 'purchase-1',
+        packageId: 'basic',
+        startTime: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Use Date object
+        endTime: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),   // Use Date object
+        status: 'completed'
+      },
+    ];
+  }
+}
+
+export const pulseService = new PulseService();

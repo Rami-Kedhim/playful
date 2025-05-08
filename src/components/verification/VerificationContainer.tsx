@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +8,22 @@ import VerificationLevelUpgrade from './level/VerificationLevelUpgrade';
 import VerificationLevelType from './level/VerificationLevelType';
 import { VerificationLevel } from '@/types/verification';
 
-const VerificationContainer = () => {
-  const { status, loading, error, verificationRequest } = useVerificationStatus();
+interface VerificationContainerProps {
+  userId?: string;
+  profileId?: string;
+  showLevel?: boolean;
+  showUpgrade?: boolean;
+  onRequestVerification?: () => void; // Make this prop optional
+}
+
+const VerificationContainer: React.FC<VerificationContainerProps> = ({
+  userId,
+  profileId,
+  showLevel = true,
+  showUpgrade = true,
+  onRequestVerification = () => {} // Provide default empty function
+}) => {
+  const { status: verificationStatus, loading, error, verificationRequest, level: verificationLevel, rejectionReason, requestId } = useVerificationStatus();
   const [activeTab, setActiveTab] = useState('status');
   const [selectedType, setSelectedType] = useState<string | null>(null);
 
@@ -44,7 +57,13 @@ const VerificationContainer = () => {
             ) : error ? (
               <div className="text-destructive">Error: {error}</div>
             ) : (
-              <VerificationStatus onRequestVerification={handleRequestVerification} />
+              <VerificationStatus
+                status={verificationStatus}
+                level={verificationLevel}
+                onRequestVerification={onRequestVerification}
+                rejectionReason={rejectionReason}
+                requestId={requestId}
+              />
             )}
           </TabsContent>
 

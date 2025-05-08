@@ -20,7 +20,7 @@ const BrainCore: React.FC<BrainCoreProps> = ({ onGeneratedContent }) => {
     
     setIsLoading(true);
     try {
-      // First check if content is safe
+      // First check if content is safe - use type instead of contentType
       const params = {
         content: input,
         type: "text" // Using type instead of contentType

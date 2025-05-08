@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/layouts/Layout';
@@ -9,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, MapPin, Filter } from 'lucide-react';
 import MapViewer from '@/components/maps/MapViewer';
 import EscortScraper from '@/services/scrapers/EscortScraper';
-import { Escort } from '@/types/Escort';
+import { Escort } from '@/types/escort';
 import { useFilterState } from '@/hooks/escort-filters/useFilterState';
 
 const EscortsPage = () => {

@@ -9,14 +9,14 @@ import { EnhancedBoostStatus, BoostPackage } from '@/types/pulse-boost';
 export function usePulseBoost(userId?: string) {
   // Initialize state with proper types
   const [boostStatus, setBoostStatus] = useState<EnhancedBoostStatus>({
-    active: false,
     isActive: false,
-    remainingMinutes: 0,
-    timeRemaining: 0,
+    remainingTime: "0",
+    timeRemaining: "0",
     percentRemaining: 0,
     expiresAt: null,
     startedAt: null,
-    isExpired: true
+    isExpired: true,
+    remainingMinutes: 0
   });
 
   const [packages, setPackages] = useState<BoostPackage[]>([]);
@@ -60,19 +60,19 @@ export function usePulseBoost(userId?: string) {
 
           setBoostStatus({
             ...status,
-            isExpired: !status.active
+            isExpired: !status.isActive
           });
         } else {
           // No active boost
           setBoostStatus({
-            active: false,
             isActive: false,
-            remainingMinutes: 0,
-            timeRemaining: 0,
+            remainingTime: "0",
+            timeRemaining: "0",
             percentRemaining: 0,
             expiresAt: null,
             startedAt: null,
-            isExpired: true
+            isExpired: true,
+            remainingMinutes: 0
           });
         }
       } catch (err) {
@@ -109,14 +109,14 @@ export function usePulseBoost(userId?: string) {
 
       // Update the boost status immediately for better UX
       setBoostStatus({
-        active: true,
-        isActive: true, 
-        remainingMinutes: boostPackage.durationMinutes,
+        isActive: true,
+        remainingTime: boostPackage.durationMinutes.toString(),
         timeRemaining: boostPackage.durationMinutes.toString(),
         percentRemaining: 100,
         expiresAt: endDate,
         startedAt: startDate,
-        isExpired: false
+        isExpired: false,
+        remainingMinutes: boostPackage.durationMinutes
       });
 
       // Perform purchase operation (mocked)

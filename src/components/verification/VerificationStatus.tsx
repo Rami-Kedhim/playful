@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { useVerificationStatus } from './hooks/useVerificationStatus';
 import { Clock, CheckCircle, XCircle, AlertCircle, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 // Simple date formatter
 const formatDate = (dateStr: string) => {
@@ -73,61 +73,82 @@ const VerificationStatusComponent = ({ onRequestVerification }) => {
     );
   }
 
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle>Verification Status</CardTitle>
-            <CardDescription>
-              {verificationRequest.requested_level ? `You requested ${verificationRequest.requested_level} verification` : `You requested ${VERIFICATION_LEVELS.BASIC} verification`}
-            </CardDescription>
-          </div>
-          <StatusBadge statusValue={status} />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div>
-            <h4 className="text-sm font-medium mb-1">Submitted</h4>
-            <p className="text-sm text-muted-foreground">
-              {formatDate(verificationRequest.submittedAt || verificationRequest.created_at || new Date().toISOString())}
-            </p>
-          </div>
-          
-          {verificationRequest.documents && verificationRequest.documents.length > 0 && (
+  const renderVerificationStatus = () => {
+    if (!status) {
+      return <VerificationEmptyState onRequest={onRequestVerification} />;
+    }
+
+    // Update this line to use the proper comparison
+    if (status === VerificationStatus.REJECTED) {
+      return (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Verification Rejected</AlertTitle>
+          <AlertDescription>
+            {rejectionReason || 'Your verification request was rejected. Please check requirements and submit again.'}
+          </AlertDescription>
+        </Alert>
+      );
+    }
+
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-start">
             <div>
-              <h4 className="text-sm font-medium mb-1">Documents</h4>
-              <div className="flex flex-wrap gap-2">
-                {verificationRequest.documents.map((doc) => (
-                  <Badge key={doc.id} variant="outline" className="flex items-center">
-                    <FileText className="h-3 w-3 mr-1" />
-                    {doc.type || doc.documentType || "Document"}
-                  </Badge>
-                ))}
-              </div>
+              <CardTitle>Verification Status</CardTitle>
+              <CardDescription>
+                {verificationRequest.requested_level ? `You requested ${verificationRequest.requested_level} verification` : `You requested ${VERIFICATION_LEVELS.BASIC} verification`}
+              </CardDescription>
             </div>
-          )}
-          
-          {(verificationRequest.rejectionReason || verificationRequest.reviewer_notes) && (
+            <StatusBadge statusValue={status} />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
             <div>
-              <h4 className="text-sm font-medium text-destructive mb-1">Feedback</h4>
-              <p className="text-sm text-destructive/80 bg-destructive/5 p-3 rounded-md">
-                {verificationRequest.rejectionReason || verificationRequest.reviewer_notes}
+              <h4 className="text-sm font-medium mb-1">Submitted</h4>
+              <p className="text-sm text-muted-foreground">
+                {formatDate(verificationRequest.submittedAt || verificationRequest.created_at || new Date().toISOString())}
               </p>
             </div>
+            
+            {verificationRequest.documents && verificationRequest.documents.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium mb-1">Documents</h4>
+                <div className="flex flex-wrap gap-2">
+                  {verificationRequest.documents.map((doc) => (
+                    <Badge key={doc.id} variant="outline" className="flex items-center">
+                      <FileText className="h-3 w-3 mr-1" />
+                      {doc.type || doc.documentType || "Document"}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {(verificationRequest.rejectionReason || verificationRequest.reviewer_notes) && (
+              <div>
+                <h4 className="text-sm font-medium text-destructive mb-1">Feedback</h4>
+                <p className="text-sm text-destructive/80 bg-destructive/5 p-3 rounded-md">
+                  {verificationRequest.rejectionReason || verificationRequest.reviewer_notes}
+                </p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-end">
+          {status === "rejected" && (
+            <Button onClick={onRequestVerification}>
+              Submit Again
+            </Button>
           )}
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-end">
-        {status === "rejected" && (
-          <Button onClick={onRequestVerification}>
-            Submit Again
-          </Button>
-        )}
-      </CardFooter>
-    </Card>
-  );
+        </CardFooter>
+      </Card>
+    );
+  };
+
+  return renderVerificationStatus();
 };
 
 const StatusBadge = ({ statusValue }) => {

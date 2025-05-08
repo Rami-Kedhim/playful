@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -144,7 +143,7 @@ export const CreatorDetailContent: React.FC<{ creatorId: string }> = ({ creatorI
 
             <div className="md:col-span-1">
               <CreatorSubscriptionCard
-                creator={creator}
+                creatorId={creator.id} // Change from creator to creatorId
                 isSubscribed={isSubscribed}
                 canSubscribe={canSubscribe}
                 onSubscribe={handleSubscribe}
@@ -159,4 +158,3 @@ export const CreatorDetailContent: React.FC<{ creatorId: string }> = ({ creatorI
 };
 
 export default CreatorDetail;
-

@@ -44,3 +44,4 @@ export interface BoostManagerHook {
   eligibilityReason?: string;
   refreshStatus: () => void;
 }
+

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth';
 import { VerificationBadge } from '@/components/verification';
-import { VerificationLevel, VerificationLevels } from '@/types/verification'; // Import from types instead
+import { VerificationLevel } from '@/types/verification'; // Changed from VerificationLevels
 
 const ProfilePage = () => {
   const { user } = useAuth();
