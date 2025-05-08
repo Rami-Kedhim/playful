@@ -1,4 +1,5 @@
 
+// Create the missing VerificationBadge component
 import { Shield, ShieldAlert, ShieldCheck } from "lucide-react";
 
 interface VerificationBadgeProps {

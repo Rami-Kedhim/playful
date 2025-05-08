@@ -15,7 +15,30 @@ export interface SessionValidationResult {
   expiry?: Date;
 }
 
-class OxumSystem {
+export interface OxumSystem {
+  checkSystemStatus(): {
+    operational: boolean;
+    traffic: string;
+    loadFactor: number;
+  };
+  
+  checkIntegrity(): SystemIntegrityResult;
+  
+  validateSession(token: string): SessionValidationResult;
+
+  // Add missing methods
+  boostAllocationEigen(matrix: number[][]): number[];
+  calculateBoostScore(profileId: string, factors?: any): number;
+  recordBoostTransaction(transaction: { 
+    userId: string;
+    amount: number;
+    timestamp: Date;
+    boostType: string; 
+  }): void;
+  configure(options: Record<string, any>): void;
+}
+
+class OxumImplementation implements OxumSystem {
   checkSystemStatus() {
     return {
       operational: true,
@@ -45,7 +68,6 @@ class OxumSystem {
     };
   }
 
-  // Add the missing methods that are being used across the application
   boostAllocationEigen(matrix: number[][]): number[] {
     console.log('Running Eigen boost allocation algorithm');
     // Mock implementation - would normally apply a mathematical algorithm
@@ -57,7 +79,22 @@ class OxumSystem {
     // Mock implementation - would normally calculate based on various factors
     return Math.floor(Math.random() * 100);
   }
+
+  recordBoostTransaction(transaction: { 
+    userId: string;
+    amount: number;
+    timestamp: Date;
+    boostType: string; 
+  }): void {
+    console.log('Recording boost transaction:', transaction);
+    // In a real implementation, this would store the transaction
+  }
+
+  configure(options: Record<string, any>): void {
+    console.log('Configuring Oxum with options:', options);
+    // Apply configuration settings
+  }
 }
 
-export const oxum = new OxumSystem();
+export const oxum: OxumSystem = new OxumImplementation();
 export default oxum;

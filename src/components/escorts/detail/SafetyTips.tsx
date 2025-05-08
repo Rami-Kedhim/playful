@@ -1,4 +1,5 @@
 
+// Create the missing SafetyTips component
 import { AlertCircle, Shield } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 

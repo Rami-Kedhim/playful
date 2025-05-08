@@ -1,11 +1,12 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Escort } from "@/types/Escort";
 import { VerificationLevel } from "@/types/verification";
-import AboutTab from "./AboutTab";
-import ServicesTab from "./ServicesTab";
-import RatesTab from "./RatesTab";
-import SafetyTips from "../SafetyTips";
-import VerificationBadge from "../VerificationBadge";
+import AboutTab from "./profile/AboutTab";
+import ServicesTab from "./profile/ServicesTab";
+import RatesTab from "./profile/RatesTab";
+import SafetyTips from "./SafetyTips";
+import VerificationBadge from "./VerificationBadge";
 import { Shield, UserCheck, DollarSign, Info } from "lucide-react";
 
 interface ProfileTabsProps {

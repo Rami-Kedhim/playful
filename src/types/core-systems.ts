@@ -1,3 +1,4 @@
+
 /**
  * Core Systems Type Definitions
  * Centralized type system for UberCore, UberWallet, UberBoost and Oxum
@@ -45,7 +46,7 @@ export interface SessionValidationResult {
 }
 
 // HermesAnalytics System Types
-export interface HermesAnalytics {
+export interface HermesSystem {
   initialize: () => Promise<void>;
   disconnect: () => void;
   getSystemStatus: () => { status: string; metrics?: any };
@@ -55,6 +56,8 @@ export interface HermesAnalytics {
   recommendNextAction: (userId: string) => RecommendedAction;
   getUserJourneyInsights: (userId: string, timeRange?: string) => UserJourneyInsights;
   enterSpatialFlow: (userId: string, spaceId: string) => void;
+  trackEvent: (userId: string, action: string, data?: any) => boolean;  // Added this method
+  configure: (options: Record<string, any>) => void;  // Added this method
 }
 
 export interface ConnectionParams {
@@ -87,39 +90,37 @@ export interface UserJourneyInsights {
 
 // LucieAI System Types
 export interface LucieAISystem {
-  generateContent: (prompt: string, options?: Record<string, any>) => Promise<GenerateContentResult>;
-  moderateContent: (params: ModerateContentParams) => Promise<ModerateContentResult>;
-  analyzeSentiment: (text: string) => Promise<SentimentAnalysisResult>;
-  getSystemStatus: () => {
+  initialize(): Promise<boolean>;
+  generateText(prompt: string): Promise<string>;
+  moderateContent(content: string): Promise<boolean>;
+  getSystemStatus(): { 
     operational: boolean;
-    modules: Record<string, 'online' | 'offline' | 'degraded'>;
+    modules: Record<string, string>;
   };
-  loadFeaturedUsers?: (count?: number) => Promise<Array<any>>;
+  configure(options: Record<string, any>): void;  // Added this method
 }
 
-export interface GenerateContentResult {
-  content: string;
-  tokensUsed: number;
-  model: string;
-}
-
-export interface ModerateContentParams {
-  content: string;
-  contentType: 'text' | 'image' | 'video';
-  context?: Record<string, any>;
-}
-
-export interface ModerateContentResult {
-  safe: boolean;
-  score: number;
-  issues?: string[];
-  blockedCategories?: string[];
-}
-
-export interface SentimentAnalysisResult {
-  score: number;
-  sentiment: 'positive' | 'negative' | 'neutral';
-  confidence: number;
+// OxumSystem Type
+export interface OxumSystem {
+  checkSystemStatus(): {
+    operational: boolean;
+    traffic: string;
+    loadFactor: number;
+  };
+  
+  checkIntegrity(): SystemIntegrityResult;
+  
+  validateSession(token: string): SessionValidationResult;
+  
+  boostAllocationEigen(matrix: number[][]): number[];
+  calculateBoostScore(profileId: string, factors?: any): number;
+  recordBoostTransaction(transaction: { 
+    userId: string;
+    amount: number;
+    timestamp: Date;
+    boostType: string; 
+  }): void;
+  configure(options: Record<string, any>): void;
 }
 
 // UberWallet System Types

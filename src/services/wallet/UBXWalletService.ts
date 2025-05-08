@@ -120,8 +120,7 @@ export class UBXWalletService {
       }
       
       // Update analytics via Hermes
-      hermes.trackEvent('ubx_transaction', {
-        userId: this.currentUserId,
+      hermes.trackEvent(this.currentUserId, 'ubx_transaction', {
         amount,
         transactionType,
         timestamp: new Date()
