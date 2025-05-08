@@ -22,7 +22,7 @@ const LucieAIAssistant = () => {
       // Check content moderation
       const params: ModerateContentParams = {
         content: input,
-        type: "text"
+        contentType: "text"
       };
       
       const isSafe = await lucieOrchestrator.isSafeContent(input);

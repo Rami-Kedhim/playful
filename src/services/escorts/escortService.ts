@@ -12,7 +12,7 @@ class EscortService {
   async getEscorts(): Promise<Escort[]> {
     try {
       const escorts = await this.escortScraper.getEscorts();
-      return escorts;
+      return escorts as Escort[];
     } catch (error) {
       console.error('Error fetching escorts:', error);
       return [];
@@ -22,7 +22,7 @@ class EscortService {
   async getEscortById(id: string): Promise<Escort | null> {
     try {
       const escort = await this.escortScraper.getEscortById(id);
-      return escort;
+      return escort as Escort | null;
     } catch (error) {
       console.error(`Error fetching escort with ID ${id}:`, error);
       return null;
@@ -32,7 +32,7 @@ class EscortService {
   async searchEscorts(query: string): Promise<Escort[]> {
     try {
       const results = await this.escortScraper.searchEscorts(query);
-      return results;
+      return results as Escort[];
     } catch (error) {
       console.error('Error searching escorts:', error);
       return [];

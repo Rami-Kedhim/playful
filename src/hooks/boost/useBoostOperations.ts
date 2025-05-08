@@ -1,131 +1,115 @@
 
-import { useCallback, useState } from 'react';
-import { BoostAnalytics } from '@/types/pulse-boost';
-import { getRandomInt } from '@/utils/math';
+import { useState } from 'react';
+import { BoostPackage, BoostPurchaseResult, BoostAnalytics } from '@/types/pulse-boost';
+import { AnalyticsData } from '@/types/analytics';
+import { useToast } from '@/components/ui/use-toast';
 
-export const useBoostOperations = (profileId: string) => {
-  const [loading, setLoading] = useState(false);
+// This hook provides operations for managing profile boosts
+const useBoostOperations = (profileId: string) => {
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const { toast } = useToast();
 
-  const getBoostAnalytics = useCallback(async (): Promise<BoostAnalytics> => {
-    setLoading(true);
+  // Function to purchase a boost package
+  const purchaseBoost = async (boostPackage: BoostPackage): Promise<BoostPurchaseResult> => {
+    setIsPurchasing(true);
     
     try {
-      // Simulated API call with random data for demo purposes
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Simulate API call with timeout
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      const baseViews = getRandomInt(1000, 5000);
-      const boostMultiplier = 1.5;
-      const boostViews = Math.round(baseViews * boostMultiplier);
-      const additionalViews = boostViews - baseViews;
-      
-      const baseImpressions = getRandomInt(5000, 20000);
-      const boostImpressions = Math.round(baseImpressions * boostMultiplier);
-      
-      const baseInteractions = getRandomInt(100, 500);
-      const boostInteractions = Math.round(baseInteractions * boostMultiplier);
-      
-      // Create analytics object with extended properties
-      const analytics: BoostAnalytics = {
-        totalBoosts: getRandomInt(5, 20),
-        activeBoosts: 1,
-        averageBoostScore: parseFloat((70 + Math.random() * 20).toFixed(1)),
-        boostHistory: Array.from({ length: 14 }).map((_, i) => ({
-          date: new Date(Date.now() - (13-i) * 24 * 60 * 60 * 1000),
-          score: 50 + Math.random() * 40
-        })),
-        views: additionalViews,
-        impressions: {
-          value: baseImpressions,
-          change: 15,
-          withBoost: boostImpressions,
-          withoutBoost: baseImpressions,
-          today: getRandomInt(200, 1000),
-          yesterday: getRandomInt(150, 900),
-          weeklyAverage: getRandomInt(180, 950),
-          increase: 20
-        },
-        interactions: {
-          value: baseInteractions,
-          change: 20,
-          withBoost: boostInteractions,
-          withoutBoost: baseInteractions,
-          today: getRandomInt(10, 100),
-          yesterday: getRandomInt(8, 90),
-          weeklyAverage: getRandomInt(9, 95),
-          increase: 25
-        },
-        additionalViews: additionalViews,
-        engagementIncrease: parseFloat((Math.random() * 25 + 10).toFixed(1)),
-        rankingPosition: getRandomInt(1, 5)
+      // Simulated successful purchase
+      const result: BoostPurchaseResult = {
+        success: true,
+        boostId: `boost-${Date.now()}`,
+        transactionId: `txn-${Date.now()}`
       };
       
-      return analytics;
-    } catch (error) {
-      console.error('Error fetching boost analytics:', error);
+      toast({
+        title: "Boost Purchased",
+        description: `You've successfully purchased the ${boostPackage.name} package.`,
+        variant: "default",
+      });
       
-      // Return fallback data
-      return {
-        totalBoosts: 0,
-        activeBoosts: 0,
-        averageBoostScore: 0,
-        boostHistory: [],
-        views: 0,
-        impressions: {
-          value: 0,
-          change: 0,
-          withBoost: 0,
-          withoutBoost: 0
-        },
-        interactions: {
-          value: 0,
-          change: 0,
-          withBoost: 0,
-          withoutBoost: 0
-        },
-        additionalViews: 0,
-        engagementIncrease: 0,
-        rankingPosition: 0
-      };
-    } finally {
-      setLoading(false);
-    }
-  }, [profileId]);
-
-  const purchaseBoost = useCallback(async (packageId: string): Promise<boolean> => {
-    setLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log(`Purchasing boost package ${packageId} for profile ${profileId}`);
-      return true;
+      return result;
     } catch (error) {
       console.error('Error purchasing boost:', error);
-      return false;
+      
+      toast({
+        title: "Purchase Failed",
+        description: "There was an error processing your purchase. Please try again.",
+        variant: "destructive",
+      });
+      
+      return {
+        success: false,
+        message: "Transaction failed. Please try again."
+      };
     } finally {
-      setLoading(false);
+      setIsPurchasing(false);
     }
-  }, [profileId]);
+  };
 
-  const cancelBoost = useCallback(async (): Promise<boolean> => {
-    setLoading(true);
+  // Function to fetch analytics data for current boosts
+  const fetchAnalytics = async (): Promise<AnalyticsData> => {
     try {
-      // Simulate API call
+      // Simulate API call with timeout
       await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log(`Cancelling boost for profile ${profileId}`);
-      return true;
+      
+      // Generate fake data
+      const data: AnalyticsData = {
+        views: Math.floor(Math.random() * 1000),
+        impressions: {
+          today: Math.floor(Math.random() * 500),
+          yesterday: Math.floor(Math.random() * 400),
+          weeklyAverage: Math.floor(Math.random() * 450),
+          withBoost: Math.floor(Math.random() * 300),
+          withoutBoost: Math.floor(Math.random() * 150),
+          increase: Math.floor(Math.random() * 100),
+          change: Math.floor(Math.random() * 30),
+          value: Math.floor(Math.random() * 500),
+        },
+        interactions: {
+          today: Math.floor(Math.random() * 100),
+          yesterday: Math.floor(Math.random() * 80),
+          weeklyAverage: Math.floor(Math.random() * 90),
+          withBoost: Math.floor(Math.random() * 70),
+          withoutBoost: Math.floor(Math.random() * 40),
+          increase: Math.floor(Math.random() * 30),
+          change: Math.floor(Math.random() * 20),
+          value: Math.floor(Math.random() * 100),
+        },
+        rank: {
+          current: Math.floor(Math.random() * 50) + 1,
+          previous: Math.floor(Math.random() * 100) + 20,
+          change: Math.floor(Math.random() * 15),
+        },
+        additionalViews: Math.floor(Math.random() * 200),
+        engagementIncrease: Math.floor(Math.random() * 40),
+        rankingPosition: Math.floor(Math.random() * 10) + 1,
+        totalBoosts: Math.floor(Math.random() * 5) + 1,
+        activeBoosts: Math.floor(Math.random() * 2),
+        averageBoostScore: Math.floor(Math.random() * 90) + 10,
+        conversionRate: Math.random() * 10, // Added this property
+        boostHistory: Array.from({ length: 10 }, (_, i) => ({
+          date: new Date(Date.now() - i * 86400000),
+          score: Math.floor(Math.random() * 100)
+        }))
+      };
+      
+      setAnalyticsData(data);
+      return data;
     } catch (error) {
-      console.error('Error cancelling boost:', error);
-      return false;
-    } finally {
-      setLoading(false);
+      console.error('Error fetching analytics:', error);
+      throw error;
     }
-  }, [profileId]);
+  };
 
   return {
-    loading,
-    getBoostAnalytics,
+    isPurchasing,
+    analyticsData,
     purchaseBoost,
-    cancelBoost
+    fetchAnalytics
   };
 };
 

@@ -29,11 +29,11 @@ export class LucieAI implements LucieAISystem {
   }
   
   async moderateContent(params: ModerateContentParams): Promise<ModerateContentResult> {
-    console.log(`Moderating content: ${params.type || 'text'}`);
+    console.log(`Moderating content: ${params.contentType || params.type || 'text'}`);
     // In a real system, would analyze content for policy violations
     
     return {
-      isSafe: true, // Use the correct property name
+      isSafe: true, 
       safe: true, // For backward compatibility
       score: 0.92,
       issues: [],
@@ -97,6 +97,12 @@ export class LucieAI implements LucieAISystem {
       content: `AI response to: ${params.prompt}`,
       warnings: []
     };
+  }
+  
+  // Add shutdown method
+  shutdown(): void {
+    console.log('Shutting down LucieAI...');
+    this.operational = false;
   }
 }
 

@@ -2,38 +2,38 @@
 export interface LivecamModel {
   id: string;
   displayName: string;
-  username?: string;
-  name?: string;
-  imageUrl?: string;
-  thumbnailUrl: string;
-  isLive?: boolean;
-  isStreaming?: boolean;
+  username: string;
+  isLive: boolean;
   viewerCount: number;
-  price?: number;
-  rating?: number;
-  language?: string;
-  country?: string;
-  category?: string; 
-  categories?: string[];
-  tags?: string[];
-  age?: number;
+  tags: string[];
+  location: string;
+  age: number;
   description?: string;
-  streamUrl?: string;
-  region?: string;
+  imageUrl: string;
+  thumbnailUrl: string;
+  hourlyRate?: number;
+  languages?: string[];
+  rating?: number;
+  reviewCount?: number;
+  boostScore?: number;
 }
 
-export interface LivecamCardProps {
-  model: LivecamModel;
-  key?: string;
-  isBoosted?: boolean;
-  onBoost?: () => boolean;
-  onCancelBoost?: () => boolean;
-  showBoostControls?: boolean;
+export interface LivecamCategory {
+  id: string;
+  name: string;
+  description?: string;
+  count: number;
+  imageUrl?: string;
 }
 
-export interface Livecam extends LivecamModel {
-  // Add any specific properties for Livecam type
-  region?: string;
-  displayName: string;
+export interface LivecamFilter {
+  gender?: string[];
+  ageRange?: [number, number];
+  categories?: string[];
+  languages?: string[];
+  priceRange?: [number, number];
+  location?: string;
+  onlyLive?: boolean;
+  onlyVerified?: boolean;
+  sortBy?: 'popularity' | 'newest' | 'rating' | 'price_low' | 'price_high';
 }
-

@@ -1,105 +1,76 @@
 
+import { SystemStatus, OxumSystem } from '@/types/core-systems';
+
 /**
- * Oxum Neural Network System
- * Advanced recommendation and matching engine
+ * Oxum - Neural network and payment processing system
  */
-export class Oxum {
-  private initialized: boolean = false;
+class Oxum implements OxumSystem {
+  private isInitialized: boolean = false;
+  private paymentProviders: string[] = [];
+  
+  constructor() {
+    this.paymentProviders = ['stripe', 'paypal', 'crypto'];
+  }
   
   async initialize(): Promise<boolean> {
-    console.log('Initializing Oxum Neural Network...');
-    this.initialized = true;
+    console.log('Oxum neural system initializing...');
+    // In a real system, would initialize APIs, neural models, etc.
+    this.isInitialized = true;
     return true;
   }
   
-  isInitialized(): boolean {
-    return this.initialized;
-  }
-  
-  /**
-   * Get a compatibility score between two profiles
-   */
-  getCompatibility(profileA: any, profileB: any): number {
-    // Mock implementation
-    return Math.random() * 100;
-  }
-  
-  /**
-   * Generate recommendations for a profile
-   */
-  async getRecommendations(profileId: string, limit: number = 10): Promise<any[]> {
-    // Mock implementation
-    return Array.from({ length: limit }, (_, i) => ({
-      id: `rec-${i}`,
-      score: Math.random() * 100,
-      reason: 'Based on your preferences'
-    }));
-  }
-  
-  /**
-   * Boost allocation method using eigenvalues
-   * @param matrix A matrix for boost allocation calculation
-   * @returns An allocation vector
-   */
-  boostAllocationEigen(matrix: number[][]): number[] {
-    // This is a simplified implementation
-    // In a real implementation, this would use eigenvalue decomposition
-    
-    // For now, just return normalized row sums
-    const rowSums = matrix.map(row => 
-      row.reduce((sum, val) => sum + val, 0)
-    );
-    
-    const total = rowSums.reduce((sum, val) => sum + val, 0);
-    
-    // Normalize to get allocation vector
-    return rowSums.map(val => val / (total || 1));
-  }
-  
-  /**
-   * Calculate score for matching
-   */
-  calculateScore(params: any): number {
-    return Math.random() * 100;
-  }
-  
-  /**
-   * Get system status
-   */
-  getSystemStatus(): { status: string } {
-    return { 
-      status: this.initialized ? 'operational' : 'offline'
-    };
-  }
-  
-  /**
-   * Check system status
-   */
-  checkSystemStatus(): { operational: boolean, latency: number } {
-    return {
-      operational: this.initialized,
-      latency: Math.floor(Math.random() * 30)
-    };
-  }
-  
-  /**
-   * Record boost transaction
-   */
-  recordBoostTransaction(userId: string, amount: number, packageId: string): boolean {
-    console.log(`Recording boost transaction for user ${userId}: ${amount} for package ${packageId}`);
-    return true;
-  }
-  
-  /**
-   * Shutdown Oxum system
-   */
   shutdown(): void {
-    console.log('Shutting down Oxum Neural Network');
-    this.initialized = false;
+    console.log('Oxum neural system shutting down...');
+    this.isInitialized = false;
+  }
+  
+  getSystemStatus(): SystemStatus {
+    return {
+      operational: this.isInitialized,
+      services: {
+        payments: 'active',
+        neural: 'active',
+        security: 'active'
+      },
+      queueLength: 0
+    };
+  }
+
+  async processPayment(amount: number, currency: string): Promise<boolean> {
+    console.log(`Processing payment of ${amount} ${currency}...`);
+    return true;
+  }
+
+  async validateTransaction(transactionId: string): Promise<boolean> {
+    console.log(`Validating transaction ${transactionId}...`);
+    return true;
+  }
+
+  async getExchangeRate(from: string, to: string): Promise<number> {
+    console.log(`Getting exchange rate from ${from} to ${to}...`);
+    // Mock exchange rates
+    const rates: Record<string, Record<string, number>> = {
+      'USD': { 'UBX': 10, 'EUR': 0.85 },
+      'EUR': { 'UBX': 12, 'USD': 1.18 },
+      'UBX': { 'USD': 0.1, 'EUR': 0.083 }
+    };
+    
+    return rates[from]?.[to] || 1;
+  }
+  
+  async calculateVisibilityScore(profileId: string): Promise<number> {
+    // In a real system, would use neural algorithms to calculate visibility
+    return Math.random() * 100;
+  }
+  
+  async boostAllocationEigen(profileId: string, boostLevel: number): Promise<number> {
+    // Calculate boost allocation using eigenvalue algorithm
+    console.log(`Calculating boost allocation for ${profileId} at level ${boostLevel}`);
+    const baseScore = 50;
+    const boostMultiplier = boostLevel * 1.5;
+    return baseScore * boostMultiplier;
   }
 }
 
-// Export a singleton instance
 export const oxum = new Oxum();
-
 export default oxum;

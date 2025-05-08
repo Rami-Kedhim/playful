@@ -3,9 +3,18 @@
  * UberWallet System
  * Handles virtual currency and transactions for the UberEscorts ecosystem
  */
+
+export interface UbxTransaction {
+  id: string;
+  type: 'credit' | 'debit' | 'transfer';
+  amount: number;
+  reason: string;
+  timestamp: Date;
+}
+
 export class UberWallet {
   private balance: number = 0;
-  private transactions: any[] = [];
+  private transactions: UbxTransaction[] = [];
   
   constructor(initialBalance: number = 0) {
     this.balance = initialBalance;
@@ -26,6 +35,7 @@ export class UberWallet {
     
     this.balance += amount;
     this.transactions.push({
+      id: `txn-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       type: 'credit',
       amount,
       reason,
@@ -43,6 +53,7 @@ export class UberWallet {
     
     this.balance -= amount;
     this.transactions.push({
+      id: `txn-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       type: 'debit',
       amount,
       reason,
@@ -55,8 +66,15 @@ export class UberWallet {
   /**
    * Get transaction history
    */
-  getTransactionHistory(limit: number = 10): any[] {
+  getTransactionHistory(limit: number = 10): UbxTransaction[] {
     return this.transactions.slice(-limit);
+  }
+
+  /**
+   * Get transactions (alias for getTransactionHistory for compatibility)
+   */
+  getTransactions(limit: number = 10): UbxTransaction[] {
+    return this.getTransactionHistory(limit);
   }
   
   /**
@@ -69,6 +87,20 @@ export class UberWallet {
     recipient.credit(amount, 'transfer_in');
     
     return true;
+  }
+
+  /**
+   * Add funds to the wallet
+   */
+  addFunds(amount: number): boolean {
+    return this.credit(amount, 'add_funds');
+  }
+
+  /**
+   * Purchase UBX tokens
+   */
+  purchaseUbx(amount: number, paymentMethod: string): boolean {
+    return this.credit(amount, `purchase_ubx_via_${paymentMethod}`);
   }
 }
 

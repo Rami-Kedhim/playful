@@ -35,11 +35,11 @@ export class LucieOrchestratorAdapter {
     try {
       const params: ModerateContentParams = {
         content,
-        type: contentType,
+        contentType: contentType, // Using contentType parameter
       };
       
       const result: ModerateContentResult = await lucieAI.moderateContent(params);
-      return result.isSafe; // Changed from 'safe' to 'isSafe'
+      return result.isSafe || result.safe || false; // Check both properties
     } catch (error) {
       console.error('Error checking content safety:', error);
       return false; // Default to unsafe if error occurs
@@ -53,7 +53,7 @@ export class LucieOrchestratorAdapter {
     try {
       const params: ModerateContentParams = {
         content,
-        type: contentType,
+        contentType: contentType,
       };
       
       const result = await lucieAI.moderateContent(params);

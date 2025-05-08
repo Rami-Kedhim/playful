@@ -6,7 +6,7 @@ interface LivecamDetailLayoutProps {
   children: React.ReactNode;
   containerClassName?: string;
   fullWidth?: boolean;
-  showNavigation?: boolean;
+  showNavigationBar?: boolean;
   hideNavbar?: boolean;
   hideFooter?: boolean;
 }
@@ -15,14 +15,14 @@ const LivecamDetailLayout: React.FC<LivecamDetailLayoutProps> = ({
   children,
   containerClassName = '',
   fullWidth = false,
-  showNavigation = true,
+  showNavigationBar = true,
   hideNavbar = false,
   hideFooter = false
 }) => {
   return (
     <MainLayout 
       containerClassName={containerClassName}
-      showNavigation={showNavigation}
+      showNavigationBar={showNavigationBar}
       hideNavbar={hideNavbar}
       hideFooter={hideFooter}
     >

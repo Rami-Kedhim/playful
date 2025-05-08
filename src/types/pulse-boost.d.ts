@@ -1,3 +1,4 @@
+
 export interface BoostPackage {
   id: string;
   name: string;
@@ -92,6 +93,22 @@ export interface BoostAnalytics {
     withBoost: number;
     withoutBoost: number;
     improvement: number;
+  };
+  totalBoosts?: number;
+  activeBoosts?: number;
+  averageBoostScore?: number;
+  boostHistory?: Array<{
+    date: Date;
+    score: number;
+  }>;
+  views?: number;
+  impressions?: {
+    value: number;
+    change?: number;
+  };
+  interactions?: {
+    value: number;
+    change?: number;
   };
 }
 

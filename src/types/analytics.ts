@@ -39,4 +39,49 @@ export interface AnalyticsData {
     date: Date;
     score: number;
   }>;
+  conversionRate?: number;
+  messageRate?: number;
+  bookingRate?: number;
+}
+
+export interface MetricCardProps {
+  title: string;
+  value: number;
+  change?: number;
+  unit?: string;
+}
+
+export interface DetailedMetricViewProps {
+  title?: string;
+  description?: string;
+  value?: number;
+  unit?: string;
+  change?: number;
+  trendData?: Array<{ name: string; value: number }>;
+  onBack: () => void;
+  metric?: {
+    title: string;
+    description?: string;
+  };
+  data?: Array<{ name: string; value: number }>;
+}
+
+export interface PerformanceChartProps {
+  data: Array<{ name: string; value: number }>;
+  dataKey: string;
+  title?: string;
+  height?: number;
+  colors?: {
+    stroke?: string;
+    fill?: string;
+  };
+}
+
+export interface MetricDetail {
+  title: string;
+  description?: string;
+  value: number;
+  unit: string;
+  change: number;
+  data: Array<{ name: string; value: number }>;
 }
