@@ -1,9 +1,8 @@
 
-// Central export for layout components
-import Layout from './Layout';
-import MainLayout from './MainLayout';
-export type { LayoutProps } from './Layout';
-
-// Export layouts for main usage
-export { Layout, MainLayout };
-export default Layout;
+// Export all layouts from a single file
+export { default as Layout } from './Layout';
+export { default as AppLayout } from './AppLayout';
+export { default as UnifiedLayout } from './UnifiedLayout';
+export * from './Layout';
+export * from './AppLayout';
+export * from './UnifiedLayout';
