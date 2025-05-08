@@ -16,6 +16,7 @@ export interface Escort {
   verificationLevel?: VerificationLevel;
   tags?: string[];
   images?: string[];
+  photos?: string[];
   imageUrl?: string;
   profileImage?: string;
   services?: string[];
@@ -26,7 +27,7 @@ export interface Escort {
   ethnicity?: string;
   hairColor?: string;
   eyeColor?: string;
-  availability?: Availability;
+  availability?: string | any;
   availableNow?: boolean;
   lastActive?: string | Date;
   responseRate?: number;
@@ -34,6 +35,10 @@ export interface Escort {
   bookedTimes?: number;
   contactInfo?: ContactInfo;
   rates?: Rates;
+  reviews?: any[];
+  description?: string;
+  shortDescription?: string;
+  city?: string;
 }
 
 export interface Rates {

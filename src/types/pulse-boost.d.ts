@@ -13,6 +13,10 @@ export interface BoostPackage {
   color?: string;
   badgeColor?: string;
   boost_power?: number;
+  boostMultiplier?: number;
+  isMostPopular?: boolean;
+  isRecommended?: boolean;
+  is_active?: boolean;
 }
 
 export interface PulseBoost {
@@ -29,8 +33,14 @@ export interface PulseBoost {
   color?: string;
   badgeColor?: string;
   boost_power?: number;
+  boostMultiplier?: number;
   isMostPopular?: boolean;
   isRecommended?: boolean;
+  profileId?: string;
+  packageId?: string;
+  startTime?: Date;
+  endTime?: Date;
+  status?: string;
 }
 
 export interface BoostPurchaseRequest {
@@ -42,6 +52,8 @@ export interface BoostPurchaseResult {
   success: boolean;
   boostId?: string;
   error?: string | null;
+  message?: string;
+  transactionId?: string;
 }
 
 export interface BoostAnalytics {
@@ -52,15 +64,20 @@ export interface BoostAnalytics {
     date: Date;
     score: number;
   }>;
-  // Add these properties to fix the errors in useBoostOperations.ts
   views?: number;
   impressions?: {
     value: number;
     change?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+    increase?: number;
   };
   interactions?: {
     value: number;
     change?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+    increase?: number;
   };
 }
 
@@ -73,4 +90,23 @@ export interface BoostHistory {
     price: number;
     status: string;
   }>;
+  userId?: string;
+  startTime?: Date;
+  endTime?: Date;
+  boostType?: string;
+  price?: number;
+  status?: string;
+}
+
+export interface EnhancedBoostStatus {
+  isActive: boolean;
+  remainingTime: string;  // in "1h 30m" format
+  timeRemaining: string;  // Same as remainingTime for backward compatibility
+  percentRemaining: number;
+  expiresAt: Date | null;
+  startedAt: Date | null;
+  isExpired: boolean;
+  remainingMinutes?: number; // in minutes
+  packageName?: string;
+  progress?: number;
 }

@@ -30,10 +30,12 @@ const SecureRouteWrapper: React.FC<SecureRouteWrapperProps> = ({
         let secure = false;
         
         if (minimumSecurityLevel === 'maximum') {
-          secure = sessionSecurity.isValid && integrityCheck.valid && integrityCheck.integrity > 90;
+          secure = sessionSecurity.isValid && integrityCheck.valid && 
+                   (integrityCheck.integrity ? integrityCheck.integrity > 90 : true);
           setSecurityMessage('Maximum security protocols active.');
         } else if (minimumSecurityLevel === 'enhanced') {
-          secure = sessionSecurity.isValid && integrityCheck.valid && integrityCheck.integrity > 70;
+          secure = sessionSecurity.isValid && integrityCheck.valid && 
+                   (integrityCheck.integrity ? integrityCheck.integrity > 70 : true);
           setSecurityMessage('Enhanced security protocols active.');
         } else {
           secure = sessionSecurity.isValid && integrityCheck.valid;

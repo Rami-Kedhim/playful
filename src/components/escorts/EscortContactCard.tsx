@@ -40,7 +40,10 @@ const EscortContactCard: React.FC<EscortContactCardProps> = ({
             <div>
               <p className="text-sm font-medium mb-1">Availability</p>
               <div className="text-sm text-muted-foreground">
-                {escort.availability}
+                {typeof escort.availability === 'string' 
+                  ? escort.availability 
+                  : 'Available by appointment'
+                }
               </div>
             </div>
           )}

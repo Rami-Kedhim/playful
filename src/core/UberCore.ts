@@ -17,6 +17,12 @@ export class UberCore implements UberCoreSystem {
     this.automaticSeo = automaticSEO;
   }
   
+  public async initialize(): Promise<boolean> {
+    console.log('UberCore initializing...');
+    // In a real implementation, would initialize subsystems
+    return true;
+  }
+  
   public async getSystemStatus(): Promise<SystemStatus> {
     // Mock system status implementation
     return {
@@ -43,7 +49,8 @@ export class UberCore implements UberCoreSystem {
       status: 'ok',
       errors: [],
       warnings: [],
-      lastChecked: new Date().toISOString()
+      lastChecked: new Date().toISOString(),
+      integrity: 100
     };
   }
   
@@ -56,6 +63,10 @@ export class UberCore implements UberCoreSystem {
       network: 15,
       load: 12
     };
+  }
+  
+  public async getSystemHealth(): Promise<SystemHealthMetrics> {
+    return this.getSystemHealthMetrics();
   }
   
   public async validateSession(token: string): Promise<SessionValidationResult> {
