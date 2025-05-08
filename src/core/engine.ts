@@ -1,59 +1,55 @@
 
-import { LucieAI } from './Lucie';
-import { Oxum } from './Oxum';
-import { UberCore } from './UberCore';
+import { oxum } from './Oxum';
+import { lucieAI } from './Lucie';
+import { uberCore } from './UberCore';
 import { hermes } from './Hermes';
-import { UberWallet } from './UberWallet';
-import { AutomaticSEO } from './AutomaticSEO';
+import { automaticSEO } from './AutomaticSEO';
+import { SystemStatus } from '@/types/core-systems';
 
-// Mock implementation of system initialization and shutdown
-export const initializeSystem = () => {
-  console.log('Initializing system...');
-  
-  // Initialize core components
-  const lucieAI = new LucieAI();
-  const oxum = new Oxum();
-  const uberCore = new UberCore(lucieAI, oxum);
-  const wallet = new UberWallet();
-  const seo = new AutomaticSEO();
-  
-  // Initialize hermes
+/**
+ * Initialize the UberEscorts core systems
+ */
+export async function initializeSystem(): Promise<boolean> {
   try {
-    hermes.init({
-      ai: lucieAI,
-      seo: seo,
-      wallet: wallet,
-      core: uberCore
-    });
-    console.log('Hermes initialization successful');
-  } catch (error) {
-    console.error('Failed to initialize Hermes:', error);
-  }
-  
-  // Return the initialized components
-  return {
-    lucieAI,
-    oxum,
-    uberCore,
-    hermes,
-    wallet,
-    seo
-  };
-};
-
-export const shutdownSystem = () => {
-  console.log('Shutting down system...');
-  
-  // Perform cleanup operations
-  try {
-    console.log('Shutting down Hermes...');
-    console.log('Shutting down LucieAI...');
-    console.log('Shutting down Oxum...');
+    console.log('Starting UberEscorts initialization...');
     
-    console.log('System shutdown complete');
+    // Initialize Oxum system
+    await oxum.initialize();
+    console.log('Oxum neural network initialized');
+    
+    // Initialize Lucie AI system
+    await lucieAI.initialize();
+    console.log('Lucie AI system initialized');
+    
+    // Initialize Automatic SEO system
+    automaticSEO.initialize();
+    console.log('Automatic SEO system initialized');
+    
+    console.log('UberEscorts system initialization complete');
+    
     return true;
   } catch (error) {
-    console.error('Error during system shutdown:', error);
+    console.error('Error during system initialization:', error);
     return false;
   }
-};
+}
+
+/**
+ * Shut down the UberEscorts core systems safely
+ */
+export function shutdownSystem(): void {
+  console.log('Shutting down UberEscorts systems...');
+  
+  // Shutdown subsystems
+  oxum.shutdown();
+  lucieAI.shutdown();
+  
+  console.log('UberEscorts systems shutdown complete');
+}
+
+/**
+ * Check the overall system status
+ */
+export function getSystemStatus(): SystemStatus {
+  return uberCore.getSystemStatus();
+}

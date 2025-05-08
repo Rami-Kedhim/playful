@@ -1,20 +1,20 @@
 
 import { SystemStatus, SessionValidationResult, UberCoreSystem, SystemIntegrityResult, SystemHealthMetrics } from '@/types/core-systems';
 import { UberWallet } from './UberWallet';
-import { OxumSystem } from '@/types/core-systems';
-import { AutomaticSEO } from './AutomaticSEO';
+import { OxumSystem } from '@/types/oxum';
+import { automaticSEO } from './AutomaticSEO';
 
 export class UberCore implements UberCoreSystem {
   private lucieAI: any; // Using any since we don't have the actual implementation
   private oxumSystem: OxumSystem;
   private wallet: UberWallet;
-  private automaticSeo: AutomaticSEO;
+  private automaticSeo: any;
   
   constructor(lucieAI?: any, oxumSystem?: OxumSystem) {
     this.lucieAI = lucieAI;
     this.oxumSystem = oxumSystem || {} as OxumSystem;
     this.wallet = new UberWallet();
-    this.automaticSeo = new AutomaticSEO();
+    this.automaticSeo = automaticSEO;
   }
   
   public getSystemStatus(): SystemStatus {
@@ -70,7 +70,7 @@ export class UberCore implements UberCoreSystem {
   }
   
   public initializeAutomaticSeo(): boolean {
-    // Mock initialization of automatic SEO
+    // Call initialize method on automaticSEO
     return this.automaticSeo.initialize();
   }
   

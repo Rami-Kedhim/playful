@@ -1,56 +1,75 @@
-export interface UbxTransaction {
-  id: string;
-  amount: number;
-  type: string;
-  timestamp: Date;
-  description: string;
-  status: string;
-  transactionType?: string;
-  createdAt?: Date;
-}
 
+/**
+ * UberWallet System
+ * Handles virtual currency and transactions for the UberEscorts ecosystem
+ */
 export class UberWallet {
+  private balance: number = 0;
+  private transactions: any[] = [];
+  
+  constructor(initialBalance: number = 0) {
+    this.balance = initialBalance;
+  }
+  
+  /**
+   * Get current balance
+   */
   getBalance(): number {
-    return 1000; // Mock balance
+    return this.balance;
   }
-
-  // Method signature updated to not require userId parameter
-  async getTransactions(): Promise<UbxTransaction[]> {
-    return [
-      {
-        id: 'tx-1',
-        amount: 100,
-        type: 'purchase',
-        timestamp: new Date(),
-        description: 'Boost purchase',
-        status: 'completed'
-      },
-      {
-        id: 'tx-2',
-        amount: 50,
-        type: 'spend',
-        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
-        description: 'Content access',
-        status: 'completed'
-      }
-    ];
-  }
-
-  // Alias for getTransactions to keep compatibility
-  async getTransactionHistory(): Promise<UbxTransaction[]> {
-    return this.getTransactions();
-  }
-
-  async addFunds(amount: number): Promise<boolean> {
-    console.log(`Adding ${amount} funds to wallet`);
+  
+  /**
+   * Add funds to wallet
+   */
+  credit(amount: number, reason: string = 'deposit'): boolean {
+    if (amount <= 0) return false;
+    
+    this.balance += amount;
+    this.transactions.push({
+      type: 'credit',
+      amount,
+      reason,
+      timestamp: new Date()
+    });
+    
     return true;
   }
-
-  // Add purchaseUbx method
-  async purchaseUbx(userId: string, amount: number): Promise<{ success: boolean }> {
-    console.log(`User ${userId} purchased ${amount} UBX`);
-    return { success: true };
+  
+  /**
+   * Remove funds from wallet
+   */
+  debit(amount: number, reason: string = 'withdrawal'): boolean {
+    if (amount <= 0 || this.balance < amount) return false;
+    
+    this.balance -= amount;
+    this.transactions.push({
+      type: 'debit',
+      amount,
+      reason,
+      timestamp: new Date()
+    });
+    
+    return true;
+  }
+  
+  /**
+   * Get transaction history
+   */
+  getTransactionHistory(limit: number = 10): any[] {
+    return this.transactions.slice(-limit);
+  }
+  
+  /**
+   * Transfer funds to another wallet
+   */
+  transfer(recipient: UberWallet, amount: number): boolean {
+    if (amount <= 0 || this.balance < amount) return false;
+    
+    this.debit(amount, 'transfer_out');
+    recipient.credit(amount, 'transfer_in');
+    
+    return true;
   }
 }
 
-export const uberWallet = new UberWallet();
+export default UberWallet;

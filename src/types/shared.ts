@@ -1,4 +1,3 @@
-
 // Consolidated type definitions for UberEscorts ecosystem
 
 // Re-export core types with proper type annotations
@@ -198,4 +197,4 @@ export interface MetaverseAvatar {
 }
 
 // Re-export boost-related types to maintain compatibility
-export type { BoostAnalytics, BoostHistory, EnhancedBoostStatus } from './pulse-boost';
+export type { BoostAnalytics, EnhancedBoostStatus } from './pulse-boost';

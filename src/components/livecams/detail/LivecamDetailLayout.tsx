@@ -22,12 +22,13 @@ const LivecamDetailLayout: React.FC<LivecamDetailLayoutProps> = ({
   return (
     <MainLayout 
       containerClassName={containerClassName}
-      fullWidth={fullWidth}
       showNavigation={showNavigation}
       hideNavbar={hideNavbar}
       hideFooter={hideFooter}
     >
-      {children}
+      <div className={fullWidth ? 'w-full' : 'container mx-auto'}>
+        {children}
+      </div>
     </MainLayout>
   );
 };

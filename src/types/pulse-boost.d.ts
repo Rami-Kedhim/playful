@@ -1,4 +1,3 @@
-
 export interface BoostPackage {
   id: string;
   name: string;
@@ -11,10 +10,10 @@ export interface BoostPackage {
   features?: string[];
   is_featured?: boolean;
   is_active?: boolean;
-  color?: string; // Optional color property
-  badgeColor?: string;
+  color?: string; // Added color property
+  badgeColor?: string; // Added badgeColor property
   visibility_increase?: number;
-  isMostPopular?: boolean; // Added this property
+  isMostPopular?: boolean;
 }
 
 export type PulseBoost = BoostPackage;
@@ -30,11 +29,16 @@ export interface EnhancedBoostStatus extends BoostStatus {
   boostLevel?: number;
   isExpired: boolean;
   percentRemaining: number;
+  timeRemaining: string;  // Make this required to fix the issue
   durationInfo?: {
     hours: number;
     minutes: number;
     seconds: number;
   };
+  packageName?: string;
+  startedAt?: Date;
+  progress?: number;
+  boostPackage?: BoostPackage;
 }
 
 export interface BoostEligibility {
@@ -89,4 +93,15 @@ export interface BoostAnalytics {
     withoutBoost: number;
     improvement: number;
   };
+}
+
+export interface BoostHistory {
+  items: Array<{
+    id: string;
+    packageId: string;
+    startDate: Date;
+    endDate: Date;
+    price: number;
+    status: string;
+  }>;
 }

@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { EnhancedBoostStatus } from '@/types/pulse-boost';
-import { BoostPackage, PulseBoost } from '@/types/pulse-boost';
 
-// Define BoostAnalytics interface here since it's missing from ai-profile
+import { useState, useEffect } from 'react';
+import { EnhancedBoostStatus, BoostPackage, PulseBoost } from '@/types/pulse-boost';
+
+// Define BoostAnalytics interface
 interface BoostAnalytics {
   additionalViews?: number;
   engagementIncrease?: number;
@@ -20,7 +20,10 @@ export const usePulseBoost = (profileId?: string) => {
   const [pulseBoostPackages, setPulseBoostPackages] = useState<PulseBoost[]>([]);
   const [activeBoosts, setActiveBoosts] = useState<PulseBoost[]>([]);
   const [boostStatus, setBoostStatus] = useState<EnhancedBoostStatus>({
-    isActive: false
+    isActive: false,
+    isExpired: false,
+    percentRemaining: 0,
+    timeRemaining: '00:00:00'
   });
   const [boostAnalytics, setBoostAnalytics] = useState<BoostAnalytics>({
     boostHistory: []
@@ -65,11 +68,14 @@ export const usePulseBoost = (profileId?: string) => {
             badgeColor: '#7c3aed',
             features: ['5x visibility', '48-hour duration', 'Top placement', 'Homepage feature']
           }
-        ]);
+        ] as any);
         
         // Set mock active boost status
         setBoostStatus({
-          isActive: false
+          isActive: false,
+          isExpired: false,
+          percentRemaining: 0,
+          timeRemaining: '00:00:00'
         });
         
         setUserEconomy({ ubxBalance: 1250 });
@@ -94,7 +100,8 @@ export const usePulseBoost = (profileId?: string) => {
         packageId: boostPackage.id,
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
         timeRemaining: '24:00:00',
-        progress: 0,
+        isExpired: false,
+        percentRemaining: 100,
         boostPackage
       };
       setBoostStatus(updatedStatus);
@@ -113,7 +120,10 @@ export const usePulseBoost = (profileId?: string) => {
       
       // Reset boost status
       setBoostStatus({
-        isActive: false
+        isActive: false,
+        isExpired: false,
+        percentRemaining: 0,
+        timeRemaining: '00:00:00'
       });
       
       return true;

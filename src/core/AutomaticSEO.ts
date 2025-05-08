@@ -3,6 +3,13 @@
  * AutomaticSEO class for Hermes SEO system
  */
 export class AutomaticSEO {
+  private initialized: boolean = false;
+  
+  initialize(): boolean {
+    this.initialized = true;
+    return true;
+  }
+  
   generateMetaTags(content: string): { title: string; description: string; keywords: string[] } {
     // Mock implementation
     return {
@@ -31,3 +38,5 @@ export class AutomaticSEO {
 
 // Export a singleton instance
 export const automaticSEO = new AutomaticSEO();
+
+export default automaticSEO;

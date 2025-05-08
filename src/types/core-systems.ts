@@ -1,21 +1,39 @@
 
-import { OxumSystem } from '@/types/core-systems';
+// Import types without conflicting with local declarations
+import { OxumSystem as ImportedOxumSystem } from './oxum';
 
+// Core system types
 export interface SystemStatus {
   operational: boolean;
-  isActive: boolean;
-  services: {
+  latency?: number;
+  services?: {
     auth: string;
     analytics: string;
     ai: string;
     wallet: string;
     seo: string;
   };
-  queueLength: number;
-  processing: boolean;
-  uptime: number;
-  lastReboot: string;
-  modules?: Record<string, string>;
+  queueLength?: number;
+  processing?: boolean;
+  uptime?: number;
+  lastReboot?: string;
+  isActive?: boolean;
+}
+
+export interface SystemIntegrityResult {
+  isValid: boolean;
+  status: string;
+  errors: string[];
+  warnings: string[];
+  lastChecked: string;
+}
+
+export interface SystemHealthMetrics {
+  cpu: number;
+  memory: number;
+  disk: number;
+  network: number;
+  load: number;
 }
 
 export interface SessionValidationResult {
@@ -26,24 +44,40 @@ export interface SessionValidationResult {
   timestamp: string;
 }
 
-export interface SystemIntegrityResult {
-  isValid: boolean;
-  status: string;
-  errors: string[];
-  warnings: string[];
-  lastChecked: string;
-  overallStatus?: string;
-  timestamp?: string;
-  modules?: Record<string, string>;
-  recommendations?: string[];
+export interface ModerateContentParams {
+  content: string;
+  context?: string;
+  strictness?: number;
+  contentType?: string; // Adding this to fix the error
 }
 
-export interface SystemHealthMetrics {
-  cpu: number;
-  memory: number;
-  disk: number;
-  network: number;
-  load: number;
+export interface ModerateContentResult {
+  isApproved: boolean;
+  score: number;
+  reasons?: string[];
+  suggestedChanges?: string;
+}
+
+export interface GenerateContentResult {
+  content: string;
+  metadata?: Record<string, any>;
+  tokens?: number;
+}
+
+export interface SentimentAnalysisResult {
+  sentiment: 'positive' | 'negative' | 'neutral';
+  score: number;
+  entities?: Array<{
+    text: string;
+    sentiment: 'positive' | 'negative' | 'neutral';
+    score: number;
+  }>;
+}
+
+export interface LucieAISystem {
+  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
+  generateContent(prompt: string): Promise<GenerateContentResult>;
+  analyzeSentiment(text: string): Promise<SentimentAnalysisResult>;
 }
 
 export interface UberCoreSystem {
@@ -55,62 +89,15 @@ export interface UberCoreSystem {
   checkSubsystemHealth(): { name: string, status: string, health: number }[];
 }
 
-export interface LucieAISystem {
-  initialize(): Promise<boolean>;
-  getSystemStatus(): SystemStatus;
-  generateText(prompt: string): Promise<string>;
-  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
-  generateContent(prompt: string, options?: Record<string, any>): Promise<GenerateContentResult>;
-  analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult>;
-  configure(options: Record<string, any>): void;
-  generateResponse(params: GenerateContentParams): Promise<GenerateContentResult>;
-}
-
-export interface ModerateContentParams {
-  content: string;
-  userId?: string;
-  strictness?: 'low' | 'medium' | 'high';
-  type?: string;
-}
-
-export interface ModerateContentResult {
-  isSafe: boolean;
-  safe?: boolean;
-  score: number;
-  issues: string[];
-  blockedCategories: string[];
-  category: string;
-  action: string;
-}
-
-export interface GenerateContentParams {
-  prompt: string;
-  options?: Record<string, any>;
-}
-
-export interface GenerateContentResult {
-  content: string;
-  moderated?: boolean;
-  warnings: any[];
-}
-
-export interface SentimentAnalysisParams {
-  text: string;
-}
-
-export interface SentimentAnalysisResult {
-  score: number;
-  sentiment: 'positive' | 'negative' | 'neutral';
-  confidence?: number;
-}
-
-export interface OxumSystem {
-  calculateBoostScore(profileId: string): number;
-  calculateScore(profileId: string): number;
-  checkSystemStatus(): {operational: boolean};
-  getSystemStatus(): SystemStatus;
-}
-
-export interface AutomaticSEO {
-  initialize(): boolean;
+// Adding RecommendedAction interface
+export interface RecommendedAction {
+  id: string;
+  title: string;
+  description: string;
+  priority?: 'low' | 'medium' | 'high';
+  action?: string;
+  actionUrl?: string;
+  category?: string;
+  dismissible?: boolean;
+  expiresAt?: string | Date;
 }

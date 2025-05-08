@@ -3,7 +3,7 @@
  * Oxum Neural Network System
  * Advanced recommendation and matching engine
  */
-class Oxum {
+export class Oxum {
   private initialized: boolean = false;
   
   async initialize(): Promise<boolean> {
@@ -57,6 +57,40 @@ class Oxum {
   }
   
   /**
+   * Calculate score for matching
+   */
+  calculateScore(params: any): number {
+    return Math.random() * 100;
+  }
+  
+  /**
+   * Get system status
+   */
+  getSystemStatus(): { status: string } {
+    return { 
+      status: this.initialized ? 'operational' : 'offline'
+    };
+  }
+  
+  /**
+   * Check system status
+   */
+  checkSystemStatus(): { operational: boolean, latency: number } {
+    return {
+      operational: this.initialized,
+      latency: Math.floor(Math.random() * 30)
+    };
+  }
+  
+  /**
+   * Record boost transaction
+   */
+  recordBoostTransaction(userId: string, amount: number, packageId: string): boolean {
+    console.log(`Recording boost transaction for user ${userId}: ${amount} for package ${packageId}`);
+    return true;
+  }
+  
+  /**
    * Shutdown Oxum system
    */
   shutdown(): void {
@@ -68,4 +102,4 @@ class Oxum {
 // Export a singleton instance
 export const oxum = new Oxum();
 
-export default Oxum;
+export default oxum;
