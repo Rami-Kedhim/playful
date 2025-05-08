@@ -1,263 +1,326 @@
 
-import React, { useState } from 'react';
-import Layout from '@/layouts/Layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTitle } from '@/hooks/useTitle';
+import { useAuth } from '@/hooks/auth/useAuth';
+import { useToast } from '@/components/ui/use-toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Banknote, Clock, CreditCard, DollarSign, AlertCircle, ArrowDownRight, ArrowUpRight, FileText } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useWallet } from '@/contexts/WalletContext';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/AppLayout';
+import { Loader2, Plus, ArrowDownUp, CreditCard, Wallet, History, TrendingUp, ExternalLink } from 'lucide-react';
 
-// Sample transaction history data
-const sampleTransactions = [
-  { id: 't1', type: 'deposit', amount: 100, date: '2023-05-08T14:30:00Z', status: 'completed' },
-  { id: 't2', type: 'purchase', amount: -50, date: '2023-05-07T10:15:00Z', status: 'completed' },
-  { id: 't3', type: 'withdrawal', amount: -30, date: '2023-05-05T16:45:00Z', status: 'processing' },
-  { id: 't4', type: 'deposit', amount: 200, date: '2023-05-03T09:20:00Z', status: 'completed' },
-  { id: 't5', type: 'purchase', amount: -75, date: '2023-05-01T12:00:00Z', status: 'completed' },
-];
+interface Transaction {
+  id: string;
+  type: 'purchase' | 'spend' | 'receive' | 'withdraw';
+  amount: number;
+  description: string;
+  date: Date;
+  status: 'completed' | 'pending' | 'failed';
+}
 
-const WalletPage = () => {
+const WalletPage: React.FC = () => {
+  useTitle('Wallet | UberEscorts');
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
-  const { balance, addFunds, withdraw } = useWallet();
   
-  const [depositAmount, setDepositAmount] = useState('');
-  const [withdrawAmount, setWithdrawAmount] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const handleDeposit = async () => {
-    const amount = parseFloat(depositAmount);
-    if (isNaN(amount) || amount <= 0) {
+  const [balance, setBalance] = useState<number>(0);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [purchaseAmount, setPurchaseAmount] = useState<number>(100);
+  
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/auth', { replace: true });
+      return;
+    }
+    
+    // Simulate fetching wallet data
+    const fetchWalletData = async () => {
+      try {
+        setIsLoading(true);
+        // In a real app, this would be an API call to fetch the user's wallet data
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Mock data
+        setBalance(1250);
+        setTransactions([
+          {
+            id: 'tx-1',
+            type: 'purchase',
+            amount: 500,
+            description: 'UBX Token Purchase',
+            date: new Date(Date.now() - 86400000 * 2), // 2 days ago
+            status: 'completed'
+          },
+          {
+            id: 'tx-2',
+            type: 'spend',
+            amount: -50,
+            description: 'Profile Boost',
+            date: new Date(Date.now() - 86400000), // 1 day ago
+            status: 'completed'
+          },
+          {
+            id: 'tx-3',
+            type: 'receive',
+            amount: 100,
+            description: 'Creator Tip Received',
+            date: new Date(Date.now() - 43200000), // 12 hours ago
+            status: 'completed'
+          },
+          {
+            id: 'tx-4',
+            type: 'withdraw',
+            amount: -300,
+            description: 'Withdrawal to Bank Account',
+            date: new Date(Date.now() - 3600000), // 1 hour ago
+            status: 'pending'
+          }
+        ]);
+      } catch (error) {
+        console.error('Error fetching wallet data:', error);
+        toast({
+          variant: "destructive",
+          title: "Failed to load wallet data",
+          description: "Please try again later."
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchWalletData();
+  }, [isAuthenticated, navigate, toast]);
+  
+  const handlePurchaseUbx = async () => {
+    if (purchaseAmount <= 0) {
       toast({
-        title: 'Invalid amount',
-        description: 'Please enter a valid amount greater than 0',
-        variant: 'destructive',
+        variant: "destructive",
+        title: "Invalid amount",
+        description: "Please enter a positive amount."
       });
       return;
     }
-
-    setIsProcessing(true);
     
     try {
-      await addFunds(amount);
-      setDepositAmount('');
+      setIsLoading(true);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Update balance
+      setBalance(prevBalance => prevBalance + purchaseAmount);
+      
+      // Add transaction
+      const newTransaction: Transaction = {
+        id: `tx-${Date.now()}`,
+        type: 'purchase',
+        amount: purchaseAmount,
+        description: 'UBX Token Purchase',
+        date: new Date(),
+        status: 'completed'
+      };
+      
+      setTransactions(prevTransactions => [newTransaction, ...prevTransactions]);
+      
       toast({
-        title: 'Deposit successful',
-        description: `$${amount.toFixed(2)} has been added to your wallet`,
+        title: "Purchase Successful",
+        description: `You purchased ${purchaseAmount} UBX tokens.`
       });
+      
+      // Reset purchase amount
+      setPurchaseAmount(100);
     } catch (error) {
+      console.error('Error purchasing UBX tokens:', error);
       toast({
-        title: 'Deposit failed',
-        description: error instanceof Error ? error.message : 'An unexpected error occurred',
-        variant: 'destructive',
+        variant: "destructive",
+        title: "Purchase Failed",
+        description: "An error occurred while processing your purchase."
       });
     } finally {
-      setIsProcessing(false);
+      setIsLoading(false);
     }
   };
-
-  const handleWithdraw = async () => {
-    const amount = parseFloat(withdrawAmount);
-    if (isNaN(amount) || amount <= 0) {
-      toast({
-        title: 'Invalid amount',
-        description: 'Please enter a valid amount greater than 0',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (amount > balance) {
-      toast({
-        title: 'Insufficient funds',
-        description: 'You do not have enough funds to withdraw this amount',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsProcessing(true);
-    
-    try {
-      await withdraw(amount);
-      setWithdrawAmount('');
-      toast({
-        title: 'Withdrawal initiated',
-        description: `$${amount.toFixed(2)} withdrawal is being processed`,
-      });
-    } catch (error) {
-      toast({
-        title: 'Withdrawal failed',
-        description: error instanceof Error ? error.message : 'An unexpected error occurred',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
+  
+  if (isLoading && transactions.length === 0) {
+    return (
+      <AppLayout title="Wallet">
+        <div className="flex justify-center items-center h-[60vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AppLayout>
+    );
+  }
+  
   return (
-    <Layout
-      title="Wallet"
-      description="Manage your funds and transactions"
-      showBreadcrumbs
-    >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Balance Card */}
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle>Available Balance</CardTitle>
-            <CardDescription>Your current wallet balance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center py-6">
-              <DollarSign className="h-8 w-8 text-primary mr-2" />
-              <span className="text-4xl font-bold">{balance.toFixed(2)}</span>
-            </div>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <Button className="w-full flex items-center justify-center">
-                <CreditCard className="h-4 w-4 mr-2" />
-                Add Funds
-              </Button>
-              <Button variant="outline" className="w-full flex items-center justify-center">
-                <Banknote className="h-4 w-4 mr-2" />
-                Withdraw
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Actions Card */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Money Operations</CardTitle>
-            <CardDescription>Deposit or withdraw funds</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="deposit">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="deposit">Deposit</TabsTrigger>
-                <TabsTrigger value="withdraw">Withdraw</TabsTrigger>
-              </TabsList>
-              <TabsContent value="deposit" className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Amount to deposit</label>
-                  <div className="flex space-x-2">
-                    <Input 
-                      type="number"
-                      placeholder="Enter amount"
-                      value={depositAmount}
-                      onChange={(e) => setDepositAmount(e.target.value)}
-                    />
-                    <Button 
-                      onClick={handleDeposit} 
-                      disabled={isProcessing || !depositAmount}
-                    >
-                      {isProcessing ? 'Processing...' : 'Deposit'}
-                    </Button>
-                  </div>
+    <AppLayout title="Wallet" requireAuth>
+      <div className="container py-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2">
+            <Card className="mb-6">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-2xl">UBX Wallet</CardTitle>
+                <CardDescription>Manage your UBX tokens</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <div className="text-4xl font-bold mb-2">
+                  {balance.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">UBX</span>
                 </div>
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Important</AlertTitle>
-                  <AlertDescription>
-                    Deposits are typically processed within minutes but may take up to 24 hours.
-                  </AlertDescription>
-                </Alert>
-              </TabsContent>
-              <TabsContent value="withdraw" className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Amount to withdraw</label>
-                  <div className="flex space-x-2">
-                    <Input 
-                      type="number"
-                      placeholder="Enter amount"
-                      value={withdrawAmount}
-                      onChange={(e) => setWithdrawAmount(e.target.value)}
-                    />
-                    <Button 
-                      onClick={handleWithdraw} 
-                      disabled={isProcessing || !withdrawAmount || parseFloat(withdrawAmount) > balance}
-                    >
-                      {isProcessing ? 'Processing...' : 'Withdraw'}
-                    </Button>
-                  </div>
+                <p className="text-muted-foreground mb-6">Approximate value: ${(balance * 0.10).toFixed(2)} USD</p>
+                
+                <div className="flex flex-wrap gap-3">
+                  <Button className="flex gap-2">
+                    <Plus size={16} />
+                    Add Funds
+                  </Button>
+                  <Button variant="outline" className="flex gap-2">
+                    <ArrowDownUp size={16} />
+                    Transfer
+                  </Button>
+                  <Button variant="outline" className="flex gap-2">
+                    <ExternalLink size={16} />
+                    Withdraw
+                  </Button>
                 </div>
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Important</AlertTitle>
-                  <AlertDescription>
-                    Withdrawals are processed within 1-3 business days depending on your payment method.
-                  </AlertDescription>
-                </Alert>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle>Transaction History</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {transactions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No transactions yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {transactions.map(transaction => (
+                      <div key={transaction.id} className="flex justify-between items-center border-b pb-3">
+                        <div className="flex gap-3">
+                          {transaction.type === 'purchase' && <CreditCard className="h-5 w-5 text-blue-500" />}
+                          {transaction.type === 'spend' && <Wallet className="h-5 w-5 text-red-500" />}
+                          {transaction.type === 'receive' && <TrendingUp className="h-5 w-5 text-green-500" />}
+                          {transaction.type === 'withdraw' && <ArrowDownUp className="h-5 w-5 text-amber-500" />}
+                          <div>
+                            <p className="font-medium">{transaction.description}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {transaction.date.toLocaleDateString()} {transaction.date.toLocaleTimeString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`font-semibold ${transaction.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {transaction.amount >= 0 ? '+' : ''}{transaction.amount} UBX
+                          </p>
+                          <p className="text-xs">
+                            {transaction.status === 'completed' && <span className="text-green-600">Completed</span>}
+                            {transaction.status === 'pending' && <span className="text-amber-600">Pending</span>}
+                            {transaction.status === 'failed' && <span className="text-red-600">Failed</span>}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Purchase UBX Tokens</CardTitle>
+                <CardDescription>Add funds to your wallet</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="ubx">
+                  <TabsList className="mb-4 w-full">
+                    <TabsTrigger value="ubx" className="flex-1">Buy UBX</TabsTrigger>
+                    <TabsTrigger value="packages" className="flex-1">Packages</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="ubx">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="amount">Amount (UBX)</Label>
+                        <Input 
+                          id="amount" 
+                          type="number" 
+                          value={purchaseAmount} 
+                          onChange={(e) => setPurchaseAmount(Number(e.target.value))}
+                          min="1"
+                        />
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Cost: ${(purchaseAmount * 0.10).toFixed(2)} USD
+                      </p>
+                      <Button onClick={handlePurchaseUbx} className="w-full">
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          <>Purchase</>
+                        )}
+                      </Button>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="packages">
+                    <div className="space-y-3">
+                      <div className="border rounded-lg p-3 cursor-pointer hover:bg-muted/50">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">Starter Package</p>
+                            <p className="text-sm text-muted-foreground">100 UBX Tokens</p>
+                          </div>
+                          <p className="font-medium">$9.99</p>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-lg p-3 cursor-pointer hover:bg-muted/50">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">Standard Package</p>
+                            <p className="text-sm text-muted-foreground">500 UBX Tokens</p>
+                          </div>
+                          <p className="font-medium">$45.99</p>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-lg p-3 cursor-pointer hover:bg-muted/50 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 bg-primary text-white text-xs px-2 py-1">
+                          BEST VALUE
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">Premium Package</p>
+                            <p className="text-sm text-muted-foreground">1200 UBX Tokens</p>
+                          </div>
+                          <p className="font-medium">$99.99</p>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+              <CardFooter className="flex-col">
+                <p className="text-xs text-muted-foreground">
+                  UBX tokens are used for all transactions within the UberEscorts platform, including
+                  tipping creators, booking services, and purchasing premium content.
+                </p>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
       </div>
-
-      {/* Transaction History */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Transaction History</CardTitle>
-          <CardDescription>Recent transactions in your wallet</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {sampleTransactions.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>No transactions yet</p>
-              <p className="text-sm">Your transaction history will appear here</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {sampleTransactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className={`p-2 rounded-full ${transaction.amount > 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                      {transaction.amount > 0 ? <ArrowDownRight className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
-                    </div>
-                    <div>
-                      <p className="font-medium capitalize">{transaction.type}</p>
-                      <p className="text-sm text-muted-foreground">{formatDate(transaction.date)}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className={`font-medium ${transaction.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {transaction.amount > 0 ? '+' : ''}{transaction.amount.toFixed(2)}
-                    </p>
-                    <div className="flex items-center text-xs">
-                      <Clock className="h-3 w-3 mr-1" />
-                      <span className={`
-                        ${transaction.status === 'completed' ? 'text-green-600' : ''}
-                        ${transaction.status === 'processing' ? 'text-amber-600' : ''}
-                        ${transaction.status === 'failed' ? 'text-red-600' : ''}
-                        capitalize
-                      `}>
-                        {transaction.status}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </Layout>
+    </AppLayout>
   );
 };
 

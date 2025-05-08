@@ -1,189 +1,202 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-// Fix imports to use consistent casing with the actual files
-import { authService } from '@/services/authService';
-import { userService } from '@/services/userService';
+import { useAuth } from '@/hooks/auth/useAuth';
+import { supabase } from '@/lib/supabase';
+import { uberCore } from '@/core/UberCore';
+import { User } from '@/types/user';
 
-// Define the context type
-interface UberEcosystemContextType {
-  isInitialized: boolean;
-  isAuthenticated: boolean;
-  user: any | null;
-  loading: boolean;
-  error: string | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  logout: () => Promise<void>;
-  register: (userData: any) => Promise<boolean>;
-  updateUser: (userData: any) => Promise<boolean>;
+interface EcosystemState {
+  initialized: boolean;
+  subsystems: {
+    core: boolean;
+    escorts: boolean;
+    creators: boolean;
+    livecams: boolean;
+    wallet: boolean;
+    verification: boolean;
+    ai: boolean;
+  };
+  healthStatus: {
+    overall: number;
+    systems: {
+      [key: string]: number;
+    };
+  };
+  config: {
+    features: {
+      boostEnabled: boolean;
+      aiAssistantEnabled: boolean;
+      metaverseEnabled: boolean;
+      liveStreamingEnabled: boolean;
+    };
+    serviceTypes: string[];
+  };
 }
 
-// Create the context with default values
-const UberEcosystemContext = createContext<UberEcosystemContextType>({
-  isInitialized: false,
-  isAuthenticated: false,
-  user: null,
-  loading: true,
-  error: null,
-  login: async () => false,
-  logout: async () => {},
-  register: async () => false,
-  updateUser: async () => false,
-});
+interface UberEcosystemContextType {
+  state: EcosystemState;
+  user: User | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+  initializeSubsystem: (name: string) => Promise<boolean>;
+  getSystemHealth: () => Promise<{overall: number, systems: {[key: string]: number}}>;
+  refreshEcosystem: () => Promise<void>;
+  toggleFeature: (featureName: string, enabled: boolean) => void;
+}
 
-// Provider component
+const defaultState: EcosystemState = {
+  initialized: false,
+  subsystems: {
+    core: false,
+    escorts: false,
+    creators: false, 
+    livecams: false,
+    wallet: false,
+    verification: false,
+    ai: false
+  },
+  healthStatus: {
+    overall: 0,
+    systems: {}
+  },
+  config: {
+    features: {
+      boostEnabled: true,
+      aiAssistantEnabled: true,
+      metaverseEnabled: false,
+      liveStreamingEnabled: true
+    },
+    serviceTypes: ['in-person', 'virtual', 'both']
+  }
+};
+
+const UberEcosystemContext = createContext<UberEcosystemContextType | undefined>(undefined);
+
 export const UberEcosystemProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Initialize the ecosystem
+  const { user, isAuthenticated, loading } = useAuth();
+  const [state, setState] = useState<EcosystemState>(defaultState);
+  
+  // Initialize core system on mount
   useEffect(() => {
-    const initializeEcosystem = async () => {
+    const initializeCore = async () => {
       try {
-        setLoading(true);
+        const success = await uberCore.initialize();
         
-        // Check for an existing user token
-        const token = localStorage.getItem('ubx_auth_token'); 
-        
-        if (token && await authService.validateToken(token)) {
-          // Get current user data
-          const currentUser = await authService.getCurrentUser();
-          if (currentUser) {
-            setUser(currentUser);
-            setIsAuthenticated(true);
+        setState(prev => ({
+          ...prev,
+          initialized: success,
+          subsystems: {
+            ...prev.subsystems,
+            core: success
           }
-        }
+        }));
         
-        setIsInitialized(true);
-        setError(null);
-      } catch (err) {
-        console.error('Failed to initialize UberEcosystem:', err);
-        setError('Failed to initialize the application');
-      } finally {
-        setLoading(false);
+        if (success) {
+          // Get initial health status
+          const healthStatus = await getSystemHealth();
+          setState(prev => ({
+            ...prev,
+            healthStatus
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to initialize UberEcosystem core:', error);
       }
     };
     
-    initializeEcosystem();
+    initializeCore();
+    
+    // Cleanup on unmount
+    return () => {
+      uberCore.shutdown();
+    };
   }, []);
+  
+  // Initialize auth integration when user changes
+  useEffect(() => {
+    if (user && !loading) {
+      // Track user for analytics
+      console.log('User authenticated in ecosystem context:', user.id);
+    }
+  }, [user, loading]);
 
-  // Login function
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const initializeSubsystem = async (name: string): Promise<boolean> => {
     try {
-      setLoading(true);
-      setError(null);
+      console.log(`Initializing subsystem: ${name}`);
+      // In a real implementation, this would call the specific subsystem's initialize method
+      const success = true;
       
-      // Call the auth service login
-      const result = await authService.login(email, password);
+      setState(prev => ({
+        ...prev,
+        subsystems: {
+          ...prev.subsystems,
+          [name]: success
+        }
+      }));
       
-      if (result.success) {
-        // Store the token
-        localStorage.setItem('ubx_auth_token', 'mock_token_' + Date.now());
-        setUser(result.user);
-        setIsAuthenticated(true);
-        return true;
-      } else {
-        setError(result.message || 'Invalid credentials');
-        return false;
-      }
-    } catch (err: any) {
-      console.error('Login error:', err);
-      setError('An unexpected error occurred during login');
+      return success;
+    } catch (error) {
+      console.error(`Failed to initialize ${name} subsystem:`, error);
       return false;
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Logout function
-  const logout = async (): Promise<void> => {
+  const getSystemHealth = async (): Promise<{overall: number, systems: {[key: string]: number}}> => {
     try {
-      setLoading(true);
-      // Call auth service logout
-      await authService.logout();
-      localStorage.removeItem('ubx_auth_token');
-      setUser(null);
-      setIsAuthenticated(false);
-      setError(null);
-    } catch (err) {
-      console.error('Logout error:', err);
-      setError('An error occurred during logout');
-    } finally {
-      setLoading(false);
+      // This would call the core system's health check in a real implementation
+      const health = {
+        overall: 95,
+        systems: {
+          escorts: 97,
+          creators: 96,
+          livecams: 95,
+          wallet: 98,
+          verification: 99,
+          ai: 90
+        }
+      };
+      
+      return health;
+    } catch (error) {
+      console.error('Failed to get system health:', error);
+      return { overall: 0, systems: {} };
     }
   };
-
-  // Register function
-  const register = async (userData: any): Promise<boolean> => {
+  
+  const refreshEcosystem = async (): Promise<void> => {
     try {
-      setLoading(true);
-      setError(null);
-      
-      // Call auth service register
-      const result = await authService.register(userData);
-      
-      if (result.success) {
-        // Store token
-        localStorage.setItem('ubx_auth_token', 'mock_token_' + Date.now());
-        setUser(result.user);
-        setIsAuthenticated(true);
-        return true;
-      } else {
-        setError(result.message || 'Failed to register');
-        return false;
-      }
-    } catch (err) {
-      console.error('Registration error:', err);
-      setError('An unexpected error occurred during registration');
-      return false;
-    } finally {
-      setLoading(false);
+      const healthStatus = await getSystemHealth();
+      setState(prev => ({
+        ...prev,
+        healthStatus
+      }));
+    } catch (error) {
+      console.error('Failed to refresh ecosystem:', error);
     }
   };
-
-  // Update user function
-  const updateUser = async (userData: any): Promise<boolean> => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      if (!user || !user.id) {
-        setError('No user is currently authenticated');
-        return false;
+  
+  const toggleFeature = (featureName: string, enabled: boolean): void => {
+    setState(prev => ({
+      ...prev,
+      config: {
+        ...prev.config,
+        features: {
+          ...prev.config.features,
+          [featureName]: enabled
+        }
       }
-      
-      // Call user service updateUser
-      const result = await userService.updateUser(user.id, userData);
-      
-      if (result.success) {
-        setUser({ ...user, ...userData });
-        return true;
-      } else {
-        setError('Failed to update user');
-        return false;
-      }
-    } catch (err) {
-      console.error('Update user error:', err);
-      setError('An unexpected error occurred while updating user');
-      return false;
-    } finally {
-      setLoading(false);
-    }
+    }));
   };
 
-  // Context value
   const value = {
-    isInitialized,
-    isAuthenticated,
+    state,
     user,
+    isAuthenticated,
     loading,
-    error,
-    login,
-    logout,
-    register,
-    updateUser,
+    initializeSubsystem,
+    getSystemHealth,
+    refreshEcosystem,
+    toggleFeature
   };
 
   return (
@@ -193,7 +206,12 @@ export const UberEcosystemProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-// Custom hook to use the context
-export const useUberEcosystem = () => useContext(UberEcosystemContext);
+export const useUberEcosystem = (): UberEcosystemContextType => {
+  const context = useContext(UberEcosystemContext);
+  if (context === undefined) {
+    throw new Error('useUberEcosystem must be used within a UberEcosystemProvider');
+  }
+  return context;
+};
 
 export default UberEcosystemContext;

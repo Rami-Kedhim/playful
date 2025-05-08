@@ -1,209 +1,229 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { 
-  Menu, 
-  Search, 
-  User, 
-  Heart, 
-  MessageSquare, 
-  Wallet,
-  Settings,
-  Video,
-  Play,
-  ImageIcon
-} from 'lucide-react';
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetTrigger 
-} from '@/components/ui/sheet';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Input } from '@/components/ui/input';
-import { useAuth } from '@/hooks/auth';
+import { Link, useLocation } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Menu, X, Bell, Search, User, LogIn, Wallet, Settings, LogOut, CreditCard, MessageCircle, Heart, Compass } from 'lucide-react';
+import { useAuth } from '@/hooks/auth/useAuth';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { AppPaths } from '@/routes/routeConfig';
 
-const Navigation = () => {
-  const { isAuthenticated, user, logout } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
+const Navigation: React.FC = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, isAuthenticated, signOut } = useAuth();
+  const location = useLocation();
+  
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const closeMenu = () => setIsMenuOpen(false);
+  
+  const handleSignOut = async () => {
+    await signOut();
+  };
+  
+  // Navigation items
+  const navItems = [
+    { path: AppPaths.HOME, label: 'Home' },
+    { path: AppPaths.ESCORTS, label: 'Escorts' },
+    { path: AppPaths.CREATORS, label: 'Creators' },
+    { path: AppPaths.LIVECAMS, label: 'Livecams' },
+  ];
   
   return (
-    <header className="border-b">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
-          {/* Mobile Menu */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu />
+    <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+      <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2">
+          <span className="font-bold text-xl">UberEscorts</span>
+        </Link>
+        
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center space-x-1">
+          {navItems.map(item => (
+            <Button 
+              key={item.path}
+              variant={location.pathname === item.path ? "secondary" : "ghost"} 
+              asChild
+            >
+              <Link to={item.path}>{item.label}</Link>
+            </Button>
+          ))}
+        </div>
+        
+        {/* Desktop Right Navigation */}
+        <div className="hidden md:flex items-center space-x-1">
+          <Button variant="ghost" size="icon">
+            <Search className="h-5 w-5" />
+          </Button>
+          {isAuthenticated ? (
+            <>
+              <Button variant="ghost" size="icon" asChild>
+                <Link to="/messages">
+                  <Bell className="h-5 w-5" />
+                </Link>
               </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-72">
-              <nav className="flex flex-col gap-4 mt-8">
-                <Link to="/" className="px-4 py-2 rounded-md hover:bg-accent">Home</Link>
-                <Link to="/escorts" className="px-4 py-2 rounded-md hover:bg-accent">Escorts</Link>
-                <Link to="/creators" className="px-4 py-2 rounded-md hover:bg-accent">Creators</Link>
-                <Link to="/livecams" className="px-4 py-2 rounded-md hover:bg-accent">Live Cams</Link>
-                <Link to="/media-generation" className="px-4 py-2 rounded-md hover:bg-accent">AI Media Generator</Link>
-                {isAuthenticated && (
-                  <>
-                    <Link to="/profile" className="px-4 py-2 rounded-md hover:bg-accent">My Profile</Link>
-                    <Link to="/messages" className="px-4 py-2 rounded-md hover:bg-accent">Messages</Link>
-                    <Link to="/favorites" className="px-4 py-2 rounded-md hover:bg-accent">Favorites</Link>
-                    <Link to="/wallet" className="px-4 py-2 rounded-md hover:bg-accent">Wallet</Link>
-                    <Link to="/settings" className="px-4 py-2 rounded-md hover:bg-accent">Settings</Link>
-                    <Button 
-                      variant="destructive" 
-                      onClick={logout} 
-                      className="mt-4"
-                    >
-                      Logout
-                    </Button>
-                  </>
-                )}
-              </nav>
-            </SheetContent>
-          </Sheet>
-
-          {/* Logo */}
-          <Link to="/" className="text-2xl font-bold">
-            UberEscorts
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
-            <Link to="/escorts" className="text-sm font-medium hover:text-primary">Escorts</Link>
-            <Link to="/creators" className="text-sm font-medium hover:text-primary">Creators</Link>
-            <Link to="/livecams" className="text-sm font-medium hover:text-primary">Live Cams</Link>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">AI Tools</span>
-                  <ImageIcon className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <Link to="/media-generation" className="flex items-center">
-                    <ImageIcon className="h-4 w-4 mr-2" />
-                    AI Media Generator
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link to="/nsfw-generator" className="flex items-center">
-                    <ImageIcon className="h-4 w-4 mr-2" />
-                    NSFW Generator
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link to="/lucie" className="flex items-center">
-                    <ImageIcon className="h-4 w-4 mr-2" />
-                    Lucie AI
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </nav>
-
-          {/* Search Bar */}
-          <div className="hidden md:block max-w-md w-full mx-4">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search..."
-                className="w-full pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user?.avatar || user?.photoUrl} alt={user?.name || 'User'} />
+                      <AvatarFallback>{user?.name?.[0] || user?.email?.[0] || 'U'}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{user?.name || user?.email}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user?.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem asChild>
+                      <Link to={AppPaths.USER_PROFILE} className="cursor-pointer w-full">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profile</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={AppPaths.WALLET} className="cursor-pointer w-full">
+                        <Wallet className="mr-2 h-4 w-4" />
+                        <span>Wallet</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={AppPaths.FAVORITES} className="cursor-pointer w-full">
+                        <Heart className="mr-2 h-4 w-4" />
+                        <span>Favorites</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={AppPaths.MESSAGES} className="cursor-pointer w-full">
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        <span>Messages</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to={AppPaths.BOOKINGS} className="cursor-pointer w-full">
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      <span>Bookings</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={AppPaths.SETTINGS} className="cursor-pointer w-full">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : (
+            <Button asChild>
+              <Link to="/auth">
+                <LogIn className="h-4 w-4 mr-2" />
+                Sign In
+              </Link>
+            </Button>
+          )}
+        </div>
+        
+        {/* Mobile Menu Button */}
+        <div className="md:hidden flex items-center">
+          <Button variant="ghost" size="icon" onClick={toggleMenu}>
+            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </Button>
+        </div>
+      </nav>
+      
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden px-4 py-2 space-y-4 bg-background border-t">
+          {/* Mobile Navigation Items */}
+          <div className="flex flex-col space-y-2">
+            {navItems.map(item => (
+              <Button 
+                key={item.path}
+                variant={location.pathname === item.path ? "secondary" : "ghost"} 
+                className="justify-start"
+                asChild
+                onClick={closeMenu}
+              >
+                <Link to={item.path}>{item.label}</Link>
+              </Button>
+            ))}
           </div>
-
-          {/* User Actions */}
-          <div className="flex items-center gap-2">
+          
+          {/* Mobile Authentication */}
+          <div className="flex flex-col space-y-2 pt-2 border-t">
             {isAuthenticated ? (
               <>
-                <Button variant="ghost" size="icon" asChild className="hidden md:flex">
-                  <Link to="/messages">
-                    <MessageSquare className="h-5 w-5" />
+                <div className="flex items-center p-2">
+                  <Avatar className="h-10 w-10 mr-3">
+                    <AvatarImage src={user?.avatar || user?.photoUrl} alt={user?.name || 'User'} />
+                    <AvatarFallback>{user?.name?.[0] || user?.email?.[0] || 'U'}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{user?.name || 'User'}</p>
+                    <p className="text-sm text-muted-foreground">{user?.email}</p>
+                  </div>
+                </div>
+                
+                <Button variant="ghost" className="justify-start" asChild onClick={closeMenu}>
+                  <Link to={AppPaths.USER_PROFILE}>
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
                   </Link>
                 </Button>
                 
-                <Button variant="ghost" size="icon" asChild className="hidden md:flex">
-                  <Link to="/favorites">
-                    <Heart className="h-5 w-5" />
+                <Button variant="ghost" className="justify-start" asChild onClick={closeMenu}>
+                  <Link to={AppPaths.WALLET}>
+                    <Wallet className="mr-2 h-4 w-4" />
+                    Wallet
                   </Link>
                 </Button>
                 
-                <Button variant="ghost" size="icon" asChild className="hidden md:flex">
-                  <Link to="/wallet">
-                    <Wallet className="h-5 w-5" />
+                <Button variant="ghost" className="justify-start" asChild onClick={closeMenu}>
+                  <Link to={AppPaths.SETTINGS}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
                   </Link>
                 </Button>
                 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Open user menu</span>
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={user?.avatar || ''} alt="User avatar" />
-                        <AvatarFallback>
-                          <User className="h-4 w-4" />
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <Link to="/profile" className="flex items-center">
-                        <User className="h-4 w-4 mr-2" />
-                        Profile
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link to="/settings" className="flex items-center">
-                        <Settings className="h-4 w-4 mr-2" />
-                        Settings
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout}>
-                      Logout
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button variant="ghost" className="justify-start" onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log Out
+                </Button>
               </>
             ) : (
-              <Button asChild>
-                <Link to="/auth">Sign In</Link>
+              <Button className="w-full" asChild onClick={closeMenu}>
+                <Link to="/auth">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Sign In
+                </Link>
               </Button>
             )}
           </div>
         </div>
-      </div>
-      
-      {/* Mobile Search */}
-      <div className="md:hidden px-4 pb-3">
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search..."
-            className="w-full pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-      </div>
+      )}
     </header>
   );
 };
