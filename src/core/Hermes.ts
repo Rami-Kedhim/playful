@@ -1,5 +1,5 @@
 
-import { LucieAISystem } from '@/types/core-systems';
+import { LucieAISystem, SystemStatus } from '@/types/core-systems';
 import { AutomaticSEO } from './AutomaticSEO';
 import { UberWallet } from './UberWallet';
 import { UberCore } from './UberCore';
@@ -25,6 +25,10 @@ class Hermes {
     this.core = config.core;
     this.initialized = true;
     return true;
+  }
+  
+  initialize(config: HermesConfig) {
+    return this.init(config);
   }
   
   isInitialized(): boolean {
@@ -53,15 +57,46 @@ class Hermes {
       timestamp: new Date().toISOString()
     };
   }
-  
-  initialize(config: any) {
+
+  calculateVisibilityScore(profileId: string): number {
     // Mock implementation
-    console.log('Initializing Hermes with config:', config);
-    this.initialized = true;
+    return Math.floor(Math.random() * 100) + 1;
+  }
+  
+  recommendNextAction(userId: string): any {
+    // Mock implementation
+    return {
+      id: 'action-' + Date.now(),
+      type: 'boost',
+      title: 'Boost your profile',
+      description: 'Increase your visibility by boosting your profile',
+      priority: 5,
+      action: '/boost',
+      actionLabel: 'Boost Now'
+    };
+  }
+
+  trackEvent(eventName: string, data?: any) {
+    console.log(`Hermes tracking event: ${eventName}`, data);
+    return true;
+  }
+
+  configure(options: Record<string, any>) {
+    console.log('Configuring Hermes with options:', options);
+    return true;
+  }
+
+  getSystemStatus(): { status: string } {
+    return {
+      status: 'operational'
+    };
+  }
+
+  connect(options: { system: string, connectionId: string, metadata: any, userId: string }) {
+    console.log(`Connecting ${options.system} with ID ${options.connectionId}`);
     return true;
   }
 }
 
 export const hermes = new Hermes();
-
 export default hermes;

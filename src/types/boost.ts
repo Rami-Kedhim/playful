@@ -1,72 +1,52 @@
 
-// User role types
-export type UserRole = 'USER' | 'ADMIN' | 'MODERATOR' | 'ESCORT' | 'CLIENT';
-
-export const UserRoleEnum = {
-  USER: 'USER' as UserRole,
-  ADMIN: 'ADMIN' as UserRole,
-  MODERATOR: 'MODERATOR' as UserRole,
-  ESCORT: 'ESCORT' as UserRole,
-  CLIENT: 'CLIENT' as UserRole
-};
-
-// Define the PulseBoost type
-export interface PulseBoost {
-  id: string;
-  name: string;
-  description: string;
-  duration: string;
-  durationMinutes?: number;
-  price: number;
-  price_ubx?: number;
-  visibility?: string;
-  visibility_increase?: number;
-  features?: string[];
-  color?: string;
-  badgeColor?: string;
-  boost_power?: number;
-  boostMultiplier?: number;
-}
-
-// Define types for the Boost Package and related operations
 export interface BoostPackage {
   id: string;
   name: string;
   description: string;
   price: number;
-  price_ubx?: number;
+  price_ubx: number;
+  durationMinutes: number;
   duration: string;
-  durationMinutes?: number;
-  features?: string[];
-  visibility?: string;
-  visibility_increase?: number;
-  boost_power?: number;
+  features: string[];
+  visibility: string;
+  visibility_increase: number;
   color?: string;
   badgeColor?: string;
+  boost_power?: number;
   boostMultiplier?: number;
-  isMostPopular?: boolean;
-  isRecommended?: boolean;
   isPopular?: boolean;
+  isMostPopular?: boolean;
 }
 
-export interface BoostPurchaseRequest {
-  profileId: string;
-  packageId: string;
+export interface BoostStatus {
+  isActive: boolean;
+  remainingTime: string;
+  packageId?: string;
+  packageName?: string;
+  startedAt?: Date;
+  expiresAt?: Date;
+  progress?: number;
+  activeBoostId?: string;
+  boostPackage?: BoostPackage;
+  // For compatibility with different component usages
+  startTime?: Date;
+  endTime?: Date;
+  timeRemaining?: string;
 }
 
-export interface BoostPurchaseResult {
-  success: boolean;
-  boostId?: string;
-  error?: string | null;
-  message?: string;
-  transactionId?: string;
+export interface BoostEligibility {
+  isEligible: boolean;
+  reasons?: string[];
+  nextEligibleTime?: string;
 }
 
-export interface BoostAnalyticsItem {
-  value: number;
-  change?: number;
-  withBoost?: number;
-  today?: number;
+export interface HermesStatus {
+  position: number;
+  activeUsers: number;
+  estimatedVisibility: number;
+  lastUpdateTime: string;
+  boostScore: number;
+  effectivenessScore: number;
 }
 
 export interface BoostAnalytics {
@@ -77,112 +57,40 @@ export interface BoostAnalytics {
     date: Date;
     score: number;
   }>;
-  additionalViews?: number;
-  engagementIncrease?: number;
-  rankingPosition?: number;
-  views?: BoostAnalyticsItem;
-  impressions?: BoostAnalyticsItem;
-  interactions?: BoostAnalyticsItem;
-}
-
-export interface BoostHistory {
-  items: Array<{
-    id: string;
-    packageId: string;
-    startDate: Date;
-    endDate: Date;
-    price: number;
-    status: string;
-  }>;
-  userId?: string;
-  startTime?: Date;
-  endTime?: Date;
-  boostType?: string;
-  price?: number;
-  status?: string;
-}
-
-export interface BoostStatus {
-  isActive: boolean;
-  packageId?: string;
-  expiresAt?: Date;
-  startedAt?: Date;
-  timeRemaining?: string;
-  remainingTime: string; // Make this required
-  packageName?: string;
-  boostPackage?: BoostPackage; // Add this property
-  progress?: number;
-  startTime?: Date;
-  endTime?: Date;
-  activeBoostId?: string;
-  boostMultiplier?: number;
-}
-
-export interface BoostEligibility {
-  isEligible: boolean;
-  eligible?: boolean; // For backward compatibility
-  reasons?: string[];
-  nextEligibleTime?: string;
-  remainingBoosts?: number;
-  maxBoostsPerDay?: number;
-}
-
-export interface HermesStatus {
-  position: number;
-  activeUsers: number;
-  estimatedVisibility: number;
-  lastUpdateTime: string;
-  boostScore: number; // Make this required
-  effectivenessScore: number; // Make this required
-  isActive?: boolean;
-}
-
-export interface EnhancedBoostStatus {
-  isActive: boolean;
-  packageId?: string;
-  packageName?: string;
-  expiresAt?: Date;
-  startedAt?: Date;
-  timeRemaining?: string;
-  boostPackage?: BoostPackage;
-  progress?: number;
-  boostMultiplier?: number;
-  remainingTime?: string;
-}
-
-export interface BoostContextType {
-  boostStatus: BoostStatus;
-  eligibility: BoostEligibility;
-  packages: BoostPackage[];
-  boostPackages?: BoostPackage[];
-  loading: boolean;
-  error: string | null;
-  boostProfile: (profileId: string, packageId: string) => Promise<boolean>;
-  cancelBoost: () => Promise<boolean>;
-  getBoostAnalytics: () => Promise<any>;
-  fetchBoostPackages: () => Promise<BoostPackage[]>;
-  dailyBoostUsage?: number;
-  dailyBoostLimit?: number;
-  formatBoostDuration?: (duration: string) => string;
-  adaptGetBoostPrice?: (fn?: (pkg: BoostPackage) => number) => number;
-  hermesStatus?: HermesStatus;
+  views?: number;
+  impressions?: {
+    value: number;
+    change?: number;
+  };
+  interactions?: {
+    value: number;
+    change?: number;
+  };
 }
 
 export interface BoostDialogTabsProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  loading: boolean;
-  boostStatus: BoostStatus;
+  packages: BoostPackage[];
+  selected: string;
+  onSelect: (id: string) => void;
+  onBoost: () => void;
+  isLoading: boolean;
   eligibility: BoostEligibility;
-  boostPackages: BoostPackage[];
-  selectedPackage: string;
-  setSelectedPackage: (id: string) => void;
-  handleBoost: () => Promise<boolean> | void;
-  handleCancel: () => Promise<boolean>;
-  dailyBoostUsage: number;
-  dailyBoostLimit: number;
-  handleDialogClose: () => void;
-  getBoostPrice?: () => number;
-  hermesStatus: HermesStatus;
-  formatBoostDuration?: (duration: string) => string;
+  boostStatus: BoostStatus;
+}
+
+export interface BoostAnalyticsItem {
+  label: string;
+  value: number;
+  change: number;
+  icon?: React.ReactNode;
+  formatter?: (value: number) => string;
+}
+
+export interface PulseBoost {
+  id: string;
+  profileId: string;
+  packageId: string;
+  startTime: Date;
+  endTime: Date;
+  status: 'active' | 'expired' | 'cancelled';
 }

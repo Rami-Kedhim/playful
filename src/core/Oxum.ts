@@ -43,8 +43,7 @@ export class Oxum implements OxumSystem {
     return v;
   }
 
-  checkSystemStatus(): SystemStatus {
-    // Mock implementation
+  getSystemStatus(): SystemStatus {
     return {
       operational: true,
       isActive: true,
@@ -60,6 +59,22 @@ export class Oxum implements OxumSystem {
       uptime: 100,
       lastReboot: new Date().toISOString()
     };
+  }
+
+  checkSystemHealth(): { name: string, status: string, health: number }[] {
+    return [
+      { name: 'core', status: 'active', health: 100 },
+      { name: 'ai', status: 'active', health: 95 },
+      { name: 'analytics', status: 'active', health: 90 },
+    ];
+  }
+
+  checkSubsystemHealth(): { name: string, status: string, health: number }[] {
+    return this.checkSystemHealth();
+  }
+
+  configure(options: Record<string, any>): void {
+    console.log('Configuring Oxum with options:', options);
   }
 }
 

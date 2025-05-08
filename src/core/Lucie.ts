@@ -4,7 +4,10 @@ import {
   ModerateContentParams,
   ModerateContentResult,
   GenerateContentResult,
-  SentimentAnalysisResult
+  SentimentAnalysisResult,
+  SentimentAnalysisParams,
+  SystemStatus,
+  GenerateContentParams
 } from '@/types/core-systems';
 
 /**
@@ -26,7 +29,7 @@ export class LucieAI implements LucieAISystem {
   }
   
   async moderateContent(params: ModerateContentParams): Promise<ModerateContentResult> {
-    console.log(`Moderating content: ${params.contentType}`);
+    console.log(`Moderating content: ${params.type || 'text'}`);
     // In a real system, would analyze content for policy violations
     
     return {
@@ -34,7 +37,9 @@ export class LucieAI implements LucieAISystem {
       safe: true, // For backward compatibility
       score: 0.92,
       issues: [],
-      blockedCategories: []
+      blockedCategories: [],
+      category: 'general',
+      action: 'allow'
     };
   }
   
@@ -47,14 +52,12 @@ export class LucieAI implements LucieAISystem {
     return {
       content,
       moderated: false, // For backward compatibility
-      originalLength: content.length,
-      moderatedLength: content.length,
       warnings: []
     };
   }
   
-  async analyzeSentiment(text: string): Promise<SentimentAnalysisResult> {
-    console.log(`Analyzing sentiment: ${text}`);
+  async analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult> {
+    console.log(`Analyzing sentiment: ${params.text}`);
     // In a real system, would use NLP to analyze sentiment
     
     return {
@@ -64,14 +67,21 @@ export class LucieAI implements LucieAISystem {
     };
   }
   
-  getSystemStatus(): { operational: boolean; modules: Record<string, string> } {
+  getSystemStatus(): SystemStatus {
     return {
       operational: this.operational,
-      modules: {
-        textGeneration: 'operational',
-        moderation: 'operational',
-        sentiment: 'operational'
-      }
+      isActive: true,
+      services: {
+        auth: 'active',
+        analytics: 'active',
+        ai: 'active',
+        wallet: 'active',
+        seo: 'active'
+      },
+      queueLength: 0,
+      processing: false,
+      uptime: 100,
+      lastReboot: new Date().toISOString()
     };
   }
   
@@ -80,10 +90,13 @@ export class LucieAI implements LucieAISystem {
     // Apply configuration options
   }
   
-  // Add the missing method required by the interface
-  async generateResponse(input: string): Promise<string> {
-    console.log(`Generating response for: ${input}`);
-    return `AI response to: ${input}`;
+  // Implementation for the required method
+  async generateResponse(params: GenerateContentParams): Promise<GenerateContentResult> {
+    console.log(`Generating response for: ${params.prompt}`);
+    return {
+      content: `AI response to: ${params.prompt}`,
+      warnings: []
+    };
   }
 }
 

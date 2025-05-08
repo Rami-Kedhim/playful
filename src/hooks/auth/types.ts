@@ -1,30 +1,46 @@
+import { User, UserProfile } from '@/types/user';
+import { Session } from '@supabase/supabase-js';
 
-import { User } from '@/types/user';
-import { UserProfile } from '@/types/auth';
+export interface AuthUser extends User {}
+
+export interface AuthResult {
+  success: boolean;
+  user?: AuthUser;
+  session?: Session;
+  error?: string;
+}
 
 export interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   profile: UserProfile | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
   loading: boolean;
+  isLoading: boolean;
   error: string | null;
+  isAuthenticated: boolean;
   initialized: boolean;
-  login: (email: string, password: string) => Promise<any>;
-  logout: () => Promise<void>;
-  signIn: (email: string, password: string) => Promise<any>;
-  signOut: () => Promise<void>;
-  register: (email: string, password: string, username?: string) => Promise<any>;
-  checkRole: (role: string) => boolean;
-  updateUserProfile: (data: any) => Promise<any>;
-  updateUser: (data: any) => Promise<any>;
-  updateProfile: (data: any) => Promise<any>;
-  loadUserProfile: () => Promise<any>;
+  
+  // Authentication methods
+  login: (email: string, password: string) => Promise<AuthResult>;
+  logout: () => Promise<boolean>;
+  signIn: (email: string, password: string) => Promise<AuthResult>;
+  signOut: () => Promise<boolean>;
+  register: (email: string, password: string, confirmPassword: string) => Promise<AuthResult>;
+  
+  // User management methods
+  updateUser: (userData: Partial<User>) => Promise<boolean>;
+  updateUserProfile: (profileData: Partial<UserProfile>) => Promise<boolean>;
+  updateProfile: (profileData: Partial<UserProfile>) => Promise<boolean>;
+  loadUserProfile: () => Promise<UserProfile | null>;
   refreshProfile: () => Promise<void>;
-  sendPasswordResetEmail: (email: string) => Promise<any>;
-  resetPassword: (token: string, password: string) => Promise<any>;
-  requestPasswordReset: (email: string) => Promise<any>;
-  verifyEmail: (token: string) => Promise<any>;
+  
+  // Password related methods
+  sendPasswordResetEmail: (email: string) => Promise<boolean>;
+  resetPassword: (password: string, token: string) => Promise<boolean>;
+  requestPasswordReset: (email: string) => Promise<boolean>;
+  verifyEmail: (token: string) => Promise<boolean>;
   updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
+  
+  // Other methods
   deleteAccount: () => Promise<boolean>;
+  checkRole: (role: string) => boolean;
 }

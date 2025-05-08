@@ -1,106 +1,103 @@
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { getRecommendedAction } from '@/core/index';
-import { RecommendedAction } from '@/types/core-systems';
-import { Zap, ChevronRight } from 'lucide-react';
+import { hermes } from '@/core/Hermes';
 
-interface RecommendedActionsProps {
-  userId: string;
-  limit?: number;
+interface RecommendedAction {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  priority: number;
+  action: string;
+  actionLabel: string;
+  iconName?: string;
 }
 
-const RecommendedActions: React.FC<RecommendedActionsProps> = ({ 
-  userId,
-  limit = 3
-}) => {
-  const [recommendations, setRecommendations] = useState<RecommendedAction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export const RecommendedActions: React.FC<{ userId: string }> = ({ userId }) => {
+  const [actions, setActions] = useState<RecommendedAction[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchRecommendations = () => {
-      setIsLoading(true);
-      
+    const fetchRecommendedActions = async () => {
       try {
-        // In a real app, we'd fetch multiple recommendations
-        // For now, we'll simulate by calling the function multiple times
-        const actions = Array.from({ length: limit }).map(() => 
-          getRecommendedAction(userId)
-        );
+        // Mock implementation until hermes.recommendNextAction is fully implemented
+        const mockActions: RecommendedAction[] = [
+          {
+            id: 'action-1',
+            type: 'boost',
+            title: 'Boost Your Profile',
+            description: 'Increase your visibility by boosting your profile for 24 hours.',
+            priority: 5,
+            action: '/boost',
+            actionLabel: 'Boost Now'
+          },
+          {
+            id: 'action-2',
+            type: 'complete-profile',
+            title: 'Complete Your Profile',
+            description: 'Add more details to your profile to attract more visitors.',
+            priority: 4,
+            action: '/profile/edit',
+            actionLabel: 'Edit Profile'
+          }
+        ];
         
-        // Sort by priority (highest first)
-        const sortedActions = [...actions].sort((a, b) => 
-          b.priority - a.priority
-        );
-        
-        setRecommendations(sortedActions);
+        setActions(mockActions);
       } catch (error) {
-        console.error('Error fetching recommendations:', error);
+        console.error('Error fetching recommended actions:', error);
+        setActions([]);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
-    
-    fetchRecommendations();
-  }, [userId, limit]);
-  
-  if (isLoading) {
+
+    if (userId) {
+      fetchRecommendedActions();
+    }
+  }, [userId]);
+
+  if (loading) {
     return (
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center">
-            <Zap className="h-4 w-4 mr-2 text-yellow-500" />
-            Recommended Actions
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col space-y-2">
-            {Array.from({ length: limit }).map((_, i) => (
-              <div key={i} className="h-12 bg-muted animate-pulse rounded"></div>
-            ))}
-          </div>
+        <CardContent className="p-4">
+          <p className="text-muted-foreground">Loading recommendations...</p>
         </CardContent>
       </Card>
     );
   }
 
-  if (recommendations.length === 0) {
-    return null;
+  if (actions.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-4">
+          <p className="text-muted-foreground">No recommendations available.</p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg flex items-center">
-          <Zap className="h-4 w-4 mr-2 text-yellow-500" />
-          Recommended Actions
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col space-y-2">
-          {recommendations.map((action, index) => (
-            <Link 
-              key={index} 
-              to={typeof action.action !== 'function' ? action.action : '#'}
-              className="block"
-            >
+      <CardContent className="p-4">
+        <h3 className="text-lg font-semibold mb-3">Recommended Actions</h3>
+        <div className="space-y-3">
+          {actions.map((action) => (
+            <div key={action.id} className="flex items-start justify-between p-3 bg-muted/50 rounded-lg">
+              <div>
+                <h4 className="font-medium">{action.title}</h4>
+                <p className="text-sm text-muted-foreground">{action.description}</p>
+              </div>
               <Button 
-                variant="outline" 
-                className="w-full justify-between h-auto py-3 group"
+                size="sm" 
+                variant="default"
+                className="ml-2 flex-shrink-0"
+                asChild
               >
-                <div className="flex flex-col items-start">
-                  <span className="font-medium">
-                    {action.title}
-                  </span>
-                  <span className="text-xs text-muted-foreground mt-1">
-                    {action.description}
-                  </span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                <a href={action.action}>{action.actionLabel}</a>
               </Button>
-            </Link>
+            </div>
           ))}
         </div>
       </CardContent>

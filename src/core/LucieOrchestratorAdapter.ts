@@ -4,7 +4,8 @@ import {
   GenerateContentResult, 
   ModerateContentParams, 
   ModerateContentResult, 
-  SentimentAnalysisResult 
+  SentimentAnalysisResult,
+  SentimentAnalysisParams 
 } from '@/types/core-systems';
 
 /**
@@ -34,7 +35,7 @@ export class LucieOrchestratorAdapter {
     try {
       const params: ModerateContentParams = {
         content,
-        contentType,
+        type: contentType,
       };
       
       const result: ModerateContentResult = await lucieAI.moderateContent(params);
@@ -52,25 +53,21 @@ export class LucieOrchestratorAdapter {
     try {
       const params: ModerateContentParams = {
         content,
-        contentType,
+        type: contentType,
       };
       
       const result = await lucieAI.moderateContent(params);
       
-      // Create a structured response with proper property access
-      return {
-        isSafe: result.isSafe, // Changed from 'safe' to 'isSafe'
-        score: result.score,
-        issues: result.issues || [],
-        blockedCategories: result.blockedCategories || []
-      };
+      return result;
     } catch (error) {
       console.error('Error in content moderation:', error);
       return {
-        isSafe: false, // Changed from 'safe' to 'isSafe'
+        isSafe: false,
         score: 1.0,
         issues: ['Error processing moderation request'],
-        blockedCategories: []
+        blockedCategories: [],
+        category: 'error',
+        action: 'block'
       };
     }
   }
@@ -80,7 +77,7 @@ export class LucieOrchestratorAdapter {
    */
   async analyzeSentiment(text: string): Promise<SentimentAnalysisResult> {
     try {
-      return await lucieAI.analyzeSentiment(text);
+      return await lucieAI.analyzeSentiment({ text });
     } catch (error) {
       console.error('Error analyzing sentiment:', error);
       return {
