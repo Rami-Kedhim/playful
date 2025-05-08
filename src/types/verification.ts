@@ -28,20 +28,21 @@ export interface VerificationDocument {
   id: string;
   type: string;
   fileUrl: string; // Main property for file access
+  filePath?: string; // Add for backward compatibility
   uploadedAt: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | string;
   notes?: string;
   documentType?: string;
-  // Add for backward compatibility
-  filePath?: string;
+  verification_request_id?: string;
 }
 
 export interface VerificationRequest {
   id: string;
   userId: string;
-  status: VerificationStatusType;
-  verificationLevel: VerificationLevelType;
-  requested_level?: VerificationLevelType;
+  status: VerificationStatusType | string;
+  verificationLevel?: VerificationLevelType;
+  requested_level?: VerificationLevelType | string;
+  requestedLevel?: VerificationLevelType | string;
   documents: VerificationDocument[];
   submittedAt: string;
   created_at?: string; // For compatibility with existing code
@@ -49,6 +50,9 @@ export interface VerificationRequest {
   rejectionReason?: string;
   reviewer_notes?: string;
   profile_id?: string; // Added for compatibility with existing components
+  reviewed_at?: string;
+  expires_at?: string;
+  reviewed_by?: string;
 }
 
 // Adding constants for verification levels that match the enum
@@ -60,14 +64,24 @@ export const VERIFICATION_LEVELS = {
   VERIFIED: VerificationLevel.VERIFIED
 };
 
+// Add constants for verification statuses
+export const VERIFICATION_STATUS = {
+  NONE: VerificationStatus.NONE,
+  PENDING: VerificationStatus.PENDING,
+  IN_REVIEW: VerificationStatus.IN_REVIEW,
+  APPROVED: VerificationStatus.APPROVED,
+  REJECTED: VerificationStatus.REJECTED,
+  EXPIRED: VerificationStatus.EXPIRED
+};
+
 // Helper function to convert string to verification level
 export function toVerificationLevel(level: string): VerificationLevelType {
   switch (level) {
-    case 'basic': return VerificationLevel.BASIC;
-    case 'enhanced': return VerificationLevel.ENHANCED;
-    case 'premium': return VerificationLevel.PREMIUM;
-    case 'verified': return VerificationLevel.VERIFIED;
-    default: return VerificationLevel.NONE;
+    case 'basic': return 'BASIC';
+    case 'enhanced': return 'ENHANCED';
+    case 'premium': return 'PREMIUM';
+    case 'verified': return 'VERIFIED';
+    default: return 'NONE';
   }
 }
 

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, UserCheck, UserX } from 'lucide-react';
-import { VerificationRequest, VerificationStatus } from '@/types/verification';
+import { VerificationRequest } from '@/types/verification';
 
 interface ReviewRequestModalProps {
   open: boolean;
@@ -25,7 +25,10 @@ const ReviewRequestModal: React.FC<ReviewRequestModalProps> = ({
   isLoading = false
 }) => {
   const [notes, setNotes] = React.useState('');
-  const isPending = request?.status === VerificationStatus.PENDING || request?.status === VerificationStatus.IN_REVIEW;
+  
+  // Convert to string and lowercase for safe comparison
+  const statusLower = request ? String(request.status).toLowerCase() : '';
+  const isPending = statusLower === 'pending' || statusLower === 'in_review';
   
   const handleApprove = async () => {
     if (!isPending || !request) return;
@@ -37,7 +40,7 @@ const ReviewRequestModal: React.FC<ReviewRequestModalProps> = ({
     await onReject(request.id, notes);
   };
   
-  const requestedLevel = request?.requested_level || 'unknown';
+  const requestedLevel = request?.requested_level || request?.requestedLevel || 'unknown';
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -50,10 +53,10 @@ const ReviewRequestModal: React.FC<ReviewRequestModalProps> = ({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="font-medium">User ID:</div>
-              <div>{request.profile_id || ''}</div>
+              <div>{request.profile_id || request.userId || ''}</div>
 
               <div className="font-medium">Status:</div>
-              <div className="capitalize">{request.status}</div>
+              <div className="capitalize">{statusLower}</div>
 
               <div className="font-medium">Requested Level:</div>
               <div className="capitalize">{requestedLevel}</div>

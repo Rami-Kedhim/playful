@@ -24,7 +24,10 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
   loading,
 }) => {
   const [notes, setNotes] = React.useState('');
-  const isPending = request.status === VerificationStatus.PENDING || request.status === VerificationStatus.IN_REVIEW;
+  
+  // Convert status to lowercase string for safe comparison
+  const statusLower = String(request.status).toLowerCase();
+  const isPending = statusLower === 'pending' || statusLower === 'in_review';
 
   const handleApprove = async () => {
     if (!isPending) return;
@@ -45,7 +48,7 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
       <CardContent className="space-y-4">
         <div className="flex items-center space-x-2">
           <User className="h-4 w-4" />
-          <span>User ID: {request.profile_id || ''}</span>
+          <span>User ID: {request.profile_id || request.userId || ''}</span>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -89,12 +92,12 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
         </Tabs>
       </CardContent>
       <CardFooter className="flex justify-between">
-        {request.status === VerificationStatus.APPROVED ? (
+        {statusLower === 'approved' ? (
           <Badge variant="outline" className="bg-green-100 text-green-500 border-green-200">
             <CheckCircle className="h-4 w-4 mr-2" />
             Approved on {request.reviewed_at ? format(new Date(request.reviewed_at), 'MMM dd, yyyy') : 'Unknown'}
           </Badge>
-        ) : request.status === VerificationStatus.REJECTED ? (
+        ) : statusLower === 'rejected' ? (
           <Badge variant="outline" className="bg-red-100 text-red-500 border-red-200">
             <AlertCircle className="h-4 w-4 mr-2" />
             Rejected on {request.reviewed_at ? format(new Date(request.reviewed_at), 'MMM dd, yyyy') : 'Unknown'}

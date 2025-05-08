@@ -7,7 +7,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
 import { lucieOrchestrator } from '@/core/LucieOrchestratorAdapter';
-import { ModerateContentParams } from '@/types/core-systems';
 
 interface Message {
   id: string;
@@ -62,9 +61,9 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
     
     try {
       // Check content moderation
-      const params: ModerateContentParams = {
+      const params = {
         content: input,
-        contentType: "text"
+        type: "text"
       };
       
       const isSafe = await lucieOrchestrator.isSafeContent(input);

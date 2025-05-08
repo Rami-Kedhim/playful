@@ -1,86 +1,79 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { lucieOrchestrator } from '@/core/LucieOrchestratorAdapter';
-import { ModerateContentParams } from '@/types/core-systems';
+import { Brain } from 'lucide-react';
 
 interface BrainCoreProps {
-  coreId: string;
-  coreName: string;
-  coreDescription?: string;
+  onGeneratedContent?: (content: string) => void;
 }
 
-const BrainCore: React.FC<BrainCoreProps> = ({
-  coreId,
-  coreName,
-  coreDescription
-}) => {
-  const [query, setQuery] = useState('');
-  const [response, setResponse] = useState('');
+const BrainCore: React.FC<BrainCoreProps> = ({ onGeneratedContent }) => {
+  const [input, setInput] = useState('');
+  const [result, setResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!query.trim()) return;
+  
+  const handleProcess = async () => {
+    if (!input.trim()) return;
     
     setIsLoading(true);
-    setResponse('');
-    
     try {
-      // Moderate content
-      const params: ModerateContentParams = {
-        content: query,
-        contentType: "text"
+      // First check if content is safe
+      const params = {
+        content: input,
+        type: "text" // Using type instead of contentType
       };
       
-      const isSafe = await lucieOrchestrator.isSafeContent(query);
+      const isSafe = await lucieOrchestrator.isSafeContent(input);
       
-      if (isSafe) {
-        // Process with brain core
-        const result = await lucieOrchestrator.generateContent(
-          `[${coreName}] ${query}`
-        );
-        setResponse(result);
-      } else {
-        setResponse("This query cannot be processed due to content restrictions.");
+      if (!isSafe) {
+        setResult("This content cannot be processed due to safety policies.");
+        return;
+      }
+      
+      const processedContent = await lucieOrchestrator.generateContent(input);
+      setResult(processedContent);
+      
+      if (onGeneratedContent) {
+        onGeneratedContent(processedContent);
       }
     } catch (error) {
-      console.error(`Error processing query with ${coreName}:`, error);
-      setResponse(`Error: Unable to process your request with ${coreName}.`);
+      console.error("Error processing input:", error);
+      setResult("An error occurred while processing your request.");
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   return (
-    <Card className="mb-6">
-      <CardHeader>
-        <CardTitle>{coreName}</CardTitle>
+    <Card>
+      <CardHeader className="flex flex-row items-center gap-2">
+        <Brain className="h-5 w-5" />
+        <CardTitle>Brain Core</CardTitle>
       </CardHeader>
-      <CardContent>
-        {coreDescription && <p className="mb-4 text-muted-foreground">{coreDescription}</p>}
+      <CardContent className="space-y-4">
+        <Textarea
+          placeholder="Enter your prompt..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          rows={5}
+          disabled={isLoading}
+        />
         
-        <form onSubmit={handleSubmit}>
-          <div className="flex space-x-2">
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={`Ask ${coreName}...`}
-              disabled={isLoading}
-            />
-            <Button type="submit" disabled={isLoading || !query.trim()}>
-              {isLoading ? "Processing..." : "Submit"}
-            </Button>
-          </div>
-        </form>
+        <Button
+          onClick={handleProcess}
+          disabled={!input.trim() || isLoading}
+          className="w-full"
+        >
+          {isLoading ? "Processing..." : "Process"}
+        </Button>
         
-        {response && (
-          <div className="mt-4 p-3 bg-muted rounded">
-            <p className="font-medium">Response:</p>
-            <p className="mt-1">{response}</p>
+        {result && (
+          <div className="border rounded-md p-3 mt-4 bg-slate-50 dark:bg-slate-900">
+            <h3 className="text-sm font-medium mb-2">Result:</h3>
+            <div className="text-sm whitespace-pre-wrap">{result}</div>
           </div>
         )}
       </CardContent>

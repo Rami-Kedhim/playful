@@ -2,19 +2,24 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { VerificationStatus as VerificationStatusEnum, VERIFICATION_LEVELS } from '@/types/verification';
+import { VerificationStatus as VerificationStatusEnum, VERIFICATION_STATUS, VERIFICATION_LEVELS } from '@/types/verification';
 import { useVerificationStatus } from './hooks/useVerificationStatus';
 import { Clock, CheckCircle, XCircle, AlertCircle, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { formatDate } from '@/utils/date-utils';
+import { format } from 'date-fns';
 
-interface VerificationStatusProps {
-  onRequestVerification: () => void;
-}
+// Simple date formatter
+const formatDate = (dateStr: string) => {
+  try {
+    return format(new Date(dateStr), 'MMM dd, yyyy');
+  } catch (e) {
+    return 'Unknown date';
+  }
+};
 
-const VerificationStatusComponent = ({ onRequestVerification }: VerificationStatusProps) => {
+const VerificationStatusComponent = ({ onRequestVerification }) => {
   const { status, verificationRequest, loading, error } = useVerificationStatus();
-
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center h-40">
@@ -39,7 +44,9 @@ const VerificationStatusComponent = ({ onRequestVerification }: VerificationStat
           <p className="text-sm text-muted-foreground">{error}</p>
         </CardContent>
         <CardFooter>
-          <Button onClick={() => window.location.reload()}>Try Again</Button>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
         </CardFooter>
       </Card>
     );
@@ -76,7 +83,7 @@ const VerificationStatusComponent = ({ onRequestVerification }: VerificationStat
               {verificationRequest.requested_level ? `You requested ${verificationRequest.requested_level} verification` : `You requested ${VERIFICATION_LEVELS.BASIC} verification`}
             </CardDescription>
           </div>
-          <StatusBadge status={status.status || 'pending'} />
+          <StatusBadge statusValue={status} />
         </div>
       </CardHeader>
       <CardContent>
@@ -87,7 +94,7 @@ const VerificationStatusComponent = ({ onRequestVerification }: VerificationStat
               {formatDate(verificationRequest.submittedAt || verificationRequest.created_at || new Date().toISOString())}
             </p>
           </div>
-
+          
           {verificationRequest.documents && verificationRequest.documents.length > 0 && (
             <div>
               <h4 className="text-sm font-medium mb-1">Documents</h4>
@@ -101,7 +108,7 @@ const VerificationStatusComponent = ({ onRequestVerification }: VerificationStat
               </div>
             </div>
           )}
-
+          
           {(verificationRequest.rejectionReason || verificationRequest.reviewer_notes) && (
             <div>
               <h4 className="text-sm font-medium text-destructive mb-1">Feedback</h4>
@@ -113,7 +120,7 @@ const VerificationStatusComponent = ({ onRequestVerification }: VerificationStat
         </div>
       </CardContent>
       <CardFooter className="flex justify-end">
-        {status.status === "rejected" && (
+        {status === "rejected" && (
           <Button onClick={onRequestVerification}>
             Submit Again
           </Button>
@@ -123,27 +130,41 @@ const VerificationStatusComponent = ({ onRequestVerification }: VerificationStat
   );
 };
 
-interface StatusBadgeProps {
-  status: string;
-}
-
-const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
-  switch (status) {
-    case VerificationStatusEnum.PENDING:
-    case 'pending':
-      return <Badge variant="outline" className="flex items-center"><Clock className="h-3 w-3 mr-1" /> Pending</Badge>;
-    case VerificationStatusEnum.IN_REVIEW:
-    case 'in_review':
-      return <Badge variant="secondary" className="flex items-center"><Clock className="h-3 w-3 mr-1" /> In Review</Badge>;
-    case VerificationStatusEnum.APPROVED:
-    case 'approved':
-      return <Badge variant="success" className="flex items-center bg-green-500"><CheckCircle className="h-3 w-3 mr-1" /> Approved</Badge>;
-    case VerificationStatusEnum.REJECTED:
-    case 'rejected':
-      return <Badge variant="destructive" className="flex items-center"><XCircle className="h-3 w-3 mr-1" /> Rejected</Badge>;
-    default:
-      return <Badge variant="outline">Unknown</Badge>;
+const StatusBadge = ({ statusValue }) => {
+  // Handle string status values directly
+  if (typeof statusValue === 'string') {
+    switch(statusValue.toLowerCase()) {
+      case 'pending':
+        return (
+          <Badge variant="outline" className="flex items-center">
+            <Clock className="h-3 w-3 mr-1" /> Pending
+          </Badge>
+        );
+      case 'in_review':
+        return (
+          <Badge variant="secondary" className="flex items-center">
+            <Clock className="h-3 w-3 mr-1" /> In Review
+          </Badge>
+        );
+      case 'approved':
+        return (
+          <Badge variant="success" className="flex items-center bg-green-500">
+            <CheckCircle className="h-3 w-3 mr-1" /> Approved
+          </Badge>
+        );
+      case 'rejected':
+        return (
+          <Badge variant="destructive" className="flex items-center">
+            <XCircle className="h-3 w-3 mr-1" /> Rejected
+          </Badge>
+        );
+      default:
+        return <Badge variant="outline">Unknown</Badge>;
+    }
   }
+  
+  // Fallback for enum values or other types
+  return <Badge variant="outline">Status: {String(statusValue)}</Badge>;
 };
 
 export default VerificationStatusComponent;

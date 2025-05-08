@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Clock, CheckCircle, AlertTriangle, FileCheck } from 'lucide-react';
-import { VerificationRequest, VerificationStatus } from '@/types/verification';
+import { VerificationRequest, VERIFICATION_STATUS } from '@/types/verification';
 
 interface VerificationTimelineProps {
   verificationRequest: VerificationRequest;
@@ -29,13 +29,10 @@ const VerificationTimeline: React.FC<VerificationTimelineProps> = ({
         icon: <Clock className="h-5 w-5 text-amber-500" />,
         date: '',
         completed: [
-          VerificationStatus.PENDING,
-          VerificationStatus.IN_REVIEW,
-          VerificationStatus.APPROVED,
-          "pending",
-          "in_review",
-          "approved"
-        ].includes(verificationRequest.status as any)
+          'pending',
+          'in_review',
+          'approved'
+        ].includes(String(verificationRequest.status).toLowerCase())
       },
       {
         id: 'review',
@@ -44,23 +41,21 @@ const VerificationTimeline: React.FC<VerificationTimelineProps> = ({
         icon: <AlertTriangle className="h-5 w-5 text-amber-500" />,
         date: '',
         completed: [
-          VerificationStatus.IN_REVIEW,
-          VerificationStatus.APPROVED,
-          "in_review",
-          "approved"
-        ].includes(verificationRequest.status as any)
+          'in_review',
+          'approved'
+        ].includes(String(verificationRequest.status).toLowerCase())
       },
       {
         id: 'decision',
-        title: verificationRequest.status === VerificationStatus.APPROVED || verificationRequest.status === "approved" 
+        title: String(verificationRequest.status).toLowerCase() === 'approved' 
           ? 'Verification Approved' 
           : 'Verification Decision',
-        description: (verificationRequest.status === VerificationStatus.APPROVED || verificationRequest.status === "approved")
+        description: String(verificationRequest.status).toLowerCase() === 'approved'
           ? 'Congratulations! Your verification has been approved.' 
           : 'Awaiting final decision on your verification.',
         icon: <CheckCircle className="h-5 w-5 text-green-500" />,
         date: '',
-        completed: verificationRequest.status === VerificationStatus.APPROVED || verificationRequest.status === "approved"
+        completed: String(verificationRequest.status).toLowerCase() === 'approved'
       }
     ];
 

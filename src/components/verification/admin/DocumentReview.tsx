@@ -23,7 +23,7 @@ const DocumentReview = ({ document }: DocumentReviewProps) => {
 
   // Use fallbacks for potentially missing properties
   const documentType = document.type || document.documentType || 'Unknown';
-  const imageUrl = document.filePath || document.fileUrl || '';
+  const imageUrl = document.fileUrl || document.filePath || '';
   const uploadDate = document.uploadedAt ? document.uploadedAt.toString() : '';
 
   return (
