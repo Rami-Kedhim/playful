@@ -1,79 +1,41 @@
 
-import React, { useState, useCallback } from 'react';
+import React from 'react';
+import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Shield } from 'lucide-react';
 
 interface HomeHeaderProps {
-  onExploreClick: () => void;
+  onExploreClick?: () => void;
 }
 
 const HomeHeader: React.FC<HomeHeaderProps> = ({ onExploreClick }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  }, []);
-  
   return (
-    <header className="relative min-h-[70vh] flex items-center overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black"></div>
-      
-      <div className="container mx-auto px-4 relative z-10 py-20">
-        <div className="max-w-3xl">
-          <div className="flex items-center gap-2 mb-4">
-            <Shield className="h-5 w-5 text-primary" />
-            <span className="text-primary font-medium">Secure • Verified • Private</span>
+    <header className="bg-gradient-to-br from-black to-zinc-800 text-white">
+      <div className="container mx-auto px-4 py-24 flex flex-col items-center text-center">
+        <h1 className="text-4xl md:text-6xl font-bold mb-6">
+          <span className="text-primary">Premium</span> Escort Services
+        </h1>
+        <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mb-10">
+          Discover verified professional escorts, premium content creators, and immersive AI companions
+        </p>
+        
+        <div className="w-full max-w-md mb-8">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+            <Input 
+              placeholder="Search by location or service..." 
+              className="pl-10 h-12 bg-black/40 border-gray-700 focus:border-primary text-white placeholder:text-gray-400"
+            />
           </div>
-          
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
-            Real • Virtual • Intelligent <br />
-            <span className="text-primary">Explore UberPersona Multiverse</span>
-          </h1>
-          
-          <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl">
-            The next generation platform unifying human escorts, creators, 
-            AI companions, and live performers in one powerful ecosystem.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 mb-10">
-            <div className="relative flex-grow">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <Input 
-                type="text"
-                placeholder="Search personas, services, or locations..."
-                className="pl-10 py-6"
-                value={searchQuery}
-                onChange={handleSearchChange}
-              />
-            </div>
-            <Button 
-              size="lg" 
-              className="bg-primary hover:bg-primary/90"
-              onClick={onExploreClick} // Use the passed callback
-            >
-              Boost Now with UBX
-            </Button>
-          </div>
-          
-          <div className="flex items-center gap-6">
-            {/* Stats */}
-            <div className="flex gap-8">
-              <div>
-                <p className="text-3xl font-bold">10K+</p>
-                <p className="text-sm text-gray-400">Verified Personas</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold">98%</p>
-                <p className="text-sm text-gray-400">Satisfaction Rate</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold">24/7</p>
-                <p className="text-sm text-gray-400">System Integrity</p>
-              </div>
-            </div>
-          </div>
+        </div>
+        
+        <div className="flex flex-wrap gap-4 justify-center">
+          <Button size="lg" onClick={onExploreClick}>
+            Explore Now
+          </Button>
+          <Button size="lg" variant="outline" className="bg-transparent hover:bg-white/10 text-white border-white hover:text-white">
+            Sign Up Free
+          </Button>
         </div>
       </div>
     </header>

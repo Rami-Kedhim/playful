@@ -1,86 +1,24 @@
 
-import { ElementType } from 'react';
-
-export interface RouteConfig {
-  path: string;
-  label: string;
-  title: string;
-  icon: ElementType;
-  requireAuth?: boolean;
-  roles?: string[];
-  category?: string;
-}
-
-export interface AppPaths {
-  HOME: string;
-  ESCORTS: string;
-  ESCORT_DETAIL: string;
-  CREATORS: string;
-  CREATOR_DETAIL: string;
-  LIVECAMS: string;
-  LIVECAM_DETAIL: string;
-  VERIFICATION: string;
-  SETTINGS: string;
-  AUTH: string;
-  PROFILE: string;
-  USER_PROFILE: string;
-  WALLET: string;
-  ADMIN: string;
-  DASHBOARD: string;
-  NEURAL_MONITOR: string;
-  NEURAL_ANALYTICS: string;
-  NEURAL_SERVICES: string;
-  FAVORITES: string;
-  MESSAGES: string;
-  PULSE_BOOST: string;
-  GUIDELINES: string;
-  SEO: string;
-  SAFETY: string;
-  TERMS: string;
-  PRIVACY: string;
-  CONTACT: string;
-  METAVERSE: string;
-  BRAIN_HUB: string;
-  AI_COMPANION: string;
-  COMPLIANCE: string;
-  BOOKINGS: string;
-}
-
-export const APP_PATHS: AppPaths = {
+export const AppPaths = {
   HOME: '/',
-  ESCORTS: '/escorts',
-  ESCORT_DETAIL: '/escorts/:id',
+  ESCORT_SEARCH: '/escorts',
+  ESCORT_DETAIL: '/escort/:id',
   CREATORS: '/creators',
-  CREATOR_DETAIL: '/creators/:id',
-  LIVECAMS: '/livecams',
-  LIVECAM_DETAIL: '/livecams/:id',
-  VERIFICATION: '/verification',
-  SETTINGS: '/settings',
-  AUTH: '/auth',
-  PROFILE: '/profile',
-  USER_PROFILE: '/user-profile',
-  WALLET: '/wallet',
-  ADMIN: '/admin',
-  DASHBOARD: '/dashboard',
-  NEURAL_MONITOR: '/neural/monitor',
-  NEURAL_ANALYTICS: '/neural/analytics',
-  NEURAL_SERVICES: '/neural/services',
-  FAVORITES: '/favorites',
-  MESSAGES: '/messages',
-  PULSE_BOOST: '/boost',
-  GUIDELINES: '/guidelines',
-  SEO: '/seo',
-  SAFETY: '/safety',
-  TERMS: '/terms',
-  PRIVACY: '/privacy',
-  CONTACT: '/contact',
-  METAVERSE: '/metaverse',
-  BRAIN_HUB: '/brain-hub',
+  CREATOR_DETAIL: '/creator/:id',
   AI_COMPANION: '/ai-companions',
-  COMPLIANCE: '/compliance',
-  BOOKINGS: '/bookings'
-};
-
-// Export both the interface and the constant
-export { APP_PATHS as AppPaths };
-export default APP_PATHS;
+  AI_COMPANION_DETAIL: '/ai-companion/:id',
+  MESSAGES: '/messages',
+  WALLET: '/wallet',
+  PROFILE: '/profile',
+  SETTINGS: '/settings',
+  VERIFICATION: '/verification',
+  PULSE_BOOST: '/pulse-boost',
+  LUCIE: '/lucie',
+  OXUM: '/oxum',
+  HERMES: '/hermes',
+  LOGIN: '/login',
+  REGISTER: '/register',
+  BRAIN_HUB: '/brain-hub',
+  NEURAL_ANALYTICS: '/neural-analytics',
+  METAVERSE: '/metaverse',
+}
