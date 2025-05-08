@@ -5,7 +5,8 @@ import {
   ModerateContentParams, 
   ModerateContentResult, 
   SentimentAnalysisResult,
-  SentimentAnalysisParams 
+  SentimentAnalysisParams,
+  GenerateContentParams
 } from '@/types/core-systems';
 
 /**
@@ -17,8 +18,14 @@ export class LucieOrchestratorAdapter {
    */
   async generateContent(prompt: string, options: Record<string, any> = {}): Promise<string> {
     try {
+      // Create params object for lucieAI
+      const params: GenerateContentParams = {
+        prompt,
+        options
+      };
+      
       // Use generateContent from lucieAI
-      const result: GenerateContentResult = await lucieAI.generateContent(prompt, options);
+      const result: GenerateContentResult = await lucieAI.generateContent(params);
       
       // Extract the content string from the result
       return result.content;
@@ -35,7 +42,7 @@ export class LucieOrchestratorAdapter {
     try {
       const params: ModerateContentParams = {
         content,
-        type: contentType, // Using contentType parameter
+        type: contentType
       };
       
       const result: ModerateContentResult = await lucieAI.moderateContent(params);

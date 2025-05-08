@@ -29,7 +29,7 @@ export class LucieAI implements LucieAISystem {
   }
   
   async moderateContent(params: ModerateContentParams): Promise<ModerateContentResult> {
-    console.log(`Moderating content: ${params.contentType || params.type || 'text'}`);
+    console.log(`Moderating content: ${params.type || 'text'}`);
     // In a real system, would analyze content for policy violations
     
     return {
@@ -43,16 +43,21 @@ export class LucieAI implements LucieAISystem {
     };
   }
   
-  async generateContent(prompt: string, options?: Record<string, any>): Promise<GenerateContentResult> {
-    console.log(`Generating content for: ${prompt}`);
+  async generateContent(params: GenerateContentParams): Promise<GenerateContentResult> {
+    console.log(`Generating content for: ${params.prompt}`);
     // In a real system, would generate and moderate content
     
-    const content = `Generated content for: ${prompt}`;
+    const content = `Generated content for: ${params.prompt}`;
     
     return {
       content,
-      moderated: false, // For backward compatibility
-      warnings: []
+      moderated: false,
+      warnings: [],
+      usage: {
+        promptTokens: 10,
+        completionTokens: 20,
+        totalTokens: 30
+      }
     };
   }
   
@@ -67,7 +72,7 @@ export class LucieAI implements LucieAISystem {
     };
   }
   
-  getSystemStatus(): SystemStatus {
+  async getSystemStatus(): Promise<SystemStatus> {
     return {
       operational: this.operational,
       isActive: true,
@@ -99,7 +104,12 @@ export class LucieAI implements LucieAISystem {
     return {
       content: `AI response to: ${params.prompt}`,
       moderated: false,
-      warnings: []
+      warnings: [],
+      usage: {
+        promptTokens: 5,
+        completionTokens: 15,
+        totalTokens: 20
+      }
     };
   }
   

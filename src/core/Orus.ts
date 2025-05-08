@@ -2,23 +2,23 @@
 import { SessionValidationResult, SystemIntegrityResult } from '@/types/core-systems';
 
 export class Orus {
-  validateSession(token: string): SessionValidationResult {
+  async validateSession(token: string): Promise<SessionValidationResult> {
     // Mock implementation
     const isValid = token && token.length > 0;
     
     return {
       isValid,
       userId: isValid ? 'user-1' : '',
-      expiry: new Date(Date.now() + 3600 * 1000),
+      expiresAt: new Date(Date.now() + 3600 * 1000).toISOString(),
       username: isValid ? 'user1' : '',
       timestamp: new Date().toISOString()
     };
   }
   
-  checkIntegrity(): SystemIntegrityResult {
+  async checkIntegrity(): Promise<SystemIntegrityResult> {
     // Mock implementation
     return {
-      isValid: true,
+      valid: true,
       status: 'ok',
       errors: [],
       warnings: [],

@@ -21,7 +21,13 @@ export interface HermesStatus {
     engagement: number;
     retention: number;
     conversion: number;
-  }
+  };
+  position?: number;
+  activeUsers?: number;
+  estimatedVisibility?: number;
+  lastUpdateTime?: string;
+  boostScore?: number;
+  effectivenessScore?: number;
 }
 
 export interface BoostPackage {

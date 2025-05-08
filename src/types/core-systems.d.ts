@@ -2,17 +2,9 @@
 export interface SystemStatus {
   operational: boolean;
   isOperational?: boolean;
-  performance: number;
-  lastUpdate: string;
-  serviceStatus: {
-    auth: string;
-    analytics: string;
-    ai: string;
-    wallet: string;
-    seo: string;
-    payments: string;
-  };
   isActive?: boolean;
+  performance?: number;
+  lastUpdate?: string;
   services?: {
     auth: string;
     analytics: string;
@@ -21,32 +13,45 @@ export interface SystemStatus {
     seo: string;
     payments?: string;
   };
+  serviceStatus?: {
+    auth: string;
+    analytics: string;
+    ai: string;
+    wallet: string;
+    seo: string;
+    payments: string;
+  };
   queueLength?: number;
   processing?: boolean;
   uptime?: number;
   lastReboot?: string;
+  modules?: Record<string, { operational: boolean; latency?: number }>;
+  latency?: number;
 }
 
 export interface SystemIntegrityResult {
-  integrity: number;
-  overallStatus?: string;
+  valid: boolean;
   isValid?: boolean;
   status?: string;
   errors?: string[];
   warnings?: string[];
   lastChecked?: string;
-  checks: {
+  integrity?: number;
+  checks?: {
     database: boolean;
     cache: boolean;
     filesystem: boolean;
     network: boolean;
   };
+  overallStatus?: string;
+  issues?: string[];
+  timestamp?: string;
 }
 
 export interface OxumSystem {
   initialize(): Promise<void>;
   shutdown(): void;
-  getSystemStatus(): SystemStatus;
+  getSystemStatus(): Promise<SystemStatus>;
   processPayment(amount: number, currency: string): Promise<boolean>;
   validateTransaction(txId: string): Promise<boolean>;
   getExchangeRate(from: string, to: string): Promise<number>;
@@ -57,88 +62,118 @@ export interface OxumSystem {
 export interface ModerateContentParams {
   content: string;
   type?: 'text' | 'image' | 'video';
-  contentType?: string;
+  contentType?: string; // Added for backward compatibility
   context?: string;
   userId?: string;
+  options?: Record<string, any>;
 }
 
 export interface ModerateContentResult {
   isSafe: boolean;
-  safe: boolean;
-  issues: string[];
+  safe?: boolean; // Added for backward compatibility
   score: number;
   category?: string;
   action?: string;
   blockedCategories?: string[];
+  issues?: string[]; // Added for compatibility
+  categories?: Record<string, number>;
+  flagged?: boolean;
 }
 
 export interface GenerateContentParams {
   prompt: string;
   type?: 'text' | 'image';
   options?: any;
+  maxTokens?: number;
+  temperature?: number;
 }
 
 export interface GenerateContentResult {
   content: string;
   moderated: boolean;
   warnings: string[];
+  usage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
 }
 
 export interface SentimentAnalysisParams {
   text: string;
   language?: string;
+  detailed?: boolean;
 }
 
 export interface SentimentAnalysisResult {
   sentiment: 'positive' | 'negative' | 'neutral';
   score: number;
-  confidence: number;
+  confidence?: number; // Added for backward compatibility
   entities?: Array<{
     text: string;
     sentiment: 'positive' | 'negative' | 'neutral';
     score: number;
   }>;
+  emotions?: Record<string, number>;
 }
 
 export interface LucieAISystem {
   moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
-  generateContent(prompt: string, options?: Record<string, any>): Promise<GenerateContentResult>;
+  generateContent(params: GenerateContentParams): Promise<GenerateContentResult>;
   generateResponse(params: GenerateContentParams): Promise<GenerateContentResult>;
   analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult>;
+  getSystemStatus(): Promise<SystemStatus>;
+  initialize?(): Promise<boolean>;
+  shutdown?(): void;
 }
 
 export interface SessionValidationResult {
   isValid: boolean;
-  userId: string;
-  expiry: Date;
-  username: string;
-  timestamp: string;
+  userId?: string;
+  username?: string;
+  timestamp?: string;
+  expiry?: Date;
+  sessionId?: string;
+  expiresAt?: string;
+  error?: string;
 }
 
 export interface SystemHealthMetrics {
   cpu: number;
   memory: number;
-  disk: number;
   network: number;
+  storage?: number;
   load: number;
+  disk?: number; // Added for backward compatibility
 }
 
 export interface UberCoreSystem {
-  getSystemStatus(): SystemStatus;
-  checkSystemIntegrity(): SystemIntegrityResult;
-  getSystemHealthMetrics(): SystemHealthMetrics;
-  validateSession(sessionId: string): SessionValidationResult;
+  getSystemStatus(): Promise<SystemStatus>;
+  checkSystemIntegrity(): Promise<SystemIntegrityResult>;
+  getSystemHealthMetrics(): Promise<SystemHealthMetrics>;
+  validateSession(token: string): Promise<SessionValidationResult>;
 }
 
 export interface RecommendedAction {
   id: string;
   title: string;
   description: string;
-  priority: 'high' | 'medium' | 'low';
+  priority?: 'high' | 'medium' | 'low';
   actionType?: string;
   actionLink?: string;
   completed?: boolean;
   createdAt?: string;
+  impact?: 'high' | 'medium' | 'low';
+  category?: string;
+  action?: string; // Added to fix RecommendedActions component
+}
+
+export interface HermesInsight {
+  type: string;
+  title: string;
+  description: string;
+  value: number;
+  change?: number;
 }
 
 export interface AnalyticsData {
@@ -149,4 +184,11 @@ export interface AnalyticsData {
   timeActive?: number;
   boostEfficiency?: number;
   trending?: boolean;
+  totalBoosts?: number;
+  activeBoosts?: number;
+  averageBoostScore?: number;
+  boostHistory?: Array<{
+    date: Date;
+    score: number;
+  }>;
 }

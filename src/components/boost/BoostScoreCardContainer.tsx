@@ -11,13 +11,13 @@ interface BoostScoreCardContainerProps {
 
 const BoostScoreCardContainer = ({ profileId, isOwnProfile }: BoostScoreCardContainerProps) => {
   const { boostScore, loading, error, fetchBoostScore, updateBoostScore } = useBoostScore();
-  const { boostStatus } = useBoostManager(profileId);
+  const boostManager = useBoostManager(profileId);
 
   useEffect(() => {
     if (profileId) {
       fetchBoostScore(profileId);
     }
-  }, [profileId, fetchBoostScore, boostStatus]);
+  }, [profileId, fetchBoostScore, boostManager.boostStatus]);
 
   const handleRefresh = async () => {
     await updateBoostScore(profileId);

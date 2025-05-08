@@ -11,9 +11,9 @@ import {
   XCircle, 
   AlertTriangle 
 } from 'lucide-react';
-import { VerificationRequest, VerificationStatus as VerificationStatusEnum } from '@/types/verification';
-import VerificationProgress from './VerificationProgress';
-import VerificationStatus from './VerificationStatus';
+import { VerificationRequest } from '@/types/verification';
+import VerificationProgress, { VerificationStatus } from './VerificationProgress';
+import VerificationStatusComponent from './VerificationStatus';
 
 interface VerificationContainerProps {
   status: string;
@@ -63,7 +63,7 @@ const VerificationContainer: React.FC<VerificationContainerProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <VerificationStatus 
+            <VerificationStatusComponent 
               status={status} 
               level={level} 
               rejectionReason={rejectionReason} 
@@ -82,7 +82,7 @@ const VerificationContainer: React.FC<VerificationContainerProps> = ({
           </CardHeader>
           <CardContent>
             <VerificationProgress 
-              status={status} 
+              verificationStatus={status} 
               onRequestVerification={onRequestVerification} 
             />
           </CardContent>

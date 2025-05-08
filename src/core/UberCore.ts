@@ -17,7 +17,7 @@ export class UberCore implements UberCoreSystem {
     this.automaticSeo = automaticSEO;
   }
   
-  public getSystemStatus(): SystemStatus {
+  public async getSystemStatus(): Promise<SystemStatus> {
     // Mock system status implementation
     return {
       operational: true,
@@ -36,10 +36,10 @@ export class UberCore implements UberCoreSystem {
     };
   }
   
-  public checkSystemIntegrity(): SystemIntegrityResult {
+  public async checkSystemIntegrity(): Promise<SystemIntegrityResult> {
     // Mock system integrity check
     return {
-      isValid: true,
+      valid: true,
       status: 'ok',
       errors: [],
       warnings: [],
@@ -47,23 +47,23 @@ export class UberCore implements UberCoreSystem {
     };
   }
   
-  public getSystemHealthMetrics(): SystemHealthMetrics {
+  public async getSystemHealthMetrics(): Promise<SystemHealthMetrics> {
     // Mock system health metrics
     return {
       cpu: 10,
       memory: 20,
-      disk: 5,
+      storage: 5,
       network: 15,
       load: 12
     };
   }
   
-  public validateSession(sessionId: string): SessionValidationResult {
+  public async validateSession(token: string): Promise<SessionValidationResult> {
     // Mock session validation
     return {
       isValid: true,
       userId: 'user-1',
-      expiry: new Date(Date.now() + 3600 * 1000),
+      expiresAt: new Date(Date.now() + 3600 * 1000).toISOString(),
       username: 'user1',
       timestamp: new Date().toISOString()
     };

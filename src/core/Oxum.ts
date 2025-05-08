@@ -5,7 +5,6 @@ import { HermesEvent } from '@/types/hermes';
 class Oxum implements OxumSystem {
   private systemStatus: SystemStatus = {
     operational: true,
-    isOperational: true,
     performance: 100,
     lastUpdate: new Date().toISOString(),
     serviceStatus: {
@@ -32,19 +31,18 @@ class Oxum implements OxumSystem {
     this.systemStatus.operational = false;
   }
 
-  getSystemStatus(): SystemStatus {
+  async getSystemStatus(): Promise<SystemStatus> {
     return {
       operational: this.systemStatus.operational,
-      isOperational: this.systemStatus.operational,
       performance: this.systemStatus.performance,
       lastUpdate: this.systemStatus.lastUpdate,
       serviceStatus: {
-        auth: this.systemStatus.serviceStatus.auth,
-        analytics: this.systemStatus.serviceStatus.analytics,
-        ai: this.systemStatus.serviceStatus.ai,
-        wallet: this.systemStatus.serviceStatus.wallet,
-        seo: this.systemStatus.serviceStatus.seo,
-        payments: this.systemStatus.serviceStatus.payments
+        auth: this.systemStatus.serviceStatus?.auth || 'operational',
+        analytics: this.systemStatus.serviceStatus?.analytics || 'operational',
+        ai: this.systemStatus.serviceStatus?.ai || 'operational',
+        wallet: this.systemStatus.serviceStatus?.wallet || 'operational',
+        seo: this.systemStatus.serviceStatus?.seo || 'operational',
+        payments: this.systemStatus.serviceStatus?.payments || 'operational'
       }
     };
   }
