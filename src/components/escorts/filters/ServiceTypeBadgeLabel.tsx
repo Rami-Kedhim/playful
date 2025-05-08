@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Building, Video, Check } from 'lucide-react';
+import { Building, Video, Check, Utensils, Massage } from 'lucide-react';
 
-export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | 'any';
+export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | 'any' | 'massage' | 'dinner';
 
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
@@ -33,6 +33,16 @@ export const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
         return {
           icon: <Check className="h-3.5 w-3.5 mr-1" />,
           label: 'In-Person & Virtual'
+        };
+      case 'massage':
+        return {
+          icon: <Massage className="h-3.5 w-3.5 mr-1" />,
+          label: 'Massage'
+        };
+      case 'dinner':
+        return {
+          icon: <Utensils className="h-3.5 w-3.5 mr-1" />,
+          label: 'Dinner Date'
         };
       case 'any':
       default:
