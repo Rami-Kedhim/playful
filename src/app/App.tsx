@@ -6,6 +6,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { FavoritesProvider } from '@/contexts/FavoritesContext';
 import AppRoutes from './AppRoutes';
 import { WalletProvider } from '@/contexts/WalletContext'; 
+import { ThemeProvider } from '@/components/ui/theme-provider';
 import { initializeSystem, shutdownSystem } from '@/core/engine';
 import { checkSystemStatus } from '@/utils/core';
 import { toast } from '@/components/ui/use-toast';
@@ -71,16 +72,18 @@ const App = () => {
   }, []);
   
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <FavoritesProvider>
-          <WalletProvider>
-            <AppRoutes />
-            <Toaster />
-          </WalletProvider>
-        </FavoritesProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <ThemeProvider defaultTheme="dark" forcedTheme="dark">
+      <BrowserRouter>
+        <AuthProvider>
+          <FavoritesProvider>
+            <WalletProvider>
+              <AppRoutes />
+              <Toaster />
+            </WalletProvider>
+          </FavoritesProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 };
 

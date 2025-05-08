@@ -21,6 +21,14 @@ import EscortsPage from '@/pages/EscortsPage';
 import EscortDetailPage from '@/pages/EscortDetailPage';
 import HomePage from '@/pages/HomePage';
 import BookPage from '@/pages/BookPage';
+import CreatorsPage from '@/pages/CreatorsPage';
+import CreatorDetailPage from '@/pages/CreatorDetailPage';
+import LivecamsPage from '@/pages/LivecamsPage';
+import LivecamDetailPage from '@/pages/LivecamDetailPage';
+import SettingsPage from '@/pages/SettingsPage';
+import MediaGenerationPage from '@/pages/MediaGenerationPage';
+import NSFWImageGeneratorPage from '@/pages/NSFWImageGeneratorPage';
+import LuciePage from '@/pages/LuciePage';
 
 /**
  * Main application routes component
@@ -31,7 +39,7 @@ const AppRoutes = () => {
       {/* Auth page with dedicated route */}
       <Route path="/auth" element={<AuthPage />} />
       
-      {/* Home redirects to dashboard */}
+      {/* Home page */}
       <Route path="/" element={<HomePage />} />
       
       {/* Main application routes */}
@@ -43,10 +51,24 @@ const AppRoutes = () => {
         <Route path={AppPaths.FAVORITES} element={<FavoritesPage />} />
         <Route path={AppPaths.DASHBOARD} element={<DashboardPage />} />
         <Route path="/book" element={<BookPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/lucie" element={<LuciePage />} />
         
         {/* Escort routes */}
         <Route path={AppPaths.ESCORTS} element={<EscortsPage />} />
         <Route path={AppPaths.ESCORT_DETAIL} element={<EscortDetailPage />} />
+        
+        {/* Creator routes */}
+        <Route path="/creators" element={<CreatorsPage />} />
+        <Route path="/creators/:id" element={<CreatorDetailPage />} />
+        
+        {/* Livecam routes */}
+        <Route path="/livecams" element={<LivecamsPage />} />
+        <Route path="/livecams/:id" element={<LivecamDetailPage />} />
+        
+        {/* Media generation routes */}
+        <Route path="/media-generation" element={<MediaGenerationPage />} />
+        <Route path="/nsfw-generator" element={<NSFWImageGeneratorPage />} />
         
         {/* Neural routes */}
         <Route path={AppPaths.NEURAL_MONITOR} element={<NeuralMonitorPage />} />

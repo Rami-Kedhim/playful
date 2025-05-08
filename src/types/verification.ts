@@ -4,7 +4,9 @@ export type VerificationLevel = "none" | "basic" | "verified" | "premium";
 export enum VerificationStatus {
   PENDING = "pending",
   APPROVED = "approved", 
-  REJECTED = "rejected"
+  REJECTED = "rejected",
+  IN_REVIEW = "in_review",
+  EXPIRED = "expired"
 }
 
 export interface VerificationRequest {
@@ -16,6 +18,10 @@ export interface VerificationRequest {
   reviewedAt?: Date;
   reviewerId?: string;
   documents: VerificationDocument[];
+  rejectionReason?: string;
+  created_at?: Date; // For backward compatibility
+  reviewer_notes?: string; // For backward compatibility 
+  profile_id?: string; // For backward compatibility
 }
 
 export interface VerificationDocument {

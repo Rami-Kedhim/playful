@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom';
 import Navigation from '@/components/navigation/Navigation';
 import Footer from '@/components/navigation/Footer';
 import { cn } from '@/lib/utils';
+import LucieAIAssistant from '@/components/ai/LucieAIAssistant';
 
 export interface LayoutProps {
   children?: React.ReactNode;
@@ -11,6 +12,7 @@ export interface LayoutProps {
   hideHeader?: boolean;
   hideFooter?: boolean;
   className?: string;
+  containerClass?: string;
 }
 
 const Layout: React.FC<LayoutProps> = ({ 
@@ -18,7 +20,8 @@ const Layout: React.FC<LayoutProps> = ({
   fullWidth = false, 
   hideHeader = false,
   hideFooter = false,
-  className 
+  className,
+  containerClass
 }) => {
   return (
     <div className="min-h-screen flex flex-col">
@@ -26,13 +29,16 @@ const Layout: React.FC<LayoutProps> = ({
       
       <main className={cn(
         "flex-1",
-        !fullWidth && "container mx-auto px-4",
+        !fullWidth && (containerClass || "container mx-auto px-4"),
         className
       )}>
         {children || <Outlet />}
       </main>
       
       {!hideFooter && <Footer />}
+      
+      {/* AI Assistant always available */}
+      <LucieAIAssistant />
     </div>
   );
 };

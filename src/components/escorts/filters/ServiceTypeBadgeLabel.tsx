@@ -1,60 +1,65 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { ServiceType } from '@/types/serviceType';
 import ServiceTypeIcon from './ServiceTypeIcon';
 
-// Define the ServiceTypeFilter type and export it
-export type ServiceTypeFilter = 'in-call' | 'out-call' | 'virtual' | 'massage' | 'dinner' | 'any' | 'in-person' | 'both';
+export type ServiceTypeFilter = "in-call" | "out-call" | "virtual" | "massage" | "dinner" | "both" | "any" | "in-person";
 
 export interface ServiceTypeBadgeLabelProps {
-  service: ServiceTypeFilter;
+  type: ServiceTypeFilter | ServiceType;
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
+  showIcon?: boolean;
 }
 
 const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
-  service, 
-  className = '', 
-  size = 'md' 
+  type, 
+  className = "",
+  showIcon = true
 }) => {
-  // Map service types to readable labels
-  const serviceLabels: Record<ServiceTypeFilter, string> = {
-    'in-call': 'In-call',
-    'out-call': 'Out-call',
-    'virtual': 'Virtual',
-    'massage': 'Massage',
-    'dinner': 'Dinner',
-    'any': 'Any Service',
-    'in-person': 'In Person',
-    'both': 'Both'
+  const getLabel = (type: ServiceTypeFilter | ServiceType): string => {
+    switch (type) {
+      case 'in-call':
+      case 'incall':
+        return 'In-Call';
+      case 'out-call':
+      case 'outcall':
+        return 'Out-Call';
+      case 'virtual':
+        return 'Virtual';
+      case 'massage':
+        return 'Massage';
+      case 'dinner':
+        return 'Dinner Date';
+      case 'in-person':
+        return 'In Person';
+      case 'both':
+        return 'In-Call & Out-Call';
+      case 'any':
+      default:
+        return 'Any Type';
+    }
   };
-
-  // Map service types to variant styles
-  const variants: Record<ServiceTypeFilter, string> = {
-    'in-call': 'bg-blue-100 text-blue-800 border-blue-200',
-    'out-call': 'bg-green-100 text-green-800 border-green-200',
-    'virtual': 'bg-purple-100 text-purple-800 border-purple-200',
-    'massage': 'bg-indigo-100 text-indigo-800 border-indigo-200',
-    'dinner': 'bg-amber-100 text-amber-800 border-amber-200',
-    'any': 'bg-gray-100 text-gray-800 border-gray-200',
-    'in-person': 'bg-blue-100 text-blue-800 border-blue-200',
-    'both': 'bg-teal-100 text-teal-800 border-teal-200'
-  };
-
-  // Size styles
-  const sizeStyles = {
-    sm: 'text-xs px-2 py-0.5',
-    md: 'text-sm px-2.5 py-0.5',
-    lg: 'text-base px-3 py-1'
+  
+  const getVariant = (type: ServiceTypeFilter | ServiceType): "default" | "outline" | "secondary" | "destructive" => {
+    switch (type) {
+      case 'in-call':
+      case 'incall':
+        return 'default';
+      case 'out-call': 
+      case 'outcall':
+        return 'secondary';
+      case 'virtual':
+        return 'outline';
+      default:
+        return 'default';
+    }
   };
 
   return (
-    <Badge 
-      variant="outline" 
-      className={`flex items-center gap-1 font-normal ${variants[service]} ${sizeStyles[size]} ${className}`}
-    >
-      <ServiceTypeIcon type={service} className="h-3.5 w-3.5" />
-      <span>{serviceLabels[service]}</span>
+    <Badge variant={getVariant(type as ServiceTypeFilter)} className={`flex items-center gap-1 ${className}`}>
+      {showIcon && <ServiceTypeIcon type={type as ServiceTypeFilter} className="h-3 w-3" />}
+      {getLabel(type as ServiceTypeFilter)}
     </Badge>
   );
 };
