@@ -1,12 +1,11 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { lucie } from '@/core/Lucie';
-import { GenerateContentResult, ModerateContentParams } from '@/types/core-systems';
+import { lucieAI } from '@/core/Lucie';
+import { ModerateContentParams, GenerateContentResult } from '@/types/core-systems';
 
 // Update Message interface to properly handle GenerateContentResult
 interface Message {
@@ -81,7 +80,7 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
         context: {}
       };
       
-      const moderationResult = await lucie.moderateContent(moderationParams);
+      const moderationResult = await lucieAI.moderateContent(moderationParams);
 
       if (!moderationResult.safe) {
         // Handle unsafe content
@@ -105,7 +104,7 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
         ? `You are an AI companion with a ${personalityType} personality. Your ID is ${companionId || 'unspecified'}.`
         : '';
 
-      const response = await lucie.generateContent(input.trim(), { 
+      const response = await lucieAI.generateContent(input.trim(), { 
         context: contextInfo,
         companionId
       });

@@ -3,7 +3,7 @@ import React from 'react';
 import Layout from '@/layouts/Layout';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { AppPaths } from '@/routes/routeConfig';
+import { APP_PATHS } from '@/routes/routeConfig';
 import { useTitle } from '@/hooks/useTitle';
 
 const NotFoundPage: React.FC = () => {
@@ -19,10 +19,10 @@ const NotFoundPage: React.FC = () => {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button asChild size="lg">
-            <Link to={AppPaths.HOME}>Go Home</Link>
+            <Link to={APP_PATHS.HOME}>Go Home</Link>
           </Button>
           <Button variant="outline" size="lg" asChild>
-            <Link to={AppPaths.ESCORTS}>Browse Escorts</Link>
+            <Link to={APP_PATHS.ESCORTS}>Browse Escorts</Link>
           </Button>
         </div>
       </div>

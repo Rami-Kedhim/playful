@@ -1,76 +1,85 @@
-
-import React from "react";
-import { format } from "date-fns";
-import { BookingFormValues } from "./types";
-import { Escort } from "@/types/escort";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+// Update import to use consistent casing
+import { Escort } from '@/types/Escort';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Check, CalendarDays, Clock, MapPin } from 'lucide-react';
 
 interface BookingConfirmationProps {
-  data: BookingFormValues;
   escort: Escort;
+  bookingDate: Date;
+  bookingTime: string;
+  duration: string;
+  location: string;
+  onClose: () => void;
 }
 
-const BookingConfirmation = ({ data, escort }: BookingConfirmationProps) => {
+const BookingConfirmation = ({ 
+  escort, 
+  bookingDate, 
+  bookingTime, 
+  duration, 
+  location, 
+  onClose 
+}: BookingConfirmationProps) => {
+  const formattedDate = bookingDate.toLocaleDateString(undefined, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
   return (
-    <Card className="mt-4">
-      <CardContent className="p-4 space-y-4">
-        <h3 className="text-lg font-semibold">Booking Summary</h3>
-        
-        <div className="grid grid-cols-2 gap-2">
-          <div className="text-sm text-muted-foreground">Date:</div>
-          <div className="text-sm font-medium">
-            {data.date ? format(data.date, "MMMM d, yyyy") : "Not selected"}
-          </div>
-          
-          <div className="text-sm text-muted-foreground">Time:</div>
-          <div className="text-sm font-medium">{data.time || "Not selected"}</div>
-          
-          <div className="text-sm text-muted-foreground">Duration:</div>
-          <div className="text-sm font-medium">{data.duration || "Not selected"}</div>
-        </div>
-        
-        <Separator />
-        
-        <div className="grid grid-cols-2 gap-2">
-          <div className="text-sm text-muted-foreground">Escort:</div>
-          <div className="text-sm font-medium">{escort.name}</div>
-          
-          <div className="text-sm text-muted-foreground">Location:</div>
-          <div className="text-sm font-medium">{escort.location}</div>
-          
-          {escort.price && (
-            <>
-              <div className="text-sm text-muted-foreground">Hourly Rate:</div>
-              <div className="text-sm font-medium">${escort.price}/hr</div>
-            </>
-          )}
-        </div>
-        
-        <Separator />
-        
-        <div className="grid grid-cols-2 gap-2">
-          <div className="text-sm text-muted-foreground">Your Name:</div>
-          <div className="text-sm font-medium">{data.name || "Not provided"}</div>
-          
-          <div className="text-sm text-muted-foreground">Your Email:</div>
-          <div className="text-sm font-medium">{data.email || "Not provided"}</div>
-          
-          <div className="text-sm text-muted-foreground">Your Phone:</div>
-          <div className="text-sm font-medium">{data.phone || "Not provided"}</div>
-        </div>
-        
-        {data.message && (
-          <>
-            <Separator />
-            <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">Your Message:</div>
-              <div className="text-sm italic bg-muted p-2 rounded">{data.message}</div>
+    <Dialog open={true} onOpenChange={() => onClose()}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Booking Confirmation</DialogTitle>
+          <DialogDescription>
+            Please review your booking details below.
+          </DialogDescription>
+        </DialogHeader>
+        <Card>
+          <CardHeader>
+            <CardTitle>Booking Details</CardTitle>
+            <CardDescription>
+              You have successfully booked {escort.name}.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <div className="flex items-center space-x-4">
+              <CalendarDays className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium leading-none">Date</p>
+                <p className="text-sm text-muted-foreground">
+                  {formattedDate}
+                </p>
+              </div>
             </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
+            <div className="flex items-center space-x-4">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium leading-none">Time</p>
+                <p className="text-sm text-muted-foreground">
+                  {bookingTime} ({duration})
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium leading-none">Location</p>
+                <p className="text-sm text-muted-foreground">{location}</p>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button className="w-full" onClick={() => onClose()}>
+              <Check className="mr-2 h-4 w-4" />
+              Confirm
+            </Button>
+          </CardFooter>
+        </Card>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -1,12 +1,5 @@
-
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Brain, Activity, Zap, MessageCircle } from 'lucide-react';
-import { lucie } from '@/core/Lucie';
+import React, { useState } from 'react';
+import { lucieAI } from '@/core/Lucie';
 import { ModerateContentParams } from '@/types/core-systems';
 
 interface BrainCoreProps {
@@ -46,7 +39,7 @@ const BrainCore: React.FC<BrainCoreProps> = ({ onStatusUpdate }) => {
         contentType: 'text'
       };
       
-      const moderation = await lucie.moderateContent(moderationParams);
+      const moderation = await lucieAI.moderateContent(moderationParams);
       
       if (!moderation.safe) {
         setResponse('Neural query rejected: Content violates system parameters.');
@@ -54,7 +47,7 @@ const BrainCore: React.FC<BrainCoreProps> = ({ onStatusUpdate }) => {
       }
       
       // Process the query if it passed moderation
-      const result = await lucie.generateContent(query);
+      const result = await lucieAI.generateContent(query);
       setResponse(result.content);
       
       // Simulate system working hard

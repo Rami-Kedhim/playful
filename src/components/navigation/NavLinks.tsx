@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { AppPaths } from '@/routes/routeConfig';
+import { APP_PATHS } from '@/routes/routeConfig';
 import { cn } from '@/lib/utils';
 import { 
   Home, 
@@ -20,7 +20,7 @@ const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
   return (
     <nav className={cn("flex items-center space-x-4", className)}>
       <NavLink 
-        to={AppPaths.HOME}
+        to={APP_PATHS.HOME}
         className={({ isActive }) => 
           cn("text-sm flex items-center gap-1.5", isActive ? "font-bold text-primary" : "text-muted-foreground hover:text-foreground")
         }
@@ -29,7 +29,7 @@ const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
       </NavLink>
       
       <NavLink 
-        to={AppPaths.ESCORTS}
+        to={APP_PATHS.ESCORTS}
         className={({ isActive }) => 
           cn("text-sm flex items-center gap-1.5", isActive ? "font-bold text-primary" : "text-muted-foreground hover:text-foreground")
         }
@@ -38,7 +38,7 @@ const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
       </NavLink>
       
       <NavLink 
-        to={AppPaths.NEURAL_MONITOR}
+        to={APP_PATHS.NEURAL_MONITOR}
         className={({ isActive }) => 
           cn("text-sm flex items-center gap-1.5", isActive ? "font-bold text-primary" : "text-muted-foreground hover:text-foreground")
         }
@@ -47,7 +47,7 @@ const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
       </NavLink>
       
       <NavLink 
-        to={AppPaths.MESSAGES}
+        to={APP_PATHS.MESSAGES}
         className={({ isActive }) => 
           cn("text-sm flex items-center gap-1.5", isActive ? "font-bold text-primary" : "text-muted-foreground hover:text-foreground")
         }
@@ -56,7 +56,7 @@ const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
       </NavLink>
       
       <NavLink 
-        to={AppPaths.SAFETY}
+        to={APP_PATHS.SAFETY}
         className={({ isActive }) => 
           cn("text-sm flex items-center gap-1.5", isActive ? "font-bold text-primary" : "text-muted-foreground hover:text-foreground")
         }
@@ -65,7 +65,7 @@ const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
       </NavLink>
 
       <NavLink 
-        to={AppPaths.SEO}
+        to={APP_PATHS.SEO}
         className={({ isActive }) => 
           cn("text-sm flex items-center gap-1.5", isActive ? "font-bold text-primary" : "text-muted-foreground hover:text-foreground")
         }

@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { AppPaths } from '@/routes/routeConfig';
+import { APP_PATHS } from '@/routes/routeConfig';
 import { 
   Twitter, 
   Instagram, 
@@ -27,18 +26,18 @@ const UnifiedFooter: React.FC<UnifiedFooterProps> = ({
 
   // Legal links
   const legalLinks = [
-    { label: 'Terms', path: AppPaths.TERMS },
-    { label: 'Privacy', path: AppPaths.PRIVACY },
-    { label: 'Safety', path: AppPaths.SAFETY },
-    { label: 'Contact', path: AppPaths.CONTACT }
+    { label: 'Terms', path: APP_PATHS.TERMS },
+    { label: 'Privacy', path: APP_PATHS.PRIVACY },
+    { label: 'Safety', path: APP_PATHS.SAFETY },
+    { label: 'Contact', path: APP_PATHS.CONTACT }
   ];
   
   // App section links
   const appLinks = [
-    { label: 'Escorts', path: AppPaths.ESCORTS },
-    { label: 'Creators', path: AppPaths.CREATORS },
-    { label: 'Livecams', path: AppPaths.LIVECAMS },
-    { label: 'Metaverse', path: AppPaths.METAVERSE }
+    { label: 'Escorts', path: APP_PATHS.ESCORTS },
+    { label: 'Creators', path: APP_PATHS.CREATORS },
+    { label: 'Livecams', path: APP_PATHS.LIVECAMS },
+    { label: 'Metaverse', path: APP_PATHS.METAVERSE }
   ];
   
   // Social media links
@@ -78,7 +77,7 @@ const UnifiedFooter: React.FC<UnifiedFooterProps> = ({
             
             {/* Safety badge */}
             <Link 
-              to={AppPaths.SAFETY}
+              to={APP_PATHS.SAFETY}
               className="inline-flex items-center rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-sm text-primary hover:bg-primary/20 transition-colors"
             >
               <Shield className="w-3.5 h-3.5 mr-1.5" />
@@ -148,7 +147,7 @@ const UnifiedFooter: React.FC<UnifiedFooterProps> = ({
         
         <div className="mt-8 pt-6 border-t border-border text-center">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} UberEscorts. All rights reserved. <Link to={AppPaths.SAFETY} className="underline">Safety Information</Link>
+            © {currentYear} UberEscorts. All rights reserved. <Link to={APP_PATHS.SAFETY} className="underline">Safety Information</Link>
           </p>
         </div>
       </div>

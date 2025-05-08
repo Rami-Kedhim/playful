@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Heart, MessageSquare, Star } from 'lucide-react';
-import { lucie } from '@/core/Lucie';
+import { lucieAI } from '@/core/Lucie';
 
 interface CompanionCardProps {
   id: string;

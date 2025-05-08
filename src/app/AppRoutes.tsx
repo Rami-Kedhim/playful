@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { AppPaths } from '@/routes/routeConfig';
+import { APP_PATHS } from '@/routes/routeConfig';
 import Layout from '@/layouts/Layout';
 import AuthPage from '@/pages/AuthPage';
 import NotFoundPage from '@/pages/NotFoundPage';
@@ -29,6 +29,7 @@ import SettingsPage from '@/pages/SettingsPage';
 import MediaGenerationPage from '@/pages/MediaGenerationPage';
 import NSFWImageGeneratorPage from '@/pages/NSFWImageGeneratorPage';
 import LuciePage from '@/pages/LuciePage';
+import GuidelinesPage from '@/pages/GuidelinesPage';
 
 /**
  * Main application routes component
@@ -45,18 +46,19 @@ const AppRoutes = () => {
       {/* Main application routes */}
       <Route path="/" element={<Layout>{/* Fix: Providing children */}<Outlet /></Layout>}>
         {/* Core routes */}
-        <Route path={AppPaths.PROFILE} element={<ProfilePage />} />
-        <Route path={AppPaths.MESSAGES} element={<MessagesPage />} />
-        <Route path={AppPaths.WALLET} element={<WalletPage />} />
-        <Route path={AppPaths.FAVORITES} element={<FavoritesPage />} />
-        <Route path={AppPaths.DASHBOARD} element={<DashboardPage />} />
+        <Route path={APP_PATHS.PROFILE} element={<ProfilePage />} />
+        <Route path={APP_PATHS.MESSAGES} element={<MessagesPage />} />
+        <Route path={APP_PATHS.WALLET} element={<WalletPage />} />
+        <Route path={APP_PATHS.FAVORITES} element={<FavoritesPage />} />
+        <Route path={APP_PATHS.DASHBOARD} element={<DashboardPage />} />
         <Route path="/book" element={<BookPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/lucie" element={<LuciePage />} />
+        <Route path={APP_PATHS.GUIDELINES} element={<GuidelinesPage />} />
         
         {/* Escort routes */}
-        <Route path={AppPaths.ESCORTS} element={<EscortsPage />} />
-        <Route path={AppPaths.ESCORT_DETAIL} element={<EscortDetailPage />} />
+        <Route path={APP_PATHS.ESCORTS} element={<EscortsPage />} />
+        <Route path={APP_PATHS.ESCORT_DETAIL} element={<EscortDetailPage />} />
         
         {/* Creator routes */}
         <Route path="/creators" element={<CreatorsPage />} />
@@ -71,12 +73,12 @@ const AppRoutes = () => {
         <Route path="/nsfw-generator" element={<NSFWImageGeneratorPage />} />
         
         {/* Neural routes */}
-        <Route path={AppPaths.NEURAL_MONITOR} element={<NeuralMonitorPage />} />
-        <Route path={AppPaths.NEURAL_ANALYTICS} element={<NeuralAnalyticsPage />} />
+        <Route path={APP_PATHS.NEURAL_MONITOR} element={<NeuralMonitorPage />} />
+        <Route path={APP_PATHS.NEURAL_ANALYTICS} element={<NeuralAnalyticsPage />} />
         
         {/* Admin routes */}
         <Route 
-          path={AppPaths.ADMIN} 
+          path={APP_PATHS.ADMIN} 
           element={
             <AuthGuard requiredRoles={['admin']}>
               <AdminPage />
@@ -85,10 +87,10 @@ const AppRoutes = () => {
         />
         
         {/* SEO Dashboard */}
-        <Route path={AppPaths.SEO} element={<SEODashboard />} />
+        <Route path={APP_PATHS.SEO} element={<SEODashboard />} />
         
         {/* Safety routes */}
-        <Route path={AppPaths.SAFETY} element={<SafetyPage />} />
+        <Route path={APP_PATHS.SAFETY} element={<SafetyPage />} />
         <Route path="/safety/route-share" element={<RouteSharePage />} />
       </Route>
       

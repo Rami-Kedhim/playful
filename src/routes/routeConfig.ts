@@ -33,6 +33,13 @@ export interface AppPaths {
   MESSAGES: string;
   PULSE_BOOST: string;
   GUIDELINES: string; // Added GUIDELINES route
+  SEO: string;
+  SAFETY: string;
+  TERMS: string;
+  PRIVACY: string;
+  CONTACT: string;
+  METAVERSE: string;
+  BRAIN_HUB: string;
 }
 
 export const APP_PATHS: AppPaths = {
@@ -57,6 +64,15 @@ export const APP_PATHS: AppPaths = {
   MESSAGES: '/messages',
   PULSE_BOOST: '/boost',
   GUIDELINES: '/guidelines', // Added GUIDELINES route
+  SEO: '/seo',
+  SAFETY: '/safety',
+  TERMS: '/terms',
+  PRIVACY: '/privacy',
+  CONTACT: '/contact',
+  METAVERSE: '/metaverse',
+  BRAIN_HUB: '/brain-hub',
 };
 
+// Export both the interface and the constant
+export { APP_PATHS as AppPaths };
 export default APP_PATHS;

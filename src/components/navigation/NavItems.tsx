@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { AppPaths } from '@/routes/routeConfig';
+import { APP_PATHS } from '@/routes/routeConfig';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRole } from '@/hooks/auth/useRole';
 import { Brain, ShieldCheck, Sparkles, Wallet, User, MessageSquare } from 'lucide-react';
@@ -21,10 +20,10 @@ const NavItems = () => {
   return (
     <nav className="flex items-center space-x-4">
       <Link 
-        to={AppPaths.HOME} 
+        to={APP_PATHS.HOME} 
         className={cn(
           "text-sm font-medium transition-colors hover:text-primary flex items-center",
-          isActive(AppPaths.HOME) && "text-primary"
+          isActive(APP_PATHS.HOME) && "text-primary"
         )}
       >
         Home
@@ -55,10 +54,10 @@ const NavItems = () => {
           </Link>
           
           <Link 
-            to={AppPaths.WALLET} 
+            to={APP_PATHS.WALLET} 
             className={cn(
               "text-sm font-medium transition-colors hover:text-primary flex items-center",
-              isActive(AppPaths.WALLET) && "text-primary"
+              isActive(APP_PATHS.WALLET) && "text-primary"
             )}
           >
             <Wallet className="h-4 w-4 mr-1" />
@@ -79,10 +78,10 @@ const NavItems = () => {
       </Link>
       
       <Link 
-        to={AppPaths.BRAIN_HUB} 
+        to={APP_PATHS.BRAIN_HUB} 
         className={cn(
           "text-sm font-medium transition-colors hover:text-primary flex items-center",
-          isActive(AppPaths.BRAIN_HUB) && "text-primary"
+          isActive(APP_PATHS.BRAIN_HUB) && "text-primary"
         )}
       >
         <Brain className="h-4 w-4 mr-1" />
@@ -116,10 +115,10 @@ const NavItems = () => {
       )}
       
       <Link 
-        to={AppPaths.PULSE_BOOST} 
+        to={APP_PATHS.PULSE_BOOST} 
         className={cn(
           "text-sm font-medium transition-colors hover:text-primary flex items-center",
-          isActive(AppPaths.PULSE_BOOST) && "text-primary"
+          isActive(APP_PATHS.PULSE_BOOST) && "text-primary"
         )}
       >
         <Sparkles className="h-4 w-4 mr-1" />
