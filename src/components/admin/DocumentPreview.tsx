@@ -1,52 +1,109 @@
 
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Eye } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { VerificationDocument } from '@/types/verification';
+import { Eye, Download, Check, X } from 'lucide-react';
 
 interface DocumentPreviewProps {
   document: VerificationDocument;
-  onView: (url: string) => void;
+  onApprove?: (document: VerificationDocument, notes?: string) => void;
+  onReject?: (document: VerificationDocument, notes?: string) => void;
+  onClose?: () => void;
+  canModerate?: boolean;
 }
 
-const DocumentPreview = ({ document, onView }: DocumentPreviewProps) => {
-  const getDocumentTypeLabel = (type: string): string => {
-    switch (type) {
-      case 'id':
-        return 'ID Document';
-      case 'selfie':
-        return 'Selfie';
-      case 'address_proof':
-        return 'Proof of Address';
-      default:
-        return 'Other Document';
-    }
+const DocumentPreview: React.FC<DocumentPreviewProps> = ({
+  document,
+  onApprove,
+  onReject,
+  onClose,
+  canModerate = false,
+}) => {
+  const [notes, setNotes] = useState(document.notes || '');
+  const [isImage, setIsImage] = useState(false);
+  const [isPdf, setIsPdf] = useState(false);
+
+  React.useEffect(() => {
+    const fileExt = document.fileUrl.split('.').pop()?.toLowerCase();
+    setIsImage(["jpg", "jpeg", "png", "gif", "webp"].includes(fileExt || ''));
+    setIsPdf(fileExt === "pdf");
+  }, [document.fileUrl]);
+
+  const handleDownload = () => {
+    window.open(document.fileUrl, '_blank');
   };
 
   return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex justify-between items-center">
-          <div>
-            <h3 className="font-medium">{getDocumentTypeLabel(document.type)}</h3>
-            <p className="text-sm text-muted-foreground">
-              Uploaded: {document.uploadedAt instanceof Date 
-                ? document.uploadedAt.toLocaleDateString() 
-                : new Date(document.uploadedAt).toLocaleDateString()}
-            </p>
-          </div>
-          <Button size="sm" variant="outline" onClick={() => onView(document.fileUrl)}>
-            <Eye className="h-4 w-4 mr-1" /> View
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">{document.type}</h3>
+        <Button variant="ghost" size="sm" onClick={handleDownload}>
+          <Download className="h-4 w-4 mr-2" />
+          Download
+        </Button>
+      </div>
+
+      {isImage && (
+        <div className="border rounded-md overflow-hidden">
+          <img 
+            src={document.fileUrl} 
+            alt={document.type} 
+            className="w-full object-contain max-h-[500px]"
+          />
+        </div>
+      )}
+      
+      {isPdf && (
+        <div className="border rounded-md overflow-hidden h-[500px]">
+          <iframe 
+            src={document.fileUrl} 
+            className="w-full h-full"
+            title={document.type}
+          ></iframe>
+        </div>
+      )}
+
+      {!isImage && !isPdf && (
+        <div className="p-8 border rounded-md flex justify-center items-center">
+          <Button onClick={handleDownload}>
+            <Eye className="h-4 w-4 mr-2" />
+            View Document
           </Button>
         </div>
-        {document.notes && (
-          <div className="mt-2">
-            <p className="text-sm italic">{document.notes}</p>
+      )}
+
+      {canModerate && (
+        <>
+          <Textarea
+            placeholder="Add reviewer notes..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={3}
+          />
+
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={() => onReject?.(document, notes)}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Reject
+            </Button>
+            <Button 
+              variant="default" 
+              onClick={() => onApprove?.(document, notes)}
+            >
+              <Check className="h-4 w-4 mr-2" />
+              Approve
+            </Button>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </>
+      )}
+    </div>
   );
 };
 

@@ -13,8 +13,7 @@ import {
   ShieldQuestion, 
   Star 
 } from 'lucide-react';
-
-export type VerificationLevel = 'unverified' | 'basic' | 'premium' | 'gold';
+import { VerificationLevel, VERIFICATION_LEVELS } from '@/types/verification';
 
 interface EscortVerificationStatusProps {
   level: VerificationLevel;
@@ -28,16 +27,18 @@ interface EscortVerificationStatusProps {
 
 const verificationLabelMap: Record<VerificationLevel, string> = {
   unverified: 'Unverified',
+  none: 'Unverified', // Added for compatibility
   basic: 'Verified',
-  premium: 'Premium Verified',
-  gold: 'Gold Verified'
+  enhanced: 'Premium Verified',
+  premium: 'Gold Verified'
 };
 
 const verificationDescriptionMap: Record<VerificationLevel, string> = {
   unverified: 'This profile has not been verified yet.',
+  none: 'This profile has not been verified yet.', // Added for compatibility
   basic: 'Identity verified through official documents.',
-  premium: 'Enhanced verification including live video verification.',
-  gold: 'Highest level of verification with physical meeting.'
+  enhanced: 'Enhanced verification including live video verification.',
+  premium: 'Highest level of verification with physical meeting.'
 };
 
 const getVerificationIcon = (level: VerificationLevel, size: 'sm' | 'md' | 'lg') => {
@@ -45,12 +46,13 @@ const getVerificationIcon = (level: VerificationLevel, size: 'sm' | 'md' | 'lg')
   
   switch (level) {
     case 'unverified':
+    case 'none':
       return <ShieldX className={`${iconSize} text-destructive`} />;
     case 'basic':
       return <ShieldCheck className={`${iconSize} text-green-500`} />;
-    case 'premium':
+    case 'enhanced':
       return <ShieldCheck className={`${iconSize} text-blue-500`} />;
-    case 'gold':
+    case 'premium':
       return <Star className={`${iconSize} text-amber-500`} />;
     default:
       return <ShieldQuestion className={`${iconSize} text-muted-foreground`} />;
@@ -60,12 +62,13 @@ const getVerificationIcon = (level: VerificationLevel, size: 'sm' | 'md' | 'lg')
 const getVerificationBadgeVariant = (level: VerificationLevel) => {
   switch (level) {
     case 'unverified':
+    case 'none':
       return 'destructive';
     case 'basic':
       return 'success';
-    case 'premium':
+    case 'enhanced':
       return 'secondary';
-    case 'gold':
+    case 'premium':
       return 'default'; // Instead of 'gold' which doesn't exist in the Badge component
     default:
       return 'outline';
@@ -85,8 +88,8 @@ const EscortVerificationStatus: React.FC<EscortVerificationStatusProps> = ({
     ? new Date(verifiedDate).toLocaleDateString() 
     : undefined;
 
-  const label = verificationLabelMap[level];
-  const description = verificationDescriptionMap[level];
+  const label = verificationLabelMap[level] || 'Unknown';
+  const description = verificationDescriptionMap[level] || 'Verification status unknown';
   const icon = getVerificationIcon(level, size);
   const badgeVariant = getVerificationBadgeVariant(level);
 

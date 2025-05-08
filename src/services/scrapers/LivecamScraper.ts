@@ -23,6 +23,8 @@ export const LivecamScraper = {
         const name = displayName;
         const imageUrl = camElement.querySelector("img")?.getAttribute("src") || "";
         const thumbnailUrl = camElement.querySelector("img")?.getAttribute("data-thumbnail") || imageUrl;
+        const streamUrl = camElement.getAttribute("data-stream-url") || "";
+        const region = camElement.getAttribute("data-region") || "Global";
         const tags: string[] = [];
         const category = camElement.getAttribute("data-category") || "Other";
         const language = camElement.getAttribute("data-language") || "English";
@@ -35,17 +37,19 @@ export const LivecamScraper = {
 
         const livecam: LivecamModel = {
           id,
-          displayName,
           name,
+          displayName,
+          username,
           thumbnailUrl,
           isStreaming,
           isLive: isStreaming,
           viewerCount,
-          username,
           imageUrl,
           tags,
           category,
-          language
+          language,
+          streamUrl,
+          region
         };
 
         livecams.push(livecam);

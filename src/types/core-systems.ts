@@ -1,39 +1,25 @@
 
-// Import types without conflicting with local declarations
-import { OxumSystem as ImportedOxumSystem } from './oxum';
+// Add this file if it doesn't exist or update it if it does
 
-// Core system types
 export interface SystemStatus {
   operational: boolean;
-  latency?: number;
-  services?: {
-    auth: string;
-    analytics: string;
-    ai: string;
-    wallet: string;
-    seo: string;
-  };
-  queueLength?: number;
-  processing?: boolean;
-  uptime?: number;
-  lastReboot?: string;
   isActive?: boolean;
-}
-
-export interface SystemIntegrityResult {
-  isValid: boolean;
-  status: string;
-  errors: string[];
-  warnings: string[];
-  lastChecked: string;
-}
-
-export interface SystemHealthMetrics {
-  cpu: number;
-  memory: number;
-  disk: number;
-  network: number;
-  load: number;
+  services: {
+    [key: string]: string;
+  };
+  queueLength: number;
+  processing: boolean;
+  uptime: number;
+  lastReboot: string;
+  performance?: number;
+  lastUpdate?: string;
+  serviceStatus?: {
+    [key: string]: {
+      operational: boolean;
+      latency?: number;
+    };
+  };
+  isOperational?: boolean;
 }
 
 export interface SessionValidationResult {
@@ -44,60 +30,101 @@ export interface SessionValidationResult {
   timestamp: string;
 }
 
+export interface SystemIntegrityResult {
+  isValid: boolean;
+  status: string;
+  errors: string[];
+  warnings: string[];
+  lastChecked: string;
+  integrity?: number;
+  checks?: {
+    [key: string]: boolean;
+  };
+  overallStatus?: 'good' | 'warning' | 'critical';
+}
+
+export interface SystemHealthMetrics {
+  cpu: number;
+  memory: number;
+  disk: number;
+  network: number;
+  load: number;
+}
+
+export interface UberCoreSystem {
+  getSystemStatus(): SystemStatus;
+  getSystemHealthMetrics(): SystemHealthMetrics;
+  checkSystemIntegrity(): SystemIntegrityResult;
+  validateSession(sessionId: string): SessionValidationResult;
+}
+
+export interface LucieAISystem {
+  initialize(): Promise<boolean>;
+  shutdown(): void;
+  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
+  generateContent(params: GenerateContentParams): Promise<GenerateContentResult>;
+  analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult>;
+}
+
+export interface OxumSystem {
+  initialize(): Promise<boolean>;
+  shutdown(): void;
+  getSystemStatus(): SystemStatus | Promise<SystemStatus>;
+  getUserScore(userId: string): number;
+  getProfileScore(profileId: string): number;
+  boostScore(profileId: string): Promise<boolean>;
+  boostAllocationEigen(profileId: string, boostLevel: number): Promise<number[]>;
+  calculateRecommendations(userId: string): string[];
+}
+
 export interface ModerateContentParams {
   content: string;
-  context?: string;
+  type?: 'text' | 'image' | 'video';
+  userId?: string;
   strictness?: number;
-  contentType?: string; // Adding this to fix the error
 }
 
 export interface ModerateContentResult {
-  isApproved: boolean;
+  allowed: boolean;
+  categories: {
+    [key: string]: number;
+  };
   score: number;
-  reasons?: string[];
-  suggestedChanges?: string;
+  isSafe?: boolean;
+  safe?: boolean;
+}
+
+export interface GenerateContentParams {
+  prompt: string;
+  type?: 'text' | 'image';
+  maxTokens?: number;
+  temperature?: number;
+  userId?: string;
 }
 
 export interface GenerateContentResult {
   content: string;
-  metadata?: Record<string, any>;
-  tokens?: number;
+  usage: {
+    tokens: number;
+  };
+  moderated?: boolean;
+  warnings?: string[];
+}
+
+export interface SentimentAnalysisParams {
+  text: string;
+  language?: string;
+  detailed?: boolean;
 }
 
 export interface SentimentAnalysisResult {
   sentiment: 'positive' | 'negative' | 'neutral';
   score: number;
-  entities?: Array<{
-    text: string;
-    sentiment: 'positive' | 'negative' | 'neutral';
-    score: number;
-  }>;
-}
-
-export interface LucieAISystem {
-  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
-  generateContent(prompt: string): Promise<GenerateContentResult>;
-  analyzeSentiment(text: string): Promise<SentimentAnalysisResult>;
-}
-
-export interface UberCoreSystem {
-  getSystemStatus(): SystemStatus;
-  checkSystemIntegrity(): SystemIntegrityResult;
-  getSystemHealthMetrics(): SystemHealthMetrics;
-  validateSession(sessionId: string): SessionValidationResult;
-  initializeAutomaticSeo(): boolean;
-  checkSubsystemHealth(): { name: string, status: string, health: number }[];
-}
-
-// Adding RecommendedAction interface
-export interface RecommendedAction {
-  id: string;
-  title: string;
-  description: string;
-  priority?: 'low' | 'medium' | 'high';
-  action?: string;
-  actionUrl?: string;
-  category?: string;
-  dismissible?: boolean;
-  expiresAt?: string | Date;
+  entities?: {
+    [key: string]: {
+      sentiment: 'positive' | 'negative' | 'neutral';
+      score: number;
+    };
+  };
+  confidence?: number;
 }

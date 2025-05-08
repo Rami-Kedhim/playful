@@ -1,145 +1,139 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle, Clock, Shield } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { VerificationRequest, VerificationStatus as VerificationStatusEnum, VERIFICATION_LEVELS } from '@/types/verification';
 import { useVerificationStatus } from './hooks/useVerificationStatus';
-import { VerificationLevel, VerificationStatus as VerificationStatusEnum } from '@/types/verification';
+import { Clock, CheckCircle, XCircle, AlertCircle, FileText } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { formatDate } from '@/utils/date-utils';
 
-const VerificationStatus: React.FC = () => {
-  const { status: verificationStatus, loading, error, verificationRequest } = useVerificationStatus();
+interface VerificationStatusComponentProps {
+  onRequestVerification?: () => void;
+}
+
+const VerificationStatusComponent: React.FC<VerificationStatusComponentProps> = ({
+  onRequestVerification
+}) => {
+  const { status, verificationRequest, loading, error } = useVerificationStatus();
   
   if (loading) {
     return (
-      <div className="flex justify-center items-center p-8">
-        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex items-center justify-center h-40">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
-  
+
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
-    );
-  }
-  
-  const getStatusBadge = () => {
-    switch (verificationStatus) {
-      case VerificationStatusEnum.APPROVED:
-        return <Badge className="bg-green-500">Verified</Badge>;
-      case VerificationStatusEnum.PENDING:
-        return <Badge className="bg-yellow-500">Pending</Badge>;
-      case VerificationStatusEnum.IN_REVIEW:
-        return <Badge className="bg-blue-500">In Review</Badge>;
-      case VerificationStatusEnum.REJECTED:
-        return <Badge className="bg-red-500">Rejected</Badge>;
-      default:
-        return <Badge>Not Verified</Badge>;
-    }
-  };
-  
-  if (!verificationRequest) {
-    return (
-      <Card>
+      <Card className="border-destructive bg-destructive/5">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            Verification Status
-            <Badge variant="outline">Not Submitted</Badge>
+          <CardTitle className="flex items-center text-destructive">
+            <AlertCircle className="mr-2 h-5 w-5" />
+            Error
           </CardTitle>
-          <CardDescription>You have not submitted any verification documents yet.</CardDescription>
+          <CardDescription>There was an error loading your verification status</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Verify your identity to unlock all features and build trust with other users.
-            </p>
-            <Button>Start Verification</Button>
-          </div>
+          <p className="text-sm text-muted-foreground">{error}</p>
         </CardContent>
+        <CardFooter>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </CardFooter>
       </Card>
     );
   }
-  
+
+  if (!status || !verificationRequest) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Verification Status</CardTitle>
+          <CardDescription>You haven't requested verification yet</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Verifying your profile helps establish trust with other users and unlocks additional features.
+          </p>
+        </CardContent>
+        <CardFooter>
+          <Button onClick={onRequestVerification}>Request Verification</Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          Verification Status
-          {getStatusBadge()}
-        </CardTitle>
-        <CardDescription>
-          {verificationRequest.requested_level === VerificationLevel.BASIC 
-            ? "Basic verification" 
-            : verificationRequest.requested_level === VerificationLevel.ENHANCED
-              ? "Enhanced verification"
-              : "Premium verification"}
-        </CardDescription>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle>Verification Status</CardTitle>
+            <CardDescription>
+              {verificationRequest.requested_level ? 
+                `You requested ${verificationRequest.requested_level} verification` :
+                `You requested ${VERIFICATION_LEVELS.BASIC} verification`}
+            </CardDescription>
+          </div>
+          <StatusBadge status={status} />
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {verificationStatus === VerificationStatusEnum.PENDING && (
-            <Alert>
-              <Clock className="h-4 w-4" />
-              <AlertTitle>Pending Review</AlertTitle>
-              <AlertDescription>
-                Your verification is pending review. This typically takes 1-3 business days.
-              </AlertDescription>
-            </Alert>
-          )}
-          
-          {verificationStatus === VerificationStatusEnum.APPROVED && (
-            <Alert className="bg-green-50 border-green-200">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <AlertTitle className="text-green-700">Verification Approved</AlertTitle>
-              <AlertDescription className="text-green-600">
-                Your account has been verified. You now have access to all features.
-              </AlertDescription>
-            </Alert>
-          )}
-          
-          {verificationStatus === VerificationStatusEnum.REJECTED && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Verification Rejected</AlertTitle>
-              <AlertDescription>
-                {verificationRequest.rejectionReason || "Your verification was rejected. Please submit clearer documents."}
-              </AlertDescription>
-            </Alert>
-          )}
+          <div>
+            <h4 className="text-sm font-medium mb-1">Submitted</h4>
+            <p className="text-sm text-muted-foreground">
+              {formatDate(verificationRequest.submittedAt || verificationRequest.created_at || new Date().toISOString())}
+            </p>
+          </div>
           
           {verificationRequest.documents && verificationRequest.documents.length > 0 && (
-            <div className="mt-4">
-              <h3 className="text-sm font-semibold mb-2">Submitted Documents</h3>
-              <ul className="space-y-2">
-                {verificationRequest.documents.map((doc, index) => (
-                  <li key={index} className="text-sm flex items-center">
-                    <Shield className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="capitalize">{doc.documentType.replace('_', ' ')}</span>
-                  </li>
+            <div>
+              <h4 className="text-sm font-medium mb-1">Documents</h4>
+              <div className="flex flex-wrap gap-2">
+                {verificationRequest.documents.map(doc => (
+                  <Badge key={doc.id} variant="outline" className="flex items-center">
+                    <FileText className="h-3 w-3 mr-1" />
+                    {doc.type || doc.documentType || "Document"}
+                  </Badge>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
-          
-          {verificationStatus === VerificationStatusEnum.REJECTED && (
-            <Button className="w-full mt-4">Submit New Verification</Button>
-          )}
-          
-          {verificationRequest.submittedAt && (
-            <p className="text-xs text-muted-foreground mt-4">
-              Submitted on: {new Date(verificationRequest.submittedAt).toLocaleDateString()}
-            </p>
+
+          {(verificationRequest.rejectionReason || verificationRequest.reviewer_notes) && (
+            <div>
+              <h4 className="text-sm font-medium text-destructive mb-1">Feedback</h4>
+              <p className="text-sm text-destructive/80 bg-destructive/5 p-3 rounded-md">
+                {verificationRequest.rejectionReason || verificationRequest.reviewer_notes}
+              </p>
+            </div>
           )}
         </div>
       </CardContent>
+      <CardFooter className="flex justify-end">
+        {status === "rejected" && (
+          <Button onClick={onRequestVerification}>Submit Again</Button>
+        )}
+      </CardFooter>
     </Card>
   );
 };
 
-export default VerificationStatus;
+const StatusBadge = ({ status }: { status: string }) => {
+  switch (status) {
+    case VerificationStatusEnum.PENDING:
+      return <Badge variant="outline" className="flex items-center"><Clock className="h-3 w-3 mr-1" /> Pending</Badge>;
+    case VerificationStatusEnum.IN_REVIEW:
+      return <Badge variant="secondary" className="flex items-center"><Clock className="h-3 w-3 mr-1" /> In Review</Badge>;
+    case VerificationStatusEnum.APPROVED:
+      return <Badge variant="success" className="flex items-center bg-green-500"><CheckCircle className="h-3 w-3 mr-1" /> Approved</Badge>;
+    case VerificationStatusEnum.REJECTED:
+      return <Badge variant="destructive" className="flex items-center"><XCircle className="h-3 w-3 mr-1" /> Rejected</Badge>;
+    default:
+      return <Badge variant="outline">Unknown</Badge>;
+  }
+};
+
+export default VerificationStatusComponent;
