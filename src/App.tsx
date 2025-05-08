@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { APP_PATHS } from '@/routes/routeConfig';
@@ -15,9 +16,9 @@ import SettingsPage from '@/pages/SettingsPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import { UberEcosystemProvider } from '@/contexts/UberEcosystemContext';
 import { ServiceTypeProvider } from '@/contexts/ServiceTypeContext';
-import AuthPage from '@/pages/AuthPage'; // We'll create this file next
-import ProfilePage from '@/pages/ProfilePage'; // We'll create this file later
-import WalletPage from '@/pages/WalletPage'; // We'll create this file later
+import AuthPage from '@/pages/AuthPage';
+import ProfilePage from '@/pages/ProfilePage';
+import WalletPage from '@/pages/Wallet'; // Updated to correct casing
 
 function App() {
   return (

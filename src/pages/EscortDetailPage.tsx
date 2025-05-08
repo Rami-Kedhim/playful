@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { UnifiedLayout } from '@/layouts';
@@ -94,8 +93,6 @@ const EscortDetailPage = () => {
                 });
               }} 
             />
-            
-            {/* Additional cards or components can be added here */}
           </div>
         </div>
       </div>
