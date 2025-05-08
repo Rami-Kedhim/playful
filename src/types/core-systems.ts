@@ -1,108 +1,102 @@
 
-export interface ModerateContentParams {
-  content: string;
-  contentType: string;
-  context?: string; // Add context property since it's being used
-}
-
-export interface ModerateContentResult {
-  isSafe: boolean; 
-  safe?: boolean; // Add this for backward compatibility
-  score: number;
-  issues: string[];
-  blockedCategories: string[];
-}
-
-export interface GenerateContentResult {
-  content: string;
-  moderated?: boolean; // Add for backward compatibility
-  originalLength: number;
-  moderatedLength: number;
-  warnings: string[];
-}
-
-export interface SentimentAnalysisResult {
-  score: number;
-  sentiment: 'positive' | 'negative' | 'neutral';
-  confidence?: number; // Add for backward compatibility
-}
-
-export interface LucieAISystem {
-  initialize(): Promise<boolean>;
-  generateText(prompt: string): Promise<string>;
-  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
-  generateContent(prompt: string, options?: Record<string, any>): Promise<GenerateContentResult>;
-  analyzeSentiment(text: string): Promise<SentimentAnalysisResult>;
-  getSystemStatus(): { operational: boolean; modules: Record<string, string> };
-  configure(options: Record<string, any>): void;
-  generateResponse(input: string): Promise<string>;
-}
+// Core system types
 
 export interface SystemStatus {
   operational: boolean;
-  latency: number;
-  uptime: number;
-  messageLength?: number; // Add for backward compatibility
+  isActive: boolean;
   services: {
     auth: string;
     analytics: string;
     ai: string;
     wallet: string;
+    seo: string;
   };
+  queueLength: number;
+  processing: boolean;
+  uptime: number;
+  lastReboot: string;
+  messageLength?: number; // Make this optional for compatibility
 }
 
 export interface SystemIntegrityResult {
-  valid: boolean;
-  isValid?: boolean; // Add for backward compatibility 
-  message: string;
-  details: {
-    database: string;
-    fileSystem: string;
-    network: string;
-  };
+  isValid: boolean; // Changed from valid to isValid for compatibility
+  status: string;
+  errors: string[];
+  warnings: string[];
+  lastChecked: string;
 }
 
 export interface SystemHealthMetrics {
-  load?: number; // Add for backward compatibility
+  cpu: number;
   memory: number;
-  latency: number;
-  errorRate: number;
-  averageResponseTime: number;
-  systemLoad: number;
-  cpuUsage: number;
-  memoryUsage: number;
+  disk: number;
+  network: number;
+  load?: number; // Make this optional for compatibility
 }
 
 export interface SessionValidationResult {
-  valid: boolean;
-  isValid?: boolean; // Add for backward compatibility
+  isValid: boolean;
+  userId: string;
+  username: string;
+  timestamp: string;
+  sessionId?: string; // Add for compatibility
+  expiresAt?: string; // Add for compatibility
+}
+
+export interface ModerateContentParams {
+  content: string;
+  context?: string; // Add for compatibility
   userId?: string;
-  sessionId?: string;
-  expiresAt?: Date;
+  strictMode?: boolean;
 }
 
-export interface UberCoreSystem {
-  initialize(): Promise<boolean>;
-  shutdown(): Promise<void>;
-  checkSystemStatus(): SystemStatus;
-  checkSystemIntegrity(): SystemIntegrityResult;
-  getSystemHealth(): SystemHealthMetrics;
-  validateUserSession(token: string): SessionValidationResult;
-}
-
-export interface RecommendedAction {
-  id: string;
-  title: string;
-  description: string;
+export interface ModerateContentResult {
+  isSafe: boolean;
+  safe?: boolean; // Add for compatibility
+  issues?: string[]; // Add for compatibility
+  blockedCategories?: string[]; // Add for compatibility
+  score: number;
+  category: string;
   action: string;
-  priority: 'high' | 'medium' | 'low';
-  target?: string;
-  icon?: string;
+}
+
+export interface GenerateContentParams {
+  prompt: string;
+  context?: string;
+  model?: string;
+  maxTokens?: number;
+  temperature?: number;
+}
+
+export interface GenerateContentResult {
+  content: string;
+  moderated?: boolean; // Add for compatibility
+  tokens: number;
+  model: string;
+  finishReason: string;
+}
+
+export interface SentimentAnalysisParams {
+  text: string;
+  detailed?: boolean;
+}
+
+export interface SentimentAnalysisResult {
+  sentiment: 'positive' | 'negative' | 'neutral';
+  confidence?: number; // Add for compatibility
+  score: number;
+  keywords?: string[];
+}
+
+export interface LucieAISystem {
+  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
+  analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult>;
+  generateResponse(params: GenerateContentParams): Promise<GenerateContentResult>;
+  getSystemStatus(): SystemStatus; // Add for compatibility
 }
 
 export interface OxumSystem {
-  checkSystemStatus(): Promise<any>;
-  boostAllocationEigen(): Promise<any>;
-  calculateBoostScore(): Promise<any>;
-  configure(): Promise<any>;
+  calculateScore(data: any): number;
+  optimizeBoostPerformance(profile: any): any;
+  checkSystemStatus(): SystemStatus; // Add for compatibility
 }

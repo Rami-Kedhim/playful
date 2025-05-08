@@ -1,98 +1,89 @@
 
-import { SystemStatus, SystemIntegrityResult, SystemHealthMetrics, SessionValidationResult } from '@/types/core-systems';
-import { LucieAI } from './Lucie';
-import { oxum } from './Oxum';
+import { LucieAISystem, SystemStatus, SystemIntegrityResult, SystemHealthMetrics, SessionValidationResult } from '@/types/core-systems';
 import { UberWallet } from './UberWallet';
+import { OxumSystem } from '@/types/oxum';
+import { AutomaticSEO } from './AutomaticSEO';
 
-/**
- * UberCore - The central system that coordinates all the subsystems
- */
-class UberCore {
-  private lucieAI: LucieAI;
+export class UberCore {
+  private lucieAI: LucieAISystem;
+  private oxumSystem: OxumSystem;
   private wallet: UberWallet;
+  private automaticSeo: AutomaticSEO;
   
-  constructor() {
-    this.lucieAI = new LucieAI();
+  constructor(lucieAI: LucieAISystem, oxumSystem: OxumSystem) {
+    this.lucieAI = lucieAI;
+    this.oxumSystem = oxumSystem;
     this.wallet = new UberWallet();
+    this.automaticSeo = new AutomaticSEO();
   }
   
-  async initialize(): Promise<boolean> {
-    console.log('UberCore initializing...');
-    try {
-      // Initialize various subsystems
-      await this.lucieAI.initialize();
-      
-      console.log('UberCore initialization complete');
-      return true;
-    } catch (error) {
-      console.error('UberCore initialization failed:', error);
-      return false;
-    }
-  }
-  
-  async shutdown(): Promise<void> {
-    console.log('UberCore shutting down...');
-    // Perform cleanup tasks
-  }
-  
-  checkSystemStatus(): SystemStatus {
-    // Get status of various subsystems
-    const aiSystemStatus = this.lucieAI.getSystemStatus();
-    
+  public getSystemStatus(): SystemStatus {
+    // Mock system status implementation
     return {
-      operational: aiSystemStatus.operational,
-      latency: 15,
-      uptime: 3600,
-      messageLength: 0, // This is for backward compatibility
+      operational: true,
+      isActive: true,
       services: {
-        auth: 'operational',
-        analytics: 'operational',
-        ai: aiSystemStatus.operational ? 'operational' : 'degraded',
-        wallet: 'operational'
-      }
+        auth: 'active',
+        analytics: 'active',
+        ai: 'active',
+        wallet: 'active',
+        seo: 'active'
+      },
+      queueLength: 0,
+      processing: false,
+      uptime: 100,
+      lastReboot: new Date().toISOString(),
+      messageLength: 10 // Added for compatibility
     };
   }
   
-  checkSystemIntegrity(): SystemIntegrityResult {
-    // In a real system, would do more extensive checks
+  public checkSystemIntegrity(): SystemIntegrityResult {
+    // Mock system integrity check
     return {
-      valid: true,
-      isValid: true, // For backward compatibility
-      message: 'All systems operational',
-      details: {
-        database: 'connected',
-        fileSystem: 'operational',
-        network: 'operational'
-      }
+      isValid: true, // Added for compatibility
+      status: 'ok',
+      errors: [],
+      warnings: [],
+      lastChecked: new Date().toISOString()
     };
   }
   
-  getSystemHealth(): SystemHealthMetrics {
+  public getSystemHealthMetrics(): SystemHealthMetrics {
+    // Mock system health metrics
     return {
-      load: 0.3, // For backward compatibility
-      memory: 60,
-      latency: 15,
-      errorRate: 0.01,
-      averageResponseTime: 150,
-      systemLoad: 0.3,
-      cpuUsage: 25,
-      memoryUsage: 60
+      cpu: 10,
+      memory: 20,
+      disk: 5,
+      network: 15,
+      load: 12 // Added for compatibility
     };
   }
   
-  validateUserSession(token: string): SessionValidationResult {
-    // In a real system, would validate against database/auth service
-    const isValid = token && token.length > 10;
-    
+  public validateSession(sessionId: string): SessionValidationResult {
+    // Mock session validation
     return {
-      valid: isValid,
-      isValid: isValid, // For backward compatibility
-      userId: isValid ? 'user-123' : undefined,
-      sessionId: isValid ? 'session-456' : undefined,
-      expiresAt: isValid ? new Date(Date.now() + 24 * 60 * 60 * 1000) : undefined
+      isValid: true, // Changed from valid to isValid
+      sessionId: sessionId, // Added for compatibility
+      expiresAt: new Date(Date.now() + 3600 * 1000).toISOString(), // Added for compatibility
+      userId: 'user-1',
+      username: 'user1',
+      timestamp: new Date().toISOString()
     };
+  }
+  
+  public initializeAutomaticSeo(): boolean {
+    // Mock initialization of automatic SEO
+    return this.automaticSeo.initialize();
+  }
+  
+  public checkSubsystemHealth(): { name: string, status: string, health: number }[] {
+    // Mock subsystem health check
+    return [
+      { name: 'auth', status: 'operational', health: 100 },
+      { name: 'ai', status: 'operational', health: 95 },
+      { name: 'analytics', status: 'operational', health: 97 },
+      { name: 'wallet', status: 'operational', health: 99 },
+      { name: 'seo', status: 'operational', health: 98 }
+    ];
   }
 }
-
-export const uberCore = new UberCore();
-export default uberCore;

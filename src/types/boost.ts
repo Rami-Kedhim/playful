@@ -46,7 +46,7 @@ export interface BoostPackage {
   boostMultiplier?: number;
   isMostPopular?: boolean;
   isRecommended?: boolean;
-  isPopular?: boolean; // Add this property
+  isPopular?: boolean;
 }
 
 export interface BoostPurchaseRequest {

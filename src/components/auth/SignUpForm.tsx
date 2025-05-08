@@ -40,11 +40,12 @@ const SignUpForm = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Fix arguments - removed confirmPassword as it's not in RegisterCredentials
-      const credentials: RegisterCredentials = {
+      // Fix arguments - Pass all necessary parameters
+      const credentials = {
         email: data.email,
         password: data.password,
-        username: data.username
+        username: data.username,
+        confirmPassword: data.confirmPassword
       };
       await register(credentials);
     } catch (err: any) {

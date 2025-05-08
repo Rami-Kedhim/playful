@@ -1,25 +1,23 @@
 
 import React from 'react';
 import { useBoost } from '@/hooks/useBoost';
-import BoostAnalytics from './BoostAnalytics';
+import BoostAnalytics from '@/components/boost/BoostAnalytics';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Zap } from 'lucide-react';
 
 const BoostManager = ({ profileId }: { profileId?: string }) => {
+  const boost = useBoost();
+  
   const {
     isActive,
-    packages,
-    boostProfile,
-    cancelBoost,
-    loading,
     boostStatus,
     hermesStatus,
     eligibility,
     remainingTime,
     getBoostAnalytics
-  } = useBoost();
+  } = boost;
 
   return (
     <div className="space-y-6">
@@ -41,7 +39,7 @@ const BoostManager = ({ profileId }: { profileId?: string }) => {
                 </div>
                 
                 <div className="flex items-center">
-                  {loading ? (
+                  {boost.loading ? (
                     <Button disabled>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Loading...

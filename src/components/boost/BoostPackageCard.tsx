@@ -1,77 +1,92 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, Star } from 'lucide-react';
+import { CheckIcon, Zap } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { BoostPackage } from '@/types/boost';
 
 interface BoostPackageCardProps {
-  boostPackage: BoostPackage;
-  onSelect: (packageId: string) => void;
-  isSelected?: boolean;
-  isDisabled?: boolean;
-  loading?: boolean;
+  pkg: BoostPackage;
+  isSelected: boolean;
+  onSelect: () => void;
+  className?: string;
+  isPopular?: boolean;
+  formatDuration?: (duration: string) => string;
 }
 
 const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
-  boostPackage,
+  pkg,
+  isSelected,
   onSelect,
-  isSelected = false,
-  isDisabled = false,
-  loading = false,
+  className,
+  isPopular,
+  formatDuration
 }) => {
-  const {
-    id,
-    name,
-    description,
-    duration,
-    price,
-    features,
-    boost_power
-  } = boostPackage;
-
-  // Add a default value for isMostPopular if it doesn't exist
-  const isMostPopular = boostPackage.isMostPopular || false;
-
+  // Use formatted duration if available
+  const duration = formatDuration ? formatDuration(pkg.duration) : pkg.duration;
+  
   return (
-    <Card className={`relative ${isSelected ? 'border-primary' : ''}`}>
-      {isMostPopular && (
-        <div className="absolute -top-3 -right-3 bg-yellow-500 text-white rounded-full p-1">
-          <Star className="h-4 w-4" />
-        </div>
+    <div
+      className={cn(
+        "p-3 border rounded-md cursor-pointer transition-all",
+        isSelected 
+          ? "border-primary bg-primary/5" 
+          : "border-border hover:border-primary/50",
+        className
       )}
-      
-      <CardHeader>
-        <CardTitle>{name}</CardTitle>
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </CardHeader>
-      
-      <CardContent>
-        <div className="mb-4">
-          <p className="text-3xl font-bold">${price}</p>
-          <p className="text-sm text-muted-foreground">Duration: {duration}</p>
+      onClick={onSelect}
+    >
+      <div className="flex justify-between items-start">
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5">
+            <h3 className="font-medium text-sm">{pkg.name}</h3>
+            {(isPopular || pkg.isMostPopular) && (
+              <span className="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.5 rounded">
+                Popular
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">{pkg.description}</p>
         </div>
         
-        <div className="space-y-2">
-          {features.map((feature, index) => (
-            <div key={index} className="flex items-start">
-              <Check className="h-4 w-4 text-primary mr-2 mt-0.5" />
-              <span className="text-sm">{feature}</span>
-            </div>
-          ))}
+        <div className={cn(
+          "w-5 h-5 rounded-full flex items-center justify-center border",
+          isSelected 
+            ? "bg-primary border-primary text-primary-foreground" 
+            : "border-input bg-background"
+        )}>
+          {isSelected && <CheckIcon className="w-3 h-3" />}
         </div>
-      </CardContent>
+      </div>
       
-      <CardFooter>
-        <Button
-          className="w-full"
-          onClick={() => onSelect(id)}
-          disabled={isDisabled || loading}
-        >
-          {loading ? "Processing..." : isSelected ? "Selected" : "Choose Plan"}
-        </Button>
-      </CardFooter>
-    </Card>
+      <div className="mt-3 grid grid-cols-2 gap-4">
+        <div>
+          <div className="text-xs text-muted-foreground">Duration</div>
+          <div className="text-sm">{duration}</div>
+        </div>
+        
+        <div>
+          <div className="text-xs text-muted-foreground">Price</div>
+          <div className="text-sm">{pkg.price_ubx || pkg.price} credits</div>
+        </div>
+      </div>
+      
+      <div className="mt-3">
+        <div className="text-xs text-muted-foreground mb-1">Features</div>
+        <ul className="text-xs space-y-1">
+          {pkg.features?.slice(0, 3).map((feature, i) => (
+            <li key={i} className="flex items-center gap-1.5">
+              <Zap className="h-3 w-3 text-blue-500" strokeWidth={2.5} />
+              <span>{feature}</span>
+            </li>
+          ))}
+          {pkg.features && pkg.features.length > 3 && (
+            <li className="text-xs text-muted-foreground">
+              +{pkg.features.length - 3} more
+            </li>
+          )}
+        </ul>
+      </div>
+    </div>
   );
 };
 

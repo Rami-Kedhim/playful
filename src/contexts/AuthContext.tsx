@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useAuth as useAuthHook } from '@/hooks/auth/useAuthContext';
+import { useAuthContext } from '@/hooks/auth/useAuthContext';
 import type { AuthContextType } from '@/hooks/auth/types';
 
 // Create the context with a default undefined value
@@ -8,7 +8,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // Provider component that wraps the app and makes auth object available to children
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const auth = useAuthHook();
+  const auth = useAuthContext();
   
   return (
     <AuthContext.Provider value={auth}>

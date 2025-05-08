@@ -1,33 +1,4 @@
 
-export interface PulseBoost {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  price_ubx: number;
-  duration: string;
-  durationMinutes: number;
-  visibility: string;
-  visibility_increase: number;
-  color?: string;
-  badgeColor?: string;
-  features: string[];
-  isMostPopular?: boolean;
-  boost_power?: number;
-  boostMultiplier?: number;
-}
-
-export interface EnhancedBoostStatus {
-  isActive: boolean;
-  packageId?: string;
-  expiresAt?: Date;
-  timeRemaining?: string;
-  progress?: number;
-  boostPackage?: PulseBoost;
-  packageName?: string;
-  startedAt?: Date;
-}
-
 export interface BoostPackage {
   id: string;
   name: string;
@@ -42,7 +13,6 @@ export interface BoostPackage {
   color?: string;
   badgeColor?: string;
   boost_power?: number;
-  boostMultiplier?: number;
 }
 
 export interface BoostPurchaseRequest {
@@ -54,8 +24,6 @@ export interface BoostPurchaseResult {
   success: boolean;
   boostId?: string;
   error?: string | null;
-  message?: string;
-  transactionId?: string;
 }
 
 export interface BoostAnalytics {
@@ -70,18 +38,11 @@ export interface BoostAnalytics {
   impressions?: {
     value: number;
     change?: number;
-    today?: number;
-    withBoost?: number;
   };
   interactions?: {
     value: number;
     change?: number;
-    today?: number;
-    withBoost?: number;
   };
-  additionalViews?: number;
-  engagementIncrease?: number;
-  rankingPosition?: number;
 }
 
 export interface BoostHistory {
@@ -95,11 +56,30 @@ export interface BoostHistory {
   }>;
 }
 
-// Re-export UserRole to avoid the error in authService.ts
-export enum UserRole {
-  ADMIN = "admin",
-  MODERATOR = "moderator",
-  CLIENT = "client",
-  ESCORT = "escort",
-  CREATOR = "creator"
+export interface UserCredentials {
+  email: string;
+  password: string;
+  username?: string;
+}
+
+export interface UserProfile {
+  id: string;
+  userId: string;
+  username?: string;
+  displayName?: string;
+  bio?: string;
+  avatarUrl?: string;
+  email?: string;
+  createdAt: Date;
+}
+
+export interface EnhancedBoostStatus {
+  isActive: boolean;
+  packageId?: string;
+  expiresAt?: Date;
+  startedAt?: Date;
+  timeRemaining?: string;
+  packageName?: string;
+  progress?: number;
+  boostPackage?: BoostPackage;
 }

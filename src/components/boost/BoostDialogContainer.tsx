@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import BoostDialogTabs from './dialog/BoostDialogTabs';
 import { useBoostContext } from '@/hooks/boost/useBoostContext';
-import { HermesStatus } from '@/types/boost';
+import { HermesStatus, BoostStatus, BoostEligibility } from '@/types/boost';
 
 export interface BoostDialogContainerProps {
   profileId: string;
@@ -117,9 +117,14 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
   };
 
   // Create a default boost status if none is provided
-  const safeBoostStatus = boostStatus || { 
+  const safeBoostStatus: BoostStatus = boostStatus || { 
     isActive: false,
     remainingTime: '0:00:00'
+  };
+
+  // Create default eligibility
+  const safeEligibility: BoostEligibility = {
+    isEligible: true
   };
 
   return (
@@ -139,7 +144,7 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
           setActiveTab={setActiveTab}
           loading={isLoading}
           boostStatus={safeBoostStatus}
-          eligibility={{ isEligible: true }}
+          eligibility={boostContext.eligibility || safeEligibility}
           boostPackages={boostPackages || []}
           selectedPackage={selectedPackage}
           setSelectedPackage={setSelectedPackage}

@@ -25,6 +25,13 @@ export const useAuthContext = () => {
         user_metadata: {
           username: email.split('@')[0],
           avatar_url: null,
+          region: null,
+          lastAiInteraction: null,
+          aiConversationCount: 0,
+          verification_request: null,
+          aiFavoriteTopics: [],
+          aiEnabled: true,
+          role: 'user'
         },
         ubxBalance: 100,
         name: 'Test User',
@@ -44,7 +51,7 @@ export const useAuthContext = () => {
     }
   }, []);
 
-  const register = useCallback(async (credentials: { email: string; password: string; username?: string }) => {
+  const register = useCallback(async (credentials: { email: string; password: string; username?: string; confirmPassword?: string }) => {
     // Mock registration implementation
     try {
       setLoading(true);
@@ -63,6 +70,13 @@ export const useAuthContext = () => {
         user_metadata: {
           username: credentials.username || credentials.email.split('@')[0],
           avatar_url: null,
+          region: null,
+          lastAiInteraction: null,
+          aiConversationCount: 0,
+          verification_request: null,
+          aiFavoriteTopics: [],
+          aiEnabled: true,
+          role: 'user'
         },
         ubxBalance: 50,
         name: credentials.username || 'New User',
@@ -101,6 +115,22 @@ export const useAuthContext = () => {
     }
   }, []);
 
+  const checkRole = useCallback((roleName: string): boolean => {
+    if (!user) return false;
+
+    // Check single role
+    if (user.role && user.role.toString().toLowerCase() === roleName.toLowerCase()) {
+      return true;
+    }
+
+    // Check for user_metadata.role
+    if (user.user_metadata?.role && user.user_metadata.role.toLowerCase() === roleName.toLowerCase()) {
+      return true;
+    }
+
+    return false;
+  }, [user]);
+
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
@@ -113,5 +143,12 @@ export const useAuthContext = () => {
     register,
     loading,
     isAuthenticated: !!user,
+    isLoading: loading,
+    checkRole
   };
 };
+
+// Export both names for compatibility
+export const useAuth = useAuthContext;
+
+export default useAuthContext;
