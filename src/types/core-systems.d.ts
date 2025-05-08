@@ -1,148 +1,71 @@
 
-export interface CoreSystemStatus {
-  operational: boolean;
-  lastChecked: Date;
-  version: string;
+export interface SystemStatus {
+  isOperational: boolean;
+  performance: number;
+  lastUpdate: string;
+  serviceStatus: {
+    auth: string;
+    analytics: string;
+    ai: string;
+    wallet: string;
+    seo: string;
+    payments: string;
+  };
 }
 
-export interface RecommendedAction {
-  id: string;
-  title: string;
-  description: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  type: 'optimization' | 'security' | 'visibility' | 'enhancement';
-  actionUrl?: string;
-  actionLabel?: string;
-  completed?: boolean;
-  icon?: string;
+export interface SystemIntegrityResult {
+  integrity: number;
+  overallStatus: string;
+  checks: {
+    database: boolean;
+    cache: boolean;
+    filesystem: boolean;
+    network: boolean;
+  };
+}
+
+export interface OxumSystem {
+  getSystemStatus(): SystemStatus;
+  processPayment(amount: number, currency: string): Promise<boolean>;
+  validateTransaction(txId: string): Promise<boolean>;
+  getExchangeRate(from: string, to: string): Promise<number>;
+  boostAllocationEigen(matrix: number[][]): Promise<number[]>;
+  calculateScore(inputs: number[]): Promise<number>;
 }
 
 export interface ModerateContentParams {
   content: string;
-  strictness?: number;
-  type?: 'text' | 'image' | 'video' | 'audio';
+  type: 'text' | 'image' | 'video';
   context?: string;
-  contentType?: string;
+  userId?: string;
 }
 
 export interface ModerateContentResult {
   isSafe: boolean;
-  safe?: boolean; // For backward compatibility
+  safe: boolean;
+  issues: string[];
   score: number;
-  issues?: string[];
-  blockedCategories?: string[];
-  category?: string;
-  action?: 'allow' | 'review' | 'block';
 }
 
 export interface GenerateContentParams {
   prompt: string;
-  options?: Record<string, any>;
+  type: 'text' | 'image';
+  options?: any;
 }
 
 export interface GenerateContentResult {
   content: string;
-  moderated?: boolean; // For backward compatibility
-  warnings?: string[];
+  moderated: boolean;
+  warnings: string[];
 }
 
 export interface SentimentAnalysisParams {
   text: string;
-  options?: Record<string, any>;
+  language?: string;
 }
 
 export interface SentimentAnalysisResult {
-  score: number;
   sentiment: 'positive' | 'negative' | 'neutral';
-  confidence?: number; // For backward compatibility
-}
-
-export interface AnalyticsData {
-  additionalViews?: number;
-  engagementIncrease?: number;
-  rankingPosition?: number;
-  views?: number;
-  conversionRate?: number;
-  conversions?: number;
-  messageRate?: number;
-  bookingRate?: number;
-  impressions?: {
-    today?: number;
-    yesterday?: number;
-    weeklyAverage?: number;
-    withBoost?: number;
-    withoutBoost?: number;
-    increase?: number;
-    change?: number;
-    value?: number;
-  };
-  interactions?: {
-    today?: number;
-    yesterday?: number;
-    weeklyAverage?: number;
-    withBoost?: number;
-    withoutBoost?: number;
-    increase?: number;
-    change?: number;
-    value?: number;
-  };
-  rank?: {
-    current?: number;
-    previous?: number;
-    change?: number;
-  };
-  totalBoosts?: number;
-  activeBoosts?: number;
-  averageBoostScore?: number;
-  boostHistory?: Array<{
-    date: Date;
-    score: number;
-  }>;
-}
-
-export interface SystemIntegrityResult {
-  status: 'ok' | 'warning' | 'error';
-  checks: Record<string, boolean>;
-  errors: string[];
-  overallStatus?: string;
-}
-
-export interface SystemStatus {
-  operational: boolean;
-  isActive?: boolean;
-  services?: Record<string, string>;
-  queueLength?: number;
-  processing?: boolean;
-  uptime?: number;
-  lastReboot?: string;
-  payments?: string;
-  neural?: string;
-  security?: string;
-  isOperational?: boolean;
-  performance?: number;
-  lastUpdate?: string;
-}
-
-export interface LucieAISystem {
-  initialize(): Promise<boolean>;
-  generateText(prompt: string): Promise<string>;
-  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
-  generateContent(prompt: string, options?: Record<string, any>): Promise<GenerateContentResult>;
-  analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult>;
-  getSystemStatus(): SystemStatus;
-  configure(options: Record<string, any>): void;
-  generateResponse(params: GenerateContentParams): Promise<GenerateContentResult>;
-  shutdown?: () => void;
-}
-
-export interface OxumSystem {
-  initialize(): Promise<boolean>;
-  shutdown(): void;
-  getSystemStatus(): SystemStatus;
-  processPayment(amount: number, currency: string): Promise<boolean>;
-  validateTransaction(transactionId: string): Promise<boolean>;
-  getExchangeRate(from: string, to: string): Promise<number>;
-  calculateVisibilityScore?(profileId: string): Promise<number>;
-  boostAllocationEigen?(profileId: string, boostLevel: number): Promise<number>;
-  boostAllocationEigen?(matrix: number[][]): Promise<number[]>;
+  score: number;
+  confidence: number;
 }

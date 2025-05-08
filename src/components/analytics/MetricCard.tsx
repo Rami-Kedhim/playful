@@ -1,60 +1,43 @@
 
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { MetricCardProps } from '@/types/analytics';
-import { ArrowDown, ArrowUp } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowUp, ArrowDown } from "lucide-react";
+import { MetricCardProps } from "@/types/analytics";
 
-interface ExtendedMetricCardProps extends MetricCardProps {
+export interface ExtendedMetricCardProps extends MetricCardProps {
   onClick?: () => void;
 }
 
-const MetricCard: React.FC<ExtendedMetricCardProps> = ({
-  title, 
-  value, 
-  change, 
-  unit,
+const MetricCard = ({
+  title,
+  value,
+  change,
+  unit = "",
   onClick
-}) => {
-  const isPositive = change > 0;
-  const isNegative = change < 0;
-  
-  const formatValue = (val: number): string => {
-    if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
-    if (val >= 1000) return `${(val / 1000).toFixed(1)}K`;
-    return val.toFixed(1);
-  };
+}: ExtendedMetricCardProps) => {
+  const formattedValue = typeof value === "number" ? value.toLocaleString() : value;
   
   return (
     <Card 
-      className={onClick ? "cursor-pointer hover:border-primary transition-colors" : ""}
+      className={onClick ? "cursor-pointer transition-all hover:border-primary/50" : ""}
       onClick={onClick}
     >
-      <CardContent className="p-6">
-        <div className="flex flex-col gap-1">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold">{formatValue(value)}</span>
-            <span className="text-sm text-muted-foreground">{unit}</span>
-          </div>
-          
-          <div className="flex items-center gap-1 mt-1">
-            <div className={cn(
-              "flex items-center text-xs",
-              isPositive && "text-green-600",
-              isNegative && "text-red-600",
-              !isPositive && !isNegative && "text-gray-500"
-            )}>
-              {isPositive && <ArrowUp className="h-3 w-3" />}
-              {isNegative && <ArrowDown className="h-3 w-3" />}
-              <span>{Math.abs(change).toFixed(1)}%</span>
-            </div>
-            <span className="text-xs text-muted-foreground">
-              vs. previous period
+      <CardContent className="p-4">
+        <h3 className="text-sm font-medium text-muted-foreground mb-1">{title}</h3>
+        <div className="text-2xl font-bold">
+          {formattedValue}{unit && <span className="text-lg font-normal">{unit}</span>}
+        </div>
+        {typeof change !== "undefined" && (
+          <div className="flex items-center mt-1">
+            {change > 0 ? (
+              <ArrowUp className="h-4 w-4 text-green-500 mr-1" />
+            ) : change < 0 ? (
+              <ArrowDown className="h-4 w-4 text-red-500 mr-1" />
+            ) : null}
+            <span className={`text-sm ${change > 0 ? "text-green-500" : change < 0 ? "text-red-500" : "text-gray-500"}`}>
+              {Math.abs(change).toFixed(1)}%
             </span>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

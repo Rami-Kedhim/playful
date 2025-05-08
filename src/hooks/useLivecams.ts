@@ -1,85 +1,75 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Livecam } from '@/types/livecams';
 
-interface LivecamsFilters {
-  categories?: string[];
-  tags?: string[];
-  priceRange?: number[];
-  onlineOnly?: boolean;
-  category?: string;
-}
-
-export const useLivecams = (options: { filters?: LivecamsFilters } = {}) => {
+const useLivecams = () => {
   const [livecams, setLivecams] = useState<Livecam[]>([]);
-  const [featured, setFeatured] = useState<Livecam[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchLivecams = async () => {
-      setIsLoading(true);
-      try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Mock data
-        const mockLivecams: Livecam[] = Array(12).fill(0).map((_, i) => ({
-          id: `livecam-${i}`,
-          name: `Livecam ${i}`,
-          displayName: `Livecam ${i}`,
-          username: `user${i}`,
-          thumbnailUrl: `https://picsum.photos/seed/${i}/300/200`,
-          imageUrl: `https://picsum.photos/seed/${i}/800/450`,
-          isLive: Math.random() > 0.3,
-          viewerCount: Math.floor(Math.random() * 1000),
-          category: ['Games', 'Music', 'Chat', 'Dance', 'Creative'][Math.floor(Math.random() * 5)],
-          categories: [['Games', 'Music', 'Chat', 'Dance', 'Creative'][Math.floor(Math.random() * 5)]],
-          description: "This is a sample livecam stream. Join now for fun and entertainment!",
-          language: ['English', 'Spanish', 'French'][Math.floor(Math.random() * 3)]
-        }));
-        
-        // Apply filters
-        let filtered = [...mockLivecams];
-        
-        if (options.filters) {
-          // Filter by categories
-          if (options.filters.categories && options.filters.categories.length > 0) {
-            filtered = filtered.filter(livecam => 
-              livecam.categories && livecam.categories.some(cat => 
-                options.filters?.categories?.includes(cat)
-              )
-            );
-          }
-          
-          // Filter by category (single category filter)
-          if (options.filters.category && options.filters.category !== 'all') {
-            filtered = filtered.filter(livecam => 
-              livecam.category?.toLowerCase() === options.filters?.category?.toLowerCase() ||
-              livecam.categories?.some(cat => 
-                cat.toLowerCase() === options.filters?.category?.toLowerCase()
-              )
-            );
-          }
-          
-          // Filter by online only
-          if (options.filters.onlineOnly) {
-            filtered = filtered.filter(livecam => livecam.isLive);
-          }
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  const fetchLivecams = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Sample data with proper types
+      const mockLivecams: Livecam[] = [
+        {
+          id: '1',
+          name: 'Jessica',
+          username: 'jessica_live',
+          displayName: 'Jessica Live',
+          imageUrl: 'https://example.com/jessica.jpg',
+          thumbnailUrl: 'https://example.com/jessica-thumb.jpg',
+          isLive: true,
+          isStreaming: true,
+          viewerCount: 342,
+          tags: ['dance', 'music'],
+          rating: 4.8,
+          price: 50,
+          category: 'Dance',
+          categories: ['Dance', 'Music'],
+          language: 'English',
+          country: 'US',
+          description: 'Join my dance party livestream!'
+        },
+        {
+          id: '2',
+          name: 'Michael',
+          username: 'michael_gaming',
+          displayName: 'Michael Gaming',
+          imageUrl: 'https://example.com/michael.jpg',
+          thumbnailUrl: 'https://example.com/michael-thumb.jpg',
+          isLive: false,
+          isStreaming: false,
+          viewerCount: 0,
+          tags: ['gaming', 'comedy'],
+          rating: 4.5,
+          price: 40,
+          category: 'Gaming',
+          categories: ['Gaming', 'Comedy'],
+          language: 'English',
+          country: 'UK',
+          description: 'Gaming streams every evening'
         }
-        
-        // Set featured (just first 3 items for demo)
-        setFeatured(mockLivecams.slice(0, 3));
-        
-        // Set filtered livecams
-        setLivecams(filtered);
-      } catch (error) {
-        console.error('Error fetching livecams:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
+      ];
+      
+      setLivecams(mockLivecams);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching livecams:', err);
+      setError('Failed to load livecams');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  
+  useEffect(() => {
     fetchLivecams();
-  }, [options.filters]);
-
-  return { livecams, featured, isLoading };
+  }, [fetchLivecams]);
+  
+  return { livecams, loading, error, refreshLivecams: fetchLivecams };
 };
+
+export default useLivecams;
