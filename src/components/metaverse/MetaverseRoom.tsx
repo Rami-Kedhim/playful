@@ -17,7 +17,7 @@ const MetaverseRoom: React.FC<MetaverseRoomProps> = ({ roomId, userId }) => {
         setIsLoading(true);
         
         // This is a workaround since the enterSpatialFlow method doesn't exist yet
-        // We'll track it using the standard routeFlow method
+        // We'll track it using the updated routeFlow method
         hermes.routeFlow({
           source: "metaverse-lobby",
           destination: `metaverse-room-${roomId}`,

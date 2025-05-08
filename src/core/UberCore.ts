@@ -1,7 +1,8 @@
+
 import { UberCoreSystem, SystemStatus, SystemIntegrityResult, SystemHealthMetrics, SessionValidationResult } from '@/types/core-systems';
 import { orus } from './Orus';
 import { hermes } from './Hermes';
-import { lucie } from './Lucie';
+import { lucieAI } from './Lucie';
 import { uberWallet } from './UberWallet';
 import { Pulse } from './Pulse';
 import { automaticSeoService } from '@/services/seo/AutomaticSeoService';
@@ -20,7 +21,7 @@ class UberCore implements UberCoreSystem {
       await hermes.initialize();
       
       // Initialize Lucie AI system
-      lucie.getSystemStatus();
+      lucieAI.getSystemStatus();
       
       // Initialize UberWallet
       uberWallet.getBalance('demo-user');
@@ -61,7 +62,7 @@ class UberCore implements UberCoreSystem {
       services: {
         auth: 'online',
         analytics: hermes.getSystemStatus().status,
-        ai: lucie.getSystemStatus().operational ? 'online' : 'offline',
+        ai: lucieAI.getSystemStatus().operational ? 'online' : 'offline',
         wallet: 'active'
       }
     };

@@ -2,7 +2,7 @@
 import { hermes } from '@/core/Hermes';
 import { oxum } from '@/core/Oxum';
 import { orus } from '@/core/Orus';
-import { lucie } from '@/core/Lucie';
+import { lucieAI } from '@/core/Lucie';
 import { SystemStatus } from '@/types/core-systems';
 
 /**
@@ -11,7 +11,7 @@ import { SystemStatus } from '@/types/core-systems';
 export function getCoreSystemHealth() {
   const hermesStatus = hermes.getSystemStatus();
   const oxumStatus = oxum.checkSystemStatus();
-  const lucieStatus = lucie.getSystemStatus();
+  const lucieStatus = lucieAI.getSystemStatus();
   
   // Convert statuses to health percentages
   const hermesHealth = hermesStatus.status === 'operational' ? 100 : 50;

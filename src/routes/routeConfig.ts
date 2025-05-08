@@ -43,6 +43,7 @@ export interface AppPaths {
   BRAIN_HUB: string;
   AI_COMPANION: string;
   COMPLIANCE: string;
+  BOOKINGS: string;
 }
 
 export const APP_PATHS: AppPaths = {
@@ -76,7 +77,8 @@ export const APP_PATHS: AppPaths = {
   METAVERSE: '/metaverse',
   BRAIN_HUB: '/brain-hub',
   AI_COMPANION: '/ai-companions',
-  COMPLIANCE: '/compliance'
+  COMPLIANCE: '/compliance',
+  BOOKINGS: '/bookings'
 };
 
 // Export both the interface and the constant

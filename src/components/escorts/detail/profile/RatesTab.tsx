@@ -11,11 +11,8 @@ const RatesTab: React.FC<RatesTabProps> = ({ escort }) => {
   const rates = escort.rates || {};
   
   // Check if rates has incall and outcall properties
-  const incallRates = rates.incall || {};
-  const outcallRates = rates.outcall || {};
-  
-  const hasIncall = Object.keys(rates.incall || {}).length > 0;
-  const hasOutcall = Object.keys(rates.outcall || {}).length > 0;
+  const hasIncall = rates.incall && Object.keys(rates.incall).length > 0;
+  const hasOutcall = rates.outcall && Object.keys(rates.outcall).length > 0;
   
   return (
     <div className="space-y-6">
@@ -30,7 +27,7 @@ const RatesTab: React.FC<RatesTabProps> = ({ escort }) => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
-                  {Object.entries(incallRates).map(([duration, price]) => (
+                  {Object.entries(rates.incall || {}).map(([duration, price]) => (
                     <div key={duration} className="flex justify-between">
                       <span className="font-medium">{duration}</span>
                       <span className="text-muted-foreground">{String(price)}</span>
@@ -48,7 +45,7 @@ const RatesTab: React.FC<RatesTabProps> = ({ escort }) => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
-                  {Object.entries(outcallRates).map(([duration, price]) => (
+                  {Object.entries(rates.outcall || {}).map(([duration, price]) => (
                     <div key={duration} className="flex justify-between">
                       <span className="font-medium">{duration}</span>
                       <span className="text-muted-foreground">{String(price)}</span>

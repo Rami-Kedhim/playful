@@ -26,12 +26,20 @@ export interface Rates {
   twoHour?: number; // legacy
   overnight?: number;
   weekend?: number;
+  incall?: Record<string, number | string>;
+  outcall?: Record<string, number | string>;
 }
 
 export interface Stats {
   viewCount?: number;
   favoriteCount?: number;
   reviewCount?: number;
+  height?: string | number;
+  weight?: string | number;
+  bust?: string | number;
+  waist?: string | number;
+  hips?: string | number;
+  measurements?: string;
 }
 
 export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium' | string;
@@ -93,6 +101,9 @@ export interface Escort {
   rates?: Rates;
   stats?: Stats;
   lastActive?: string | Date; // For EscortCard lastActive prop
+  measurements?: string;
+  payment_methods?: string[];
+  deposit_required?: boolean;
   [key: string]: any;
 }
 

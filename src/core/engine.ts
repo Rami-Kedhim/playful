@@ -2,7 +2,7 @@
 import { hermes } from '@/core/Hermes';
 import { oxum } from '@/core/Oxum';
 import { orus } from '@/core/Orus';
-import { lucie } from '@/core/Lucie';
+import { lucieAI } from '@/core/Lucie';
 import { SystemStatus } from '@/types/core-systems';
 
 /**
@@ -32,7 +32,7 @@ export const initializeSystem = async (): Promise<boolean> => {
     
     // Stage 3: Initialize AI and analytics systems
     console.info('Stage 3: Initializing Lucie AI systems...');
-    const lucieStatus = lucie.getSystemStatus();
+    const lucieStatus = lucieAI.getSystemStatus();
     const lucieOperational = Object.values(lucieStatus.modules).every(
       status => status === 'online'
     );
@@ -96,7 +96,7 @@ export const checkSystemStatus = async (): Promise<SystemStatus> => {
     const oxumOk = oxumStatus.operational;
     
     // Check Lucie status
-    const lucieStatus = lucie.getSystemStatus();
+    const lucieStatus = lucieAI.getSystemStatus();
     const lucieOk = Object.values(lucieStatus.modules).every(
       status => status === 'online'
     );

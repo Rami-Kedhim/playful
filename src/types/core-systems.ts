@@ -63,9 +63,13 @@ export interface HermesSystem {
   trackEvent(userId: string, action: string, data?: any): boolean;
   recordUserAction(action: string, metadata?: Record<string, any>): void;
   calculateConversionRate(stats: any): number;
-  getSystemStatus(): { operational: boolean; services: Record<string, string> };
+  getSystemStatus(): { operational: boolean; services: Record<string, string>; status: string };
   configure(options: Record<string, any>): void;
-  routeFlow(from: string, to: string, metadata?: Record<string, any>): void;
+  routeFlow(params: { source: string; destination: string; params?: any }): void;
+  connect(params: { system: string; connectionId: string; metadata: any; userId: string }): void;
+  disconnect(): void;
+  calculateVisibilityScore(profileId: string): number;
+  recommendNextAction(userId: string): RecommendedAction;
 }
 
 // Oxum System for blockchain and payments
@@ -77,6 +81,7 @@ export interface OxumSystem {
   getSystemStatus(): { operational: boolean; blockchain: string; network: string };
   recordBoostTransaction(userId: string, amount: number, type: string): Promise<boolean>;
   configure(options: Record<string, any>): void;
+  checkSystemStatus(): { operational: boolean };
 }
 
 // Orus System for content management
@@ -88,4 +93,52 @@ export interface OrusSystem {
   deleteContent(contentId: string): Promise<boolean>;
   getSystemStatus(): { operational: boolean; storage: Record<string, string> };
   configure(options: Record<string, any>): void;
+  validateSession(token: string): SessionValidationResult;
+  checkIntegrity(): { isValid: boolean; message: string };
+}
+
+// UberCore System
+export interface UberCoreSystem {
+  initialize(): Promise<boolean>;
+  shutdown(): Promise<void>;
+  checkSystemStatus(): SystemStatus;
+  checkSystemIntegrity(): SystemIntegrityResult;
+  getSystemHealth(): SystemHealthMetrics;
+  validateUserSession(token: string): SessionValidationResult;
+}
+
+// System status interface
+export interface SystemStatus {
+  operational: boolean;
+  messageLength?: number;
+  latency?: number;
+  uptime?: number;
+  services?: Record<string, string>;
+}
+
+// System integrity result
+export interface SystemIntegrityResult {
+  isValid: boolean;
+  message: string;
+  details?: Record<string, string>;
+}
+
+// System health metrics
+export interface SystemHealthMetrics {
+  load: number;
+  memory: number;
+  latency: number;
+  errorRate: number;
+  averageResponseTime: number;
+  systemLoad: number;
+  cpuUsage: number;
+  memoryUsage: number;
+}
+
+// Session validation result
+export interface SessionValidationResult {
+  isValid: boolean;
+  userId?: string;
+  expiry?: string | Date;
+  message?: string;
 }
