@@ -5,9 +5,10 @@
 export interface LucieAISystem {
   initialize(): Promise<boolean>;
   generateText(prompt: string): Promise<string>;
-  moderateContent(content: string): Promise<boolean>;
+  moderateContent(content: ModerateContentParams): Promise<ModerateContentResult>;
   getSystemStatus(): { operational: boolean; modules: Record<string, string> };
   configure(options: Record<string, any>): void;
+  analyzeSentiment(text: string): Promise<SentimentAnalysisResult>;
 }
 
 // Parameters for content moderation
@@ -15,6 +16,16 @@ export interface ModerateContentParams {
   content: string;
   strictness?: 'low' | 'medium' | 'high';
   categories?: string[];
+  contentType?: 'text' | 'image' | 'video'; // Added contentType
+  context?: Record<string, any>;            // Added context
+}
+
+// Result of content moderation
+export interface ModerateContentResult {
+  safe: boolean;
+  score: number;
+  issues?: string[];
+  blockedCategories?: string[];
 }
 
 // Result of content generation
@@ -24,6 +35,22 @@ export interface GenerateContentResult {
   originalLength: number;
   moderatedLength: number;
   warnings?: string[];
+}
+
+// Result of sentiment analysis
+export interface SentimentAnalysisResult {
+  score: number;
+  sentiment: 'positive' | 'negative' | 'neutral';
+  confidence: number;
+}
+
+// Recommended action interface
+export interface RecommendedAction {
+  type: string;
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high';
+  actionUrl?: string;
 }
 
 // Hermes Analytics System

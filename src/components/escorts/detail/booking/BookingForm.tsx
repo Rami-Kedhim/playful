@@ -1,144 +1,201 @@
 
-import React, { useState } from "react";
-import { Escort } from "@/types/escort";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Escort } from '@/types/Escort'; // Fixed casing
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { CalendarIcon, Clock } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+const formSchema = z.object({
+  date: z.date({
+    required_error: "Please select a date",
+  }),
+  time: z.string({
+    required_error: "Please select a time",
+  }),
+  duration: z.string({
+    required_error: "Please select a duration",
+  }),
+  location: z.string().min(1, {
+    message: "Please select a location",
+  }),
+});
 
-import { bookingFormSchema, BookingFormData, BookingFormValues } from "./types";
-import { BookingCalendar } from "./";
-import { BookingTimeSlots } from "./";
-import { BookingDuration } from "./";
-import { BookingContactInfo } from "./";
-import { BookingMessage } from "./";
-import BookingConfirmation from "./BookingConfirmation";
+type FormValues = z.infer<typeof formSchema>;
 
 interface BookingFormProps {
   escort: Escort;
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: BookingFormData) => void;
+  onSubmit: (values: FormValues) => void;
 }
 
-const BookingForm = ({ escort, isOpen, onClose, onSubmit }: BookingFormProps) => {
-  const [step, setStep] = useState<'form' | 'review'>('form');
+const BookingForm: React.FC<BookingFormProps> = ({ escort, onSubmit }) => {
+  const [date, setDate] = useState<Date | undefined>(undefined);
   
-  const form = useForm<BookingFormValues>({
-    resolver: zodResolver(bookingFormSchema),
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      message: "",
+      time: '',
+      duration: '',
+      location: '',
     },
   });
 
-  const handleSubmit = (data: BookingFormValues) => {
-    onSubmit(data as BookingFormData);
-    toast({
-      title: "Booking request sent",
-      description: `Your booking request with ${escort.name} has been submitted.`,
-      variant: "success",
-    });
-    form.reset();
-    setStep('form');
-    onClose();
+  const handleSubmit = (values: FormValues) => {
+    onSubmit(values);
   };
 
-  const handleReview = () => {
-    const result = form.trigger();
-    if (result) {
-      setStep('review');
-    }
-  };
+  // Generate time slots
+  const timeSlots = Array.from({ length: 12 }, (_, i) => {
+    const hour = i + 10; // Start from 10 AM
+    return `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
+  });
 
-  const handleBack = () => {
-    setStep('form');
-  };
+  // Duration options
+  const durationOptions = ['1 hour', '2 hours', '3 hours', 'Overnight'];
 
-  const handleClose = () => {
-    setStep('form');
-    form.reset();
-    onClose();
-  };
+  // Location options based on escort's available locations
+  const locationOptions = escort.locations || ['Incall', 'Outcall'];
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Book Appointment with {escort.name}</DialogTitle>
-          <DialogDescription>
-            {step === 'form' 
-              ? 'Fill out the form below to request an appointment.'
-              : 'Review your booking details before submitting.'}
-          </DialogDescription>
-        </DialogHeader>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            {step === 'form' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <BookingCalendar form={form} />
-                
-                <div className="flex flex-col space-y-4 md:space-y-0 md:grid md:grid-cols-2 md:gap-4">
-                  <BookingTimeSlots form={form} />
-                  <BookingDuration form={form} />
-                </div>
-                
-                <div className="col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <BookingContactInfo form={form} />
-                </div>
-                
-                <BookingMessage form={form} />
-              </div>
-            ) : (
-              <BookingConfirmation 
-                data={form.getValues()} 
-                escort={escort} 
-              />
-            )}
-            
-            <DialogFooter className="flex flex-col sm:flex-row gap-2">
-              {step === 'review' && (
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={handleBack}
-                  className="flex-1 sm:flex-none"
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Form
-                </Button>
-              )}
-              
-              {step === 'form' ? (
-                <Button 
-                  type="button" 
-                  onClick={handleReview}
-                  className="w-full"
-                >
-                  Review Booking
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              ) : (
-                <Button 
-                  type="submit" 
-                  className="flex-1 sm:flex-none"
-                >
-                  Confirm Booking
-                  <Check className="ml-2 h-4 w-4" />
-                </Button>
-              )}
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className="pl-3 text-left font-normal"
+                    >
+                      {field.value ? (
+                        format(field.value, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={(date) => {
+                      field.onChange(date);
+                      setDate(date);
+                    }}
+                    disabled={(date) => {
+                      // Disable dates in the past
+                      return date < new Date(new Date().setHours(0, 0, 0, 0));
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="time"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Time</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select time">
+                      {field.value ? (
+                        <div className="flex items-center">
+                          <Clock className="mr-2 h-4 w-4" />
+                          {field.value}
+                        </div>
+                      ) : (
+                        "Select time"
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {timeSlots.map((time) => (
+                    <SelectItem key={time} value={time}>
+                      {time}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="duration"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Duration</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {durationOptions.map((duration) => (
+                    <SelectItem key={duration} value={duration}>
+                      {duration}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Location</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {locationOptions.map((location) => (
+                    <SelectItem key={location} value={location}>
+                      {location}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" className="w-full">Book Appointment</Button>
+      </form>
+    </Form>
   );
 };
 

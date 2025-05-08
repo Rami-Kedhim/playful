@@ -1,70 +1,53 @@
 
-// Create the missing DirectMessageContent component
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Send, Phone } from "lucide-react";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+const formSchema = z.object({
+  phone: z.string()
+    .min(7, { message: 'Phone number must be at least 7 characters long' })
+    .regex(/^[0-9+\s()-]+$/, { message: 'Please enter a valid phone number' }),
+});
 
 interface DirectMessageContentProps {
   onSubmit: (phone: string) => void;
 }
 
-const DirectMessageContent = ({ onSubmit }: DirectMessageContentProps) => {
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [isValid, setIsValid] = useState(false);
+const DirectMessageContent: React.FC<DirectMessageContentProps> = ({ onSubmit }) => {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      phone: '',
+    },
+  });
 
-  const validatePhoneNumber = (number: string) => {
-    // Very basic validation - in a real app this would be more complex
-    const hasValidLength = number.replace(/\D/g, "").length >= 10;
-    setIsValid(hasValidLength);
-    return hasValidLength;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (validatePhoneNumber(phoneNumber)) {
-      onSubmit(phoneNumber);
-      setPhoneNumber("");
-    }
-  };
+  function handleSubmit(values: z.infer<typeof formSchema>) {
+    onSubmit(values.phone);
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="phone-number">Phone Number</Label>
-        <div className="flex items-center space-x-2">
-          <div className="relative flex-1">
-            <Phone className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="phone-number"
-              type="tel"
-              placeholder="(555) 123-4567"
-              className="pl-9"
-              value={phoneNumber}
-              onChange={(e) => {
-                setPhoneNumber(e.target.value);
-                validatePhoneNumber(e.target.value);
-              }}
-              required
-            />
-          </div>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          We'll send an SMS with a link to this profile
-        </p>
-      </div>
-
-      <Button 
-        type="submit" 
-        className="w-full" 
-        disabled={!isValid}
-      >
-        <Send className="mr-2 h-4 w-4" />
-        Send Link
-      </Button>
-    </form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter phone number" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-full">Send Profile via SMS</Button>
+      </form>
+    </Form>
   );
 };
 

@@ -1,8 +1,10 @@
+
 // Update import to use consistent casing
 import { Escort } from '@/types/Escort';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, CalendarDays, Clock, MapPin } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface BookingConfirmationProps {
   escort: Escort;

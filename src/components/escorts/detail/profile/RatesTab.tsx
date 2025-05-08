@@ -1,87 +1,83 @@
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Escort } from "@/types/Escort";
-import { Calendar } from "lucide-react";
+import React from 'react';
+import { Escort } from '@/types/Escort';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface RatesTabProps {
   escort: Escort;
 }
 
-const RatesTab = ({ escort }: RatesTabProps) => {
-  const rates = escort.rates;
-
-  if (!rates) {
-    return (
-      <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-4">Rates Information</h3>
-        <p className="text-gray-600">No rate information available.</p>
-      </Card>
-    );
-  }
-
-  // Helper function to render rate safely, fallback to '-' if not a valid number
-  const renderRate = (rate?: unknown) => {
-    if (typeof rate === "number") {
-      return `$${rate}`;
-    }
-    return "-";
-  };
-
+const RatesTab: React.FC<RatesTabProps> = ({ escort }) => {
+  const rates = escort.rates || {};
+  const incallRates = rates.incall || {};
+  const outcallRates = rates.outcall || {};
+  
+  const hasIncall = Object.keys(incallRates).length > 0;
+  const hasOutcall = Object.keys(outcallRates).length > 0;
+  
   return (
-    <Card className="p-6">
-      <h3 className="text-xl font-semibold mb-4">Rates Information</h3>
-
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {"hourly" in rates && renderRate(rates.hourly) !== "-" && (
-            <div className="bg-muted/30 p-4 rounded-md">
-              <div className="flex items-center mb-2">
-                <Calendar className="h-4 w-4 mr-2 text-primary" />
-                <h4 className="font-medium">1 Hour</h4>
-              </div>
-              <p className="text-2xl font-bold">{renderRate(rates.hourly)}</p>
-            </div>
+    <div className="space-y-6">
+      {(!hasIncall && !hasOutcall) ? (
+        <p className="text-muted-foreground">No rates information available.</p>
+      ) : (
+        <>
+          {hasIncall && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle>Incall Rates</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(incallRates).map(([duration, price]) => (
+                    <div key={duration} className="flex justify-between">
+                      <span className="font-medium">{duration}</span>
+                      <span className="text-muted-foreground">{price}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
-
-          {"twoHours" in rates && renderRate(rates.twoHours) !== "-" && (
-            <div className="bg-muted/30 p-4 rounded-md">
-              <div className="flex items-center mb-2">
-                <Calendar className="h-4 w-4 mr-2 text-primary" />
-                <h4 className="font-medium">2 Hours</h4>
-              </div>
-              <p className="text-2xl font-bold">{renderRate(rates.twoHours)}</p>
-            </div>
+          
+          {hasOutcall && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle>Outcall Rates</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(outcallRates).map(([duration, price]) => (
+                    <div key={duration} className="flex justify-between">
+                      <span className="font-medium">{duration}</span>
+                      <span className="text-muted-foreground">{price}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
-
-          {"overnight" in rates && renderRate(rates.overnight) !== "-" && (
-            <div className="bg-muted/30 p-4 rounded-md">
-              <div className="flex items-center mb-2">
-                <Calendar className="h-4 w-4 mr-2 text-primary" />
-                <h4 className="font-medium">Overnight</h4>
-              </div>
-              <p className="text-2xl font-bold">{renderRate(rates.overnight)}</p>
-            </div>
-          )}
-
-          {"weekend" in rates && renderRate(rates.weekend) !== "-" && (
-            <div className="bg-muted/30 p-4 rounded-md">
-              <div className="flex items-center mb-2">
-                <Calendar className="h-4 w-4 mr-2 text-primary" />
-                <h4 className="font-medium">Weekend</h4>
-              </div>
-              <p className="text-2xl font-bold">{renderRate(rates.weekend)}</p>
-            </div>
-          )}
+        </>
+      )}
+      
+      {escort.payment_methods && escort.payment_methods.length > 0 && (
+        <div>
+          <h3 className="text-lg font-medium mb-2">Payment Methods</h3>
+          <p className="text-muted-foreground">
+            {escort.payment_methods.join(', ')}
+          </p>
         </div>
-
-        <div className="mt-6 text-sm text-muted-foreground">
-          <p>* Rates may be subject to change. Please confirm during booking.</p>
-          <p>* Additional services may have different rates.</p>
+      )}
+      
+      {escort.deposit_required && (
+        <div>
+          <h3 className="text-lg font-medium mb-2">Deposit</h3>
+          <p className="text-muted-foreground">
+            A deposit is required to secure your booking.
+          </p>
         </div>
-      </div>
-    </Card>
+      )}
+    </div>
   );
 };
 
 export default RatesTab;
-

@@ -1,56 +1,64 @@
 
-// Create the missing SafetyTips component
-import { AlertCircle, Shield } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React from 'react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Shield } from 'lucide-react';
 
-const SafetyTips = () => {
+const SafetyTips: React.FC = () => {
   return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-semibold mb-4">Safety Information</h3>
+    <div className="space-y-6">
+      <Alert>
+        <Shield className="h-4 w-4" />
+        <AlertTitle>Safety First</AlertTitle>
+        <AlertDescription>
+          Always prioritize your safety when meeting new people. We recommend following these guidelines.
+        </AlertDescription>
+      </Alert>
       
-      <Card className="border-amber-500/30 bg-amber-500/5">
-        <CardHeader className="pb-2">
-          <div className="flex items-start gap-2">
-            <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
-            <div>
-              <CardTitle className="text-base">Safety First</CardTitle>
-              <CardDescription>Important tips for a safe encounter</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <ul className="list-disc pl-6 space-y-2 text-sm">
-            <li>Always meet in a public place first for initial encounters</li>
-            <li>Let a trusted friend know your whereabouts</li>
-            <li>Trust your instincts - if something feels wrong, leave</li>
-            <li>Verify the identity of your companion before private meetings</li>
-            <li>Discuss boundaries and expectations clearly beforehand</li>
-            <li>Be aware of your drink at all times</li>
-            <li>Have a safe word or check-in system in place</li>
-          </ul>
-        </CardContent>
-      </Card>
-      
-      <Card className="border-primary/30 bg-primary/5">
-        <CardHeader className="pb-2">
-          <div className="flex items-start gap-2">
-            <Shield className="h-5 w-5 text-primary mt-0.5" />
-            <div>
-              <CardTitle className="text-base">User Verification</CardTitle>
-              <CardDescription>We recommend verification for safety</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="text-sm">
-          <p>
-            Our platform encourages both escorts and clients to complete identity verification.
-            Verified users enjoy a safer experience and build trust within our community.
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Essential Safety Tips</h3>
+        
+        <div>
+          <h4 className="font-medium mb-1">Verify Identity</h4>
+          <p className="text-sm text-muted-foreground">
+            Always verify the identity of the person you're meeting. Look for verified profiles and read reviews.
           </p>
-          <div className="mt-4">
-            <a href="#" className="text-primary hover:underline font-medium">Learn about our verification process</a>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+        
+        <div>
+          <h4 className="font-medium mb-1">Public Meeting</h4>
+          <p className="text-sm text-muted-foreground">
+            For initial meetings, choose a public location like a hotel lobby or a café.
+          </p>
+        </div>
+        
+        <div>
+          <h4 className="font-medium mb-1">Share Your Location</h4>
+          <p className="text-sm text-muted-foreground">
+            Let a trusted friend know where you're going, who you're meeting, and when you expect to return.
+          </p>
+        </div>
+        
+        <div>
+          <h4 className="font-medium mb-1">Trust Your Instincts</h4>
+          <p className="text-sm text-muted-foreground">
+            If something doesn't feel right, don't hesitate to leave the situation.
+          </p>
+        </div>
+        
+        <div>
+          <h4 className="font-medium mb-1">Stay Sober</h4>
+          <p className="text-sm text-muted-foreground">
+            Maintain clarity of mind by avoiding excessive alcohol or substances.
+          </p>
+        </div>
+        
+        <div>
+          <h4 className="font-medium mb-1">Emergency Contact</h4>
+          <p className="text-sm text-muted-foreground">
+            Have emergency contacts readily available on your phone.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,94 +1,63 @@
 
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { Escort } from "@/types/Escort";
-import { serviceCategories } from "@/data/serviceCategories";
-import ServiceCategoryBadge from "../ServiceCategoryBadge";
-import { Sparkles } from "lucide-react";
-import useServices from "@/hooks/useServices";
+import React from 'react';
+import { Escort } from '@/types/Escort';
+import { Check, X } from 'lucide-react';
 
 interface ServicesTabProps {
   escort: Escort;
 }
 
-const ServicesTab = ({ escort }: ServicesTabProps) => {
-  const { services = [] } = escort;
-  const { 
-    categoriesWithServices, 
-    servicesByCategory, 
-    hasServices 
-  } = useServices(services);
-  
-  const [activeCategory, setActiveCategory] = useState<string>(
-    categoriesWithServices[0]?.id || "companionship"
-  );
-  
-  if (!hasServices) {
-    return (
-      <Card>
-        <CardContent className="pt-6 text-center">
-          <div className="flex flex-col items-center py-10">
-            <Sparkles className="text-primary h-10 w-10 mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Services Coming Soon</h3>
-            <p className="text-muted-foreground max-w-md">
-              {escort.name} is currently updating their service offerings. 
-              Check back soon for a complete list of available experiences.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-  
+const ServicesTab: React.FC<ServicesTabProps> = ({ escort }) => {
+  const services = escort.services || [];
+
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <h3 className="text-xl font-semibold mb-4">Professional Services</h3>
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium mb-4">Services Offered</h3>
         
-        <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-          <TabsList className="mb-4 w-full flex overflow-x-auto pb-1">
-            {categoriesWithServices.map(category => (
-              <TabsTrigger 
-                key={category.id} 
-                value={category.id}
-                className="whitespace-nowrap"
-              >
-                {category.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          
-          {categoriesWithServices.map(category => (
-            <TabsContent key={category.id} value={category.id} className="mt-0">
-              <div>
-                <p className="text-muted-foreground mb-4">
-                  {category.description}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {servicesByCategory[category.id]?.map(serviceId => (
-                    <ServiceCategoryBadge 
-                      key={serviceId} 
-                      serviceName={serviceId} 
-                      className="mb-2 animate-fade-in"
-                    />
-                  ))}
-                </div>
+        {services.length === 0 ? (
+          <p className="text-muted-foreground">No services information available.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {services.map((service, index) => (
+              <div key={index} className="flex items-center">
+                <Check className="h-4 w-4 text-green-500 mr-2" />
+                <span>{service}</span>
               </div>
-            </TabsContent>
-          ))}
-        </Tabs>
-        
-        <div className="mt-6 pt-4 border-t text-sm text-muted-foreground">
-          <p>
-            For detailed information about services and rates, please contact {escort.name} directly.
-            All services provided are legal and professional in nature.
-          </p>
+            ))}
+          </div>
+        )}
+      </div>
+      
+      {escort.specialties && escort.specialties.length > 0 && (
+        <div>
+          <h3 className="text-lg font-medium mb-4">Specialties</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {escort.specialties.map((specialty, index) => (
+              <div key={index} className="flex items-center">
+                <Check className="h-4 w-4 text-primary mr-2" />
+                <span>{specialty}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      )}
+      
+      {escort.limitations && escort.limitations.length > 0 && (
+        <div>
+          <h3 className="text-lg font-medium mb-4">Not Offered</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {escort.limitations.map((limitation, index) => (
+              <div key={index} className="flex items-center">
+                <X className="h-4 w-4 text-destructive mr-2" />
+                <span>{limitation}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
 export default ServicesTab;
-

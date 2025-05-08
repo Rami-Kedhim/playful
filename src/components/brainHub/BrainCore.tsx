@@ -1,6 +1,13 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { lucieAI } from '@/core/Lucie';
 import { ModerateContentParams } from '@/types/core-systems';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { Brain, Activity, Zap, MessageCircle } from "lucide-react";
 
 interface BrainCoreProps {
   onStatusUpdate?: (status: string) => void;
@@ -47,8 +54,8 @@ const BrainCore: React.FC<BrainCoreProps> = ({ onStatusUpdate }) => {
       }
       
       // Process the query if it passed moderation
-      const result = await lucieAI.generateContent(query);
-      setResponse(result.content);
+      const result = await lucieAI.generateText(query);
+      setResponse(result);
       
       // Simulate system working hard
       setProcessingPower(prev => Math.max(30, prev - 15));

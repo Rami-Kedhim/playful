@@ -1,220 +1,176 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Send } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { lucieAI } from '@/core/Lucie';
-import { ModerateContentParams, GenerateContentResult } from '@/types/core-systems';
 
-// Update Message interface to properly handle GenerateContentResult
-interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
-}
+import React, { useState, useCallback, useRef } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { lucieAI } from '@/core/Lucie';
+import { ModerateContentParams } from '@/types/core-systems';
+import { AIMessage } from '@/types/ai-messages';
 
 interface AICompanionChatProps {
-  companionName?: string;
-  companionId?: string; // Add companionId prop
-  primaryColor?: string;
-  initialMessage?: string;
-  name?: string; // Add name prop
-  avatarUrl?: string; // Add avatarUrl prop
-  personalityType?: string; // Add personalityType prop
-  onClose?: () => void; // Add onClose prop
+  aiName: string;
+  aiAvatar?: string;
+  userAvatar?: string;
+  initialMessages?: AIMessage[];
+  onMessageSent?: (message: AIMessage) => void;
 }
 
 const AICompanionChat: React.FC<AICompanionChatProps> = ({
-  companionName = 'AI Companion',
-  companionId, // Use companionId if provided
-  primaryColor = '#7c3aed',
-  initialMessage = "Hi there! I'm your AI companion. How can I assist you today?",
-  name, // Use name if provided
-  avatarUrl, // Use avatarUrl if provided
-  personalityType, // Use personalityType if provided
-  onClose, // Use onClose if provided
+  aiName,
+  aiAvatar,
+  userAvatar,
+  initialMessages = [],
+  onMessageSent
 }) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: uuidv4(),
-      text: initialMessage,
-      sender: 'ai',
-      timestamp: new Date(),
-    },
-  ]);
-  const [input, setInput] = useState('');
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState<AIMessage[]>(initialMessages.length > 0 
+    ? initialMessages 
+    : [{
+        id: 'welcome',
+        role: 'assistant',
+        content: `Hi there! I'm ${aiName}. How can I help you today?`,
+        timestamp: new Date(),
+        is_ai: true
+      }]
+  );
   const [isLoading, setIsLoading] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const displayName = name || companionName;
-
-  useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-    }
-  }, [messages]);
-
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
   const handleSendMessage = async () => {
-    if (!input.trim()) return;
-
-    // Add user message to chat
-    const userMessage: Message = {
-      id: uuidv4(),
-      text: input.trim(),
-      sender: 'user',
-      timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput('');
+    if (!message.trim()) return;
+    
     setIsLoading(true);
-    setIsTyping(true);
-
+    
     try {
-      // Moderate content before processing
-      const moderationParams: ModerateContentParams = {
-        content: input.trim(),
-        contentType: 'text',
-        context: {}
+      // Create user message
+      const userMessage: AIMessage = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: message,
+        timestamp: new Date(),
+        is_ai: false
       };
       
-      const moderationResult = await lucieAI.moderateContent(moderationParams);
-
-      if (!moderationResult.safe) {
-        // Handle unsafe content
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: uuidv4(),
-            text: "I'm sorry, I can't respond to that type of content. Let's talk about something else.",
-            sender: 'ai',
-            timestamp: new Date(),
-          },
-        ]);
-        setIsLoading(false);
-        setIsTyping(false);
+      // Add user message to chat
+      setMessages(prev => [...prev, userMessage]);
+      setMessage('');
+      
+      // Moderate content
+      const moderationParams: ModerateContentParams = {
+        content: message,
+        contentType: 'text'
+      };
+      
+      const moderation = await lucieAI.moderateContent(moderationParams);
+      
+      if (!moderation.safe) {
+        // Handle filtered content
+        const rejectionMessage: AIMessage = {
+          id: Date.now().toString() + '-rejection',
+          role: 'assistant',
+          content: "I'm sorry, I can't respond to that type of message. Please try a different question.",
+          timestamp: new Date(),
+          is_ai: true
+        };
+        
+        setMessages(prev => [...prev, rejectionMessage]);
         return;
       }
-
-      // Generate AI response
-      // Add context about the companion if available
-      const contextInfo = personalityType 
-        ? `You are an AI companion with a ${personalityType} personality. Your ID is ${companionId || 'unspecified'}.`
-        : '';
-
-      const response = await lucieAI.generateContent(input.trim(), { 
-        context: contextInfo,
-        companionId
-      });
       
-      // Add AI response to chat
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: uuidv4(),
-          text: response.content,
-          sender: 'ai',
-          timestamp: new Date(),
-        },
-      ]);
+      // Generate AI response
+      const aiResponseText = await lucieAI.generateText(message);
+      
+      // Create AI message
+      const aiMessage: AIMessage = {
+        id: Date.now().toString() + '-ai',
+        role: 'assistant',
+        content: aiResponseText,
+        timestamp: new Date(),
+        is_ai: true
+      };
+      
+      // Add AI message to chat
+      setMessages(prev => [...prev, aiMessage]);
+      
+      // Notify parent component if callback provided
+      if (onMessageSent) {
+        onMessageSent(aiMessage);
+      }
+      
     } catch (error) {
-      console.error('Error in AI response:', error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: uuidv4(),
-          text: "I'm sorry, I encountered an error. Please try again later.",
-          sender: 'ai',
-          timestamp: new Date(),
-        },
-      ]);
+      console.error('Error in AI chat:', error);
+      
+      // Add error message
+      const errorMessage: AIMessage = {
+        id: Date.now().toString() + '-error',
+        role: 'assistant',
+        content: "I'm sorry, I encountered an error. Please try again later.",
+        timestamp: new Date(),
+        is_ai: true
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
-      setIsTyping(false);
+      setTimeout(scrollToBottom, 100);
     }
   };
-
+  
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
+  };
+  
   return (
-    <div className="flex flex-col h-full border rounded-lg overflow-hidden">
-      <div 
-        className="py-3 px-4 font-semibold border-b"
-        style={{ backgroundColor: primaryColor, color: 'white' }}
-      >
-        <div className="flex justify-between items-center">
-          <span>{displayName}</span>
-          {onClose && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={onClose}
-              className="h-6 w-6 text-white hover:bg-white/20"
-            >
-              <span className="sr-only">Close</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </Button>
-          )}
-        </div>
-      </div>
-      
-      <ScrollArea className="flex-1 p-4">
-        <div ref={scrollAreaRef} className="space-y-4">
-          {messages.map((message) => (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`flex ${msg.is_ai ? 'justify-start' : 'justify-end'}`}
+          >
+            {msg.is_ai && aiAvatar && (
+              <div className="h-8 w-8 rounded-full overflow-hidden mr-2 flex-shrink-0">
+                <img src={aiAvatar} alt={aiName} className="h-full w-full object-cover" />
+              </div>
+            )}
             <div
-              key={message.id}
-              className={`flex ${
-                message.sender === 'user' ? 'justify-end' : 'justify-start'
+              className={`px-4 py-2 rounded-lg max-w-[80%] ${
+                msg.is_ai
+                  ? 'bg-secondary text-secondary-foreground'
+                  : 'bg-primary text-primary-foreground'
               }`}
             >
-              <div
-                className={`max-w-[80%] rounded-lg p-3 ${
-                  message.sender === 'user'
-                    ? `bg-primary text-primary-foreground`
-                    : 'bg-muted'
-                }`}
-              >
-                {message.text}
-              </div>
+              {msg.content}
             </div>
-          ))}
-          {isTyping && (
-            <div className="flex justify-start">
-              <div className="max-w-[80%] rounded-lg p-3 bg-muted">
-                <div className="flex space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></div>
-                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                </div>
+            {!msg.is_ai && userAvatar && (
+              <div className="h-8 w-8 rounded-full overflow-hidden ml-2 flex-shrink-0">
+                <img src={userAvatar} alt="You" className="h-full w-full object-cover" />
               </div>
-            </div>
-          )}
-        </div>
-      </ScrollArea>
+            )}
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
       
-      <div className="p-3 border-t flex gap-2">
-        <Textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message..."
-          className="resize-none min-h-[50px]"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              handleSendMessage();
-            }
-          }}
-        />
-        <Button
-          onClick={handleSendMessage}
-          disabled={isLoading || !input.trim()}
-          className="shrink-0"
-        >
-          <Send className="h-5 w-5" />
-        </Button>
+      <div className="p-4 border-t">
+        <div className="flex space-x-2">
+          <Input
+            placeholder="Type a message..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={isLoading}
+            className="flex-1"
+          />
+          <Button onClick={handleSendMessage} disabled={!message.trim() || isLoading}>
+            {isLoading ? "Sending..." : "Send"}
+          </Button>
+        </div>
       </div>
     </div>
   );
