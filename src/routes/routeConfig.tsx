@@ -24,21 +24,37 @@ const FavoritesPage = /*#__PURE__*/ lazy(() => import('@/pages/FavoritesPage'));
 const AuthPage = /*#__PURE__*/ lazy(() => import('@/pages/AuthPage'));
 
 // Define app paths as constants for reuse
-export enum AppPaths {
-  HOME = '/',
-  LOGIN = '/login',
-  REGISTER = '/register',
-  DASHBOARD = '/dashboard',
-  PROFILE = '/profile',
-  SETTINGS = '/settings',
-  ABOUT = '/about',
-  CONTACT = '/contact',
-  TERMS = '/terms',
-  PRIVACY = '/privacy',
-  NEURAL_MONITOR = '/neural/monitor',
-  NEURAL_ANALYTICS = '/neural/analytics',
-  NOT_FOUND = '*'
-}
+export const AppPaths = {
+  HOME: '/',
+  ESCORTS: '/escorts',
+  ESCORT_DETAIL: '/escorts/:id',
+  CREATORS: '/creators',
+  CREATOR_DETAIL: '/creators/:id',
+  LIVECAMS: '/livecams',
+  LIVECAM_DETAIL: '/livecams/:id',
+  VERIFICATION: '/verification',
+  SETTINGS: '/settings',
+  AUTH: '/auth',
+  PROFILE: '/profile',
+  MESSAGES: '/messages',
+  FAVORITES: '/favorites',
+  WALLET: '/wallet',
+  DASHBOARD: '/dashboard',
+  ADMIN: '/admin',
+  SAFETY: '/safety',
+  PAYMENT: '/payment',
+  SEO: '/seo',
+  NEURAL_MONITOR: '/neural/monitor',
+  NEURAL_ANALYTICS: '/neural/analytics',
+  HELP: '/help',
+  TERMS: '/legal/terms',
+  PRIVACY: '/legal/privacy',
+  CONTACT: '/contact',
+  PRICING: '/pricing',
+  APP_DOWNLOAD: '/app',
+  PULSE_BOOST: '/pulse-boost',
+  GUIDELINES: '/safety/guidelines' // Added this property
+};
 
 // Define route category definitions
 export enum RouteCategory {

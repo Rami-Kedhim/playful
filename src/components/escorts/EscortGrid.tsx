@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort'; // Updated to consistent casing
 import EscortCard from './EscortCard';
 
 export interface ExtendedEscort extends Escort {

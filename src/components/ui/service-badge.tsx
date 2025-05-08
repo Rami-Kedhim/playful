@@ -2,7 +2,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ServiceTypeFilter } from '@/types/serviceType';
-import { MapPin, Globe, Users, Home, Navigation, Utensils, Spa } from 'lucide-react';
+import { MapPin, Globe, Users, Home, Navigation, Utensils, Flower } from 'lucide-react'; // Changed Spa to Flower
 
 interface ServiceTypeBadgeProps {
   type: ServiceTypeFilter;
@@ -16,7 +16,7 @@ const iconMap = {
   'in-call': <Home className="h-3.5 w-3.5 mr-1" />,
   'out-call': <Navigation className="h-3.5 w-3.5 mr-1" />,
   'dinner': <Utensils className="h-3.5 w-3.5 mr-1" />,
-  'massage': <Spa className="h-3.5 w-3.5 mr-1" />,
+  'massage': <Flower className="h-3.5 w-3.5 mr-1" />, // Changed Spa to Flower
   'any': null,
   'all': null
 };

@@ -12,7 +12,7 @@ import AdminPage from '@/pages/AdminPage';
 import NeuralMonitorPage from '@/pages/neural/NeuralMonitorPage';
 import NeuralAnalyticsPage from '@/pages/neural/NeuralAnalyticsPage';
 import SafetyPage from '@/pages/SafetyPage';
-import RouteSharePage from '@/pages/safety/RouteSharePage';
+import RouteSharePage from '@/pages/RouteSharePage';
 import ProfilePage from '@/pages/ProfilePage';
 import MessagesPage from '@/pages/MessagesPage';
 import WalletPage from '@/pages/WalletPage';
@@ -43,7 +43,7 @@ const AppRoutes = () => {
       <Route path="/" element={<HomePage />} />
       
       {/* Main application routes */}
-      <Route element={<Layout />}>
+      <Route path="/" element={<Layout>{/* Fix: Providing children */}<Outlet /></Layout>}>
         {/* Core routes */}
         <Route path={AppPaths.PROFILE} element={<ProfilePage />} />
         <Route path={AppPaths.MESSAGES} element={<MessagesPage />} />
@@ -97,5 +97,8 @@ const AppRoutes = () => {
     </Routes>
   );
 };
+
+// Need to import Outlet
+import { Outlet } from 'react-router-dom';
 
 export default AppRoutes;

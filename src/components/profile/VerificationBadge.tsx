@@ -34,25 +34,25 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({ level }) => {
     label: string;
     description: string;
   }> = {
-    "basic": {
+    [VerificationLevel.BASIC]: {
       color: "text-blue-500",
       icon: <Shield className="h-4 w-4 mr-1" />,
       label: "Basic Verification",
       description: "Identity has been verified"
     },
-    "verified": {
+    [VerificationLevel.VERIFIED]: {
       color: "text-green-500",
       icon: <Shield className="h-4 w-4 mr-1" />,
       label: "Verified",
       description: "Identity is fully verified"
     },
-    "enhanced": {
+    [VerificationLevel.ENHANCED]: {
       color: "text-green-500",
       icon: <Shield className="h-4 w-4 mr-1" />,
       label: "Enhanced Verification",
       description: "Identity and address verified"
     },
-    "premium": {
+    [VerificationLevel.PREMIUM]: {
       color: "text-purple-500",
       icon: <Shield className="h-4 w-4 mr-1" />,
       label: "Premium Verification",
@@ -61,8 +61,8 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({ level }) => {
   };
 
   // Convert level to string for lookup
-  const levelKey = typeof level === 'string' ? level.toLowerCase() : level.toString().toLowerCase();
-  const badge = badgeConfigurations[levelKey] || badgeConfigurations["basic"];
+  const levelKey = typeof level === 'string' ? level.toLowerCase() : VerificationLevel[level];
+  const badge = badgeConfigurations[levelKey] || badgeConfigurations[VerificationLevel.BASIC];
 
   return (
     <TooltipProvider>

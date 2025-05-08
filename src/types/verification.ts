@@ -54,9 +54,10 @@ export interface VerificationRequest {
   reviewed_by?: string;
   documents?: VerificationDocument[];
   expires_at?: string | Date;
+  reviewedAt?: string | Date; // Allow both naming conventions
 }
 
-export interface VerificationStatus {
+export interface VerificationStatusInfo {
   userId: string;
   level: VerificationLevel;
   isVerified: boolean;
@@ -65,3 +66,6 @@ export interface VerificationStatus {
   pendingRequests: number;
   status?: string | VerificationStatus;
 }
+
+// Export VerificationLevels for ProfilePage.tsx
+export const VerificationLevels = VerificationLevel;

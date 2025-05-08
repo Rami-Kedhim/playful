@@ -8,8 +8,9 @@ export interface LayoutProps {
   containerClass?: string;
   hideHeader?: boolean;
   hideFooter?: boolean;
+  hideNavbar?: boolean; // Added for LivecamDetailLayout
   fullWidth?: boolean;
-  title?: string; // Add these properties to fix type errors
+  title?: string; // Added these properties for pages using them
   description?: string;
   showBreadcrumbs?: boolean;
 }
@@ -20,6 +21,7 @@ const Layout: React.FC<LayoutProps> = ({
   containerClass,
   hideHeader = false,
   hideFooter = false,
+  hideNavbar = false, // Added with default
   fullWidth = false,
   // New props don't need to be used in this component
   title,
@@ -28,7 +30,7 @@ const Layout: React.FC<LayoutProps> = ({
 }) => {
   return (
     <div className={cn('min-h-screen flex flex-col', className)}>
-      {!hideHeader && (
+      {!hideHeader && !hideNavbar && (
         <header className="border-b">
           <div className="container mx-auto p-4">
             Header Placeholder

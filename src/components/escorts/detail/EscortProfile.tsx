@@ -1,100 +1,71 @@
-
-import React, { useState } from 'react';
-import { Escort } from "@/types/Escort";
-import { Button } from '@/components/ui/button';
-import { Heart, MessageSquare, Share2, Calendar } from 'lucide-react';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
-import ProfileInfo from './ProfileInfo';
-import ProfileTabs from './ProfileTabs';
-import { useFavorites } from '@/contexts/FavoritesContext';
+import React from 'react';
+import { Escort } from '@/types/Escort';  // Using consistent casing
 import { VerificationLevel } from '@/types/verification';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Verified } from 'lucide-react';
 
 interface EscortProfileProps {
   escort: Escort;
+  loading?: boolean;
 }
 
-const EscortProfile: React.FC<EscortProfileProps> = ({ escort }) => {
-  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
-  const [showingDialog, setShowingDialog] = useState<'booking' | 'message' | 'share' | null>(null);
-  const isMobile = useMediaQuery('(max-width: 768px)');
+const EscortProfile: React.FC<EscortProfileProps> = ({ escort, loading = false }) => {
+  // Cast or convert the verificationLevel to the proper enum type
+  const verificationLevel = escort.verificationLevel 
+    ? (typeof escort.verificationLevel === 'string' 
+      ? escort.verificationLevel as VerificationLevel 
+      : escort.verificationLevel)
+    : VerificationLevel.NONE;
 
-  // Ensure the escort has sensible defaults for missing values
-  // Convert verificationLevel to enum type
+  // Use the processed verification level for all component needs
   const normalizedEscort: Escort = {
     ...escort,
-    name: escort.name || 'Unknown',
-    age: escort.age || 25,
-    location: escort.location || 'Unknown',
-    rating: escort.rating || 0,
-    reviewCount: escort.reviewCount || 0,
-    // Properly convert verification level to enum
-    verificationLevel: getVerificationLevelEnum(escort.verificationLevel),
-    tags: escort.tags || [],
-    price: escort.price || 0,
-    services: escort.services || [],
-    bio: escort.bio || 'No biography available',
-    images: escort.images || [escort.imageUrl || escort.profileImage || ''],
-    languages: escort.languages || ['English'],
+    verificationLevel: verificationLevel
   };
 
-  // Helper function to convert verification level to enum
-  function getVerificationLevelEnum(level: any): VerificationLevel {
-    if (!level) return VerificationLevel.NONE;
-    
-    if (typeof level === 'string') {
-      switch (level.toLowerCase()) {
-        case 'basic': return VerificationLevel.BASIC;
-        case 'verified': return VerificationLevel.VERIFIED;
-        case 'enhanced': return VerificationLevel.ENHANCED;
-        case 'premium': return VerificationLevel.PREMIUM;
-        default: return VerificationLevel.NONE;
-      }
-    }
-    
-    return VerificationLevel.NONE;
+  if (loading) {
+    return <div>Loading escort profile...</div>;
   }
 
-  const handleFavoriteToggle = () => {
-    if (isFavorite(escort.id)) {
-      removeFavorite(escort.id);
-    } else {
-      addFavorite(escort);
-    }
-  };
-
-  // Check if this escort is in favorites
-  const isFav = isFavorite(escort.id);
+  if (!escort) {
+    return <div>Escort profile not found.</div>;
+  }
 
   return (
-    <div className="flex flex-col md:flex-row gap-8">
-      <div className="flex-1">
-        <ProfileInfo escort={normalizedEscort} />
+    <div className="flex flex-col md:flex-row gap-4">
+      <div className="md:w-1/3">
+        <Avatar className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-2 border-primary">
+          <AvatarImage src={normalizedEscort.profileImage || normalizedEscort.imageUrl} alt={normalizedEscort.name} />
+          <AvatarFallback>{normalizedEscort.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+        </Avatar>
+        <div className="mt-2 text-center">
+          <h2 className="text-xl font-semibold">{normalizedEscort.name}</h2>
+          <p className="text-muted-foreground">{normalizedEscort.location}</p>
+          {normalizedEscort.isVerified && (
+            <Badge variant="outline" className="mt-2">
+              <Verified className="w-4 h-4 mr-1" />
+              Verified
+            </Badge>
+          )}
+        </div>
       </div>
 
-      <div className="md:w-72 lg:w-80 space-y-4">
-        {/* Mobile Actions */}
-        {isMobile && (
-          <div className="flex space-x-2 mb-4">
-            <Button className="flex-1">
-              <Calendar className="mr-2 h-4 w-4" />
-              Book Now
-            </Button>
-            
-            <Button variant="outline" className="flex-grow-0" onClick={handleFavoriteToggle}>
-              <Heart className="h-4 w-4" fill={isFav ? "currentColor" : "none"} />
-            </Button>
-            
-            <Button variant="outline" className="flex-grow-0" onClick={() => setShowingDialog('message')}>
-              <MessageSquare className="h-4 w-4" />
-            </Button>
-            
-            <Button variant="outline" className="flex-grow-0" onClick={() => setShowingDialog('share')}>
-              <Share2 className="h-4 w-4" />
-            </Button>
+      <div className="md:w-2/3">
+        <h3 className="text-lg font-semibold">About</h3>
+        <p className="text-muted-foreground">{normalizedEscort.bio || 'No bio available.'}</p>
+        <h3 className="text-lg font-semibold mt-4">Details</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div>
+            <span className="font-semibold">Age:</span> {normalizedEscort.age}
           </div>
-        )}
-        
-        <ProfileTabs escort={normalizedEscort} />
+          <div>
+            <span className="font-semibold">Gender:</span> {normalizedEscort.gender}
+          </div>
+          <div>
+            <span className="font-semibold">Price:</span> ${normalizedEscort.price}
+          </div>
+        </div>
       </div>
     </div>
   );
