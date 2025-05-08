@@ -22,7 +22,21 @@ export const AppPaths = {
   LUCIE: '/lucie',
   OXUM: '/oxum',
   HERMES: '/hermes',
-  ORUS: '/orus'
+  ORUS: '/orus',
+  
+  // Additional paths used in components
+  REGISTER: '/register',
+  ESCORT_SEARCH: '/escorts',
+  TERMS: '/terms',
+  PRIVACY: '/privacy',
+  SAFETY: '/safety',
+  CONTACT: '/contact',
+  CREATORS: '/creators',
+  LIVECAMS: '/livecams',
+  NEURAL_MONITOR: '/neural/monitor',
+  NEURAL_ANALYTICS: '/neural/analytics',
+  SEO: '/seo',
+  GUIDELINES: '/guidelines'
 };
 
 // Export AppPaths as APP_PATHS for backward compatibility

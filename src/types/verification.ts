@@ -20,6 +20,10 @@ export interface VerificationDocument {
   notes?: string;
   reviewedAt?: string;
   reviewedBy?: string;
+  
+  // Additional properties needed by components
+  filePath?: string;
+  documentType?: string;
 }
 
 export interface VerificationRequest {
