@@ -1,132 +1,58 @@
 
 import React from 'react';
-import { UnifiedLayout } from '@/layouts';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useNavigate } from 'react-router-dom';
-import { UnifiedRoutes } from '@/routes/unifiedRoutes';
+import { Layout } from '@/layouts';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Shield } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import EscortGrid from '@/components/escorts/EscortGrid';
+import { mockEscorts } from '@/data/mockEscorts';
 
-const HomePage: React.FC = () => {
-  const navigate = useNavigate();
+const HomePage = () => {
+  const { user } = useAuth();
   
   return (
-    <UnifiedLayout title="Welcome to UberEscorts" hideHeader={false} fullWidth={false}>
-      <div className="py-8">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">UberEscorts Ecosystem</h1>
-            <p className="text-lg text-muted-foreground">
-              Your premium platform for escorts, creators, and AI companions
-            </p>
-          </div>
+    <Layout 
+      title="UberEscorts Ecosystem"
+      description="The premier digital platform for escorts, clients, and AI companions"
+      showBreadcrumbs={false}
+    >
+      <div className="space-y-8">
+        <Card className="border-t-4 border-t-primary">
+          <CardContent className="pt-6 pb-4">
+            <div className="flex items-center space-x-2 text-primary">
+              <Shield className="h-5 w-5" />
+              <span className="text-sm font-medium">Secure Connection Active | Protected by Orus</span>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Tabs defaultValue="escorts" className="w-full">
+          <TabsList className="w-full justify-start">
+            <TabsTrigger value="escorts">Escorts</TabsTrigger>
+            <TabsTrigger value="creators">Content Creators</TabsTrigger>
+            <TabsTrigger value="livecams">Live Cams</TabsTrigger>
+            <TabsTrigger value="ai-companions">AI Companions</TabsTrigger>
+          </TabsList>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Escorts Card */}
-            <Card className="hover:shadow-md transition-shadow cursor-pointer" 
-                  onClick={() => navigate(UnifiedRoutes.escorts.base)}>
-              <CardHeader>
-                <CardTitle>Escorts</CardTitle>
-                <CardDescription>Discover verified escorts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground">
-                  Browse our curated selection of premium escorts, 
-                  verified for your safety and satisfaction.
-                </p>
-                <Button variant="outline" className="w-full">
-                  Browse Escorts
-                </Button>
-              </CardContent>
-            </Card>
-            
-            {/* Creators Card */}
-            <Card className="hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => navigate(UnifiedRoutes.creators.base)}>
-              <CardHeader>
-                <CardTitle>Creators</CardTitle>
-                <CardDescription>Exclusive content creators</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground">
-                  Subscribe to premium creators who share exclusive content and experiences.
-                </p>
-                <Button variant="outline" className="w-full">
-                  View Creators
-                </Button>
-              </CardContent>
-            </Card>
-            
-            {/* AI Companions Card */}
-            <Card className="hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => navigate('/ai-companions')}>
-              <CardHeader>
-                <CardTitle>AI Companions</CardTitle>
-                <CardDescription>Virtual companions powered by AI</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground">
-                  Experience our cutting-edge AI companions with unique personalities.
-                </p>
-                <Button variant="outline" className="w-full">
-                  Meet AI Companions
-                </Button>
-              </CardContent>
-            </Card>
-            
-            {/* Metaverse Card */}
-            <Card className="hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => navigate(UnifiedRoutes.lucie.base)}>
-              <CardHeader>
-                <CardTitle>Lucie AI</CardTitle>
-                <CardDescription>Your personal AI assistant</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground">
-                  Talk to Lucie, an advanced AI designed to enhance your UberEscorts experience.
-                </p>
-                <Button variant="outline" className="w-full">
-                  Chat with Lucie
-                </Button>
-              </CardContent>
-            </Card>
-            
-            {/* Wallet Card */}
-            <Card className="hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => navigate(UnifiedRoutes.wallet.base)}>
-              <CardHeader>
-                <CardTitle>UBX Wallet</CardTitle>
-                <CardDescription>Manage your tokens</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground">
-                  Purchase and manage UBX tokens for transactions on our platform.
-                </p>
-                <Button variant="outline" className="w-full">
-                  Open Wallet
-                </Button>
-              </CardContent>
-            </Card>
-            
-            {/* Neural Hub Card */}
-            <Card className="hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => navigate('/brain-hub')}>
-              <CardHeader>
-                <CardTitle>Brain Hub</CardTitle>
-                <CardDescription>Neural ecosystem insights</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground">
-                  Dive into the UberEscorts neural network and ecosystem analytics.
-                </p>
-                <Button variant="outline" className="w-full">
-                  Explore Brain Hub
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+          <TabsContent value="escorts" className="mt-6">
+            <EscortGrid escorts={mockEscorts} />
+          </TabsContent>
+          
+          <TabsContent value="creators" className="mt-6">
+            <EscortGrid escorts={mockEscorts.filter(e => e.tags?.includes('creator'))} />
+          </TabsContent>
+          
+          <TabsContent value="livecams" className="mt-6">
+            <EscortGrid escorts={mockEscorts.filter(e => e.tags?.includes('livecam'))} />
+          </TabsContent>
+          
+          <TabsContent value="ai-companions" className="mt-6">
+            <EscortGrid escorts={mockEscorts.filter(e => e.tags?.includes('ai'))} />
+          </TabsContent>
+        </Tabs>
       </div>
-    </UnifiedLayout>
+    </Layout>
   );
 };
 

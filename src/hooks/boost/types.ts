@@ -13,7 +13,7 @@ export interface BoostStatus {
   modifiers?: Record<string, number>;
   packageName?: string;
   packageId?: string;
-  startedAt?: Date;
+  startedAt?: Date | string;
   progress?: number;
   timeRemaining?: string;
 }

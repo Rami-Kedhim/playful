@@ -31,11 +31,11 @@ const SecureRouteWrapper: React.FC<SecureRouteWrapperProps> = ({
         
         if (minimumSecurityLevel === 'maximum') {
           secure = sessionSecurity.isValid && integrityCheck.valid && 
-                   (integrityCheck.integrity ? integrityCheck.integrity > 90 : true);
+                   (integrityCheck.integrity ? integrityCheck.integrity > 90 : false);
           setSecurityMessage('Maximum security protocols active.');
         } else if (minimumSecurityLevel === 'enhanced') {
           secure = sessionSecurity.isValid && integrityCheck.valid && 
-                   (integrityCheck.integrity ? integrityCheck.integrity > 70 : true);
+                   (integrityCheck.integrity ? integrityCheck.integrity > 70 : false);
           setSecurityMessage('Enhanced security protocols active.');
         } else {
           secure = sessionSecurity.isValid && integrityCheck.valid;

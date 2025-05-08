@@ -1,89 +1,73 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Star, MessageSquare } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Star } from 'lucide-react';
 
 interface Review {
   id: string;
-  userId: string;
   userName: string;
+  userAvatar?: string;
   rating: number;
-  content: string;
   date: string;
-  verified?: boolean;
+  content: string;
 }
 
 interface EscortReviewsSectionProps {
-  escortId: string;
   reviews: Review[];
+  averageRating?: number;
+  totalReviews?: number;
 }
 
-const EscortReviewsSection: React.FC<EscortReviewsSectionProps> = ({
-  escortId,
-  reviews = []
+const EscortReviewsSection: React.FC<EscortReviewsSectionProps> = ({ 
+  reviews = [], 
+  averageRating = 0, 
+  totalReviews = 0 
 }) => {
-  const avgRating = reviews.length > 0
-    ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
-    : '0.0';
-  
-  // Function to render stars based on rating
-  const renderStars = (rating: number) => {
-    return Array(5).fill(0).map((_, i) => (
-      <Star 
-        key={i} 
-        className={`h-4 w-4 ${i < rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`} 
-      />
-    ));
-  };
-
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span className="flex items-center">
-            <MessageSquare className="mr-2 h-5 w-5" />
-            Reviews ({reviews.length})
-          </span>
-          {reviews.length > 0 && (
-            <span className="flex items-center text-sm bg-muted px-2 py-1 rounded-md">
-              {avgRating}
-              <Star className="ml-1 h-4 w-4 text-yellow-500 fill-yellow-500" />
-            </span>
-          )}
+          <span>Reviews</span>
+          <div className="flex items-center space-x-1">
+            <Star className="h-4 w-4 fill-primary text-primary" />
+            <span>{averageRating.toFixed(1)}</span>
+            <span className="text-sm text-muted-foreground">({totalReviews})</span>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {reviews.length > 0 ? (
-          <div className="space-y-4">
-            {reviews.map((review) => (
-              <div key={review.id} className="border-b pb-4 last:border-0">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center">
-                    <span className="font-medium mr-2">{review.userName}</span>
-                    {review.verified && (
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
-                        Verified
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex text-sm text-gray-500">
-                    {new Date(review.date).toLocaleDateString()}
-                  </div>
-                </div>
-                <div className="flex items-center mb-2">
-                  {renderStars(review.rating)}
-                </div>
-                <p className="text-sm text-gray-600">{review.content}</p>
-              </div>
-            ))}
+        {reviews.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No reviews yet
           </div>
         ) : (
-          <div className="text-center py-6">
-            <p className="text-muted-foreground mb-4">No reviews yet</p>
-            <Button size="sm" variant="outline">
-              Write a Review
-            </Button>
+          <div className="space-y-6">
+            {reviews.map((review) => (
+              <div key={review.id} className="border-b pb-4 mb-4 last:border-0">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <Avatar>
+                      <AvatarImage src={review.userAvatar} alt={review.userName} />
+                      <AvatarFallback>{review.userName.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h4 className="font-medium">{review.userName}</h4>
+                      <p className="text-sm text-muted-foreground">{review.date}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    {Array(5).fill(0).map((_, i) => (
+                      <Star 
+                        key={i} 
+                        className={`h-4 w-4 ${i < review.rating ? 'fill-primary text-primary' : 'text-muted'}`} 
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-sm">{review.content}</p>
+              </div>
+            ))}
           </div>
         )}
       </CardContent>

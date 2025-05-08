@@ -1,127 +1,171 @@
 
 /**
- * UberEscorts Core Systems Type Definitions
- * Contains type definitions for core UberEscorts systems: Lucie, Oxum, Hermes, Orus
+ * Core Systems - Shared Type Definitions
  */
 
-// Generic System Types
+// System Status
 export interface SystemStatus {
   operational: boolean;
+  isActive?: boolean;
+  services?: {
+    auth: string;
+    analytics: string;
+    ai: string;
+    wallet: string;
+    seo: string;
+  };
+  serviceStatus?: {
+    auth: string;
+    analytics: string;
+    ai: string;
+    wallet: string;
+    seo: string;
+    payments: string;
+  };
+  queueLength?: number;
+  processing?: boolean;
+  uptime?: number;
+  lastReboot?: string;
+  performance?: number;
+  lastUpdate?: string;
+  status?: string;
   latency?: number;
-  modules?: Record<string, { operational: boolean; latency?: number }>;
+  traffic?: string;
+  loadFactor?: number;
 }
 
+// System Integrity Check
 export interface SystemIntegrityResult {
   valid: boolean;
-  issues?: string[];
-  timestamp: string;
+  status?: string;
+  errors?: string[];
+  warnings?: string[];
+  lastChecked: string;
+  integrity?: number;
+  checks?: {
+    database?: boolean;
+    cache?: boolean;
+    filesystem?: boolean;
+    network?: boolean;
+  }
+  modules?: Record<string, string>;
+  recommendations?: string[];
+  overallStatus?: string;
 }
 
+// System Health
 export interface SystemHealthMetrics {
   cpu: number;
   memory: number;
-  network: number;
   storage: number;
+  network: number;
   load: number;
 }
 
-// Session Types
+// Session Validation
 export interface SessionValidationResult {
   isValid: boolean;
-  userId?: string;
-  sessionId?: string;
-  expiresAt?: string;
-  error?: string;
+  userId: string;
+  expiresAt: string;
+  username?: string;
+  timestamp?: string;
+  expiry?: string;
 }
 
-// Lucie AI System Types
-export interface LucieAISystem {
-  generateContent: (params: GenerateContentParams) => Promise<GenerateContentResult>;
-  moderateContent: (params: ModerateContentParams) => Promise<ModerateContentResult>;
-  analyzeSentiment: (params: SentimentAnalysisParams) => Promise<SentimentAnalysisResult>;
-  getSystemStatus: () => Promise<SystemStatus>;
+// Content Moderation
+export interface ModerateContentParams {
+  content: string;
+  type: 'text' | 'image' | 'video';
+  settings?: Record<string, any>;
 }
 
+export interface ModerateContentResult {
+  isSafe: boolean;
+  safe?: boolean;
+  score: number;
+  issues?: string[];
+  blockedCategories: string[];
+  category: string;
+  action: 'allow' | 'warn' | 'block';
+}
+
+// Content Generation
 export interface GenerateContentParams {
   prompt: string;
-  maxTokens?: number;
-  temperature?: number;
   options?: Record<string, any>;
 }
 
 export interface GenerateContentResult {
   content: string;
-  moderated: boolean;
-  warnings: string[];
-  usage: {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  };
+  tokens?: number;
+  promptTokens?: number;
+  completionTokens?: number;
 }
 
-export interface ModerateContentParams {
-  content: string;
-  type: string;
-  options?: Record<string, any>;
-}
-
-export interface ModerateContentResult {
-  isSafe: boolean;
-  categories?: Record<string, number>;
-  flagged?: boolean;
-}
-
+// Sentiment Analysis
 export interface SentimentAnalysisParams {
   text: string;
-  detailed?: boolean;
+  language?: string;
 }
 
 export interface SentimentAnalysisResult {
-  sentiment: 'positive' | 'negative' | 'neutral';
   score: number;
-  emotions?: Record<string, number>;
+  sentiment: 'positive' | 'neutral' | 'negative';
+  confidence?: number;
 }
 
-// Hermes Analytics Types
-export interface HermesInsight {
+// Recommended Actions
+export interface RecommendedAction {
+  id: string;
   type: string;
   title: string;
   description: string;
-  value: number;
-  change?: number;
+  priority: number;
+  action?: string;
+  actionLabel?: string;
+  url?: string;
+  deadline?: string;
+  completedAt?: string;
 }
 
-export interface RecommendedAction {
-  id: string;
-  title: string;
-  description: string;
-  impact: 'high' | 'medium' | 'low';
-  category: string;
-  actionType: string;
+// LucieAI System Interface
+export interface LucieAISystem {
+  initialize(): Promise<void>;
+  shutdown(): Promise<void>;
+  generateContent(params: GenerateContentParams): Promise<GenerateContentResult>;
+  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
+  analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult>;
+  getSystemStatus(): any;
 }
 
-// Oxum System Types
+// OxumSystem Interface
 export interface OxumSystem {
-  calculatePayment: (amount: number, currency: string) => Promise<Record<string, any>>;
-  verifyTransaction: (transactionId: string) => Promise<boolean>;
-  getExchangeRate: (fromCurrency: string, toCurrency: string) => Promise<number>;
-  getSystemStatus: () => Promise<SystemStatus>;
+  initialize(): Promise<void>;
+  shutdown(): void;
+  getSystemStatus(): Promise<SystemStatus>;
+  processPayment(amount: number, currency: string): Promise<boolean>;
+  validateTransaction(txId: string): Promise<boolean>;
+  getExchangeRate(from: string, to: string): Promise<number>;
+  boostAllocationEigen(userId: string, boostLevel: number): Promise<number[]>;
+  calculateScore(inputs: number[]): Promise<number>;
+  emitEvent(event: string, data: any): void;
+  checkSystemStatus(): {
+    operational: boolean;
+    traffic: string;
+    loadFactor: number;
+  };
+  calculatePayment?: (amount: number, currency: string) => Promise<number>;
+  verifyTransaction?: (txId: string) => Promise<boolean>;
 }
 
-// UberCore System Types
+// UberCoreSystem Interface
 export interface UberCoreSystem {
-  initialize: () => Promise<boolean>;
-  validateSession: (token: string) => Promise<SessionValidationResult>;
-  checkSystemIntegrity: () => Promise<SystemIntegrityResult>;
-  getSystemHealth: () => Promise<SystemHealthMetrics>;
-  getSystemStatus: () => Promise<SystemStatus>;
-}
-
-// Unified wallet interface
-export interface UberWallet {
-  getBalance: () => Promise<number>;
-  getTransactions: () => Promise<any[]>;
-  credit: (amount: number, reason: string) => Promise<boolean>;
-  debit: (amount: number, reason: string) => Promise<boolean>;
+  initialize(): Promise<boolean>;
+  getSystemStatus(): SystemStatus | Promise<SystemStatus>;
+  checkSystemIntegrity(): Promise<SystemIntegrityResult>;
+  getSystemHealthMetrics(): Promise<SystemHealthMetrics>;
+  getSystemHealth(): Promise<SystemHealthMetrics>;
+  validateSession(token: string): Promise<SessionValidationResult>;
+  initializeAutomaticSeo(): boolean;
+  checkSubsystemHealth(): { name: string, status: string, health: number }[];
 }

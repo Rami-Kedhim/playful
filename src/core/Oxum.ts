@@ -101,6 +101,20 @@ class Oxum implements OxumSystem {
       loadFactor: 0.45
     };
   }
+
+  // Implement missing methods to satisfy OxumSystem interface
+  async calculatePayment(amount: number, currency: string): Promise<number> {
+    // Mock implementation
+    if (currency === 'USD') {
+      return amount * 100; // Convert to UBX
+    }
+    return amount;
+  }
+  
+  async verifyTransaction(txId: string): Promise<boolean> {
+    // Mock implementation
+    return txId && txId.length > 0;
+  }
 }
 
 export const oxum = new Oxum();

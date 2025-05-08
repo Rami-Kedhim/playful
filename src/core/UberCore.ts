@@ -1,7 +1,7 @@
 
 import { SystemStatus, SessionValidationResult, UberCoreSystem, SystemIntegrityResult, SystemHealthMetrics } from '@/types/core-systems';
 import { UberWallet } from './UberWallet';
-import { OxumSystem } from '@/types/oxum';
+import { OxumSystem } from '@/types/core-systems';
 import { automaticSEO } from './AutomaticSEO';
 
 export class UberCore implements UberCoreSystem {
@@ -23,7 +23,7 @@ export class UberCore implements UberCoreSystem {
     return true;
   }
   
-  public async getSystemStatus(): Promise<SystemStatus> {
+  public getSystemStatus(): SystemStatus {
     // Mock system status implementation
     return {
       operational: true,
@@ -50,7 +50,13 @@ export class UberCore implements UberCoreSystem {
       errors: [],
       warnings: [],
       lastChecked: new Date().toISOString(),
-      integrity: 100
+      integrity: 100,
+      checks: {
+        database: true,
+        cache: true,
+        filesystem: true,
+        network: true
+      }
     };
   }
   

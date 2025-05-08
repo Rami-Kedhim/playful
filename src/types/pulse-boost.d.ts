@@ -17,6 +17,7 @@ export interface BoostPackage {
   isMostPopular?: boolean;
   isRecommended?: boolean;
   is_active?: boolean;
+  boostLevel?: number;
 }
 
 export interface PulseBoost {
@@ -38,9 +39,10 @@ export interface PulseBoost {
   isRecommended?: boolean;
   profileId?: string;
   packageId?: string;
-  startTime?: Date;
-  endTime?: Date;
+  startTime?: Date | string;
+  endTime?: Date | string;
   status?: string;
+  boostLevel?: number;
 }
 
 export interface BoostPurchaseRequest {
@@ -91,8 +93,8 @@ export interface BoostHistory {
     status: string;
   }>;
   userId?: string;
-  startTime?: Date;
-  endTime?: Date;
+  startTime?: Date | string;
+  endTime?: Date | string;
   boostType?: string;
   price?: number;
   status?: string;
