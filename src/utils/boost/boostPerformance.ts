@@ -1,34 +1,30 @@
 
-/**
- * Boost Performance Optimization Utilities
- */
+import { BoostAnalytics, BoostPackage } from "@/types/pulse-boost";
 
-/**
- * Optimizes boost performance by analyzing usage patterns
- * and adjusting boost parameters accordingly
- */
-export const optimizeBoostPerformance = (
-  profileData: any,
-  history: any[] = [],
-  options: Record<string, any> = {}
-) => {
-  // Mock implementation
-  const baseScore = typeof profileData === 'number' 
-    ? profileData 
-    : Math.random() * 100;
-    
-  const optimizedScore = baseScore * (1 + (Math.random() * 0.2));
-  
-  return {
-    originalScore: baseScore,
-    optimizedScore,
-    improvement: ((optimizedScore - baseScore) / baseScore) * 100,
-    recommendations: [
-      'Adjust boost timing to match peak hours',
-      'Consider longer duration boosts for better ROI',
-      'Target specific audience segments for better engagement'
-    ]
-  };
+export const calculateBoostPerformance = (analytics: BoostAnalytics): number => {
+  // Simple performance calculation based on analytics
+  const viewsWeight = 0.4;
+  const interactionsWeight = 0.6;
+
+  // Get base values
+  const views = analytics.impressions?.value || 0;
+  const interactions = analytics.interactions?.value || 0;
+
+  // Calculate performance score (0-100)
+  const viewScore = Math.min(views / 1000, 1) * 100; 
+  const interactionScore = Math.min(interactions / 100, 1) * 100;
+
+  return (viewScore * viewsWeight) + (interactionScore * interactionsWeight);
 };
 
-export default optimizeBoostPerformance;
+export const getBoostImpactPercentage = (
+  analytics: BoostAnalytics
+): number => {
+  const regularViews = analytics.impressions?.value || 0;
+  const boostedViews = analytics.impressions?.withBoost || 0;
+  
+  if (regularViews === 0) return 0;
+  
+  const increase = ((boostedViews - regularViews) / regularViews) * 100;
+  return Math.round(increase);
+};

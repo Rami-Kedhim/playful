@@ -1,110 +1,113 @@
 
-/**
- * UberWallet - Digital Currency System for UberEscorts
- */
-
-export interface UbxTransactionResult {
-  success: boolean;
-  message?: string;
-  transactionId?: string;
-  timestamp: Date;
-}
-
-export interface UbxTransaction {
-  id: string;
-  userId: string;
-  amount: number;
-  transactionType: string;
-  description?: string;
-  createdAt: Date;
-  status: 'completed' | 'pending' | 'failed';
-}
-
 export class UberWallet {
+  private balance: number = 0;
   private initialized: boolean = false;
-  
+  private transactions: Array<{
+    id: string;
+    type: 'deposit' | 'withdrawal' | 'transfer';
+    amount: number;
+    timestamp: Date;
+    from?: string;
+    to?: string;
+  }> = [];
+
   constructor() {
-    this.initialized = true;
-  }
-  
-  async getBalance(userId: string): Promise<number> {
-    // Mock implementation
-    return 1000;
+    this.balance = 0;
+    this.initialized = false;
   }
 
-  async spendUbx(userId: string, amount: number, purpose: string): Promise<UbxTransactionResult> {
-    console.log(`User ${userId} spending ${amount} UBX for ${purpose}`);
+  public async initialize(initialBalance: number): Promise<boolean> {
+    if (this.initialized) {
+      return true;
+    }
     
-    // Mock implementation
-    return {
-      success: true,
-      message: `Successfully spent ${amount} UBX`,
-      transactionId: `tx-${Date.now()}`,
+    this.balance = initialBalance;
+    this.initialized = true;
+    
+    this.transactions.push({
+      id: `init-${Date.now()}`,
+      type: 'deposit',
+      amount: initialBalance,
       timestamp: new Date()
-    };
-  }
-  
-  // This method will be used by engine.ts for transfer functionality
-  transfer(fromUserId: string, toUserId: string, amount: number): boolean {
-    console.log(`Transfer ${amount} UBX from ${fromUserId} to ${toUserId}`);
+    });
+    
     return true;
   }
-  
-  // Add missing method referenced in engine.ts
-  isInitialized(): boolean {
+
+  public isInitialized(): boolean {
     return this.initialized;
   }
-  
-  // Add missing methods referenced in WalletPage
-  async getTransactionHistory(userId: string): Promise<UbxTransaction[]> {
-    // Mock implementation
-    return [
-      { 
-        id: `tx-${Date.now()-1000}`, 
-        userId, 
-        amount: -50, 
-        transactionType: 'purchase', 
-        description: 'Purchased boost',
-        createdAt: new Date(Date.now() - 3600000),
-        status: 'completed'
-      },
-      { 
-        id: `tx-${Date.now()-2000}`, 
-        userId, 
-        amount: 200, 
-        transactionType: 'deposit', 
-        description: 'Added funds',
-        createdAt: new Date(Date.now() - 7200000),
-        status: 'completed'
-      }
-    ];
+
+  public async getBalance(): Promise<number> {
+    return this.balance;
   }
-  
-  async purchaseUbx(userId: string, amount: number): Promise<UbxTransactionResult> {
-    console.log(`User ${userId} purchasing ${amount} UBX`);
+
+  public async transfer(destination: string, amount: number): Promise<boolean> {
+    if (amount <= 0) {
+      throw new Error('Transfer amount must be positive');
+    }
     
-    // Mock implementation
-    return {
-      success: true,
-      message: `Successfully purchased ${amount} UBX`,
-      transactionId: `purchase-${Date.now()}`,
-      timestamp: new Date()
-    };
+    if (amount > this.balance) {
+      throw new Error('Insufficient funds for transfer');
+    }
+    
+    this.balance -= amount;
+    
+    this.transactions.push({
+      id: `transfer-${Date.now()}`,
+      type: 'transfer',
+      amount: amount,
+      timestamp: new Date(),
+      to: destination
+    });
+    
+    return true;
   }
-  
-  // Add the missing debit method that is used in aiOrchestration.ts
-  async debit(userId: string, amount: number, purpose: string): Promise<UbxTransactionResult> {
-    console.log(`Debiting ${amount} UBX from user ${userId} for ${purpose}`);
+
+  public async deposit(amount: number): Promise<boolean> {
+    if (amount <= 0) {
+      throw new Error('Deposit amount must be positive');
+    }
     
-    // Mock implementation
-    return {
-      success: true,
-      message: `Successfully debited ${amount} UBX`,
-      transactionId: `debit-${Date.now()}`,
+    this.balance += amount;
+    
+    this.transactions.push({
+      id: `deposit-${Date.now()}`,
+      type: 'deposit',
+      amount: amount,
       timestamp: new Date()
-    };
+    });
+    
+    return true;
+  }
+
+  public async withdraw(amount: number): Promise<boolean> {
+    if (amount <= 0) {
+      throw new Error('Withdrawal amount must be positive');
+    }
+    
+    if (amount > this.balance) {
+      throw new Error('Insufficient funds for withdrawal');
+    }
+    
+    this.balance -= amount;
+    
+    this.transactions.push({
+      id: `withdraw-${Date.now()}`,
+      type: 'withdrawal',
+      amount: amount,
+      timestamp: new Date()
+    });
+    
+    return true;
+  }
+
+  public async getTransactionHistory(): Promise<any[]> {
+    return [...this.transactions];
+  }
+
+  public async shutdown(): Promise<boolean> {
+    console.log('UberWallet system shutting down...');
+    return true;
   }
 }
-
-export const uberWallet = new UberWallet();
-export default uberWallet;

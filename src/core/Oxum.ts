@@ -1,79 +1,53 @@
 
-/**
- * Oxum - System Status and Health Monitoring
- */
-
-interface SystemStatus {
-  operational: boolean;
-  services: {
-    [key: string]: string;
-  };
-  uptime?: number;
-}
-
 class OxumSystem {
-  checkSystemStatus(): SystemStatus {
-    // Mock implementation
-    return {
-      operational: true,
-      services: {
-        core: 'online',
-        analytics: 'online',
-        security: 'online',
-        database: 'online'
-      },
-      uptime: Date.now()
-    };
-  }
-  
-  monitorPerformance(): {
-    cpu: number;
-    memory: number;
-    latency: number;
-  } {
-    // Mock implementation
-    return {
-      cpu: Math.random() * 100,
-      memory: Math.random() * 100,
-      latency: Math.random() * 50
-    };
-  }
-  
-  reportIssue(system: string, issue: string): void {
-    console.log(`[Oxum] Issue reported for ${system}: ${issue}`);
+  private initialized: boolean = false;
+
+  async initialize(): Promise<boolean> {
+    this.initialized = true;
+    return true;
   }
 
-  // Add missing method for boost allocation
+  isInitialized(): boolean {
+    return this.initialized;
+  }
+
+  configure(options: any): void {
+    console.log('Configuring Oxum system with options:', options);
+  }
+
   boostAllocationEigen(matrix: number[][]): number[] {
-    // Simple implementation to return normalized values
-    const rows = matrix.length;
-    const result = new Array(rows).fill(0);
+    // Simple implementation of allocation calculation
+    const result: number[] = [];
     
-    // Sum the columns for normalization
-    for (let i = 0; i < rows; i++) {
-      let sum = 0;
-      for (let j = 0; j < matrix[i].length; j++) {
-        sum += matrix[i][j];
-      }
-      result[i] = sum / matrix[i].length;
+    // Calculate row sums
+    for (let i = 0; i < matrix.length; i++) {
+      const row = matrix[i];
+      const sum = row.reduce((a, b) => a + b, 0);
+      result.push(sum / row.length);
     }
     
-    // Normalize to ensure sum is 1
-    const total = result.reduce((acc, val) => acc + val, 0);
-    return result.map(val => val / total);
+    // Normalize the result
+    const total = result.reduce((a, b) => a + b, 0);
+    return result.map(v => v / total);
   }
 
-  // Add missing method for calculating boost score
-  calculateBoostScore(profile: any, contextFactor: number = 1): number {
-    return Math.floor(Math.random() * 100) * contextFactor;
-  }
-  
-  // Add configure method
-  configure(options: Record<string, any>): boolean {
-    console.log(`[Oxum] Configuring with options:`, options);
-    return true;
+  calculateBoostScore(factors: Record<string, number>): number {
+    const weights = {
+      profileCompleteness: 0.3,
+      activityScore: 0.2,
+      engagementRate: 0.3,
+      reviewScore: 0.2
+    };
+
+    let score = 0;
+    for (const [key, value] of Object.entries(factors)) {
+      if (key in weights) {
+        score += value * weights[key as keyof typeof weights];
+      }
+    }
+
+    return Math.min(Math.max(score * 10, 0), 100);
   }
 }
 
 export const oxum = new OxumSystem();
-export default oxum;

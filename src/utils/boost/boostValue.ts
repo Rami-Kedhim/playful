@@ -1,37 +1,39 @@
 
-/**
- * Boost Value Calculation Utilities
- */
+import { BoostPackage } from "@/types/pulse-boost";
 
-/**
- * Evaluates the monetary value and ROI of a boost
- */
-export const evaluateBoostValue = (
-  boostCost: number,
-  expectedImpressions: number,
-  conversionRate: number = 0.02,
-  averageValue: number = 100
-) => {
-  // Calculate expected conversions
-  const expectedConversions = expectedImpressions * conversionRate;
+export const calculateBoostValue = (
+  boostPackage: BoostPackage
+): { value: number; roi: number } => {
+  // Calculate the value of a boost package
+  const visibilityIncrease = boostPackage.visibility_increase || 0;
+  const durationHours = boostPackage.durationMinutes / 60;
+  const price = boostPackage.price;
   
-  // Calculate expected revenue
-  const expectedRevenue = expectedConversions * averageValue;
+  // Calculate raw value - higher visibility for longer duration
+  const rawValue = visibilityIncrease * durationHours;
   
-  // Calculate ROI
-  const roi = ((expectedRevenue - boostCost) / boostCost) * 100;
+  // Calculate ROI - value per dollar spent
+  const roi = price > 0 ? rawValue / price : 0;
   
   return {
-    cost: boostCost,
-    expectedImpressions,
-    expectedConversions,
-    expectedRevenue,
-    roi,
-    recommendation: roi > 100 ? 'Highly Recommended' : 
-                   roi > 50 ? 'Recommended' : 
-                   roi > 0 ? 'Consider' : 'Not Recommended',
-    valueScore: Math.min(Math.max(roi / 2, 0), 100)
+    value: Math.round(rawValue / 10), // Normalized to 0-100 scale
+    roi: parseFloat(roi.toFixed(2))
   };
 };
 
-export default evaluateBoostValue;
+export const getBestValuePackage = (packages: BoostPackage[]): BoostPackage | null => {
+  if (!packages || packages.length === 0) return null;
+  
+  // Calculate ROI for each package
+  const packagesWithValue = packages.map(pkg => ({
+    package: pkg,
+    valueMetrics: calculateBoostValue(pkg)
+  }));
+  
+  // Find package with highest ROI
+  return packagesWithValue.reduce(
+    (best, current) => 
+      current.valueMetrics.roi > best.valueMetrics.roi ? current : best,
+    packagesWithValue[0]
+  ).package;
+};

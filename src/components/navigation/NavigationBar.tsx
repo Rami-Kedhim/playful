@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth';
+import AuthStatus from '@/components/auth/AuthStatus';
 
 export const NavigationBar = () => {
   const { user } = useAuth();
@@ -11,12 +12,15 @@ export const NavigationBar = () => {
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="font-bold text-xl">UberEscorts</Link>
         
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-center">
           <Link to="/" className="hover:underline">Home</Link>
           <Link to="/escorts" className="hover:underline">Escorts</Link>
           <Link to="/creators" className="hover:underline">Creators</Link>
           {user ? (
-            <Link to="/profile" className="hover:underline">Profile</Link>
+            <>
+              <Link to="/profile" className="hover:underline">Profile</Link>
+              <AuthStatus />
+            </>
           ) : (
             <Link to="/login" className="hover:underline">Login</Link>
           )}
@@ -25,3 +29,5 @@ export const NavigationBar = () => {
     </nav>
   );
 };
+
+export default NavigationBar;

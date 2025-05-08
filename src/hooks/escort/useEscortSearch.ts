@@ -1,47 +1,45 @@
 
-import { useState, useEffect } from 'react';
-import { Escort } from '@/types/Escort';
+import { useState, useCallback } from 'react';
 import escortService from '@/services/escorts/escortService';
+import { Escort } from '@/types/Escort';
 
-export const useEscortSearch = (searchQuery: string = '') => {
-  const [escorts, setEscorts] = useState<Escort[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+export const useEscortSearch = () => {
+  const [results, setResults] = useState<Escort[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   
-  useEffect(() => {
-    const fetchEscorts = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const allEscorts = await escortService.getEscorts();
-        
-        // Simple filtering based on the search query
-        if (searchQuery) {
-          const filtered = allEscorts.filter(escort => 
-            escort.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            escort.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            escort.location?.toLowerCase().includes(searchQuery.toLowerCase())
-          );
-          setEscorts(filtered);
-        } else {
-          setEscorts(allEscorts);
-        }
-      } catch (err: any) {
-        console.error('Error searching escorts:', err);
-        setError(err.message || 'Failed to search escorts');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const search = useCallback(async (query: string, filters?: any) => {
+    if (!query.trim()) {
+      setResults([]);
+      return;
+    }
     
-    fetchEscorts();
-  }, [searchQuery]);
+    setIsSearching(true);
+    setSearchError(null);
+    
+    try {
+      const searchResults = await escortService.searchEscorts(query, filters);
+      setResults(searchResults);
+    } catch (error: any) {
+      console.error('Search error:', error);
+      setSearchError(error.message || 'Failed to search escorts');
+      setResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
+  
+  const clearSearch = useCallback(() => {
+    setResults([]);
+    setSearchError(null);
+  }, []);
   
   return {
-    escorts,
-    loading,
-    error
+    results,
+    isSearching,
+    searchError,
+    search,
+    clearSearch
   };
 };
 

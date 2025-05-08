@@ -1,3 +1,33 @@
+
+export interface PulseBoost {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  price_ubx: number;
+  duration: string;
+  durationMinutes: number;
+  visibility: string;
+  visibility_increase: number;
+  color?: string;
+  badgeColor?: string;
+  features: string[];
+  isMostPopular?: boolean;
+  boost_power?: number;
+  boostMultiplier?: number;
+}
+
+export interface EnhancedBoostStatus {
+  isActive: boolean;
+  packageId?: string;
+  expiresAt?: Date;
+  timeRemaining?: string;
+  progress?: number;
+  boostPackage?: PulseBoost;
+  packageName?: string;
+  startedAt?: Date;
+}
+
 export interface BoostPackage {
   id: string;
   name: string;
@@ -13,7 +43,6 @@ export interface BoostPackage {
   badgeColor?: string;
   boost_power?: number;
   boostMultiplier?: number;
-  isMostPopular?: boolean;
 }
 
 export interface BoostPurchaseRequest {
@@ -41,24 +70,18 @@ export interface BoostAnalytics {
   impressions?: {
     value: number;
     change?: number;
-    withBoost?: number;
     today?: number;
+    withBoost?: number;
   };
   interactions?: {
     value: number;
     change?: number;
-    withBoost?: number;
     today?: number;
+    withBoost?: number;
   };
   additionalViews?: number;
   engagementIncrease?: number;
   rankingPosition?: number;
-}
-
-export interface PulseBoost extends BoostPackage {
-  // Any additional fields specific to PulseBoost
-  boostMultiplier?: number;
-  isMostPopular?: boolean;
 }
 
 export interface BoostHistory {
@@ -72,23 +95,11 @@ export interface BoostHistory {
   }>;
 }
 
-export interface EnhancedBoostStatus {
-  isActive: boolean;
-  packageId?: string;
-  packageName?: string;
-  expiresAt?: Date;
-  startedAt?: Date;
-  timeRemaining?: string;
-  progress?: number;
-  boostPackage?: BoostPackage;
-}
-
-// Add UserRole type which is missing in authService
+// Re-export UserRole to avoid the error in authService.ts
 export enum UserRole {
-  USER = 'user',
-  ADMIN = 'admin',
-  ESCORT = 'escort',
-  CREATOR = 'creator',
-  MODERATOR = 'moderator',
-  AI = 'ai'
+  ADMIN = "admin",
+  MODERATOR = "moderator",
+  CLIENT = "client",
+  ESCORT = "escort",
+  CREATOR = "creator"
 }

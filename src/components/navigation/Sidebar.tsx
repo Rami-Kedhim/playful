@@ -1,70 +1,73 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/auth';
 import { 
   Home, 
-  User, 
   Heart, 
+  Search, 
+  User, 
   MessageSquare, 
-  Settings,
-  Users,
-  Zap,
-  Book,
-  BarChart
+  Settings, 
+  Video, 
+  DollarSign,
+  ShieldCheck 
 } from 'lucide-react';
 
-export const Sidebar = () => {
+const Sidebar = () => {
+  const { user } = useAuth();
+  
+  const menuItems = [
+    { label: 'Home', icon: <Home size={18} />, path: '/' },
+    { label: 'Search', icon: <Search size={18} />, path: '/search' },
+    { label: 'Escorts', icon: <User size={18} />, path: '/escorts' },
+    { label: 'Creators', icon: <DollarSign size={18} />, path: '/creators' },
+    { label: 'Live Cams', icon: <Video size={18} />, path: '/livecams' },
+  ];
+  
+  const userItems = user ? [
+    { label: 'Profile', icon: <User size={18} />, path: '/profile' },
+    { label: 'Messages', icon: <MessageSquare size={18} />, path: '/messages' },
+    { label: 'Favorites', icon: <Heart size={18} />, path: '/favorites' },
+    { label: 'Safety', icon: <ShieldCheck size={18} />, path: '/safety' },
+    { label: 'Settings', icon: <Settings size={18} />, path: '/settings' },
+  ] : [];
+  
   return (
-    <aside className="w-64 border-r bg-background h-screen">
-      <div className="p-4 space-y-4">
-        <div className="space-y-1">
-          <Link to="/" className="flex items-center gap-2 text-sm p-2 rounded-md hover:bg-muted">
-            <Home className="h-4 w-4" />
-            <span>Home</span>
+    <aside className="w-64 border-r h-screen p-4">
+      <div className="font-bold text-xl mb-8 p-2">UberEscorts</div>
+      
+      <nav className="space-y-2">
+        {menuItems.map((item) => (
+          <Link
+            key={item.path}
+            to={item.path}
+            className="flex items-center gap-3 p-2 rounded-md hover:bg-primary/10"
+          >
+            {item.icon}
+            <span>{item.label}</span>
           </Link>
-          <Link to="/profile" className="flex items-center gap-2 text-sm p-2 rounded-md hover:bg-muted">
-            <User className="h-4 w-4" />
-            <span>Profile</span>
-          </Link>
-          <Link to="/favorites" className="flex items-center gap-2 text-sm p-2 rounded-md hover:bg-muted">
-            <Heart className="h-4 w-4" />
-            <span>Favorites</span>
-          </Link>
-          <Link to="/messages" className="flex items-center gap-2 text-sm p-2 rounded-md hover:bg-muted">
-            <MessageSquare className="h-4 w-4" />
-            <span>Messages</span>
-          </Link>
-        </div>
+        ))}
         
-        <div className="pt-4 border-t">
-          <h3 className="mb-2 text-xs font-medium">Explore</h3>
-          <div className="space-y-1">
-            <Link to="/escorts" className="flex items-center gap-2 text-sm p-2 rounded-md hover:bg-muted">
-              <Users className="h-4 w-4" />
-              <span>Escorts</span>
-            </Link>
-            <Link to="/creators" className="flex items-center gap-2 text-sm p-2 rounded-md hover:bg-muted">
-              <Zap className="h-4 w-4" />
-              <span>Creators</span>
-            </Link>
-            <Link to="/brain-hub" className="flex items-center gap-2 text-sm p-2 rounded-md hover:bg-muted">
-              <Book className="h-4 w-4" />
-              <span>Brain Hub</span>
-            </Link>
-            <Link to="/analytics" className="flex items-center gap-2 text-sm p-2 rounded-md hover:bg-muted">
-              <BarChart className="h-4 w-4" />
-              <span>Analytics</span>
-            </Link>
-          </div>
-        </div>
-        
-        <div className="pt-4 border-t mt-auto">
-          <Link to="/settings" className="flex items-center gap-2 text-sm p-2 rounded-md hover:bg-muted">
-            <Settings className="h-4 w-4" />
-            <span>Settings</span>
-          </Link>
-        </div>
-      </div>
+        {userItems.length > 0 && (
+          <>
+            <div className="h-px bg-border my-3" />
+            
+            {userItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className="flex items-center gap-3 p-2 rounded-md hover:bg-primary/10"
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </Link>
+            ))}
+          </>
+        )}
+      </nav>
     </aside>
   );
 };
+
+export default Sidebar;
