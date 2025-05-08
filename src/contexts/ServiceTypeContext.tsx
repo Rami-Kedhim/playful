@@ -2,62 +2,36 @@
 import React, { createContext, useContext, useState } from 'react';
 import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
-export interface ServiceTypeContextType {
+interface ServiceTypeContextType {
   serviceType: ServiceTypeFilter;
   setServiceType: (type: ServiceTypeFilter) => void;
-  specializedServiceTypes?: string[];
-  selectedSpecializedTypes?: string[];
-  toggleSpecializedType?: (type: string) => void;
+  clearServiceType: () => void;
 }
 
-const ServiceTypeContext = createContext<ServiceTypeContextType>({
-  serviceType: 'any',
-  setServiceType: () => {}
-});
+const ServiceTypeContext = createContext<ServiceTypeContextType | undefined>(undefined);
 
 export const ServiceTypeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [serviceType, setServiceType] = useState<ServiceTypeFilter>('any');
-  const [selectedSpecializedTypes, setSelectedSpecializedTypes] = useState<string[]>([]);
   
-  // Sample specialized service types
-  const specializedServiceTypes = [
-    "Massage",
-    "Dinner Date",
-    "Travel Companion",
-    "BDSM",
-    "Roleplay",
-    "Couples",
-    "Groups",
-    "Fetish"
-  ];
-  
-  const toggleSpecializedType = (type: string) => {
-    setSelectedSpecializedTypes(prev => 
-      prev.includes(type) 
-        ? prev.filter(t => t !== type) 
-        : [...prev, type]
-    );
-  };
-
-  // Ensure service type is never empty
-  const handleSetServiceType = (type: ServiceTypeFilter | string) => {
-    const safeType: ServiceTypeFilter = !type || type === "" ? "any" : type as ServiceTypeFilter;
-    setServiceType(safeType);
+  const clearServiceType = () => {
+    setServiceType('any');
   };
 
   return (
     <ServiceTypeContext.Provider value={{ 
       serviceType, 
-      setServiceType: handleSetServiceType,
-      specializedServiceTypes,
-      selectedSpecializedTypes,
-      toggleSpecializedType
+      setServiceType, 
+      clearServiceType 
     }}>
       {children}
     </ServiceTypeContext.Provider>
   );
 };
 
-export const useServiceType = () => useContext(ServiceTypeContext);
-
-export default ServiceTypeContext;
+export const useServiceType = () => {
+  const context = useContext(ServiceTypeContext);
+  if (context === undefined) {
+    throw new Error('useServiceType must be used within a ServiceTypeProvider');
+  }
+  return context;
+};

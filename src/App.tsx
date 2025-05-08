@@ -8,24 +8,27 @@ import { FavoritesProvider } from '@/contexts/FavoritesContext';
 import { WalletProvider } from '@/contexts/WalletContext';
 import { BoostProvider } from '@/contexts/BoostContext';
 import { ServiceTypeProvider } from '@/contexts/ServiceTypeContext';
+import { ThemeProvider } from '@/components/theme-provider';
 import './App.css';
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <FavoritesProvider>
-          <WalletProvider>
-            <BoostProvider>
-              <ServiceTypeProvider>
-                <AppRoutes />
-                <Toaster />
-              </ServiceTypeProvider>
-            </BoostProvider>
-          </WalletProvider>
-        </FavoritesProvider>
-      </AuthProvider>
-    </Router>
+    <ThemeProvider defaultTheme="light" storageKey="uberescorts-theme">
+      <Router>
+        <AuthProvider>
+          <FavoritesProvider>
+            <WalletProvider>
+              <BoostProvider>
+                <ServiceTypeProvider>
+                  <AppRoutes />
+                  <Toaster />
+                </ServiceTypeProvider>
+              </BoostProvider>
+            </WalletProvider>
+          </FavoritesProvider>
+        </AuthProvider>
+      </Router>
+    </ThemeProvider>
   );
 }
 

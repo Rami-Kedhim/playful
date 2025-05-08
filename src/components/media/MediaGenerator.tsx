@@ -1,175 +1,296 @@
 
-import { useState } from 'react';
-import { Loader2, Image, Video, Wand2, RefreshCcw, Download } from 'lucide-react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import useMediaGeneration from '@/hooks/useMediaGeneration';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ImageIcon, Video, Wand2, Loader2, Download, Copy, Share2 } from 'lucide-react';
+import { useMediaGeneration } from '@/hooks/useMediaGeneration';
+import { useToast } from '@/hooks/use-toast';
 
-const MediaGenerator = () => {
-  const [prompt, setPrompt] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'image' | 'video'>('image');
-  const [selectedModel, setSelectedModel] = useState<string>('');
+// Available AI media models
+const imageModels = [
+  { id: "black-forest-labs/FLUX.1-schnell", name: "FLUX.1 (Fast)" },
+  { id: "stabilityai/stable-diffusion-xl-base-1.0", name: "Stable Diffusion XL" },
+  { id: "runwayml/stable-diffusion-v1-5", name: "Stable Diffusion v1.5" }
+];
+
+const videoModels = [
+  { id: "cerspense/zeroscope_v2_576w", name: "Zeroscope v2" },
+  { id: "anotherjesse/zeroscope-v2-xl", name: "Zeroscope v2 XL" }
+];
+
+const presetPrompts = {
+  image: [
+    "A luxurious hotel suite with a city view at sunset",
+    "Professional portrait photo in elegant clothing against a neutral background",
+    "Candid street photography in an urban setting with natural lighting"
+  ],
+  video: [
+    "A slow pan across a beautiful beach at sunset with waves gently rolling in",
+    "Walking through a luxurious hotel lobby with elegant furnishings",
+    "City streets at night with bokeh lights and slight rain"
+  ]
+};
+
+const MediaGenerator: React.FC = () => {
+  const { toast } = useToast();
   const { generateMedia, resetMedia, loading, mediaUrl, error } = useMediaGeneration();
 
-  const handleGenerate = async () => {
-    if (!prompt.trim()) return;
+  const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
+  const [prompt, setPrompt] = useState("");
+  const [selectedModel, setSelectedModel] = useState(
+    mediaType === 'image' ? imageModels[0].id : videoModels[0].id
+  );
+  const [width, setWidth] = useState(512);
+  const [height, setHeight] = useState(512);
+  const [useAdvanced, setUseAdvanced] = useState(false);
+  
+  // Update selected model when media type changes
+  React.useEffect(() => {
+    setSelectedModel(mediaType === 'image' ? imageModels[0].id : videoModels[0].id);
+  }, [mediaType]);
 
-    await generateMedia({
-      prompt,
-      type: activeTab,
-      modelId: selectedModel || undefined,
-    });
+  const handlePresetPrompt = (presetPrompt: string) => {
+    setPrompt(presetPrompt);
+  };
+
+  const handleGenerate = async () => {
+    if (!prompt.trim()) {
+      toast({
+        title: "Prompt Required",
+        description: "Please enter a description of what you want to generate.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await generateMedia({
+        prompt,
+        type: mediaType,
+        modelId: selectedModel,
+        width,
+        height,
+        options: {},
+        userId: 'anonymous'
+      });
+    } catch (err) {
+      console.error("Error in media generation:", err);
+    }
+  };
+
+  const handleReset = () => {
+    resetMedia();
+    setPrompt("");
+  };
+
+  const handleCopyLink = () => {
+    if (mediaUrl) {
+      navigator.clipboard.writeText(mediaUrl);
+      toast({ title: "Link Copied", description: "Media link copied to clipboard" });
+    }
   };
 
   const handleDownload = () => {
-    if (!mediaUrl) return;
-    
-    const link = document.createElement('a');
-    link.href = mediaUrl;
-    link.download = `generated-${activeTab}-${Date.now()}.${activeTab === 'image' ? 'png' : 'mp4'}`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (mediaUrl) {
+      const a = document.createElement('a');
+      a.href = mediaUrl;
+      a.download = `generated-${mediaType}-${Date.now()}.${mediaType === 'image' ? 'png' : 'mp4'}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          {activeTab === 'image' ? <Image className="h-5 w-5" /> : <Video className="h-5 w-5" />}
-          AI Media Generator
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent>
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'image' | 'video')}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="image" className="flex items-center gap-1">
-              <Image className="h-4 w-4" /> Image
-            </TabsTrigger>
-            <TabsTrigger value="video" className="flex items-center gap-1">
-              <Video className="h-4 w-4" /> Video
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="image">
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Select Model</label>
-                <Select value={selectedModel} onValueChange={setSelectedModel}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Default (Flux Schnell)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Default (Flux Schnell)</SelectItem>
-                    <SelectItem value="stabilityai/stable-diffusion-xl-base-1.0">Stable Diffusion XL</SelectItem>
-                    <SelectItem value="runwayml/stable-diffusion-v1-5">Stable Diffusion v1.5</SelectItem>
-                    <SelectItem value="prompthero/openjourney-v4">Openjourney v4</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+    <div className="space-y-6">
+      <Tabs defaultValue="image" onValueChange={(value) => setMediaType(value as 'image' | 'video')}>
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="image" className="flex items-center">
+            <ImageIcon className="h-4 w-4 mr-2" /> Image Generator
+          </TabsTrigger>
+          <TabsTrigger value="video" className="flex items-center">
+            <Video className="h-4 w-4 mr-2" /> Video Generator
+          </TabsTrigger>
+        </TabsList>
+
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="lg:col-span-2 space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  {mediaType === 'image' ? 'Image Generation' : 'Video Generation'} Settings
+                </CardTitle>
+              </CardHeader>
               
-              <div>
-                <label className="text-sm font-medium mb-2 block">Prompt</label>
-                <Textarea 
-                  placeholder="Describe the image you want to generate..." 
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  rows={4}
-                />
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="video">
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Select Model</label>
-                <Select value={selectedModel} onValueChange={setSelectedModel}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Default (Zeroscope v2)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Default (Zeroscope v2)</SelectItem>
-                    <SelectItem value="damo-vilab/text-to-video-ms-1.7b">Damo Text-to-Video</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="prompt">Prompt</Label>
+                  <Textarea
+                    id="prompt"
+                    placeholder={`Describe the ${mediaType} you want to generate...`}
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    rows={5}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Preset Prompts</Label>
+                  <div className="grid grid-cols-1 gap-2">
+                    {presetPrompts[mediaType].map((presetPrompt, idx) => (
+                      <Button
+                        key={idx}
+                        variant="outline"
+                        size="sm"
+                        className="text-left h-auto py-2 px-3 whitespace-normal justify-start"
+                        onClick={() => handlePresetPrompt(presetPrompt)}
+                      >
+                        {presetPrompt}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="model">Model</Label>
+                  <Select value={selectedModel} onValueChange={setSelectedModel}>
+                    <SelectTrigger id="model">
+                      <SelectValue placeholder="Select a model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(mediaType === 'image' ? imageModels : videoModels).map((model) => (
+                        <SelectItem key={model.id} value={model.id}>{model.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch id="advanced" checked={useAdvanced} onCheckedChange={setUseAdvanced} />
+                  <Label htmlFor="advanced">Advanced Settings</Label>
+                </div>
+                
+                {useAdvanced && (
+                  <div className="space-y-4 border rounded-md p-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="width">Width</Label>
+                        <Input 
+                          id="width" 
+                          type="number" 
+                          value={width} 
+                          onChange={(e) => setWidth(Number(e.target.value))} 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="height">Height</Label>
+                        <Input 
+                          id="height" 
+                          type="number" 
+                          value={height} 
+                          onChange={(e) => setHeight(Number(e.target.value))} 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
               
-              <div>
-                <label className="text-sm font-medium mb-2 block">Prompt</label>
-                <Textarea 
-                  placeholder="Describe the video you want to generate..." 
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  rows={4}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Note: Video generation may take longer and has a higher chance of failing due to model timeouts.
-              </p>
-            </div>
-          </TabsContent>
-        </Tabs>
-        
-        {error && (
-          <div className="mt-4 p-3 bg-destructive/10 text-destructive rounded-md text-sm">
-            {error}
+              <CardFooter className="flex justify-between">
+                <Button variant="outline" onClick={handleReset} disabled={loading}>
+                  Reset
+                </Button>
+                <Button onClick={handleGenerate} disabled={loading || !prompt.trim()}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="h-4 w-4 mr-2" />
+                      Generate {mediaType}
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
           </div>
-        )}
-        
-        {mediaUrl && (
-          <div className="mt-4 flex flex-col items-center">
-            <div className="w-full max-h-[400px] overflow-hidden rounded-md border bg-muted">
-              {activeTab === 'image' ? (
-                <img 
-                  src={mediaUrl} 
-                  alt="Generated image" 
-                  className="w-full h-auto object-contain" 
-                />
-              ) : (
-                <video 
-                  src={mediaUrl} 
-                  controls
-                  className="w-full h-auto" 
-                  autoPlay
-                  loop
-                />
+
+          <div className="lg:col-span-3">
+            <Card className="h-full flex flex-col">
+              <CardHeader>
+                <CardTitle>Preview</CardTitle>
+              </CardHeader>
+              
+              <CardContent className="flex-grow flex items-center justify-center p-0">
+                {error ? (
+                  <div className="text-center p-6 text-red-500">
+                    <p className="text-lg font-semibold">Error</p>
+                    <p>{error}</p>
+                  </div>
+                ) : loading ? (
+                  <div className="text-center p-12">
+                    <Loader2 className="h-16 w-16 animate-spin mx-auto mb-4 text-primary" />
+                    <p className="text-lg text-muted-foreground">Generating your {mediaType}...</p>
+                    <p className="text-sm text-muted-foreground mt-2">This may take up to a minute</p>
+                  </div>
+                ) : mediaUrl ? (
+                  <div className="w-full h-full flex items-center justify-center p-4">
+                    {mediaType === 'image' ? (
+                      <img 
+                        src={mediaUrl} 
+                        alt="Generated" 
+                        className="max-w-full max-h-[500px] object-contain rounded-md shadow-md" 
+                      />
+                    ) : (
+                      <video 
+                        src={mediaUrl} 
+                        controls 
+                        className="max-w-full max-h-[500px] rounded-md shadow-md" 
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center p-12 border-2 border-dashed rounded-lg m-6 flex flex-col items-center justify-center text-muted-foreground">
+                    {mediaType === 'image' ? (
+                      <ImageIcon className="h-16 w-16 mb-4" />
+                    ) : (
+                      <Video className="h-16 w-16 mb-4" />
+                    )}
+                    <p className="text-lg">No {mediaType} generated yet</p>
+                    <p className="text-sm mt-2">Enter a prompt and click Generate to create your {mediaType}</p>
+                  </div>
+                )}
+              </CardContent>
+              
+              {mediaUrl && (
+                <CardFooter className="flex justify-center gap-2">
+                  <Button variant="outline" size="sm" onClick={handleCopyLink}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy Link
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleDownload}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Download
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share
+                  </Button>
+                </CardFooter>
               )}
-            </div>
+            </Card>
           </div>
-        )}
-      </CardContent>
-      
-      <CardFooter className="flex gap-2 justify-end border-t pt-4">
-        {mediaUrl && (
-          <>
-            <Button variant="outline" onClick={resetMedia}>
-              <RefreshCcw className="mr-2 h-4 w-4" /> Try Again
-            </Button>
-            <Button variant="secondary" onClick={handleDownload}>
-              <Download className="mr-2 h-4 w-4" /> Download
-            </Button>
-          </>
-        )}
-        
-        <Button onClick={handleGenerate} disabled={loading || !prompt.trim()}>
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...
-            </>
-          ) : (
-            <>
-              <Wand2 className="mr-2 h-4 w-4" /> Generate {activeTab === 'image' ? 'Image' : 'Video'}
-            </>
-          )}
-        </Button>
-      </CardFooter>
-    </Card>
+        </div>
+      </Tabs>
+    </div>
   );
 };
 

@@ -1,40 +1,25 @@
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { toast } from '@/hooks/use-toast';
 import { Escort } from '@/types/escort';
 
-interface FavoritesState {
+export interface FavoritesState {
   escorts: Escort[];
-  creators: any[];
-  livecams: any[];
 }
 
-export interface FavoritesContextProps {
+interface FavoritesContextType {
   favorites: FavoritesState;
-  isFavorite: (type: 'escorts' | 'creators' | 'livecams', id: string) => boolean;
-  toggleFavorite: (type: 'escorts' | 'creators' | 'livecams', id: string) => void;
-  removeFavorite: (type: 'escorts' | 'creators' | 'livecams', id: string) => void;
-  addFavorite: (type: 'escorts' | 'creators' | 'livecams', item: any) => void;
+  addFavorite: (escort: Escort) => void;
+  removeFavorite: (id: string) => void;
+  clearFavorites: () => void;
+  isFavorite: (id: string) => boolean;
 }
 
-const FavoritesContext = createContext<FavoritesContextProps | undefined>(undefined);
+const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
 
-export const useFavorites = () => {
-  const context = useContext(FavoritesContext);
-  if (!context) {
-    throw new Error('useFavorites must be used within a FavoritesProvider');
-  }
-  return context;
-};
-
-interface FavoritesProviderProps {
-  children: ReactNode;
-}
-
-export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }) => {
+export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [favorites, setFavorites] = useState<FavoritesState>({
-    escorts: [],
-    creators: [],
-    livecams: []
+    escorts: []
   });
 
   // Load favorites from localStorage on mount
@@ -42,60 +27,87 @@ export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }
     const savedFavorites = localStorage.getItem('favorites');
     if (savedFavorites) {
       try {
-        setFavorites(JSON.parse(savedFavorites));
-      } catch (e) {
-        console.error('Failed to parse favorites from localStorage:', e);
+        const parsed = JSON.parse(savedFavorites);
+        setFavorites(parsed);
+      } catch (error) {
+        console.error('Error parsing saved favorites:', error);
+        // Initialize with empty arrays if parsing fails
+        setFavorites({ escorts: [] });
       }
     }
   }, []);
 
-  // Save favorites to localStorage whenever they change
+  // Save favorites to localStorage when updated
   useEffect(() => {
     localStorage.setItem('favorites', JSON.stringify(favorites));
   }, [favorites]);
 
-  const isFavorite = (type: 'escorts' | 'creators' | 'livecams', id: string) => {
-    return favorites[type].some(item => item.id === id);
-  };
-
-  const addFavorite = (type: 'escorts' | 'creators' | 'livecams', item: any) => {
-    if (!isFavorite(type, item.id)) {
-      setFavorites(prev => ({
+  const addFavorite = (escort: Escort) => {
+    setFavorites(prev => {
+      // Check if escort is already in favorites
+      if (prev.escorts.some(item => item.id === escort.id)) {
+        return prev;
+      }
+      
+      toast({
+        title: "Added to favorites",
+        description: `${escort.name} has been added to your favorites.`
+      });
+      
+      return {
         ...prev,
-        [type]: [...prev[type], item]
-      }));
-    }
+        escorts: [...prev.escorts, escort]
+      };
+    });
   };
 
-  const removeFavorite = (type: 'escorts' | 'creators' | 'livecams', id: string) => {
-    setFavorites(prev => ({
-      ...prev,
-      [type]: prev[type].filter(item => item.id !== id)
-    }));
+  const removeFavorite = (id: string) => {
+    setFavorites(prev => {
+      const escort = prev.escorts.find(e => e.id === id);
+      
+      if (escort) {
+        toast({
+          title: "Removed from favorites",
+          description: `${escort.name} has been removed from your favorites.`
+        });
+      }
+      
+      return {
+        ...prev,
+        escorts: prev.escorts.filter(escort => escort.id !== id)
+      };
+    });
   };
 
-  const toggleFavorite = (type: 'escorts' | 'creators' | 'livecams', id: string) => {
-    if (isFavorite(type, id)) {
-      removeFavorite(type, id);
-    } else {
-      // For toggle, we need the item object, not just the ID
-      // This is a simplified approach; in a real app, you might fetch the item details
-      const dummyItem = { id };
-      addFavorite(type, dummyItem);
-    }
+  const clearFavorites = () => {
+    setFavorites({ escorts: [] });
+    toast({
+      title: "Favorites cleared",
+      description: "All favorites have been removed."
+    });
+  };
+
+  const isFavorite = (id: string) => {
+    return favorites.escorts.some(escort => escort.id === id);
   };
 
   return (
-    <FavoritesContext.Provider
-      value={{
-        favorites,
-        isFavorite,
-        toggleFavorite,
-        removeFavorite,
-        addFavorite
-      }}
-    >
+    <FavoritesContext.Provider value={{ 
+      favorites, 
+      addFavorite, 
+      removeFavorite, 
+      clearFavorites, 
+      isFavorite 
+    }}>
       {children}
     </FavoritesContext.Provider>
   );
+};
+
+export const useFavorites = () => {
+  const context = useContext(FavoritesContext);
+  if (context === undefined) {
+    throw new Error('useFavorites must be used within a FavoritesProvider');
+  }
+  return context;
 };
