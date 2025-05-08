@@ -20,14 +20,14 @@ export const checkVerificationStatus = async (userId: string): Promise<{
     // This is where you would typically make an API call to get the status
     // For demonstration, we'll return mock data
     return {
-      status: VerificationStatus.NONE,
+      status: VerificationStatus.PENDING,
       level: null,
       lastSubmitted: null
     };
   } catch (error) {
     console.error('Error checking verification status:', error);
     return {
-      status: VerificationStatus.NONE,
+      status: VerificationStatus.PENDING,
       level: null,
       lastSubmitted: null,
       reason: 'Failed to check verification status'
@@ -42,21 +42,21 @@ export const checkVerificationStatus = async (userId: string): Promise<{
  */
 export const getVerificationRequirements = (targetLevel: VerificationLevel) => {
   switch (targetLevel) {
-    case VerificationLevel.BASIC:
+    case 'basic':
       return {
         documents: ['id_card', 'passport', 'drivers_license'],
         needsSelfie: true,
         needsAddress: false,
         fee: 0
       };
-    case VerificationLevel.ENHANCED:
+    case 'enhanced':
       return {
         documents: ['id_card', 'passport', 'drivers_license'],
         needsSelfie: true,
         needsAddress: true,
         fee: 5
       };
-    case VerificationLevel.PREMIUM:
+    case 'premium':
       return {
         documents: ['passport', 'drivers_license'],
         needsSelfie: true,
