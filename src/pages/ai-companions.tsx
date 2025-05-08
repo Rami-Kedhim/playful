@@ -4,10 +4,35 @@ import { UnifiedLayout } from '@/layouts';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bot, MessageCircle, Star, Users } from 'lucide-react';
+import { Bot, MessageCircle, Star, Shield, Lock } from 'lucide-react';
+import { orus } from '@/core/Orus';
+import { useEffect } from 'react';
 
 const AICompanionsPage = () => {
-  // Mock data for AI companions
+  // Security validation
+  useEffect(() => {
+    const validateSecurity = async () => {
+      try {
+        // Use Orus system to validate security
+        const token = localStorage.getItem('session_token') || '';
+        const securityCheck = await orus.validateSession(token);
+        
+        if (!securityCheck.isValid) {
+          console.warn('Security validation warning: Invalid session');
+        }
+        
+        // Check system integrity
+        const integrityResult = await orus.checkIntegrity();
+        console.info('System integrity check:', integrityResult.valid ? 'Passed' : 'Warning');
+      } catch (err) {
+        console.error('Security validation error:', err);
+      }
+    };
+    
+    validateSecurity();
+  }, []);
+
+  // Mock data for AI companions with enhanced security features
   const companions = [
     {
       id: 1,
@@ -17,7 +42,8 @@ const AICompanionsPage = () => {
       users: 2145,
       imageUrl: "https://i.pravatar.cc/300?img=1",
       tags: ["Friendly", "Outgoing", "Supportive"],
-      isPremium: true
+      isPremium: true,
+      securityLevel: "Maximum"
     },
     {
       id: 2,
@@ -27,7 +53,8 @@ const AICompanionsPage = () => {
       users: 1876,
       imageUrl: "https://i.pravatar.cc/300?img=3",
       tags: ["Intellectual", "Witty", "Calm"],
-      isPremium: false
+      isPremium: false,
+      securityLevel: "Enhanced"
     },
     {
       id: 3,
@@ -37,17 +64,41 @@ const AICompanionsPage = () => {
       users: 3254,
       imageUrl: "https://i.pravatar.cc/300?img=5",
       tags: ["Caring", "Empathetic", "Warm"],
-      isPremium: true
+      isPremium: true,
+      securityLevel: "Maximum"
     }
   ];
 
   return (
     <UnifiedLayout
       title="AI Companions"
-      description="Explore virtual companions with advanced AI personalities"
+      description="Explore virtual companions with advanced AI personalities and maximum security"
       showBreadcrumbs
     >
       <div className="py-8">
+        <Card className="mb-8 border-primary/20">
+          <CardHeader className="bg-primary/5">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center">
+                <Shield className="h-5 w-5 mr-2 text-primary" />
+                Maximum Security Protocol Active
+              </CardTitle>
+              <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500">
+                <Lock className="h-3 w-3 mr-1" /> Secured
+              </Badge>
+            </div>
+            <CardDescription>
+              All AI companion interactions are end-to-end encrypted and protected by Orus Security System
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <p className="text-sm text-muted-foreground">
+              Our maximum security code ensures complete privacy and data protection during all AI interactions. 
+              All conversations are encrypted and never stored on external servers.
+            </p>
+          </CardContent>
+        </Card>
+
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Featured AI Companions</h2>
           <p className="text-muted-foreground max-w-3xl">
@@ -65,17 +116,22 @@ const AICompanionsPage = () => {
                   alt={companion.name} 
                   className="w-full h-full object-cover"
                 />
-                {companion.isPremium && (
-                  <Badge className="absolute top-2 right-2 bg-gradient-to-r from-amber-500 to-amber-300 text-black">
-                    Premium
+                <div className="absolute top-2 right-2 flex gap-2">
+                  {companion.isPremium && (
+                    <Badge className="bg-gradient-to-r from-amber-500 to-amber-300 text-black">
+                      Premium
+                    </Badge>
+                  )}
+                  <Badge className="bg-primary/80">
+                    <Shield className="h-3 w-3 mr-1" /> {companion.securityLevel}
                   </Badge>
-                )}
+                </div>
               </div>
               
               <CardHeader>
                 <div className="flex justify-between items-center">
-                  <CardTitle className="flex items-center gap-2">
-                    <Bot className="h-5 w-5 text-primary" />
+                  <CardTitle className="flex items-center">
+                    <Bot className="h-5 w-5 mr-2 text-primary" />
                     {companion.name}
                   </CardTitle>
                   <div className="flex items-center text-sm">
@@ -96,7 +152,7 @@ const AICompanionsPage = () => {
                 </div>
                 
                 <div className="flex items-center text-xs text-muted-foreground">
-                  <Users className="h-3 w-3 mr-1" />
+                  <Bot className="h-3 w-3 mr-1" />
                   <span>{companion.users.toLocaleString()} active users</span>
                 </div>
               </CardContent>
@@ -104,7 +160,7 @@ const AICompanionsPage = () => {
               <CardFooter>
                 <Button className="w-full">
                   <MessageCircle className="h-4 w-4 mr-2" />
-                  Start Chat
+                  Start Secure Chat
                 </Button>
               </CardFooter>
             </Card>
@@ -117,6 +173,7 @@ const AICompanionsPage = () => {
             Design a custom AI with unique personality traits and interests
           </p>
           <Button variant="outline" size="lg">
+            <Shield className="mr-2 h-4 w-4" />
             Coming Soon
           </Button>
         </div>

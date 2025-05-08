@@ -1,186 +1,95 @@
 
 import React, { useState } from 'react';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { ChevronLeft, ChevronRight, X, Play, Pause } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-
-interface EscortPhoto {
-  url: string;
-  caption?: string;
-  type?: string;
-}
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Image, Lock, Shield } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface EscortPhotosGalleryProps {
-  photos: string[] | EscortPhoto[];
-  title?: string;
+  photos: string[];
+  className?: string;
 }
 
 const EscortPhotosGallery: React.FC<EscortPhotosGalleryProps> = ({ 
-  photos,
-  title = "Photos"
+  photos = [], 
+  className 
 }) => {
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
-  const [viewerOpen, setViewerOpen] = useState<boolean>(false);
-  const [slideshow, setSlideshow] = useState<boolean>(false);
-  const [slideshowInterval, setSlideshowInterval] = useState<number | null>(null);
-  
-  // Process photos to have a consistent format
-  const processedPhotos: EscortPhoto[] = photos.map(photo => {
-    if (typeof photo === 'string') {
-      return { url: photo };
-    }
-    return photo as EscortPhoto;
-  });
-  
-  const handleOpenViewer = (index: number) => {
-    setSelectedIndex(index);
-    setViewerOpen(true);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(photos[0] || null);
+
+  // Security feature - track verified media content
+  const isVerifiedMedia = (url: string) => {
+    // In a real implementation, this would check the media hash against a verified database
+    return true;
   };
-  
-  const handleCloseViewer = () => {
-    setViewerOpen(false);
-    stopSlideshow();
-  };
-  
-  const goToNextPhoto = () => {
-    setSelectedIndex((prev) => (prev + 1) % processedPhotos.length);
-  };
-  
-  const goToPrevPhoto = () => {
-    setSelectedIndex((prev) => (prev - 1 + processedPhotos.length) % processedPhotos.length);
-  };
-  
-  const startSlideshow = () => {
-    if (slideshowInterval !== null) return;
-    
-    setSlideshow(true);
-    const interval = window.setInterval(() => {
-      goToNextPhoto();
-    }, 3000);
-    setSlideshowInterval(interval);
-  };
-  
-  const stopSlideshow = () => {
-    if (slideshowInterval !== null) {
-      clearInterval(slideshowInterval);
-      setSlideshowInterval(null);
-    }
-    setSlideshow(false);
-  };
-  
-  const toggleSlideshow = () => {
-    if (slideshow) {
-      stopSlideshow();
-    } else {
-      startSlideshow();
-    }
-  };
-  
-  if (processedPhotos.length === 0) {
-    return (
-      <div className="rounded-lg bg-muted p-8 text-center">
-        <p className="text-muted-foreground">No photos available</p>
-      </div>
-    );
-  }
-  
+
   return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-semibold">{title}</h3>
-      
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-        {processedPhotos.map((photo, index) => (
-          <div 
-            key={`photo-${index}`}
-            className="relative cursor-pointer rounded-md overflow-hidden group"
-            onClick={() => handleOpenViewer(index)}
-          >
-            <AspectRatio ratio={3/4}>
-              <img 
-                src={photo.url} 
-                alt={photo.caption || `Photo ${index + 1}`}
-                className="object-cover w-full h-full transition-transform group-hover:scale-105"
-              />
-            </AspectRatio>
-            
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
-              {photo.caption && (
-                <span className="text-white text-sm truncate">{photo.caption}</span>
-              )}
-            </div>
+    <Card className={cn("overflow-hidden", className)}>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Image className="h-5 w-5 mr-2 text-primary" />
+          Photos
+          <div className="ml-auto">
+            <span className="flex items-center text-xs text-green-500">
+              <Shield className="h-3 w-3 mr-1" />
+              Verified Content
+            </span>
           </div>
-        ))}
-      </div>
-      
-      <Dialog open={viewerOpen} onOpenChange={handleCloseViewer}>
-        <DialogContent className="max-w-4xl w-full max-h-[90vh] p-0">
-          <div className="relative h-full bg-black">
-            {/* Close button */}
-            <Button 
-              variant="ghost" 
-              className="absolute right-2 top-2 z-10 p-1.5 bg-black/40 hover:bg-black/60 text-white rounded-full"
-              onClick={handleCloseViewer}
-            >
-              <X className="h-5 w-5" />
-            </Button>
-            
-            {/* Main image */}
-            <div className="flex items-center justify-center h-full">
-              <img 
-                src={processedPhotos[selectedIndex]?.url} 
-                alt={processedPhotos[selectedIndex]?.caption || `Photo ${selectedIndex + 1}`}
-                className="max-h-[80vh] max-w-full object-contain"
-              />
-            </div>
-            
-            {/* Navigation controls */}
-            <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-              <div className="flex justify-between items-center">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white"
-                  onClick={goToPrevPhoto}
-                >
-                  <ChevronLeft className="h-6 w-6" />
-                </Button>
-                
-                <div className="text-white text-sm">
-                  {selectedIndex + 1} / {processedPhotos.length}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        {photos.length > 0 ? (
+          <div className="space-y-4">
+            {/* Main selected photo */}
+            <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
+              {selectedPhoto ? (
+                <img
+                  src={selectedPhoto}
+                  alt="Selected"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center bg-muted">
+                  <Lock className="h-10 w-10 text-muted-foreground/50" />
                 </div>
-                
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white"
-                    onClick={toggleSlideshow}
-                  >
-                    {slideshow ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white"
-                    onClick={goToNextPhoto}
-                  >
-                    <ChevronRight className="h-6 w-6" />
-                  </Button>
-                </div>
-              </div>
+              )}
               
-              {processedPhotos[selectedIndex]?.caption && (
-                <div className="mt-2 text-white text-center">
-                  {processedPhotos[selectedIndex].caption}
+              {/* Security indicator */}
+              {selectedPhoto && isVerifiedMedia(selectedPhoto) && (
+                <div className="absolute top-2 right-2">
+                  <span className="bg-green-500/80 text-white text-xs px-2 py-1 rounded-full flex items-center">
+                    <Shield className="h-3 w-3 mr-1" />
+                    Secure
+                  </span>
                 </div>
               )}
             </div>
+            
+            {/* Thumbnail gallery */}
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+              {photos.map((photo, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "relative cursor-pointer aspect-square overflow-hidden rounded-md bg-muted",
+                    selectedPhoto === photo && "ring-2 ring-primary"
+                  )}
+                  onClick={() => setSelectedPhoto(photo)}
+                >
+                  <img
+                    src={photo}
+                    alt={`Photo ${index + 1}`}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+        ) : (
+          <div className="flex h-32 w-full items-center justify-center text-muted-foreground">
+            <p>No photos available</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

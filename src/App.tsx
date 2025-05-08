@@ -18,31 +18,40 @@ import { UberEcosystemProvider } from '@/contexts/UberEcosystemContext';
 import { ServiceTypeProvider } from '@/contexts/ServiceTypeContext';
 import AuthPage from '@/pages/AuthPage';
 import ProfilePage from '@/pages/ProfilePage';
-import WalletPage from '@/pages/Wallet'; // Updated to correct casing
+import WalletPage from '@/pages/Wallet';
+import AICompanionsPage from '@/pages/ai-companions';
+import MetaversePage from '@/pages/metaverse';
+import OrusPage from '@/pages/orus';
+import { FavoritesProvider } from '@/contexts/FavoritesContext';
 
 function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="uberescorts-theme">
       <UberEcosystemProvider>
         <ServiceTypeProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path={APP_PATHS.HOME} element={<HomePage />} />
-              <Route path={APP_PATHS.ESCORTS} element={<EscortsPage />} />
-              <Route path={APP_PATHS.ESCORT_DETAIL} element={<EscortDetailPage />} />
-              <Route path={APP_PATHS.CREATORS} element={<CreatorsPage />} />
-              <Route path={APP_PATHS.CREATOR_DETAIL} element={<CreatorDetailPage />} />
-              <Route path={APP_PATHS.LIVECAMS} element={<LivecamsPage />} />
-              <Route path={APP_PATHS.LIVECAM_DETAIL} element={<LivecamDetailPage />} />
-              <Route path={APP_PATHS.VERIFICATION} element={<VerificationPage />} />
-              <Route path={APP_PATHS.SETTINGS} element={<SettingsPage />} />
-              <Route path={APP_PATHS.AUTH} element={<AuthPage />} />
-              <Route path={APP_PATHS.PROFILE} element={<ProfilePage />} />
-              <Route path={APP_PATHS.WALLET} element={<WalletPage />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </BrowserRouter>
-          <Toaster />
+          <FavoritesProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path={APP_PATHS.HOME} element={<HomePage />} />
+                <Route path={APP_PATHS.ESCORTS} element={<EscortsPage />} />
+                <Route path={APP_PATHS.ESCORT_DETAIL} element={<EscortDetailPage />} />
+                <Route path={APP_PATHS.CREATORS} element={<CreatorsPage />} />
+                <Route path={APP_PATHS.CREATOR_DETAIL} element={<CreatorDetailPage />} />
+                <Route path={APP_PATHS.LIVECAMS} element={<LivecamsPage />} />
+                <Route path={APP_PATHS.LIVECAM_DETAIL} element={<LivecamDetailPage />} />
+                <Route path={APP_PATHS.VERIFICATION} element={<VerificationPage />} />
+                <Route path={APP_PATHS.SETTINGS} element={<SettingsPage />} />
+                <Route path={APP_PATHS.AUTH} element={<AuthPage />} />
+                <Route path={APP_PATHS.PROFILE} element={<ProfilePage />} />
+                <Route path={APP_PATHS.WALLET} element={<WalletPage />} />
+                <Route path={APP_PATHS.AI_COMPANION} element={<AICompanionsPage />} />
+                <Route path={APP_PATHS.METAVERSE} element={<MetaversePage />} />
+                <Route path="/orus" element={<OrusPage />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </BrowserRouter>
+            <Toaster />
+          </FavoritesProvider>
         </ServiceTypeProvider>
       </UberEcosystemProvider>
     </ThemeProvider>
