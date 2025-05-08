@@ -9,10 +9,12 @@ export enum VerificationLevel {
 
 // Make VerificationStatus an enum so it can be used as a value
 export enum VerificationStatus {
+  NONE = "none",
   PENDING = "pending",
   IN_REVIEW = "in_review",
   APPROVED = "approved",
-  REJECTED = "rejected"
+  REJECTED = "rejected",
+  EXPIRED = "expired"
 }
 
 export interface VerificationDocument {

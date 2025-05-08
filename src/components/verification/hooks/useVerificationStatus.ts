@@ -1,11 +1,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/auth';
-import { VerificationStatus as VerificationStatusEnum, VerificationRequest } from '@/types/verification';
+import { VerificationStatus, VerificationRequest } from '@/types/verification';
 import { supabase } from '@/lib/supabase';
 
 interface UseVerificationStatusResult {
-  status: VerificationStatusEnum;
+  status: VerificationStatus;
   loading: boolean;
   error: string | null;
   verificationRequest: VerificationRequest | null;
@@ -13,7 +13,7 @@ interface UseVerificationStatusResult {
 
 export const useVerificationStatus = (): UseVerificationStatusResult => {
   const { user } = useAuth();
-  const [status, setStatus] = useState<VerificationStatusEnum>(VerificationStatusEnum.NONE);
+  const [status, setStatus] = useState<VerificationStatus>(VerificationStatus.NONE);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [verificationRequest, setVerificationRequest] = useState<VerificationRequest | null>(null);
@@ -33,7 +33,7 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
       
       if (verificationData) {
         setVerificationRequest(verificationData as VerificationRequest);
-        setStatus((verificationData.status as VerificationStatusEnum) || VerificationStatusEnum.NONE);
+        setStatus((verificationData.status as VerificationStatus) || VerificationStatus.NONE);
       } else {
         // In a real implementation, we would fetch this from the database
         // For now, use a simulated API call
@@ -51,9 +51,9 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
 
         if (data) {
           setVerificationRequest(data as VerificationRequest);
-          setStatus((data.status as VerificationStatusEnum) || VerificationStatusEnum.NONE);
+          setStatus((data.status as VerificationStatus) || VerificationStatus.NONE);
         } else {
-          setStatus(VerificationStatusEnum.NONE);
+          setStatus(VerificationStatus.NONE);
         }
       }
     } catch (err: any) {

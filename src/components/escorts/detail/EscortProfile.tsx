@@ -19,6 +19,7 @@ const EscortProfile: React.FC<EscortProfileProps> = ({ escort }) => {
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   // Ensure the escort has sensible defaults for missing values
+  // Convert verificationLevel to enum type
   const normalizedEscort: Escort = {
     ...escort,
     name: escort.name || 'Unknown',
@@ -26,11 +27,8 @@ const EscortProfile: React.FC<EscortProfileProps> = ({ escort }) => {
     location: escort.location || 'Unknown',
     rating: escort.rating || 0,
     reviewCount: escort.reviewCount || 0,
-    verificationLevel: (escort.verificationLevel 
-      ? typeof escort.verificationLevel === 'string' 
-        ? escort.verificationLevel as VerificationLevel 
-        : escort.verificationLevel
-      : VerificationLevel.NONE),
+    // Properly convert verification level to enum
+    verificationLevel: getVerificationLevelEnum(escort.verificationLevel),
     tags: escort.tags || [],
     price: escort.price || 0,
     services: escort.services || [],
@@ -38,6 +36,23 @@ const EscortProfile: React.FC<EscortProfileProps> = ({ escort }) => {
     images: escort.images || [escort.imageUrl || escort.profileImage || ''],
     languages: escort.languages || ['English'],
   };
+
+  // Helper function to convert verification level to enum
+  function getVerificationLevelEnum(level: any): VerificationLevel {
+    if (!level) return VerificationLevel.NONE;
+    
+    if (typeof level === 'string') {
+      switch (level.toLowerCase()) {
+        case 'basic': return VerificationLevel.BASIC;
+        case 'verified': return VerificationLevel.VERIFIED;
+        case 'enhanced': return VerificationLevel.ENHANCED;
+        case 'premium': return VerificationLevel.PREMIUM;
+        default: return VerificationLevel.NONE;
+      }
+    }
+    
+    return VerificationLevel.NONE;
+  }
 
   const handleFavoriteToggle = () => {
     if (isFavorite(escort.id)) {
@@ -65,15 +80,15 @@ const EscortProfile: React.FC<EscortProfileProps> = ({ escort }) => {
               Book Now
             </Button>
             
-            <Button variant="outline" className="flex-grow-0">
+            <Button variant="outline" className="flex-grow-0" onClick={handleFavoriteToggle}>
               <Heart className="h-4 w-4" fill={isFav ? "currentColor" : "none"} />
             </Button>
             
-            <Button variant="outline" className="flex-grow-0">
+            <Button variant="outline" className="flex-grow-0" onClick={() => setShowingDialog('message')}>
               <MessageSquare className="h-4 w-4" />
             </Button>
             
-            <Button variant="outline" className="flex-grow-0">
+            <Button variant="outline" className="flex-grow-0" onClick={() => setShowingDialog('share')}>
               <Share2 className="h-4 w-4" />
             </Button>
           </div>

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort'; // Change to uppercase E to match actual file name
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';

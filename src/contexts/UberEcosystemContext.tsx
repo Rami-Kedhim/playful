@@ -1,149 +1,92 @@
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  useContext,
-  ReactNode,
-} from 'react';
-import { useAuth } from '@/hooks/auth';
-import { useToast } from '@/components/ui/use-toast';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+// Define the context type
 interface UberEcosystemContextType {
-  isReady: boolean;
-  isInitialized: boolean;
-  isOperational: boolean;
-  isActive: boolean;
-  services: {
-    auth: string;
-    analytics: string;
-    ai: string;
-    wallet: string;
-    seo: string;
+  isAuthenticated: boolean;
+  loading: boolean;
+  state: {
+    initialized: boolean;
   };
-  queueLength: number;
-  processing: boolean;
-  lastUpdated: string;
-  initialize: () => Promise<void>;
-  shutdown: () => Promise<void>;
-  checkSubsystemHealth: () => { name: string; status: string; health: number }[];
-  getSystemStatus: () => any;
+  initialize: () => boolean;
+  shutdown: () => boolean;
+  initializeAutomaticSeo: () => boolean;
 }
 
-const defaultUberEcosystemContext: UberEcosystemContextType = {
-  isReady: false,
-  isInitialized: false,
-  isOperational: false,
-  isActive: false,
-  services: {
-    auth: 'offline',
-    analytics: 'offline',
-    ai: 'offline',
-    wallet: 'offline',
-    seo: 'offline',
+// Create the context with default values
+const UberEcosystemContext = createContext<UberEcosystemContextType>({
+  isAuthenticated: false,
+  loading: true,
+  state: {
+    initialized: false,
   },
-  queueLength: 0,
-  processing: false,
-  lastUpdated: 'N/A',
-  initialize: async () => {},
-  shutdown: async () => {},
-  checkSubsystemHealth: () => [],
-  getSystemStatus: () => ({}),
-};
-
-const UberEcosystemContext = createContext<UberEcosystemContextType>(
-  defaultUberEcosystemContext
-);
+  initialize: () => false,
+  shutdown: () => false,
+  initializeAutomaticSeo: () => false,
+});
 
 interface UberEcosystemProviderProps {
   children: ReactNode;
 }
 
-export const UberEcosystemProvider: React.FC<UberEcosystemProviderProps> = ({
-  children,
-}) => {
-  const [isReady, setIsReady] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isOperational, setIsOperational] = useState(false);
-  const [isActive, setIsActive] = useState(false);
-  const [services, setServices] = useState({
-    auth: 'offline',
-    analytics: 'offline',
-    ai: 'offline',
-    wallet: 'offline',
-    seo: 'offline',
-  });
-  const [queueLength, setQueueLength] = useState(0);
-  const [processing, setProcessing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState('N/A');
-  const { toast } = useToast();
-  const { isAuthenticated } = useAuth();
+export const UberEcosystemProvider: React.FC<UberEcosystemProviderProps> = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
+  // Initialize the ecosystem on mount
   useEffect(() => {
-    const initializeAutomaticSeo = () => {
-      console.log('Initializing UberEcosystem services...');
-      setIsInitialized(true);
-      setIsOperational(true);
-      setIsActive(true);
-      setServices({
-        auth: 'online',
-        analytics: 'online',
-        ai: 'online',
-        wallet: 'online',
-        seo: 'online',
-      });
-      setQueueLength(10);
-      setProcessing(true);
-      setLastUpdated(new Date().toLocaleTimeString());
-      toast({
-        title: 'UberEcosystem Initialized',
-        description: 'All core services are now online.',
-      });
-      return true;
+    const initializeEcosystem = async () => {
+      setLoading(true);
+      try {
+        // Simulate initialization
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setInitialized(true);
+        
+        // Check authentication status
+        const token = localStorage.getItem('auth_token');
+        setIsAuthenticated(!!token);
+      } catch (error) {
+        console.error('Failed to initialize UberEcosystem:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (isAuthenticated && !isInitialized) {
-      initializeAutomaticSeo();
-    }
+    initializeEcosystem();
 
-    setIsReady(true);
-
+    // Cleanup on unmount
     return () => {
-      console.log("UberEcosystem shutting down...");
+      // Cleanup logic here
     };
-  }, [isAuthenticated, isInitialized, toast]);
+  }, []);
 
-  const checkSubsystemHealth = () => {
-    return [
-      { name: 'Auth', status: 'online', health: 100 },
-      { name: 'Analytics', status: 'online', health: 95 },
-      { name: 'AI', status: 'degraded', health: 60 },
-    ];
+  const initialize = () => {
+    console.log('Initializing UberEcosystem');
+    setInitialized(true);
+    return true;
   };
 
-  const getSystemStatus = () => {
-    return {
-      operational: isOperational,
-      isActive: isActive,
-      services: services,
-      queueLength: queueLength,
-      processing: processing,
-      lastUpdated: lastUpdated,
-    };
+  const shutdown = () => {
+    console.log('Shutting down UberEcosystem');
+    setInitialized(false);
+    return true;
+  };
+
+  const initializeAutomaticSeo = () => {
+    console.log('Initializing automatic SEO');
+    // Implementation would go here
+    return true;
   };
 
   const value = {
-    isReady,
-    isInitialized,
-    isOperational,
-    isActive,
-    services,
-    queueLength,
-    processing,
-    lastUpdated,
-    initialize: () => Promise.resolve(initializeAutomaticSeo()),
-    shutdown: () => Promise.resolve(console.log("UberEcosystem shutting down...")),
-    checkSubsystemHealth,
-    getSystemStatus,
+    isAuthenticated,
+    loading,
+    state: {
+      initialized,
+    },
+    initialize,
+    shutdown,
+    initializeAutomaticSeo,
   };
 
   return (
@@ -156,9 +99,9 @@ export const UberEcosystemProvider: React.FC<UberEcosystemProviderProps> = ({
 export const useUberEcosystem = () => {
   const context = useContext(UberEcosystemContext);
   if (!context) {
-    throw new Error(
-      'useUberEcosystem must be used within a UberEcosystemProvider'
-    );
+    throw new Error('useUberEcosystem must be used within an UberEcosystemProvider');
   }
   return context;
 };
+
+export default UberEcosystemContext;

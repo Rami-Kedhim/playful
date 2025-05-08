@@ -13,6 +13,7 @@ export interface ServiceTypeContextType {
   toggleServiceType?: (type: ServiceTypeFilter) => void;
   getServiceTypeLabel?: (type: ServiceTypeFilter) => string;
   // Add these properties to fix errors
+  serviceTypes: ServiceTypeFilter[];
   specializedServiceTypes: string[];
   selectedSpecializedTypes: string[];
   toggleSpecializedType: (type: string) => void;
@@ -29,6 +30,7 @@ const defaultServiceTypeContext: ServiceTypeContextType = {
   isAnyServiceType: true,
   clearServiceType: () => {},
   // Implement the missing properties
+  serviceTypes: ["any", "in-person", "virtual", "both", "in-call", "out-call", "massage", "dinner"],
   specializedServiceTypes: ['massage', 'dinner', 'in-call', 'out-call', 'companionship'],
   selectedSpecializedTypes: [],
   toggleSpecializedType: () => {},
@@ -49,6 +51,11 @@ interface ServiceTypeProviderProps {
 export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({ children }) => {
   const [serviceType, setServiceType] = useState<ServiceTypeFilter>("any");
   const [selectedSpecializedTypes, setSelectedSpecializedTypes] = useState<string[]>([]);
+  
+  const serviceTypes: ServiceTypeFilter[] = [
+    "any", "in-person", "virtual", "both", "in-call", "out-call", "massage", "dinner"
+  ];
+
   const specializedServiceTypes = ['massage', 'dinner', 'in-call', 'out-call', 'companionship'];
 
   const isInPersonService = serviceType === "in-person" || serviceType === "both" || serviceType === "in-call" || serviceType === "out-call";
@@ -88,12 +95,15 @@ export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({ childr
   };
 
   const validateServiceName = (name: string): boolean => {
-    return specializedServiceTypes.includes(name.toLowerCase()) || 
-      ["in-person", "virtual", "both", "all", "any", "in-call", "out-call"].includes(name.toLowerCase());
+    if (!name) return false;
+    const validTypes: ServiceTypeFilter[] = ["in-person", "virtual", "both", "all", "any", "in-call", "out-call", "massage", "dinner"];
+    return validTypes.includes(name.toLowerCase() as ServiceTypeFilter) || 
+      specializedServiceTypes.includes(name.toLowerCase());
   };
 
-  const getSafeServiceName = (name: string): string => {
-    return validateServiceName(name) ? name.toLowerCase() : "any";
+  const getSafeServiceName = (name: string): ServiceTypeFilter => {
+    if (!name) return "any";
+    return validateServiceName(name) ? name.toLowerCase() as ServiceTypeFilter : "any";
   };
 
   return (
@@ -107,6 +117,7 @@ export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({ childr
       clearServiceType,
       toggleServiceType,
       getServiceTypeLabel,
+      serviceTypes,
       specializedServiceTypes,
       selectedSpecializedTypes,
       toggleSpecializedType,
