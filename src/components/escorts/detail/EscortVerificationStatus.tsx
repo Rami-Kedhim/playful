@@ -57,7 +57,7 @@ const getVerificationIcon = (level: VerificationLevel, size: 'sm' | 'md' | 'lg')
   }
 };
 
-const getVerificationBadgeVariant = (level: VerificationLevel): "success" | "default" | "destructive" | "warning" | "outline" | "secondary" | "ubx" => {
+const getVerificationBadgeVariant = (level: VerificationLevel) => {
   switch (level) {
     case 'unverified':
       return 'destructive';
@@ -104,7 +104,7 @@ const EscortVerificationStatus: React.FC<EscortVerificationStatusProps> = ({
   if (!showTooltip) {
     return (
       <Badge 
-        variant={badgeVariant}
+        variant={badgeVariant as any}
         className={className}
       >
         {badgeContent}
@@ -118,7 +118,7 @@ const EscortVerificationStatus: React.FC<EscortVerificationStatusProps> = ({
       <Tooltip>
         <TooltipTrigger asChild>
           <Badge 
-            variant={badgeVariant}
+            variant={badgeVariant as any}
             className={`cursor-help ${className}`}
           >
             {badgeContent}

@@ -19,20 +19,33 @@ export const LivecamScraper = {
         const viewerCountText = camElement.querySelector(".viewer-count")?.textContent || "0";
         const viewerCount = parseInt(viewerCountText, 10) || 0;
         const username = camElement.querySelector(".username")?.textContent || "Unknown";
+        const displayName = camElement.querySelector(".display-name")?.textContent || username;
+        const name = displayName;
         const imageUrl = camElement.querySelector("img")?.getAttribute("src") || "";
+        const thumbnailUrl = camElement.querySelector("img")?.getAttribute("data-thumbnail") || imageUrl;
         const tags: string[] = [];
         const category = camElement.getAttribute("data-category") || "Other";
+        const language = camElement.getAttribute("data-language") || "English";
+
+        // Extract tags if available
+        const tagElements = camElement.querySelectorAll(".cam-tag");
+        tagElements.forEach(tag => {
+          tags.push(tag.textContent || "");
+        });
 
         const livecam: LivecamModel = {
           id,
-          displayName: username,
-          thumbnailUrl: imageUrl,
+          displayName,
+          name,
+          thumbnailUrl,
           isStreaming,
+          isLive: isStreaming,
           viewerCount,
           username,
           imageUrl,
           tags,
-          category
+          category,
+          language
         };
 
         livecams.push(livecam);
@@ -45,4 +58,3 @@ export const LivecamScraper = {
     }
   }
 };
-

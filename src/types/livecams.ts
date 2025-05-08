@@ -43,6 +43,8 @@ export interface Livecam {
   country?: string;
   description?: string;
   boostScore?: number;
+  streamUrl?: string;
+  region?: string;
 }
 
 export interface LivecamFilter {

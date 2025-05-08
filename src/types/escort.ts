@@ -33,6 +33,17 @@ export interface Escort {
   featured?: boolean;
   bookedTimes?: number;
   contactInfo?: ContactInfo;
+  rates?: Rates;
+}
+
+export interface Rates {
+  hourly?: number;
+  twoHours?: number;
+  twoHour?: number; // legacy
+  overnight?: number;
+  weekend?: number;
+  incall?: Record<string, number | string>;
+  outcall?: Record<string, number | string>;
 }
 
 export type ServiceType = "in-call" | "out-call" | "virtual" | "massage" | "dinner";

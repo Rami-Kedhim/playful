@@ -1,9 +1,9 @@
 
 // Fix properties to match Escort type and fix array includes call with safeguards
 
-import { Escort } from '@/types/Escort';
+import { Escort, Rates } from '@/types/escort';
 
-interface Rates {
+interface EscortRates {
   hourly: number;
   halfHour: number;
   overnight: number;
@@ -92,7 +92,7 @@ export class EscortScraper {
         price: rates.hourly || 300,
         imageUrl: `https://picsum.photos/seed/${id}/800/1200`,
         profileImage: `https://picsum.photos/seed/${id}-profile/400/400`,
-        gallery: [
+        images: [
           `https://picsum.photos/seed/${id}-1/800/1200`,
           `https://picsum.photos/seed/${id}-2/800/1200`,
           `https://picsum.photos/seed/${id}-3/800/1200`
@@ -102,12 +102,7 @@ export class EscortScraper {
         reviewCount: Math.floor(Math.random() * 50) + 5,
         verified: Math.random() > 0.5,
         isVerified: Math.random() > 0.5,
-        featured: Math.random() > 0.8,
-        images: [
-          `https://picsum.photos/seed/${id}-1/800/1200`,
-          `https://picsum.photos/seed/${id}-2/800/1200`,
-        ],
-        boostLevel: Math.floor(Math.random() * 5)
+        featured: Math.random() > 0.8
       };
 
       escorts.push(mockEscort);
@@ -122,4 +117,3 @@ export class EscortScraper {
 }
 
 export default EscortScraper;
-

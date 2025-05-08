@@ -7,7 +7,7 @@ export interface BoostPackage {
   durationMinutes: number;
   price: number;
   price_ubx?: number;
-  visibility: number;
+  visibility: number | string;
   visibility_increase: number;
   boost_level?: number;
   features: string[];
@@ -18,11 +18,12 @@ export interface EnhancedBoostStatus {
   active: boolean;
   isActive?: boolean;
   remainingMinutes: number;
-  timeRemaining?: number;
+  timeRemaining?: number | string;
   percentRemaining: number;
-  expiresAt: string | null;
-  startedAt: string | null;
+  expiresAt: string | Date | null;
+  startedAt: string | Date | null;
   isExpired?: boolean;
+  boostPackage?: BoostPackage;
 }
 
 export interface BoostAnalyticsData {
@@ -30,6 +31,9 @@ export interface BoostAnalyticsData {
   viewsIncrease: number;
   rankingIncrease: number;
   conversionRate: number;
+  timeActive?: number;
+  boostEfficiency?: number;
+  trending?: boolean;
 }
 
 export interface BoostPurchase {

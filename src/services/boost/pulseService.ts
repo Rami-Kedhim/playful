@@ -71,13 +71,13 @@ export const pulseService = {
   calculateBoostStatus(startTime?: string, duration?: number): EnhancedBoostStatus {
     if (!startTime || !duration) {
       return {
-        isActive: false,
         active: false,
+        isActive: false,
         remainingMinutes: 0,
+        timeRemaining: "0",
         percentRemaining: 0,
         expiresAt: null,
         startedAt: null,
-        timeRemaining: 0,
         isExpired: true
       };
     }
@@ -100,10 +100,10 @@ export const pulseService = {
     const percentRemaining = isActive ? (remainingMinutes / totalDuration) * 100 : 0;
     
     return {
-      isActive: isActive,
       active: isActive,
+      isActive: isActive,
       remainingMinutes: remainingMinutes,
-      timeRemaining: remainingMinutes,
+      timeRemaining: remainingMinutes.toString(),
       percentRemaining: percentRemaining,
       expiresAt: isActive ? endDate.toISOString() : null,
       startedAt: startDate.toISOString(),

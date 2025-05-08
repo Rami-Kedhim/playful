@@ -23,18 +23,13 @@ export class Orus {
       errors: [],
       warnings: [],
       lastChecked: new Date().toISOString(),
-      overallStatus: 'operational',
-      timestamp: new Date().toISOString(),
-      modules: {
-        auth: 'operational',
-        content: 'operational',
-        payments: 'operational',
-        security: 'operational'
-      },
-      recommendations: [
-        'Regular security updates recommended',
-        'Implement two-factor authentication'
-      ]
+      integrity: 100,
+      checks: {
+        database: true,
+        cache: true,
+        filesystem: true,
+        network: true
+      }
     };
   }
 }

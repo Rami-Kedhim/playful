@@ -5,6 +5,7 @@ import { HermesEvent } from '@/types/hermes';
 class Oxum implements OxumSystem {
   private systemStatus: SystemStatus = {
     operational: true,
+    isOperational: true,
     performance: 100,
     lastUpdate: new Date().toISOString(),
     serviceStatus: {
@@ -34,6 +35,7 @@ class Oxum implements OxumSystem {
   getSystemStatus(): SystemStatus {
     return {
       operational: this.systemStatus.operational,
+      isOperational: this.systemStatus.operational,
       performance: this.systemStatus.performance,
       lastUpdate: this.systemStatus.lastUpdate,
       serviceStatus: {
@@ -92,6 +94,14 @@ class Oxum implements OxumSystem {
     };
     
     console.log('Oxum event emitted:', hermesEvent);
+  }
+
+  checkSystemStatus() {
+    return {
+      operational: true,
+      traffic: 'normal',
+      loadFactor: 0.45
+    };
   }
 }
 

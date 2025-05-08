@@ -35,7 +35,7 @@ export class LucieOrchestratorAdapter {
     try {
       const params: ModerateContentParams = {
         content,
-        contentType: contentType, // Using contentType parameter
+        type: contentType, // Using contentType parameter
       };
       
       const result: ModerateContentResult = await lucieAI.moderateContent(params);
@@ -53,7 +53,7 @@ export class LucieOrchestratorAdapter {
     try {
       const params: ModerateContentParams = {
         content,
-        contentType: contentType,
+        type: contentType,
       };
       
       const result = await lucieAI.moderateContent(params);
@@ -63,6 +63,7 @@ export class LucieOrchestratorAdapter {
       console.error('Error in content moderation:', error);
       return {
         isSafe: false,
+        safe: false,
         score: 1.0,
         issues: ['Error processing moderation request'],
         blockedCategories: [],
@@ -82,7 +83,8 @@ export class LucieOrchestratorAdapter {
       console.error('Error analyzing sentiment:', error);
       return {
         score: 0,
-        sentiment: 'neutral'
+        sentiment: 'neutral',
+        confidence: 0
       };
     }
   }

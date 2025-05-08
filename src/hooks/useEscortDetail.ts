@@ -73,7 +73,8 @@ export const useEscortDetail = (escortId?: string) => {
     
     // Calculate estimated price based on duration and rates
     const durationHours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
-    const estimatedPrice = Math.round(durationHours * (escort.rates?.hourly || 200));
+    const hourlyRate = escort.rates?.hourly || 200;
+    const estimatedPrice = Math.round(durationHours * hourlyRate);
     
     // Check wallet balance
     if (balance < estimatedPrice) {

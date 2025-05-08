@@ -1,110 +1,125 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Livecam } from '@/types/livecams';
 
-export const useLivecamDetail = (livecamId: string) => {
+interface UseLivecamDetailProps {
+  livecamId: string;
+}
+
+interface UseLivecamDetailResult {
+  livecam: Livecam | null;
+  loading: boolean;
+  error: string | null;
+  viewerCount: number;
+  isSubscribed: boolean;
+  isFavorited: boolean;
+  isStreaming: boolean;
+  toggleFavorite: () => void;
+  subscribeToModel: () => Promise<boolean>;
+  sendTip: (amount: number, message: string) => Promise<boolean>;
+}
+
+export function useLivecamDetail({ livecamId }: UseLivecamDetailProps): UseLivecamDetailResult {
   const [livecam, setLivecam] = useState<Livecam | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewerCount, setViewerCount] = useState<number>(0);
+  const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
+  const [isFavorited, setIsFavorited] = useState<boolean>(false);
+  const [isStreaming, setIsStreaming] = useState<boolean>(false);
 
-  const fetchLivecam = useCallback(async () => {
-    if (!livecamId) {
-      setError('No livecam ID provided');
-      setLoading(false);
-      return;
-    }
+  useEffect(() => {
+    const fetchLivecamDetails = async () => {
+      setLoading(true);
+      setError(null);
 
-    setLoading(true);
-    setError(null);
+      try {
+        // Mock API call with delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+        // Mock data
+        const mockLivecam: Livecam = {
+          id: livecamId,
+          name: `Model ${livecamId}`,
+          username: `model_${livecamId}`,
+          displayName: `Model ${livecamId}`,
+          imageUrl: `https://picsum.photos/seed/${livecamId}/800/600`,
+          thumbnailUrl: `https://picsum.photos/seed/${livecamId}/400/300`,
+          isLive: true,
+          isStreaming: true,
+          viewerCount: Math.floor(Math.random() * 1000) + 100,
+          tags: ['tag1', 'tag2', Math.random() > 0.5 ? 'featured' : 'trending'],
+          category: 'category1',
+          categories: ['category1', 'category2'],
+          language: 'English',
+          country: 'United States',
+          description: 'This is a mock livecam model with streaming capability.',
+          streamUrl: `https://example.com/streams/${livecamId}`,
+          rating: 4.5,
+          price: 9.99
+        };
 
-      // Mock data
-      const mockLivecam: Livecam = {
-        id: livecamId,
-        name: 'Jessica',
-        displayName: 'Jessica Diamond',
-        username: 'jessica_diamond',
-        thumbnailUrl: 'https://i.imgur.com/0y0tGXn.png',
-        imageUrl: 'https://i.imgur.com/0y0tGXn.png',
-        isLive: true,
-        viewerCount: 423,
-        streamUrl: 'https://example.com/stream.mp4',
-        category: 'Dance',
-        categories: ['Dance', 'Music'],
-        language: 'English',
-        country: 'United States',
-        tags: ['blonde', 'dance', 'music'],
-        description: 'Join me for a fun dance stream! I take song requests and love to chat with my viewers.',
-        rating: 4.8,
-        isStreaming: true,
-        region: 'North America'
-      };
+        setLivecam(mockLivecam);
+        setViewerCount(mockLivecam.viewerCount);
+        setIsStreaming(mockLivecam.isLive);
+        
+        // Random subscription and favorite status
+        setIsSubscribed(Math.random() > 0.7);
+        setIsFavorited(Math.random() > 0.6);
+      } catch (err: any) {
+        console.error('Error fetching livecam details:', err);
+        setError(err.message || 'Failed to load livecam details');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      setLivecam(mockLivecam);
-    } catch (error) {
-      console.error('Error fetching livecam:', error);
-      setError('Failed to load livecam details');
-    } finally {
-      setLoading(false);
+    if (livecamId) {
+      fetchLivecamDetails();
     }
   }, [livecamId]);
 
-  // Refetch when the livecam ID changes
+  // Simulate view count increasing randomly during the stream
   useEffect(() => {
-    fetchLivecam();
-  }, [fetchLivecam]);
+    if (!livecam?.isLive) return;
 
-  // Function to follow livecam
-  const followLivecam = async (): Promise<boolean> => {
+    const interval = setInterval(() => {
+      setViewerCount(current => {
+        const change = Math.floor(Math.random() * 5) - 2; // -2 to +2 viewers
+        return Math.max(10, current + change);
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [livecam?.isLive]);
+
+  // Toggle favorite status
+  const toggleFavorite = () => {
+    setIsFavorited(prev => !prev);
+  };
+
+  // Subscribe to model
+  const subscribeToModel = async (): Promise<boolean> => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      console.log(`Following livecam: ${livecamId}`);
+      // Mock API call with delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setIsSubscribed(true);
       return true;
-    } catch (error) {
-      console.error('Error following livecam:', error);
+    } catch (err) {
+      console.error('Error subscribing to model:', err);
       return false;
     }
   };
 
-  // Function to unfollow livecam
-  const unfollowLivecam = async (): Promise<boolean> => {
+  // Send tip to model
+  const sendTip = async (amount: number, message: string): Promise<boolean> => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      console.log(`Unfollowing livecam: ${livecamId}`);
-      return true;
-    } catch (error) {
-      console.error('Error unfollowing livecam:', error);
-      return false;
-    }
-  };
-
-  // Function to send tip
-  const sendTip = async (amount: number): Promise<boolean> => {
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      console.log(`Sent tip of ${amount} to livecam: ${livecamId}`);
-      return true;
-    } catch (error) {
-      console.error('Error sending tip:', error);
-      return false;
-    }
-  };
-
-  // Function to boost livecam
-  const boostLivecam = async (boost: number): Promise<boolean> => {
-    try {
-      // Simulate API call
+      // Mock API call with delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log(`Boosting livecam: ${livecamId} with boost: ${boost}`);
+      console.log(`Sending tip of ${amount} with message: ${message}`);
       return true;
-    } catch (error) {
-      console.error('Error boosting livecam:', error);
+    } catch (err) {
+      console.error('Error sending tip:', err);
       return false;
     }
   };
@@ -113,12 +128,12 @@ export const useLivecamDetail = (livecamId: string) => {
     livecam,
     loading,
     error,
-    refreshLivecam: fetchLivecam,
-    followLivecam,
-    unfollowLivecam,
-    sendTip,
-    boostLivecam
+    viewerCount,
+    isSubscribed,
+    isFavorited,
+    isStreaming,
+    toggleFavorite,
+    subscribeToModel,
+    sendTip
   };
-};
-
-export default useLivecamDetail;
+}

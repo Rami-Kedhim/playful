@@ -1,15 +1,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { EnhancedBoostStatus, BoostPackage } from '@/types/pulse-boost';
 import { pulseService } from '@/services/boost/pulseService';
-import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/hooks/auth';
+import { EnhancedBoostStatus, BoostPackage } from '@/types/pulse-boost';
 
-export const usePulseBoost = (profileId?: string) => {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [boostPackages, setBoostPackages] = useState<BoostPackage[]>([]);
-  const [loading, setLoading] = useState(true);
+/**
+ * usePulseBoost hook for managing escort boost status
+ */
+export function usePulseBoost(userId?: string) {
+  // Initialize state with proper types
   const [boostStatus, setBoostStatus] = useState<EnhancedBoostStatus>({
     active: false,
     isActive: false,
@@ -18,122 +16,146 @@ export const usePulseBoost = (profileId?: string) => {
     percentRemaining: 0,
     expiresAt: null,
     startedAt: null,
-    isExpired: false
+    isExpired: true
   });
-  
-  const userId = profileId || user?.id;
-  
-  // Load packages and boost status
+
+  const [packages, setPackages] = useState<BoostPackage[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [refreshCounter, setRefreshCounter] = useState(0);
+
+  // Fetch boost packages
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchPackages = async () => {
+      try {
+        const fetchedPackages = pulseService.getPackages();
+        setPackages(fetchedPackages);
+      } catch (err) {
+        console.error('Error fetching boost packages:', err);
+      }
+    };
+
+    fetchPackages();
+  }, []);
+
+  // Load user's active boost status
+  useEffect(() => {
+    const fetchBoostStatus = async () => {
+      if (!userId) return;
+
       setLoading(true);
       try {
-        // Get packages
-        const packages = pulseService.getPackages();
-        setBoostPackages(packages);
-        
-        if (userId) {
-          // Get existing boost purchase
-          const boostPurchase = pulseService.getMockBoostPurchase(userId);
-          
-          if (boostPurchase) {
-            const selectedPackage = packages.find(p => p.id === boostPurchase.packageId);
-            const status = pulseService.calculateBoostStatus(
-              boostPurchase.startTime, 
-              selectedPackage?.durationMinutes
-            );
-            setBoostStatus(status);
-          } else {
-            // No active boost
-            setBoostStatus({
-              active: false,
-              isActive: false,
-              remainingMinutes: 0,
-              timeRemaining: 0,
-              percentRemaining: 0,
-              expiresAt: null,
-              startedAt: null,
-              isExpired: true
-            });
-          }
+        // Get mock boost purchase for the user
+        const activePurchase = pulseService.getMockBoostPurchase(userId);
+
+        if (activePurchase) {
+          // Get package details
+          const packageDetails = packages.find(pkg => pkg.id === activePurchase.packageId);
+          const durationInMinutes = packageDetails?.durationMinutes || 0;
+
+          // Calculate boost status
+          const status = pulseService.calculateBoostStatus(
+            activePurchase.startTime,
+            durationInMinutes
+          );
+
+          setBoostStatus({
+            ...status,
+            isExpired: !status.active
+          });
+        } else {
+          // No active boost
+          setBoostStatus({
+            active: false,
+            isActive: false,
+            remainingMinutes: 0,
+            timeRemaining: 0,
+            percentRemaining: 0,
+            expiresAt: null,
+            startedAt: null,
+            isExpired: true
+          });
         }
-      } catch (error) {
-        console.error('Error loading boost data:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load boost information',
-          variant: 'destructive',
-        });
+      } catch (err) {
+        console.error('Error fetching boost status:', err);
       } finally {
         setLoading(false);
       }
     };
-    
-    fetchData();
-  }, [userId, toast]);
-  
-  // Activate a boost package
-  const activateBoost = useCallback(async (packageId: string): Promise<boolean> => {
-    if (!userId) {
-      toast({
-        title: 'Authentication Required',
-        description: 'Please log in to activate a boost',
-        variant: 'destructive',
-      });
-      return false;
-    }
-    
-    setLoading(true);
+
+    fetchBoostStatus();
+  }, [userId, refreshCounter, packages]);
+
+  // Manually refresh the boost status
+  const refreshStatus = useCallback(() => {
+    setRefreshCounter(prev => prev + 1);
+  }, []);
+
+  // Purchase a boost for the user
+  const purchaseBoost = useCallback(async (packageId: string) => {
+    if (!userId) return { success: false, message: 'User ID is required' };
+
     try {
-      // Find the selected package
-      const selectedPackage = boostPackages.find(p => p.id === packageId);
+      setLoading(true);
       
-      if (!selectedPackage) {
-        throw new Error('Invalid package selected');
+      // Find package details
+      const boostPackage = packages.find(p => p.id === packageId);
+      if (!boostPackage) {
+        return { success: false, message: 'Invalid package selected' };
       }
-      
-      // Simulate successful activation
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const now = new Date();
-      
-      // Update boost status
+      const startDate = now;
+      const endDate = new Date(now.getTime() + boostPackage.durationMinutes * 60 * 1000);
+
+      // Update the boost status immediately for better UX
       setBoostStatus({
         active: true,
-        isActive: true,
-        remainingMinutes: selectedPackage.durationMinutes,
-        timeRemaining: selectedPackage.durationMinutes,
+        isActive: true, 
+        remainingMinutes: boostPackage.durationMinutes,
+        timeRemaining: boostPackage.durationMinutes.toString(),
         percentRemaining: 100,
-        expiresAt: new Date(now.getTime() + selectedPackage.durationMinutes * 60 * 1000).toISOString(),
-        startedAt: now.toISOString(),
+        expiresAt: endDate,
+        startedAt: startDate,
         isExpired: false
       });
-      
-      toast({
-        title: 'Boost Activated',
-        description: `${selectedPackage.name} has been successfully activated!`,
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error activating boost:', error);
-      toast({
-        title: 'Activation Failed',
-        description: 'Failed to activate boost. Please try again.',
-        variant: 'destructive',
-      });
-      return false;
+
+      // Perform purchase operation (mocked)
+      // In a real app, this would call an API endpoint
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      refreshStatus();
+      return { success: true, message: 'Boost activated successfully' };
+    } catch (error: any) {
+      console.error('Error purchasing boost:', error);
+      return { 
+        success: false, 
+        message: error.message || 'Failed to purchase boost'
+      };
     } finally {
       setLoading(false);
     }
-  }, [userId, boostPackages, toast]);
-  
+  }, [userId, packages, refreshStatus]);
+
+  // Format the remaining time as a human-readable string
+  const getFormattedTimeRemaining = useCallback(() => {
+    const minutes = boostStatus.remainingMinutes || 0;
+    const hours = Math.floor(minutes / 60);
+    const remainingMins = minutes % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${remainingMins}m`;
+    }
+    return `${remainingMins}m`;
+  }, [boostStatus.remainingMinutes]);
+
   return {
-    boostPackages,
     boostStatus,
+    packages,
     loading,
-    activateBoost
+    refreshStatus,
+    purchaseBoost,
+    getFormattedTimeRemaining
   };
-};
+}
 
 export default usePulseBoost;

@@ -1,70 +1,82 @@
 
 import { BoostPackage } from '@/types/pulse-boost';
 
-export const fetchBoostPackages = async (): Promise<BoostPackage[]> => {
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 500));
+// Mock implementation of the Pulse Boost Service
+export class PulseBoostService {
+  getBoostPackages(): BoostPackage[] {
+    return [
+      {
+        id: 'basic',
+        name: 'Basic Boost',
+        description: 'Enhance your visibility for 24 hours',
+        duration: '24:00:00',
+        price: 29.99,
+        price_ubx: 300,
+        features: ['Top search positions', 'Featured section placement', 'Increased visibility'],
+        visibility: 50,
+        visibility_increase: 50,
+        durationMinutes: 1440,
+        is_active: true
+      },
+      {
+        id: 'premium',
+        name: 'Premium Boost',
+        description: 'Maximum visibility for 3 days',
+        duration: '72:00:00',
+        price: 69.99,
+        price_ubx: 700,
+        features: ['Top search positions', 'Featured section placement', 'Highlighted profile', 'Premium badge'],
+        visibility: 100,
+        visibility_increase: 100,
+        durationMinutes: 4320,
+        is_active: true
+      }
+    ];
+  }
   
-  // Return mock boost packages
-  return [
-    {
-      id: 'basic-boost',
-      name: 'Basic Boost',
-      description: '24-hour visibility boost',
-      duration: '24 hours',
-      durationMinutes: 1440,
-      price: 45,
-      price_ubx: 45,
-      visibility: 150,
-      visibility_increase: 50,
-      features: [
-        '50% higher visibility in search results',
-        'Featured in recommended profiles',
-        '24 hour duration'
-      ]
-    },
-    {
-      id: 'premium-boost',
-      name: 'Premium Boost',
-      description: '3-day visibility boost with premium features',
-      duration: '3 days',
-      durationMinutes: 4320,
-      price: 99,
-      price_ubx: 99,
-      visibility: 250,
-      visibility_increase: 150,
-      features: [
-        '150% higher visibility in search results',
-        'Top placement in recommended profiles',
-        'Featured tag on your profile',
-        '3 day duration'
-      ]
-    },
-    {
-      id: 'max-boost',
-      name: 'Maximum Boost',
-      description: '7-day visibility boost with all premium features',
-      duration: '7 days',
-      durationMinutes: 10080,
-      price: 199,
-      price_ubx: 199,
-      visibility: 500,
-      visibility_increase: 400,
-      features: [
-        '400% higher visibility in search results',
-        'Top placement in recommended profiles',
-        'Featured tag on your profile',
-        'Priority in messaging',
-        '7 day duration'
-      ]
-    }
-  ];
-};
+  async purchaseBoost(
+    profileId: string,
+    packageId: string,
+    userId: string
+  ): Promise<BoostPurchaseResult> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    return {
+      success: true,
+      boostId: 'boost-' + Date.now(),
+      transactionId: 'tx-' + Date.now()
+    };
+  }
+  
+  async cancelBoost(boostId: string): Promise<boolean> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    return true;
+  }
+  
+  async getBoostAnalytics(profileId: string): Promise<any> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
+    return {
+      totalBoosts: 8,
+      activeBoosts: 1,
+      averageBoostScore: 78,
+      additionalViews: 523,
+      engagementIncrease: 42,
+      rankingPosition: 3
+    };
+  }
+}
 
-export const activateBoost = async (userId: string, packageId: string): Promise<boolean> => {
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  // Simulate success
-  return true;
-};
+export interface BoostPurchaseResult {
+  success: boolean;
+  boostId?: string;
+  error?: string | null;
+  transactionId?: string;
+}
+
+export const pulseBoostService = new PulseBoostService();
+export const getPulsePackages = pulseBoostService.getBoostPackages.bind(pulseBoostService);

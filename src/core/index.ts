@@ -23,6 +23,7 @@ export * from './utils';
 
 // Initialize and export
 const lucieAI = new LucieAI();
-const uberCore = new UberCore(lucieAI, oxum);
+// Remove the type casting that was causing errors
+const uberCore = new UberCore(lucieAI);
 
 export { lucieAI, uberCore };

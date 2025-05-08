@@ -1,195 +1,219 @@
 
-import { useState, useEffect } from 'react';
-import { BoostStatus, BoostEligibility, BoostPackage, HermesStatus } from '@/types/boost';
-import { AnalyticsData } from '@/types/analytics';
+import { useState, useEffect, useCallback } from 'react';
+import { useToast } from '@/components/ui/use-toast';
+import { pulseService } from '@/services/boost/pulseService';
+import { BoostPackage, BoostAnalyticsData } from '@/types/pulse-boost';
 
-export const useBoostManager = (profileId?: string) => {
-  const [boostStatus, setBoostStatus] = useState<BoostStatus>({
-    isActive: false,
-    remainingTime: '',
+interface BoostManagerHook {
+  activeBoost: any | null;
+  boostPackages: BoostPackage[];
+  isLoading: boolean;
+  analyticsData: BoostAnalyticsData;
+  purchaseBoost: (packageId: string) => Promise<{ success: boolean; message: string }>;
+  cancelBoost: () => Promise<boolean>;
+  refreshBoostStatus: () => void;
+}
+
+interface AnalyticsData {
+  impressionsIncrease: number;
+  viewsIncrease: number;
+  rankingIncrease: number;
+  conversionRate: number;
+  timeActive?: number;
+  boostEfficiency?: number;
+  trending?: boolean;
+}
+
+export function useBoostManager(profileId?: string): BoostManagerHook {
+  const [activeBoost, setActiveBoost] = useState<any | null>(null);
+  const [boostPackages, setBoostPackages] = useState<BoostPackage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
+    impressionsIncrease: 0,
+    viewsIncrease: 0,
+    rankingIncrease: 0,
+    conversionRate: 0
   });
-  const [hermesStatus, setHermesStatus] = useState<HermesStatus>({
-    position: 0,
-    activeUsers: 0,
-    estimatedVisibility: 0,
-    lastUpdateTime: new Date().toISOString(),
-    boostScore: 0,
-    effectivenessScore: 0,
-  });
-  const [eligibility, setEligibility] = useState<BoostEligibility>({
-    isEligible: true,
-  });
-  const [packages, setPackages] = useState<BoostPackage[]>([]);
-  const [loading, setLoading] = useState(true);
   
-  useEffect(() => {
+  const { toast } = useToast();
+  
+  // Function to load boost packages
+  const loadBoostPackages = useCallback(async () => {
+    try {
+      const packages = pulseService.getPackages();
+      setBoostPackages(packages);
+    } catch (error) {
+      console.error('Error loading boost packages:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load boost packages',
+        variant: 'destructive'
+      });
+    }
+  }, [toast]);
+  
+  // Load active boost for profile
+  const loadActiveBoost = useCallback(async () => {
     if (!profileId) return;
     
-    // Fetch boost status, packages and eligibility
-    const fetchBoostData = async () => {
-      setLoading(true);
-      try {
-        // Mock data
-        setPackages([
-          {
-            id: 'boost-1',
-            name: '24 Hour Boost',
-            description: 'Boost your profile for 24 hours',
-            duration: '24:00:00',
-            durationMinutes: 1440, // 24 hours in minutes
-            price: 29.99,
-            price_ubx: 300,
-            boostMultiplier: 1.5,
-            features: ['Top search results', 'Featured profile'],
-            isMostPopular: true,
-            boost_power: 50,
-            visibility: 'High',
-            visibility_increase: 50
-          },
-          {
-            id: 'boost-2',
-            name: 'Weekend Boost',
-            description: 'Boost your profile for the entire weekend',
-            duration: '72:00:00',
-            durationMinutes: 4320, // 72 hours in minutes
-            price: 69.99,
-            price_ubx: 700,
-            boostMultiplier: 2,
-            features: ['Top search results', 'Featured profile', 'Homepage feature'],
-            boost_power: 75,
-            visibility: 'Very High',
-            visibility_increase: 75
-          }
-        ]);
+    setIsLoading(true);
+    try {
+      // In a real app, this would be an API call
+      // For now, simulate a 50% chance the user has an active boost
+      const hasActiveBoost = Math.random() > 0.5;
+      
+      if (hasActiveBoost) {
+        // Get a random boost package
+        const randomIdx = Math.floor(Math.random() * boostPackages.length);
+        const randomPackage = boostPackages[randomIdx];
         
-        setBoostStatus({
-          isActive: false,
-          remainingTime: '00:00:00'
-        });
-        
-        setEligibility({
-          isEligible: true
-        });
-        
-        setHermesStatus({
-          position: 0,
-          activeUsers: 200,
-          estimatedVisibility: 65,
-          lastUpdateTime: new Date().toISOString(),
-          boostScore: 0,
-          effectivenessScore: 0
-        });
-      } catch (error) {
-        console.error('Failed to fetch boost data', error);
-      } finally {
-        setLoading(false);
+        if (randomPackage) {
+          // Random remaining time between 0-100%
+          const remainingPercent = Math.random();
+          const totalMinutes = randomPackage.durationMinutes;
+          const remainingMinutes = Math.floor(totalMinutes * remainingPercent);
+          
+          const now = new Date();
+          const startedAt = new Date(now.getTime() - ((totalMinutes - remainingMinutes) * 60 * 1000));
+          const expiresAt = new Date(startedAt.getTime() + (totalMinutes * 60 * 1000));
+          
+          setActiveBoost({
+            packageId: randomPackage.id,
+            packageName: randomPackage.name,
+            packageDuration: randomPackage.duration,
+            remainingTime: `${Math.floor(remainingMinutes / 60)}h ${remainingMinutes % 60}m`,
+            remainingMinutes,
+            startedAt,
+            expiresAt,
+            percentRemaining: remainingPercent * 100
+          });
+          
+          // Also set analytics data
+          setAnalyticsData({
+            impressionsIncrease: Math.floor(Math.random() * 200) + 50,
+            viewsIncrease: Math.floor(Math.random() * 100) + 20,
+            rankingIncrease: Math.floor(Math.random() * 5) + 1,
+            conversionRate: Math.random() * 10,
+            timeActive: (totalMinutes - remainingMinutes),
+            boostEfficiency: (Math.random() * 50) + 50,
+            trending: Math.random() > 0.5
+          });
+        }
+      } else {
+        setActiveBoost(null);
       }
-    };
+    } catch (error) {
+      console.error('Error loading active boost:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load active boost',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [profileId, boostPackages, toast]);
+  
+  // Initial load
+  useEffect(() => {
+    loadBoostPackages();
+  }, [loadBoostPackages]);
+  
+  useEffect(() => {
+    if (boostPackages.length > 0) {
+      loadActiveBoost();
+    }
+  }, [boostPackages, loadActiveBoost]);
+  
+  // Purchase a boost
+  const purchaseBoost = useCallback(async (packageId: string) => {
+    if (!profileId) {
+      return { success: false, message: 'No profile ID provided' };
+    }
     
-    fetchBoostData();
-  }, [profileId]);
-  
-  const boostProfile = async (profileId: string, packageId: string): Promise<boolean> => {
+    setIsLoading(true);
     try {
-      console.log(`Boosting profile ${profileId} with package ${packageId}`);
-      // This would be a real API call
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Set active boost status
-      setBoostStatus({
-        isActive: true,
-        packageId: packageId,
-        startedAt: new Date(),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
-        remainingTime: '24:00:00',
-        packageName: '24 Hour Boost',
-        progress: 0,
-        activeBoostId: 'active-boost-1'
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Failed to boost profile', error);
-      return false;
-    }
-  };
-  
-  const cancelBoost = async (): Promise<boolean> => {
-    try {
-      console.log('Cancelling active boost');
-      // This would be a real API call
-      
-      // Reset boost status
-      setBoostStatus({
-        isActive: false,
-        remainingTime: '00:00:00'
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Failed to cancel boost', error);
-      return false;
-    }
-  };
-  
-  const getBoostAnalytics = async (): Promise<AnalyticsData> => {
-    // Mock analytics data with all required properties
-    return {
-      additionalViews: 145,
-      engagementIncrease: 32,
-      rankingPosition: 8,
-      views: 300,
-      impressions: {
-        today: 180,
-        yesterday: 150,
-        weeklyAverage: 145,
-        withBoost: 180,
-        withoutBoost: 120,
-        increase: 50,
-        change: 20
-      },
-      interactions: {
-        today: 45,
-        yesterday: 32,
-        weeklyAverage: 30,
-        withBoost: 45,
-        withoutBoost: 25,
-        increase: 80,
-        change: 40
-      },
-      rank: {
-        current: 8,
-        previous: 24,
-        change: 16
-      },
-      conversionRate: 5.2,
-      messageRate: 12.7,
-      bookingRate: 3.8,
-      conversions: 12,
-      timeActive: '5 days',
-      boostEfficiency: 87,
-      trending: true,
-      roi: 2.4,
-      clicks: {
-        today: 45,
-        yesterday: 32,
-        lastWeek: 210,
-        thisWeek: 275,
-        change: 31,
-        total: 1200
+      const selectedPackage = boostPackages.find(p => p.id === packageId);
+      if (!selectedPackage) {
+        return { success: false, message: 'Package not found' };
       }
-    };
-  };
+      
+      // Create a new active boost
+      const now = new Date();
+      const expiresAt = new Date(now.getTime() + (selectedPackage.durationMinutes * 60 * 1000));
+      
+      setActiveBoost({
+        packageId: selectedPackage.id,
+        packageName: selectedPackage.name,
+        packageDuration: selectedPackage.duration,
+        remainingTime: selectedPackage.duration,
+        remainingMinutes: selectedPackage.durationMinutes,
+        startedAt: now,
+        expiresAt,
+        percentRemaining: 100
+      });
+      
+      toast({
+        title: 'Boost Activated',
+        description: `Your ${selectedPackage.name} has been successfully activated.`
+      });
+      
+      return { success: true, message: 'Boost activated successfully' };
+    } catch (error) {
+      console.error('Error purchasing boost:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to purchase boost',
+        variant: 'destructive'
+      });
+      return { success: false, message: 'Failed to purchase boost' };
+    } finally {
+      setIsLoading(false);
+    }
+  }, [profileId, boostPackages, toast]);
+  
+  // Cancel active boost
+  const cancelBoost = useCallback(async () => {
+    if (!activeBoost || !profileId) return false;
+    
+    setIsLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setActiveBoost(null);
+      
+      toast({
+        title: 'Boost Cancelled',
+        description: 'Your active boost has been cancelled'
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error cancelling boost:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to cancel boost',
+        variant: 'destructive'
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeBoost, profileId, toast]);
   
   return {
-    boostStatus,
-    hermesStatus,
-    eligibility,
-    packages,
-    loading,
-    boostProfile,
+    activeBoost,
+    boostPackages,
+    isLoading,
+    analyticsData,
+    purchaseBoost,
     cancelBoost,
-    getBoostAnalytics
+    refreshBoostStatus: loadActiveBoost
   };
-};
+}
 
 export default useBoostManager;

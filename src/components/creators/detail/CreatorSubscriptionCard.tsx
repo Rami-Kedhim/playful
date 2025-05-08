@@ -1,103 +1,100 @@
 
 import React from 'react';
-import { 
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, Crown } from 'lucide-react';
 import { useWallet } from '@/hooks/useWallet';
-import { useToast } from '@/components/ui/use-toast';
+import { Zap, Check } from 'lucide-react';
 
-interface CreatorSubscriptionCardProps {
+export interface CreatorSubscriptionCardProps {
   creatorId: string;
-  name: string;
-  price: number;
-  benefits: string[];
-  isSubscribed?: boolean;
+  isSubscribed: boolean;
+  canSubscribe: boolean;
+  subscriptionPrice?: number;
+  onSubscribe: () => Promise<void>;
+  onSendTip: () => Promise<void>;
 }
 
 const CreatorSubscriptionCard: React.FC<CreatorSubscriptionCardProps> = ({
   creatorId,
-  name,
-  price,
-  benefits,
-  isSubscribed = false,
+  isSubscribed,
+  canSubscribe,
+  subscriptionPrice = 9.99,
+  onSubscribe,
+  onSendTip
 }) => {
-  const { toast } = useToast();
-  const { balance, spend } = useWallet();
-  
-  const handleSubscribe = async () => {
-    if (balance < price) {
-      toast({
-        title: "Insufficient balance",
-        description: "Please add more UBX tokens to subscribe",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    try {
-      const success = await spend(price, `Subscription to ${name}`);
-      
-      if (success) {
-        toast({
-          title: "Subscription successful",
-          description: `You have subscribed to ${name}`,
-        });
-      } else {
-        toast({
-          title: "Subscription failed",
-          description: "Failed to process subscription",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Subscription error:", error);
-      toast({
-        title: "Error",
-        description: "An error occurred while processing your subscription",
-        variant: "destructive",
-      });
-    }
-  };
+  const { balance } = useWallet();
 
   return (
-    <Card className="border-2 border-muted">
-      <CardHeader className="pb-3">
-        <div className="flex items-center space-x-2">
-          <Crown className="h-5 w-5 text-amber-500" />
-          <CardTitle>Premium Subscription</CardTitle>
-        </div>
-        <CardDescription>Exclusive content and perks</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex justify-between items-baseline mb-6">
-          <span className="text-3xl font-bold">{price} UBX</span>
-          <span className="text-sm text-muted-foreground">per month</span>
-        </div>
-        
-        <ul className="space-y-2 mb-6">
-          {benefits.map((benefit, index) => (
-            <li key={index} className="flex items-start">
-              <Check className="h-4 w-4 mr-2 mt-1 text-green-500" />
-              <span className="text-sm">{benefit}</span>
-            </li>
-          ))}
-        </ul>
-
-        <Button 
-          className="w-full"
-          variant={isSubscribed ? "outline" : "default"}
-          onClick={handleSubscribe}
-          disabled={isSubscribed}
-        >
-          {isSubscribed ? "Already Subscribed" : "Subscribe Now"}
-        </Button>
+    <Card className="w-full">
+      <CardContent className="pt-6">
+        {isSubscribed ? (
+          <div className="mb-4 rounded-md bg-green-50 dark:bg-green-900/20 p-3 text-green-800 dark:text-green-200">
+            <div className="flex items-center">
+              <Check className="h-5 w-5 mr-2" />
+              <p className="text-sm font-medium">You are subscribed to this creator</p>
+            </div>
+          </div>
+        ) : (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2">Subscribe for Premium Content</h3>
+            <ul className="space-y-2">
+              <li className="flex items-start">
+                <Check className="h-4 w-4 text-green-500 mt-1 mr-2" />
+                <span className="text-sm">Exclusive photo and video content</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-4 w-4 text-green-500 mt-1 mr-2" />
+                <span className="text-sm">Private messaging with creator</span>
+              </li>
+              <li className="flex items-start">
+                <Check className="h-4 w-4 text-green-500 mt-1 mr-2" />
+                <span className="text-sm">Live stream access</span>
+              </li>
+            </ul>
+            <div className="mt-4 py-3 border-t border-b">
+              <div className="flex justify-between items-center">
+                <span>Price per month</span>
+                <span className="font-bold">${subscriptionPrice.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        )}
       </CardContent>
+      <CardFooter className="flex flex-col space-y-2">
+        {isSubscribed ? (
+          <Button 
+            className="w-full" 
+            variant="outline" 
+            onClick={onSendTip}
+          >
+            <Zap className="mr-2 h-4 w-4" />
+            Send Tip
+          </Button>
+        ) : (
+          <Button 
+            className="w-full" 
+            onClick={onSubscribe} 
+            disabled={!canSubscribe}
+            variant="default"
+          >
+            {canSubscribe ? (
+              <>Subscribe ${subscriptionPrice.toFixed(2)}/month</>
+            ) : (
+              <>Insufficient Balance</>
+            )}
+          </Button>
+        )}
+        {!isSubscribed && (
+          <Button 
+            className="w-full" 
+            variant="outline"
+            onClick={onSendTip}
+          >
+            <Zap className="mr-2 h-4 w-4" />
+            Send Tip
+          </Button>
+        )}
+      </CardFooter>
     </Card>
   );
 };

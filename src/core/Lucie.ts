@@ -71,12 +71,15 @@ export class LucieAI implements LucieAISystem {
     return {
       operational: this.operational,
       isActive: true,
-      services: {
+      performance: 100,
+      lastUpdate: new Date().toISOString(),
+      serviceStatus: {
         auth: 'active',
         analytics: 'active',
         ai: 'active',
         wallet: 'active',
-        seo: 'active'
+        seo: 'active',
+        payments: 'active'
       },
       queueLength: 0,
       processing: false,
@@ -95,6 +98,7 @@ export class LucieAI implements LucieAISystem {
     console.log(`Generating response for: ${params.prompt}`);
     return {
       content: `AI response to: ${params.prompt}`,
+      moderated: false,
       warnings: []
     };
   }

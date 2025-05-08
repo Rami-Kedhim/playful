@@ -19,7 +19,7 @@ export interface SystemStatus {
     ai: string;
     wallet: string;
     seo: string;
-    payments: string;
+    payments?: string;
   };
   queueLength?: number;
   processing?: boolean;
@@ -57,6 +57,7 @@ export interface OxumSystem {
 export interface ModerateContentParams {
   content: string;
   type?: 'text' | 'image' | 'video';
+  contentType?: string;
   context?: string;
   userId?: string;
 }
@@ -66,11 +67,14 @@ export interface ModerateContentResult {
   safe: boolean;
   issues: string[];
   score: number;
+  category?: string;
+  action?: string;
+  blockedCategories?: string[];
 }
 
 export interface GenerateContentParams {
   prompt: string;
-  type: 'text' | 'image';
+  type?: 'text' | 'image';
   options?: any;
 }
 
@@ -89,10 +93,18 @@ export interface SentimentAnalysisResult {
   sentiment: 'positive' | 'negative' | 'neutral';
   score: number;
   confidence: number;
+  entities?: Array<{
+    text: string;
+    sentiment: 'positive' | 'negative' | 'neutral';
+    score: number;
+  }>;
 }
 
 export interface LucieAISystem {
   moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
+  generateContent(prompt: string, options?: Record<string, any>): Promise<GenerateContentResult>;
+  generateResponse(params: GenerateContentParams): Promise<GenerateContentResult>;
+  analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult>;
 }
 
 export interface SessionValidationResult {
@@ -123,8 +135,18 @@ export interface RecommendedAction {
   title: string;
   description: string;
   priority: 'high' | 'medium' | 'low';
-  actionType: string;
+  actionType?: string;
   actionLink?: string;
-  completed: boolean;
-  createdAt: string;
+  completed?: boolean;
+  createdAt?: string;
+}
+
+export interface AnalyticsData {
+  impressionsIncrease: number;
+  viewsIncrease: number;
+  rankingIncrease: number;
+  conversionRate: number;
+  timeActive?: number;
+  boostEfficiency?: number;
+  trending?: boolean;
 }
