@@ -39,6 +39,19 @@ export interface SentimentAnalysisResult {
   confidence: number;
 }
 
+// Add RecommendedAction type for the components that need it
+export interface RecommendedAction {
+  id: string;
+  title: string;
+  description?: string;
+  icon?: string;
+  action: () => void;
+  priority: number;
+  category?: string;
+  tags?: string[];
+  visible?: boolean;
+}
+
 // UberCore System Types
 export interface UberCoreSystem {
   initialize(): Promise<boolean>;

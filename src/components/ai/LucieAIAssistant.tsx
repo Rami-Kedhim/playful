@@ -1,42 +1,40 @@
-
 import React, { useState } from 'react';
-import { lucieAI } from '@/core/Lucie';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { lucieOrchestrator } from '@/core/LucieOrchestratorAdapter';
 import { ModerateContentParams } from '@/types/core-systems';
 
-const LucieAIAssistant: React.FC = () => {
-  const [message, setMessage] = useState('');
+const LucieAIAssistant = () => {
+  const [input, setInput] = useState('');
   const [response, setResponse] = useState('');
-  const [isModerated, setIsModerated] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
-
+    if (!input.trim()) return;
+    
     setIsLoading(true);
     
     try {
       // Check content moderation
-      const moderationParams: ModerateContentParams = {
-        content: message,
-        contentType: 'text'
+      const params: ModerateContentParams = {
+        content: input,
+        contentType: "text",
+        context: {} // Empty context object
       };
       
-      const moderationResult = await lucieAI.moderateContent(moderationParams);
+      const isSafe = await lucieOrchestrator.isSafeContent(input);
       
-      // Update moderation state
-      setIsModerated(moderationResult.safe);
-      
-      // If content is safe, generate response
-      if (moderationResult.safe) {
-        const aiResponse = await lucieAI.generateText(message);
-        setResponse(aiResponse);
+      if (isSafe) {
+        const result = await lucieOrchestrator.generateContent(input);
+        setResponse(result);
       } else {
-        setResponse("I'm sorry, I cannot respond to that request.");
+        setResponse("I'm sorry, but I can't respond to that type of content.");
       }
     } catch (error) {
-      console.error("Error in Lucie AI Assistant:", error);
-      setResponse("Sorry, I encountered an error. Please try again later.");
+      console.error("Error generating AI response:", error);
+      setResponse("Sorry, I encountered an error processing your request.");
     } finally {
       setIsLoading(false);
     }
@@ -48,23 +46,23 @@ const LucieAIAssistant: React.FC = () => {
       
       <form onSubmit={handleSubmit} className="mb-4">
         <div className="mb-2">
-          <input
+          <Input
             type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
             className="w-full p-2 border rounded"
             placeholder="Ask Lucie something..."
             disabled={isLoading}
           />
         </div>
         
-        <button 
+        <Button 
           type="submit" 
           className="px-4 py-2 bg-blue-500 text-white rounded"
-          disabled={isLoading || !message.trim()}
+          disabled={isLoading || !input.trim()}
         >
           {isLoading ? "Processing..." : "Ask Lucie"}
-        </button>
+        </Button>
       </form>
       
       {response && (

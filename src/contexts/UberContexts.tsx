@@ -5,6 +5,7 @@ import { FavoritesProvider } from '@/contexts/FavoritesContext';
 import { UberEcosystemProvider } from '@/contexts/UberEcosystemContext';
 import { WalletProvider } from '@/contexts/WalletContext';
 import { ThemeProvider } from '@/components/ui/theme-provider';
+import { BoostProvider } from '@/contexts/BoostContext';
 
 interface UberContextsProviderProps {
   children: ReactNode;
@@ -18,9 +19,11 @@ const UberContextsProvider: React.FC<UberContextsProviderProps> = ({ children })
       <UberEcosystemProvider>
         <AuthProvider>
           <WalletProvider>
-            <FavoritesProvider>
-              {children}
-            </FavoritesProvider>
+            <BoostProvider>
+              <FavoritesProvider>
+                {children}
+              </FavoritesProvider>
+            </BoostProvider>
           </WalletProvider>
         </AuthProvider>
       </UberEcosystemProvider>

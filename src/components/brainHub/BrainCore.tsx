@@ -1,74 +1,61 @@
-
 import React, { useState, useEffect } from 'react';
-import { lucieAI } from '@/core/Lucie';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { lucieOrchestrator } from '@/core/LucieOrchestratorAdapter';
 import { ModerateContentParams } from '@/types/core-systems';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { Brain, Activity, Zap, MessageCircle } from "lucide-react";
 
 interface BrainCoreProps {
-  onStatusUpdate?: (status: string) => void;
+  initialPrompt?: string;
+  onResponseGenerated?: (response: string) => void;
 }
 
-const BrainCore: React.FC<BrainCoreProps> = ({ onStatusUpdate }) => {
-  const [systemHealth, setSystemHealth] = useState(85);
-  const [processingPower, setProcessingPower] = useState(72);
-  const [query, setQuery] = useState('');
+const BrainCore: React.FC<BrainCoreProps> = ({ 
+  initialPrompt = '',
+  onResponseGenerated
+}) => {
+  const [prompt, setPrompt] = useState(initialPrompt);
   const [response, setResponse] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // Simulate system health fluctuation
-    const healthInterval = setInterval(() => {
-      setSystemHealth(prevHealth => {
-        const newHealth = prevHealth + (Math.random() * 2 - 1);
-        return Math.max(70, Math.min(99, newHealth));
-      });
-    }, 5000);
-    
-    return () => clearInterval(healthInterval);
+    // Initialize brain core
+    setIsInitialized(true);
   }, []);
 
-  const handleQuerySubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query.trim()) return;
+    if (!prompt.trim() || isGenerating) return;
     
-    setIsProcessing(true);
-    if (onStatusUpdate) onStatusUpdate('Processing neural query...');
+    setIsGenerating(true);
     
     try {
-      // First moderate the content
-      const moderationParams: ModerateContentParams = {
-        content: query,
-        contentType: 'text'
+      // Check content moderation
+      const params: ModerateContentParams = {
+        content: prompt,
+        contentType: "text",
+        context: {} // Empty context object
       };
       
-      const moderation = await lucieAI.moderateContent(moderationParams);
+      const isSafe = await lucieOrchestrator.isSafeContent(prompt);
       
-      if (!moderation.safe) {
-        setResponse('Neural query rejected: Content violates system parameters.');
-        return;
+      if (isSafe) {
+        // Generate response
+        const generatedResponse = await lucieOrchestrator.generateContent(prompt);
+        setResponse(generatedResponse);
+        
+        if (onResponseGenerated) {
+          onResponseGenerated(generatedResponse);
+        }
+      } else {
+        setResponse("I'm sorry, but I can't respond to that type of content.");
       }
-      
-      // Process the query if it passed moderation
-      const result = await lucieAI.generateText(query);
-      setResponse(result);
-      
-      // Simulate system working hard
-      setProcessingPower(prev => Math.max(30, prev - 15));
-      setTimeout(() => {
-        setProcessingPower(prev => Math.min(95, prev + 25));
-      }, 3000);
-      
     } catch (error) {
-      console.error('Neural processing error:', error);
-      setResponse('Neural processing error detected. System unable to complete request.');
+      console.error('Error generating brain response:', error);
+      setResponse('Error: Could not generate a response. Please try again.');
     } finally {
-      setIsProcessing(false);
-      if (onStatusUpdate) onStatusUpdate('Idle');
+      setIsGenerating(false);
     }
   };
 
@@ -135,16 +122,16 @@ const BrainCore: React.FC<BrainCoreProps> = ({ onStatusUpdate }) => {
           <CardTitle>Neural Interface</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleQuerySubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex space-x-2">
-              <Input
+              <Textarea
                 placeholder="Enter neural query..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                disabled={isProcessing}
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                disabled={isGenerating}
               />
-              <Button type="submit" disabled={isProcessing || !query.trim()}>
-                {isProcessing ? 'Processing...' : 'Process'}
+              <Button type="submit" disabled={isGenerating || !prompt.trim()}>
+                {isGenerating ? 'Processing...' : 'Process'}
               </Button>
             </div>
             
