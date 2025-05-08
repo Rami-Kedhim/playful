@@ -1,6 +1,7 @@
-
-import { useState } from "react";
-import { Escort } from "@/types/escort";
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { Escort, VerificationLevel } from '@/types/Escort';
+import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 
 /**
  * Custom hook to manage escort profile state

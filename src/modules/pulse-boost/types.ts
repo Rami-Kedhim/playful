@@ -12,6 +12,7 @@ export interface BoostPackage {
   visibility_increase: number;
   color?: string;
   badgeColor?: string;
+  boost_power?: number;
 }
 
 export interface BoostPurchaseRequest {
@@ -33,6 +34,16 @@ export interface BoostAnalytics {
     date: Date;
     score: number;
   }>;
+  // Add these properties to fix the errors in useBoostOperations.ts
+  views?: number;
+  impressions?: {
+    value: number;
+    change?: number;
+  };
+  interactions?: {
+    value: number;
+    change?: number;
+  };
 }
 
 export interface BoostHistory {

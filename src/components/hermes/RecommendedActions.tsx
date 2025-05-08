@@ -26,7 +26,14 @@ export const RecommendedActions: React.FC<RecommendedActionsProps> = ({ timeRang
     if (isConnected && !isLoading) {
       const recommendedAction = getRecommendedAction();
       if (recommendedAction) {
-        setCurrentAction(prevState => recommendedAction as RecommendedAction);
+        // Convert to the correct RecommendedAction type with the required fields
+        setCurrentAction({
+          id: recommendedAction.id || `action-${Date.now()}`,
+          title: recommendedAction.title || '',
+          description: recommendedAction.description || '',
+          priority: recommendedAction.priority || 0,
+          action: recommendedAction.action || '#'
+        });
       }
     }
   }, [isConnected, isLoading, getRecommendedAction]);
