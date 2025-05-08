@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, createContext } from 'react';
+import { useContext, useState, useEffect, createContext, ReactNode } from 'react';
 import { UserProfile, AuthContextType } from '@/types/user';
 
 const AuthContext = createContext<AuthContextType>({
@@ -195,7 +195,11 @@ export const useAuthContext = () => {
   return authContextValue;
 };
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider = ({ children }: AuthProviderProps) => {
   const auth = useAuthContext();
   
   return (
