@@ -25,6 +25,7 @@ export const AppPaths = {
   // Add missing routes
   NEURAL_MONITOR: '/neural/monitor',
   NEURAL_ANALYTICS: '/neural/analytics',
+  BRAIN_HUB: '/brain-hub',
   ADMIN: '/admin',
   SEO: '/seo',
   SAFETY: '/safety',
@@ -32,7 +33,8 @@ export const AppPaths = {
   TERMS: '/terms',
   COMPLIANCE: '/compliance',
   CONTACT: '/contact',
-  AI_COMPANION: '/ai-companions'
+  AI_COMPANION: '/ai-companions',
+  PULSE_BOOST: '/pulse-boost'
 };
 
 export interface RouteConfig {
@@ -74,3 +76,45 @@ export const dashboardRoutes: RouteConfig[] = [
   { path: '/earnings', label: 'Earnings', requireAuth: true, roles: ['creator', 'escort', 'provider'] },
   { path: '/schedule', label: 'Schedule', requireAuth: true, roles: ['creator', 'escort', 'provider'] }
 ];
+
+// Add these exports to match what's being imported in AppNavigation.tsx
+export type RouteCategory = 
+  'core' | 
+  'escort' | 
+  'client' | 
+  'creator' | 
+  'metaverse' | 
+  'neural' | 
+  'admin' | 
+  'auth' | 
+  'safety' | 
+  'wallet' | 
+  'settings';
+
+export function getRoutesByCategory(category: RouteCategory): RouteConfig[] {
+  // Simple implementation that returns routes based on category
+  switch (category) {
+    case 'core':
+      return mainRoutes;
+    case 'wallet':
+      return accountRoutes.filter(route => route.path.includes('wallet'));
+    case 'escort':
+      return mainRoutes.filter(route => route.path.includes('escort'));
+    case 'neural':
+      return [
+        { path: AppPaths.NEURAL_MONITOR, label: 'Neural Monitor' },
+        { path: AppPaths.NEURAL_ANALYTICS, label: 'Neural Analytics' },
+        { path: AppPaths.BRAIN_HUB, label: 'Brain Hub' }
+      ];
+    case 'safety':
+      return [
+        { path: AppPaths.SAFETY, label: 'Safety Center' }
+      ];
+    case 'admin':
+      return [
+        { path: AppPaths.ADMIN, label: 'Admin Dashboard', requireAuth: true, roles: ['admin'] }
+      ];
+    default:
+      return [];
+  }
+}

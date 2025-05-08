@@ -8,7 +8,8 @@ export enum ServiceTypeEnum {
   OUT_CALL = "out-call",
   MASSAGE = "massage",
   DINNER = "dinner",
-  ANY = "any"
+  ANY = "any",
+  ALL = "all"
 }
 
 // Export the ServiceTypeFilter type used throughout the app
@@ -21,7 +22,8 @@ export type ServiceTypeFilter =
   | "out-call" 
   | "massage" 
   | "dinner"
-  | "any";
+  | "any"
+  | "all";
 
 export type ServiceType = ServiceTypeFilter;
 
@@ -29,7 +31,7 @@ export type ServiceType = ServiceTypeFilter;
 export const isValidServiceType = (type: string): type is ServiceTypeFilter => {
   return [
     "in-person", "virtual", "both", "in-call", "out-call", 
-    "massage", "dinner", "any"
+    "massage", "dinner", "any", "all"
   ].includes(type);
 };
 
@@ -42,6 +44,7 @@ export const getServiceTypeLabel = (type: ServiceTypeFilter): string => {
     case "out-call": return "Out-call";
     case "massage": return "Massage";
     case "dinner": return "Dinner Date";
+    case "all": return "All Services";
     case "any": return "Any Service";
     default: return "Any Service";
   }

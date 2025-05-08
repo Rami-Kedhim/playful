@@ -1,6 +1,15 @@
 
-// Update the Verification types to fix errors
-export type VerificationLevel = "none" | "basic" | "verified" | "premium" | "enhanced";
+// Define VerificationLevel as an enum with values, so it can be used both as a type and a value
+export enum VerificationLevel {
+  NONE = "none",
+  BASIC = "basic",
+  VERIFIED = "verified",
+  PREMIUM = "premium",
+  ENHANCED = "enhanced"
+}
+
+// For backwards compatibility, also export the type
+export type VerificationLevelType = "none" | "basic" | "verified" | "premium" | "enhanced";
 
 export enum VerificationStatus {
   PENDING = "pending",
@@ -42,9 +51,9 @@ export interface VerificationDocument {
 
 // Define constants for verification levels
 export const VerificationLevels = {
-  NONE: "none" as VerificationLevel,
-  BASIC: "basic" as VerificationLevel,
-  VERIFIED: "verified" as VerificationLevel,
-  PREMIUM: "premium" as VerificationLevel,
-  ENHANCED: "enhanced" as VerificationLevel
+  NONE: VerificationLevel.NONE,
+  BASIC: VerificationLevel.BASIC,
+  VERIFIED: VerificationLevel.VERIFIED,
+  PREMIUM: VerificationLevel.PREMIUM,
+  ENHANCED: VerificationLevel.ENHANCED
 };

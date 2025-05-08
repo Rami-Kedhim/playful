@@ -29,9 +29,9 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
   };
 
   // Convert the string verification level to the proper enum type
-  const verificationLevel: VerificationLevel = 
+  const verificationLevel = 
     profile.verification_level && 
-    Object.values(VerificationLevel).includes(profile.verification_level as VerificationLevel)
+    Object.values(VerificationLevel).includes(profile.verification_level as any)
       ? (profile.verification_level as VerificationLevel)
       : VerificationLevel.NONE;
 

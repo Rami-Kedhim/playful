@@ -34,6 +34,12 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({ level }) => {
       label: "Basic Verification",
       description: "Identity has been verified"
     },
+    [VerificationLevel.VERIFIED]: {
+      color: "text-green-500",
+      icon: <Shield className="h-4 w-4 mr-1" />,
+      label: "Verified",
+      description: "Identity is fully verified"
+    },
     [VerificationLevel.ENHANCED]: {
       color: "text-green-500",
       icon: <Shield className="h-4 w-4 mr-1" />,

@@ -1,7 +1,10 @@
 
 import React from 'react';
-import { ServiceTypeFilter } from '@/types/serviceType';
+import { ServiceTypeFilter as ServiceTypeFilterType } from '@/types/serviceType';
 import { Badge } from '@/components/ui/badge';
+
+// Export the ServiceTypeFilter type to be used by other components
+export type ServiceTypeFilter = ServiceTypeFilterType;
 
 export interface ServiceTypeBadgeLabelProps {
   type?: ServiceTypeFilter;
