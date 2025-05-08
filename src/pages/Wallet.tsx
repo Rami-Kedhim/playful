@@ -1,356 +1,322 @@
 
-import React, { useEffect, useState } from 'react';
-import { uberWallet } from '@/core/index';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { ArrowUp, ArrowDown, CreditCard, MoreVertical } from 'lucide-react';
-import type { UbxTransaction } from '@/core/UberWallet';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UbxTransaction } from "@/core/UberWallet";
+import { useWallet } from "@/hooks/useWallet";
+import { Calendar, DollarSign, Clock, Plus, ArrowUp, ArrowDown } from "lucide-react";
+import { format } from 'date-fns';
 
-const Wallet = () => {
-  const [balance, setBalance] = useState(0);
-  const [transactions, setTransactions] = useState<UbxTransaction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [addAmount, setAddAmount] = useState('');
-  const [purchaseAmount, setPurchaseAmount] = useState('');
-  const [activeTab, setActiveTab] = useState("overview");
-  const [processingAdd, setProcessingAdd] = useState(false);
-  const [processingPurchase, setProcessingPurchase] = useState(false);
+const WalletPage: React.FC = () => {
+  const { balance, transactions, loading, addFunds, purchaseUbx, refresh } = useWallet();
+  const [amount, setAmount] = useState<number>(50);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  useEffect(() => {
-    const fetchWalletData = async () => {
-      setLoading(true);
-      try {
-        const balance = uberWallet.getBalance();
-        setBalance(balance);
-        
-        const transactions = await uberWallet.getTransactions();
-        setTransactions(transactions);
-      } catch (error) {
-        console.error("Error loading wallet data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchWalletData();
-  }, []);
-  
   const handleAddFunds = async () => {
-    if (!addAmount || isNaN(Number(addAmount))) return;
-    
-    setProcessingAdd(true);
+    setIsProcessing(true);
     try {
-      const success = await uberWallet.addFunds(Number(addAmount));
-      
-      if (success) {
-        setBalance(uberWallet.getBalance());
-        const transactions = await uberWallet.getTransactions();
-        setTransactions(transactions);
-        setAddAmount('');
-      }
+      await addFunds(amount);
     } catch (error) {
-      console.error("Error adding funds:", error);
+      console.error('Error adding funds:', error);
     } finally {
-      setProcessingAdd(false);
+      setIsProcessing(false);
     }
   };
-  
+
   const handlePurchaseUbx = async () => {
-    if (!purchaseAmount || isNaN(Number(purchaseAmount))) return;
-    
-    setProcessingPurchase(true);
+    setIsProcessing(true);
     try {
-      const result = await uberWallet.purchaseUbx(Number(purchaseAmount));
-      
-      if (result.success) {
-        setBalance(uberWallet.getBalance());
-        const transactions = await uberWallet.getTransactions();
-        setTransactions(transactions);
-        setPurchaseAmount('');
+      const result = await purchaseUbx(amount);
+      if (!result.success) {
+        console.error('Failed to purchase UBX');
       }
     } catch (error) {
-      console.error("Error purchasing UBX:", error);
+      console.error('Error purchasing UBX:', error);
     } finally {
-      setProcessingPurchase(false);
+      setIsProcessing(false);
+    }
+  };
+
+  const getTransactionIcon = (type: string) => {
+    switch (type) {
+      case 'credit':
+        return <ArrowUp className="h-4 w-4 text-green-500" />;
+      case 'debit':
+        return <ArrowDown className="h-4 w-4 text-red-500" />;
+      default:
+        return <Clock className="h-4 w-4 text-muted-foreground" />;
+    }
+  };
+
+  const getTransactionColor = (type: string) => {
+    switch (type) {
+      case 'credit':
+        return "text-green-600";
+      case 'debit':
+        return "text-red-600";
+      default:
+        return "text-muted-foreground";
+    }
+  };
+
+  const formatTransactionType = (type: string, transactionType: string) => {
+    if (type === 'purchase' || transactionType === 'purchase') {
+      return "Purchase";
+    } else if (type === 'spend' || transactionType === 'spend') {
+      return "Payment";
+    } else if (type === 'credit') {
+      return "Deposit";
+    } else if (type === 'debit') {
+      return "Withdrawal";
+    } else {
+      return "Transaction";
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'MMM dd, yyyy');
+    } catch (e) {
+      return dateString;
+    }
+  };
+
+  const formatTime = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'hh:mm a');
+    } catch (e) {
+      return '';
     }
   };
 
   return (
-    <div className="container mx-auto py-10 px-4 space-y-8">
-      <h1 className="text-3xl font-bold">Wallet</h1>
-      
-      <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="add-funds">Add Funds</TabsTrigger>
-          <TabsTrigger value="purchase">Purchase UBX</TabsTrigger>
-        </TabsList>
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        <TabsContent value="overview" className="space-y-6">
-          {loading ? (
-            <Card>
-              <CardHeader>
-                <div className="h-7 bg-gray-200 animate-pulse rounded w-1/3"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-9 bg-gray-200 animate-pulse rounded w-1/4 mb-6"></div>
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 animate-pulse rounded w-full"></div>
-                  <div className="h-4 bg-gray-200 animate-pulse rounded w-5/6"></div>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>UBX Balance</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold mb-6">{balance.toLocaleString()} UBX</div>
-                <p className="text-muted-foreground">
-                  Your UBX balance can be used for services across the platform including profile boosting,
-                  content access, and more.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Button
-              className="py-6 flex flex-col items-center justify-center text-lg h-auto"
-              onClick={() => setActiveTab("add-funds")}
-            >
-              <ArrowUp className="h-10 w-10 mb-2" />
-              Add Funds
+        {/* Balance Card */}
+        <Card className="md:col-span-1">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-lg font-medium">My Wallet</CardTitle>
+            <Button variant="outline" size="icon" onClick={refresh}>
+              <Clock className="h-4 w-4" />
             </Button>
-            
-            <Button
-              className="py-6 flex flex-col items-center justify-center text-lg h-auto"
-              variant="outline"
-              onClick={() => setActiveTab("purchase")}
-            >
-              <CreditCard className="h-10 w-10 mb-2" />
-              Purchase UBX
-            </Button>
-          </div>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="space-y-4">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="flex justify-between py-2">
-                      <div className="h-6 bg-gray-200 animate-pulse rounded w-1/3"></div>
-                      <div className="h-6 bg-gray-200 animate-pulse rounded w-1/4"></div>
-                    </div>
-                  ))}
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <div className="text-muted-foreground text-sm">Available Balance</div>
+                <div className="flex items-center">
+                  <div className="text-3xl font-bold">{balance}</div>
+                  <span className="ml-2 text-muted-foreground">LC</span>
                 </div>
-              ) : transactions.length > 0 ? (
-                <div className="space-y-2">
-                  {transactions.slice(0, 5).map(tx => (
-                    <div key={tx.id} className="flex justify-between py-2 border-b last:border-0">
-                      <div className="flex items-center">
-                        {tx.type === 'credit' || tx.type === 'purchase' ? (
-                          <ArrowDown className="mr-2 h-4 w-4 text-green-500" />
-                        ) : (
-                          <ArrowUp className="mr-2 h-4 w-4 text-red-500" />
-                        )}
-                        <div>
-                          <div className="font-medium">{tx.description}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {new Date(tx.createdAt).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </div>
-                      <div className={`font-medium ${tx.type === 'credit' || tx.type === 'purchase' ? 'text-green-600' : 'text-red-600'}`}>
-                        {tx.type === 'credit' || tx.type === 'purchase' ? '+' : '-'}
-                        {tx.amount.toLocaleString()} UBX
-                      </div>
-                    </div>
-                  ))}
+                <div className="text-xs text-muted-foreground">
+                  LC (LuCoin) can be used for all services
                 </div>
-              ) : (
-                <div className="text-center py-6 text-muted-foreground">
-                  No transactions yet
-                </div>
-              )}
+              </div>
               
-              {transactions.length > 5 && (
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Input 
+                    type="number" 
+                    min="10" 
+                    value={amount} 
+                    onChange={(e) => setAmount(Number(e.target.value))} 
+                    className="flex-1" 
+                    placeholder="Amount" 
+                  />
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setAmount(prev => prev + 50)}
+                    className="flex-none"
+                  >
+                    +50
+                  </Button>
+                </div>
+                
                 <Button 
-                  variant="ghost" 
-                  className="w-full mt-4"
-                  onClick={() => setActiveTab("transactions")}
+                  className="w-full" 
+                  onClick={handleAddFunds} 
+                  disabled={isProcessing || amount <= 0}
                 >
-                  View All Transactions
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Funds
                 </Button>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                
+                <Button 
+                  variant="outline"
+                  className="w-full" 
+                  onClick={handlePurchaseUbx} 
+                  disabled={isProcessing || amount <= 0}
+                >
+                  <DollarSign className="mr-2 h-4 w-4" />
+                  Purchase UBX
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         
-        <TabsContent value="transactions">
-          <Card>
-            <CardHeader>
-              <CardTitle>Transaction History</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="space-y-4">
-                  {[1, 2, 3, 4, 5].map(i => (
-                    <div key={i} className="flex justify-between py-2">
-                      <div className="h-6 bg-gray-200 animate-pulse rounded w-1/3"></div>
-                      <div className="h-6 bg-gray-200 animate-pulse rounded w-1/4"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : transactions.length > 0 ? (
-                <div className="space-y-3">
-                  {transactions.map(tx => (
-                    <div key={tx.id} className="flex justify-between py-2 items-center border-b last:border-0">
-                      <div className="flex items-center">
-                        {tx.type === 'credit' || tx.type === 'purchase' ? (
-                          <ArrowDown className="mr-3 h-5 w-5 text-green-500" />
-                        ) : (
-                          <ArrowUp className="mr-3 h-5 w-5 text-red-500" />
-                        )}
+        {/* Transactions Card */}
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-lg font-medium">Transaction History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="all">
+              <TabsList className="grid grid-cols-3 mb-4">
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="deposits">Deposits</TabsTrigger>
+                <TabsTrigger value="payments">Payments</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="all">
+                {loading ? (
+                  <div className="space-y-3">
+                    {Array(5).fill(0).map((_, i) => (
+                      <div key={i} className="h-16 bg-muted rounded-md animate-pulse" />
+                    ))}
+                  </div>
+                ) : transactions.length > 0 ? (
+                  <div className="space-y-2">
+                    {transactions.map((tx) => (
+                      <div 
+                        key={tx.id} 
+                        className="flex items-center justify-between border-b border-border py-3"
+                      >
+                        <div className="flex items-center">
+                          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center mr-3">
+                            {getTransactionIcon(tx.type)}
+                          </div>
+                          <div>
+                            <div className="font-medium">
+                              {formatTransactionType(tx.type, tx.transactionType)}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {tx.description}
+                            </div>
+                          </div>
+                        </div>
                         <div>
-                          <div className="font-medium">{tx.description}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {new Date(tx.createdAt).toLocaleDateString()} at {new Date(tx.createdAt).toLocaleTimeString()}
+                          <div className={`text-right font-medium ${getTransactionColor(tx.type)}`}>
+                            {tx.type === 'credit' ? '+' : '-'}{tx.amount} LC
+                          </div>
+                          <div className="text-xs text-muted-foreground text-right">
+                            {formatDate(tx.createdAt)} • {formatTime(tx.createdAt)}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center">
-                        <div className={`font-medium ${tx.type === 'credit' || tx.type === 'purchase' ? 'text-green-600' : 'text-red-600'}`}>
-                          {tx.type === 'credit' || tx.type === 'purchase' ? '+' : '-'}
-                          {tx.amount.toLocaleString()} UBX
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-muted-foreground">No transactions yet</div>
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="deposits">
+                {loading ? (
+                  <div className="space-y-3">
+                    {Array(3).fill(0).map((_, i) => (
+                      <div key={i} className="h-16 bg-muted rounded-md animate-pulse" />
+                    ))}
+                  </div>
+                ) : transactions.filter(tx => tx.type === 'credit').length > 0 ? (
+                  <div className="space-y-2">
+                    {transactions
+                      .filter(tx => tx.type === 'credit')
+                      .map((tx) => (
+                        <div 
+                          key={tx.id}
+                          className="flex items-center justify-between border-b border-border py-3"
+                        >
+                          <div className="flex items-center">
+                            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center mr-3">
+                              {getTransactionIcon(tx.type)}
+                            </div>
+                            <div>
+                              <div className="font-medium">
+                                {formatTransactionType(tx.type, tx.transactionType)}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {tx.description}
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className={`text-right font-medium ${getTransactionColor(tx.type)}`}>
+                              +{tx.amount} LC
+                            </div>
+                            <div className="text-xs text-muted-foreground text-right">
+                              {formatDate(tx.createdAt)} • {formatTime(tx.createdAt)}
+                            </div>
+                          </div>
                         </div>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 text-muted-foreground">
-                  No transactions found
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="add-funds">
-          <Card>
-            <CardHeader>
-              <CardTitle>Add Funds</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="amount" className="block text-sm font-medium">
-                  Amount (UBX)
-                </label>
-                <Input
-                  id="amount"
-                  type="number"
-                  placeholder="Enter amount"
-                  value={addAmount}
-                  onChange={e => setAddAmount(e.target.value)}
-                  min="1"
-                />
-              </div>
+                      ))
+                    }
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-muted-foreground">No deposits yet</div>
+                  </div>
+                )}
+              </TabsContent>
               
-              <Button
-                className="w-full"
-                onClick={handleAddFunds}
-                disabled={!addAmount || processingAdd}
-              >
-                {processingAdd ? 'Processing...' : 'Add Funds'}
-              </Button>
-              
-              <div className="pt-4 border-t">
-                <h3 className="text-lg font-medium mb-2">Payment Methods</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Button variant="outline" className="justify-start">
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    Credit Card
-                  </Button>
-                  <Button variant="outline" className="justify-start">
-                    <svg 
-                      className="h-4 w-4 mr-2" 
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-.278 19.297c-3.409 0-6.443-2.534-6.443-5.869 0-2.711 1.823-4.668 4.344-4.668.318 0 .602.044.884.116-.211-.571-.274-1.107-.274-1.613 0-.884.116-1.722.116-1.722h3.374s-.169.838-.169 1.722c0 .507.063 1.107.275 1.613.338-.072.622-.116.949-.116 2.257 0 4.001 1.972 4.001 4.668 0 3.335-2.951 5.869-6.484 5.869h-.573zm.699-5.392c-.75 0-1.141.604-1.141 1.34 0 .736.391 1.34 1.141 1.34.766 0 1.141-.604 1.141-1.34.016-.736-.375-1.34-1.141-1.34zm-2.852-5.765c-.651 0-1.165.525-1.165 1.176 0 .65.514 1.176 1.165 1.176.652 0 1.166-.525 1.166-1.176 0-.651-.514-1.176-1.166-1.176zm5.072 0c-.652 0-1.166.525-1.166 1.176 0 .65.514 1.176 1.166 1.176s1.181-.525 1.181-1.176c0-.651-.529-1.176-1.181-1.176z" />
-                    </svg>
-                    Crypto
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="purchase">
-          <Card>
-            <CardHeader>
-              <CardTitle>Purchase UBX</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="purchaseAmount" className="block text-sm font-medium">
-                  Amount (UBX)
-                </label>
-                <Input
-                  id="purchaseAmount"
-                  type="number"
-                  placeholder="Enter amount"
-                  value={purchaseAmount}
-                  onChange={e => setPurchaseAmount(e.target.value)}
-                  min="1"
-                />
-              </div>
-              
-              <Button
-                className="w-full"
-                onClick={handlePurchaseUbx}
-                disabled={!purchaseAmount || processingPurchase}
-              >
-                {processingPurchase ? 'Processing...' : 'Purchase UBX'}
-              </Button>
-              
-              <div className="pt-4 border-t space-y-4">
-                <h3 className="text-lg font-medium">UBX Packages</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col">
-                    <span className="text-xl font-bold">500 UBX</span>
-                    <span className="text-muted-foreground">$4.99</span>
-                  </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col border-primary">
-                    <span className="text-xl font-bold">1000 UBX</span>
-                    <span className="text-muted-foreground">$9.99</span>
-                    <span className="text-xs mt-1 bg-primary/10 text-primary px-2 py-0.5 rounded-full">Best Value</span>
-                  </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col">
-                    <span className="text-xl font-bold">2500 UBX</span>
-                    <span className="text-muted-foreground">$19.99</span>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              <TabsContent value="payments">
+                {loading ? (
+                  <div className="space-y-3">
+                    {Array(3).fill(0).map((_, i) => (
+                      <div key={i} className="h-16 bg-muted rounded-md animate-pulse" />
+                    ))}
+                  </div>
+                ) : transactions.filter(tx => tx.type === 'debit').length > 0 ? (
+                  <div className="space-y-2">
+                    {transactions
+                      .filter(tx => tx.type === 'debit')
+                      .map((tx) => (
+                        <div 
+                          key={tx.id} 
+                          className="flex items-center justify-between border-b border-border py-3"
+                        >
+                          <div className="flex items-center">
+                            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center mr-3">
+                              {getTransactionIcon(tx.type)}
+                            </div>
+                            <div>
+                              <div className="font-medium">
+                                {formatTransactionType(tx.type, tx.transactionType)}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {tx.description}
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className={`text-right font-medium ${getTransactionColor(tx.type)}`}>
+                              -{tx.amount} LC
+                            </div>
+                            <div className="text-xs text-muted-foreground text-right">
+                              {formatDate(tx.createdAt)} • {formatTime(tx.createdAt)}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    }
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-muted-foreground">No payments yet</div>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
 
-export default Wallet;
+export default WalletPage;

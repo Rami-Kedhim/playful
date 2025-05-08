@@ -1,123 +1,191 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { useToast } from '@/components/ui/use-toast';
+import { useState, useEffect } from 'react';
+import { toast } from '@/components/ui/use-toast';
 
-// Service type enum
-export enum ServiceType {
-  Massage = 'massage',
-  Roleplay = 'roleplay',
-  Overnight = 'overnight',
-  Companionship = 'companionship',
-  Dinner = 'dinner',
-  Events = 'events',
-  Travel = 'travel',
-  BDSM = 'bdsm'
-}
-
-interface ServiceOption {
-  value: string;
-  label: string;
+interface EscortService {
+  id: string;
+  name: string;
   description: string;
+  price: number;
+  duration: string; // e.g. "1 hour", "2 hours", "overnight"
+  category: string;
+  isPopular?: boolean;
+  isAvailable?: boolean;
 }
 
-interface UseEscortServicesProps {
-  escortId?: string;
-  initialServices?: string[];
+interface ServiceCategory {
+  id: string;
+  name: string;
+  description: string;
+  services: EscortService[];
 }
 
-export const useEscortServices = ({
-  escortId,
-  initialServices = []
-}: UseEscortServicesProps) => {
-  const [services, setServices] = useState<string[]>(initialServices);
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
+export const useEscortServices = (escortId?: string) => {
+  const [services, setServices] = useState<EscortService[]>([]);
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
-
-  // Available service options
-  const serviceOptions: ServiceOption[] = [
-    { value: ServiceType.Massage, label: 'Massage', description: 'Professional massage services' },
-    { value: ServiceType.Roleplay, label: 'Role Play', description: 'Customized role play experiences' },
-    { value: ServiceType.Overnight, label: 'Overnight', description: 'Overnight companionship' },
-    { value: ServiceType.Companionship, label: 'Companionship', description: 'General companionship services' },
-    { value: ServiceType.Dinner, label: 'Dinner Date', description: 'Accompaniment for dinner engagements' },
-    { value: ServiceType.Events, label: 'Event Companion', description: 'Accompaniment for various events' },
-    { value: ServiceType.Travel, label: 'Travel Companion', description: 'Accompaniment for travel' },
-    { value: ServiceType.BDSM, label: 'BDSM', description: 'BDSM experiences' }
-  ];
-
-  // Toggle a service
-  const toggleService = useCallback((serviceValue: string) => {
-    setServices(prev => {
-      if (prev.includes(serviceValue)) {
-        return prev.filter(s => s !== serviceValue);
-      } else {
-        return [...prev, serviceValue];
-      }
-    });
-  }, []);
-
-  // Check if a service is selected
-  const isServiceSelected = useCallback((serviceValue: string) => {
-    return services.includes(serviceValue);
-  }, [services]);
-
-  // Save services to the server
-  const saveServices = useCallback(async () => {
-    if (!escortId) {
-      setError('Escort ID is required to save services');
-      return false;
-    }
-
-    setSaving(true);
+  
+  const fetchServices = async () => {
+    setLoading(true);
     setError(null);
-
+    
     try {
-      // In a real app, this would be an API call
-      console.log('Saving services for escort:', escortId, services);
+      // Simulate API call
+      await new Promise(r => setTimeout(r, 700));
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Mock data
+      const mockServices: EscortService[] = [
+        {
+          id: '1',
+          name: 'Standard Date',
+          description: 'Companionship for dinner or events',
+          price: 300,
+          duration: '1 hour',
+          category: 'companionship',
+          isPopular: true,
+          isAvailable: true
+        },
+        {
+          id: '2',
+          name: 'Extended Date',
+          description: 'Extended companionship for longer events',
+          price: 500,
+          duration: '3 hours',
+          category: 'companionship',
+          isAvailable: true
+        },
+        {
+          id: '3',
+          name: 'Overnight',
+          description: 'Full night companionship',
+          price: 1200,
+          duration: '8-10 hours',
+          category: 'companionship',
+          isPopular: true
+        },
+        {
+          id: '4',
+          name: 'Weekend Getaway',
+          description: 'Full weekend companionship',
+          price: 3000,
+          duration: '48 hours',
+          category: 'travel'
+        },
+        {
+          id: '5',
+          name: 'Business Trip',
+          description: 'Travel companion for business trips',
+          price: 5000,
+          duration: '3-5 days',
+          category: 'travel'
+        },
+        {
+          id: '6',
+          name: 'Erotic Massage',
+          description: 'Full body sensual massage',
+          price: 250,
+          duration: '1 hour',
+          category: 'massage',
+          isAvailable: true,
+          isPopular: true
+        },
+        {
+          id: '7',
+          name: 'Couples Experience',
+          description: 'Special experience for couples',
+          price: 600,
+          duration: '2 hours',
+          category: 'specialty'
+        },
+        {
+          id: '8',
+          name: 'BDSM Session',
+          description: 'Customized BDSM experience',
+          price: 400,
+          duration: '2 hours',
+          category: 'specialty'
+        }
+      ];
       
-      toast({
-        title: 'Services updated',
-        description: 'Your service offerings have been saved.',
+      // Create categories
+      const categoryMap: Record<string, ServiceCategory> = {
+        companionship: {
+          id: 'companionship',
+          name: 'Companionship',
+          description: 'Social companionship services',
+          services: []
+        },
+        travel: {
+          id: 'travel',
+          name: 'Travel Companionship',
+          description: 'Extended travel and getaway services',
+          services: []
+        },
+        massage: {
+          id: 'massage',
+          name: 'Massage',
+          description: 'Professional massage services',
+          services: []
+        },
+        specialty: {
+          id: 'specialty',
+          name: 'Specialty Services',
+          description: 'Specialized experiences',
+          services: []
+        }
+      };
+      
+      // Group services by category
+      mockServices.forEach(service => {
+        if (categoryMap[service.category]) {
+          categoryMap[service.category].services.push(service);
+        }
       });
       
-      return true;
+      const categoriesArray = Object.values(categoryMap);
+      
+      setServices(mockServices);
+      setCategories(categoriesArray);
     } catch (err) {
-      console.error('Error saving services:', err);
-      setError('Failed to save services. Please try again.');
+      console.error('Error fetching escort services:', err);
+      setError('Failed to load escort services');
       
       toast({
-        title: 'Save failed',
-        description: 'There was a problem updating your services. Please try again.',
-        variant: 'destructive',
+        title: 'Error Loading Services',
+        description: 'Could not load escort services. Please try again later.',
+        variant: 'destructive'
       });
-      
-      return false;
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
-  }, [escortId, services, toast]);
-
-  // Get services by category
-  const getServicesByCategory = useCallback((category: 'all' | 'basic' | 'premium') => {
-    // In a real app, you would have categories defined for services
-    return services;
-  }, [services]);
-
+  };
+  
+  useEffect(() => {
+    fetchServices();
+  }, [escortId]);
+  
+  const getPopularServices = () => {
+    return services.filter(service => service.isPopular);
+  };
+  
+  const getServicesByCategory = (categoryId: string) => {
+    return services.filter(service => service.category === categoryId);
+  };
+  
+  const getAvailableServices = () => {
+    return services.filter(service => service.isAvailable);
+  };
+  
   return {
     services,
-    serviceOptions,
+    categories,
     loading,
-    saving,
     error,
-    toggleService,
-    isServiceSelected,
-    saveServices,
-    getServicesByCategory
+    refreshServices: fetchServices,
+    getPopularServices,
+    getServicesByCategory,
+    getAvailableServices
   };
 };
 

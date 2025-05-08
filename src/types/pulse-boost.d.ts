@@ -1,39 +1,39 @@
 
-export interface EnhancedBoostStatus {
-  isActive: boolean;
-  packageId?: string;
-  expiresAt?: Date;
-  timeRemaining: string;
-  percentRemaining: number;
-  isExpired?: boolean;
-  boostPackage?: BoostPackage;
-}
-
 export interface BoostPackage {
   id: string;
   name: string;
   description: string;
-  price: number;
-  price_ubx: number;
   duration: string;
-  features: string[];
-  is_active: boolean;
-  is_featured: boolean;
-  visibility_increase: number;
-  color: string;
-  badgeColor: string;
-  boost_level?: number;
-  isMostPopular?: boolean;
-}
-
-export interface PulseBoost extends BoostPackage {
   durationMinutes: number;
-  visibility: string;
+  price: number;
+  price_ubx?: number;
+  visibility: number;
+  visibility_increase: number;
+  boost_level?: number;
+  features: string[];
+  is_active?: boolean;
 }
 
-export interface BoostPurchaseResult {
-  success: boolean;
-  orderId?: string;
-  transactionId?: string;
-  message?: string;
+export interface EnhancedBoostStatus {
+  active: boolean;
+  remainingMinutes: number;
+  percentRemaining: number;
+  expiresAt: string | null;
+  startedAt: string | null;
+  isExpired?: boolean;
+}
+
+export interface BoostAnalyticsData {
+  impressionsIncrease: number;
+  viewsIncrease: number;
+  rankingIncrease: number;
+  conversionRate: number;
+}
+
+export interface BoostPurchase {
+  userId: string;
+  packageId: string;
+  startTime: string;
+  endTime: string;
+  status: 'active' | 'expired' | 'cancelled';
 }

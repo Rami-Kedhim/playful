@@ -1,125 +1,139 @@
 
-/**
- * Enhanced livecamsService that uses the LivecamScraper
- */
-import { supabase } from "@/integrations/supabase/client";
-import { LivecamModel } from "@/types/livecams";
-import { toast } from "sonner";
-import { LivecamScraper } from "@/services/scrapers/LivecamScraper";
+import { LivecamModel } from '@/types/livecams';
 
-// Removed import of non-existent LivecamsFilter and LivecamsResponse types
-
-export const fetchLivecams = async (
-  filters: any = {}
-): Promise<any> => {   // Use any for now due to missing types
-  try {
-    // Try first with the Supabase Edge Function
-    try {
-      const { data, error } = await supabase.functions.invoke('get-livecams', {
-        body: { ...filters }
-      });
-      
-      if (error) {
-        console.error("Error fetching livecams from edge function:", error);
-        throw new Error(`Edge function error: ${error.message}`);
-      }
-      
-      if (!data) {
-        console.error("No data received from livecams API");
-        throw new Error("No data received from livecams API");
-      }
-      
-      console.log("Livecams data received from edge function:", data);
-      
-      if (!Array.isArray(data.models)) {
-        console.error("Invalid data format received:", data);
-        throw new Error("Invalid data format received from API");
-      }
-      
-      const validatedModels = data.models.map((model: any) => {
-        // Validate existence of previewVideoUrl and remove it from object
-        const validatedModel: LivecamModel = {
-          id: model.id || `id-${Math.random().toString(36).substring(2)}`,
-          name: model.name || model.username || model.displayName || 'Unknown',
-          username: model.username || 'unknown',
-          displayName: model.displayName || model.username || 'Unknown',
-          imageUrl: model.imageUrl || `https://picsum.photos/seed/${model.id || model.username}/800/450`,
-          thumbnailUrl: model.thumbnailUrl || `https://picsum.photos/seed/${model.id || model.username}/200/200`,
-          isLive: model.isLive !== undefined ? model.isLive : false,
-          viewerCount: model.viewerCount !== undefined ? model.viewerCount : 0,
-          country: model.country || undefined,
-          categories: Array.isArray(model.categories) ? model.categories : [],
-          age: model.age || undefined,
-          language: model.language || undefined,
-          description: model.description || undefined,
-          streamUrl: model.streamUrl || undefined
-        };
-        return validatedModel;
-      });
-      
-      return {
-        models: validatedModels,
-        totalCount: data.totalCount || validatedModels.length,
-        page: data.page || filters.page || 1,
-        pageSize: data.pageSize || filters.limit || 24,
-        hasMore: data.hasMore !== undefined ? data.hasMore : false
-      };
-    } catch (edgeFunctionError) {
-      console.log("Edge function failed, falling back to scraper:", edgeFunctionError);
-
-      // Removed getInstance() usage - directly use LivecamScraper.scrapeLivecams()
-      // But we need to change scraper usage accordingly.
-      // Since LivecamScraper now exports a method not a class singleton, adjust usage:
-      
-      const scrapedLivecams = await LivecamScraper.scrapeLivecams();
-
-      // Return data in expected format with filters applied manually if needed
-      return {
-        models: scrapedLivecams,
-        totalCount: scrapedLivecams.length,
-        page: 1,
-        pageSize: scrapedLivecams.length,
-        hasMore: false
-      };
+class LivecamsService {
+  private mockLivecams: LivecamModel[] = [
+    {
+      id: '1',
+      name: 'Sophia',
+      username: 'sophia_live',
+      displayName: 'Sophia Live',
+      imageUrl: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=1964&h=2000',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=1964&h=2000',
+      isLive: true,
+      isStreaming: true,
+      viewerCount: 245,
+      tags: ['dance', 'music', 'chat'],
+      rating: 4.8,
+      price: 5,
+      category: 'Entertainment',
+      categories: ['Dance', 'Music'],
+      language: 'English',
+      country: 'USA',
+      description: 'Join my interactive dance session!'
+    },
+    {
+      id: '2',
+      name: 'Emma',
+      username: 'emma_streams',
+      displayName: 'Emma\'s World',
+      imageUrl: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1000&h=1200',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1000&h=1200',
+      isLive: false,
+      viewerCount: 0,
+      tags: ['gaming', 'talk', 'lifestyle'],
+      rating: 4.6,
+      category: 'Gaming',
+      categories: ['Gaming', 'Talk Show'],
+      language: 'English',
+      country: 'Canada'
+    },
+    {
+      id: '3',
+      name: 'Luna',
+      username: 'luna_asmr',
+      displayName: 'Luna ASMR',
+      imageUrl: 'https://images.unsplash.com/photo-1564485377539-4af72d1f6a2f?q=80&w=1000&h=1200',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1564485377539-4af72d1f6a2f?q=80&w=1000&h=1200',
+      isLive: true,
+      isStreaming: true,
+      viewerCount: 178,
+      tags: ['asmr', 'relaxation', 'sleep'],
+      rating: 4.9,
+      price: 8,
+      category: 'ASMR',
+      categories: ['ASMR', 'Relaxation'],
+      language: 'Spanish',
+      country: 'Spain',
+      description: 'The best ASMR triggers for your relaxation'
     }
-  } catch (error: any) {
-    console.error("Livecams service error:", error);
-    toast.error(`Error: ${error.message || "Failed to load livecams"}`);
+  ];
 
-    return getMockLivecams(filters);
+  async getLivecams(): Promise<LivecamModel[]> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+    return this.mockLivecams;
   }
-};
 
-const getMockLivecams = (filters: any) => {
-  const { limit = 24, page = 1 } = filters;
-  const mockModels: LivecamModel[] = [];
+  async getLivecamById(id: string): Promise<LivecamModel | null> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const livecam = this.mockLivecams.find(lc => lc.id === id);
+    return livecam || null;
+  }
 
-  for (let i = 0; i < limit; i++) {
-    const id = `model-${page}-${i}`;
-    const seed = id + "-" + Date.now().toString().substring(8, 13);
-    const username = `model${page}${i}`;
-    mockModels.push({
+  async getFeaturedLivecams(): Promise<LivecamModel[]> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
+    // Return only live cams with highest viewer counts
+    return this.mockLivecams
+      .filter(lc => lc.isLive)
+      .sort((a, b) => b.viewerCount - a.viewerCount)
+      .slice(0, 4);
+  }
+
+  async searchLivecams(query: string): Promise<LivecamModel[]> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 700));
+    
+    const lowercaseQuery = query.toLowerCase();
+    return this.mockLivecams.filter(lc =>
+      lc.name.toLowerCase().includes(lowercaseQuery) ||
+      lc.username.toLowerCase().includes(lowercaseQuery) ||
+      lc.category?.toLowerCase().includes(lowercaseQuery) ||
+      lc.categories?.some(cat => cat.toLowerCase().includes(lowercaseQuery)) ||
+      lc.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
+    );
+  }
+
+  async getLivecamByUsername(username: string): Promise<LivecamModel | null> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const livecam = this.mockLivecams.find(lc => lc.username === username);
+    return livecam || null;
+  }
+  
+  // Method to generate random livecam data for testing
+  generateMockLivecam(): LivecamModel {
+    const id = Math.random().toString(36).substring(2, 10);
+    const name = ['Sophia', 'Emma', 'Luna', 'Mia', 'Olivia'][Math.floor(Math.random() * 5)];
+    const username = `${name.toLowerCase()}_${Math.floor(Math.random() * 1000)}`;
+    const displayName = `${name}'s Channel`;
+    
+    return {
       id,
-      name: `Model ${page}${i}`,
+      name,
       username,
-      displayName: `Model ${page}${i}`,
-      imageUrl: `https://picsum.photos/seed/${seed}/800/450`,
-      thumbnailUrl: `https://picsum.photos/seed/${seed}/200/200`,
-      isLive: Math.random() > 0.3,
-      viewerCount: Math.floor(Math.random() * 1000),
-      country: filters.country || ['US', 'CA', 'UK', 'FR', 'DE'][Math.floor(Math.random() * 5)],
-      categories: filters.category ? [filters.category] : ['chat', 'dance', 'games', 'music'].slice(0, Math.floor(Math.random() * 3) + 1),
-      age: 20 + Math.floor(Math.random() * 15),
-      language: ['English', 'Spanish', 'French', 'German'][Math.floor(Math.random() * 4)],
-      description: "Welcome to my stream! I love interacting with my viewers."
-    });
+      displayName,
+      imageUrl: `https://source.unsplash.com/random/300x400?woman&${id}`,
+      thumbnailUrl: `https://source.unsplash.com/random/300x400?woman&${id}`,
+      isLive: Math.random() > 0.5,
+      isStreaming: Math.random() > 0.5,
+      viewerCount: Math.floor(Math.random() * 500),
+      tags: ['chat', 'dance', 'music', 'gaming', 'asmr'].sort(() => 0.5 - Math.random()).slice(0, 3),
+      rating: 4 + Math.random(),
+      price: Math.floor(Math.random() * 10) + 1,
+      category: ['Entertainment', 'Gaming', 'ASMR', 'Fitness', 'Music'][Math.floor(Math.random() * 5)],
+      categories: ['Entertainment', 'Gaming', 'ASMR'].sort(() => 0.5 - Math.random()).slice(0, 2),
+      language: ['English', 'Spanish', 'French'][Math.floor(Math.random() * 3)],
+      country: ['USA', 'Canada', 'Spain', 'France'][Math.floor(Math.random() * 4)],
+      description: 'Join my amazing livestream!'
+    };
   }
+}
 
-  return {
-    models: mockModels,
-    totalCount: 1000,
-    page,
-    pageSize: limit,
-    hasMore: page * limit < 1000
-  };
-};
+export const livecamsService = new LivecamsService();
+export default livecamsService;

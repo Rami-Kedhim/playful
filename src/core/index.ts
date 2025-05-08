@@ -4,7 +4,7 @@ import { LucieAI } from './Lucie';
 import { oxum } from './Oxum';
 import { UberCore } from './UberCore';
 import { hermes } from './Hermes';
-import { UberWallet } from './UberWallet';
+import { uberWallet } from './UberWallet';
 import { automaticSEO } from './AutomaticSEO';
 import { initializeSystem, shutdownSystem } from './engine';
 
@@ -14,7 +14,8 @@ export {
   hermes,
   initializeSystem,
   shutdownSystem,
-  automaticSEO
+  automaticSEO,
+  uberWallet
 };
 
 // Export any utility functions that components might need

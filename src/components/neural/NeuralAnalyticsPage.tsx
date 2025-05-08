@@ -1,50 +1,73 @@
 
 import React from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import NeuralAnalytics from '@/components/neural/NeuralAnalytics';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import NeuralMetricsDisplay from "./NeuralMetricsDisplay";
 import { Button } from '@/components/ui/button';
-import { ArrowUpRight, Activity, Brain } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { Link } from 'react-router-dom';
+import { Download } from 'lucide-react';
 
-const NeuralAnalyticsPage: React.FC = () => {
+interface NeuralAnalyticsPageProps {
+  title?: string;
+}
+
+const NeuralAnalyticsPage: React.FC<NeuralAnalyticsPageProps> = ({ 
+  title = "Neural Network Analytics" 
+}) => {
+  const downloadReports = () => {
+    console.log("Downloading reports...");
+    // Implement download functionality here
+  };
+  
   return (
-    <MainLayout
-      title="Neural Analytics"
-      description="Advanced neural system analytics and monitoring dashboard"
-    >
-      <div className="space-y-6 pb-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-full bg-primary/10">
-              <Brain className="h-8 w-8 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Neural Analytics Dashboard</h1>
-              <p className="text-muted-foreground">
-                Real-time metrics and insights for neural processing systems
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/neural-monitoring">
-                <Activity className="h-4 w-4 mr-2" />
-                <span>Monitoring</span>
-              </Link>
-            </Button>
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
-              <span>Documentation</span>
-              <ArrowUpRight className="h-4 w-4" />
+    <div className="container mx-auto px-4 py-6">
+      <Card className="mb-8">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle>{title}</CardTitle>
+            <Button onClick={downloadReports} variant="outline" size="sm" className="gap-2">
+              <Download className="h-4 w-4" />
+              <span>Export Reports</span>
             </Button>
           </div>
-        </div>
-        
-        <Separator className="my-4" />
-        
-        <NeuralAnalytics refreshInterval={30} />
-      </div>
-    </MainLayout>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="overview">
+            <TabsList className="grid grid-cols-3 mb-6">
+              <TabsTrigger value="overview">Network Overview</TabsTrigger>
+              <TabsTrigger value="performance">Performance</TabsTrigger>
+              <TabsTrigger value="predictions">Prediction Analysis</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="overview">
+              <NeuralMetricsDisplay 
+                title="Neural Network Overview"
+                refreshInterval={30000} 
+              />
+            </TabsContent>
+            
+            <TabsContent value="performance">
+              <div className="space-y-6">
+                <h2 className="text-lg font-semibold">Performance Metrics</h2>
+                <p className="text-muted-foreground">
+                  View detailed performance metrics of the neural network system.
+                </p>
+                {/* Additional performance metrics would go here */}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="predictions">
+              <div className="space-y-6">
+                <h2 className="text-lg font-semibold">Prediction Analysis</h2>
+                <p className="text-muted-foreground">
+                  Analyze the accuracy of predictions made by the neural network.
+                </p>
+                {/* Prediction analysis components would go here */}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

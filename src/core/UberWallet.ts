@@ -11,7 +11,7 @@ export interface UbxTransaction {
   transactionType: string;
 }
 
-class UberWallet {
+export class UberWallet {
   private balance: number = 0;
   private transactions: UbxTransaction[] = [];
 
@@ -118,4 +118,5 @@ class UberWallet {
   }
 }
 
+export const uberWallet = new UberWallet();
 export default UberWallet;

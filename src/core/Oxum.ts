@@ -43,6 +43,7 @@ class Oxum implements OxumSystem {
     // This would normally be an API call
     return {
       isOperational: true,
+      operational: true,
       performance: 92,
       lastUpdate: new Date().toISOString(),
       serviceStatus: {
@@ -86,4 +87,5 @@ class Oxum implements OxumSystem {
   }
 }
 
+export const oxum = new Oxum();
 export default Oxum;

@@ -1,170 +1,129 @@
 
-import { useState, useEffect } from 'react';
-import { EnhancedBoostStatus, BoostPackage, PulseBoost } from '@/types/pulse-boost';
+import { useState, useEffect, useCallback } from 'react';
+import { pulseService } from '@/services/boost/pulseService';
+import { BoostPackage, EnhancedBoostStatus } from '@/types/pulse-boost';
+import { useToast } from '@/components/ui/use-toast';
 
-// Define BoostAnalytics interface
-interface BoostAnalytics {
-  additionalViews?: number;
-  engagementIncrease?: number;
-  rankingPosition?: number;
-  boostHistory: Array<{
-    date: Date;
-    score: number;
-  }>;
-  totalBoosts?: number;
-  activeBoosts?: number;
-  averageBoostScore?: number;
-}
+export const usePulseBoost = (userId: string) => {
+  const [packages, setPackages] = useState<BoostPackage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [purchasing, setPurchasing] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [optimalPackage, setOptimalPackage] = useState<string | null>(null);
+  const [optimizationReason, setOptimizationReason] = useState<string | null>(null);
+  const { toast } = useToast();
 
-export const usePulseBoost = (profileId?: string) => {
-  const [pulseBoostPackages, setPulseBoostPackages] = useState<PulseBoost[]>([]);
-  const [activeBoosts, setActiveBoosts] = useState<PulseBoost[]>([]);
-  const [boostStatus, setBoostStatus] = useState<EnhancedBoostStatus>({
-    isActive: false,
-    isExpired: false,
+  const [boostStatus, setBoostStatus] = useState<EnhancedBoostStatus>(() => ({
+    active: false,
+    remainingMinutes: 0,
     percentRemaining: 0,
-    timeRemaining: '00:00:00'
-  });
-  const [boostAnalytics, setBoostAnalytics] = useState<BoostAnalytics>({
-    boostHistory: []
-  });
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [userEconomy, setUserEconomy] = useState<{ubxBalance: number}>({ ubxBalance: 0 });
-  
+    expiresAt: null,
+    startedAt: null,
+  }));
+
+  // Fetch packages and status
   useEffect(() => {
-    const fetchPulseBoosts = async () => {
-      if (!profileId) return;
-      
-      setIsLoading(true);
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        // Mock data
-        setPulseBoostPackages([
-          {
-            id: 'pulse-1',
-            name: 'Pulse Boost Basic',
-            description: 'Boost your visibility for 24 hours',
-            price: 29.99,
-            price_ubx: 300,
-            duration: '24:00:00',
-            durationMinutes: 1440,
-            visibility: '300%',
-            visibility_increase: 200,
-            color: '#3b82f6',
-            badgeColor: '#3b82f6',
-            features: ['3x visibility', '24-hour duration', 'Top placement']
-          },
-          {
-            id: 'pulse-2',
-            name: 'Pulse Boost Premium',
-            description: 'Premium visibility boost for 48 hours',
-            price: 49.99,
-            price_ubx: 500,
-            duration: '48:00:00',
-            durationMinutes: 2880,
-            visibility: '500%',
-            visibility_increase: 400,
-            color: '#7c3aed',
-            badgeColor: '#7c3aed',
-            features: ['5x visibility', '48-hour duration', 'Top placement', 'Homepage feature']
-          }
-        ] as any);
-        
-        // Set mock active boost status
-        setBoostStatus({
-          isActive: false,
-          isExpired: false,
-          percentRemaining: 0,
-          timeRemaining: '00:00:00'
+        const [packagesData, statusData] = await Promise.all([
+          pulseService.getBoostPackages(),
+          pulseService.getBoostStatus(userId)
+        ]);
+
+        setPackages(packagesData);
+        setBoostStatus(statusData);
+
+        // Get optimal package recommendation
+        const userData = {
+          visibilityNeed: 7,
+          budget: 200,
+          urgency: 5
+        };
+
+        const optimal = await pulseService.calculateOptimalBoost(userData);
+        setOptimalPackage(optimal.packageId);
+        setOptimizationReason(optimal.reason);
+      } catch (error) {
+        console.error('Error fetching boost data:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load boost data. Please try again.',
+          variant: 'destructive'
         });
-        
-        setUserEconomy({ ubxBalance: 1250 });
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch Pulse Boost data');
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
-    
-    fetchPulseBoosts();
-  }, [profileId]);
-  
-  const purchaseBoost = async (boostPackage: BoostPackage): Promise<boolean> => {
+
+    fetchData();
+  }, [userId, toast]);
+
+  const getPackageById = useCallback((packageId: string) => {
+    return packages.find(p => p.id === packageId) || null;
+  }, [packages]);
+
+  const purchaseBoost = useCallback(async (packageId: string) => {
+    if (!packageId) return false;
+
+    setPurchasing(true);
     try {
-      console.log(`Purchasing ${boostPackage.name} boost for profile ${profileId}`);
-      // This would be a real API call
-      
-      // Update boost status
-      const updatedStatus: EnhancedBoostStatus = {
-        isActive: true,
-        packageId: boostPackage.id,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-        timeRemaining: '24:00:00',
-        isExpired: false,
-        percentRemaining: 100,
-        boostPackage
-      };
-      setBoostStatus(updatedStatus);
-      
-      return true;
+      const result = await pulseService.purchaseBoost(packageId, userId);
+
+      if (result.success) {
+        const selectedPkg = getPackageById(packageId);
+        toast({
+          title: 'Boost Activated',
+          description: `Your ${selectedPkg?.name} is now active!`,
+        });
+
+        // Update status
+        const newStatus = await pulseService.getBoostStatus(userId);
+        setBoostStatus(newStatus);
+
+        return true;
+      } else {
+        toast({
+          title: 'Purchase Failed',
+          description: result.error || 'Failed to purchase boost.',
+          variant: 'destructive'
+        });
+        return false;
+      }
     } catch (error) {
-      console.error('Failed to purchase boost', error);
-      return false;
-    }
-  };
-  
-  const cancelBoost = async (): Promise<boolean> => {
-    try {
-      console.log('Cancelling active pulse boost');
-      // This would be a real API call
-      
-      // Reset boost status
-      setBoostStatus({
-        isActive: false,
-        isExpired: false,
-        percentRemaining: 0,
-        timeRemaining: '00:00:00'
+      console.error('Error purchasing boost:', error);
+      toast({
+        title: 'Error',
+        description: 'An unexpected error occurred. Please try again.',
+        variant: 'destructive'
       });
-      
-      return true;
-    } catch (error) {
-      console.error('Failed to cancel boost', error);
       return false;
+    } finally {
+      setPurchasing(false);
     }
-  };
-  
-  const getAnalytics = async () => {
-    // Mock analytics data
-    const mockAnalytics: BoostAnalytics = {
-      additionalViews: 145,
-      engagementIncrease: 32,
-      rankingPosition: 8,
-      boostHistory: [
-        { date: new Date(), score: 90 }
-      ],
-      totalBoosts: 1,
-      activeBoosts: 1,
-      averageBoostScore: 90
-    };
-    setBoostAnalytics(mockAnalytics);
-  };
-  
-  useEffect(() => {
-    if (profileId && boostStatus.isActive) {
-      getAnalytics();
+  }, [userId, getPackageById, toast]);
+
+  const refreshStatus = useCallback(async () => {
+    try {
+      const status = await pulseService.getBoostStatus(userId);
+      setBoostStatus(status);
+    } catch (error) {
+      console.error('Error refreshing boost status:', error);
     }
-  }, [profileId, boostStatus.isActive]);
-  
+  }, [userId]);
+
   return {
-    pulseBoostPackages,
-    activeBoosts,
+    packages,
     boostStatus,
-    isLoading,
-    error,
-    userEconomy,
+    loading,
+    purchasing,
+    selectedPackage,
+    setSelectedPackage,
+    optimalPackage,
+    optimizationReason,
+    getPackageById,
     purchaseBoost,
-    cancelBoost,
-    boostAnalytics
+    refreshStatus
   };
 };
 

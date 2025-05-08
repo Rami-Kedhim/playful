@@ -1,94 +1,85 @@
 
-import React from 'react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from 'recharts';
-import { PerformanceChartProps } from '@/types/analytics';
-import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import React from "react";
+import { Card } from "@/components/ui/card";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { RefreshCw } from "lucide-react";
+import { PerformanceChartProps } from "@/types/analytics";
 
+/**
+ * Performance Chart Component
+ * Renders a responsive line chart visualizing performance data over time
+ */
 const PerformanceChart: React.FC<PerformanceChartProps> = ({
   data,
   dataKey,
-  title = 'Performance',
-  onRefresh
-}) => {
-  if (!data || data.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64">
-        <p className="text-muted-foreground mb-4">No data available</p>
-        {onRefresh && (
-          <Button variant="outline" size="sm" onClick={onRefresh}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-        )}
-      </div>
-    );
+  title,
+  height = 250,
+  onRefresh,
+  colors = {
+    stroke: "#2563eb",
+    fill: "rgba(37, 99, 235, 0.2)"
   }
-
+}) => {
   return (
-    <div className="w-full h-[300px]">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis
-            dataKey="name"
-            tick={{ fontSize: 12 }}
-            tickFormatter={(value) => value}
-          />
-          <YAxis
-            tickFormatter={(value) => {
-              if (dataKey === 'predictedResponseTime') return `${value}ms`;
-              if (dataKey === 'predictedErrorRate') return `${(value * 100).toFixed(1)}%`;
-              return value.toString();
+    <div className="w-full">
+      {title && (
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              className="p-1 hover:bg-muted rounded-full"
+              title="Refresh data"
+            >
+              <RefreshCw className="h-4 w-4 text-muted-foreground" />
+            </button>
+          )}
+        </div>
+      )}
+      
+      <div style={{ width: '100%', height: `${height}px` }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart
+            data={data}
+            margin={{
+              top: 5,
+              right: 10,
+              left: 10,
+              bottom: 5,
             }}
-            tick={{ fontSize: 12 }}
-          />
-          <Tooltip
-            formatter={(value: number) => [
-              dataKey === 'predictedErrorRate' 
-                ? `${(value * 100).toFixed(2)}%` 
-                : dataKey === 'predictedResponseTime'
-                  ? `${value.toFixed(1)}ms`
-                  : value.toFixed(1),
-              dataKey === 'predictedErrorRate'
-                ? 'Error Rate'
-                : dataKey === 'predictedResponseTime'
-                  ? 'Response Time'
-                  : dataKey === 'expectedLoad'
-                    ? 'Expected Load'
-                    : 'Value'
-            ]}
-            labelFormatter={(label) => label}
-          />
-          <Legend />
-          <Line
-            type="monotone"
-            dataKey="value"
-            name={
-              dataKey === 'predictedErrorRate'
-                ? 'Error Rate'
-                : dataKey === 'predictedResponseTime'
-                  ? 'Response Time'
-                  : dataKey === 'expectedLoad'
-                    ? 'Expected Load'
-                    : 'Value'
-            }
-            stroke="#8884d8"
-            strokeWidth={2}
-            dot={{ r: 4 }}
-            activeDot={{ r: 6 }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+            <XAxis 
+              dataKey="name" 
+              tick={{ fontSize: 12 }} 
+              tickLine={false}
+              axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
+            />
+            <YAxis 
+              tick={{ fontSize: 12 }} 
+              tickLine={false}
+              axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
+              width={30}
+            />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                border: '1px solid #e2e8f0',
+                borderRadius: '4px'
+              }} 
+            />
+            <Line
+              type="monotone"
+              dataKey={dataKey}
+              stroke={colors.stroke}
+              strokeWidth={2}
+              dot={{ r: 0 }}
+              activeDot={{ r: 6, fill: colors.stroke }}
+              animationDuration={500}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };

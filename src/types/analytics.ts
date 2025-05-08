@@ -43,7 +43,7 @@ export interface AnalyticsData {
   conversions?: number;
   messageRate?: number;
   bookingRate?: number;
-  timeActive?: number;
+  timeActive?: number | string;
 }
 
 export interface MetricCardProps {
@@ -91,6 +91,6 @@ export interface MetricDetail {
 }
 
 export interface NeuralMetricsDisplayProps {
-  title: string;
+  title?: string;
   refreshInterval?: number;
 }
