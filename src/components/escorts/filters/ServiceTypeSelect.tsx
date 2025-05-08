@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { ServiceTypeFilter } from '@/contexts/ServiceTypeContext';
 import {
   Select,
   SelectContent,
@@ -7,78 +8,52 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ServiceTypeFilter } from '@/contexts/ServiceTypeContext';
 import ServiceTypeIcon from './ServiceTypeIcon';
 
 export interface ServiceTypeSelectProps {
   value: ServiceTypeFilter;
   onChange: (type: ServiceTypeFilter) => void;
-  label?: string;
   className?: string;
+  label?: string;
 }
 
 const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
   value,
   onChange,
-  label,
-  className,
+  className = '',
+  label
 }) => {
+  // Map service types to readable labels
+  const serviceOptions: { value: ServiceTypeFilter; label: string }[] = [
+    { value: 'any', label: 'Any Service' },
+    { value: 'in-call', label: 'In-call' },
+    { value: 'out-call', label: 'Out-call' },
+    { value: 'virtual', label: 'Virtual' },
+    { value: 'massage', label: 'Massage' },
+    { value: 'dinner', label: 'Dinner' }
+  ];
+  
   return (
     <div className={className}>
       {label && <div className="text-sm font-medium mb-2">{label}</div>}
-      <Select value={value} onValueChange={(val: ServiceTypeFilter) => onChange(val)}>
+      <Select value={value} onValueChange={(val) => onChange(val as ServiceTypeFilter)}>
         <SelectTrigger className="w-full">
-          <SelectValue>
-            <div className="flex items-center">
-              <ServiceTypeIcon type={value} className="mr-2 h-4 w-4" />
-              <span>
-                {value === 'any' ? 'Any Service Type' :
-                value === 'in-call' ? 'In-Call' :
-                value === 'out-call' ? 'Out-Call' :
-                value === 'virtual' ? 'Virtual' : 
-                value === 'massage' ? 'Massage' : 
-                value === 'dinner' ? 'Dinner Date' : 'Unknown'}
-              </span>
+          <SelectValue placeholder="Select service type">
+            <div className="flex items-center gap-2">
+              <ServiceTypeIcon type={value} className="h-4 w-4" />
+              <span>{serviceOptions.find(opt => opt.value === value)?.label || 'Any Service'}</span>
             </div>
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="any">
-            <div className="flex items-center">
-              <ServiceTypeIcon type="any" className="mr-2 h-4 w-4" />
-              <span>Any Service Type</span>
-            </div>
-          </SelectItem>
-          <SelectItem value="in-call">
-            <div className="flex items-center">
-              <ServiceTypeIcon type="in-call" className="mr-2 h-4 w-4" />
-              <span>In-Call</span>
-            </div>
-          </SelectItem>
-          <SelectItem value="out-call">
-            <div className="flex items-center">
-              <ServiceTypeIcon type="out-call" className="mr-2 h-4 w-4" />
-              <span>Out-Call</span>
-            </div>
-          </SelectItem>
-          <SelectItem value="virtual">
-            <div className="flex items-center">
-              <ServiceTypeIcon type="virtual" className="mr-2 h-4 w-4" />
-              <span>Virtual</span>
-            </div>
-          </SelectItem>
-          <SelectItem value="massage">
-            <div className="flex items-center">
-              <ServiceTypeIcon type="massage" className="mr-2 h-4 w-4" />
-              <span>Massage</span>
-            </div>
-          </SelectItem>
-          <SelectItem value="dinner">
-            <div className="flex items-center">
-              <ServiceTypeIcon type="dinner" className="mr-2 h-4 w-4" />
-              <span>Dinner Date</span>
-            </div>
-          </SelectItem>
+          {serviceOptions.map(option => (
+            <SelectItem key={option.value} value={option.value}>
+              <div className="flex items-center gap-2">
+                <ServiceTypeIcon type={option.value} className="h-4 w-4" />
+                <span>{option.label}</span>
+              </div>
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>

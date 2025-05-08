@@ -24,7 +24,7 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({
       label = "Premium";
       badgeColor = "bg-purple-500 hover:bg-purple-600";
       break;
-    case "enhanced":
+    case "verified":
       icon = <ShieldCheck className="h-4 w-4" />;
       label = "Enhanced";
       badgeColor = "bg-blue-500 hover:bg-blue-600";
@@ -48,10 +48,10 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({
 
   const tooltipContent = {
     premium: "Premium verification with background check and official ID verification",
-    enhanced: "Enhanced verification with multiple forms of ID verified",
+    verified: "Enhanced verification with multiple forms of ID verified",
     basic: "Basic verification with photo ID",
     none: "This profile is not verified"
-  }[level];
+  }[level as VerificationLevel];
 
   if (level === "none") {
     return null;

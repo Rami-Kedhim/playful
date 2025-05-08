@@ -1,57 +1,60 @@
 
-import React, { createContext, useContext, useState } from 'react';
-export type ServiceTypeFilter = 'any' | 'in-call' | 'out-call' | 'virtual' | 'massage' | 'dinner';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+// Define the service type filter
+export type ServiceTypeFilter = 'in-call' | 'out-call' | 'virtual' | 'massage' | 'dinner' | 'any';
 
 interface ServiceTypeContextType {
   serviceType: ServiceTypeFilter;
   setServiceType: (type: ServiceTypeFilter) => void;
-  clearServiceType: () => void;
-  specializedServiceTypes: string[];
-  selectedSpecializedTypes: string[];
-  toggleSpecializedType: (type: string) => void;
+  clearFilter: () => void;
 }
 
 const ServiceTypeContext = createContext<ServiceTypeContextType | undefined>(undefined);
 
-export const ServiceTypeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ServiceTypeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [serviceType, setServiceType] = useState<ServiceTypeFilter>('any');
-  const [selectedSpecializedTypes, setSelectedSpecializedTypes] = useState<string[]>([]);
-  
-  // Available specialized service types
-  const specializedServiceTypes = [
-    'BDSM', 'GFE', 'Massage', 'Roleplay', 'Fetish', 'Couples'
-  ];
-  
-  const clearServiceType = () => {
+
+  // Load service type filter from localStorage on initial render
+  useEffect(() => {
+    const savedServiceType = localStorage.getItem('serviceTypeFilter');
+    if (savedServiceType) {
+      try {
+        // Validate that the saved value is a valid ServiceTypeFilter
+        const parsedType = savedServiceType as ServiceTypeFilter;
+        if (['in-call', 'out-call', 'virtual', 'massage', 'dinner', 'any'].includes(parsedType)) {
+          setServiceType(parsedType);
+        }
+      } catch (error) {
+        console.error('Error parsing saved service type filter:', error);
+      }
+    }
+  }, []);
+
+  // Save service type filter to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('serviceTypeFilter', serviceType);
+  }, [serviceType]);
+
+  // Clear the filter
+  const clearFilter = () => {
     setServiceType('any');
-  };
-  
-  const toggleSpecializedType = (type: string) => {
-    setSelectedSpecializedTypes(prev => 
-      prev.includes(type)
-        ? prev.filter(t => t !== type)
-        : [...prev, type]
-    );
   };
 
   return (
-    <ServiceTypeContext.Provider value={{ 
-      serviceType, 
-      setServiceType, 
-      clearServiceType,
-      specializedServiceTypes,
-      selectedSpecializedTypes,
-      toggleSpecializedType
-    }}>
+    <ServiceTypeContext.Provider value={{ serviceType, setServiceType, clearFilter }}>
       {children}
     </ServiceTypeContext.Provider>
   );
 };
 
-export const useServiceType = () => {
+// Custom hook for using the service type context
+export const useServiceType = (): ServiceTypeContextType => {
   const context = useContext(ServiceTypeContext);
+  
   if (context === undefined) {
     throw new Error('useServiceType must be used within a ServiceTypeProvider');
   }
+  
   return context;
 };

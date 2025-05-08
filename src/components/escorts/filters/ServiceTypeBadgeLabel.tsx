@@ -1,70 +1,54 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Building, Video, Check, Utensils } from 'lucide-react';
+import { ServiceTypeFilter } from '@/contexts/ServiceTypeContext';
+import ServiceTypeIcon from './ServiceTypeIcon';
 
-export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | 'any' | 'massage' | 'dinner';
-
-interface ServiceTypeBadgeLabelProps {
-  type: ServiceTypeFilter;
-  selected?: boolean;
-  onClick?: () => void;
+export interface ServiceTypeBadgeLabelProps {
+  service: ServiceTypeFilter;
+  className?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-export const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
-  type,
-  selected = false,
-  onClick
+const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
+  service, 
+  className = '', 
+  size = 'md' 
 }) => {
-  // Define badge styles based on type
-  const getBadgeContent = () => {
-    switch (type) {
-      case 'in-person':
-        return {
-          icon: <Building className="h-3.5 w-3.5 mr-1" />,
-          label: 'In-Person Only'
-        };
-      case 'virtual':
-        return {
-          icon: <Video className="h-3.5 w-3.5 mr-1" />,
-          label: 'Virtual Only'
-        };
-      case 'both':
-        return {
-          icon: <Check className="h-3.5 w-3.5 mr-1" />,
-          label: 'In-Person & Virtual'
-        };
-      case 'massage':
-        return {
-          icon: <Utensils className="h-3.5 w-3.5 mr-1" />,
-          label: 'Massage'
-        };
-      case 'dinner':
-        return {
-          icon: <Utensils className="h-3.5 w-3.5 mr-1" />,
-          label: 'Dinner Date'
-        };
-      case 'any':
-      default:
-        return {
-          icon: null,
-          label: 'All Service Types'
-        };
-    }
+  // Map service types to readable labels
+  const serviceLabels: Record<ServiceTypeFilter, string> = {
+    'in-call': 'In-call',
+    'out-call': 'Out-call',
+    'virtual': 'Virtual',
+    'massage': 'Massage',
+    'dinner': 'Dinner',
+    'any': 'Any Service'
   };
 
-  const { icon, label } = getBadgeContent();
+  // Map service types to variant styles
+  const variants: Record<ServiceTypeFilter, string> = {
+    'in-call': 'bg-blue-100 text-blue-800 border-blue-200',
+    'out-call': 'bg-green-100 text-green-800 border-green-200',
+    'virtual': 'bg-purple-100 text-purple-800 border-purple-200',
+    'massage': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+    'dinner': 'bg-amber-100 text-amber-800 border-amber-200',
+    'any': 'bg-gray-100 text-gray-800 border-gray-200'
+  };
+
+  // Size styles
+  const sizeStyles = {
+    sm: 'text-xs px-2 py-0.5',
+    md: 'text-sm px-2.5 py-0.5',
+    lg: 'text-base px-3 py-1'
+  };
 
   return (
-    <Badge
-      variant={selected ? 'default' : 'outline'}
-      className={`flex items-center gap-1 cursor-pointer ${
-        selected ? '' : 'hover:bg-muted'
-      }`}
-      onClick={onClick}
+    <Badge 
+      variant="outline" 
+      className={`flex items-center gap-1 font-normal ${variants[service]} ${sizeStyles[size]} ${className}`}
     >
-      {icon}
-      {label}
+      <ServiceTypeIcon type={service} className="h-3.5 w-3.5" />
+      <span>{serviceLabels[service]}</span>
     </Badge>
   );
 };

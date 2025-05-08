@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Header from '@/components/navigation/Header';
+import Navigation from '@/components/navigation/Navigation';
 import Footer from '@/components/navigation/Footer';
 import { cn } from '@/lib/utils';
 
@@ -22,7 +22,7 @@ const Layout: React.FC<LayoutProps> = ({
 }) => {
   return (
     <div className="min-h-screen flex flex-col">
-      {!hideHeader && <Header />}
+      {!hideHeader && <Navigation />}
       
       <main className={cn(
         "flex-1",

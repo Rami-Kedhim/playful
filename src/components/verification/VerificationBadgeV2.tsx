@@ -26,35 +26,40 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({
   };
 
   // Level configurations
-  const levelConfig = {
-    [VerificationLevel.PREMIUM]: {
+  const levelConfig: Record<string, {
+    icon: JSX.Element;
+    text: string;
+    variant: 'success' | 'ubx' | 'default' | 'outline';
+    tooltip: string;
+  }> = {
+    'premium': {
       icon: <CheckCircle2 className={sizeConfig[size].icon} />,
       text: 'Premium',
-      variant: 'success' as const,
+      variant: 'success',
       tooltip: 'Premium verified account with highest level of trust'
     },
-    [VerificationLevel.ENHANCED]: {
+    'verified': {
       icon: <CheckCircle2 className={sizeConfig[size].icon} />,
       text: 'Enhanced',
-      variant: 'ubx' as const,
+      variant: 'ubx',
       tooltip: 'Enhanced verification with additional verification steps'
     },
-    [VerificationLevel.BASIC]: {
+    'basic': {
       icon: <CheckCircle2 className={sizeConfig[size].icon} />,
       text: 'Verified',
-      variant: 'default' as const,
+      variant: 'default',
       tooltip: 'Basic verification completed'
     },
-    [VerificationLevel.NONE]: {
+    'none': {
       icon: <Shield className={sizeConfig[size].icon} />,
       text: 'Not Verified',
-      variant: 'outline' as const,
+      variant: 'outline',
       tooltip: 'This profile has not been verified'
     }
   };
 
   // Get configuration based on level
-  const config = levelConfig[level as VerificationLevel] || levelConfig[VerificationLevel.NONE];
+  const config = levelConfig[level] || levelConfig['none'];
   
   const badge = (
     <Badge 

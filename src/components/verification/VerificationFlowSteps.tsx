@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { VerificationStatus } from '@/types/verification';
 
 interface VerificationFlowStepsProps {
-  status: string; // Changed from VerificationStatus to string to avoid the type usage issue
+  status: VerificationStatus | string;
   className?: string;
 }
 
