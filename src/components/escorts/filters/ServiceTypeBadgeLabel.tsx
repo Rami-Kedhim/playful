@@ -1,63 +1,60 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import ServiceTypeIcon from './ServiceTypeIcon';
+import { Building, Video, Check } from 'lucide-react';
 
-// Update the ServiceTypeFilter type to include all needed service types
-export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "any" | "massage" | "dinner";
+export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | 'any';
 
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
-  color?: string;
-  size?: string;
-  showIcon?: boolean;
+  selected?: boolean;
+  onClick?: () => void;
 }
 
-const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
+export const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
   type,
-  color,
-  size,
-  showIcon = true
+  selected = false,
+  onClick
 }) => {
-  // Ensure type is never empty by using "any" as fallback
-  const safeType: ServiceTypeFilter = 
-    (!type || typeof type !== 'string' || type === "any") ? "any" : type as ServiceTypeFilter;
-  
-  // Return null if type is "any"
-  if (safeType === "any") return null;
+  // Define badge styles based on type
+  const getBadgeContent = () => {
+    switch (type) {
+      case 'in-person':
+        return {
+          icon: <Building className="h-3.5 w-3.5 mr-1" />,
+          label: 'In-Person Only'
+        };
+      case 'virtual':
+        return {
+          icon: <Video className="h-3.5 w-3.5 mr-1" />,
+          label: 'Virtual Only'
+        };
+      case 'both':
+        return {
+          icon: <Check className="h-3.5 w-3.5 mr-1" />,
+          label: 'In-Person & Virtual'
+        };
+      case 'any':
+      default:
+        return {
+          icon: null,
+          label: 'All Service Types'
+        };
+    }
+  };
 
-  let label: string;
-  let variant: "default" | "outline" | "secondary" | "destructive" = "outline";
-  
-  switch (safeType) {
-    case "in-person":
-      label = "In Person";
-      variant = "default";
-      break;
-    case "virtual":
-      label = "Virtual";
-      variant = "secondary";
-      break;
-    case "both":
-      label = "Both Types";
-      variant = "outline";
-      break;
-    case "massage":
-      label = "Massage";
-      variant = "outline";
-      break;
-    case "dinner":
-      label = "Dinner Date";
-      variant = "outline";
-      break;
-    default:
-      return null;
-  }
+  const { icon, label } = getBadgeContent();
 
   return (
-    <Badge variant={variant} className="flex items-center gap-1">
-      {showIcon && <ServiceTypeIcon type={safeType} size={14} />}
-      <span>{label}</span>
+    <Badge
+      variant={selected ? 'default' : 'outline'}
+      className={`flex items-center gap-1 cursor-pointer ${
+        selected ? '' : 'hover:bg-muted'
+      }`}
+      onClick={onClick}
+    >
+      {icon}
+      {label}
     </Badge>
   );
 };

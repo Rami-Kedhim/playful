@@ -19,6 +19,8 @@ import WalletPage from '@/pages/WalletPage';
 import FavoritesPage from '@/pages/FavoritesPage';
 import EscortsPage from '@/pages/EscortsPage';
 import EscortDetailPage from '@/pages/EscortDetailPage';
+import HomePage from '@/pages/HomePage';
+import BookPage from '@/pages/BookPage';
 
 /**
  * Main application routes component
@@ -30,7 +32,7 @@ const AppRoutes = () => {
       <Route path="/auth" element={<AuthPage />} />
       
       {/* Home redirects to dashboard */}
-      <Route path="/" element={<DashboardPage />} />
+      <Route path="/" element={<HomePage />} />
       
       {/* Main application routes */}
       <Route element={<Layout />}>
@@ -39,6 +41,8 @@ const AppRoutes = () => {
         <Route path={AppPaths.MESSAGES} element={<MessagesPage />} />
         <Route path={AppPaths.WALLET} element={<WalletPage />} />
         <Route path={AppPaths.FAVORITES} element={<FavoritesPage />} />
+        <Route path={AppPaths.DASHBOARD} element={<DashboardPage />} />
+        <Route path="/book" element={<BookPage />} />
         
         {/* Escort routes */}
         <Route path={AppPaths.ESCORTS} element={<EscortsPage />} />

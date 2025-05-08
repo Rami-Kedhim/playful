@@ -6,6 +6,7 @@ import AppRoutes from './app/AppRoutes';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { FavoritesProvider } from '@/contexts/FavoritesContext';
 import { WalletProvider } from '@/contexts/WalletContext';
+import { BoostProvider } from '@/contexts/BoostContext';
 import './App.css';
 
 function App() {
@@ -14,8 +15,10 @@ function App() {
       <AuthProvider>
         <FavoritesProvider>
           <WalletProvider>
-            <AppRoutes />
-            <Toaster />
+            <BoostProvider>
+              <AppRoutes />
+              <Toaster />
+            </BoostProvider>
           </WalletProvider>
         </FavoritesProvider>
       </AuthProvider>

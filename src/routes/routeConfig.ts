@@ -9,6 +9,7 @@ export const AppPaths = {
   FAVORITES: '/favorites',
   PROFILE: '/profile',
   SETTINGS: '/settings',
+  DASHBOARD: '/dashboard',
   
   // Escort paths
   ESCORTS: '/escorts',
@@ -94,6 +95,12 @@ export const routes: RouteDefinition[] = [
     path: AppPaths.HOME,
     title: 'Home',
     category: 'core',
+  },
+  {
+    path: AppPaths.DASHBOARD,
+    title: 'Dashboard',
+    category: 'core',
+    isAuthRequired: true,
   },
   {
     path: AppPaths.MESSAGES,

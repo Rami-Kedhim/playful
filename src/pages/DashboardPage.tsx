@@ -21,13 +21,13 @@ const DashboardPage = () => {
     recentChanges: [5, 2, -1, 3, 8, 4, -2, 6]
   });
 
-  // Mock featured content
+  // Mock featured content with proper typing
   const featuredEscorts = [
     {
       id: 'esc1',
       title: 'Sophia Lynn',
       image: 'https://placehold.co/300x450/210033/f5f5f5?text=Sophia',
-      type: 'escort',
+      type: 'escort' as const,
       rating: 4.9,
       price: '$300/hr',
       location: 'Los Angeles, CA',
@@ -37,7 +37,7 @@ const DashboardPage = () => {
       id: 'esc2',
       title: 'Emma Watson',
       image: 'https://placehold.co/300x450/210033/f5f5f5?text=Emma',
-      type: 'escort',
+      type: 'escort' as const,
       rating: 4.8,
       price: '$280/hr',
       location: 'New York, NY'
@@ -46,7 +46,7 @@ const DashboardPage = () => {
       id: 'esc3',
       title: 'Jessica Parker',
       image: 'https://placehold.co/300x450/210033/f5f5f5?text=Jessica',
-      type: 'escort',
+      type: 'escort' as const,
       rating: 4.7,
       price: '$250/hr',
       location: 'Miami, FL'
@@ -55,7 +55,7 @@ const DashboardPage = () => {
       id: 'esc4',
       title: 'Olivia Marks',
       image: 'https://placehold.co/300x450/210033/f5f5f5?text=Olivia',
-      type: 'escort',
+      type: 'escort' as const,
       rating: 4.8,
       price: '$300/hr',
       location: 'Chicago, IL'

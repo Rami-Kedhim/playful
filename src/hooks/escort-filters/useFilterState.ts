@@ -1,7 +1,10 @@
 
-import { useState } from "react";
+import { useState } from 'react';
 import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
+/**
+ * Custom hook for managing escort filter state
+ */
 export const useFilterState = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
@@ -12,28 +15,20 @@ export const useFilterState = () => {
   const [selectedOrientations, setSelectedOrientations] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
-  const [ageRange, setAgeRange] = useState<[number, number]>([21, 60]);
+  const [ageRange, setAgeRange] = useState<[number, number]>([18, 60]);
   const [ratingMin, setRatingMin] = useState(0);
   const [availableNow, setAvailableNow] = useState(false);
-  // Always use "any" as default, never empty string
   const [serviceTypeFilter, setServiceTypeFilter] = useState<ServiceTypeFilter>("any");
-  const [isLoading, setIsLoading] = useState(false);
-  
+
   // Toggle service selection
   const toggleService = (service: string) => {
-    if (service === "") {
-      // Special case for clearing services
-      setSelectedServices([]);
-      return;
-    }
-    
     if (selectedServices.includes(service)) {
       setSelectedServices(selectedServices.filter(s => s !== service));
     } else {
       setSelectedServices([...selectedServices, service]);
     }
   };
-  
+
   // Toggle gender selection
   const toggleGender = (gender: string) => {
     if (selectedGenders.includes(gender)) {
@@ -42,7 +37,7 @@ export const useFilterState = () => {
       setSelectedGenders([...selectedGenders, gender]);
     }
   };
-  
+
   // Toggle orientation selection
   const toggleOrientation = (orientation: string) => {
     if (selectedOrientations.includes(orientation)) {
@@ -51,18 +46,22 @@ export const useFilterState = () => {
       setSelectedOrientations([...selectedOrientations, orientation]);
     }
   };
-  
-  // Handle price range change with proper typing
+
+  // Handle price range change
   const handlePriceRangeChange = (values: number[]) => {
-    setPriceRange([values[0], values[1]] as [number, number]);
+    if (values && values.length >= 2) {
+      setPriceRange([values[0], values[1]]);
+    }
   };
-  
-  // Handle age range change with proper typing
+
+  // Handle age range change
   const handleAgeRangeChange = (values: number[]) => {
-    setAgeRange([values[0], values[1]] as [number, number]);
+    if (values && values.length >= 2) {
+      setAgeRange([values[0], values[1]]);
+    }
   };
-  
-  // Always reset serviceTypeFilter to "any"
+
+  // Clear all filters
   const clearFilters = () => {
     setSearchQuery("");
     setLocation("");
@@ -73,19 +72,12 @@ export const useFilterState = () => {
     setSelectedOrientations([]);
     setSortBy("newest");
     setCurrentPage(1);
-    setAgeRange([21, 60]);
+    setAgeRange([18, 60]);
     setRatingMin(0);
     setAvailableNow(false);
     setServiceTypeFilter("any");
   };
 
-  // Ensure serviceTypeFilter is never an empty string
-  const safeSetServiceTypeFilter = (type: ServiceTypeFilter | string) => {
-    const safeType: ServiceTypeFilter = !type ? "any" :
-      (type === "" ? "any" : type as ServiceTypeFilter);
-    setServiceTypeFilter(safeType);
-  };
-  
   return {
     searchQuery,
     setSearchQuery,
@@ -117,9 +109,7 @@ export const useFilterState = () => {
     availableNow,
     setAvailableNow,
     serviceTypeFilter,
-    setServiceTypeFilter: safeSetServiceTypeFilter,
-    isLoading,
-    setIsLoading,
+    setServiceTypeFilter,
     clearFilters
   };
 };
