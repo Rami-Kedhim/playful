@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ const LucieAIAssistant = () => {
   const [input, setInput] = useState('');
   const [response, setResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isContentSafe, setIsContentSafe] = useState(true);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +27,7 @@ const LucieAIAssistant = () => {
       };
       
       const isSafe = await lucieOrchestrator.isSafeContent(input);
+      setIsContentSafe(isSafe);
       
       if (isSafe) {
         const result = await lucieOrchestrator.generateContent(input);
@@ -66,8 +69,8 @@ const LucieAIAssistant = () => {
       </form>
       
       {response && (
-        <div className={`p-3 rounded ${isModerated ? 'bg-green-50' : 'bg-red-50'}`}>
-          <h3 className="font-medium mb-1">{isModerated ? "Response:" : "Content Moderated:"}</h3>
+        <div className={`p-3 rounded ${isContentSafe ? 'bg-green-50' : 'bg-red-50'}`}>
+          <h3 className="font-medium mb-1">{isContentSafe ? "Response:" : "Content Moderated:"}</h3>
           <p className="text-gray-700">{response}</p>
         </div>
       )}

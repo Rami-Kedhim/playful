@@ -13,7 +13,7 @@ interface RecommendedActionsProps {
 }
 
 export const RecommendedActions: React.FC<RecommendedActionsProps> = ({ timeRange = '7d' }) => {
-  const [action, setAction] = useState<RecommendedAction | null>(null);
+  const [currentAction, setCurrentAction] = useState<RecommendedAction | null>(null);
   
   const hermesOptions: UseHermesFlowOptions = {
     autoConnect: true,
@@ -25,13 +25,15 @@ export const RecommendedActions: React.FC<RecommendedActionsProps> = ({ timeRang
   useEffect(() => {
     if (isConnected && !isLoading) {
       const recommendedAction = getRecommendedAction();
-      setAction(recommendedAction);
+      if (recommendedAction) {
+        setCurrentAction(recommendedAction);
+      }
     }
   }, [isConnected, isLoading, getRecommendedAction]);
   
   const handleActionClick = () => {
-    if (action) {
-      trackStep('recommended_action_clicked', { actionType: action.type });
+    if (currentAction) {
+      trackStep('recommended_action_clicked', { actionId: currentAction.id });
     }
   };
   
@@ -53,7 +55,7 @@ export const RecommendedActions: React.FC<RecommendedActionsProps> = ({ timeRang
     );
   }
   
-  if (!action) {
+  if (!currentAction) {
     return (
       <Card className="border-green-200 bg-green-50 dark:bg-green-900/10 dark:border-green-900/30">
         <CardHeader>
@@ -75,12 +77,11 @@ export const RecommendedActions: React.FC<RecommendedActionsProps> = ({ timeRang
   }
   
   const getPriorityColor = () => {
-    switch (action.priority) {
-      case 'high': return 'border-red-200 bg-red-50 dark:bg-red-900/10 dark:border-red-900/30';
-      case 'medium': return 'border-yellow-200 bg-yellow-50 dark:bg-yellow-900/10 dark:border-yellow-900/30';
-      case 'low': return 'border-blue-200 bg-blue-50 dark:bg-blue-900/10 dark:border-blue-900/30';
-      default: return '';
-    }
+    const priority = currentAction.priority;
+    
+    if (priority > 8) return 'border-red-200 bg-red-50 dark:bg-red-900/10 dark:border-red-900/30';
+    if (priority > 5) return 'border-yellow-200 bg-yellow-50 dark:bg-yellow-900/10 dark:border-yellow-900/30';
+    return 'border-blue-200 bg-blue-50 dark:bg-blue-900/10 dark:border-blue-900/30';
   };
   
   return (
@@ -88,22 +89,22 @@ export const RecommendedActions: React.FC<RecommendedActionsProps> = ({ timeRang
       <CardHeader>
         <CardTitle className="flex items-center">
           <CircleAlert className="h-5 w-5 mr-2 text-amber-600 dark:text-amber-400" />
-          {action.title}
+          {currentAction.title}
         </CardTitle>
         <CardDescription>
-          {action.reason || "Recommended action to improve your metrics"}
+          {currentAction.description || "Recommended action to improve your metrics"}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <p className="text-sm">
-          {action.description}
+          {currentAction.description}
         </p>
       </CardContent>
-      {(action.actionUrl || action.destination) && (
+      {typeof currentAction.action !== 'function' && (
         <CardFooter>
           <Button asChild onClick={handleActionClick}>
-            <Link to={action.actionUrl || action.destination || "#"}>
-              {action.action || "Take Action"}
+            <Link to={typeof currentAction.action === 'string' ? currentAction.action : '#'}>
+              Take Action
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

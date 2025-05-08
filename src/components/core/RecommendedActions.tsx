@@ -32,7 +32,7 @@ const RecommendedActions: React.FC<RecommendedActionsProps> = ({
         
         // Sort by priority (highest first)
         const sortedActions = [...actions].sort((a, b) => 
-          b.priority === 'high' ? 1 : (a.priority === 'high' ? -1 : 0)
+          b.priority - a.priority
         );
         
         setRecommendations(sortedActions);
@@ -83,7 +83,7 @@ const RecommendedActions: React.FC<RecommendedActionsProps> = ({
           {recommendations.map((action, index) => (
             <Link 
               key={index} 
-              to={action.actionUrl || '#'}
+              to={typeof action.action !== 'function' ? action.action : '#'}
               className="block"
             >
               <Button 
@@ -92,7 +92,7 @@ const RecommendedActions: React.FC<RecommendedActionsProps> = ({
               >
                 <div className="flex flex-col items-start">
                   <span className="font-medium">
-                    {actionToTitle(action.type)}
+                    {action.title}
                   </span>
                   <span className="text-xs text-muted-foreground mt-1">
                     {action.description}
@@ -107,22 +107,5 @@ const RecommendedActions: React.FC<RecommendedActionsProps> = ({
     </Card>
   );
 };
-
-// Helper to convert action names to display titles
-function actionToTitle(action: string): string {
-  const mapping: Record<string, string> = {
-    'complete_profile': 'Complete Your Profile',
-    'browse_escorts': 'Browse Escorts',
-    'check_messages': 'Check Messages',
-    'purchase_credits': 'Purchase Credits',
-    'update_photos': 'Update Your Photos',
-    'setup_verification': 'Get Verified',
-    'boost_profile': 'Boost Your Profile'
-  };
-  
-  return mapping[action] || action.split('_').map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join(' ');
-}
 
 export default RecommendedActions;

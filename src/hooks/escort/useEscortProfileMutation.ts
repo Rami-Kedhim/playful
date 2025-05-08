@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Escort } from "@/types/escort"; // Updated to use lowercase for consistency
+import { Escort } from "@/types/escort"; // Using lowercase to avoid casing issues
 
 /**
  * Hook for mutating escort profile data

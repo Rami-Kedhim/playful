@@ -1,9 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { lucieOrchestrator } from '@/core/LucieOrchestratorAdapter';
 import { ModerateContentParams } from '@/types/core-systems';
+import { Brain, Activity, Zap, MessageCircle } from 'lucide-react';
 
 interface BrainCoreProps {
   initialPrompt?: string;
@@ -18,6 +22,8 @@ const BrainCore: React.FC<BrainCoreProps> = ({
   const [response, setResponse] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [systemHealth, setSystemHealth] = useState(85);
+  const [processingPower, setProcessingPower] = useState(72);
 
   useEffect(() => {
     // Initialize brain core
