@@ -1,134 +1,97 @@
 
 import React from 'react';
-import { Escort } from '@/types/escort';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { User, MapPin, Star, CheckCircle, Language } from 'lucide-react';
-import { formatCurrency } from '@/lib/utils';
-import ServiceTypeBadge from '@/components/escorts/filters/ServiceTypeBadge';
-import ImageGallery from './ImageGallery';
-import { VerificationLevel } from '@/types/verification';
+import { Star, MapPin, Calendar, Clock, Globe, Users } from 'lucide-react';
+import type { Escort } from '@/types/Escort';
 
-interface ProfileInfoProps {
-  escort: Escort;
-}
-
-const ProfileInfo: React.FC<ProfileInfoProps> = ({ escort }) => {
-  // Use shared verification level type
-  const verificationLevel: VerificationLevel = escort.verificationLevel || 'none';
-
-  const verificationColors = {
-    'none': 'bg-gray-200 text-gray-700',
-    'basic': 'bg-blue-100 text-blue-700',
-    'verified': 'bg-green-100 text-green-700',
-    'premium': 'bg-purple-100 text-purple-700',
-  };
-  
-  const verificationLabels = {
-    'none': 'Not Verified',
-    'basic': 'Basic Verified',
-    'verified': 'Verified',
-    'premium': 'Premium Verified',
-  };
-
+const ProfileInfo: React.FC<{ escort: Escort }> = ({ escort }) => {
   return (
-    <div className="space-y-6">
-      {/* Gallery */}
-      <ImageGallery 
-        images={escort.images || [escort.imageUrl || '']} 
-        name={escort.name}
-      />
+    <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+      <Avatar className="h-24 w-24 md:h-32 md:w-32">
+        <AvatarImage src={escort.avatarUrl || escort.profileImage} alt={escort.name} />
+        <AvatarFallback>{escort.name?.charAt(0) || 'E'}</AvatarFallback>
+      </Avatar>
       
-      {/* Basic Info */}
-      <div className="flex flex-wrap items-center gap-2 md:gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold">{escort.name}</h1>
-        
-        {escort.age && (
-          <div className="flex items-center text-muted-foreground">
-            <User className="inline-block mr-1 h-4 w-4" />
-            <span>{escort.age} years</span>
+      <div className="flex-1 space-y-4 text-center md:text-left">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{escort.name}</h1>
+          <div className="text-muted-foreground flex flex-wrap items-center justify-center md:justify-start gap-3 mt-1">
+            <div className="flex items-center gap-1">
+              <MapPin className="h-4 w-4" />
+              <span>{escort.location}</span>
+            </div>
+            
+            {escort.age && (
+              <div className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                <span>{escort.age} years</span>
+              </div>
+            )}
+            
+            {escort.lastActive && (
+              <div className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                <span>Active {formatLastActive(escort.lastActive)}</span>
+              </div>
+            )}
+            
+            {Array.isArray(escort.languages) && escort.languages.length > 0 && (
+              <div className="flex items-center gap-1">
+                <Globe className="h-4 w-4" />
+                <span>{escort.languages.join(', ')}</span>
+              </div>
+            )}
+            
+            {escort.clientsServed && (
+              <div className="flex items-center gap-1">
+                <Users className="h-4 w-4" />
+                <span>{escort.clientsServed} clients</span>
+              </div>
+            )}
           </div>
-        )}
+        </div>
         
-        {escort.location && (
-          <div className="flex items-center text-muted-foreground">
-            <MapPin className="inline-block mr-1 h-4 w-4" />
-            <span>{escort.location}</span>
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+          {escort.isVerified && (
+            <Badge variant="secondary">Verified</Badge>
+          )}
+          {escort.tags?.map(tag => (
+            <Badge key={tag} variant="outline">{tag}</Badge>
+          ))}
+        </div>
         
-        {Boolean(escort.rating) && (
-          <div className="flex items-center">
-            <Star className="inline-block mr-1 h-4 w-4 text-yellow-500 fill-yellow-500" />
-            <span className="mr-1">{escort.rating?.toFixed(1)}</span>
-            <span className="text-sm text-muted-foreground">
-              ({escort.reviewCount || 0} reviews)
-            </span>
-          </div>
-        )}
+        <div className="flex items-center gap-1 justify-center md:justify-start">
+          <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+          <span className="font-bold">{escort.rating || 5.0}</span>
+          <span className="text-muted-foreground">({escort.reviewCount || 0} reviews)</span>
+        </div>
       </div>
-      
-      {/* Verification Badge */}
-      <div className="flex items-center gap-2">
-        <Badge className={verificationColors[verificationLevel]}>
-          <CheckCircle className="mr-1 h-3 w-3" />
-          {verificationLabels[verificationLevel]}
-        </Badge>
-        
-        {escort.price && (
-          <Badge variant="outline" className="font-medium">
-            {formatCurrency(escort.price)}/hr
-          </Badge>
-        )}
-      </div>
-      
-      {/* Service Types */}
-      {escort.services && escort.services.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-muted-foreground">Services</h3>
-          <div className="flex flex-wrap gap-2">
-            {escort.services.map((service, i) => (
-              <ServiceTypeBadge key={i} service={service as any} />
-            ))}
-          </div>
-        </div>
-      )}
-      
-      {/* Languages */}
-      {escort.languages && escort.languages.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-muted-foreground flex items-center">
-            <Language className="mr-1 h-4 w-4" />
-            Languages
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {escort.languages.map((lang, i) => (
-              <Badge key={i} variant="outline">{lang}</Badge>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      {/* Bio */}
-      {escort.bio && (
-        <div className="space-y-2">
-          <h3 className="font-medium">About Me</h3>
-          <p className="text-muted-foreground whitespace-pre-line">{escort.bio}</p>
-        </div>
-      )}
-      
-      {/* Tags */}
-      {escort.tags && escort.tags.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-muted-foreground">Tags</h3>
-          <div className="flex flex-wrap gap-2">
-            {escort.tags.map((tag, i) => (
-              <Badge key={i} variant="outline">{tag}</Badge>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
+
+function formatLastActive(lastActive: string | Date): string {
+  const date = typeof lastActive === 'string' ? new Date(lastActive) : lastActive;
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  
+  if (diffMins < 60) {
+    return diffMins <= 5 ? 'just now' : `${diffMins} mins ago`;
+  }
+  
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) {
+    return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+  }
+  
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) {
+    return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+  }
+  
+  return date.toLocaleDateString();
+}
 
 export default ProfileInfo;

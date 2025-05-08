@@ -1,6 +1,4 @@
 
-// Fix verificationLevel typing to use VerificationLevel enum and strict typing from '@/types/verification'
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Escort } from "@/types/Escort";
 import { VerificationLevel } from "@/types/verification";
@@ -15,14 +13,23 @@ interface ProfileTabsProps {
   escort: Escort;
 }
 
+// Create an enum for verification levels
+const VerificationLevelEnum = {
+  NONE: "none" as VerificationLevel,
+  BASIC: "basic" as VerificationLevel,
+  VERIFIED: "verified" as VerificationLevel,
+  PREMIUM: "premium" as VerificationLevel
+};
+
 const ProfileTabs = ({ escort }: ProfileTabsProps) => {
   // Normalize the verificationLevel prop to strict VerificationLevel union and fallback to 'none'
-  const verificationLevel: VerificationLevel =
-    escort.verificationLevel &&
-    typeof escort.verificationLevel === "string" &&
-    Object.values(VerificationLevel).includes(escort.verificationLevel as VerificationLevel)
-      ? (escort.verificationLevel as VerificationLevel)
-      : VerificationLevel.NONE;
+  let verificationLevel: VerificationLevel = "none";
+  
+  if (escort.verificationLevel && 
+      typeof escort.verificationLevel === "string" &&
+      ["none", "basic", "verified", "premium"].includes(escort.verificationLevel as string)) {
+    verificationLevel = escort.verificationLevel as VerificationLevel;
+  }
 
   return (
     <div className="mt-6">
@@ -71,4 +78,3 @@ const ProfileTabs = ({ escort }: ProfileTabsProps) => {
 };
 
 export default ProfileTabs;
-

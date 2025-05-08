@@ -1,158 +1,80 @@
 
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import React from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import { VerificationDocument, VerificationRequest, VerificationStatus } from '@/types/verification';
+import { VerificationDocument } from '@/types/verification';
+import DocumentPreview from './DocumentPreview';
 
-export interface DocumentReviewModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  document: VerificationDocument;
-  request: VerificationRequest;
-  onApprove: () => Promise<void>;
-  onReject: (reason: string) => Promise<void>;
-  verification?: VerificationRequest;
+// Define a proper enum for VerificationStatus
+enum VerificationStatusEnum {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected'
 }
 
-const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
+interface DocumentReviewModalProps {
+  document: VerificationDocument | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onApprove: (id: string) => void;
+  onReject: (id: string, reason: string) => void;
+}
+
+const DocumentReviewModal = ({
+  document,
   isOpen,
   onClose,
-  document,
-  request,
   onApprove,
-  onReject
-}) => {
-  const [rejectionReason, setRejectionReason] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  onReject,
+}: DocumentReviewModalProps) => {
+  const [rejectionReason, setRejectionReason] = React.useState('');
+  
+  if (!document) return null;
 
-  const handleApprove = async () => {
-    try {
-      setIsSubmitting(true);
-      setError(null);
-      await onApprove();
-      onClose();
-    } catch (error) {
-      setError('Failed to approve document');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleReject = async () => {
-    try {
-      setIsSubmitting(true);
-      setError(null);
-      await onReject(rejectionReason);
-      onClose();
-    } catch (error) {
-      setError('Failed to reject document');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const getDocumentUrl = () => {
-    return document.filePath || document.fileUrl || '';
+  const handleView = (url: string) => {
+    window.open(url, '_blank');
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Document Review - {document.type || document.documentType}</DialogTitle>
+          <DialogTitle>Review Document</DialogTitle>
         </DialogHeader>
-
-        <div className="grid gap-6">
-          {error && (
-            <Alert variant="destructive">
-              <ExclamationTriangleIcon className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <div className="overflow-hidden rounded-md">
-            {getDocumentUrl() && getDocumentUrl().match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
-              <img
-                src={getDocumentUrl()}
-                alt={document.type || document.documentType || "Document"}
-                className="w-full h-auto max-h-[500px] object-contain"
-              />
-            ) : (
-              <div className="bg-muted p-4 rounded-md text-center">
-                <p>Document preview not available</p>
-                <a 
-                  href={getDocumentUrl()} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  Download Document
-                </a>
-              </div>
-            )}
-          </div>
-
-          <div className="grid gap-2">
-            <h3 className="font-medium">Document Information</h3>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="font-medium">Type</div>
-              <div>{document.type || document.documentType}</div>
-              
-              <div className="font-medium">Uploaded</div>
-              <div>{document.uploadedAt ? new Date(document.uploadedAt).toLocaleString() : 'Unknown'}</div>
-              
-              <div className="font-medium">Status</div>
-              <div>
-                <span className={`inline-block px-2 py-1 rounded-full text-xs 
-                  ${document.status === VerificationStatus.APPROVED ? 'bg-green-100 text-green-800' : 
-                    document.status === VerificationStatus.REJECTED ? 'bg-red-100 text-red-800' : 
-                    'bg-yellow-100 text-yellow-800'}`}>
-                  {document.status.charAt(0).toUpperCase() + document.status.slice(1)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {document.status === VerificationStatus.PENDING && (
-            <div className="grid gap-2">
-              <h3 className="font-medium">Rejection Reason</h3>
-              <Textarea
-                placeholder="Provide a reason for rejection (required for rejecting documents)"
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-              />
-            </div>
-          )}
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-            Cancel
-          </Button>
-          {document.status === VerificationStatus.PENDING && (
-            <>
+        <div className="grid gap-4 py-4">
+          <DocumentPreview document={document} onView={handleView} />
+          
+          <div className="space-y-4">
+            <Textarea
+              placeholder="Enter rejection reason (required for rejecting documents)"
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              className="min-h-[100px]"
+            />
+            
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
               <Button 
                 variant="destructive" 
-                onClick={handleReject} 
-                disabled={isSubmitting || !rejectionReason.trim()}
+                onClick={() => onReject(document.id, rejectionReason)}
+                disabled={!rejectionReason}
               >
                 Reject
               </Button>
-              <Button 
-                variant="default" 
-                onClick={handleApprove} 
-                disabled={isSubmitting}
-              >
+              <Button onClick={() => onApprove(document.id)}>
                 Approve
               </Button>
-            </>
-          )}
-        </DialogFooter>
+            </div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

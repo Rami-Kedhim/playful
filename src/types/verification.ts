@@ -1,7 +1,11 @@
 
 export type VerificationLevel = "none" | "basic" | "verified" | "premium";
 
-export type VerificationStatus = "pending" | "approved" | "rejected";
+export enum VerificationStatus {
+  PENDING = "pending",
+  APPROVED = "approved", 
+  REJECTED = "rejected"
+}
 
 export interface VerificationRequest {
   id: string;

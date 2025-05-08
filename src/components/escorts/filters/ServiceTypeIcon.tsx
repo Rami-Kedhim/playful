@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Home, MapPin, Video, Users, Utensils } from 'lucide-react';
-import { ServiceTypeFilter } from '@/contexts/ServiceTypeContext';
+import { Home, MapPin, Video, Users, Utensils, Globe } from 'lucide-react';
+import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
 
 interface ServiceTypeIconProps {
   type: ServiceTypeFilter;
@@ -21,6 +21,10 @@ const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({ type, className, size
       return <Users className={className} size={size} />; // Using Users instead of Massage
     case 'dinner':
       return <Utensils className={className} size={size} />;
+    case 'in-person':
+      return <MapPin className={className} size={size} />;
+    case 'both':
+      return <Globe className={className} size={size} />;
     case 'any':
     default:
       return <Home className={className} size={size} />;
