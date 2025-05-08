@@ -1,7 +1,8 @@
-import { useContext, useState, useEffect, createContext, ReactNode } from 'react';
-import { UserProfile, AuthContextType } from '@/types/user';
+import { useState, useEffect, createContext } from 'react';
+import type { UserProfile, AuthContextType } from '@/types/user';
 
-const AuthContext = createContext<AuthContextType>({
+// Create the context with default values
+export const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
   isLoading: true,
@@ -12,14 +13,6 @@ const AuthContext = createContext<AuthContextType>({
   updateProfile: async () => false
 });
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
 export const useAuthContext = () => {
   const [user, setUserProfile] = useState<UserProfile | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -28,157 +21,104 @@ export const useAuthContext = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      setIsLoading(true);
-      try {
-        // Check if user is logged in
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-          // Mock user data for development
-          const mockUser = {
-            id: 'mock-user-1',
-            name: 'Test User',
-            username: 'testuser',
-            avatarUrl: '/path/to/avatar.jpg',  // Use avatarUrl instead of avatar_url
-            region: 'US',
-            aiPreferences: { theme: 'dark' },
-            lastAiInteraction: new Date().toISOString(),
-            aiConversationCount: 5,
-            aiFavoriteTopics: ['travel', 'technology'],
-            aiEnabled: true,
-            role: 'user'
-          };
-          
-          setUserProfile(mockUser as UserProfile);
-          setProfile(mockUser as UserProfile);
-          setIsAuthenticated(true);
-        } else {
-          setUserProfile(null);
-          setProfile(null);
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        setUserProfile(null);
-        setProfile(null);
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setUserProfile(parsedUser);
+        setIsAuthenticated(true);
       }
+      setIsLoading(false);
     };
 
     checkAuth();
   }, []);
 
   const signIn = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    try {
-      // Mock authentication
-      if (email && password) {
-        // Store token
-        localStorage.setItem('auth_token', 'mock-token');
-        
-        // Mock user data
-        const mockUser = {
-          id: 'mock-user-1',
+    // Mock sign-in implementation
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const mockUser: UserProfile = {
+          id: '1',
           name: 'Test User',
+          email: email,
           username: 'testuser',
-          avatarUrl: '/path/to/avatar.jpg',  // Use avatarUrl instead of avatar_url
-          region: 'US',
-          aiPreferences: { theme: 'dark' },
-          lastAiInteraction: new Date().toISOString(),
-          aiConversationCount: 5,
-          aiFavoriteTopics: ['travel', 'technology'],
-          aiEnabled: true,
-          role: 'user'
+          is_escort: false,
+          is_verified: true,
+          verified: true
         };
-        
-        setUserProfile(mockUser as UserProfile);
-        setProfile(mockUser as UserProfile);
+        setUserProfile(mockUser);
         setIsAuthenticated(true);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Sign in failed:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        resolve(true);
+      }, 500);
+    });
   };
 
   const signOut = async (): Promise<void> => {
-    try {
-      // Remove token
-      localStorage.removeItem('auth_token');
-      
-      // Clear user data
-      setUserProfile(null);
-      setProfile(null);
-      setIsAuthenticated(false);
-    } catch (error) {
-      console.error('Sign out failed:', error);
-    }
+    // Mock sign-out implementation
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setUserProfile(null);
+        setProfile(null);
+        setIsAuthenticated(false);
+        localStorage.removeItem('user');
+        resolve();
+      }, 500);
+    });
   };
 
   const signUp = async (email: string, password: string, userData?: any): Promise<boolean> => {
-    setIsLoading(true);
-    try {
-      // Mock sign up
-      if (email && password) {
-        // Create user profile
-        const newProfile = await createUserProfile(userData);
-        
-        // Store token
-        localStorage.setItem('auth_token', 'mock-token');
-        
-        setUserProfile(newProfile as UserProfile);
-        setProfile(newProfile as UserProfile);
+    // Mock sign-up implementation
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const mockUser: UserProfile = {
+          id: '2',
+          name: userData?.name || 'New User',
+          email: email,
+          username: userData?.username || 'newuser',
+          is_escort: false,
+          is_verified: false,
+          verified: false
+        };
+        setUserProfile(mockUser);
         setIsAuthenticated(true);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Sign up failed:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        resolve(true);
+      }, 500);
+    });
   };
 
   const resetPassword = async (email: string): Promise<boolean> => {
-    try {
-      // Mock password reset
-      console.log(`Password reset requested for ${email}`);
-      return true;
-    } catch (error) {
-      console.error('Password reset failed:', error);
-      return false;
-    }
+    // Mock reset password implementation
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log('Password reset email sent to:', email);
+        resolve(true);
+      }, 500);
+    });
   };
 
   const updateProfile = async (data: Partial<UserProfile>): Promise<boolean> => {
-    try {
-      // Mock profile update
-      setUserProfile(prev => prev ? { ...prev, ...data } : null);
-      setProfile(prev => prev ? { ...prev, ...data } : null);
-      return true;
-    } catch (error) {
-      console.error('Profile update failed:', error);
-      return false;
-    }
+    // Mock update profile implementation
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setProfile(prevProfile => ({ ...prevProfile, ...data }));
+        resolve(true);
+      }, 500);
+    });
   };
 
   const createUserProfile = async (userData: any) => {
-    // Use emailAddress instead of email
-    return {
-      id: 'new-user-123',
-      name: userData.name || 'New User',
-      emailAddress: userData.emailAddress || '',
-      // ... other profile properties
-    };
+    // Mock user profile creation
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setProfile(userData);
+        resolve(true);
+      }, 500);
+    });
   };
 
-  // Add setUser to auth context
+  // Create the auth context value
   const authContextValue: AuthContextType = {
     user,
     profile,
@@ -189,24 +129,8 @@ export const useAuthContext = () => {
     signUp,
     resetPassword,
     updateProfile,
-    setUser: setUserProfile  // Add this line to match AuthContextType
+    setUser: setUserProfile  // Add this to match AuthContextType
   };
 
   return authContextValue;
 };
-
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const auth = useAuthContext();
-  
-  return (
-    <AuthContext.Provider value={auth}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-export default useAuth;
