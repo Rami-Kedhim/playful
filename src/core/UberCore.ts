@@ -164,6 +164,26 @@ export const uberCore = {
       queueLength: 0,
       processing: false
     };
+  },
+  
+  /**
+   * Add the shutdown method to the uberCore object
+   */
+  shutdown: async (): Promise<void> => {
+    try {
+      console.log('[UberCore] Shutting down UberCore system...');
+      
+      // Disconnect Hermes analytics
+      await hermes.disconnect();
+      
+      // Update the operational status
+      uberCoreInstance['operational'] = false;
+      
+      console.log('[UberCore] UberCore system shutdown complete.');
+      Pulse.track('system', 'core_shutdown');
+    } catch (error) {
+      console.error('[UberCore] Error shutting down UberCore system:', error);
+    }
   }
 };
 

@@ -13,6 +13,8 @@ export interface BoostPackage {
   color?: string;
   badgeColor?: string;
   boost_power?: number;
+  boostMultiplier?: number;
+  isMostPopular?: boolean;
 }
 
 export interface BoostPurchaseRequest {
@@ -54,6 +56,7 @@ export interface BoostAnalytics {
 export interface PulseBoost extends BoostPackage {
   // Any additional fields specific to PulseBoost
   boostMultiplier?: number;
+  isMostPopular?: boolean;
 }
 
 export interface BoostHistory {
@@ -70,7 +73,9 @@ export interface BoostHistory {
 export interface EnhancedBoostStatus {
   isActive: boolean;
   packageId?: string;
+  packageName?: string;
   expiresAt?: Date;
+  startedAt?: Date;
   timeRemaining?: string;
   progress?: number;
   boostPackage?: BoostPackage;

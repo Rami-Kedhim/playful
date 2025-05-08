@@ -1,12 +1,14 @@
 
-// Export escort-related types and functions
-export * from '@/types/Escort';
-// Don't re-export from escort.ts to avoid case sensitivity conflicts
+// Export escort-related types 
+// Avoid re-exporting with explicit imports to prevent duplicate exports
+import { Escort } from '@/types/Escort';
+export { Escort };
 
-export * from '@/hooks/escort/useEscortDetail';
-export * from '@/hooks/escort/useEscortFilter';
-export * from '@/hooks/escort/useEscortSearch';
-export * from '@/hooks/escort/useEscortProfileState';
+// Export hooks - use relative paths to prevent conflicts
+export { useEscortDetail } from '../../hooks/escort/useEscortDetail';
+export { useEscortFilter } from '../../hooks/escort/useEscortFilter';
+export { useEscortSearch } from '../../hooks/escort/useEscortSearch';
+export { useEscortProfileState } from '../../hooks/escort/useEscortProfileState';
 
 // Export components
 export { default as EscortCard } from '@/components/escorts/EscortCard';

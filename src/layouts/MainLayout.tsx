@@ -1,40 +1,57 @@
 
-import React, { ReactNode } from 'react';
-import MainNavigation from '@/components/navigation/MainNavigation';
+import React from 'react';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { NavigationBar } from '@/components/navigation/NavigationBar';
+import { Sidebar } from '@/components/navigation/Sidebar';
+import { Footer } from '@/components/layout/Footer';
 
-interface MainLayoutProps {
-  children: ReactNode;
-  showNavigation?: boolean;
-  fullWidth?: boolean;
-  containerClass?: string; // Add this prop to fix the type error
-  hideNavbar?: boolean;    // Add compatibility with other layouts
-  hideFooter?: boolean;    // Add compatibility with other layouts
+export interface MainLayoutProps {
+  children: React.ReactNode;
+  showBreadcrumbs?: boolean;
+  showNavigationBar?: boolean;
+  showSidebar?: boolean;
+  showFooter?: boolean;
+  className?: string;
+  title?: string; // Add missing property
+  description?: string; // Add missing property
+  containerClassName?: string;
+  contentClassName?: string;
 }
 
-/**
- * Main application layout component
- */
-const MainLayout: React.FC<MainLayoutProps> = ({ 
-  children, 
-  showNavigation = true,
-  fullWidth = false,
-  containerClass = '',
-  hideNavbar = false,
-  hideFooter = false
+const MainLayout: React.FC<MainLayoutProps> = ({
+  children,
+  showBreadcrumbs = false,
+  showNavigationBar = true,
+  showSidebar = true,
+  showFooter = true,
+  className = '',
+  title,
+  description,
+  containerClassName = '',
+  contentClassName = ''
 }) => {
   return (
-    <div className="flex flex-col min-h-screen">
-      {showNavigation && !hideNavbar && <MainNavigation />}
-      
-      <main className={`flex-1 ${fullWidth ? '' : 'container'} mx-auto py-6 ${containerClass}`}>
-        {children}
-      </main>
-      
-      {!hideFooter && (
-        <footer className="border-t p-4 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} UberEscorts. All rights reserved.</p>
-        </footer>
-      )}
+    <div className={`min-h-screen flex flex-col ${className}`}>
+      {showNavigationBar && <NavigationBar />}
+
+      <div className={`flex flex-1 ${containerClassName}`}>
+        {showSidebar && <Sidebar />}
+
+        <main className={`flex-1 p-4 md:p-6 ${contentClassName}`}>
+          {showBreadcrumbs && <Breadcrumb className="mb-4" />}
+          
+          {(title || description) && (
+            <div className="mb-6">
+              {title && <h1 className="text-2xl font-bold">{title}</h1>}
+              {description && <p className="text-muted-foreground mt-1">{description}</p>}
+            </div>
+          )}
+          
+          {children}
+        </main>
+      </div>
+
+      {showFooter && <Footer />}
     </div>
   );
 };

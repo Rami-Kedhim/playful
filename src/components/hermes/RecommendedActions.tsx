@@ -116,10 +116,10 @@ export const RecommendedActions: React.FC<RecommendedActionsProps> = ({ timeRang
           {currentAction.description}
         </p>
       </CardContent>
-      {typeof currentAction.action !== 'function' && (
+      {typeof currentAction.action === 'string' && (
         <CardFooter>
           <Button asChild onClick={handleActionClick}>
-            <Link to={typeof currentAction.action === 'string' ? currentAction.action : '#'}>
+            <Link to={currentAction.action as string}>
               Take Action
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>

@@ -1,4 +1,3 @@
-
 // Export boost-related types and functions without duplicates
 export * from '@/types/pulse-boost';
 

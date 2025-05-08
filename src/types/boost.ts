@@ -26,6 +26,7 @@ export interface PulseBoost {
   badgeColor?: string;
   boost_power?: number;
   boostMultiplier?: number;
+  isMostPopular?: boolean;
 }
 
 // Define types for the Boost Package and related operations
@@ -73,6 +74,24 @@ export interface BoostAnalytics {
   additionalViews?: number;
   engagementIncrease?: number;
   rankingPosition?: number;
+  views?: number;
+  impressions?: {
+    value: number;
+    change?: number;
+  };
+  interactions?: {
+    value: number;
+    change?: number;
+  };
+}
+
+export interface AnalyticsData {
+  views: number;
+  likes: number;
+  messages: number;
+  bookings: number;
+  clickthroughRate: number;
+  conversionRate: number;
 }
 
 export interface BoostHistory {

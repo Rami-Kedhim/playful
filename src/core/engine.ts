@@ -91,7 +91,8 @@ export const getSystemStatus = (): SystemStatus => {
  * Get wallet balance for user
  */
 export const getWalletBalance = async (userId: string): Promise<number> => {
-  return await uberWallet.getBalance(userId);
+  const balance = await uberWallet.getBalance(userId);
+  return balance;
 };
 
 /**

@@ -116,4 +116,7 @@ export interface BoostAnalytics {
     value: number;
     change?: number;
   };
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
 }
