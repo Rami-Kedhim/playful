@@ -44,11 +44,13 @@ export interface SystemIntegrityResult {
 }
 
 export interface OxumSystem {
+  initialize(): Promise<void>;
+  shutdown(): void;
   getSystemStatus(): SystemStatus;
   processPayment(amount: number, currency: string): Promise<boolean>;
   validateTransaction(txId: string): Promise<boolean>;
   getExchangeRate(from: string, to: string): Promise<number>;
-  boostAllocationEigen(matrix: number[][]): Promise<number[]>;
+  boostAllocationEigen(userId: string, boostLevel: number): Promise<number[]>;
   calculateScore(inputs: number[]): Promise<number>;
 }
 
@@ -90,7 +92,6 @@ export interface SentimentAnalysisResult {
 }
 
 export interface LucieAISystem {
-  // Add any other methods
   moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
 }
 
@@ -115,4 +116,15 @@ export interface UberCoreSystem {
   checkSystemIntegrity(): SystemIntegrityResult;
   getSystemHealthMetrics(): SystemHealthMetrics;
   validateSession(sessionId: string): SessionValidationResult;
+}
+
+export interface RecommendedAction {
+  id: string;
+  title: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+  actionType: string;
+  actionLink?: string;
+  completed: boolean;
+  createdAt: string;
 }

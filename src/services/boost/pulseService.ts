@@ -1,150 +1,144 @@
 
 import { BoostPackage, EnhancedBoostStatus } from '@/types/pulse-boost';
-import { oxum } from '@/core/Oxum';
 
-export class PulseService {
-  // Get available boost packages
-  async getBoostPackages(): Promise<BoostPackage[]> {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Return mock boost packages
+/**
+ * Service for handling pulse boost functionality
+ */
+export const pulseService = {
+  getPackages(): BoostPackage[] {
+    // Mock data for boost packages
     return [
       {
-        id: 'basic',
+        id: 'boost-basic',
         name: 'Basic Boost',
-        description: 'Increase visibility for 24 hours',
+        description: '24 hour visibility boost',
         duration: '24 hours',
-        durationMinutes: 1440,
-        price: 50,
-        price_ubx: 5,
-        visibility: 1.5,
-        visibility_increase: 50,
-        boost_level: 1,
-        features: ['1.5x visibility', 'Priority in search results', 'Basic analytics'],
+        durationMinutes: 1440, // 24 hours in minutes
+        price: 45,
+        price_ubx: 45,
+        visibility: 150,
+        visibility_increase: 50, 
+        features: [
+          '50% higher visibility in search results',
+          'Featured in recommended profiles',
+          '24 hour duration'
+        ],
         is_active: true
       },
       {
-        id: 'premium',
+        id: 'boost-premium',
         name: 'Premium Boost',
-        description: 'Major visibility boost for 3 days',
+        description: '3 day visibility boost with premium features',
         duration: '3 days',
-        durationMinutes: 4320,
-        price: 120,
-        price_ubx: 12,
-        visibility: 3,
-        visibility_increase: 200,
-        boost_level: 2,
-        features: ['3x visibility', 'Featured in top results', 'Enhanced analytics', 'Profile highlighting'],
+        durationMinutes: 4320, // 3 days in minutes
+        price: 99,
+        price_ubx: 99,
+        visibility: 250,
+        visibility_increase: 150,
+        features: [
+          '150% higher visibility in search results',
+          'Top placement in recommended profiles',
+          'Featured tag on your profile',
+          '3 day duration'
+        ],
         is_active: true
       },
       {
-        id: 'ultra',
-        name: 'Ultra Boost',
-        description: 'Maximum visibility for 7 days',
+        id: 'boost-max',
+        name: 'Maximum Boost',
+        description: '7 day visibility boost with all premium features',
         duration: '7 days',
-        durationMinutes: 10080,
-        price: 250,
-        price_ubx: 25,
-        visibility: 5,
+        durationMinutes: 10080, // 7 days in minutes
+        price: 199,
+        price_ubx: 199,
+        visibility: 500,
         visibility_increase: 400,
-        boost_level: 3,
-        features: ['5x visibility', 'Guaranteed top placement', 'Advanced analytics', 'Profile highlighting', 'Featured badge'],
+        features: [
+          '400% higher visibility in search results',
+          'Top placement in recommended profiles',
+          'Featured tag on your profile',
+          'Priority in messaging',
+          '7 day duration'
+        ],
         is_active: true
       }
     ];
-  }
-  
-  // Purchase a boost package
-  async purchaseBoost(packageId: string, userId: string): Promise<{success: boolean; error?: string}> {
-    // In a real app, this would call an API or database service
-    
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Return a successful result (always succeeds in this mock)
-    return { success: true };
-  }
-  
-  // Calculate optimal boost allocation based on user data
-  async calculateOptimalBoost(userData: any): Promise<{packageId: string; reason: string}> {
-    // This would use the oxum.boostAllocationEigen function in a real app
-    const inputMatrix = [
-      [userData.visibilityNeed || 5, userData.budget || 100, userData.urgency || 3],
-      [7, 150, 5],
-      [9, 200, 8]
-    ];
-    
-    try {
-      const allocationVector = await oxum.boostAllocationEigen(inputMatrix);
-      
-      // Determine the best package based on the allocation vector
-      const maxIndex = allocationVector.indexOf(Math.max(...allocationVector));
-      const packageIds = ['basic', 'premium', 'ultra'];
-      const reasons = [
-        'Based on your profile activity and budget',
-        'Optimal for your visibility needs and timeline',
-        'Best value for maximum exposure'
-      ];
-      
+  },
+
+  /**
+   * Calculate boost status from a start time
+   */
+  calculateBoostStatus(startTime?: string, duration?: number): EnhancedBoostStatus {
+    if (!startTime || !duration) {
       return {
-        packageId: packageIds[maxIndex],
-        reason: reasons[maxIndex]
-      };
-    } catch (error) {
-      console.error('Error calculating optimal boost:', error);
-      // Fallback to basic if calculation fails
-      return {
-        packageId: 'basic',
-        reason: 'Recommended starter package'
-      };
-    }
-  }
-  
-  // Get boost status for a user
-  async getBoostStatus(userId: string): Promise<EnhancedBoostStatus> {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 600));
-    
-    // Random status for demo
-    const isActive = Math.random() > 0.5;
-    
-    if (!isActive) {
-      return {
+        isActive: false,
         active: false,
         remainingMinutes: 0,
         percentRemaining: 0,
         expiresAt: null,
         startedAt: null,
+        timeRemaining: 0,
         isExpired: true
       };
     }
-    
-    // Generate a future expiration time
+
+    const startDate = new Date(startTime);
     const now = new Date();
-    const expiresAt = new Date(now);
-    expiresAt.setHours(now.getHours() + Math.floor(Math.random() * 72) + 1); // 1-72 hours from now
+    const endDate = new Date(startDate.getTime() + (duration * 60 * 1000));
     
-    const totalDuration = 72 * 60; // 72 hours in minutes
-    const remainingMinutes = Math.floor((expiresAt.getTime() - now.getTime()) / (1000 * 60));
-    const percentRemaining = Math.floor((remainingMinutes / totalDuration) * 100);
+    const isActive = now < endDate && now >= startDate;
+    const isExpired = now >= endDate;
+    
+    // Calculate remaining time
+    let remainingMinutes = 0;
+    if (isActive) {
+      remainingMinutes = Math.max(0, Math.floor((endDate.getTime() - now.getTime()) / (1000 * 60)));
+    }
+    
+    // Calculate percentage remaining
+    const totalDuration = duration;
+    const percentRemaining = isActive ? (remainingMinutes / totalDuration) * 100 : 0;
     
     return {
-      active: true,
-      remainingMinutes,
-      percentRemaining,
-      expiresAt: expiresAt.toISOString(),
-      startedAt: new Date(expiresAt.getTime() - (totalDuration * 60 * 1000)).toISOString(),
-      isExpired: false
+      isActive: isActive,
+      active: isActive,
+      remainingMinutes: remainingMinutes,
+      timeRemaining: remainingMinutes,
+      percentRemaining: percentRemaining,
+      expiresAt: isActive ? endDate.toISOString() : null,
+      startedAt: startDate.toISOString(),
+      isExpired: isExpired
+    };
+  },
+  
+  /**
+   * Get a mock boost purchase for a user
+   */
+  getMockBoostPurchase(userId: string) {
+    // For demo purposes, simulate a 50% chance the user has an active boost
+    const hasActivePurchase = Math.random() > 0.5;
+    
+    if (!hasActivePurchase) {
+      return null;
+    }
+    
+    // Randomly select one of the packages
+    const packages = this.getPackages();
+    const randomPackage = packages[Math.floor(Math.random() * packages.length)];
+    
+    // Set start time between 0-70% through the duration
+    const now = new Date();
+    const maxStartOffset = randomPackage.durationMinutes * 0.7;
+    const startOffset = Math.floor(Math.random() * maxStartOffset);
+    const startTime = new Date(now.getTime() - (startOffset * 60 * 1000));
+    const endTime = new Date(startTime.getTime() + (randomPackage.durationMinutes * 60 * 1000));
+    
+    return {
+      userId: userId,
+      packageId: randomPackage.id,
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
+      status: 'active'
     };
   }
-}
-
-export const pulseService = new PulseService();
-
-// Function to get pulse packages
-export const getPulsePackages = async () => {
-  return await pulseService.getBoostPackages();
 };
-
-export default pulseService;

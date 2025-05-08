@@ -1,239 +1,140 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
+import React from 'react';
+import { Badge } from '@/components/ui/badge';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip';
 import { 
-  Shield, 
   ShieldCheck, 
-  ShieldAlert, 
-  CheckCircle2, 
-  Upload, 
-  Award, 
-  Clock
-} from "lucide-react";
-import { 
-  verificationService, 
-  VerificationLevel, 
-  VerificationType 
-} from '@/services/escorts/verificationService';
-import { format } from 'date-fns';
+  ShieldX, 
+  ShieldQuestion, 
+  Star 
+} from 'lucide-react';
+
+export type VerificationLevel = 'unverified' | 'basic' | 'premium' | 'gold';
 
 interface EscortVerificationStatusProps {
-  userId: string;
-  isOwnProfile?: boolean;
-  showUpgradeButton?: boolean;
+  level: VerificationLevel;
+  verifiedDate?: string;
+  size?: 'sm' | 'md' | 'lg';
+  showDate?: boolean;
+  showLabel?: boolean;
+  showTooltip?: boolean;
+  className?: string;
 }
 
-const EscortVerificationStatus: React.FC<EscortVerificationStatusProps> = ({ 
-  userId,
-  isOwnProfile = false,
-  showUpgradeButton = true 
+const verificationLabelMap: Record<VerificationLevel, string> = {
+  unverified: 'Unverified',
+  basic: 'Verified',
+  premium: 'Premium Verified',
+  gold: 'Gold Verified'
+};
+
+const verificationDescriptionMap: Record<VerificationLevel, string> = {
+  unverified: 'This profile has not been verified yet.',
+  basic: 'Identity verified through official documents.',
+  premium: 'Enhanced verification including live video verification.',
+  gold: 'Highest level of verification with physical meeting.'
+};
+
+const getVerificationIcon = (level: VerificationLevel, size: 'sm' | 'md' | 'lg') => {
+  const iconSize = size === 'sm' ? 'h-3 w-3' : size === 'md' ? 'h-4 w-4' : 'h-5 w-5';
+  
+  switch (level) {
+    case 'unverified':
+      return <ShieldX className={`${iconSize} text-destructive`} />;
+    case 'basic':
+      return <ShieldCheck className={`${iconSize} text-green-500`} />;
+    case 'premium':
+      return <ShieldCheck className={`${iconSize} text-blue-500`} />;
+    case 'gold':
+      return <Star className={`${iconSize} text-amber-500`} />;
+    default:
+      return <ShieldQuestion className={`${iconSize} text-muted-foreground`} />;
+  }
+};
+
+const getVerificationBadgeVariant = (level: VerificationLevel): "success" | "default" | "destructive" | "warning" | "outline" | "secondary" | "ubx" => {
+  switch (level) {
+    case 'unverified':
+      return 'destructive';
+    case 'basic':
+      return 'success';
+    case 'premium':
+      return 'secondary';
+    case 'gold':
+      return 'default'; // Instead of 'gold' which doesn't exist in the Badge component
+    default:
+      return 'outline';
+  }
+};
+
+const EscortVerificationStatus: React.FC<EscortVerificationStatusProps> = ({
+  level,
+  verifiedDate,
+  size = 'md',
+  showDate = false,
+  showLabel = true,
+  showTooltip = true,
+  className = ''
 }) => {
-  const [status, setStatus] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    const fetchVerificationStatus = async () => {
-      setLoading(true);
-      try {
-        const verificationStatus = await verificationService.getVerificationStatus(userId);
-        setStatus(verificationStatus);
-      } catch (error) {
-        console.error('Error fetching verification status:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchVerificationStatus();
-  }, [userId]);
-  
-  const handleRequestVerification = async () => {
-    if (!status?.nextLevel) return;
-    
-    await verificationService.requestVerification(
-      userId,
-      VerificationType.ID,
-      status.nextLevel
-    );
-    
-    // Refresh the verification status
-    const updatedStatus = await verificationService.getVerificationStatus(userId);
-    setStatus(updatedStatus);
-  };
-  
-  if (loading) {
+  const formattedDate = verifiedDate 
+    ? new Date(verifiedDate).toLocaleDateString() 
+    : undefined;
+
+  const label = verificationLabelMap[level];
+  const description = verificationDescriptionMap[level];
+  const icon = getVerificationIcon(level, size);
+  const badgeVariant = getVerificationBadgeVariant(level);
+
+  const badgeContent = (
+    <div className="flex items-center gap-1.5">
+      {icon}
+      {showLabel && <span>{label}</span>}
+      {showDate && verifiedDate && (
+        <span className="text-xs opacity-70"> · {formattedDate}</span>
+      )}
+    </div>
+  );
+
+  // If no tooltip, just return the badge
+  if (!showTooltip) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center space-x-2">
-            <div className="h-10 w-10 rounded-full bg-muted animate-pulse"></div>
-            <div className="space-y-2">
-              <div className="h-4 bg-muted rounded w-32 animate-pulse"></div>
-              <div className="h-3 bg-muted rounded w-24 animate-pulse"></div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <Badge 
+        variant={badgeVariant}
+        className={className}
+      >
+        {badgeContent}
+      </Badge>
     );
   }
-  
-  if (!status) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center py-4">
-            <ShieldAlert className="h-8 w-8 text-muted-foreground mr-2" />
-            <div className="text-muted-foreground">Verification status unavailable</div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-  
-  const levelInfo = verificationService.getVerificationLevelInfo(status.currentLevel);
-  const nextLevelInfo = status.nextLevel 
-    ? verificationService.getVerificationLevelInfo(status.nextLevel)
-    : null;
-    
-  // Calculate verification progress percentage
-  const levels = Object.values(VerificationLevel);
-  const currentLevelIndex = levels.indexOf(status.currentLevel);
-  const progress = Math.round((currentLevelIndex / (levels.length - 1)) * 100);
-  
-  const getBadgeVariant = () => {
-    switch (status.currentLevel) {
-      case VerificationLevel.NONE:
-        return "outline";
-      case VerificationLevel.BASIC:
-        return "secondary";
-      case VerificationLevel.VERIFIED:
-        return "default";
-      case VerificationLevel.PREMIUM:
-        return "destructive";
-      case VerificationLevel.ELITE:
-        return "gold"; // Custom variant
-      default:
-        return "outline";
-    }
-  };
-  
-  const getVerificationIcon = () => {
-    switch (status.currentLevel) {
-      case VerificationLevel.NONE:
-        return <Shield className="h-5 w-5" />;
-      case VerificationLevel.BASIC:
-        return <Shield className="h-5 w-5" />;
-      case VerificationLevel.VERIFIED:
-        return <ShieldCheck className="h-5 w-5" />;
-      case VerificationLevel.PREMIUM:
-        return <Award className="h-5 w-5" />;
-      case VerificationLevel.ELITE:
-        return <Award className="h-5 w-5" />;
-      default:
-        return <Shield className="h-5 w-5" />;
-    }
-  };
-  
+
+  // With tooltip
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle>Verification Status</CardTitle>
-          <Badge
-            variant={getBadgeVariant()}
-            className={`
-              px-2 py-1
-              ${status.currentLevel === VerificationLevel.ELITE ? 'bg-amber-500 text-black' : ''}
-            `}
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge 
+            variant={badgeVariant}
+            className={`cursor-help ${className}`}
           >
-            {getVerificationIcon()}
-            <span className="ml-1">{levelInfo.name}</span>
+            {badgeContent}
           </Badge>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        <div className="relative pt-1">
-          <Progress value={progress} className="h-2" />
-          <div className="flex justify-between text-xs text-muted-foreground mt-1">
-            <span>Basic</span>
-            <span>Verified</span>
-            <span>Premium</span>
-            <span>Elite</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <div className="text-sm">
-            {levelInfo.description}
-          </div>
-          
-          {status.verifiedAt && (
-            <div className="text-xs text-muted-foreground flex items-center">
-              <CheckCircle2 className="h-3 w-3 mr-1 text-green-500" />
-              Verified since {format(new Date(status.verifiedAt), 'MMMM d, yyyy')}
-            </div>
-          )}
-        </div>
-        
-        <Separator />
-        
-        <div className="space-y-3">
-          <h4 className="font-medium text-sm">Benefits</h4>
-          <ul className="space-y-1">
-            {levelInfo.benefits.map((benefit, index) => (
-              <li key={index} className="text-sm flex items-center">
-                <CheckCircle2 className="h-3 w-3 mr-2 text-green-500" />
-                {benefit}
-              </li>
-            ))}
-          </ul>
-        </div>
-        
-        {isOwnProfile && status.pendingRequests.length > 0 && (
-          <div className="bg-muted p-3 rounded-md">
-            <div className="flex items-center text-sm font-medium">
-              <Clock className="h-4 w-4 mr-2 text-amber-500" />
-              Verification in progress
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Your {status.pendingRequests[0].requestedLevel} verification request is under review.
-              Submitted on {format(new Date(status.pendingRequests[0].submittedAt), 'MMM d, yyyy')}.
-            </p>
-          </div>
-        )}
-        
-        {isOwnProfile && showUpgradeButton && status.canRequestVerification && status.nextLevel && (
-          <div>
-            <Button 
-              onClick={handleRequestVerification}
-              className="w-full"
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              Upgrade to {nextLevelInfo?.name}
-            </Button>
-            
-            {nextLevelInfo && (
-              <div className="mt-2 text-xs text-muted-foreground">
-                <h5 className="font-medium mb-1">Requirements:</h5>
-                <ul className="space-y-1">
-                  {nextLevelInfo.requirements.map((req, index) => (
-                    <li key={index} className="flex items-center">
-                      <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground mr-1.5"></div>
-                      {req}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <div className="max-w-[200px]">
+            <p className="font-medium">{label}</p>
+            <p className="text-xs opacity-90">{description}</p>
+            {showDate && verifiedDate && (
+              <p className="text-xs mt-1 opacity-70">Verified on {formattedDate}</p>
             )}
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 

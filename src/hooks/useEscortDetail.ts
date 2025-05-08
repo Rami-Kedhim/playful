@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { Escort } from '@/types/Escort';
+import { Escort } from '@/types/escort';
 import { useToast } from '@/components/ui/use-toast';
 import { useWallet } from '@/hooks/useWallet';
 
@@ -9,7 +9,7 @@ import { useWallet } from '@/hooks/useWallet';
  */
 export const useEscortDetail = (escortId?: string) => {
   const { toast } = useToast();
-  const { wallet } = useWallet();
+  const { balance } = useWallet();
   
   const [escort, setEscort] = useState<Escort | null>(null);
   const [loading, setLoading] = useState(true);
@@ -76,7 +76,7 @@ export const useEscortDetail = (escortId?: string) => {
     const estimatedPrice = Math.round(durationHours * (escort.rates?.hourly || 200));
     
     // Check wallet balance
-    if (!wallet || wallet.balance < estimatedPrice) {
+    if (balance < estimatedPrice) {
       toast({
         title: "Insufficient funds",
         description: "Please add more funds to your wallet",
@@ -91,7 +91,7 @@ export const useEscortDetail = (escortId?: string) => {
     });
     
     return true;
-  }, [escort, wallet, toast]);
+  }, [escort, balance, toast]);
   
   // Toggle favorite status
   const toggleFavorite = useCallback(() => {
@@ -112,9 +112,8 @@ export const useEscortDetail = (escortId?: string) => {
     isFavorite,
     toggleFavorite,
     handleBookingRequest,
-    canBook: !!wallet && wallet.balance >= (escort?.rates?.hourly || 200)
+    canBook: balance >= (escort?.rates?.hourly || 200)
   };
 };
 
 export default useEscortDetail;
-

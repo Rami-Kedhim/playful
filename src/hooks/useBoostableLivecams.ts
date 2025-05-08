@@ -1,111 +1,113 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { Livecam } from '@/types/livecams';
+import { useState, useEffect } from 'react';
+import { LivecamModel } from '@/types/livecams';
+import { useToast } from '@/components/ui/use-toast';
+import { oxum } from '@/core';
 
-const useBoostableLivecams = () => {
-  const [livecams, setLivecams] = useState<Livecam[]>([]);
+export const useBoostableLivecams = () => {
+  const [livecams, setLivecams] = useState<LivecamModel[]>([]);
+  const [boostedLivecams, setBoostedLivecams] = useState<LivecamModel[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  const fetchLivecams = useCallback(async () => {
-    setLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Sample data with proper types
-      const mockLivecams: Livecam[] = [
-        {
-          id: '1',
-          name: 'Jessica',
-          username: 'jessica_live',
-          displayName: 'Jessica Live',
-          imageUrl: 'https://example.com/jessica.jpg',
-          thumbnailUrl: 'https://example.com/jessica-thumb.jpg',
-          isLive: true,
-          isStreaming: true,
-          viewerCount: 342,
-          tags: ['dance', 'music'],
-          rating: 4.8,
-          price: 50,
-          category: 'Dance',
-          categories: ['Dance', 'Music'],
-          language: 'English',
-          country: 'US',
-          description: 'Join my dance party livestream!'
-        },
-        {
-          id: '2',
-          name: 'Michael',
-          username: 'michael_gaming',
-          displayName: 'Michael Gaming',
-          imageUrl: 'https://example.com/michael.jpg',
-          thumbnailUrl: 'https://example.com/michael-thumb.jpg',
-          isLive: false,
-          isStreaming: false,
-          viewerCount: 0,
-          tags: ['gaming', 'comedy'],
-          rating: 4.5,
-          price: 40,
-          category: 'Gaming',
-          categories: ['Gaming', 'Comedy'],
-          language: 'English',
-          country: 'UK',
-          description: 'Gaming streams every evening'
-        }
-      ];
-      
-      setLivecams(mockLivecams);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching livecams:', err);
-      setError('Failed to load live cams');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-  
-  // Boost a livecam
-  const boostLivecam = async (livecamId: string, boost: number): Promise<boolean> => {
-    try {
-      // In a real app, this would be an API call
-      // For now, we'll just simulate a successful boost
-      
-      // Simulate a delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Use Oxum to calculate some boost scores
-      const matrix = [
-        [0.7, 0.2, 0.1],
-        [0.2, 0.6, 0.2],
-        [0.1, 0.2, 0.7]
-      ];
-      
-      // Update the local state
-      setLivecams(prevLivecams => 
-        prevLivecams.map(livecam => 
-          livecam.id === livecamId 
-            ? {
-                ...livecam,
-                isCurrentlyBoosted: true,
-                remainingBoostTime: 86400 // 24 hours in seconds
-              }
-            : livecam
-        )
-      );
-      
-      return true;
-    } catch (err) {
-      console.error('Error boosting livecam:', err);
-      return false;
-    }
-  };
-  
+  const { toast } = useToast();
+
+  // Load livecams and apply boost
   useEffect(() => {
+    const fetchLivecams = async () => {
+      setLoading(true);
+      try {
+        // Mock livecams data
+        const mockLivecams: LivecamModel[] = [
+          {
+            id: 'cam1',
+            name: 'Jessica',
+            username: 'jessica_cam',
+            displayName: 'Jessica Glamour',
+            imageUrl: '/assets/livecams/cam1.jpg',
+            thumbnailUrl: '/assets/livecams/thumbnails/cam1.jpg',
+            isLive: true,
+            isStreaming: true,
+            viewerCount: 245,
+            tags: ['blonde', 'american', 'dance'],
+            rating: 4.8,
+            price: 4.99,
+            category: 'dance',
+            categories: ['dance', 'chat'],
+            language: 'English',
+            country: 'USA',
+            description: 'Join me for a fun dance session!',
+            streamUrl: 'https://example.com/stream/jessica_cam',
+            age: 24,
+            gender: 'female',
+            region: 'North America'
+          },
+          {
+            id: 'cam2',
+            name: 'Sophia',
+            username: 'sophia_stars',
+            displayName: 'Sophia Star',
+            imageUrl: '/assets/livecams/cam2.jpg',
+            thumbnailUrl: '/assets/livecams/thumbnails/cam2.jpg',
+            isLive: true,
+            isStreaming: true,
+            viewerCount: 189,
+            tags: ['brunette', 'european', 'chat'],
+            rating: 4.7,
+            price: 3.99,
+            category: 'chat',
+            categories: ['chat', 'music'],
+            language: 'English, Spanish',
+            country: 'Spain',
+            description: 'Let\'s have a nice conversation!',
+            streamUrl: 'https://example.com/stream/sophia_stars',
+            age: 26,
+            gender: 'female',
+            region: 'Europe'
+          }
+        ];
+
+        // Apply boost to livecams using Oxum
+        const boosted = await Promise.all(mockLivecams.map(async (livecam) => {
+          // Create a score array from various metrics for this livecam
+          const scoreInputs = [
+            livecam.isLive ? 100 : 0,
+            livecam.viewerCount / 5, // Scale viewers to 0-100
+            livecam.rating * 20, // Convert 0-5 rating to 0-100
+          ];
+          
+          // Calculate boost score
+          const boostScore = await oxum.calculateScore(scoreInputs);
+          
+          return {
+            ...livecam,
+            boostScore
+          };
+        }));
+        
+        // Sort by boost score and set state
+        const sorted = [...boosted].sort((a, b) => (b.boostScore || 0) - (a.boostScore || 0));
+        
+        setLivecams(mockLivecams);
+        setBoostedLivecams(sorted);
+      } catch (error) {
+        console.error('Error loading livecams:', error);
+        toast({
+          title: 'Error',
+          description: 'Could not load livecam data',
+          variant: 'destructive'
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchLivecams();
-  }, [fetchLivecams]);
-  
-  return { livecams, loading, error, refreshLivecams: fetchLivecams, boostLivecam };
+  }, [toast]);
+
+  return {
+    livecams,
+    boostedLivecams,
+    loading
+  };
 };
 
 export default useBoostableLivecams;

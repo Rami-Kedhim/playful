@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import BoostDialogContainer from '@/components/boost/BoostDialogContainer';
 import { useAuth } from '@/hooks/auth';
 import { useToast } from '@/hooks/use-toast';
-import { oxum } from '@/core/Oxum';
+import { oxum } from '@/core';
 
 const BoostManagerContainer = ({ profileId }: { profileId?: string }) => {
   const { user } = useAuth();
@@ -26,16 +26,9 @@ const BoostManagerContainer = ({ profileId }: { profileId?: string }) => {
       description: "Your profile boost has been successfully applied!",
     });
 
-    // Define a matrix for boost allocation calculation
-    const matrix = [
-      [0.6, 0.2, 0.1],
-      [0.3, 0.7, 0.4],
-      [0.1, 0.1, 0.5]
-    ];
-
     // Use Oxum's boost allocation algorithm
     try {
-      // Use the new boostAllocationEigen method with proper arguments
+      // Use the updated boostAllocationEigen method with proper arguments
       const boostLevel = 2; // Default boost level
       const allocationVector = await oxum.boostAllocationEigen(activeProfileId, boostLevel);
       console.log("Boost allocation vector:", allocationVector);

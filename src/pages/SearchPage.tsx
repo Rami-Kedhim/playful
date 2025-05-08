@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { oxum } from '@/core/Oxum';
+import { oxum } from '@/core';
 
 const SearchPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,14 +21,16 @@ const SearchPage = () => {
         ];
         
         // Apply boost calculation to results
-        const boostedResults = mockResults.map(result => {
-          // Use calculateScore instead of calculateBoostScore
-          const boostScore = oxum.calculateScore(result);
+        const boostedResults = await Promise.all(mockResults.map(async (result) => {
+          // Create a numeric array from the result's relevance for scoring
+          const scoreInput = [result.relevance * 100]; // Convert to range 0-100
+          const boostScore = await oxum.calculateScore(scoreInput);
+          
           return {
             ...result,
             boostScore
           };
-        });
+        }));
         
         // Sort by combined score (relevance + boost)
         boostedResults.sort((a, b) => {
@@ -69,7 +71,7 @@ const SearchPage = () => {
               <h2 className="text-lg font-semibold">{result.name}</h2>
               <div className="text-sm text-gray-500">
                 Relevance: {Math.round(result.relevance * 100)}% | 
-                Boost: {Math.round(result.boostScore)}
+                Boost: {result.boostScore}
               </div>
             </li>
           ))}

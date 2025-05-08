@@ -44,6 +44,7 @@ export interface AnalyticsData {
   messageRate?: number;
   bookingRate?: number;
   timeActive?: number | string;
+  boostEfficiency?: number;
 }
 
 export interface MetricCardProps {

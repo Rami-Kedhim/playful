@@ -16,7 +16,9 @@ export interface BoostPackage {
 
 export interface EnhancedBoostStatus {
   active: boolean;
+  isActive?: boolean;
   remainingMinutes: number;
+  timeRemaining?: number;
   percentRemaining: number;
   expiresAt: string | null;
   startedAt: string | null;

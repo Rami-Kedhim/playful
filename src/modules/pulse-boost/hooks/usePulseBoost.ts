@@ -1,129 +1,138 @@
 
 import { useState, useEffect, useCallback } from 'react';
+import { EnhancedBoostStatus, BoostPackage } from '@/types/pulse-boost';
 import { pulseService } from '@/services/boost/pulseService';
-import { BoostPackage, EnhancedBoostStatus } from '@/types/pulse-boost';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/hooks/auth';
 
-export const usePulseBoost = (userId: string) => {
-  const [packages, setPackages] = useState<BoostPackage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [purchasing, setPurchasing] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
-  const [optimalPackage, setOptimalPackage] = useState<string | null>(null);
-  const [optimizationReason, setOptimizationReason] = useState<string | null>(null);
+export const usePulseBoost = (profileId?: string) => {
+  const { user } = useAuth();
   const { toast } = useToast();
-
-  const [boostStatus, setBoostStatus] = useState<EnhancedBoostStatus>(() => ({
+  const [boostPackages, setBoostPackages] = useState<BoostPackage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [boostStatus, setBoostStatus] = useState<EnhancedBoostStatus>({
     active: false,
+    isActive: false,
     remainingMinutes: 0,
+    timeRemaining: 0,
     percentRemaining: 0,
     expiresAt: null,
     startedAt: null,
-  }));
-
-  // Fetch packages and status
+    isExpired: false
+  });
+  
+  const userId = profileId || user?.id;
+  
+  // Load packages and boost status
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [packagesData, statusData] = await Promise.all([
-          pulseService.getBoostPackages(),
-          pulseService.getBoostStatus(userId)
-        ]);
-
-        setPackages(packagesData);
-        setBoostStatus(statusData);
-
-        // Get optimal package recommendation
-        const userData = {
-          visibilityNeed: 7,
-          budget: 200,
-          urgency: 5
-        };
-
-        const optimal = await pulseService.calculateOptimalBoost(userData);
-        setOptimalPackage(optimal.packageId);
-        setOptimizationReason(optimal.reason);
+        // Get packages
+        const packages = pulseService.getPackages();
+        setBoostPackages(packages);
+        
+        if (userId) {
+          // Get existing boost purchase
+          const boostPurchase = pulseService.getMockBoostPurchase(userId);
+          
+          if (boostPurchase) {
+            const selectedPackage = packages.find(p => p.id === boostPurchase.packageId);
+            const status = pulseService.calculateBoostStatus(
+              boostPurchase.startTime, 
+              selectedPackage?.durationMinutes
+            );
+            setBoostStatus(status);
+          } else {
+            // No active boost
+            setBoostStatus({
+              active: false,
+              isActive: false,
+              remainingMinutes: 0,
+              timeRemaining: 0,
+              percentRemaining: 0,
+              expiresAt: null,
+              startedAt: null,
+              isExpired: true
+            });
+          }
+        }
       } catch (error) {
-        console.error('Error fetching boost data:', error);
+        console.error('Error loading boost data:', error);
         toast({
           title: 'Error',
-          description: 'Failed to load boost data. Please try again.',
-          variant: 'destructive'
+          description: 'Failed to load boost information',
+          variant: 'destructive',
         });
       } finally {
         setLoading(false);
       }
     };
-
+    
     fetchData();
   }, [userId, toast]);
-
-  const getPackageById = useCallback((packageId: string) => {
-    return packages.find(p => p.id === packageId) || null;
-  }, [packages]);
-
-  const purchaseBoost = useCallback(async (packageId: string) => {
-    if (!packageId) return false;
-
-    setPurchasing(true);
-    try {
-      const result = await pulseService.purchaseBoost(packageId, userId);
-
-      if (result.success) {
-        const selectedPkg = getPackageById(packageId);
-        toast({
-          title: 'Boost Activated',
-          description: `Your ${selectedPkg?.name} is now active!`,
-        });
-
-        // Update status
-        const newStatus = await pulseService.getBoostStatus(userId);
-        setBoostStatus(newStatus);
-
-        return true;
-      } else {
-        toast({
-          title: 'Purchase Failed',
-          description: result.error || 'Failed to purchase boost.',
-          variant: 'destructive'
-        });
-        return false;
-      }
-    } catch (error) {
-      console.error('Error purchasing boost:', error);
+  
+  // Activate a boost package
+  const activateBoost = useCallback(async (packageId: string): Promise<boolean> => {
+    if (!userId) {
       toast({
-        title: 'Error',
-        description: 'An unexpected error occurred. Please try again.',
-        variant: 'destructive'
+        title: 'Authentication Required',
+        description: 'Please log in to activate a boost',
+        variant: 'destructive',
+      });
+      return false;
+    }
+    
+    setLoading(true);
+    try {
+      // Find the selected package
+      const selectedPackage = boostPackages.find(p => p.id === packageId);
+      
+      if (!selectedPackage) {
+        throw new Error('Invalid package selected');
+      }
+      
+      // Simulate successful activation
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const now = new Date();
+      
+      // Update boost status
+      setBoostStatus({
+        active: true,
+        isActive: true,
+        remainingMinutes: selectedPackage.durationMinutes,
+        timeRemaining: selectedPackage.durationMinutes,
+        percentRemaining: 100,
+        expiresAt: new Date(now.getTime() + selectedPackage.durationMinutes * 60 * 1000).toISOString(),
+        startedAt: now.toISOString(),
+        isExpired: false
+      });
+      
+      toast({
+        title: 'Boost Activated',
+        description: `${selectedPackage.name} has been successfully activated!`,
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error activating boost:', error);
+      toast({
+        title: 'Activation Failed',
+        description: 'Failed to activate boost. Please try again.',
+        variant: 'destructive',
       });
       return false;
     } finally {
-      setPurchasing(false);
+      setLoading(false);
     }
-  }, [userId, getPackageById, toast]);
-
-  const refreshStatus = useCallback(async () => {
-    try {
-      const status = await pulseService.getBoostStatus(userId);
-      setBoostStatus(status);
-    } catch (error) {
-      console.error('Error refreshing boost status:', error);
-    }
-  }, [userId]);
-
+  }, [userId, boostPackages, toast]);
+  
   return {
-    packages,
+    boostPackages,
     boostStatus,
     loading,
-    purchasing,
-    selectedPackage,
-    setSelectedPackage,
-    optimalPackage,
-    optimizationReason,
-    getPackageById,
-    purchaseBoost,
-    refreshStatus
+    activateBoost
   };
 };
 

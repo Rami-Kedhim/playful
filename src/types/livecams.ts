@@ -1,69 +1,80 @@
 
 export interface LivecamModel {
   id: string;
-  displayName: string;
+  name: string;
   username: string;
-  isLive: boolean;
-  viewerCount: number;
-  tags: string[];
-  location?: string;
-  age?: number;
-  description?: string;
+  displayName: string;
   imageUrl: string;
   thumbnailUrl: string;
-  hourlyRate?: number;
-  languages?: string[];
-  rating?: number;
-  reviewCount?: number;
-  boostScore?: number;
-  name: string;
-  country?: string;
-  categories?: string[];
-  category?: string;
+  isLive: boolean;
   isStreaming?: boolean;
-  streamUrl?: string;
-  profileUrl?: string;
-  boosted?: boolean;
-  isPopular?: boolean;
-  region?: string;
+  viewerCount: number;
+  tags: string[];
+  rating?: number;
   price?: number;
-  language?: string;
-  isBoosted?: boolean;
+  category?: string;
+  categories?: string[];
+  language: string;
+  country?: string;
+  description?: string;
+  streamUrl?: string;
+  age?: number;
+  gender?: string;
+  region?: string;
+  boostScore?: number;
 }
 
-export interface Livecam extends LivecamModel {
-  // Any additional properties specific to Livecam instances
-  title?: string;
-  startTime?: Date | string;
-  quality?: string;
-}
-
-export interface LivecamCategory {
+export interface Livecam {
   id: string;
   name: string;
+  username: string;
+  displayName: string;
+  imageUrl: string;
+  thumbnailUrl: string;
+  isLive: boolean;
+  isStreaming?: boolean;
+  viewerCount: number;
+  tags: string[];
+  rating?: number;
+  price?: number;
+  category?: string;
+  categories?: string[];
+  language: string;
+  country?: string;
   description?: string;
-  count: number;
-  imageUrl?: string;
+  boostScore?: number;
 }
 
 export interface LivecamFilter {
-  gender?: string[];
-  ageRange?: [number, number];
-  categories?: string[];
-  languages?: string[];
-  priceRange?: [number, number];
-  location?: string;
-  onlyLive?: boolean;
-  onlyVerified?: boolean;
-  sortBy?: 'popularity' | 'newest' | 'rating' | 'price_low' | 'price_high';
+  isLive?: boolean;
+  tags?: string[];
+  minPrice?: number;
+  maxPrice?: number;
+  category?: string;
+  language?: string;
+  country?: string;
+  gender?: string;
+  region?: string;
 }
 
-export interface LivecamContextType {
-  livecams: Livecam[];
-  loadingLivecams: boolean;
-  error: string | null;
-  fetchLivecams: () => Promise<void>;
-  getLivecamById?: (id: string) => Livecam | undefined;
+export interface LivecamComment {
+  id: string;
+  userId: string;
+  username: string;
+  userAvatar?: string;
+  livecamId: string;
+  content: string;
+  timestamp: string;
+  likes: number;
 }
 
-export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "massage" | "dinner" | "";
+export interface LivecamTip {
+  id: string;
+  userId: string;
+  username: string;
+  livecamId: string;
+  amount: number;
+  message?: string;
+  timestamp: string;
+  isAnonymous: boolean;
+}

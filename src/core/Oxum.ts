@@ -1,89 +1,97 @@
 
 import { SystemStatus, OxumSystem } from '@/types/core-systems';
+import { HermesEvent } from '@/types/hermes';
 
 class Oxum implements OxumSystem {
-  private apiKey: string;
-  private endpoint: string;
-
-  constructor(apiKey: string = "demo-key", endpoint: string = "https://api.oxum.ai") {
-    this.apiKey = apiKey;
-    this.endpoint = endpoint;
-  }
-
-  async boostAllocationEigen(matrix: number[][]): Promise<number[]> {
-    try {
-      // In a real application, this would call the Oxum API
-      // For demo purposes, we'll just return a mock response
-      console.log("Calculating eigen allocation for matrix:", matrix);
-      
-      // Simple mock implementation that returns normalized values
-      const sumPerRow = matrix.map(row => row.reduce((sum, val) => sum + val, 0));
-      const totalSum = sumPerRow.reduce((sum, val) => sum + val, 0);
-      
-      return sumPerRow.map(val => val / totalSum);
-    } catch (error) {
-      console.error("Error in boostAllocationEigen:", error);
-      throw error;
+  private systemStatus: SystemStatus = {
+    operational: true,
+    performance: 100,
+    lastUpdate: new Date().toISOString(),
+    serviceStatus: {
+      auth: 'operational',
+      analytics: 'operational',
+      ai: 'operational',
+      wallet: 'operational',
+      seo: 'operational',
+      payments: 'operational'
     }
-  }
-  
-  async calculateScore(inputs: number[]): Promise<number> {
-    try {
-      // Mock implementation
-      const sum = inputs.reduce((acc, val) => acc + val, 0);
-      const weightedAverage = sum / inputs.length;
-      return Math.min(100, Math.max(0, weightedAverage * 10));
-    } catch (error) {
-      console.error("Error in calculateScore:", error);
-      throw error;
-    }
+  };
+
+  async initialize(): Promise<void> {
+    console.log('Oxum system initializing...');
+    // Simulate initialization
+    await new Promise(resolve => setTimeout(resolve, 500));
+    this.systemStatus.operational = true;
+    this.systemStatus.lastUpdate = new Date().toISOString();
+    console.log('Oxum system initialized');
   }
 
-  async getSystemStatus(): Promise<SystemStatus> {
-    // This would normally be an API call
+  shutdown(): void {
+    console.log('Oxum system shutting down...');
+    this.systemStatus.operational = false;
+  }
+
+  getSystemStatus(): SystemStatus {
     return {
-      isOperational: true,
-      operational: true,
-      performance: 92,
-      lastUpdate: new Date().toISOString(),
+      operational: this.systemStatus.operational,
+      performance: this.systemStatus.performance,
+      lastUpdate: this.systemStatus.lastUpdate,
       serviceStatus: {
-        auth: "operational",
-        analytics: "operational",
-        ai: "operational",
-        wallet: "operational",
-        seo: "operational",
-        payments: "operational"
+        auth: this.systemStatus.serviceStatus.auth,
+        analytics: this.systemStatus.serviceStatus.analytics,
+        ai: this.systemStatus.serviceStatus.ai,
+        wallet: this.systemStatus.serviceStatus.wallet,
+        seo: this.systemStatus.serviceStatus.seo,
+        payments: this.systemStatus.serviceStatus.payments
       }
     };
   }
 
   async processPayment(amount: number, currency: string): Promise<boolean> {
-    console.log(`Processing payment: ${amount} ${currency}`);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return true;
+    console.log(`Processing payment of ${amount} ${currency}`);
+    // Mock implementation
+    return amount > 0;
   }
 
   async validateTransaction(txId: string): Promise<boolean> {
     console.log(`Validating transaction: ${txId}`);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Mock implementation
     return true;
   }
 
   async getExchangeRate(from: string, to: string): Promise<number> {
     console.log(`Getting exchange rate from ${from} to ${to}`);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // Mock rates
-    const rates: Record<string, Record<string, number>> = {
-      "USD": { "UBX": 10.5, "EUR": 0.85 },
-      "UBX": { "USD": 0.095, "EUR": 0.08 },
-      "EUR": { "USD": 1.18, "UBX": 12.5 }
+    // Mock implementation
+    if (from === 'USD' && to === 'UBX') return 100;
+    if (from === 'UBX' && to === 'USD') return 0.01;
+    return 1;
+  }
+
+  async boostAllocationEigen(userId: string, boostLevel: number): Promise<number[]> {
+    console.log(`Calculating boost allocation for user ${userId} at level ${boostLevel}`);
+    // Mock implementation
+    return [0.7, 0.2, 0.1];
+  }
+
+  async calculateScore(inputs: number[]): Promise<number> {
+    if (!Array.isArray(inputs)) {
+      console.warn('Invalid input to calculateScore, expected array of numbers');
+      return 0;
+    }
+    // Basic calculation of weighted score
+    const sum = inputs.reduce((acc, val) => acc + val, 0);
+    return inputs.length > 0 ? Math.round(sum / inputs.length * 100) : 0;
+  }
+
+  emitEvent(event: string, data: any): void {
+    const hermesEvent: HermesEvent = {
+      event,
+      source: 'oxum',
+      timestamp: new Date().toISOString(),
+      data
     };
     
-    return rates[from]?.[to] || 1.0;
+    console.log('Oxum event emitted:', hermesEvent);
   }
 }
 
