@@ -9,12 +9,14 @@ interface ServiceTypeSelectProps {
   value: ServiceTypeFilter;
   onChange: (value: ServiceTypeFilter) => void;
   className?: string;
+  label?: string; // Added label prop
 }
 
 const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
   value,
   onChange,
-  className = ''
+  className = '',
+  label
 }) => {
   // Ensure we have a safe value
   const safeValue: ServiceTypeFilter = !value ? 'any' : value;
@@ -27,7 +29,7 @@ const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
   
   return (
     <div className={`space-y-2 ${className}`}>
-      <h3 className="text-sm font-medium">Service Type</h3>
+      {label !== undefined && <h3 className="text-sm font-medium">{label || "Service Type"}</h3>}
       <RadioGroup
         value={safeValue}
         onValueChange={handleChange}

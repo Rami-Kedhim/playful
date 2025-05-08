@@ -7,9 +7,12 @@ import EscortGrid from '@/components/escorts/EscortGrid';
 import { Button } from '@/components/ui/button';
 import { AppPaths } from '@/routes/routeConfig';
 import { HeartOff } from 'lucide-react';
+import { Escort } from '@/types/escort';
 
 const FavoritesPage = () => {
-  const { favorites = [], removeFavorite } = useFavorites();
+  // Use escorts array directly from the favorites object
+  const { favorites } = useFavorites();
+  const favoriteEscorts = favorites.escorts || [];
   
   const emptyState = (
     <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -32,13 +35,13 @@ const FavoritesPage = () => {
       description="Profiles you've saved as favorites"
       showBreadcrumbs
     >
-      {favorites.length === 0 ? (
+      {favoriteEscorts.length === 0 ? (
         emptyState
       ) : (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <p className="text-muted-foreground">
-              {favorites.length} {favorites.length === 1 ? 'favorite' : 'favorites'}
+              {favoriteEscorts.length} {favoriteEscorts.length === 1 ? 'favorite' : 'favorites'}
             </p>
             <Button variant="outline" size="sm">
               Clear All
@@ -46,7 +49,7 @@ const FavoritesPage = () => {
           </div>
           
           <EscortGrid
-            escorts={favorites}
+            escorts={favoriteEscorts}
             emptyMessage="No favorites found"
           />
         </div>
