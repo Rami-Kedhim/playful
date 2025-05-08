@@ -1,4 +1,3 @@
-
 export interface SystemStatus {
   operational: boolean;
   isActive: boolean;

@@ -25,6 +25,8 @@ export interface AIModelPreference {
   provider?: string;
   capabilities?: string[];
   settings?: Record<string, any>;
+  model?: string;             // Add this for useNSFWAIChat
+  systemPrompt?: string;      // Add this for useNSFWAIChat
 }
 
 // Add any other AI-related types here

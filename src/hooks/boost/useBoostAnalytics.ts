@@ -1,6 +1,65 @@
 
 import { useState } from 'react';
-import { BoostAnalytics } from '@/types/core-systems';
+
+// Define the AnalyticsData interface
+export interface AnalyticsData {
+  views: number;
+  additionalViews: number;
+  engagementIncrease: number;
+  rankingPosition: number;
+  conversionRate: number;
+  messageRate: number;
+  bookingRate: number;
+  change?: number;
+  withBoost?: number;
+  withoutBoost?: number;
+  boostEfficiency?: number;
+  remainingTime?: string;
+  impressions?: {
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+    increase?: number;
+    change?: number;
+    value?: number;
+  };
+  interactions?: {
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+    increase?: number;
+    change?: number;
+    value?: number;
+  };
+  rank?: {
+    current?: number;
+    previous?: number;
+    change?: number;
+  };
+  conversions?: number;
+  timeActive?: string;
+  trending?: boolean;
+  roi?: number;
+  clicks?: {
+    today?: number;
+    yesterday?: number;
+    lastWeek?: number;
+    thisWeek?: number;
+    change?: number;
+    total?: number;
+  };
+}
+
+// Define the BoostAnalytics interface extending AnalyticsData
+export interface BoostAnalytics extends AnalyticsData {
+  // Additional properties specific to BoostAnalytics
+  boostEfficiency?: number;
+  remainingTime?: string;
+}
 
 export const useBoostAnalytics = (initialData?: Partial<BoostAnalytics>) => {
   const [analytics, setAnalytics] = useState<BoostAnalytics>({
@@ -41,6 +100,19 @@ export const useBoostAnalytics = (initialData?: Partial<BoostAnalytics>) => {
       withoutBoost: Math.floor(Math.random() * 500),
       boostEfficiency: Math.random() * 0.9,
       remainingTime: '12:34:56',
+      conversions: Math.floor(Math.random() * 20),
+      impressions: {
+        value: Math.floor(Math.random() * 1000),
+        change: Math.random() * 0.3,
+        withBoost: Math.floor(Math.random() * 1000),
+        withoutBoost: Math.floor(Math.random() * 500),
+      },
+      interactions: {
+        value: Math.floor(Math.random() * 500),
+        change: Math.random() * 0.3,
+        withBoost: Math.floor(Math.random() * 500),
+        withoutBoost: Math.floor(Math.random() * 250),
+      }
     });
   };
 
@@ -51,7 +123,5 @@ export const useBoostAnalytics = (initialData?: Partial<BoostAnalytics>) => {
   };
 };
 
-// Re-export the BoostAnalytics type for components to use
-export type { BoostAnalytics };
-
+// Export the interfaces and hook
 export default useBoostAnalytics;

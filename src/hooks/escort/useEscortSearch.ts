@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from 'react';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort'; // Using the correct casing
 import { escortService } from '@/services/escortService';
 
 export const useEscortSearch = () => {

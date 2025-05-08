@@ -1,174 +1,93 @@
-
-import { useState, useEffect } from "react";
-import BoostManager from "./boost/BoostManager";
-import BoostAnalyticsCard from "./boost/BoostAnalyticsCard";
-import BoostHistoryTable from "./boost/BoostHistoryTable";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Zap, TrendingUp, BarChart } from "lucide-react";
-import { useBoostManager } from "@/hooks/boost";
-import { BoostAnalytics as GlobalBoostAnalytics } from "@/types/boost";
-import { BoostAnalytics, AnalyticsData } from "@/hooks/boost/useBoostAnalytics";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
+import BoostAnalyticsCard from "@/components/creators/dashboard/boost/BoostAnalyticsCard";
+import BoostHistoryTable from "@/components/creators/dashboard/boost/BoostHistoryTable";
+import HermesOxumQueueVisualization from "@/components/creators/dashboard/boost/HermesOxumQueueVisualization";
+import { BoostAnalytics, AnalyticsData } from '@/hooks/boost/useBoostAnalytics';
 
 interface CreatorBoostTabProps {
+  isActive: boolean;
+  getAnalytics: () => Promise<AnalyticsData | null>;
   creatorId: string;
-  profile: any;
 }
 
-const CreatorBoostTab = ({ creatorId, profile }: CreatorBoostTabProps) => {
-  const [activeTab, setActiveTab] = useState("boost");
+const CreatorBoostTab: React.FC<CreatorBoostTabProps> = ({ isActive, getAnalytics, creatorId }) => {
   const [boostHistory, setBoostHistory] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
-  
-  const {
-    boostStatus,
-    getBoostAnalytics
-  } = useBoostManager(creatorId);
-  
-  // This wrapper ensures the returned data conforms to BoostAnalytics type
-  const getAnalyticsWrapper = async (): Promise<BoostAnalytics> => {
-    const data = await getBoostAnalytics();
-    
-    // Ensure data has all required properties with non-optional fields
-    const analyticsData: BoostAnalytics = {
-      views: data?.views || 0,
-      additionalViews: data?.additionalViews || 0,
-      engagementIncrease: data?.engagementIncrease || 0,
-      rankingPosition: data?.rankingPosition || 0,
-      conversions: data?.conversions || 0,
-      timeActive: data?.timeActive || 0,
-      boostEfficiency: data?.boostEfficiency || 0,
-      trending: data?.trending || false,
-      roi: data?.roi || 0,
-      impressions: {
-        today: data?.impressions?.today || 0,
-        yesterday: data?.impressions?.yesterday || 0,
-        weeklyAverage: data?.impressions?.weeklyAverage || 0,
-        withBoost: data?.impressions?.withBoost || 0,
-        withoutBoost: data?.impressions?.withoutBoost || 0,
-        increase: data?.impressions?.increase || 0
-      },
-      interactions: {
-        today: data?.interactions?.today || 0,
-        yesterday: data?.interactions?.yesterday || 0,
-        weeklyAverage: data?.interactions?.weeklyAverage || 0,
-        withBoost: data?.interactions?.withBoost || 0,
-        withoutBoost: data?.interactions?.withoutBoost || 0,
-        increase: data?.interactions?.increase || 0
-      },
-      rank: {
-        current: data?.rank?.current || 0,
-        previous: data?.rank?.previous || 0,
-        change: data?.rank?.change || 0
-      },
-      clicks: {
-        today: data?.clicks?.today || 0,
-        yesterday: data?.clicks?.yesterday || 0,
-        weeklyAverage: data?.clicks?.weeklyAverage || 0,
-        withBoost: data?.clicks?.withBoost || 0,
-        withoutBoost: data?.clicks?.withoutBoost || 0,
-        increase: data?.clicks?.increase || 0
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Fetch boost history data
+    const fetchHistory = async () => {
+      try {
+        setHistoryLoading(true);
+        // Mock history data
+        setTimeout(() => {
+          setBoostHistory([
+            {
+              id: "history-1",
+              startDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+              endDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+              boostPackage: {
+                id: "boost-1",
+                name: "Weekend Boost",
+                duration: "72:00:00",
+                price_lucoin: 120
+              },
+              price: 120
+            },
+            {
+              id: "history-2",
+              startDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
+              endDate: new Date(Date.now() - 17 * 24 * 60 * 60 * 1000),
+              boostPackage: {
+                id: "boost-2",
+                name: "24 Hour Boost",
+                duration: "24:00:00",
+                price_lucoin: 50
+              },
+              price: 50
+            }
+          ]);
+          setHistoryLoading(false);
+        }, 1000);
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch history data");
+        setHistoryLoading(false);
       }
     };
-    
-    return analyticsData;
-  };
-  
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setBoostHistory([
-        {
-          id: "history-1",
-          startDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-          endDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-          boostPackage: {
-            id: "boost-1",
-            name: "Weekend Boost",
-            duration: "72:00:00",
-            price_ubx: 120
-          },
-          price: 120
-        },
-        {
-          id: "history-2",
-          startDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
-          endDate: new Date(Date.now() - 17 * 24 * 60 * 60 * 1000),
-          boostPackage: {
-            id: "boost-2",
-            name: "24 Hour Boost",
-            duration: "24:00:00",
-            price_ubx: 50
-          },
-          price: 50
-        }
-      ]);
-      setHistoryLoading(false);
-    }, 1500);
-    
-    return () => clearTimeout(timer);
+
+    fetchHistory();
   }, []);
-  
+
+  if (error) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-md">
+        Error loading analytics: {error}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="boost" className="flex items-center">
-            <Zap className="h-4 w-4 mr-2" />
-            Boost Profile
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center">
-            <BarChart className="h-4 w-4 mr-2" />
-            Boost Analytics
-          </TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center">
-            <TrendingUp className="h-4 w-4 mr-2" />
-            Boost History
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="boost" className="mt-6">
-          <BoostManager 
-            creatorId={creatorId}
-            profileCompleteness={profile?.profile_completeness || 0}
-            isVerified={profile?.isVerified || false}
-            rating={profile?.rating || 0}
-            profileCreatedDate={profile?.created_at ? new Date(profile.created_at) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)}
-            country={profile?.country || "US"}
-            role={profile?.isVerified ? 'verified' : 'regular'}
-            ubxBalance={profile?.ubx_balance || 0}
-          />
-        </TabsContent>
-        
-        <TabsContent value="analytics" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <BoostAnalyticsCard 
-              isActive={boostStatus.isActive} 
-              getAnalytics={getAnalyticsWrapper}
-            />
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Engagement Statistics</CardTitle>
-                <CardDescription>
-                  Track how boosts affect profile engagement
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>More detailed analytics will appear here as you use profile boosts.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="history" className="mt-6">
-          <BoostHistoryTable 
-            history={boostHistory}
-            loading={historyLoading}
-          />
-        </TabsContent>
-      </Tabs>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <BoostAnalyticsCard
+          isActive={isActive}
+          getAnalytics={getAnalytics}
+        />
+
+        {/* Add the Hermes-Oxum Queue Visualization when boost is active */}
+        {isActive && creatorId && (
+          <HermesOxumQueueVisualization profileId={creatorId} />
+        )}
+      </div>
+
+      <BoostHistoryTable
+        history={boostHistory}
+        loading={historyLoading}
+      />
     </div>
   );
 };

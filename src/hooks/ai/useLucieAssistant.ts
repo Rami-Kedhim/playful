@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from "@/integrations/supabase/client";
@@ -30,7 +29,7 @@ export function useLucieAssistant(options: UseLucieAssistantOptions = {}) {
     enableVoice = false
   } = options;
 
-  const { state } = useUberEcosystem();
+  const { lucieAI } = useUberEcosystem();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -42,10 +41,10 @@ export function useLucieAssistant(options: UseLucieAssistantOptions = {}) {
 
   useEffect(() => {
     // Check if Lucie is initialized
-    if (!state.modules.lucie) {
+    if (!lucieAI) {
       setError("Lucie AI system is not initialized");
     }
-  }, [state.modules.lucie]);
+  }, [lucieAI]);
 
   const toggleChat = useCallback(() => {
     setIsOpen(prev => !prev);
