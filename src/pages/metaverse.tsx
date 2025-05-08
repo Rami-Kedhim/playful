@@ -1,119 +1,119 @@
 
 import React, { useEffect } from 'react';
-import { Container } from '@/components/ui/container';
 import { UnifiedLayout } from '@/layouts';
-import { orus } from '@/core/Orus';
-import { Shield, Globe, Lock } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Globe, Users, Map, Layers } from 'lucide-react';
 
-const MetaversePage: React.FC = () => {
-  // Load session data and validate security
+const MetaversePage = () => {
   useEffect(() => {
-    const validateSession = async () => {
-      try {
-        // Validate session integrity with Orus
-        const token = localStorage.getItem('session_token') || '';
-        const sessionResult = await orus.validateSession(token);
-        
-        if (!sessionResult.isValid) {
-          console.warn('Session validation warning: Invalid session');
-        }
-        
-        // Check system integrity
-        const integrityCheck = await orus.checkIntegrity();
-        if (!integrityCheck.valid) {
-          console.error('System integrity warning', integrityCheck.warnings);
-        }
-      } catch (err) {
-        console.error('Session validation error:', err);
-      }
-    };
-    
-    validateSession();
+    // Initialize metaverse components
+    console.log('Initializing metaverse components');
   }, []);
 
   return (
-    <UnifiedLayout title="Metaverse" description="Virtual experiences in the UberEscorts ecosystem" showBreadcrumbs>
-      <Container>
-        <div className="py-8 space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Globe className="h-5 w-5 mr-2 text-primary" />
-                  Metaverse Experience
-                </CardTitle>
-                <CardDescription>
-                  Enter our virtual world and connect with others in an immersive environment
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-muted rounded-md p-6 flex flex-col items-center justify-center text-center h-64">
-                  <Globe className="h-16 w-16 mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-medium mb-2">Virtual Environment Loading</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Our 3D world is preparing to launch. Enhanced security protocols active.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Shield className="h-5 w-5 mr-2 text-primary" />
-                  Security Status
-                </CardTitle>
-                <CardDescription>Protected by Orus Security System</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center">
-                      <Lock className="h-4 w-4 mr-2 text-green-500" />
-                      Encryption
-                    </span>
-                    <span className="text-green-500 font-medium">Active</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center">
-                      <Shield className="h-4 w-4 mr-2 text-green-500" />
-                      Identity Protection
-                    </span>
-                    <span className="text-green-500 font-medium">Enabled</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center">
-                      <Shield className="h-4 w-4 mr-2 text-green-500" />
-                      Secure Transactions
-                    </span>
-                    <span className="text-green-500 font-medium">Protected</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+    <UnifiedLayout 
+      title="Metaverse"
+      description="Enter the UberEscorts Metaverse - Virtual experiences and spaces"
+      showBreadcrumbs={true}
+    >
+      <div className="space-y-8">
+        <Card className="overflow-hidden">
+          <div className="h-64 bg-gradient-to-r from-purple-900 via-indigo-800 to-blue-900 relative">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Button size="lg" className="bg-primary hover:bg-primary/90">
+                <Globe className="mr-2 h-4 w-4" />
+                Enter Metaverse
+              </Button>
+            </div>
           </div>
+          <CardContent className="p-6">
+            <h2 className="text-2xl font-bold mb-2">Welcome to the UberEscorts Metaverse</h2>
+            <p className="text-muted-foreground">
+              Explore virtual spaces, interact with escorts and creators in real-time, and enjoy 
+              immersive experiences. Connect your avatar and start your journey now.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Tabs defaultValue="spaces" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="spaces">
+              <Layers className="mr-2 h-4 w-4" />
+              Virtual Spaces
+            </TabsTrigger>
+            <TabsTrigger value="events">
+              <Users className="mr-2 h-4 w-4" />
+              Live Events
+            </TabsTrigger>
+            <TabsTrigger value="assets">
+              <Globe className="mr-2 h-4 w-4" />
+              My Assets
+            </TabsTrigger>
+            <TabsTrigger value="map">
+              <Map className="mr-2 h-4 w-4" />
+              Explore Map
+            </TabsTrigger>
+          </TabsList>
           
-          <Card>
-            <CardHeader>
-              <CardTitle>Virtual Experiences</CardTitle>
-              <CardDescription>Explore secure, private virtual environments</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {['Private Suites', 'Social Lounges', 'Fantasy Worlds'].map((space, index) => (
-                  <div key={index} className="border rounded-lg p-4 text-center">
-                    <h3 className="font-medium mb-2">{space}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      End-to-end encrypted virtual space
-                    </p>
+          <TabsContent value="spaces" className="mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i}>
+                  <div className="h-40 bg-muted rounded-t-lg"></div>
+                  <CardContent className="p-4">
+                    <h3 className="font-medium">Virtual Space #{i+1}</h3>
+                    <p className="text-sm text-muted-foreground">Active users: {Math.floor(Math.random() * 20)}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="events" className="mt-6">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Upcoming Metaverse Events</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">No upcoming events scheduled. Check back later!</p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="assets" className="mt-6">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Your Metaverse Assets</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">You haven't acquired any metaverse assets yet.</p>
+                  <Button className="mt-4">Browse Asset Store</Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="map" className="mt-6">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Metaverse Map</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[400px] bg-muted rounded-md flex items-center justify-center">
+                    <p className="text-muted-foreground">Metaverse Map Loading...</p>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </Container>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
     </UnifiedLayout>
   );
 };

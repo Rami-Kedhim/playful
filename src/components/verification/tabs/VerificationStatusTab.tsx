@@ -1,10 +1,11 @@
 
+import React from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useVerificationStatus } from "@/hooks/verification/useVerificationStatus";
 import { Shield, Loader2, BadgeCheck } from "lucide-react";
 import VerificationTimeline from "../status/VerificationTimeline";
-import { VerificationStatus } from "@/types/verification";
+import { VERIFICATION_STATUS } from "@/types/verification";
 
 export default function VerificationStatusTab() {
   const { status, loading, verificationRequest } = useVerificationStatus();
@@ -30,7 +31,7 @@ export default function VerificationStatusTab() {
   }
 
   // Using string comparison to avoid enum issues
-  const isApproved = status.status === "approved" || status.status === VerificationStatus.APPROVED;
+  const isApproved = status === "approved" || status === VERIFICATION_STATUS.APPROVED;
 
   return (
     <div className="space-y-6">

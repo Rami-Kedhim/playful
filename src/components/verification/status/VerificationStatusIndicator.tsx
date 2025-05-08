@@ -1,67 +1,64 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Clock, CheckCircle, X, AlertTriangle, TimerReset } from 'lucide-react';
-import { VerificationStatus } from '@/types/verification';
+import { CheckCircle2, Clock, AlertTriangle, Shield } from 'lucide-react';
+import { VERIFICATION_STATUS } from '@/types/verification';
 
 interface VerificationStatusIndicatorProps {
-  status: string;
-  size?: 'sm' | 'default';
+  status: 'unverified' | 'pending' | 'verified' | 'rejected';
+  size?: 'sm' | 'md' | 'lg';
 }
 
-const VerificationStatusIndicator: React.FC<VerificationStatusIndicatorProps> = ({ 
-  status, 
-  size = 'default' 
+const VerificationStatusIndicator: React.FC<VerificationStatusIndicatorProps> = ({
+  status,
+  size = 'md'
 }) => {
-  const getStatusConfig = (status: string) => {
+  // Define styling based on status
+  const getStatusConfig = () => {
     switch (status) {
-      case VerificationStatus.PENDING:
+      case 'verified':
         return {
-          icon: <Clock className="h-3 w-3 mr-1" />,
-          label: 'Pending',
-          variant: 'outline' as const
-        };
-      case VerificationStatus.IN_REVIEW:
-        return {
-          icon: <AlertTriangle className="h-3 w-3 mr-1" />,
-          label: 'In Review',
-          variant: 'secondary' as const
-        };
-      case VerificationStatus.APPROVED:
-        return {
-          icon: <CheckCircle className="h-3 w-3 mr-1" />,
-          label: 'Approved',
+          icon: <CheckCircle2 className="mr-1 h-3.5 w-3.5" />,
+          label: 'Verified',
           variant: 'success' as const
         };
-      case VerificationStatus.REJECTED:
+      case 'pending':
         return {
-          icon: <X className="h-3 w-3 mr-1" />,
+          icon: <Clock className="mr-1 h-3.5 w-3.5" />,
+          label: 'Pending',
+          variant: 'warning' as const
+        };
+      case 'rejected':
+        return {
+          icon: <AlertTriangle className="mr-1 h-3.5 w-3.5" />,
           label: 'Rejected',
           variant: 'destructive' as const
         };
-      case VerificationStatus.EXPIRED:
-        return {
-          icon: <TimerReset className="h-3 w-3 mr-1" />,
-          label: 'Expired',
-          variant: 'outline' as const
-        };
       default:
         return {
-          icon: <Clock className="h-3 w-3 mr-1" />,
-          label: 'Unknown',
+          icon: <Shield className="mr-1 h-3.5 w-3.5" />,
+          label: 'Unverified',
           variant: 'outline' as const
         };
     }
   };
-
-  const { icon, label, variant } = getStatusConfig(status);
-
+  
+  const { icon, label, variant } = getStatusConfig();
+  
+  // Size classes
+  const sizeClasses = {
+    sm: 'text-xs py-0 h-5',
+    md: 'text-sm py-0.5',
+    lg: 'text-base py-1'
+  }[size];
+  
   return (
-    <Badge variant={variant} className={size === 'sm' ? 'text-xs py-0 px-2' : ''}>
-      <span className="flex items-center">
-        {icon}
-        {label}
-      </span>
+    <Badge 
+      variant={variant} 
+      className={`flex items-center ${sizeClasses}`}
+    >
+      {icon}
+      {label}
     </Badge>
   );
 };

@@ -9,6 +9,13 @@ export enum VerificationLevel {
   VERIFIED = 'verified'
 }
 
+export const VERIFICATION_STATUS = {
+  PENDING: 'pending',
+  IN_REVIEW: 'in_review',
+  APPROVED: 'approved',
+  REJECTED: 'rejected'
+};
+
 export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
 
 export interface VerificationDocument {

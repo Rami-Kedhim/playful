@@ -2,7 +2,7 @@
 import React from 'react';
 import { CheckCircle2, Clock, AlertTriangle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { VerificationStatus } from '@/types/verification';
+import { VERIFICATION_STATUS } from '@/types/verification';
 
 interface TimelineStep {
   title: string;
@@ -11,7 +11,7 @@ interface TimelineStep {
 }
 
 interface VerificationStatusTimelineProps {
-  status: VerificationStatus;
+  status: string;
   className?: string;
 }
 
@@ -25,22 +25,22 @@ export function VerificationStatusTimeline({ status, className }: VerificationSt
     {
       title: 'Initial Review',
       description: 'Documents are being reviewed by our system',
-      status: status === VerificationStatus.PENDING ? 'current' : 
-             status === VerificationStatus.IN_REVIEW || status === VerificationStatus.APPROVED || status === VerificationStatus.REJECTED ? 'completed' : 
+      status: status === VERIFICATION_STATUS.PENDING ? 'current' : 
+             status === VERIFICATION_STATUS.IN_REVIEW || status === VERIFICATION_STATUS.APPROVED || status === VERIFICATION_STATUS.REJECTED ? 'completed' : 
              'upcoming'
     },
     {
       title: 'Manual Verification',
       description: 'Documents are being verified by our team',
-      status: status === VerificationStatus.IN_REVIEW ? 'current' :
-             status === VerificationStatus.APPROVED || status === VerificationStatus.REJECTED ? 'completed' :
+      status: status === VERIFICATION_STATUS.IN_REVIEW ? 'current' :
+             status === VERIFICATION_STATUS.APPROVED || status === VERIFICATION_STATUS.REJECTED ? 'completed' :
              'upcoming'
     },
     {
       title: 'Final Decision',
       description: 'Verification process complete',
-      status: status === VerificationStatus.APPROVED ? 'completed' :
-             status === VerificationStatus.REJECTED ? 'error' :
+      status: status === VERIFICATION_STATUS.APPROVED ? 'completed' :
+             status === VERIFICATION_STATUS.REJECTED ? 'error' :
              'upcoming'
     }
   ];

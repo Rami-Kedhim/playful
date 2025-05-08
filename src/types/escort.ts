@@ -1,6 +1,14 @@
 
 import { VerificationLevel } from './verification';
 
+export interface Rates {
+  hourly?: number;
+  twoHour?: number;
+  overnight?: number;
+  weekend?: number;
+  [key: string]: number | undefined;
+}
+
 export interface Escort {
   id: string;
   name: string;
@@ -9,7 +17,9 @@ export interface Escort {
   location?: string;
   services?: string[];
   photos?: string[];
-  rates?: Record<string, number>;
+  rates?: Rates;
+  price?: number; // Added for compatibility with components
+  responseRate?: number; // Added for compatibility with components
   languages?: string[];
   availability?: string[];
   contactInfo?: ContactInfo;

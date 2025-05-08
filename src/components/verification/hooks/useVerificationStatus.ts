@@ -1,12 +1,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/auth';
-import { VerificationStatus, VerificationRequest } from '@/types/verification';
+import { VerificationRequest, VERIFICATION_STATUS } from '@/types/verification';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useVerificationStatus = () => {
   const { user } = useAuth();
-  const [status, setStatus] = useState<keyof typeof VerificationStatus | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const [verificationRequest, setVerificationRequest] = useState<VerificationRequest | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +33,7 @@ export const useVerificationStatus = () => {
 
       if (data && data.length > 0) {
         const latestRequest = data[0] as VerificationRequest;
-        setStatus(latestRequest.status as keyof typeof VerificationStatus);
+        setStatus(latestRequest.status);
         setVerificationRequest(latestRequest);
       } else {
         setStatus(null);
