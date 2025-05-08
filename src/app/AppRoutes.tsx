@@ -1,68 +1,73 @@
 
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { routes as routeConfig } from '@/routes/routeConfig.tsx';
+import { AppPaths } from '@/routes/routeConfig';
 import Layout from '@/layouts/Layout';
 import AuthPage from '@/pages/AuthPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import AuthGuard from '@/components/auth/AuthGuard';
-import SEODashboard from '@/pages/SEODashboard'; // Import the SEO Dashboard
+import SEODashboard from '@/pages/SEODashboard';
+import DashboardPage from '@/pages/DashboardPage';
+import AdminPage from '@/pages/AdminPage';
+import NeuralMonitorPage from '@/pages/neural/NeuralMonitorPage';
+import NeuralAnalyticsPage from '@/pages/neural/NeuralAnalyticsPage';
+import SafetyPage from '@/pages/SafetyPage';
+import RouteSharePage from '@/pages/safety/RouteSharePage';
+import ProfilePage from '@/pages/ProfilePage';
+import MessagesPage from '@/pages/MessagesPage';
+import WalletPage from '@/pages/WalletPage';
+import FavoritesPage from '@/pages/FavoritesPage';
+import EscortsPage from '@/pages/EscortsPage';
+import EscortDetailPage from '@/pages/EscortDetailPage';
 
+/**
+ * Main application routes component
+ */
 const AppRoutes = () => {
   return (
     <Routes>
       {/* Auth page with dedicated route */}
       <Route path="/auth" element={<AuthPage />} />
       
-      {/* SEO Dashboard Route */}
-      <Route path="/seo" element={<SEODashboard />} />
+      {/* Home redirects to dashboard */}
+      <Route path="/" element={<DashboardPage />} />
       
-      {/* Main routes with Layout */}
+      {/* Main application routes */}
       <Route element={<Layout />}>
-        {routeConfig.map((route, index) => {
-          // Check if route requires authentication
-          const requireAuth = route.isAuthRequired === true;
-          const Element = route.element;
-          
-          return (
-            <Route
-              key={`route-${route.path}-${index}`}
-              path={route.path}
-              element={
-                requireAuth ? (
-                  <AuthGuard requiredRoles={route.roles}>
-                    {Element}
-                  </AuthGuard>
-                ) : Element
-              }
-            >
-              {route.children?.map((childRoute, childIndex) => {
-                // Check if child route requires authentication
-                const childRequireAuth = childRoute.isAuthRequired === true;
-                const ChildElement = childRoute.element;
-                
-                return (
-                  <Route
-                    key={`child-${childRoute.path || 'index'}-${childIndex}`}
-                    index={childRoute.index}
-                    path={childRoute.path}
-                    element={
-                      childRequireAuth ? (
-                        <AuthGuard requiredRoles={childRoute.roles}>
-                          {ChildElement}
-                        </AuthGuard>
-                      ) : ChildElement
-                    }
-                  />
-                );
-              })}
-            </Route>
-          );
-        })}
+        {/* Core routes */}
+        <Route path={AppPaths.PROFILE} element={<ProfilePage />} />
+        <Route path={AppPaths.MESSAGES} element={<MessagesPage />} />
+        <Route path={AppPaths.WALLET} element={<WalletPage />} />
+        <Route path={AppPaths.FAVORITES} element={<FavoritesPage />} />
         
-        {/* Catch-all route */}
-        <Route path="*" element={<NotFoundPage />} />
+        {/* Escort routes */}
+        <Route path={AppPaths.ESCORTS} element={<EscortsPage />} />
+        <Route path={AppPaths.ESCORT_DETAIL} element={<EscortDetailPage />} />
+        
+        {/* Neural routes */}
+        <Route path={AppPaths.NEURAL_MONITOR} element={<NeuralMonitorPage />} />
+        <Route path={AppPaths.NEURAL_ANALYTICS} element={<NeuralAnalyticsPage />} />
+        
+        {/* Admin routes */}
+        <Route 
+          path={AppPaths.ADMIN} 
+          element={
+            <AuthGuard requiredRoles={['admin']}>
+              <AdminPage />
+            </AuthGuard>
+          } 
+        />
+        
+        {/* SEO Dashboard */}
+        <Route path={AppPaths.SEO} element={<SEODashboard />} />
+        
+        {/* Safety routes */}
+        <Route path={AppPaths.SAFETY} element={<SafetyPage />} />
+        <Route path="/safety/route-share" element={<RouteSharePage />} />
       </Route>
+      
+      {/* Catch-all route */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };

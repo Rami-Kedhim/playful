@@ -3,6 +3,8 @@ import React, { ReactNode } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Header } from '@/components/navigation/Header';
 import { Footer } from '@/components/layout/Footer';
+import { cn } from '@/lib/utils';
+import Breadcrumbs from '@/components/navigation/Breadcrumbs';
 
 export interface LayoutProps {
   children?: ReactNode;
@@ -20,6 +22,8 @@ export interface LayoutProps {
   headerAction?: ReactNode;
   headerContent?: ReactNode;
   footerContent?: ReactNode;
+  showBreadcrumbs?: boolean;
+  className?: string;
 }
 
 /**
@@ -41,18 +45,21 @@ const Layout: React.FC<LayoutProps> = ({
   sidebarPosition = 'right',
   headerAction,
   headerContent,
-  footerContent
+  footerContent,
+  showBreadcrumbs = false,
+  className
 }) => {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className={cn("min-h-screen bg-background flex flex-col", className)}>
       {showHeader && !hideNavbar && (
         <Header simplified={!showNavigation} />
       )}
       
       <main className={`flex-1 ${fullWidth ? "w-full" : containerClass}`}>
-        {title && (
+        {(title || description || showBreadcrumbs) && (
           <div className="mb-6">
-            <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+            {showBreadcrumbs && <Breadcrumbs className="mb-2" />}
+            {title && <h1 className="text-2xl font-bold tracking-tight">{title}</h1>}
             {description && <p className="text-muted-foreground">{description}</p>}
             {headerContent}
           </div>
