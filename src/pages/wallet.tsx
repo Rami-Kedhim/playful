@@ -1,144 +1,107 @@
 
 import React from 'react';
 import { Layout } from '@/layouts';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, Wallet } from 'lucide-react';
-import { orus } from '@/core/Orus';
-import SecureRouteWrapper from '@/components/security/SecureRouteWrapper';
+import UBXWallet from '@/components/wallet/UBXWallet';
+import SolanaWalletPanel from '@/components/wallet/SolanaWalletPanel';
+import WalletConnect from '@/components/solana/WalletConnect';
+import SecureWalletSection from '@/components/wallet/SecureWalletSection';
+import { useNavigate } from 'react-router-dom';
+import { APP_PATHS } from '@/routes/routeConfig';
 
 const WalletPage = () => {
-  const [balance, setBalance] = React.useState(2500);
-  const [activeTab, setActiveTab] = React.useState('overview');
+  const navigate = useNavigate();
   
-  React.useEffect(() => {
-    // Security validation with Orus
-    const validateSession = async () => {
-      try {
-        const token = localStorage.getItem('session_token') || '';
-        await orus.validateSession(token);
-      } catch (err) {
-        console.error('Session validation error:', err);
-      }
-    };
-    
-    validateSession();
-  }, []);
+  const handleRechargeClick = () => {
+    navigate(`${APP_PATHS.WALLET}/recharge`);
+  };
+  
+  const handleViewTransactions = () => {
+    navigate(`${APP_PATHS.WALLET}/history`);
+  };
   
   return (
     <Layout 
-      title="UBX Wallet" 
+      title="Wallet" 
       description="Manage your UBX tokens and transactions"
-      showBreadcrumbs
+      showBreadcrumbs={true}
     >
-      <SecureRouteWrapper minimumSecurityLevel="enhanced">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-6">
-          <Card className="border-t-4 border-t-primary">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Wallet className="h-5 w-5" />
-                UBX Balance
-              </CardTitle>
-              <CardDescription>Your current UberEscorts token balance</CardDescription>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-lg">Wallet Security</CardTitle>
+              <WalletConnect />
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">{balance.toLocaleString()} UBX</div>
-              <div className="mt-4 flex gap-2">
-                <Button>Recharge Wallet</Button>
-                <Button variant="outline">View Transactions</Button>
-              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Connect your wallet to enable secure transactions and withdrawals.
+              </p>
             </CardContent>
           </Card>
           
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="packages">UBX Packages</TabsTrigger>
-              <TabsTrigger value="history">Transaction History</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="overview" className="mt-4 space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Button className="h-auto py-4 flex flex-col items-center">
-                    <span>Buy Boost</span>
-                    <span className="text-xs opacity-70 mt-1">Increase Visibility</span>
-                  </Button>
-                  <Button className="h-auto py-4 flex flex-col items-center" variant="outline">
-                    <span>Purchase Credits</span>
-                    <span className="text-xs opacity-70 mt-1">Add to Wallet</span>
-                  </Button>
-                  <Button className="h-auto py-4 flex flex-col items-center" variant="outline">
-                    <span>Transfer UBX</span>
-                    <span className="text-xs opacity-70 mt-1">Send to Others</span>
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="packages" className="mt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>UBX Packages</CardTitle>
-                  <CardDescription>Purchase UBX tokens in packages</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[
-                    { name: 'Starter', amount: 1000, price: 10, popular: false },
-                    { name: 'Standard', amount: 5000, price: 45, popular: true },
-                    { name: 'Premium', amount: 10000, price: 85, popular: false }
-                  ].map((pkg) => (
-                    <Card key={pkg.name} className={pkg.popular ? 'border-primary' : ''}>
-                      <CardHeader className={pkg.popular ? 'bg-primary/10' : ''}>
-                        <CardTitle>{pkg.name}</CardTitle>
-                        {pkg.popular && <span className="text-xs font-medium text-primary">Most Popular</span>}
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">{pkg.amount} UBX</div>
-                        <div className="mt-2 text-sm text-muted-foreground">
-                          ${pkg.price} USD
-                        </div>
-                        <Button className="mt-4 w-full">Purchase</Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="history" className="mt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Transaction History</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { type: 'Purchase', amount: 5000, date: '2025-05-07', status: 'completed' },
-                      { type: 'Boost', amount: -1000, date: '2025-05-06', status: 'completed' },
-                      { type: 'Credit', amount: 500, date: '2025-05-05', status: 'completed' },
-                    ].map((tx, i) => (
-                      <div key={i} className="flex justify-between items-center border-b pb-3">
-                        <div>
-                          <div className="font-medium">{tx.type}</div>
-                          <div className="text-sm text-muted-foreground">{tx.date}</div>
-                        </div>
-                        <div className={tx.amount > 0 ? 'text-green-500' : 'text-red-500'}>
-                          {tx.amount > 0 ? `+${tx.amount}` : tx.amount} UBX
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+          <UBXWallet 
+            compact={false}
+            showRefresh={true}
+            showHistory={true}
+            onRecharge={handleRechargeClick}
+          />
+          
+          <SolanaWalletPanel />
         </div>
-      </SecureRouteWrapper>
+        
+        <div className="space-y-6">
+          <SecureWalletSection balance={250.00} />
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="transactions">
+                <TabsList className="w-full">
+                  <TabsTrigger value="transactions" className="flex-1">Transactions</TabsTrigger>
+                  <TabsTrigger value="earnings" className="flex-1">Earnings</TabsTrigger>
+                  <TabsTrigger value="spending" className="flex-1">Spending</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="transactions" className="pt-4">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center py-2 border-b">
+                      <span className="text-sm">Boost Purchase</span>
+                      <span className="text-sm text-red-500">-25 UBX</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b">
+                      <span className="text-sm">Wallet Recharge</span>
+                      <span className="text-sm text-green-500">+100 UBX</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b">
+                      <span className="text-sm">Content Purchase</span>
+                      <span className="text-sm text-red-500">-15 UBX</span>
+                    </div>
+                  </div>
+                  
+                  <button 
+                    className="w-full text-center text-sm text-muted-foreground underline mt-4"
+                    onClick={handleViewTransactions}
+                  >
+                    View all transactions
+                  </button>
+                </TabsContent>
+                
+                <TabsContent value="earnings" className="pt-4">
+                  <p className="text-sm text-muted-foreground">No recent earnings to display.</p>
+                </TabsContent>
+                
+                <TabsContent value="spending" className="pt-4">
+                  <p className="text-sm text-muted-foreground">No recent spending to display.</p>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </Layout>
   );
 };
