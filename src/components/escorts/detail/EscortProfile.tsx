@@ -1,80 +1,82 @@
 
-import { useState } from "react";
-import { Escort } from "@/types/escort"; // Use strict Escort interface here
-import { VerificationLevel } from "@/types/verification";
-import { useFavorites } from "@/contexts/FavoritesContext";
-import MediaSection from "./MediaSection";
-import ProfileInfo from "./ProfileInfo";
-import ProfileTabs from "./profile/ProfileTabs";
-import DialogManager from "./profile/DialogManager";
+import React, { useState } from 'react';
+import { Escort, ServiceType } from "@/types/escort";
+import { Button } from '@/components/ui/button';
+import { Heart, MessageSquare, Share2, Calendar } from 'lucide-react';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import ProfileInfo from './ProfileInfo';
+import ProfileTabs from './ProfileTabs';
+import { useFavorites } from '@/contexts/FavoritesContext';
+import { VerificationLevel } from '@/types/verification';
 
 interface EscortProfileProps {
   escort: Escort;
-  onBookNow: () => void;
 }
 
-const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
-  const { toggleFavorite } = useFavorites();
-  const [bookingOpen, setBookingOpen] = useState(false);
-  const [messageOpen, setMessageOpen] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
+const EscortProfile: React.FC<EscortProfileProps> = ({ escort }) => {
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const [showingDialog, setShowingDialog] = useState<'booking' | 'message' | 'share' | null>(null);
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
-  // Normalize verificationLevel with VerificationLevel enum and fallback to 'none'
-  const normalizedVerificationLevel: VerificationLevel =
-    escort.verificationLevel &&
-    typeof escort.verificationLevel === "string" &&
-    Object.values(VerificationLevel).includes(escort.verificationLevel as VerificationLevel)
-      ? (escort.verificationLevel as VerificationLevel)
-      : VerificationLevel.NONE;
-
-  // Create normalized escort with correct verificationLevel type
+  // Ensure the escort has sensible defaults for missing values
   const normalizedEscort: Escort = {
     ...escort,
-    verificationLevel: normalizedVerificationLevel,
+    name: escort.name || 'Unknown',
+    age: escort.age || 25,
+    location: escort.location || 'Unknown',
+    rating: escort.rating || 0,
+    reviewCount: escort.reviewCount || 0,
+    verificationLevel: (escort.verificationLevel || 'none') as VerificationLevel,
+    tags: escort.tags || [],
+    price: escort.price || 0,
+    services: escort.services || [],
+    bio: escort.bio || 'No biography available',
+    images: escort.images || [escort.imageUrl || escort.profileImage || ''],
+    languages: escort.languages || ['English'],
   };
 
-  const handleFavoriteToggle = () => {
-    toggleFavorite('escorts', escort.id);
+  const handleFavoriteClick = () => {
+    if (isFavorite('escorts', escort.id)) {
+      removeFavorite('escorts', escort.id);
+    } else {
+      addFavorite('escorts', escort);
+    }
   };
+
+  // Check if this escort is in favorites
+  const isFav = isFavorite('escorts', escort.id);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2">
-        <MediaSection escort={normalizedEscort} />
+    <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex-1">
+        <ProfileInfo escort={normalizedEscort} />
+      </div>
 
-        <div className="block lg:hidden mt-6">
-          <ProfileInfo
-            escort={normalizedEscort}
-            onFavoriteToggle={handleFavoriteToggle}
-            onBookingOpen={() => setBookingOpen(true)}
-            onMessageOpen={() => setMessageOpen(true)}
-            onShareOpen={() => setShareOpen(true)}
-          />
-        </div>
-
+      <div className="md:w-72 lg:w-80 space-y-4">
+        {/* Mobile Actions */}
+        {isMobile && (
+          <div className="flex space-x-2 mb-4">
+            <Button className="flex-1">
+              <Calendar className="mr-2 h-4 w-4" />
+              Book Now
+            </Button>
+            
+            <Button variant="outline" className="flex-grow-0">
+              <Heart className="h-4 w-4" fill={isFav ? "currentColor" : "none"} />
+            </Button>
+            
+            <Button variant="outline" className="flex-grow-0">
+              <MessageSquare className="h-4 w-4" />
+            </Button>
+            
+            <Button variant="outline" className="flex-grow-0">
+              <Share2 className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+        
         <ProfileTabs escort={normalizedEscort} />
       </div>
-
-      <div className="hidden lg:block">
-        <ProfileInfo
-          escort={normalizedEscort}
-          onFavoriteToggle={handleFavoriteToggle}
-          onBookingOpen={() => setBookingOpen(true)}
-          onMessageOpen={() => setMessageOpen(true)}
-          onShareOpen={() => setShareOpen(true)}
-        />
-      </div>
-
-      <DialogManager
-        escort={normalizedEscort}
-        onBookNow={onBookNow}
-        bookingOpen={bookingOpen}
-        messageOpen={messageOpen}
-        shareOpen={shareOpen}
-        onBookingClose={() => setBookingOpen(false)}
-        onMessageClose={() => setMessageOpen(false)}
-        onShareClose={() => setShareOpen(false)}
-      />
     </div>
   );
 };

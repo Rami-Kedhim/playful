@@ -1,4 +1,6 @@
 
+import { VerificationLevel } from './verification';
+
 export interface Escort {
   id: string;
   name: string;
@@ -33,7 +35,7 @@ export interface Escort {
   contactInfo?: ContactInfo;
 }
 
-export type VerificationLevel = "none" | "basic" | "verified" | "premium";
+export type ServiceType = "in-call" | "out-call" | "virtual" | "massage" | "dinner";
 
 export interface Availability {
   monday?: string[];

@@ -1,129 +1,132 @@
 
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Escort } from "@/types/escort"; // Use strict Escort interface here
-import { VerificationLevel } from "@/types/verification";
-import ProfileHeader from "./ProfileHeader";
-import ProfileActions from "./ProfileActions";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { VideoIcon, ImageIcon } from "lucide-react";
-import BookingDialog from "./booking/BookingDialog";
+import React from 'react';
+import { Escort } from '@/types/escort';
+import { Badge } from '@/components/ui/badge';
+import { User, MapPin, Star, CheckCircle, Language } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
+import ServiceTypeBadge from '@/components/escorts/filters/ServiceTypeBadge';
+import ImageGallery from './ImageGallery';
+import { VerificationLevel } from '@/types/verification';
 
 interface ProfileInfoProps {
   escort: Escort;
-  onFavoriteToggle: () => void;
-  onBookingOpen: () => void;
-  onMessageOpen: () => void;
-  onShareOpen: () => void;
 }
 
-const ProfileInfo = ({
-  escort,
-  onFavoriteToggle,
-  onBookingOpen,
-  onMessageOpen,
-  onShareOpen,
-}: ProfileInfoProps) => {
-  const [serviceTab, setServiceTab] = useState("in-person");
-  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+const ProfileInfo: React.FC<ProfileInfoProps> = ({ escort }) => {
+  // Use shared verification level type
+  const verificationLevel: VerificationLevel = escort.verificationLevel || 'none';
 
-  // Normalize verificationLevel with proper enum and fallback to VerificationLevel.NONE
-  const normalizedVerificationLevel: VerificationLevel =
-    escort.verificationLevel &&
-    typeof escort.verificationLevel === "string" &&
-    Object.values(VerificationLevel).includes(escort.verificationLevel as VerificationLevel)
-      ? (escort.verificationLevel as VerificationLevel)
-      : VerificationLevel.NONE;
-
-  const normalizedEscort: Escort = {
-    ...escort,
-    verificationLevel: normalizedVerificationLevel,
+  const verificationColors = {
+    'none': 'bg-gray-200 text-gray-700',
+    'basic': 'bg-blue-100 text-blue-700',
+    'verified': 'bg-green-100 text-green-700',
+    'premium': 'bg-purple-100 text-purple-700',
   };
-
-  const handleBookNow = () => {
-    setBookingDialogOpen(true);
-  };
-
-  const bookingOnSubmit = async (data: any) => {
-    console.log("BookingDialog onSubmit called", data);
-    return Promise.resolve();
+  
+  const verificationLabels = {
+    'none': 'Not Verified',
+    'basic': 'Basic Verified',
+    'verified': 'Verified',
+    'premium': 'Premium Verified',
   };
 
   return (
     <div className="space-y-6">
-      <Card className="overflow-hidden">
-        <CardContent className="p-6">
-          <ProfileHeader escort={normalizedEscort} onFavoriteToggle={onFavoriteToggle} />
-
-          <div className="mt-6 mb-6">
-            <Tabs value={serviceTab} onValueChange={setServiceTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="in-person">In Person</TabsTrigger>
-                <TabsTrigger value="content">Virtual Content</TabsTrigger>
-                <TabsTrigger value="livestream">Live Stream</TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            <div className="mt-4">
-              {serviceTab === "in-person" && (
-                <div className="space-y-4">
-                  <p className="text-muted-foreground text-sm">
-                    Book {normalizedEscort.name} for in-person encounters and enjoy personalized services.
-                  </p>
-                  <Button onClick={handleBookNow} className="w-full">
-                    Book Now
-                  </Button>
-                </div>
-              )}
-
-              {serviceTab === "content" && (
-                <div className="space-y-4">
-                  <p className="text-muted-foreground text-sm">
-                    Access {normalizedEscort.name}&apos;s exclusive photos, videos, and premium content.
-                  </p>
-                  <Button asChild className="w-full">
-                    <Link to={`/escort/${normalizedEscort.id}/content`}>
-                      <ImageIcon className="mr-2 h-4 w-4" />
-                      View Content
-                    </Link>
-                  </Button>
-                </div>
-              )}
-
-              {serviceTab === "livestream" && (
-                <div className="space-y-4">
-                  <p className="text-muted-foreground text-sm">
-                    Join {normalizedEscort.name}&apos;s live streams for real-time interaction and personalized experiences.
-                  </p>
-                  <Button asChild className="w-full">
-                    <Link to={`/escort/${normalizedEscort.id}/live`}>
-                      <VideoIcon className="mr-2 h-4 w-4" />
-                      Join Live Stream
-                    </Link>
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <ProfileActions
-            escort={normalizedEscort}
-            onBookingOpen={onBookingOpen}
-            onMessageOpen={onMessageOpen}
-            onShareOpen={onShareOpen}
-          />
-        </CardContent>
-      </Card>
-
-      <BookingDialog
-        escort={normalizedEscort}
-        isOpen={bookingDialogOpen}
-        onClose={() => setBookingDialogOpen(false)}
-        onSubmit={bookingOnSubmit}
-        onBookNow={onBookingOpen}
+      {/* Gallery */}
+      <ImageGallery 
+        images={escort.images || [escort.imageUrl || '']} 
+        name={escort.name}
       />
+      
+      {/* Basic Info */}
+      <div className="flex flex-wrap items-center gap-2 md:gap-4">
+        <h1 className="text-2xl md:text-3xl font-bold">{escort.name}</h1>
+        
+        {escort.age && (
+          <div className="flex items-center text-muted-foreground">
+            <User className="inline-block mr-1 h-4 w-4" />
+            <span>{escort.age} years</span>
+          </div>
+        )}
+        
+        {escort.location && (
+          <div className="flex items-center text-muted-foreground">
+            <MapPin className="inline-block mr-1 h-4 w-4" />
+            <span>{escort.location}</span>
+          </div>
+        )}
+        
+        {Boolean(escort.rating) && (
+          <div className="flex items-center">
+            <Star className="inline-block mr-1 h-4 w-4 text-yellow-500 fill-yellow-500" />
+            <span className="mr-1">{escort.rating?.toFixed(1)}</span>
+            <span className="text-sm text-muted-foreground">
+              ({escort.reviewCount || 0} reviews)
+            </span>
+          </div>
+        )}
+      </div>
+      
+      {/* Verification Badge */}
+      <div className="flex items-center gap-2">
+        <Badge className={verificationColors[verificationLevel]}>
+          <CheckCircle className="mr-1 h-3 w-3" />
+          {verificationLabels[verificationLevel]}
+        </Badge>
+        
+        {escort.price && (
+          <Badge variant="outline" className="font-medium">
+            {formatCurrency(escort.price)}/hr
+          </Badge>
+        )}
+      </div>
+      
+      {/* Service Types */}
+      {escort.services && escort.services.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground">Services</h3>
+          <div className="flex flex-wrap gap-2">
+            {escort.services.map((service, i) => (
+              <ServiceTypeBadge key={i} service={service as any} />
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Languages */}
+      {escort.languages && escort.languages.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground flex items-center">
+            <Language className="mr-1 h-4 w-4" />
+            Languages
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {escort.languages.map((lang, i) => (
+              <Badge key={i} variant="outline">{lang}</Badge>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Bio */}
+      {escort.bio && (
+        <div className="space-y-2">
+          <h3 className="font-medium">About Me</h3>
+          <p className="text-muted-foreground whitespace-pre-line">{escort.bio}</p>
+        </div>
+      )}
+      
+      {/* Tags */}
+      {escort.tags && escort.tags.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground">Tags</h3>
+          <div className="flex flex-wrap gap-2">
+            {escort.tags.map((tag, i) => (
+              <Badge key={i} variant="outline">{tag}</Badge>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

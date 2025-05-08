@@ -18,10 +18,14 @@ const CreatorHeader: React.FC<CreatorHeaderProps> = ({
   isSubscribed,
   isFavorite 
 }) => {
-  const { toggleFavorite } = useFavorites();
+  const favorites = useFavorites();
   
   const handleFavoriteToggle = () => {
-    toggleFavorite('creators', creator.id);
+    if (isFavorite) {
+      favorites.removeFavorite('creators', creator.id);
+    } else {
+      favorites.addFavorite('creators', creator);
+    }
   };
   
   return (

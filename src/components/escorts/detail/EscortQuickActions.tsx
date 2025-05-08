@@ -19,10 +19,14 @@ const EscortQuickActions: React.FC<EscortQuickActionsProps> = ({
   onBookNow,
   onMessage
 }) => {
-  const { toggleFavorite } = useFavorites();
+  const { addFavorite, removeFavorite } = useFavorites();
   
   const handleFavoriteToggle = () => {
-    toggleFavorite('escorts', escort.id);
+    if (isFavorite) {
+      removeFavorite('escorts', escort.id);
+    } else {
+      addFavorite('escorts', escort);
+    }
   };
   
   return (

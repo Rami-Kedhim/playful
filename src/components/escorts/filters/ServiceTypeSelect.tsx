@@ -1,88 +1,86 @@
 
 import React from 'react';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ServiceTypeFilter } from '@/contexts/ServiceTypeContext';
 import ServiceTypeIcon from './ServiceTypeIcon';
 
-interface ServiceTypeSelectProps {
+export interface ServiceTypeSelectProps {
   value: ServiceTypeFilter;
-  onChange: (value: ServiceTypeFilter) => void;
+  onChange: (type: ServiceTypeFilter) => void;
+  label?: string;
   className?: string;
-  label?: string; // Added label prop
 }
 
 const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
   value,
   onChange,
-  className = '',
-  label
+  label,
+  className,
 }) => {
-  // Ensure we have a safe value
-  const safeValue: ServiceTypeFilter = !value ? 'any' : value;
-  
-  // Handle change with type safety
-  const handleChange = (newValue: string) => {
-    // Cast to ServiceTypeFilter since we control the options
-    onChange(newValue as ServiceTypeFilter);
-  };
-  
   return (
-    <div className={`space-y-2 ${className}`}>
-      {label !== undefined && <h3 className="text-sm font-medium">{label || "Service Type"}</h3>}
-      <RadioGroup
-        value={safeValue}
-        onValueChange={handleChange}
-        className="flex flex-col space-y-1.5"
-      >
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="any" id="any-service" />
-          <Label htmlFor="any-service" className="text-sm flex items-center cursor-pointer">
-            <ServiceTypeIcon type="any" className="mr-1.5" />
-            Any Service Type
-          </Label>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="in-person" id="in-person" />
-          <Label htmlFor="in-person" className="text-sm flex items-center cursor-pointer">
-            <ServiceTypeIcon type="in-person" className="mr-1.5" />
-            In Person
-          </Label>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="virtual" id="virtual" />
-          <Label htmlFor="virtual" className="text-sm flex items-center cursor-pointer">
-            <ServiceTypeIcon type="virtual" className="mr-1.5" />
-            Virtual
-          </Label>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="both" id="both-types" />
-          <Label htmlFor="both-types" className="text-sm flex items-center cursor-pointer">
-            <ServiceTypeIcon type="both" className="mr-1.5" />
-            Both Types
-          </Label>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="massage" id="massage" />
-          <Label htmlFor="massage" className="text-sm flex items-center cursor-pointer">
-            <ServiceTypeIcon type="massage" className="mr-1.5" />
-            Massage
-          </Label>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="dinner" id="dinner" />
-          <Label htmlFor="dinner" className="text-sm flex items-center cursor-pointer">
-            <ServiceTypeIcon type="dinner" className="mr-1.5" />
-            Dinner Date
-          </Label>
-        </div>
-      </RadioGroup>
+    <div className={className}>
+      {label && <div className="text-sm font-medium mb-2">{label}</div>}
+      <Select value={value} onValueChange={(val: ServiceTypeFilter) => onChange(val)}>
+        <SelectTrigger className="w-full">
+          <SelectValue>
+            <div className="flex items-center">
+              <ServiceTypeIcon type={value} className="mr-2 h-4 w-4" />
+              <span>
+                {value === 'any' ? 'Any Service Type' :
+                value === 'in-call' ? 'In-Call' :
+                value === 'out-call' ? 'Out-Call' :
+                value === 'virtual' ? 'Virtual' : 
+                value === 'massage' ? 'Massage' : 
+                value === 'dinner' ? 'Dinner Date' : 'Unknown'}
+              </span>
+            </div>
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="any">
+            <div className="flex items-center">
+              <ServiceTypeIcon type="any" className="mr-2 h-4 w-4" />
+              <span>Any Service Type</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="in-call">
+            <div className="flex items-center">
+              <ServiceTypeIcon type="in-call" className="mr-2 h-4 w-4" />
+              <span>In-Call</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="out-call">
+            <div className="flex items-center">
+              <ServiceTypeIcon type="out-call" className="mr-2 h-4 w-4" />
+              <span>Out-Call</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="virtual">
+            <div className="flex items-center">
+              <ServiceTypeIcon type="virtual" className="mr-2 h-4 w-4" />
+              <span>Virtual</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="massage">
+            <div className="flex items-center">
+              <ServiceTypeIcon type="massage" className="mr-2 h-4 w-4" />
+              <span>Massage</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="dinner">
+            <div className="flex items-center">
+              <ServiceTypeIcon type="dinner" className="mr-2 h-4 w-4" />
+              <span>Dinner Date</span>
+            </div>
+          </SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 };

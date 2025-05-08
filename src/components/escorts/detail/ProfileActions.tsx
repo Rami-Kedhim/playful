@@ -19,18 +19,26 @@ const ProfileActions = ({
   onMessageOpen, 
   onShareOpen 
 }: ProfileActionsProps) => {
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
   const [isLoadingFavorite, setIsLoadingFavorite] = useState(false);
   
   const handleFavoriteToggle = async () => {
     setIsLoadingFavorite(true);
-    toggleFavorite('escorts', escort.id);
-    toast({
-      title: isFavorite('escorts', escort.id) ? "Removed from favorites" : "Added to favorites",
-      description: isFavorite('escorts', escort.id) 
-        ? `${escort.name} has been removed from your favorites.` 
-        : `${escort.name} has been added to your favorites.`,
-    });
+    
+    if (isFavorite('escorts', escort.id)) {
+      removeFavorite('escorts', escort.id);
+      toast({
+        title: "Removed from favorites",
+        description: `${escort.name} has been removed from your favorites.`,
+      });
+    } else {
+      addFavorite('escorts', escort);
+      toast({
+        title: "Added to favorites",
+        description: `${escort.name} has been added to your favorites.`,
+      });
+    }
+    
     setIsLoadingFavorite(false);
   };
   

@@ -1,40 +1,32 @@
 
-export enum ContentType {
-  PHOTO = "photo",
-  VIDEO = "video",
-  MESSAGE = "message",
-  AUDIO = "audio",
-  STORY = "story",
-  LIVESTREAM = "livestream"
+export type ContentItemType = "escort" | "creator" | "livecam";
+
+export interface ContentItem {
+  id: string;
+  title: string;
+  image: string;
+  type: ContentItemType;
+  rating: number;
+  price: string | number;
+  location?: string;
+  featured?: boolean;
 }
 
-export interface VirtualContent {
+export interface MediaResource {
   id: string;
+  url: string;
+  type: 'image' | 'video';
+  thumbnail?: string;
   title?: string;
   description?: string;
-  thumbnailUrl?: string;
-  contentUrl?: string;
-  type: ContentType;
-  price: number;
-  creatorId: string;
-  unlocked?: boolean;
 }
 
-export interface ContentUnlockOptions {
-  creatorId: string;
-  contentId: string;
-  contentType: ContentType;
-  price: number;
-}
-
-export interface ContentCreator {
-  id: string;
-  name: string;
-  username: string;
-  bio?: string;
-  avatarUrl?: string;
-  isVerified?: boolean;
-  isOnline?: boolean;
-  rating?: number;
-  tags?: string[];
+export interface SearchFilters {
+  query?: string;
+  location?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  services?: string[];
+  sortBy?: 'price' | 'rating' | 'distance' | 'popularity';
+  sortDir?: 'asc' | 'desc';
 }

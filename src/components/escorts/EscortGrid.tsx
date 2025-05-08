@@ -1,8 +1,9 @@
 
-import { Escort } from '@/types/Escort';
+import React from 'react';
+import { Escort } from '@/types/escort';
 import EscortCard from './EscortCard';
 
-interface ExtendedEscort extends Escort {
+export interface ExtendedEscort extends Escort {
   sexualOrientation?: string;
   lastActive?: string | Date;
 }
@@ -71,4 +72,3 @@ const EscortGrid: React.FC<EscortGridProps> = ({
 };
 
 export default EscortGrid;
-
