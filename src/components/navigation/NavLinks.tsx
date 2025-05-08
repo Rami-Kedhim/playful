@@ -47,15 +47,6 @@ const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
       </NavLink>
       
       <NavLink 
-        to={AppPaths.BRAIN_HUB}
-        className={({ isActive }) => 
-          cn("text-sm flex items-center gap-1.5", isActive ? "font-bold text-primary" : "text-muted-foreground hover:text-foreground")
-        }
-      >
-        <Brain className="w-4 h-4" /> Brain Hub
-      </NavLink>
-      
-      <NavLink 
         to={AppPaths.MESSAGES}
         className={({ isActive }) => 
           cn("text-sm flex items-center gap-1.5", isActive ? "font-bold text-primary" : "text-muted-foreground hover:text-foreground")

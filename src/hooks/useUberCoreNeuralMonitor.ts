@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
+import { uberCore } from '@/core/UberCore';
 
 /**
  * Neural monitoring hook for system performance
@@ -20,25 +21,28 @@ export function useUberCoreNeuralMonitor() {
   });
   
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<null | string>(null);
   const [isMonitoring, setIsMonitoring] = useState(false);
-  const [performanceReport, setPerformanceReport] = useState(null);
-  const [systemStatus, setSystemStatus] = useState(null);
-  const [systemMetrics, setSystemMetrics] = useState(null);
-  const [subsystemHealth, setSubsystemHealth] = useState([]);
+  const [performanceReport, setPerformanceReport] = useState<any>(null);
+  const [systemStatus, setSystemStatus] = useState<any>(null);
+  const [systemMetrics, setSystemMetrics] = useState<any>(null);
+  const [subsystemHealth, setSubsystemHealth] = useState<any[]>([]);
   
   const performHealthCheck = useCallback(() => {
     try {
+      // Use actual uberCore health data if available
+      const metrics = uberCore.getSystemHealth();
+      
       return {
-        status: 'ok',
+        status: metrics.errorRate < 0.05 ? 'ok' : 'degraded',
         metrics: {
-          load: Math.random() * 100,
-          memory: Math.random() * 100,
-          latency: Math.random() * 100,
-          errorRate: Math.random() * 0.05,
-          averageResponseTime: Math.random() * 200,
-          cpuUsage: Math.random() * 100,
-          memoryUsage: Math.random() * 100
+          load: metrics.load,
+          memory: metrics.memory,
+          latency: metrics.latency,
+          errorRate: metrics.errorRate,
+          averageResponseTime: metrics.averageResponseTime,
+          cpuUsage: metrics.cpuUsage,
+          memoryUsage: metrics.memoryUsage
         },
         timestamp: new Date().toISOString()
       };
@@ -79,22 +83,19 @@ export function useUberCoreNeuralMonitor() {
     setIsMonitoring(true);
     refreshHealth();
     
-    // Generate some mock data for the other state variables
+    // Get actual system status and subsystem health from uberCore
+    const status = uberCore.getSystemStatus();
+    const subHealth = uberCore.checkSubsystemHealth();
+    
+    setSystemStatus(status);
+    setSubsystemHealth(subHealth);
+    
     setPerformanceReport({
       timestamp: new Date().toISOString(),
       overallHealth: 'good',
       metrics: {
         cpuUsage: Math.random() * 100,
         memoryUsage: Math.random() * 100
-      }
-    });
-    
-    setSystemStatus({
-      operational: true,
-      services: {
-        auth: 'online',
-        analytics: 'online',
-        ai: 'online'
       }
     });
     
@@ -107,15 +108,6 @@ export function useUberCoreNeuralMonitor() {
       errorRate: Math.random() * 0.05,
       averageResponseTime: Math.random() * 200
     });
-    
-    setSubsystemHealth([
-      { name: 'escorts', status: 'operational', health: 95 },
-      { name: 'creators', status: 'operational', health: 92 },
-      { name: 'livecams', status: 'operational', health: 88 },
-      { name: 'companion', status: 'operational', health: 90 },
-      { name: 'seo', status: 'operational', health: 85 },
-      { name: 'wallet', status: 'operational', health: 97 }
-    ]);
   }, [refreshHealth]);
   
   const stopMonitoring = useCallback(() => {
@@ -145,6 +137,9 @@ export function useUberCoreNeuralMonitor() {
         errorRate: Math.random() * 0.05,
         averageResponseTime: Math.random() * 200
       });
+      
+      // Update subsystem health from uberCore
+      setSubsystemHealth(uberCore.checkSubsystemHealth());
     }
   }, [refreshHealth, isMonitoring]);
   

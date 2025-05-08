@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/hooks/auth';
+import { useAuth } from '@/hooks/auth/useAuthContext';
 import { Button } from '@/components/ui/button';
 import { 
   Laptop, 
@@ -9,7 +9,8 @@ import {
   X, 
   User, 
   LogOut, 
-  Settings 
+  Settings,
+  Brain
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -22,12 +23,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import MobileMenu from '@/components/navigation/MobileMenu';
 import NavLinks from '@/components/navigation/NavLinks';
+import { AppPaths } from '@/routes/routeConfig';
 
-interface HeaderProps {
+export interface HeaderProps {
   simplified?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ simplified = false }) => {
+export const Header: React.FC<HeaderProps> = ({ simplified = false }) => {
   const { user, isAuthenticated, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -85,6 +87,12 @@ const Header: React.FC<HeaderProps> = ({ simplified = false }) => {
                   <Link to="/settings" className="w-full flex items-center">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to={AppPaths.NEURAL_MONITOR} className="w-full flex items-center">
+                    <Brain className="mr-2 h-4 w-4" />
+                    Neural Monitor
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

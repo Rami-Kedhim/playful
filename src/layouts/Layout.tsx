@@ -1,69 +1,85 @@
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Outlet } from 'react-router-dom';
-import Header from '@/components/navigation/Header';
-import Footer from '@/components/navigation/Footer';
-import { cn } from '@/lib/utils';
-import Breadcrumbs from '@/components/navigation/Breadcrumbs';
+import { Header } from '@/components/navigation/Header';
+import { Footer } from '@/components/layout/Footer';
 
 export interface LayoutProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   title?: string;
   description?: string;
-  hideHeader?: boolean;
+  showNavigation?: boolean;
+  requireAuth?: boolean;
+  showHeader?: boolean;
   hideNavbar?: boolean;
   hideFooter?: boolean;
-  showBreadcrumbs?: boolean;
   containerClass?: string;
   fullWidth?: boolean;
-  className?: string;
-  requireAuth?: boolean;
-  showAuthButton?: boolean;
-  simplified?: boolean;
+  sidebar?: ReactNode;
+  sidebarPosition?: 'left' | 'right';
+  headerAction?: ReactNode;
+  headerContent?: ReactNode;
+  footerContent?: ReactNode;
 }
 
 /**
- * Unified Layout component that serves as the main layout across the UberEscorts platform.
- * This component provides a consistent structure for all pages in the application.
+ * Main application layout component
+ * This is the consolidated layout that all other layout components use
  */
-const Layout: React.FC<LayoutProps> = ({
-  children,
+const Layout: React.FC<LayoutProps> = ({ 
+  children, 
   title,
   description,
-  hideHeader = false,
+  showNavigation = true,
+  requireAuth, // Not used directly but kept for prop consistency
+  showHeader = true,
   hideNavbar = false,
   hideFooter = false,
-  showBreadcrumbs = false,
-  containerClass = "container mx-auto px-4 py-6",
+  containerClass = "container mx-auto px-4 py-4",
   fullWidth = false,
-  className,
-  simplified = false,
+  sidebar,
+  sidebarPosition = 'right',
+  headerAction,
+  headerContent,
+  footerContent
 }) => {
   return (
-    <div className={cn("flex min-h-screen flex-col bg-background theme-transition", className)}>
-      {!hideHeader && !hideNavbar && <Header simplified={simplified} />}
-      
-      {(title || description || showBreadcrumbs) && (
-        <div className="bg-gradient-to-r from-background to-background/80 border-b border-border/40 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-6">
-            <div className="space-y-2">
-              {showBreadcrumbs && (
-                <div className="mb-2 text-sm text-muted-foreground">
-                  <Breadcrumbs />
-                </div>
-              )}
-              {title && <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">{title}</h1>}
-              {description && <p className="text-muted-foreground">{description}</p>}
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-background flex flex-col">
+      {showHeader && !hideNavbar && (
+        <Header simplified={!showNavigation} />
       )}
       
-      <main className={cn("flex-1 animate-fade-in", !fullWidth && containerClass)}>
-        {children || <Outlet />}
+      <main className={`flex-1 ${fullWidth ? "w-full" : containerClass}`}>
+        {title && (
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+            {description && <p className="text-muted-foreground">{description}</p>}
+            {headerContent}
+          </div>
+        )}
+        
+        <div className={`flex ${sidebar ? (sidebarPosition === 'left' ? 'flex-row-reverse' : 'flex-row') : 'flex-col'} gap-6`}>
+          {sidebar && (
+            <aside className="w-full lg:w-64 flex-shrink-0">
+              {sidebar}
+            </aside>
+          )}
+          
+          <div className={`flex-1 ${sidebar ? "lg:max-w-[calc(100%-16rem)]" : "w-full"}`}>
+            {children || <Outlet />}
+          </div>
+        </div>
+        
+        {footerContent && (
+          <div className="mt-6">
+            {footerContent}
+          </div>
+        )}
       </main>
-      
-      {!hideFooter && <Footer simplified={simplified} />}
+
+      {!hideFooter && (
+        <Footer />
+      )}
     </div>
   );
 };
