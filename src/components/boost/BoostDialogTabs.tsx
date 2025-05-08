@@ -93,7 +93,7 @@ const BoostDialogTabs: React.FC<DialogTabsProps> = ({
               Analytics
             </TabsTrigger>
           </TabsList>
-
+          
           <TabsContent value="packages" className="space-y-4">
             <ScrollArea className="max-h-[400px] pr-4">
               <BoostPackages 

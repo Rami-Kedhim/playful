@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { BoostAnalytics } from '@/types/pulse-boost';
 
 export interface AnalyticsData {
   additionalViews: number;
@@ -14,6 +15,7 @@ export interface AnalyticsData {
     withoutBoost?: number;
     increase?: number;
     change?: number;
+    value?: number;
   };
   interactions: {
     today: number;
@@ -23,6 +25,7 @@ export interface AnalyticsData {
     withoutBoost?: number;
     increase?: number;
     change?: number;
+    value?: number;
   };
   rank: {
     current: number;
@@ -47,6 +50,41 @@ export interface AnalyticsData {
     increase?: number;
   };
 }
+
+// Create a converter function to transform BoostAnalytics to AnalyticsData
+export const convertToAnalyticsData = (boostAnalytics: BoostAnalytics): AnalyticsData => {
+  return {
+    additionalViews: boostAnalytics.additionalViews || 0,
+    engagementIncrease: boostAnalytics.engagementIncrease || 0,
+    rankingPosition: boostAnalytics.rankingPosition || 0,
+    views: boostAnalytics.views || 0,
+    impressions: {
+      today: 0,
+      yesterday: 0,
+      weeklyAverage: 0,
+      withBoost: boostAnalytics.impressions?.withBoost || 0,
+      withoutBoost: boostAnalytics.impressions?.withoutBoost || 0,
+      increase: boostAnalytics.impressions?.increase || 0,
+      change: boostAnalytics.impressions?.change || 0,
+      value: boostAnalytics.impressions?.value || 0,
+    },
+    interactions: {
+      today: 0,
+      yesterday: 0,
+      weeklyAverage: 0,
+      withBoost: boostAnalytics.interactions?.withBoost || 0,
+      withoutBoost: boostAnalytics.interactions?.withoutBoost || 0,
+      increase: boostAnalytics.interactions?.increase || 0,
+      change: boostAnalytics.interactions?.change || 0,
+      value: boostAnalytics.interactions?.value || 0,
+    },
+    rank: {
+      current: 0,
+      previous: 0,
+      change: 0
+    }
+  };
+};
 
 export const useBoostAnalytics = (profileId?: string) => {
   const [data, setData] = useState<AnalyticsData | null>(null);
@@ -76,7 +114,8 @@ export const useBoostAnalytics = (profileId?: string) => {
             withBoost: 180,
             withoutBoost: 120,
             increase: 50,
-            change: 20
+            change: 20,
+            value: 180
           },
           interactions: {
             today: 45,
@@ -85,7 +124,8 @@ export const useBoostAnalytics = (profileId?: string) => {
             withBoost: 45,
             withoutBoost: 25,
             increase: 80,
-            change: 40
+            change: 40,
+            value: 45
           },
           rank: {
             current: 8,
@@ -126,6 +166,3 @@ export const useBoostAnalytics = (profileId?: string) => {
 };
 
 export default useBoostAnalytics;
-
-// Export class for backward compatibility
-export class BoostAnalytics {}

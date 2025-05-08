@@ -1,22 +1,18 @@
 
-export interface AIModelPreference {
-  model: string;
-  temperature?: number;
-  systemPrompt?: string;
-  outputFormat?: string;
-  maxTokens?: number;
-  provider?: string;
+export interface ModerateContentParams {
+  content: string;
+  userId?: string;
+  strictness?: 'low' | 'medium' | 'high';
+  contentType?: string; // Add this to fix BrainCore errors
 }
 
-export interface AIProvider {
-  name: string;
-  apiKey?: string;
-  baseUrl?: string;
-  models: string[];
-  capabilities: {
-    streaming: boolean;
-    functionCalling: boolean;
-    vision: boolean;
-    audio: boolean;
+export interface ModerationResult {
+  isAppropriate: boolean;
+  score: number;
+  categories: {
+    [key: string]: number;
   };
+  message?: string;
 }
+
+// Add any other AI-related types here

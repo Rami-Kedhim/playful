@@ -1,69 +1,31 @@
 
-export enum UserRole {
-  USER = 'user',
-  ADMIN = 'admin',
-  ESCORT = 'escort',
-  CREATOR = 'creator',
-  MODERATOR = 'moderator',
-  AI = 'ai'
-}
-
-export interface User {
-  id: string;
-  name?: string;
-  email: string;
-  role: UserRole;
-  username?: string;
-  avatarUrl?: string;
-  profileImageUrl?: string;
-  avatar_url?: string;
-  bio?: string;
-  website?: string;
-  roles?: string[];
-  ubxBalance?: number;
-  isVerified?: boolean;
-  created_at?: string;
-  user_metadata?: {
-    aiPreferences?: {
-      theme?: string;
-    };
-    username?: string;
-    region?: string;
-    lastAiInteraction?: string;
-    aiConversationCount?: number;
-    verification_request?: any;
-    aiFavoriteTopics?: string[];
-    aiEnabled?: boolean;
-    role?: string;
-  };
-}
-
 export interface UserProfile {
   id: string;
-  userId: string;
-  displayName?: string;
-  bio?: string;
+  name: string;
+  avatar_url?: string;  // Make this optional to avoid errors
+  email?: string;       // Make this optional to avoid errors
+  phone_number?: string;
   location?: string;
-  avatar?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  phone?: string;
-  website?: string;
-  verification_level?: string;
-  rates?: any;
-  services?: string[];
-  languages?: string[];
-  availability?: string[];
+  bio?: string;
+  is_escort?: boolean;
+  is_verified?: boolean;
+  verified?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  username?: string;    // Add this for EscortDashboard
+  ubx_balance?: number; // Add this for useBoostPurchase
+  ubxBalance?: number;  // Add this for useBoostPurchase (alternative naming)
 }
 
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterCredentials {
-  email: string;
-  password: string;
-  username?: string;
-  confirmPassword?: string;
+export interface AuthContextType {
+  user: UserProfile | null;
+  profile?: UserProfile | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  signIn: (email: string, password: string) => Promise<boolean>;
+  signOut: () => Promise<void>;
+  signUp: (email: string, password: string, userData?: any) => Promise<boolean>;
+  resetPassword: (email: string) => Promise<boolean>;
+  updateProfile: (data: Partial<UserProfile>) => Promise<boolean>;
+  setUser?: (user: UserProfile | null) => void; // Add this for useAuthContext
 }

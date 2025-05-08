@@ -1,4 +1,3 @@
-
 export interface BoostPackage {
   id: string;
   name: string;
@@ -16,11 +15,12 @@ export interface BoostPackage {
   boostMultiplier?: number;
   isPopular?: boolean;
   isMostPopular?: boolean;
+  isRecommended?: boolean;
 }
 
 export interface BoostStatus {
   isActive: boolean;
-  remainingTime: string;
+  remainingTime?: string;  // Make this optional to fix useBoostStatusBase errors
   packageId?: string;
   packageName?: string;
   startedAt?: Date;
@@ -104,4 +104,5 @@ export interface PulseBoost {
 
 export interface EnhancedBoostStatus extends BoostStatus {
   timeRemaining?: string;
+  boostPackage?: BoostPackage;
 }

@@ -1,70 +1,93 @@
 
-import { useState } from "react";
-import { BoostStatus } from "@/types/boost";
+import { useState } from 'react';
+import { useBoostContext } from './boost/useBoostContext';
+import { BoostStatus } from '@/types/boost';
 
-export const useBoostDialog = (profileId: string) => {
-  const [showDialog, setShowDialog] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [boostStatus, setBoostStatus] = useState<BoostStatus>({
-    isActive: false,
-    packageId: "",
-  });
+export const useBoostDialog = (profileId?: string) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('packages');
+  const [selectedPackage, setSelectedPackage] = useState<string>('');
   
-  const handleOpenDialog = () => {
-    setShowDialog(true);
-  };
-  
-  const handleCloseDialog = () => {
-    setShowDialog(false);
-  };
-  
-  const handleSuccess = () => {
-    // Implement success handling
-    setBoostStatus({
-      isActive: true,
-      packageId: "basic-boost",
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      startedAt: new Date()
-    });
-    handleCloseDialog();
-  };
-  
-  const toggleDialog = () => {
-    setShowDialog(!showDialog);
-    return true;
-  };
-
-  // Return the state and functions
-  return {
-    showDialog,
-    isLoading,
+  const {
     boostStatus,
-    handleOpenDialog,
-    handleCloseDialog,
-    handleSuccess,
-    toggleDialog,
-    // Additional properties
-    hermesStatus: {
-      position: 0,
-      activeUsers: 0,
-      estimatedVisibility: 0,
-      lastUpdateTime: new Date().toISOString(),
-      isActive: false
-    },
-    eligibility: {
-      isEligible: true
-    },
-    boostPackages: [],
-    selectedPackage: "",
-    setSelectedPackage: () => {},
-    handleBoost: async () => true,
-    handleCancel: async () => true,
-    dailyBoostUsage: 0,
-    dailyBoostLimit: 3,
-    activeTab: "packages",
-    setActiveTab: () => {},
-    getBoostPrice: () => 0,
-    formatBoostDuration: (duration: string) => duration
+    eligibility,
+    packages,
+    boostProfile,
+    cancelBoost,
+    loading,
+    error,
+    dailyBoostUsage = 0,
+    dailyBoostLimit = 3,
+    formatBoostDuration,
+    hermesStatus
+  } = useBoostContext();
+  
+  const openDialog = () => {
+    setIsOpen(true);
+    // Reset to packages tab when opening
+    setActiveTab('packages');
+    // Set first package as selected by default if available
+    if (packages.length > 0 && !selectedPackage) {
+      setSelectedPackage(packages[0].id);
+    }
+  };
+  
+  const closeDialog = () => {
+    setIsOpen(false);
+  };
+  
+  const handleSelectPackage = (id: string) => {
+    setSelectedPackage(id);
+  };
+  
+  const handleBoost = async (): Promise<boolean> => {
+    if (!profileId || !selectedPackage) return false;
+    
+    const success = await boostProfile(profileId, selectedPackage);
+    
+    if (success) {
+      closeDialog();
+    }
+    
+    return success;
+  };
+  
+  const handleCancelBoost = async (): Promise<boolean> => {
+    const success = await cancelBoost();
+    
+    if (success) {
+      closeDialog();
+    }
+    
+    return success;
+  };
+  
+  const getBoostPrice = (): number => {
+    const selected = packages.find(p => p.id === selectedPackage);
+    return selected?.price_ubx || 0;
+  };
+  
+  return {
+    isOpen,
+    setIsOpen,
+    openDialog,
+    closeDialog,
+    activeTab,
+    setActiveTab,
+    selectedPackage,
+    setSelectedPackage: handleSelectPackage,
+    handleBoost,
+    handleCancelBoost,
+    boostStatus,
+    eligibility,
+    packages,
+    loading,
+    error,
+    dailyBoostUsage,
+    dailyBoostLimit,
+    getBoostPrice,
+    hermesStatus,
+    formatBoostDuration
   };
 };
 

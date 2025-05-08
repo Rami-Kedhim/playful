@@ -1,10 +1,9 @@
 
 import { useState, useEffect } from 'react';
-import { PulseBoost } from '@/types/pulse-boost';
-import { BoostPackage } from '@/types/boost';
+import { PulseBoost, BoostPackage } from '@/types/pulse-boost';
 
 export const usePulseBoost = (profileId?: string) => {
-  const [pulseBoostPackages, setPulseBoostPackages] = useState<PulseBoost[]>([]);
+  const [pulseBoostPackages, setPulseBoostPackages] = useState<BoostPackage[]>([]);
   const [activeBoosts, setActiveBoosts] = useState<PulseBoost[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,8 +15,8 @@ export const usePulseBoost = (profileId?: string) => {
       
       setIsLoading(true);
       try {
-        // Mock data
-        setPulseBoostPackages([
+        // Mock data - use BoostPackage instead of directly using PulseBoost
+        const mockPackages: BoostPackage[] = [
           {
             id: 'pulse-1',
             name: 'Pulse Boost Basic',
@@ -46,8 +45,9 @@ export const usePulseBoost = (profileId?: string) => {
             badgeColor: '#7c3aed',
             features: ['5x visibility', '48-hour duration', 'Top placement', 'Homepage feature']
           }
-        ]);
+        ];
         
+        setPulseBoostPackages(mockPackages);
         setUserEconomy({ ubxBalance: 1250 });
       } catch (err: any) {
         setError(err.message || 'Failed to fetch Pulse Boost data');

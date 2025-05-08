@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -40,6 +39,10 @@ const EscortDashboard = () => {
     );
   }
 
+  // Update field access with optional chaining and fallbacks
+  const displayName = profile?.username || profile?.name || 'User';
+  const isVerified = profile?.verified || profile?.is_verified || false;
+
   return (
     <MainLayout>
       <div className="space-y-6">
@@ -48,7 +51,7 @@ const EscortDashboard = () => {
           <Button onClick={() => navigate(`/escorts/${profile?.username}`)}>View Public Profile</Button>
         </div>
 
-        {profile?.verified || profile?.is_verified ? (
+        {isVerified ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList className="grid grid-cols-4 w-full md:w-auto">
               <TabsTrigger value="bookings">Bookings</TabsTrigger>

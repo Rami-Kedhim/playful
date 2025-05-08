@@ -4,13 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Zap } from "lucide-react";
-import { PulseBoost } from "@/types/pulse-boost";
+import { BoostPackage } from "@/types/pulse-boost";
 
 interface PulseBoostCardProps {
-  boost: PulseBoost;
+  boost: BoostPackage;  // Changed from PulseBoost to BoostPackage
   isActive: boolean;
   timeRemaining?: string;
-  onActivate: (boost: PulseBoost) => Promise<boolean>;
+  onActivate: (boost: BoostPackage) => Promise<boolean>;
   onCancel: (boostId: string) => Promise<boolean>;
   userBalance: number;
   disabled?: boolean;

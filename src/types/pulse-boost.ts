@@ -13,6 +13,9 @@ export interface BoostPackage {
   color?: string;
   badgeColor?: string;
   boost_power?: number;
+  boostMultiplier?: number;
+  isPopular?: boolean;
+  isMostPopular?: boolean;
 }
 
 export interface BoostPurchaseRequest {
@@ -34,20 +37,30 @@ export interface BoostAnalytics {
     date: Date;
     score: number;
   }>;
-  // Add these properties to fix the errors in useBoostOperations.ts
   views?: number;
   impressions?: {
     value: number;
     change?: number;
     withBoost?: number;
     withoutBoost?: number;
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
+    increase?: number;
   };
   interactions?: {
     value: number;
     change?: number;
     withBoost?: number;
     withoutBoost?: number;
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
+    increase?: number;
   };
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
 }
 
 export interface BoostHistory {
@@ -68,6 +81,21 @@ export interface PulseBoost {
   startTime: Date;
   endTime: Date;
   status: 'active' | 'expired' | 'cancelled';
+  // Add these properties to fix PulseBoostCard.tsx errors
+  name?: string;
+  description?: string;
+  price?: number;
+  price_ubx?: number;
+  durationMinutes?: number;
+  features?: string[];
+  visibility?: string;
+  visibility_increase?: number;
+  color?: string;
+  badgeColor?: string;
+  boost_power?: number;
+  boostMultiplier?: number;
+  duration?: string;
+  isMostPopular?: boolean;
 }
 
 export interface EnhancedBoostStatus {
@@ -79,4 +107,6 @@ export interface EnhancedBoostStatus {
   expiresAt?: Date;
   progress?: number;
   timeRemaining?: string;
+  boostPackage?: BoostPackage;
 }
+

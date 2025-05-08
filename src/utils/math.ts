@@ -61,3 +61,16 @@ export const movingAverage = (values: number[], window: number): number[] => {
   
   return result;
 };
+
+/**
+ * Generate a random integer between min and max (inclusive)
+ * @param min Minimum value
+ * @param max Maximum value
+ * @returns Random integer
+ */
+export const getRandomInt = (min: number, max: number): number => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+

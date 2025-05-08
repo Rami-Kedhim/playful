@@ -1,3 +1,4 @@
+
 import { useCallback, useState } from 'react';
 import { BoostAnalytics } from '@/types/pulse-boost';
 import { getRandomInt } from '@/utils/math';
@@ -37,13 +38,21 @@ export const useBoostOperations = (profileId: string) => {
           value: baseImpressions,
           change: 15,
           withBoost: boostImpressions,
-          today: getRandomInt(200, 1000)
+          withoutBoost: baseImpressions,
+          today: getRandomInt(200, 1000),
+          yesterday: getRandomInt(150, 900),
+          weeklyAverage: getRandomInt(180, 950),
+          increase: 20
         },
         interactions: {
           value: baseInteractions,
           change: 20,
           withBoost: boostInteractions,
-          today: getRandomInt(10, 100)
+          withoutBoost: baseInteractions,
+          today: getRandomInt(10, 100),
+          yesterday: getRandomInt(8, 90),
+          weeklyAverage: getRandomInt(9, 95),
+          increase: 25
         },
         additionalViews: additionalViews,
         engagementIncrease: parseFloat((Math.random() * 25 + 10).toFixed(1)),
@@ -65,13 +74,13 @@ export const useBoostOperations = (profileId: string) => {
           value: 0,
           change: 0,
           withBoost: 0,
-          today: 0
+          withoutBoost: 0
         },
         interactions: {
           value: 0,
           change: 0,
           withBoost: 0,
-          today: 0
+          withoutBoost: 0
         },
         additionalViews: 0,
         engagementIncrease: 0,

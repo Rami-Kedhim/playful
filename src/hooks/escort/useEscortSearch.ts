@@ -1,71 +1,70 @@
+import { useState, useEffect } from 'react';
+import { Escort } from '@/types/escort';
+import { escortService } from '@/services/escortService';
 
-import { useState, useEffect, useCallback } from 'react';
-import escortService from '@/services/escorts/escortService';
-import { Escort } from '@/types/Escort';
-
-interface SearchFilters {
-  location?: string;
-  services?: string[];
-  priceRange?: [number, number];
-  age?: [number, number];
-  gender?: string;
-  sortBy?: string;
-  page?: number;
-  limit?: number;
-}
-
-export const useEscortSearch = (initialFilters: SearchFilters = {}) => {
-  const [filters, setFilters] = useState<SearchFilters>(initialFilters);
-  const [escorts, setEscorts] = useState<Escort[]>([]);
+export const useEscortSearch = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState<Escort[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [totalCount, setTotalCount] = useState(0);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
-  const searchEscorts = useCallback(async (searchFilters: SearchFilters = filters) => {
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [searchTerm]);
+
+  // Replace searchEscorts with a compatible approach
+  const searchResults = async (query: string) => {
     setLoading(true);
-    setError(null);
-    
     try {
-      const { data, total } = await escortService.searchEscorts(searchFilters);
-      setEscorts(data);
-      setTotalCount(total);
-    } catch (err: any) {
-      console.error('Error searching escorts:', err);
-      setError(err.message || 'Failed to search escorts');
+      // Instead of escortService.searchEscorts, use getEscorts and filter locally
+      const allEscorts = await escortService.getEscorts();
+      const filtered = allEscorts.filter(escort => 
+        escort.name.toLowerCase().includes(query.toLowerCase()) || 
+        (escort.location && escort.location.toLowerCase().includes(query.toLowerCase()))
+      );
+      return filtered;
+    } catch (error) {
+      console.error('Error searching escorts:', error);
+      return [];
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  };
 
-  // Search with initial filters when component mounts
   useEffect(() => {
-    searchEscorts(initialFilters);
-  }, [initialFilters, searchEscorts]);
+    if (debouncedSearchTerm) {
+      const fetchSearchResults = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const results = await searchResults(debouncedSearchTerm);
+          setSearchResults(results);
+        } catch (err: any) {
+          setError(err.message || 'Failed to fetch search results');
+          setSearchResults([]);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-  const updateFilters = (newFilters: Partial<SearchFilters>) => {
-    setFilters(prevFilters => ({
-      ...prevFilters,
-      ...newFilters,
-      // Reset to page 1 when filters change (except when page is specifically updated)
-      page: newFilters.hasOwnProperty('page') ? newFilters.page : 1
-    }));
-  };
-
-  const resetFilters = () => {
-    setFilters({});
-    searchEscorts({});
-  };
+      fetchSearchResults();
+    } else {
+      setSearchResults([]);
+    }
+  }, [debouncedSearchTerm]);
 
   return {
-    escorts,
+    searchTerm,
+    setSearchTerm,
+    searchResults,
     loading,
-    error,
-    totalCount,
-    filters,
-    updateFilters,
-    resetFilters,
-    searchEscorts
+    error
   };
 };
-
-export default useEscortSearch;

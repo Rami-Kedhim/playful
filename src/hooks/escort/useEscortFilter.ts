@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import escortService from '@/services/escorts/escortService';
 import { Escort } from '@/types/Escort';
@@ -21,20 +20,17 @@ export const useEscortFilter = () => {
   const [error, setError] = useState<string | null>(null);
   const [filterParams, setFilterParams] = useState<FilterParams>({});
 
-  const fetchEscorts = useCallback(async () => {
+  const fetchEscorts = async () => {
     setLoading(true);
     try {
-      const data = await escortService.getAllEscorts();
-      setEscorts(data);
-      setFilteredEscorts(data);
-      setError(null);
-    } catch (err: any) {
-      console.error('Error fetching escorts:', err);
-      setError(err.message || 'Failed to load escorts');
+      const fetchedEscorts = await escortService.getEscorts();
+      setEscorts(fetchedEscorts);
+    } catch (error) {
+      console.error('Error fetching escorts:', error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   const applyFilters = useCallback((params: FilterParams) => {
     setFilterParams(params);

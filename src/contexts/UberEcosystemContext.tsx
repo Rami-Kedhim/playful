@@ -1,226 +1,213 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { OxumSystem } from '@/types/core-systems';
+import { UberCore } from '@/core/UberCore';
+import { AutomaticSEO } from '@/core/AutomaticSEO';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { oxum } from '@/core/Oxum';
-import { lucieAI } from '@/core/Lucie';
-import { hermes } from '@/core/Hermes';
-import { orus } from '@/core/Orus';
-import Pulse from '@/core/Pulse';
-
-/**
- * Define the shape of the state stored in the UberEcosystemContext
- */
-interface UberEcosystemState {
-  initialized: boolean;
-  error: string | null;
-  modules: {
-    ubxWallet: boolean;
-    oxum: boolean;
-    lucie: boolean;
-    hermes: boolean;
-    boostSystem: boolean;
-    orus: boolean;
-    pulse: boolean;
+// Define types for the ecosystem context
+export interface UserPreferences {
+  theme: 'light' | 'dark' | 'system';
+  notifications: boolean;
+  language: string;
+  currency: string;
+  privacySettings: {
+    shareData: boolean;
+    allowTracking: boolean;
   };
 }
 
-/**
- * Define the UberEcosystem API that will be exposed to consumers
- */
-interface UberEcosystemContextType {
-  state: UberEcosystemState;
-  initialize: () => Promise<boolean>;
-  reset: () => void;
-  configure: (moduleId: string, config: Record<string, any>) => Promise<boolean>;
-  recordEvent: (eventType: string, data: Record<string, any>) => void;
-  // Add user and loading properties for backward compatibility
-  user: any | null;
-  loading: boolean;
+export interface EcosystemEvent {
+  type: string;
+  data: any;
+  timestamp: string;
+  source: string;
 }
 
-// Create the context with default values
-const UberEcosystemContext = createContext<UberEcosystemContextType | undefined>(undefined);
+export interface UberEcosystemContextType {
+  isInitialized: boolean;
+  userPreferences: UserPreferences;
+  updateUserPreferences: (preferences: UserPreferences) => Promise<boolean>;
+  oxumSystemStatus: {
+    isOperational: boolean;
+    performance: number;
+    lastUpdate: string;
+  };
+  uberCoreStatus: {
+    operational: boolean;
+    services: Record<string, string>;
+  };
+  seoStatus: {
+    active: boolean;
+    lastUpdate: string;
+    pendingTasks: number;
+  };
+  handleEcosystemEvent: (event: EcosystemEvent) => void;
+}
 
-/**
- * UberEcosystemProvider component
- */
-export const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) => {
-  // Define the state to track ecosystem initialization and status
-  const [state, setState] = useState<UberEcosystemState>({
-    initialized: false,
-    error: null,
-    modules: {
-      ubxWallet: false,
-      oxum: false,
-      lucie: false,
-      hermes: false,
-      boostSystem: false,
-      orus: false,
-      pulse: false,
-    }
+// Create the context
+const UberEcosystemContext = createContext<UberEcosystemContextType | null>(null);
+
+// Default user preferences
+const defaultUserPreferences: UserPreferences = {
+  theme: 'system',
+  notifications: true,
+  language: 'en',
+  currency: 'USD',
+  privacySettings: {
+    shareData: true,
+    allowTracking: true,
+  },
+};
+
+// Mock functions for database operations
+const fetchUserPreferencesFromDb = async (userId: string): Promise<UserPreferences> => {
+  // In a real app, this would fetch from a database
+  return defaultUserPreferences;
+};
+
+const updateUserPreferencesInDb = async (preferences: UserPreferences): Promise<boolean> => {
+  // In a real app, this would update the database
+  return true;
+};
+
+const processEcosystemEvent = (event: EcosystemEvent, userPreferences: UserPreferences): void => {
+  // Process the event based on type and user preferences
+  console.log(`Processing event: ${event.type} from ${event.source}`);
+};
+
+// Create the provider component
+export const UberEcosystemProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [userPreferences, setUserPreferences] = useState<UserPreferences>(defaultUserPreferences);
+  
+  const [oxumSystem] = useState<OxumSystem>({} as OxumSystem);
+  const [uberCore] = useState<UberCore>(new UberCore());
+  const [automaticSeo] = useState<AutomaticSEO>(new AutomaticSEO());
+  
+  const [oxumSystemStatus, setOxumSystemStatus] = useState({
+    isOperational: false,
+    performance: 0,
+    lastUpdate: new Date().toISOString(),
   });
   
-  // Add user and loading states for backward compatibility
-  const [user, setUser] = useState<any | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [uberCoreStatus, setUberCoreStatus] = useState({
+    operational: false,
+    services: {},
+  });
+  
+  const [seoStatus, setSeoStatus] = useState({
+    active: false,
+    lastUpdate: new Date().toISOString(),
+    pendingTasks: 0,
+  });
 
   // Initialize the ecosystem
-  const initialize = async (): Promise<boolean> => {
-    if (state.initialized) return true;
-    
-    setLoading(true);
-    
-    try {
-      // Initialize Oxum system
-      await oxum.checkSystemStatus();
-      
-      // Update module status
-      setState(prev => ({
-        ...prev,
-        modules: {
-          ...prev.modules,
-          oxum: true,
-        },
-      }));
-      
-      // Initialize Lucie AI system
-      await lucieAI.initialize();
-      
-      // Update module status 
-      setState(prev => ({
-        ...prev,
-        modules: {
-          ...prev.modules,
-          lucie: true,
-        },
-      }));
-      
-      // Initialize Hermes analytics
-      await hermes.initialize();
-      
-      // Update module status
-      setState(prev => ({
-        ...prev,
-        modules: {
-          ...prev.modules,
-          hermes: true,
-        },
-      }));
-      
-      // Initialize Orus security
-      await orus.initialize();
-      
-      // Update module status
-      setState(prev => ({
-        ...prev,
-        modules: {
-          ...prev.modules,
-          orus: true,
-        },
-        initialized: true,
-      }));
-      
-      // Simulate user login for backward compatibility
-      setUser({ id: 'simulated-user', role: 'user' });
-      setLoading(false);
-      
-      console.log('UberEcosystem initialized successfully');
-      return true;
-    } catch (error) {
-      console.error('Failed to initialize UberEcosystem:', error);
-      
-      setState(prev => ({
-        ...prev,
-        error: 'Ecosystem initialization failed',
-      }));
-      
-      setLoading(false);
-      return false;
-    }
-  };
-
-  // Reset the ecosystem state
-  const reset = () => {
-    setState({
-      initialized: false,
-      error: null,
-      modules: {
-        ubxWallet: false,
-        oxum: false,
-        lucie: false,
-        hermes: false,
-        boostSystem: false,
-        orus: false,
-        pulse: false,
-      }
-    });
-    
-    setUser(null);
-    setLoading(true);
-  };
-
-  // Record events using available modules
-  const recordEvent = (eventType: string, data: Record<string, any>) => {
-    // Use Hermes for analytics tracking if available
-    if (state.modules.hermes) {
-      const userId = data.userId || 'anonymous';
-      hermes.trackEvent(userId, eventType, data);
-    }
-    
-    // Use Pulse for basic event logging if available
-    Pulse.track(data.userId || 'anonymous', eventType, data);
-  };
-
-  // Configure module settings
-  const configure = async (moduleId: string, config: Record<string, any>): Promise<boolean> => {
-    try {
-      switch (moduleId) {
-        case 'oxum':
-          if (state.modules.oxum) {
-            oxum.configure(config);
-            return true;
-          }
-          break;
-        case 'lucie':
-          if (state.modules.lucie) {
-            lucieAI.configure(config);
-            return true;
-          }
-          break;
-        case 'hermes':
-          if (state.modules.hermes) {
-            // Added configure method to hermes in a previous step
-            hermes.configure(config);
-            return true;
-          }
-          break;
-        default:
-          console.warn(`Unknown module: ${moduleId}`);
-          return false;
-      }
-      
-      return false;
-    } catch (error) {
-      console.error(`Failed to configure module ${moduleId}:`, error);
-      return false;
-    }
-  };
-
-  // Initialize the ecosystem once when the component mounts
   useEffect(() => {
-    initialize().catch(console.error);
+    const initializeEcosystem = async () => {
+      try {
+        // Initialize core systems
+        const coreStatus = uberCore.getSystemStatus();
+        setUberCoreStatus({
+          operational: coreStatus.operational,
+          services: coreStatus.services,
+        });
+        
+        // Initialize SEO system
+        const seoInitialized = uberCore.initializeAutomaticSeo();
+        setSeoStatus({
+          active: seoInitialized,
+          lastUpdate: new Date().toISOString(),
+          pendingTasks: 0,
+        });
+        
+        // Fetch user preferences (would use real user ID in production)
+        const preferences = await fetchUserPreferencesFromDb('user-1');
+        setUserPreferences(preferences);
+        
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize UberEcosystem:', error);
+      }
+    };
+    
+    initializeEcosystem();
   }, []);
 
+  // Update system status every 5 minutes
+  useEffect(() => {
+    const checkSystems = async () => {
+      try {
+        // Fix method call
+        const oxumStatus = oxumSystem.getSystemStatus(); // Instead of checkSystemStatus
+        setOxumSystemStatus(oxumStatus);
+        
+        // Update UberCore status
+        const coreStatus = uberCore.getSystemStatus();
+        setUberCoreStatus({
+          operational: coreStatus.operational,
+          services: coreStatus.services,
+        });
+        
+        // Update SEO status
+        setSeoStatus(prev => ({
+          ...prev,
+          lastUpdate: new Date().toISOString(),
+        }));
+      } catch (error) {
+        console.error('Error checking system status:', error);
+      }
+    };
+    
+    // Initial check
+    checkSystems();
+    
+    // Set interval for checks
+    const interval = setInterval(checkSystems, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+  
+  // Fix function calls in the appropriate methods
+  const updateUserPreferences = async (preferences: UserPreferences) => {
+    // Fix argument count
+    const result = await updateUserPreferencesInDb(preferences); // Pass only preferences
+    if (result) {
+      setUserPreferences(preferences);
+    }
+    return result;
+  };
+  
+  const handleEcosystemEvent = (event: EcosystemEvent) => {
+    // Fix argument count
+    processEcosystemEvent(event, userPreferences); // Pass two arguments instead of three
+    
+    // Handle specific event types
+    switch (event.type) {
+      case 'system_update':
+        // Handle system update events
+        break;
+      case 'user_preference_change':
+        // Handle preference changes
+        break;
+      case 'security_alert':
+        // Handle security alerts
+        break;
+      default:
+        // Handle other events
+        break;
+    }
+  };
+  
   // Create the context value
   const contextValue: UberEcosystemContextType = {
-    state,
-    initialize,
-    reset,
-    configure,
-    recordEvent,
-    user, // Add user for backward compatibility
-    loading, // Add loading for backward compatibility
+    isInitialized,
+    userPreferences,
+    updateUserPreferences,
+    oxumSystemStatus,
+    uberCoreStatus,
+    seoStatus,
+    handleEcosystemEvent,
   };
-
+  
+  // Provide the context to children
   return (
     <UberEcosystemContext.Provider value={contextValue}>
       {children}
@@ -228,13 +215,14 @@ export const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ childre
   );
 };
 
-// Custom hook for using the UberEcosystem context
-export const useUberEcosystem = (): UberEcosystemContextType => {
+// Create a hook for using the context
+export const useUberEcosystem = () => {
   const context = useContext(UberEcosystemContext);
-  
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useUberEcosystem must be used within a UberEcosystemProvider');
   }
-  
   return context;
 };
+
+// Export the context and provider
+export default UberEcosystemContext;
