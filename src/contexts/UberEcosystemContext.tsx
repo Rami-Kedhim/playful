@@ -10,7 +10,10 @@ export interface UberEcosystemContextType {
   state?: any;
 }
 
-const UberEcosystemContext = createContext<UberEcosystemContextType>({});
+const UberEcosystemContext = createContext<UberEcosystemContextType>({
+  lucieAI: {},
+  state: {}
+});
 
 export const useUberEcosystem = () => {
   return useContext(UberEcosystemContext);

@@ -16,6 +16,9 @@ export const getPulsePackages = async (): Promise<BoostPackage[]> => {
         price_ubx: (pb as any).price_ubx ?? 0,
         price: pb.price || 0,
         features: pb.features || [],
+        durationMinutes: pb.durationMinutes || 0,
+        visibility: pb.visibility || '0%',
+        visibility_increase: pb.visibility_increase || 0
       }));
       resolve(adaptedPackages);
     }, 500);

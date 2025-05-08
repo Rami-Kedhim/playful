@@ -21,6 +21,12 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ user, profile }) 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   
+  const enhancedProfile: UserProfile = {
+    ...profile,
+    userId: profile.userId || user.id,
+    createdAt: profile.createdAt || new Date()
+  };
+  
   const handleUpdateProfile = async (data: Partial<UserProfile>) => {
     setIsSubmitting(true);
     setMessage(null);
@@ -82,7 +88,7 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ user, profile }) 
         <Card>
           <TabsContent value="profile">
             <ProfileEditForm 
-              initialData={profile}
+              initialData={enhancedProfile}
               onSubmit={handleUpdateProfile}
             />
           </TabsContent>

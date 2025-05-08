@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { BoostStatus, BoostEligibility, BoostPackage, HermesStatus } from '@/types/boost';
-import { AnalyticsData } from './useBoostAnalytics';
+import { AnalyticsData } from '@/types/analytics';
 
 export const useBoostManager = (profileId?: string) => {
   const [boostStatus, setBoostStatus] = useState<BoostStatus>({
@@ -132,7 +132,7 @@ export const useBoostManager = (profileId?: string) => {
   };
   
   const getBoostAnalytics = async (): Promise<AnalyticsData> => {
-    // Mock analytics data
+    // Mock analytics data with all required properties
     return {
       additionalViews: 145,
       engagementIncrease: 32,
@@ -161,6 +161,9 @@ export const useBoostManager = (profileId?: string) => {
         previous: 24,
         change: 16
       },
+      conversionRate: 5.2,
+      messageRate: 12.7,
+      bookingRate: 3.8,
       conversions: 12,
       timeActive: '5 days',
       boostEfficiency: 87,

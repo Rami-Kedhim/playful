@@ -1,65 +1,85 @@
 
 import { BoostPackage } from '@/types/boost';
 
-export const pulseBoostService = {
-  getBoostPackages: async (): Promise<{ data: BoostPackage[], error: any }> => {
-    return { 
-      data: [
-        {
-          id: "boost-1",
-          name: "Standard Boost",
-          description: "Basic visibility boost for 24 hours",
-          price: 50,
-          duration: "24:00:00",
-          features: ["Homepage visibility", "Search result priority"],
-          price_ubx: 50,
-          durationMinutes: 24 * 60
-        },
-        {
-          id: "boost-2",
-          name: "Premium Boost",
-          description: "Enhanced visibility boost for 3 days",
-          price: 120,
-          duration: "72:00:00",
-          features: ["Homepage visibility", "Search result priority", "Featured profile"],
-          price_ubx: 120,
-          durationMinutes: 72 * 60
-        }
-      ], 
-      error: null 
-    };
-  },
-
-  getActiveBoosts: async (profileId: string): Promise<{ data: any[], error: any }> => {
-    return { 
-      data: [], 
-      error: null 
-    };
-  },
-
-  getUserEconomy: async (profileId: string): Promise<{ data: any, error: any }> => {
-    return { 
-      data: {
-        ubxBalance: 1000,
-        paidBalance: 0
-      }, 
-      error: null 
-    };
-  },
-
-  purchaseBoost: async (profileId: string, boostPackageId: string): Promise<{ success: boolean, error: any }> => {
-    return { 
-      success: true, 
-      error: null 
-    };
-  },
-
-  cancelBoost: async (profileId: string, boostId?: string): Promise<{ success: boolean, error: any }> => {
-    return { 
-      success: true, 
-      error: null 
+// Mock implementation of the Pulse Boost Service
+export class PulseBoostService {
+  getBoostPackages(): BoostPackage[] {
+    return [
+      {
+        id: 'basic',
+        name: 'Basic Boost',
+        description: 'Enhance your visibility for 24 hours',
+        duration: '24:00:00',
+        price: 29.99,
+        price_ubx: 300,
+        features: ['Top search positions', 'Featured section placement', 'Increased visibility'],
+        visibility: '50%',
+        visibility_increase: 50,
+        durationMinutes: 1440,
+        color: '#4CAF50',
+        badgeColor: '#4CAF50',
+        boost_power: 10
+      },
+      {
+        id: 'premium',
+        name: 'Premium Boost',
+        description: 'Maximum visibility for 3 days',
+        duration: '72:00:00',
+        price: 69.99,
+        price_ubx: 700,
+        features: ['Top search positions', 'Featured section placement', 'Highlighted profile', 'Premium badge'],
+        visibility: '100%',
+        visibility_increase: 100,
+        durationMinutes: 4320,
+        color: '#2196F3',
+        badgeColor: '#2196F3',
+        boost_power: 20
+      }
+    ];
+  }
+  
+  async purchaseBoost(
+    profileId: string,
+    packageId: string,
+    userId: string
+  ): Promise<BoostPurchaseResult> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    return {
+      success: true,
+      boostId: 'boost-' + Date.now(),
+      transactionId: 'tx-' + Date.now()
     };
   }
-};
+  
+  async cancelBoost(boostId: string): Promise<boolean> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    return true;
+  }
+  
+  async getBoostAnalytics(profileId: string): Promise<any> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
+    return {
+      totalBoosts: 8,
+      activeBoosts: 1,
+      averageBoostScore: 78,
+      additionalViews: 523,
+      engagementIncrease: 42,
+      rankingPosition: 3
+    };
+  }
+}
 
-export default pulseBoostService;
+export interface BoostPurchaseResult {
+  success: boolean;
+  boostId?: string;
+  error?: string | null;
+  transactionId?: string;
+}
+
+export const pulseBoostService = new PulseBoostService();

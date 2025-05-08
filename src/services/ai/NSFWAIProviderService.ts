@@ -1,81 +1,70 @@
 
 import { AIModelPreference, AIProvider } from '@/types/ai';
 
-interface Message {
-  role: string;
-  content: string;
-}
-
-class NSFWAIProviderService {
-  private providers: Map<string, AIProvider>;
-
-  constructor() {
-    this.providers = new Map();
-    // Initialize with some mock providers
-    this.providers.set('openai', {
-      name: 'OpenAI',
-      models: ['gpt-4', 'gpt-3.5-turbo'],
-      capabilities: {
-        streaming: true,
-        functionCalling: true,
-        vision: true,
-        audio: false
+export class NSFWAIProviderService {
+  getProviders(): AIProvider[] {
+    // Mock implementation
+    return [
+      {
+        id: 'openai',
+        name: 'OpenAI',
+        models: [
+          {
+            id: 'gpt-4',
+            name: 'GPT-4',
+            description: 'Most advanced model',
+            contextLength: 8192,
+            model: 'gpt-4',
+            temperature: 0.7,
+            systemPrompt: 'You are a helpful assistant.'
+          },
+          {
+            id: 'gpt-3.5-turbo',
+            name: 'GPT-3.5 Turbo',
+            description: 'Fast and efficient',
+            contextLength: 4096,
+            model: 'gpt-3.5-turbo',
+            temperature: 0.7,
+            systemPrompt: 'You are a helpful assistant.'
+          }
+        ],
+        apiKey: '',
+        isEnabled: true,
+        defaultModel: 'gpt-3.5-turbo'
+      },
+      {
+        id: 'claude',
+        name: 'Anthropic Claude',
+        models: [
+          {
+            id: 'claude-2',
+            name: 'Claude 2',
+            description: 'Advanced AI assistant',
+            contextLength: 100000,
+            model: 'claude-2',
+            temperature: 0.7,
+            systemPrompt: 'You are Claude, an AI assistant.'
+          }
+        ],
+        apiKey: '',
+        isEnabled: false,
+        defaultModel: 'claude-2'
       }
-    });
-    
-    this.providers.set('anthropic', {
-      name: 'Anthropic',
-      models: ['claude-2', 'claude-instant'],
-      capabilities: {
-        streaming: true,
-        functionCalling: false,
-        vision: false,
-        audio: false
-      }
-    });
+    ];
   }
 
-  getProviderFromPreference(preference: AIModelPreference): AIProvider {
-    // Determine which provider this model belongs to
-    const providerName = preference.provider || this.detectProviderFromModel(preference.model);
-    return this.providers.get(providerName) || {
-      name: 'Unknown Provider',
-      models: [],
-      capabilities: {
-        streaming: false,
-        functionCalling: false,
-        vision: false,
-        audio: false
-      }
-    };
-  }
-
-  prepareMessageForProvider(
-    messages: Message[], 
-    provider: AIProvider, 
-    systemPrompt?: string
-  ): Record<string, any> {
-    // Format the messages according to the provider's API
-    const formattedMessages = [...messages];
-    
-    // Add system prompt if provided
-    if (systemPrompt) {
-      formattedMessages.unshift({
-        role: 'system',
-        content: systemPrompt
-      });
-    }
+  getDefaultProvider(): AIProvider {
+    const providers = this.getProviders();
+    const provider = providers.find(p => p.isEnabled) || providers[0];
     
     return {
-      messages: formattedMessages,
-      provider: provider.name
+      id: provider.id,
+      name: provider.name,
+      models: provider.models,
+      apiKey: provider.apiKey,
+      isEnabled: provider.isEnabled,
+      defaultModel: provider.defaultModel
     };
-  }
-
-  private detectProviderFromModel(model: string): string {
-    if (model.startsWith('gpt')) return 'openai';
-    if (model.startsWith('claude')) return 'anthropic';
-    return 'unknown';
   }
 }
 

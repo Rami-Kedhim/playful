@@ -1,4 +1,3 @@
-
 export interface UbxTransaction {
   id: string;
   amount: number;
@@ -6,6 +5,8 @@ export interface UbxTransaction {
   timestamp: Date;
   description: string;
   status: string;
+  transactionType?: string;
+  createdAt?: Date;
 }
 
 export class UberWallet {
@@ -13,6 +14,7 @@ export class UberWallet {
     return 1000; // Mock balance
   }
 
+  // Method signature updated to not require userId parameter
   async getTransactions(): Promise<UbxTransaction[]> {
     return [
       {
@@ -34,9 +36,20 @@ export class UberWallet {
     ];
   }
 
+  // Alias for getTransactions to keep compatibility
+  async getTransactionHistory(): Promise<UbxTransaction[]> {
+    return this.getTransactions();
+  }
+
   async addFunds(amount: number): Promise<boolean> {
     console.log(`Adding ${amount} funds to wallet`);
     return true;
+  }
+
+  // Add purchaseUbx method
+  async purchaseUbx(userId: string, amount: number): Promise<{ success: boolean }> {
+    console.log(`User ${userId} purchased ${amount} UBX`);
+    return { success: true };
   }
 }
 

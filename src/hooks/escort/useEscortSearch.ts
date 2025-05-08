@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Escort } from '@/types/Escort'; // Using the correct casing
+import { Escort } from '@/types/escort.d'; // Match the case
 import escortService from '@/services/escorts/escortService'; // Fix import to use default export
 
 export const useEscortSearch = () => {
@@ -20,7 +20,7 @@ export const useEscortSearch = () => {
     };
   }, [searchTerm]);
 
-  // Replace searchEscorts with a compatible approach
+  // Function to search escorts
   const searchEscorts = async (query: string): Promise<Escort[]> => {
     setLoading(true);
     try {

@@ -38,6 +38,12 @@ export interface AIProvider {
   baseUrl?: string;
   isEnabled?: boolean;
   defaultModel?: string;
+  capabilities?: {
+    streaming?: boolean;
+    functionCalling?: boolean;
+    vision?: boolean;
+    audio?: boolean;
+  };
 }
 
 // Add any other AI-related types here

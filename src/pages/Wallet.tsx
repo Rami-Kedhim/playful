@@ -1,13 +1,14 @@
+
 import React, { useEffect, useState } from 'react';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { uberWallet, UbxTransaction } from '@/core/UberWallet';
+import { UberWallet, UbxTransaction } from '@/core/UberWallet';
 import { useAuth } from '@/hooks/auth';
 
 const WalletPage: React.FC = () => {
   const { user, profile } = useAuth();
-  const userId = user?.id || 'anonymous';
+  const [uberWallet] = useState(new UberWallet()); // Create an instance
   
   const [transactions, setTransactions] = useState<UbxTransaction[]>([]);
   const [balance, setBalance] = useState({
@@ -20,21 +21,19 @@ const WalletPage: React.FC = () => {
   const loadData = async () => {
     try {
       // Get balance
-      if (userId) {
-        const balanceAmount = await uberWallet.getBalance(userId);
-        
-        // Create a structured balance object
-        setBalance({
-          available: balanceAmount * 0.8,
-          pending: balanceAmount * 0.1,
-          reserved: balanceAmount * 0.1,
-          total: balanceAmount
-        });
-        
-        // Get transaction history
-        const history = await uberWallet.getTransactionHistory(userId);
-        setTransactions(history);
-      }
+      const balanceAmount = await uberWallet.getBalance();
+      
+      // Create a structured balance object
+      setBalance({
+        available: balanceAmount * 0.8,
+        pending: balanceAmount * 0.1,
+        reserved: balanceAmount * 0.1,
+        total: balanceAmount
+      });
+      
+      // Get transaction history
+      const history = await uberWallet.getTransactions();
+      setTransactions(history);
     } catch (error) {
       console.error('Error loading wallet data:', error);
     }
@@ -46,9 +45,9 @@ const WalletPage: React.FC = () => {
       // For demo, just add 100 UBX
       const amount = 100;
       
-      const result = await uberWallet.purchaseUbx(userId, amount);
+      const result = await uberWallet.addFunds(amount);
       
-      if (result.success) {
+      if (result) {
         // Update balance (in a real app, we would fetch the new balance)
         const newTotal = balance.total + amount;
         setBalance({
@@ -59,7 +58,7 @@ const WalletPage: React.FC = () => {
         });
         
         // Refresh transaction history
-        const history = await uberWallet.getTransactionHistory(userId);
+        const history = await uberWallet.getTransactions();
         setTransactions(history);
       }
     } catch (error) {
@@ -69,7 +68,7 @@ const WalletPage: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, [userId]);
+  }, []);
 
   // Check for boosted status with fallbacks
   const isBoostedProfile = profile?.isBoosted || profile?.is_boosted;
@@ -107,9 +106,9 @@ const WalletPage: React.FC = () => {
                 {transactions.map((tx) => (
                   <div key={tx.id} className="flex justify-between items-center border-b pb-2">
                     <div>
-                      <div className="font-medium">{tx.description || tx.transactionType}</div>
+                      <div className="font-medium">{tx.description || tx.type}</div>
                       <div className="text-sm text-muted-foreground">
-                        {new Date(tx.createdAt).toLocaleString()}
+                        {tx.timestamp instanceof Date ? tx.timestamp.toLocaleString() : new Date(tx.timestamp).toLocaleString()}
                       </div>
                     </div>
                     <div className={tx.amount > 0 ? 'text-green-500' : ''}>
