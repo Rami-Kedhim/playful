@@ -97,7 +97,6 @@ export interface RecommendedAction {
   action: string | (() => void);
 }
 
-// Update the BoostAnalytics interface to include the missing properties
 export interface BoostAnalytics {
   totalBoosts: number;
   activeBoosts: number;
@@ -106,7 +105,6 @@ export interface BoostAnalytics {
     date: Date;
     score: number;
   }>;
-  // Add these new properties to match usage in useBoostOperations
   views?: number;
   impressions?: {
     value: number;

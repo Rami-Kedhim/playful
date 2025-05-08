@@ -1,279 +1,299 @@
 
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
-import { Loader2, ImagePlus, Download } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Textarea } from '@/components/ui/textarea';
+import { Download, Image, RefreshCcw, Trash2 } from 'lucide-react';
+import { useNSFWImageGenerator } from '@/hooks/ai/useNSFWImageGenerator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 
-interface ImageGenerationParams {
-  prompt: string;
-  negativePrompt?: string;
-  width?: number;
-  height?: number;
-  steps?: number;
-  cfgScale?: number;
-  seed?: number;
-  modelId?: string;
-}
+const ethnicities = [
+  'Asian', 'Black', 'Caucasian', 'Hispanic', 'Latina', 
+  'Middle Eastern', 'Mixed'
+];
+
+const styles = [
+  'Glamour', 'Artistic', 'Casual', 'Professional', 'Candid',
+  'Fashion', 'Boudoir', 'Lifestyle'
+];
+
+const clothingTypes = [
+  'Elegant dress', 'Casual outfit', 'Business attire', 'Swimwear',
+  'Lingerie', 'Evening gown', 'Workout clothes', 'Minimalist'
+];
+
+const backgrounds = [
+  'Luxury hotel suite', 'Beach sunset', 'Urban cityscape', 'Studio setting',
+  'Modern apartment', 'Natural landscape', 'Nightclub', 'Poolside'
+];
+
+const poses = [
+  'Standing', 'Sitting', 'Lying down', 'Leaning', 'Casual',
+  'Professional', 'Seductive', 'Playful'
+];
 
 const NSFWImageGenerator: React.FC = () => {
-  const [tab, setTab] = useState<string>("text-to-image");
-  const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [params, setParams] = useState<ImageGenerationParams>({
-    prompt: "",
-    negativePrompt: "blurry, bad anatomy, bad hands, cropped, worst quality",
-    width: 512,
-    height: 768,
-    steps: 30,
-    cfgScale: 7,
-    seed: -1,
-    modelId: "realistic-vision-v5"
-  });
+  const [name, setName] = useState('Lucia');
+  const [age, setAge] = useState('25');
+  const [ethnicity, setEthnicity] = useState('Latina');
+  const [style, setStyle] = useState('Glamour');
+  const [clothingType, setClothingType] = useState('Elegant dress');
+  const [background, setBackground] = useState('Luxury hotel suite');
+  const [pose, setPose] = useState('Seductive');
+  const [prompt, setPrompt] = useState('');
+  const [additionalTags, setAdditionalTags] = useState('');
   
-  const { toast } = useToast();
-
-  const updateParam = <K extends keyof ImageGenerationParams>(
-    key: K,
-    value: ImageGenerationParams[K]
-  ) => {
-    setParams((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleGenerate = async () => {
-    if (!params.prompt) {
-      toast({
-        title: "Error",
-        description: "Please enter a prompt",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      setIsGenerating(true);
-      // Placeholder for API call - this would be replaced by actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      
-      // Mock generated image
-      setGeneratedImage(`https://picsum.photos/${params.width}/${params.height}?random=${Date.now()}`);
-      
-      toast({
-        title: "Image generated",
-        description: "Your image has been generated successfully"
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to generate image",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const handleDownload = () => {
-    if (!generatedImage) return;
+  const { generateImage, resetImage, loading, imageUrl, error } = useNSFWImageGenerator();
+  
+  const handleGenerateClick = async () => {
+    // Build the complete prompt
+    const fullPrompt = prompt || `${name}, ${age} years old, ${ethnicity}, ${style} style, wearing ${clothingType}, in ${background}, ${pose} pose${additionalTags ? ', ' + additionalTags : ''}`;
     
-    // Fixed: Changed to use only one argument
-    downloadImage(generatedImage);
+    // Generate the image
+    await generateImage({
+      name,
+      age,
+      ethnicity,
+      style,
+      clothing: clothingType,
+      background,
+      pose,
+      tags: additionalTags.split(',').map(tag => tag.trim()).filter(tag => tag)
+    });
   };
-
-  // Updated downloadImage function to take a single parameter
-  const downloadImage = (url: string) => {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `generated-image-${Date.now()}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  
+  const handleDownloadClick = () => {
+    if (imageUrl) {
+      // Create a temporary link to download the image
+      const a = document.createElement('a');
+      a.href = imageUrl;
+      a.download = `nsfw-image-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
-        <CardTitle>NSFW Image Generator</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="text-to-image">Text to Image</TabsTrigger>
-            <TabsTrigger value="advanced">Advanced Settings</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="text-to-image" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="prompt">Prompt</Label>
-                  <Textarea
-                    id="prompt"
-                    placeholder="Describe what you want to generate..."
-                    rows={4}
-                    value={params.prompt}
-                    onChange={(e) => updateParam('prompt', e.target.value)}
-                    className="resize-none"
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <Card className="lg:col-span-2">
+        <CardHeader>
+          <CardTitle>Image Generator</CardTitle>
+          <CardDescription>
+            Create custom AI-generated images using our free APIs
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent>
+          <Tabs defaultValue="guided">
+            <TabsList className="mb-4">
+              <TabsTrigger value="guided">Guided</TabsTrigger>
+              <TabsTrigger value="advanced">Advanced</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="guided" className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input 
+                    id="name" 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Character name" 
                   />
                 </div>
                 
-                <div>
-                  <Label htmlFor="negative-prompt">Negative Prompt</Label>
-                  <Textarea
-                    id="negative-prompt"
-                    placeholder="Describe what to avoid..."
-                    rows={2}
-                    value={params.negativePrompt}
-                    onChange={(e) => updateParam('negativePrompt', e.target.value)}
-                    className="resize-none"
+                <div className="space-y-2">
+                  <Label htmlFor="age">Age</Label>
+                  <Input 
+                    id="age" 
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    placeholder="25" 
                   />
                 </div>
               </div>
               
-              <div className="flex flex-col items-center justify-center border rounded-lg p-4 min-h-[300px] bg-muted/30">
-                {isGenerating ? (
-                  <div className="flex flex-col items-center">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary mb-2" />
-                    <p className="text-sm text-muted-foreground">Generating image...</p>
-                  </div>
-                ) : generatedImage ? (
-                  <div className="w-full h-full flex flex-col items-center">
-                    <img
-                      src={generatedImage}
-                      alt="Generated"
-                      className="max-w-full max-h-[300px] object-contain rounded-md"
-                    />
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="mt-2"
-                      onClick={handleDownload}
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Download
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center text-center">
-                    <ImagePlus className="h-12 w-12 text-muted-foreground mb-2" />
-                    <p className="text-muted-foreground">Generated image will appear here</p>
-                  </div>
-                )}
+              <div className="space-y-2">
+                <Label htmlFor="ethnicity">Ethnicity</Label>
+                <Select value={ethnicity} onValueChange={setEthnicity}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select ethnicity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ethnicities.map((item) => (
+                      <SelectItem key={item} value={item}>{item}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="advanced" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-              <div>
-                <Label className="mb-2 block">Image Dimensions</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label htmlFor="width" className="text-xs">Width</Label>
-                    <Input
-                      id="width"
-                      type="number"
-                      value={params.width}
-                      onChange={(e) => updateParam('width', Number(e.target.value))}
-                      min={256}
-                      max={1024}
-                      step={64}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="height" className="text-xs">Height</Label>
-                    <Input
-                      id="height"
-                      type="number"
-                      value={params.height}
-                      onChange={(e) => updateParam('height', Number(e.target.value))}
-                      min={256}
-                      max={1024}
-                      step={64}
-                    />
-                  </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="style">Style</Label>
+                <Select value={style} onValueChange={setStyle}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select style" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {styles.map((item) => (
+                      <SelectItem key={item} value={item}>{item}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="clothing">Clothing</Label>
+                <Select value={clothingType} onValueChange={setClothingType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select clothing" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clothingTypes.map((item) => (
+                      <SelectItem key={item} value={item}>{item}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="background">Background</Label>
+                <Select value={background} onValueChange={setBackground}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select background" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {backgrounds.map((item) => (
+                      <SelectItem key={item} value={item}>{item}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="pose">Pose</Label>
+                <Select value={pose} onValueChange={setPose}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select pose" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {poses.map((item) => (
+                      <SelectItem key={item} value={item}>{item}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="tags">Additional Tags (comma separated)</Label>
+                <Input 
+                  id="tags" 
+                  value={additionalTags}
+                  onChange={(e) => setAdditionalTags(e.target.value)}
+                  placeholder="high quality, detailed, perfect lighting" 
+                />
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="advanced">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="custom-prompt">Custom Prompt</Label>
+                  <Textarea 
+                    id="custom-prompt"
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder="Enter a detailed prompt for your image generation"
+                    rows={5}
+                  />
                 </div>
               </div>
-              
-              <div>
-                <Label className="mb-1 block">Steps: {params.steps}</Label>
-                <Slider
-                  value={[params.steps || 30]}
-                  min={10}
-                  max={50}
-                  step={1}
-                  onValueChange={(value) => updateParam('steps', value[0])}
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Higher values = better quality, slower generation
-                </p>
-              </div>
-              
-              <div>
-                <Label className="mb-1 block">CFG Scale: {params.cfgScale}</Label>
-                <Slider
-                  value={[params.cfgScale || 7]}
-                  min={1}
-                  max={14}
-                  step={0.5}
-                  onValueChange={(value) => updateParam('cfgScale', value[0])}
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  How closely to follow the prompt
-                </p>
-              </div>
-              
-              <div>
-                <Label htmlFor="seed">Seed (-1 for random)</Label>
-                <Input
-                  id="seed"
-                  type="number"
-                  value={params.seed}
-                  onChange={(e) => updateParam('seed', Number(e.target.value))}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="model">Model</Label>
-                <select
-                  id="model"
-                  value={params.modelId}
-                  onChange={(e) => updateParam('modelId', e.target.value)}
-                  className="w-full border border-input bg-background px-3 py-2 rounded-md"
-                >
-                  <option value="realistic-vision-v5">Realistic Vision 5.0</option>
-                  <option value="dreamshaper-8">DreamShaper 8</option>
-                  <option value="deliberate-2">Deliberate 2</option>
-                  <option value="anything-v5">Anything V5</option>
-                </select>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+        
+        <CardFooter className="flex justify-between flex-wrap gap-2">
+          <div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={resetImage}
+              disabled={loading || !imageUrl}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={handleDownloadClick}
+              disabled={loading || !imageUrl}
+              variant="outline"
+              size="sm"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download
+            </Button>
+            <Button 
+              onClick={handleGenerateClick} 
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Image className="h-4 w-4 mr-2" />
+                  Generate Image
+                </>
+              )}
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
       
-      <CardFooter>
-        <Button 
-          onClick={handleGenerate} 
-          disabled={isGenerating || !params.prompt}
-          className="w-full"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            "Generate Image"
-          )}
-        </Button>
-      </CardFooter>
-    </Card>
+      <div className="lg:col-span-1">
+        <Card className="h-full flex flex-col">
+          <CardHeader>
+            <CardTitle>Preview</CardTitle>
+            <CardDescription>
+              Generated image preview
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="flex-grow flex items-center justify-center">
+            {error ? (
+              <div className="text-center p-4 text-red-500">
+                <p>Error: {error}</p>
+              </div>
+            ) : imageUrl ? (
+              <img 
+                src={imageUrl} 
+                alt="Generated NSFW" 
+                className="max-w-full max-h-[500px] rounded-md object-contain"
+              />
+            ) : (
+              <div className="text-center p-8 text-muted-foreground bg-muted/30 rounded-md w-full h-full min-h-[300px] flex items-center justify-center">
+                <div>
+                  <Image className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                  <p>No image generated yet</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Complete the form and click Generate
+                  </p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 

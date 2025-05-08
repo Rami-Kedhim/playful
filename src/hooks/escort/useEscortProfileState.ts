@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Escort, VerificationLevel } from '@/types/Escort';
-import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
+
+import { useState } from 'react';
+
+// Import the correctly cased Escort type
+import { Escort } from '@/types/Escort';
 
 /**
  * Custom hook to manage escort profile state

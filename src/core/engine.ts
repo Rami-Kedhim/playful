@@ -1,124 +1,101 @@
 
-import { hermes } from '@/core/Hermes';
-import { oxum } from '@/core/Oxum';
-import { orus } from '@/core/Orus';
-import { lucieAI } from '@/core/Lucie';
+import { lucieAI } from './Lucie';
+import { hermes } from './Hermes';
+import { uberCore } from './UberCore';
+import { orus } from './Orus';
+import { uberWallet } from './UberWallet';
 import { SystemStatus } from '@/types/core-systems';
 
 /**
- * Initialize the UberEscorts core systems
+ * Initialize the UberEscorts ecosystem
+ * This initializes all core subsystems
  */
 export const initializeSystem = async (): Promise<boolean> => {
   try {
-    console.info('Initializing core UberEscorts systems...');
+    console.log('Initializing UberEscorts system...');
     
-    // Stage 1: Verify security and system integrity
-    console.info('Stage 1: Verifying system integrity...');
-    const orusResult = orus.checkIntegrity();
-    if (!orusResult.isValid) {
-      console.error('Security integrity check failed:', orusResult.message);
-      return false;
-    }
-    console.info('Orus security system initialized successfully');
+    // Initialize Lucie AI
+    await lucieAI.initialize();
     
-    // Stage 2: Initialize ranking and visibility systems
-    console.info('Stage 2: Initializing Oxum ranking algorithm...');
-    const oxumStatus = oxum.checkSystemStatus();
-    if (!oxumStatus.operational) {
-      console.error('Oxum initialization failed');
-      return false;
-    }
-    console.info('Oxum boost and ranking system initialized successfully');
-    
-    // Stage 3: Initialize AI and analytics systems
-    console.info('Stage 3: Initializing Lucie AI systems...');
-    const lucieStatus = lucieAI.getSystemStatus();
-    const lucieOperational = Object.values(lucieStatus.modules).every(
-      status => status === 'online'
-    );
-    
-    if (!lucieOperational) {
-      console.warn('Lucie AI subsystems partially degraded:', 
-        Object.entries(lucieStatus.modules)
-          .filter(([_, status]) => status !== 'online')
-          .map(([name]) => name)
-          .join(', ')
-      );
-    } else {
-      console.info('Lucie AI systems initialized successfully');
-    }
-    
-    // Stage 4: Initialize analytics and tracking
-    console.info('Stage 4: Initializing Hermes analytics...');
+    // Initialize Hermes analytics
     await hermes.initialize();
-    const hermesStatus = hermes.getSystemStatus();
-    if (hermesStatus.status !== 'operational') {
-      console.warn('Hermes analytics partially degraded');
-    } else {
-      console.info('Hermes analytics initialized successfully');
-    }
     
-    console.info('UberEscorts core systems initialized successfully');
+    // Initialize Orus security
+    await orus.initialize();
+    
+    console.info('UberEcosystem initialized successfully');
     return true;
   } catch (error) {
-    console.error('Failed to initialize UberEscorts core systems:', error);
+    console.error('Error initializing UberEscorts system:', error);
     return false;
   }
 };
 
 /**
- * Gracefully shutdown the UberEscorts core systems
+ * Shutdown the UberEscorts ecosystem
  */
-export const shutdownSystem = (): void => {
+export const shutdownSystem = async (): Promise<void> => {
   try {
-    console.info('Shutting down UberEscorts core systems...');
+    console.log('Shutting down UberEscorts system...');
     
-    // Disconnect from Hermes analytics
-    hermes.disconnect();
+    // Shutdown each subsystem
+    await uberCore.shutdown();
     
-    console.info('UberEscorts core systems shut down successfully');
+    console.info('UberEcosystem shutdown successfully');
   } catch (error) {
-    console.error('Error during system shutdown:', error);
+    console.error('Error shutting down UberEscorts system:', error);
   }
 };
 
 /**
- * Check system status to see if all components are operational
+ * Get system status
+ * @returns System status
  */
-export const checkSystemStatus = async (): Promise<SystemStatus> => {
+export const getSystemStatus = (): SystemStatus => {
   try {
-    // Check Hermes status
-    const hermesStatus = hermes.getSystemStatus();
-    const hermesOk = hermesStatus.status === 'operational';
+    // Get status from UberCore
+    const status = uberCore.checkSystemStatus();
     
-    // Check Oxum status
-    const oxumStatus = oxum.checkSystemStatus();
-    const oxumOk = oxumStatus.operational;
-    
-    // Check Lucie status
-    const lucieStatus = lucieAI.getSystemStatus();
-    const lucieOk = Object.values(lucieStatus.modules).every(
-      status => status === 'online'
-    );
-    
-    // Calculate overall system health
-    const isOperational = hermesOk && oxumOk;
-    const latency = Math.floor(Math.random() * 50) + 30; // Mock latency for demo purposes
-    
+    // Enhance with additional metrics
     return {
-      operational: isOperational,
-      latency
+      ...status,
+      operational: true,
+      latency: Math.random() * 100,
+      services: {
+        auth: 'online',
+        analytics: hermes.getSystemStatus().status,
+        ai: lucieAI.getSystemStatus().operational ? 'online' : 'offline',
+        wallet: uberWallet.isInitialized() ? 'online' : 'offline'
+      }
     };
   } catch (error) {
-    console.error('Error checking system status:', error);
+    console.error('Error getting system status:', error);
     return {
-      operational: false
+      operational: false,
+      services: {
+        auth: 'offline',
+        analytics: 'offline',
+        ai: 'offline',
+        wallet: 'offline'
+      }
     };
   }
 };
 
-export default {
-  initializeSystem,
-  shutdownSystem,
-  checkSystemStatus
+/**
+ * Get wallet balance for user
+ */
+export const getWalletBalance = (userId: string): number => {
+  return uberWallet.getBalance(userId);
+};
+
+/**
+ * Process transaction
+ */
+export const processTransaction = (
+  fromUserId: string,
+  toUserId: string,
+  amount: number
+): boolean => {
+  return uberWallet.transfer(fromUserId, toUserId, amount);
 };

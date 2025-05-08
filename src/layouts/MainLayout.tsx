@@ -6,6 +6,9 @@ interface MainLayoutProps {
   children: ReactNode;
   showNavigation?: boolean;
   fullWidth?: boolean;
+  containerClass?: string; // Add this prop to fix the type error
+  hideNavbar?: boolean;    // Add compatibility with other layouts
+  hideFooter?: boolean;    // Add compatibility with other layouts
 }
 
 /**
@@ -14,19 +17,24 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ 
   children, 
   showNavigation = true,
-  fullWidth = false 
+  fullWidth = false,
+  containerClass = '',
+  hideNavbar = false,
+  hideFooter = false
 }) => {
   return (
     <div className="flex flex-col min-h-screen">
-      {showNavigation && <MainNavigation />}
+      {showNavigation && !hideNavbar && <MainNavigation />}
       
-      <main className={`flex-1 ${fullWidth ? '' : 'container'} mx-auto py-6`}>
+      <main className={`flex-1 ${fullWidth ? '' : 'container'} mx-auto py-6 ${containerClass}`}>
         {children}
       </main>
       
-      <footer className="border-t p-4 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} UberEscorts. All rights reserved.</p>
-      </footer>
+      {!hideFooter && (
+        <footer className="border-t p-4 text-center text-sm text-muted-foreground">
+          <p>© {new Date().getFullYear()} UberEscorts. All rights reserved.</p>
+        </footer>
+      )}
     </div>
   );
 };

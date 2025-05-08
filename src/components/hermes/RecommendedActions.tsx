@@ -26,12 +26,12 @@ export const RecommendedActions: React.FC<RecommendedActionsProps> = ({ timeRang
     if (isConnected && !isLoading) {
       const recommendedAction = getRecommendedAction();
       if (recommendedAction) {
-        // Convert to the correct RecommendedAction type with the required fields
+        // Convert from hook's RecommendedAction to our core-systems RecommendedAction
         setCurrentAction({
           id: recommendedAction.id || `action-${Date.now()}`,
           title: recommendedAction.title || '',
           description: recommendedAction.description || '',
-          priority: recommendedAction.priority || 0,
+          priority: typeof recommendedAction.priority === 'number' ? recommendedAction.priority : 0,
           action: recommendedAction.action || '#'
         });
       }

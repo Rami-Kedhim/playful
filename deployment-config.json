@@ -1,0 +1,37 @@
+
+{
+  "app": "uberescorts",
+  "environment": "production",
+  "api": {
+    "maps": {
+      "provider": "leaflet",
+      "url": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    },
+    "imageGeneration": {
+      "provider": "huggingface",
+      "models": {
+        "safeImages": "black-forest-labs/FLUX.1-schnell",
+        "nsfwImages": "stablediffusionapi/realistic-vision-v5"
+      }
+    },
+    "contentModeration": {
+      "provider": "openai",
+      "endpoint": "moderations"
+    }
+  },
+  "security": {
+    "cors": {
+      "allowedOrigins": ["*"],
+      "allowedMethods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      "allowedHeaders": ["authorization", "x-client-info", "apikey", "content-type"]
+    },
+    "rateLimit": {
+      "windowMs": 900000,
+      "maxRequests": 100
+    }
+  },
+  "resources": {
+    "memory": "1024Mi",
+    "cpu": "500m"
+  }
+}
