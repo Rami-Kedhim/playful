@@ -1,191 +1,138 @@
+
 import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { VerificationStatus as VerificationStatusEnum, VERIFICATION_STATUS, VERIFICATION_LEVELS } from '@/types/verification';
-import { useVerificationStatus } from './hooks/useVerificationStatus';
-import { Clock, CheckCircle, XCircle, AlertCircle, FileText } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { VerificationStatus as VerificationStatusEnum } from '@/types/verification';
 
-// Simple date formatter
-const formatDate = (dateStr: string) => {
-  try {
-    return format(new Date(dateStr), 'MMM dd, yyyy');
-  } catch (e) {
-    return 'Unknown date';
-  }
-};
+interface VerificationStatusProps {
+  status: string;
+  level?: string;
+  onRequestVerification?: () => void;
+  rejectionReason?: string;
+  requestId?: string;
+}
 
-const VerificationStatusComponent = ({ onRequestVerification }) => {
-  const { status, verificationRequest, loading, error } = useVerificationStatus();
-  
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-40">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+const VerificationEmptyState = ({ onRequestVerification }: { onRequestVerification?: () => void }) => (
+  <div className="text-center p-6">
+    <div className="mx-auto bg-muted rounded-full p-3 w-12 h-12 flex items-center justify-center mb-4">
+      <AlertCircle className="h-6 w-6 text-muted-foreground" />
+    </div>
+    <h3 className="font-medium text-lg mb-2">Not Verified</h3>
+    <p className="text-muted-foreground mb-4">
+      Your account is not verified. Verification increases trust and visibility.
+    </p>
+    {onRequestVerification && (
+      <Button onClick={onRequestVerification}>Request Verification</Button>
+    )}
+  </div>
+);
+
+const VerificationPendingState = ({ requestId }: { requestId?: string }) => (
+  <div className="text-center p-6">
+    <div className="mx-auto bg-yellow-100 dark:bg-yellow-900/30 rounded-full p-3 w-12 h-12 flex items-center justify-center mb-4">
+      <Clock className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+    </div>
+    <h3 className="font-medium text-lg mb-2">Verification Pending</h3>
+    <p className="text-muted-foreground mb-4">
+      Your verification request is being processed. This usually takes 1-2 business days.
+    </p>
+    {requestId && (
+      <div className="text-xs text-muted-foreground">
+        Request ID: {requestId}
       </div>
-    );
-  }
+    )}
+  </div>
+);
 
-  if (error) {
-    return (
-      <Card className="border-destructive bg-destructive/5">
-        <CardHeader>
-          <CardTitle className="flex items-center text-destructive">
-            <AlertCircle className="mr-2 h-5 w-5" />
-            Error
-          </CardTitle>
-          <CardDescription>
-            There was an error loading your verification status
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">{error}</p>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={() => window.location.reload()}>
-            Try Again
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  }
+const VerificationApprovedState = ({ level }: { level?: string }) => (
+  <div className="text-center p-6">
+    <div className="mx-auto bg-green-100 dark:bg-green-900/30 rounded-full p-3 w-12 h-12 flex items-center justify-center mb-4">
+      <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+    </div>
+    <h3 className="font-medium text-lg mb-2">Verified Account</h3>
+    <p className="text-muted-foreground mb-4">
+      Your account is verified. {level && `Verification level: ${level}`}
+    </p>
+    <div>
+      <Progress value={100} className="bg-muted h-2" />
+      <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+        <span>Verification complete</span>
+        <span>100%</span>
+      </div>
+    </div>
+  </div>
+);
 
-  if (!status || !verificationRequest) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Verification Status</CardTitle>
-          <CardDescription>You haven't requested verification yet</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">
-            Verifying your profile helps establish trust with other users and unlocks additional features.
-          </p>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={onRequestVerification}>
-            Request Verification
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  }
+const VerificationRejectedState = ({ rejectionReason, onRequestVerification }: { 
+  rejectionReason?: string;
+  onRequestVerification?: () => void;
+}) => (
+  <div className="text-center p-6">
+    <div className="mx-auto bg-red-100 dark:bg-red-900/30 rounded-full p-3 w-12 h-12 flex items-center justify-center mb-4">
+      <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+    </div>
+    <h3 className="font-medium text-lg mb-2">Verification Rejected</h3>
+    <p className="text-muted-foreground mb-4">
+      {rejectionReason || 'Your verification request was rejected. Please try again with the correct documentation.'}
+    </p>
+    {onRequestVerification && (
+      <Button onClick={onRequestVerification}>Try Again</Button>
+    )}
+  </div>
+);
 
-  const renderVerificationStatus = () => {
-    if (!status) {
-      return <VerificationEmptyState onRequest={onRequestVerification} />;
-    }
-
-    // Update this line to use the proper comparison
-    if (status === VerificationStatus.REJECTED) {
-      return (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Verification Rejected</AlertTitle>
-          <AlertDescription>
-            {rejectionReason || 'Your verification request was rejected. Please check requirements and submit again.'}
-          </AlertDescription>
-        </Alert>
-      );
-    }
-
-    return (
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle>Verification Status</CardTitle>
-              <CardDescription>
-                {verificationRequest.requested_level ? `You requested ${verificationRequest.requested_level} verification` : `You requested ${VERIFICATION_LEVELS.BASIC} verification`}
-              </CardDescription>
-            </div>
-            <StatusBadge statusValue={status} />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <h4 className="text-sm font-medium mb-1">Submitted</h4>
-              <p className="text-sm text-muted-foreground">
-                {formatDate(verificationRequest.submittedAt || verificationRequest.created_at || new Date().toISOString())}
-              </p>
-            </div>
-            
-            {verificationRequest.documents && verificationRequest.documents.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium mb-1">Documents</h4>
-                <div className="flex flex-wrap gap-2">
-                  {verificationRequest.documents.map((doc) => (
-                    <Badge key={doc.id} variant="outline" className="flex items-center">
-                      <FileText className="h-3 w-3 mr-1" />
-                      {doc.type || doc.documentType || "Document"}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {(verificationRequest.rejectionReason || verificationRequest.reviewer_notes) && (
-              <div>
-                <h4 className="text-sm font-medium text-destructive mb-1">Feedback</h4>
-                <p className="text-sm text-destructive/80 bg-destructive/5 p-3 rounded-md">
-                  {verificationRequest.rejectionReason || verificationRequest.reviewer_notes}
-                </p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-end">
-          {status === "rejected" && (
-            <Button onClick={onRequestVerification}>
-              Submit Again
-            </Button>
-          )}
-        </CardFooter>
-      </Card>
-    );
-  };
-
-  return renderVerificationStatus();
-};
-
-const StatusBadge = ({ statusValue }) => {
-  // Handle string status values directly
-  if (typeof statusValue === 'string') {
-    switch(statusValue.toLowerCase()) {
-      case 'pending':
-        return (
-          <Badge variant="outline" className="flex items-center">
-            <Clock className="h-3 w-3 mr-1" /> Pending
-          </Badge>
-        );
-      case 'in_review':
-        return (
-          <Badge variant="secondary" className="flex items-center">
-            <Clock className="h-3 w-3 mr-1" /> In Review
-          </Badge>
-        );
-      case 'approved':
-        return (
-          <Badge variant="success" className="flex items-center bg-green-500">
-            <CheckCircle className="h-3 w-3 mr-1" /> Approved
-          </Badge>
-        );
-      case 'rejected':
-        return (
-          <Badge variant="destructive" className="flex items-center">
-            <XCircle className="h-3 w-3 mr-1" /> Rejected
-          </Badge>
-        );
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
-    }
-  }
+const renderVerificationStatus = (props: VerificationStatusProps) => {
+  const { status, level, onRequestVerification, rejectionReason, requestId } = props;
   
-  // Fallback for enum values or other types
-  return <Badge variant="outline">Status: {String(statusValue)}</Badge>;
+  switch(status) {
+    case 'NONE':
+      return <VerificationEmptyState onRequestVerification={onRequestVerification} />;
+    case 'PENDING':
+    case 'IN_REVIEW':
+      return <VerificationPendingState requestId={requestId} />;
+    case 'APPROVED':
+      return <VerificationApprovedState level={level} />;
+    case 'REJECTED':
+      return <VerificationRejectedState 
+        rejectionReason={rejectionReason} 
+        onRequestVerification={onRequestVerification} 
+      />;
+    case 'EXPIRED':
+      return <VerificationRejectedState 
+        rejectionReason="Your verification has expired. Please submit a new verification request." 
+        onRequestVerification={onRequestVerification} 
+      />;
+    default:
+      return <VerificationEmptyState onRequestVerification={onRequestVerification} />;
+  }
 };
 
-export default VerificationStatusComponent;
+const VerificationStatus = (props: VerificationStatusProps) => {
+  return (
+    <Card>
+      <CardContent className="px-0 py-0">
+        <Tabs defaultValue="status">
+          <TabsList className="w-full rounded-none border-b">
+            <TabsTrigger value="status" className="flex-1">Status</TabsTrigger>
+            <TabsTrigger value="upgrade" className="flex-1">Upgrade</TabsTrigger>
+          </TabsList>
+          <TabsContent value="status" className="m-0">
+            {renderVerificationStatus(props)}
+          </TabsContent>
+          <TabsContent value="upgrade" className="m-0 p-6">
+            <h3 className="font-medium text-lg mb-2">Upgrade Verification</h3>
+            <p className="text-muted-foreground mb-4">
+              Upgrade your verification level to get more features and visibility.
+            </p>
+            <Button disabled={props.status !== 'APPROVED'}>Upgrade Now</Button>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default VerificationStatus;

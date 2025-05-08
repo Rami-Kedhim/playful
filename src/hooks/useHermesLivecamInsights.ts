@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { hermes } from '@/core/Hermes';
 import { HermesInsight } from '@/types/core-systems';
@@ -39,9 +40,9 @@ export const useHermesLivecamInsights = (profileId?: string) => {
     const ratioInsight = insights.find(i => i.type === 'conversion');
     
     return {
-      views: viewsInsight?.value ? Number(viewsInsight.value) : 0,
-      impressions: impressionsInsight?.value ? Number(impressionsInsight.value) : 0,
-      ratio: ratioInsight?.value ? Number(ratioInsight.value) : 0
+      views: viewsInsight?.value ?? 0,
+      impressions: impressionsInsight?.value ?? 0,
+      ratio: ratioInsight?.value ?? 0
     };
   }, [insights]);
 

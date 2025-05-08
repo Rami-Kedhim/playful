@@ -1,4 +1,8 @@
 
+/**
+ * Pulse Boost System Type Definitions
+ */
+
 export interface BoostPackage {
   id: string;
   name: string;
@@ -42,6 +46,7 @@ export interface BoostAnalytics {
   impressions?: {
     value: number;
     change?: number;
+    withBoost?: number;
   };
   interactions?: {
     value: number;
@@ -72,5 +77,30 @@ export interface EnhancedBoostStatus {
   startedAt: Date | null;
   isExpired: boolean;
   remainingMinutes?: number; // in minutes
+  packageName?: string;
+  progress?: number;
 }
 
+// Adding additional types needed by the system
+export interface UserProfile {
+  id: string;
+  username: string;
+  email: string;
+  profileType: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserCredentials {
+  email: string;
+  password: string;
+}
+
+export interface PulseBoost {
+  id: string;
+  profileId: string;
+  packageId: string;
+  startTime: Date;
+  endTime: Date;
+  status: string;
+}

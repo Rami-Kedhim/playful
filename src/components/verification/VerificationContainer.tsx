@@ -1,89 +1,94 @@
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useVerificationStatus } from './hooks/useVerificationStatus';
-import VerificationForm from './VerificationForm';
+
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { 
+  ShieldCheck, 
+  Upload, 
+  FileCheck, 
+  Clock, 
+  CheckCircle, 
+  XCircle, 
+  AlertTriangle 
+} from 'lucide-react';
+import { VerificationRequest, VerificationStatus as VerificationStatusEnum } from '@/types/verification';
+import VerificationProgress from './VerificationProgress';
 import VerificationStatus from './VerificationStatus';
-import VerificationLevelUpgrade from './level/VerificationLevelUpgrade';
-import VerificationLevelType from './level/VerificationLevelType';
-import { VerificationLevel } from '@/types/verification';
 
 interface VerificationContainerProps {
-  userId?: string;
-  profileId?: string;
-  showLevel?: boolean;
-  showUpgrade?: boolean;
-  onRequestVerification?: () => void; // Make this prop optional
+  status: string;
+  verificationRequest: VerificationRequest;
+  loading: boolean;
+  error: string;
+  level?: string; 
+  rejectionReason?: string;
+  requestId?: string;
+  onRequestVerification: () => void;
+  refresh: () => Promise<void>;
 }
 
-const VerificationContainer: React.FC<VerificationContainerProps> = ({
-  userId,
-  profileId,
-  showLevel = true,
-  showUpgrade = true,
-  onRequestVerification = () => {} // Provide default empty function
+interface VerificationProgressComponentProps {
+  onRequestVerification: () => void;
+}
+
+const VerificationContainer: React.FC<VerificationContainerProps> = ({ 
+  status, 
+  verificationRequest, 
+  loading, 
+  error,
+  level,
+  rejectionReason,
+  requestId,
+  onRequestVerification,
+  refresh 
 }) => {
-  const { status: verificationStatus, loading, error, verificationRequest, level: verificationLevel, rejectionReason, requestId } = useVerificationStatus();
-  const [activeTab, setActiveTab] = useState('status');
-  const [selectedType, setSelectedType] = useState<string | null>(null);
-
-  const handleSelectType = (type: string) => {
-    setSelectedType(type);
-  };
-
-  const handleRequestVerification = () => {
-    setActiveTab('verify');
-  };
-
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Identity Verification</CardTitle>
-        <CardDescription>
-          Verify your identity to unlock all platform features and build trust with other users.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-3 mb-6">
-            <TabsTrigger value="status">Status</TabsTrigger>
-            <TabsTrigger value="verify">Verify</TabsTrigger>
-            <TabsTrigger value="upgrade">Upgrade</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="status">
-            {loading ? (
-              <div>Loading...</div>
-            ) : error ? (
-              <div className="text-destructive">Error: {error}</div>
-            ) : (
-              <VerificationStatus
-                status={verificationStatus}
-                level={verificationLevel}
-                onRequestVerification={onRequestVerification}
-                rejectionReason={rejectionReason}
-                requestId={requestId}
-              />
-            )}
-          </TabsContent>
-
-          <TabsContent value="verify">
-            <VerificationForm onSubmissionComplete={() => setActiveTab('status')} />
-          </TabsContent>
-
-          <TabsContent value="upgrade">
-            <VerificationLevelUpgrade />
-          </TabsContent>
-        </Tabs>
-
-        <div className="mt-8">
-          <VerificationLevelType
-            selectedType={selectedType as 'personal' | 'business' | 'premium' | null}
-            onSelectType={handleSelectType as (type: 'personal' | 'business' | 'premium') => void}
-          />
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Verification Center</h2>
+          <p className="text-muted-foreground">Verify your identity to unlock all platform features</p>
         </div>
-      </CardContent>
-    </Card>
+        <Button variant="outline" onClick={refresh} disabled={loading}>
+          {loading ? 'Refreshing...' : 'Refresh Status'}
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              Verification Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <VerificationStatus 
+              status={status} 
+              level={level} 
+              rejectionReason={rejectionReason} 
+              requestId={requestId} 
+              onRequestVerification={onRequestVerification} 
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileCheck className="h-5 w-5 text-primary" />
+              Verification Progress
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <VerificationProgress 
+              status={status} 
+              onRequestVerification={onRequestVerification} 
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 

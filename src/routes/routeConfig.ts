@@ -1,42 +1,56 @@
 
+import { UnifiedRoutes } from './unifiedRoutes';
+
 export const AppPaths = {
-  HOME: '/',
-  ESCORT_SEARCH: '/escorts',
-  ESCORTS: '/escorts', // Adding this for backward compatibility
-  ESCORT_DETAIL: '/escort/:id',
-  CREATORS: '/creators',
-  CREATOR_DETAIL: '/creator/:id',
-  AI_COMPANION: '/ai-companions',
-  AI_COMPANION_DETAIL: '/ai-companion/:id',
-  MESSAGES: '/messages',
-  WALLET: '/wallet',
-  PROFILE: '/profile',
-  USER_PROFILE: '/profile', // Adding this for backward compatibility
-  SETTINGS: '/settings',
-  VERIFICATION: '/verification',
-  PULSE_BOOST: '/pulse-boost',
-  LUCIE: '/lucie',
-  OXUM: '/oxum',
-  HERMES: '/hermes',
-  LOGIN: '/login',
-  REGISTER: '/register',
-  BRAIN_HUB: '/brain-hub',
-  NEURAL_ANALYTICS: '/neural-analytics',
-  METAVERSE: '/metaverse',
-  TERMS: '/terms',
-  PRIVACY: '/privacy',
-  SAFETY: '/safety',
-  CONTACT: '/contact',
-  LIVECAMS: '/livecams',
-  LIVECAM_DETAIL: '/livecam/:id',
-  ADMIN: '/admin',
-  AUTH: '/auth',
-  NEURAL_MONITOR: '/neural/monitor',
-  SEO: '/seo',
-  DASHBOARD: '/dashboard',
-  GUIDELINES: '/guidelines',
-  FAVORITES: '/favorites',
-  BOOKINGS: '/bookings' // Adding this for backward compatibility
+  HOME: UnifiedRoutes.home,
+  ESCORT_SEARCH: UnifiedRoutes.escorts.base,
+  ESCORTS: UnifiedRoutes.escorts.base,
+  ESCORT_DETAIL: UnifiedRoutes.escorts.profile,
+  ESCORT_MAP: UnifiedRoutes.escorts.map,
+  ESCORT_VERIFIED: UnifiedRoutes.escorts.verified,
+  CREATORS: UnifiedRoutes.creators.base,
+  CREATOR_DETAIL: UnifiedRoutes.creators.profile,
+  CREATOR_GALLERY: UnifiedRoutes.creators.gallery,
+  AI_COMPANION: "/ai-companions", // Maintaining backward compatibility
+  AI_COMPANION_DETAIL: "/ai-companion/:id", // Maintaining backward compatibility
+  MESSAGES: "/messages", // Maintaining backward compatibility
+  WALLET: UnifiedRoutes.wallet.base,
+  WALLET_RECHARGE: UnifiedRoutes.wallet.recharge,
+  WALLET_HISTORY: UnifiedRoutes.wallet.history,
+  PROFILE: "/profile", // Maintaining backward compatibility
+  USER_PROFILE: "/profile", // Maintaining backward compatibility
+  SETTINGS: "/settings", // Maintaining backward compatibility
+  VERIFICATION: "/verification", // Maintaining backward compatibility
+  PULSE_BOOST: "/pulse-boost", // Maintaining backward compatibility
+  LUCIE: UnifiedRoutes.lucie.base,
+  LUCIE_TALK: UnifiedRoutes.lucie.talk,
+  LUCIE_GUIDE: UnifiedRoutes.lucie.guide,
+  LUCIE_BOOST: UnifiedRoutes.lucie.boost,
+  OXUM: "/oxum", // Maintaining backward compatibility
+  HERMES: "/hermes", // Maintaining backward compatibility
+  LOGIN: UnifiedRoutes.clients.login,
+  REGISTER: "/register", // Maintaining backward compatibility
+  BRAIN_HUB: "/brain-hub", // Maintaining backward compatibility
+  NEURAL_ANALYTICS: "/neural-analytics", // Maintaining backward compatibility
+  METAVERSE: "/metaverse", // Maintaining backward compatibility
+  TERMS: "/terms", // Maintaining backward compatibility
+  PRIVACY: "/privacy", // Maintaining backward compatibility
+  SAFETY: "/safety", // Maintaining backward compatibility
+  CONTACT: "/contact", // Maintaining backward compatibility
+  LIVECAMS: UnifiedRoutes.livecams.base,
+  LIVECAM_DETAIL: UnifiedRoutes.livecams.room,
+  ADMIN: UnifiedRoutes.admin.base,
+  ADMIN_USERS: UnifiedRoutes.admin.users,
+  ADMIN_REPORTS: UnifiedRoutes.admin.reports,
+  AUTH: "/auth", // Maintaining backward compatibility
+  NEURAL_MONITOR: "/neural/monitor", // Maintaining backward compatibility
+  SEO: "/seo", // Maintaining backward compatibility
+  DASHBOARD: "/dashboard", // Maintaining backward compatibility
+  GUIDELINES: "/guidelines", // Maintaining backward compatibility
+  FAVORITES: UnifiedRoutes.clients.favorites,
+  BOOKINGS: UnifiedRoutes.bookings.base,
+  BOOKINGS_NEW: UnifiedRoutes.bookings.new,
+  BOOKINGS_HISTORY: UnifiedRoutes.bookings.history
 }
 
 // Export AppPaths as APP_PATHS as well for backward compatibility

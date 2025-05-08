@@ -1,4 +1,8 @@
 
+/**
+ * Boost System Type Definitions
+ */
+
 export interface BoostStatus {
   isActive: boolean;
   isExpiring: boolean;
@@ -7,6 +11,7 @@ export interface BoostStatus {
   boostLevel?: number;
   boostType?: string;
   modifiers?: Record<string, number>;
+  packageName?: string;
 }
 
 export interface HermesStatus {
@@ -44,4 +49,3 @@ export interface BoostManagerHook {
   eligibilityReason?: string;
   refreshStatus: () => void;
 }
-
