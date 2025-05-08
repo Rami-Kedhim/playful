@@ -1,62 +1,51 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import BoostAnalyticsCard from './BoostAnalyticsCard';
+import { AnalyticsData } from '@/hooks/boost/useBoostAnalytics';
 
 interface BoostAnalyticsProps {
-  analytics: {
-    additionalViews?: number;
-    engagementIncrease?: number;
-    rankingPosition?: number;
-  };
-  loading?: boolean;
+  isActive: boolean;
+  getAnalytics: () => Promise<AnalyticsData | null>;
+  creatorId: string;
 }
 
-const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({ analytics, loading = false }) => {
-  const { additionalViews, engagementIncrease, rankingPosition } = analytics;
-  
-  if (loading) {
+const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({ 
+  isActive, 
+  getAnalytics,
+  creatorId
+}) => {
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setHistoryLoading(false);
+  }, []);
+
+  if (error) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Analytics</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center p-6">
-            Loading analytics...
-          </div>
-        </CardContent>
-      </Card>
+      <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-md">
+        Error loading analytics: {error}
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Boost Performance</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-primary/10 rounded-md flex flex-col items-center">
-            <TrendingUp className="h-8 w-8 mb-2 text-primary" />
-            <div className="text-2xl font-bold">{additionalViews || 0}</div>
-            <div className="text-sm text-muted-foreground">Additional Views</div>
+    <div className="space-y-6">
+      <BoostAnalyticsCard 
+        isActive={isActive} 
+        getAnalytics={getAnalytics}
+      />
+      
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-sm text-muted-foreground">
+            <p>Analytics data shows the impact of profile boosting on your visibility and interactions.</p>
+            <p className="mt-2">Boost your profile to see detailed analytics data here.</p>
           </div>
-          
-          <div className="p-4 bg-primary/10 rounded-md flex flex-col items-center">
-            <BarChart className="h-8 w-8 mb-2 text-primary" />
-            <div className="text-2xl font-bold">{engagementIncrease ? `${engagementIncrease}%` : '0%'}</div>
-            <div className="text-sm text-muted-foreground">Engagement Increase</div>
-          </div>
-          
-          <div className="p-4 bg-primary/10 rounded-md flex flex-col items-center">
-            <div className="h-8 w-8 mb-2 text-primary font-bold text-xl flex items-center justify-center">#</div>
-            <div className="text-2xl font-bold">{rankingPosition || 'N/A'}</div>
-            <div className="text-sm text-muted-foreground">Ranking Position</div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

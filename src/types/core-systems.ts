@@ -2,11 +2,12 @@
 export interface ModerateContentParams {
   content: string;
   contentType: string;
-  // Remove context property that's causing issues
+  context?: string; // Add context property since it's being used
 }
 
 export interface ModerateContentResult {
-  isSafe: boolean; // Changed from 'safe' to 'isSafe' to match implementation
+  isSafe: boolean; 
+  safe?: boolean; // Add this for backward compatibility
   score: number;
   issues: string[];
   blockedCategories: string[];
@@ -14,7 +15,7 @@ export interface ModerateContentResult {
 
 export interface GenerateContentResult {
   content: string;
-  // Remove moderated property that's causing issues
+  moderated?: boolean; // Add for backward compatibility
   originalLength: number;
   moderatedLength: number;
   warnings: string[];
@@ -23,7 +24,7 @@ export interface GenerateContentResult {
 export interface SentimentAnalysisResult {
   score: number;
   sentiment: 'positive' | 'negative' | 'neutral';
-  // Remove confidence property that's causing issues
+  confidence?: number; // Add for backward compatibility
 }
 
 export interface LucieAISystem {
@@ -34,7 +35,6 @@ export interface LucieAISystem {
   analyzeSentiment(text: string): Promise<SentimentAnalysisResult>;
   getSystemStatus(): { operational: boolean; modules: Record<string, string> };
   configure(options: Record<string, any>): void;
-  // Add the missing method that's required by the interface
   generateResponse(input: string): Promise<string>;
 }
 
@@ -42,7 +42,7 @@ export interface SystemStatus {
   operational: boolean;
   latency: number;
   uptime: number;
-  // Remove messageLength property that's causing issues
+  messageLength?: number; // Add for backward compatibility
   services: {
     auth: string;
     analytics: string;
@@ -52,8 +52,8 @@ export interface SystemStatus {
 }
 
 export interface SystemIntegrityResult {
-  // Changed from 'isValid' to match implementation
-  valid: boolean; 
+  valid: boolean;
+  isValid?: boolean; // Add for backward compatibility 
   message: string;
   details: {
     database: string;
@@ -63,7 +63,7 @@ export interface SystemIntegrityResult {
 }
 
 export interface SystemHealthMetrics {
-  // Remove 'load' property that's causing issues
+  load?: number; // Add for backward compatibility
   memory: number;
   latency: number;
   errorRate: number;
@@ -75,6 +75,7 @@ export interface SystemHealthMetrics {
 
 export interface SessionValidationResult {
   valid: boolean;
+  isValid?: boolean; // Add for backward compatibility
   userId?: string;
   sessionId?: string;
   expiresAt?: Date;
@@ -90,18 +91,18 @@ export interface UberCoreSystem {
 }
 
 export interface RecommendedAction {
-  id: string; // Add missing property
+  id: string;
   title: string;
   description: string;
-  action: string; // Add missing property
+  action: string;
   priority: 'high' | 'medium' | 'low';
   target?: string;
   icon?: string;
 }
 
 export interface OxumSystem {
-  checkSystemStatus(): Promise<any>; // Add missing method
-  boostAllocationEigen(): Promise<any>; // Add missing method
-  calculateBoostScore(): Promise<any>; // Add missing method
-  configure(): Promise<any>; // Add missing method
+  checkSystemStatus(): Promise<any>;
+  boostAllocationEigen(): Promise<any>;
+  calculateBoostScore(): Promise<any>;
+  configure(): Promise<any>;
 }

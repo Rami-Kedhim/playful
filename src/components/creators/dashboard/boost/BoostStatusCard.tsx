@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -61,11 +62,7 @@ const BoostStatusCard: React.FC<BoostStatusCardProps> = ({
     }
     
     // Get package name
-    const packageName = boostStatus.packageName || 
-      (boostStatus.boostPackage ? boostStatus.boostPackage.name : 'Standard Boost');
-    
-    // Get package duration
-    const duration = boostStatus.boostPackage ? boostStatus.boostPackage.duration : '24:00:00';
+    const packageName = boostStatus.packageName || 'Standard Boost';
     
     return (
       <Card>
@@ -95,7 +92,7 @@ const BoostStatusCard: React.FC<BoostStatusCardProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-secondary/20 p-3 rounded-md flex flex-col items-center">
               <Clock className="h-4 w-4 mb-1 text-muted-foreground" />
-              <span className="text-sm font-semibold">{boostStatus.timeRemaining || '16h 32m'}</span>
+              <span className="text-sm font-semibold">{boostStatus.remainingTime || '16h 32m'}</span>
               <span className="text-xs text-muted-foreground">Remaining</span>
             </div>
             <div className="bg-secondary/20 p-3 rounded-md flex flex-col items-center">

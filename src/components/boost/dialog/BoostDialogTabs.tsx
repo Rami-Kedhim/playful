@@ -4,16 +4,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Zap, BarChart2, Clock, XCircle } from "lucide-react";
 import BoostPackages from "./BoostPackages";
-import BoostActivePackage from "./BoostActivePackage";
+import BoostActivePackage from "../BoostActivePackage";
 import BoostEligibilityCheck from "./BoostEligibilityCheck";
 import HermesBoostInfo from "./HermesBoostInfo";
-import {
-  BoostStatus,
-  BoostEligibility,
-  BoostPackage,
-  HermesStatus,
-  BoostDialogTabsProps
-} from "@/types/boost";
+import { BoostStatus, BoostEligibility, BoostPackage, HermesStatus } from "@/types/boost";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface DialogTabsProps {
@@ -54,7 +48,7 @@ const BoostDialogTabs: React.FC<DialogTabsProps> = ({
   formatBoostDuration = (d) => d
 }) => {
   // Don't show tabs if not eligible or if there's an active boost
-  const shouldShowTabs = (eligibility.eligible || eligibility.isEligible) && !boostStatus.isActive;
+  const shouldShowTabs = eligibility.isEligible && !boostStatus.isActive;
 
   return (
     <div className="space-y-4">
@@ -79,7 +73,7 @@ const BoostDialogTabs: React.FC<DialogTabsProps> = ({
       )}
 
       {/* Eligibility Check */}
-      {!boostStatus.isActive && !(eligibility.eligible || eligibility.isEligible) && (
+      {!boostStatus.isActive && !eligibility.isEligible && (
         <BoostEligibilityCheck 
           eligibility={eligibility} 
           onClose={handleDialogClose}

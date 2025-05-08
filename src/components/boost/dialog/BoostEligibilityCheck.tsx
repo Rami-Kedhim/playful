@@ -24,7 +24,7 @@ const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({
           <div>
             <h3 className="font-medium">Boost Not Available</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              {eligibility.reason || "You're not eligible to boost at this time"}
+              {"You're not eligible to boost at this time"}
             </p>
           </div>
         </div>

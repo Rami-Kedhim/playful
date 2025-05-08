@@ -112,6 +112,14 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
     activeUsers: 0,
     estimatedVisibility: 0,
     lastUpdateTime: '',
+    boostScore: 0,
+    effectivenessScore: 0
+  };
+
+  // Create a default boost status if none is provided
+  const safeBoostStatus = boostStatus || { 
+    isActive: false,
+    remainingTime: '0:00:00'
   };
 
   return (
@@ -130,8 +138,8 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           loading={isLoading}
-          boostStatus={boostStatus || { isActive: false }}
-          eligibility={{ eligible: true }}
+          boostStatus={safeBoostStatus}
+          eligibility={{ isEligible: true }}
           boostPackages={boostPackages || []}
           selectedPackage={selectedPackage}
           setSelectedPackage={setSelectedPackage}

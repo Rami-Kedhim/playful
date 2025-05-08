@@ -1,181 +1,156 @@
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { BarChart, LineChart, TrendingUp, Users, Zap } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { BoostAnalytics } from "@/types/boost";
-
-// Define our own AnalyticsData interface instead of extending BoostAnalytics
-interface AnalyticsData {
-  impressions?: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-  clicks?: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-  engagementRate?: number;
-  conversionRate?: number;
-  boostEfficiency?: number;
-  additionalViews?: number;
-  engagementIncrease?: number;
-  rankingPosition?: number;
-  viewsIncrease?: number;
-}
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { RefreshCw, TrendingUp, Eye, MousePointer } from 'lucide-react';
+import { BoostAnalyticsItem } from '@/types/boost';
+import { AnalyticsData } from '@/hooks/boost/useBoostAnalytics';
 
 interface BoostAnalyticsCardProps {
   isActive: boolean;
   getAnalytics: () => Promise<AnalyticsData | null>;
 }
 
-const BoostAnalyticsCard = ({ isActive, getAnalytics }: BoostAnalyticsCardProps) => {
-  const [loading, setLoading] = useState(true);
+const BoostAnalyticsCard: React.FC<BoostAnalyticsCardProps> = ({ isActive, getAnalytics }) => {
+  const [loading, setLoading] = useState(false);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-  
+  const [refreshing, setRefreshing] = useState(false);
+
   useEffect(() => {
-    const fetchAnalytics = async () => {
-      if (!isActive) {
-        setLoading(false);
-        return;
-      }
-      
-      setLoading(true);
-      try {
-        const data = await getAnalytics();
-        setAnalytics(data);
-      } catch (err) {
-        console.error("Error fetching boost analytics:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     fetchAnalytics();
-    
-    // Refresh analytics every 5 minutes
-    const interval = setInterval(fetchAnalytics, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [isActive, getAnalytics]);
-  
-  // Mock chart data for visualization
-  const chartData = [
-    { name: 'Day 1', views: 10 },
-    { name: 'Day 2', views: 25 },
-    { name: 'Day 3', views: 40 },
-    { name: 'Day 4', views: 35 },
-    { name: 'Day 5', views: 45 },
-    { name: 'Day 6', views: 60 },
-    { name: 'Day 7', views: 55 },
-  ];
-  
-  if (!isActive) {
-    return (
-      <Card className="col-span-2">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <BarChart className="h-5 w-5 mr-2" />
-            Boost Analytics
-          </CardTitle>
-          <CardDescription>
-            Analytics will appear here when you have an active boost
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="h-[240px] flex items-center justify-center">
-          <div className="text-center text-muted-foreground">
-            <Zap className="h-12 w-12 mx-auto mb-4 opacity-20" />
-            <p>No active boost to analyze</p>
-            <p className="text-sm mt-2">Boost your profile to see performance metrics</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-  
+  }, [isActive]);
+
+  const fetchAnalytics = async () => {
+    setLoading(true);
+    try {
+      const data = await getAnalytics();
+      setAnalytics(data);
+    } catch (error) {
+      console.error('Failed to fetch boost analytics', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchAnalytics();
+    setRefreshing(false);
+  };
+
+  const formatChange = (change?: number): string => {
+    if (change === undefined) return '';
+    return change > 0 ? `+${change}%` : `${change}%`;
+  };
+
+  const formatMetricValue = (item?: BoostAnalyticsItem): string => {
+    if (!item) return '0';
+    return item.value.toString();
+  };
+
   if (loading) {
     return (
-      <Card className="col-span-2">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <BarChart className="h-5 w-5 mr-2" />
-            Boost Analytics
-          </CardTitle>
-          <CardDescription>
-            Loading boost performance data
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <Skeleton className="h-[200px] w-full" />
-            <div className="grid grid-cols-3 gap-4">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-            </div>
-          </div>
+      <Card>
+        <CardContent className="p-8 flex items-center justify-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
         </CardContent>
       </Card>
     );
   }
-  
+
   return (
-    <Card className="col-span-2">
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          <BarChart className="h-5 w-5 mr-2" />
-          Boost Analytics
-        </CardTitle>
-        <CardDescription>
-          Performance metrics for your active boost
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[200px] mb-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={chartData}
-              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Area 
-                type="monotone" 
-                dataKey="views" 
-                stroke="#8884d8" 
-                fill="hsl(224.3 76.3% 48% / 0.5)" 
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">Boost Analytics</CardTitle>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-1 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
         </div>
-        
-        {analytics && (
-          <div className="grid grid-cols-3 gap-4 pt-2">
-            <div className="flex flex-col items-center p-3 bg-secondary/20 rounded-md">
-              <Users className="h-5 w-5 mb-1 text-blue-500" />
-              <span className="text-2xl font-bold">{analytics.additionalViews || 0}</span>
-              <span className="text-xs text-muted-foreground">additional views</span>
+      </CardHeader>
+      <CardContent className="pt-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-secondary/20 p-3 rounded-md">
+            <div className="flex items-center space-x-2 mb-1">
+              <Eye className="h-4 w-4 text-blue-500" />
+              <span className="text-sm font-medium">Views</span>
             </div>
-            <div className="flex flex-col items-center p-3 bg-secondary/20 rounded-md">
-              <TrendingUp className="h-5 w-5 mb-1 text-green-500" />
-              <span className="text-2xl font-bold">{analytics.engagementIncrease || 0}%</span>
-              <span className="text-xs text-muted-foreground">engagement increase</span>
+            <div className="flex justify-between items-end">
+              <div className="text-2xl font-semibold">
+                {analytics?.views || 0}
+              </div>
+              {analytics?.views && analytics.views.change !== undefined && (
+                <div className={`text-xs ${analytics.views.change > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {formatChange(analytics.views.change)}
+                </div>
+              )}
             </div>
-            <div className="flex flex-col items-center p-3 bg-secondary/20 rounded-md">
-              <LineChart className="h-5 w-5 mb-1 text-purple-500" />
-              <span className="text-2xl font-bold">#{analytics.rankingPosition || 0}</span>
-              <span className="text-xs text-muted-foreground">ranking position</span>
+            {isActive && analytics?.views && analytics.views.withBoost !== undefined && (
+              <div className="text-xs text-green-500 mt-1">
+                +{analytics.views.withBoost} with boost
+              </div>
+            )}
+          </div>
+
+          <div className="bg-secondary/20 p-3 rounded-md">
+            <div className="flex items-center space-x-2 mb-1">
+              <TrendingUp className="h-4 w-4 text-green-500" />
+              <span className="text-sm font-medium">Impressions</span>
             </div>
+            <div className="flex justify-between items-end">
+              <div className="text-2xl font-semibold">
+                {analytics?.impressions?.today || 0}
+              </div>
+              {analytics?.impressions && (
+                <div className={`text-xs ${(analytics.impressions.change || 0) > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {formatChange(analytics.impressions.change)}
+                </div>
+              )}
+            </div>
+            {isActive && analytics?.impressions && analytics.impressions.withBoost && (
+              <div className="text-xs text-green-500 mt-1">
+                +{analytics.impressions.withBoost} with boost
+              </div>
+            )}
+          </div>
+
+          <div className="bg-secondary/20 p-3 rounded-md">
+            <div className="flex items-center space-x-2 mb-1">
+              <MousePointer className="h-4 w-4 text-purple-500" />
+              <span className="text-sm font-medium">Interactions</span>
+            </div>
+            <div className="flex justify-between items-end">
+              <div className="text-2xl font-semibold">
+                {analytics?.interactions?.today || 0}
+              </div>
+              {analytics?.interactions && (
+                <div className={`text-xs ${(analytics.interactions.change || 0) > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {formatChange(analytics.interactions.change)}
+                </div>
+              )}
+            </div>
+            {isActive && analytics?.interactions && analytics.interactions.withBoost && (
+              <div className="text-xs text-green-500 mt-1">
+                +{analytics.interactions.withBoost} with boost
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Additional metrics */}
+        {analytics && analytics.additionalViews !== undefined && (
+          <div className="mt-4 p-3 bg-primary/10 rounded-md">
+            <p className="text-sm">
+              <span className="font-medium">Your profile has received </span>
+              <span className="font-bold text-primary">{analytics.additionalViews} additional views</span>
+              <span className="font-medium"> since you started using PULSE Boost.</span>
+            </p>
           </div>
         )}
       </CardContent>

@@ -24,15 +24,17 @@ const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({
           <div>
             <h3 className="font-medium">Boost Not Available</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              {eligibility.reason || "You're not eligible to boost at this time"}
+              {"You're not eligible to boost at this time"}
             </p>
           </div>
         </div>
         
-        {eligibility.reason && eligibility.reason.length > 0 && (
+        {eligibility.reasons && eligibility.reasons.length > 0 && (
           <div className="bg-muted/50 rounded p-3">
             <ul className="text-sm space-y-1 list-disc pl-4">
-              <li>{eligibility.reason}</li>
+              {eligibility.reasons.map((reason, i) => (
+                <li key={i}>{reason}</li>
+              ))}
             </ul>
           </div>
         )}

@@ -28,10 +28,13 @@ export interface User {
       theme?: string;
     };
     username?: string;
-    region?: string; // Add missing property
-    lastAiInteraction?: string; // Add missing property
-    aiConversationCount?: number; // Add missing property
-    verification_request?: any; // Add missing property
+    region?: string;
+    lastAiInteraction?: string;
+    aiConversationCount?: number;
+    verification_request?: any;
+    aiFavoriteTopics?: string[];
+    aiEnabled?: boolean;
+    role?: string;
   };
 }
 
@@ -48,9 +51,9 @@ export interface UserProfile {
   website?: string;
   verification_level?: string;
   rates?: any;
-  services?: string[]; // Add missing property
-  languages?: string[]; // Add missing property
-  availability?: string[]; // Add missing property
+  services?: string[];
+  languages?: string[];
+  availability?: string[];
 }
 
 export interface LoginCredentials {
@@ -62,5 +65,5 @@ export interface RegisterCredentials {
   email: string;
   password: string;
   username?: string;
-  confirmPassword?: string; // Add missing property
+  confirmPassword?: string;
 }

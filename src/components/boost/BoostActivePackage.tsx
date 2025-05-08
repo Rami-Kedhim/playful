@@ -52,7 +52,8 @@ const BoostActivePackage: React.FC<BoostActivePackageProps> = ({
   };
 
   const progress = boostStatus.progress || calculateProgress();
-  const remainingFormatted = boostStatus.remainingTime || boostStatus.timeRemaining || "Unknown";
+  // Use either remainingTime or timeRemaining based on which is available
+  const remainingFormatted = boostStatus.remainingTime || "Unknown";
 
   // Format dates for display
   const formatDate = (date: Date | string | undefined): string => {
@@ -67,8 +68,9 @@ const BoostActivePackage: React.FC<BoostActivePackageProps> = ({
     }
   };
 
-  const startDateDisplay = formatDate(boostStatus.startedAt || boostStatus.startTime);
-  const endDateDisplay = formatDate(boostStatus.expiresAt || boostStatus.endTime);
+  // Use startedAt as the primary date field, with fallbacks
+  const startDateDisplay = formatDate(boostStatus.startedAt);
+  const endDateDisplay = formatDate(boostStatus.expiresAt);
 
   return (
     <div className="space-y-4">

@@ -1,32 +1,25 @@
 
-import { useState } from 'react';
-import type { AuthContextType } from './types';
+import { useState, useEffect, useCallback } from 'react';
 import { User } from '@/types/user';
-import { UserProfile } from '@/types/auth';
+import { UserRole } from '@/types/user';
 
-export type { AuthContextType };
-
-export const useAuth = (): AuthContextType => {
-  // Mock implementation for development
+export const useAuthContext = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [initialized, setInitialized] = useState(true);
-  
-  const login = async (email: string, password: string): Promise<any> => {
-    // Mock login logic
-    setIsLoading(true);
+  const [loading, setLoading] = useState(true);
+
+  const login = useCallback(async (email: string, password: string) => {
+    // Mock login implementation
     try {
-      console.log(`Login attempt: ${email}`);
-      const mockUser = {
-        id: 'user-123',
-        email,
+      setLoading(true);
+      // In a real app, this would call an API
+      console.log('Login attempt with', email);
+      
+      // Simulate successful login with mock user
+      const mockUser: User = {
+        id: 'user-1',
+        email: email,
+        role: UserRole.USER, // Set the role properly
         username: email.split('@')[0],
-        roles: ['client'],
-        created_at: new Date().toISOString(),
         avatarUrl: null,
         profileImageUrl: null,
         user_metadata: {
@@ -34,102 +27,91 @@ export const useAuth = (): AuthContextType => {
           avatar_url: null,
         },
         ubxBalance: 100,
-        name: email.split('@')[0],
-      };
-      setUser(mockUser);
-      setIsAuthenticated(true);
-      return { success: true, user: mockUser };
-    } catch (err) {
-      setError('Failed to login');
-      return { success: false, error: 'Failed to login' };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const logout = async (): Promise<void> => {
-    setUser(null);
-    setIsAuthenticated(false);
-  };
-
-  const signIn = login;
-  const signOut = logout;
-  
-  const register = async (email: string, password: string, username?: string): Promise<any> => {
-    // Mock registration logic
-    setIsLoading(true);
-    try {
-      console.log(`Register attempt: ${email}, ${username}`);
-      const mockUser = {
-        id: 'user-123',
-        email,
-        username: username || email.split('@')[0],
-        roles: ['client'],
+        name: 'Test User',
         created_at: new Date().toISOString(),
+      };
+      
+      // Save to local storage
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      
+      setUser(mockUser);
+      return { success: true, user: mockUser };
+    } catch (error) {
+      console.error('Login error:', error);
+      return { success: false, error: 'Invalid credentials' };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const register = useCallback(async (credentials: { email: string; password: string; username?: string }) => {
+    // Mock registration implementation
+    try {
+      setLoading(true);
+      
+      // Simulate registration process
+      console.log('Register attempt with', credentials);
+      
+      // Create mock user
+      const mockUser: User = {
+        id: 'user-' + Date.now(),
+        email: credentials.email,
+        role: UserRole.USER, // Set the role properly
+        username: credentials.username || credentials.email.split('@')[0],
         avatarUrl: null,
         profileImageUrl: null,
         user_metadata: {
-          username: username || email.split('@')[0],
+          username: credentials.username || credentials.email.split('@')[0],
           avatar_url: null,
         },
-        ubxBalance: 0,
-        name: username || email.split('@')[0],
+        ubxBalance: 50,
+        name: credentials.username || 'New User',
+        created_at: new Date().toISOString(),
       };
+      
+      // Save to local storage
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      
       setUser(mockUser);
-      setIsAuthenticated(true);
       return { success: true, user: mockUser };
-    } catch (err) {
-      setError('Failed to register');
-      return { success: false, error: 'Failed to register' };
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { success: false, error: 'Registration failed' };
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  };
+  }, []);
 
-  const checkRole = (role: string): boolean => {
-    if (!user) return false;
-    return user.roles?.includes(role) || false;
-  };
-
-  // Add other required methods with basic implementations
-  const updateUserProfile = async () => { return Promise.resolve(true); };
-  const updateUser = async () => { return Promise.resolve(true); };
-  const updateProfile = async () => { return Promise.resolve(true); };
-  const loadUserProfile = async () => { return Promise.resolve(user); };
-  const refreshProfile = async () => { return Promise.resolve(); };
-  const sendPasswordResetEmail = async () => { return Promise.resolve({ success: true }); };
-  const resetPassword = async () => { return Promise.resolve({ success: true }); };
-  const requestPasswordReset = async () => { return Promise.resolve({ success: true }); };
-  const verifyEmail = async () => { return Promise.resolve({ success: true }); };
-  const updatePassword = async () => { return Promise.resolve(true); };
-  const deleteAccount = async () => { return Promise.resolve(true); };
+  const logout = useCallback(() => {
+    localStorage.removeItem('user');
+    setUser(null);
+    return { success: true };
+  }, []);
   
+  const checkAuth = useCallback(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
+      }
+    } catch (error) {
+      console.error('Error checking auth:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
   return {
     user,
-    profile,
-    isAuthenticated,
-    isLoading,
-    loading,
-    error,
-    initialized,
+    setUser,
     login,
     logout,
-    signIn,
-    signOut,
     register,
-    checkRole,
-    updateUserProfile,
-    updateUser,
-    updateProfile,
-    loadUserProfile,
-    refreshProfile,
-    sendPasswordResetEmail,
-    resetPassword,
-    requestPasswordReset,
-    verifyEmail,
-    updatePassword,
-    deleteAccount
+    loading,
+    isAuthenticated: !!user,
   };
 };
-
-export default useAuth;

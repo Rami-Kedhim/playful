@@ -1,67 +1,82 @@
 
 import React from 'react';
 import { useBoost } from '@/hooks/useBoost';
-import BoostAnalytics from '@/components/boost/BoostAnalytics';
+import BoostAnalytics from './BoostAnalytics';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Loader2, Zap } from 'lucide-react';
 
-interface BoostManagerProps {
-  profileId: string;
-}
-
-const BoostManager: React.FC<BoostManagerProps> = ({ profileId }) => {
+const BoostManager = ({ profileId }: { profileId?: string }) => {
   const {
     isActive,
     packages,
     boostProfile,
     cancelBoost,
     loading,
-    error
+    boostStatus,
+    hermesStatus,
+    eligibility,
+    remainingTime,
+    getBoostAnalytics
   } = useBoost();
 
-  // Mock function to get analytics since getBoostAnalytics is missing
-  const getAnalyticsData = () => {
-    return {
-      additionalViews: 145,
-      engagementIncrease: 32,
-      rankingPosition: 8
-    };
-  };
-
   return (
-    <div>
-      <h2>Boost Manager</h2>
-      
-      <BoostAnalytics 
-        analytics={getAnalyticsData()} 
-        loading={loading}
-      />
-      
-      {packages.map((pkg) => (
-        <div key={pkg.id} className="mb-4 p-4 border rounded">
-          <h3>{pkg.name}</h3>
-          <p>{pkg.description}</p>
-          <p>Duration: {pkg.duration}</p>
-          <p>Price: {pkg.price}</p>
-          <Button 
-            onClick={() => boostProfile(profileId, pkg.id)}
-            disabled={loading || isActive}
-          >
-            Activate Boost
-          </Button>
-        </div>
-      ))}
-      
-      {isActive && (
-        <Button 
-          variant="destructive" 
-          onClick={cancelBoost}
-          disabled={loading}
-        >
-          Cancel Boost
-        </Button>
-      )}
-      
-      {error && <p className="text-red-500">{error}</p>}
+    <div className="space-y-6">
+      <Tabs defaultValue="status" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="status">Status</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="status" className="space-y-6 mt-4">
+          <Card>
+            <CardContent className="pt-6 space-y-4">
+              <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                <div>
+                  <h2 className="text-xl font-semibold">Profile Boost</h2>
+                  <p className="text-muted-foreground text-sm">
+                    Increase your visibility and get more profile views
+                  </p>
+                </div>
+                
+                <div className="flex items-center">
+                  {loading ? (
+                    <Button disabled>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Loading...
+                    </Button>
+                  ) : isActive ? (
+                    <div className="flex flex-col items-end">
+                      <div className="text-sm font-medium text-green-600 flex items-center gap-1">
+                        <Zap className="h-4 w-4" /> Boost Active
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {remainingTime} remaining
+                      </div>
+                    </div>
+                  ) : (
+                    <Button onClick={() => console.log('Open boost dialog')}>
+                      <Zap className="mr-2 h-4 w-4" />
+                      Boost Profile
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="analytics" className="mt-4">
+          {getBoostAnalytics && (
+            <BoostAnalytics 
+              isActive={isActive} 
+              getAnalytics={getBoostAnalytics}
+              creatorId={profileId || ''}
+            />
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

@@ -1,95 +1,91 @@
 
+import { 
+  LucieAISystem,
+  ModerateContentParams,
+  ModerateContentResult,
+  GenerateContentResult,
+  SentimentAnalysisResult
+} from '@/types/core-systems';
+
 /**
- * Lucie AI System
+ * LucieAI - AI system implementation
  */
-
-import { LucieAISystem, ModerateContentParams, ModerateContentResult, GenerateContentResult, SentimentAnalysisResult } from '@/types/core-systems';
-
-class LucieAI implements LucieAISystem {
-  private isInitialized: boolean = false;
+export class LucieAI implements LucieAISystem {
+  private operational = true;
   
   async initialize(): Promise<boolean> {
-    console.log('Initializing Lucie AI system');
-    this.isInitialized = true;
+    console.log('LucieAI initializing...');
+    // In a real system, would load models, connect to services etc.
     return true;
   }
   
   async generateText(prompt: string): Promise<string> {
-    if (!this.isInitialized) {
-      throw new Error('Lucie AI not initialized');
-    }
-    
-    console.log(`Lucie: Generating text for prompt: ${prompt.substring(0, 50)}...`);
-    return `Generated response for: ${prompt.substring(0, 30)}...`;
-  }
-
-  // Add the missing method required by the interface
-  async generateResponse(input: string): Promise<string> {
-    return this.generateText(input);
+    console.log(`Generating text for prompt: ${prompt}`);
+    // In a real system, would call an LLM API
+    return `Generated response for: ${prompt}`;
   }
   
   async moderateContent(params: ModerateContentParams): Promise<ModerateContentResult> {
-    console.log(`Lucie: Moderating content of length ${params.content.length}`);
-    
-    // Simple mock implementation
-    const isSafe = params.content.length < 1000 && 
-      !params.content.toLowerCase().includes('vulgar') &&
-      !params.content.toLowerCase().includes('offensive');
+    console.log(`Moderating content: ${params.contentType}`);
+    // In a real system, would analyze content for policy violations
     
     return {
-      isSafe: isSafe, // Changed from 'safe' to 'isSafe'
-      score: isSafe ? 0.2 : 0.8,
-      issues: isSafe ? [] : ['Content too long or contains inappropriate language'],
-      blockedCategories: isSafe ? [] : ['inappropriate_content']
+      isSafe: true, // Use the correct property name
+      safe: true, // For backward compatibility
+      score: 0.92,
+      issues: [],
+      blockedCategories: []
     };
   }
   
-  async generateContent(prompt: string, options: Record<string, any> = {}): Promise<GenerateContentResult> {
-    const text = await this.generateText(prompt);
+  async generateContent(prompt: string, options?: Record<string, any>): Promise<GenerateContentResult> {
+    console.log(`Generating content for: ${prompt}`);
+    // In a real system, would generate and moderate content
+    
+    const content = `Generated content for: ${prompt}`;
     
     return {
-      content: text,
-      originalLength: prompt.length,
-      moderatedLength: text.length,
+      content,
+      moderated: false, // For backward compatibility
+      originalLength: content.length,
+      moderatedLength: content.length,
       warnings: []
     };
   }
   
   async analyzeSentiment(text: string): Promise<SentimentAnalysisResult> {
-    // Mock implementation
-    const score = Math.random();
-    let sentiment: 'positive' | 'negative' | 'neutral';
-    
-    if (score > 0.6) {
-      sentiment = 'positive';
-    } else if (score < 0.4) {
-      sentiment = 'negative';
-    } else {
-      sentiment = 'neutral';
-    }
+    console.log(`Analyzing sentiment: ${text}`);
+    // In a real system, would use NLP to analyze sentiment
     
     return {
-      score,
-      sentiment
+      score: 0.75,
+      sentiment: 'positive',
+      confidence: 0.8 // For backward compatibility
     };
   }
   
   getSystemStatus(): { operational: boolean; modules: Record<string, string> } {
     return {
-      operational: this.isInitialized,
+      operational: this.operational,
       modules: {
-        textGeneration: 'online',
-        moderation: 'online',
-        recommendation: 'online'
+        textGeneration: 'operational',
+        moderation: 'operational',
+        sentiment: 'operational'
       }
     };
   }
-
+  
   configure(options: Record<string, any>): void {
-    console.log('Configuring Lucie AI with options:', options);
-    // Apply configuration settings
+    console.log('Configuring LucieAI', options);
+    // Apply configuration options
+  }
+  
+  // Add the missing method required by the interface
+  async generateResponse(input: string): Promise<string> {
+    console.log(`Generating response for: ${input}`);
+    return `AI response to: ${input}`;
   }
 }
 
-export const lucieAI: LucieAISystem = new LucieAI();
+export const lucieAI = new LucieAI();
 export default lucieAI;

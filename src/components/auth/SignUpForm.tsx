@@ -40,7 +40,7 @@ const SignUpForm = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Only include the fields that exist in RegisterCredentials
+      // Fix arguments - removed confirmPassword as it's not in RegisterCredentials
       const credentials: RegisterCredentials = {
         email: data.email,
         password: data.password,

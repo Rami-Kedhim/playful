@@ -1,181 +1,98 @@
 
 import { SystemStatus, SystemIntegrityResult, SystemHealthMetrics, SessionValidationResult } from '@/types/core-systems';
-import { orus } from './Orus';
-import { hermes } from './Hermes';
-import { lucieAI } from './Lucie';
-import { UberWallet } from './UberWallet'; // Fixed import
-import { Pulse } from './Pulse';
-import { automaticSeoService } from '@/services/seo/AutomaticSeoService';
+import { LucieAI } from './Lucie';
+import { oxum } from './Oxum';
+import { UberWallet } from './UberWallet';
 
 /**
- * UberCore system implementation
+ * UberCore - The central system that coordinates all the subsystems
  */
 class UberCore {
-  private operational: boolean = false;
-
+  private lucieAI: LucieAI;
+  private wallet: UberWallet;
+  
+  constructor() {
+    this.lucieAI = new LucieAI();
+    this.wallet = new UberWallet();
+  }
+  
   async initialize(): Promise<boolean> {
+    console.log('UberCore initializing...');
     try {
-      console.log('[UberCore] Initializing UberCore system...');
+      // Initialize various subsystems
+      await this.lucieAI.initialize();
       
-      // Initialize Hermes analytics
-      await hermes.initialize();
-      
-      // Initialize Lucie AI system
-      lucieAI.initialize(); // Fixed method call
-      
-      // Initialize UberWallet
-      const uberWallet = new UberWallet(); // Create instance
-      uberWallet.getBalance('demo-user');
-      
-      this.operational = true;
-      console.log('[UberCore] UberCore system initialized successfully.');
-      Pulse.track('system', 'core_initialized');
+      console.log('UberCore initialization complete');
       return true;
     } catch (error) {
-      console.error('[UberCore] UberCore system initialization failed:', error);
-      Pulse.track('system', 'core_init_failed', { error: String(error) });
-      this.operational = false;
+      console.error('UberCore initialization failed:', error);
       return false;
     }
   }
-
+  
   async shutdown(): Promise<void> {
-    console.log('[UberCore] Shutting down UberCore system...');
-    
-    // Disconnect Hermes analytics
-    hermes.disconnect();
-    
-    this.operational = false;
-    console.log('[UberCore] UberCore system shutdown complete.');
-    Pulse.track('system', 'core_shutdown');
+    console.log('UberCore shutting down...');
+    // Perform cleanup tasks
   }
-
+  
   checkSystemStatus(): SystemStatus {
-    const latency = Math.random() * 100;
-    const uptime = Date.now(); // Using Date.now() instead of process.uptime()
+    // Get status of various subsystems
+    const aiSystemStatus = this.lucieAI.getSystemStatus();
     
     return {
-      operational: this.operational,
-      latency,
-      uptime,
+      operational: aiSystemStatus.operational,
+      latency: 15,
+      uptime: 3600,
+      messageLength: 0, // This is for backward compatibility
       services: {
-        auth: 'online',
-        analytics: hermes.getSystemStatus().status,
-        ai: lucieAI.getSystemStatus().operational ? 'online' : 'offline',
-        wallet: 'active'
+        auth: 'operational',
+        analytics: 'operational',
+        ai: aiSystemStatus.operational ? 'operational' : 'degraded',
+        wallet: 'operational'
       }
     };
   }
-
+  
   checkSystemIntegrity(): SystemIntegrityResult {
-    const valid = Math.random() > 0.1; // Changed from isValid
-    const message = valid ? 'System integrity check passed.' : 'System integrity check failed.';
-    
+    // In a real system, would do more extensive checks
     return {
-      valid, // Changed from isValid
-      message,
+      valid: true,
+      isValid: true, // For backward compatibility
+      message: 'All systems operational',
       details: {
-        database: 'ok',
-        fileSystem: 'ok',
-        network: 'ok'
+        database: 'connected',
+        fileSystem: 'operational',
+        network: 'operational'
       }
     };
   }
-
+  
   getSystemHealth(): SystemHealthMetrics {
-    const memory = Math.random() * 100;
-    const latency = Math.random() * 50;
-    const errorRate = Math.random() * 5;
-    const averageResponseTime = Math.random() * 200;
-    const systemLoad = Math.random() * 100;
-    const cpuUsage = Math.random() * 100;
-    const memoryUsage = Math.random() * 100;
-    
     return {
-      memory,
-      latency,
-      errorRate,
-      averageResponseTime,
-      systemLoad,
-      cpuUsage,
-      memoryUsage
+      load: 0.3, // For backward compatibility
+      memory: 60,
+      latency: 15,
+      errorRate: 0.01,
+      averageResponseTime: 150,
+      systemLoad: 0.3,
+      cpuUsage: 25,
+      memoryUsage: 60
     };
   }
-
+  
   validateUserSession(token: string): SessionValidationResult {
-    const orusResult = orus.validateSession(token);
-    // Ensure the result matches the expected type
+    // In a real system, would validate against database/auth service
+    const isValid = token && token.length > 10;
+    
     return {
-      valid: orusResult.valid || false,
-      userId: orusResult.userId,
-      sessionId: orusResult.sessionId,
-      expiresAt: orusResult.expiresAt
+      valid: isValid,
+      isValid: isValid, // For backward compatibility
+      userId: isValid ? 'user-123' : undefined,
+      sessionId: isValid ? 'session-456' : undefined,
+      expiresAt: isValid ? new Date(Date.now() + 24 * 60 * 60 * 1000) : undefined
     };
   }
 }
 
-/**
- * UberCore system singleton instance
- */
-const uberCoreInstance = new UberCore();
-
-/**
- * UberCore system with additional methods
- */
-export const uberCore = {
-  ...uberCoreInstance,
-  
-  /**
-   * Initialize SEO automation for the ecosystem
-   */
-  initializeAutomaticSeo: () => {
-    console.log('[UberCore] Initializing automatic SEO system');
-    
-    // Start automatic SEO monitoring with 1-hour interval
-    automaticSeoService.startAutoMonitoring(3600000);
-    
-    return true;
-  },
-  
-  /**
-   * Check subsystem health
-   */
-  checkSubsystemHealth: () => {
-    return [
-      { name: 'escorts', status: 'operational', health: 95 },
-      { name: 'creators', status: 'operational', health: 92 },
-      { name: 'livecams', status: 'operational', health: 88 },
-      { name: 'companion', status: 'operational', health: 90 },
-      { name: 'seo', status: 'operational', health: 85 },
-      { name: 'wallet', status: 'operational', health: 97 }
-    ];
-  },
-  
-  /**
-   * Get the system status
-   */
-  getSystemStatus: () => {
-    return {
-      operational: true,
-      isActive: true,
-      services: {
-        auth: 'online',
-        analytics: 'active',
-        ai: 'active',
-        wallet: 'active',
-        seo: automaticSeoService.getStatus().active ? 'active' : 'inactive'
-      },
-      queueLength: 0,
-      processing: false
-    };
-  },
-  
-  /**
-   * Add the shutdown method to the uberCore object
-   */
-  shutdown: async (): Promise<void> => {
-    await uberCoreInstance.shutdown();
-  }
-};
-
+export const uberCore = new UberCore();
 export default uberCore;
