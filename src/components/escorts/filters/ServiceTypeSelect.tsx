@@ -1,101 +1,86 @@
 
 import React from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import ServiceTypeIcon from './ServiceTypeIcon';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
+import ServiceTypeIcon from './ServiceTypeIcon';
 
 interface ServiceTypeSelectProps {
-  value: ServiceTypeFilter | string;
+  value: ServiceTypeFilter;
   onChange: (value: ServiceTypeFilter) => void;
   className?: string;
-  label?: string;
 }
 
-/**
- * A dropdown select component for choosing service types
- * with integrated icons and ethical service guidelines
- */
 const ServiceTypeSelect: React.FC<ServiceTypeSelectProps> = ({
   value,
   onChange,
-  className,
-  label = "Service Type"
+  className = ''
 }) => {
-  // Make extra sure that value is never an empty string
-  const safeValue: ServiceTypeFilter = !value || value === "" ? "any" : value as ServiceTypeFilter;
+  // Ensure we have a safe value
+  const safeValue: ServiceTypeFilter = !value ? 'any' : value;
   
-  // Define handler to prevent empty strings being passed back
-  const handleValueChange = (val: string) => {
-    // Ensure we never pass an empty string back to parent
-    if (!val || val === "") {
-      onChange("any");
-    } else {
-      onChange(val as ServiceTypeFilter);
-    }
+  // Handle change with type safety
+  const handleChange = (newValue: string) => {
+    // Cast to ServiceTypeFilter since we control the options
+    onChange(newValue as ServiceTypeFilter);
   };
   
   return (
-    <div className={className}>
-      {label && (
-        <Label className="mb-2 block">{label}</Label>
-      )}
-      <Select 
-        value={safeValue} 
-        onValueChange={handleValueChange}
-        defaultValue="any"
+    <div className={`space-y-2 ${className}`}>
+      <h3 className="text-sm font-medium">Service Type</h3>
+      <RadioGroup
+        value={safeValue}
+        onValueChange={handleChange}
+        className="flex flex-col space-y-1.5"
       >
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Select service type">
-            <div className="flex items-center gap-2">
-              <ServiceTypeIcon type={safeValue} size={16} className="text-primary" />
-              {safeValue === 'in-person' ? 'In Person' : 
-               safeValue === 'virtual' ? 'Virtual' : 
-               safeValue === 'both' ? 'Both Types' : 
-               safeValue === 'massage' ? 'Massage' : 
-               safeValue === 'dinner' ? 'Dinner Date' : 'Any Type'}
-            </div>
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="any">
-            <div className="flex items-center gap-2">
-              <ServiceTypeIcon type="any" size={16} className="text-gray-500" />
-              Any Type
-            </div>
-          </SelectItem>
-          <SelectItem value="in-person">
-            <div className="flex items-center gap-2">
-              <ServiceTypeIcon type="in-person" size={16} className="text-blue-500" />
-              In Person
-            </div>
-          </SelectItem>
-          <SelectItem value="virtual">
-            <div className="flex items-center gap-2">
-              <ServiceTypeIcon type="virtual" size={16} className="text-purple-500" />
-              Virtual
-            </div>
-          </SelectItem>
-          <SelectItem value="both">
-            <div className="flex items-center gap-2">
-              <ServiceTypeIcon type="both" size={16} className="text-green-500" />
-              Both Types
-            </div>
-          </SelectItem>
-          <SelectItem value="massage">
-            <div className="flex items-center gap-2">
-              <ServiceTypeIcon type="massage" size={16} className="text-indigo-500" />
-              Massage
-            </div>
-          </SelectItem>
-          <SelectItem value="dinner">
-            <div className="flex items-center gap-2">
-              <ServiceTypeIcon type="dinner" size={16} className="text-amber-500" />
-              Dinner Date
-            </div>
-          </SelectItem>
-        </SelectContent>
-      </Select>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="any" id="any-service" />
+          <Label htmlFor="any-service" className="text-sm flex items-center cursor-pointer">
+            <ServiceTypeIcon type="any" className="mr-1.5" />
+            Any Service Type
+          </Label>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="in-person" id="in-person" />
+          <Label htmlFor="in-person" className="text-sm flex items-center cursor-pointer">
+            <ServiceTypeIcon type="in-person" className="mr-1.5" />
+            In Person
+          </Label>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="virtual" id="virtual" />
+          <Label htmlFor="virtual" className="text-sm flex items-center cursor-pointer">
+            <ServiceTypeIcon type="virtual" className="mr-1.5" />
+            Virtual
+          </Label>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="both" id="both-types" />
+          <Label htmlFor="both-types" className="text-sm flex items-center cursor-pointer">
+            <ServiceTypeIcon type="both" className="mr-1.5" />
+            Both Types
+          </Label>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="massage" id="massage" />
+          <Label htmlFor="massage" className="text-sm flex items-center cursor-pointer">
+            <ServiceTypeIcon type="massage" className="mr-1.5" />
+            Massage
+          </Label>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="dinner" id="dinner" />
+          <Label htmlFor="dinner" className="text-sm flex items-center cursor-pointer">
+            <ServiceTypeIcon type="dinner" className="mr-1.5" />
+            Dinner Date
+          </Label>
+        </div>
+      </RadioGroup>
     </div>
   );
 };

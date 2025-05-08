@@ -7,6 +7,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { FavoritesProvider } from '@/contexts/FavoritesContext';
 import { WalletProvider } from '@/contexts/WalletContext';
 import { BoostProvider } from '@/contexts/BoostContext';
+import { ServiceTypeProvider } from '@/contexts/ServiceTypeContext';
 import './App.css';
 
 function App() {
@@ -16,8 +17,10 @@ function App() {
         <FavoritesProvider>
           <WalletProvider>
             <BoostProvider>
-              <AppRoutes />
-              <Toaster />
+              <ServiceTypeProvider>
+                <AppRoutes />
+                <Toaster />
+              </ServiceTypeProvider>
             </BoostProvider>
           </WalletProvider>
         </FavoritesProvider>
