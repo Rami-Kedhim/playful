@@ -4,7 +4,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { FavoritesProvider } from '@/contexts/FavoritesContext';
 import { WalletProvider } from '@/contexts/WalletContext';
 import { BoostProvider } from '@/contexts/BoostContext';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 interface UnifiedContextProviderProps {
   children: ReactNode;

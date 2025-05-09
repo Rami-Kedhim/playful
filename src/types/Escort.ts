@@ -53,6 +53,7 @@ export interface Escort {
   lastActive?: string | Date;
   isFavorited?: boolean;
   gallery?: string[];
+  height?: string | number; // Add support for both string and number types
 }
 
 export interface ContactInfo {

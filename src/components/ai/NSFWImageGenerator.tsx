@@ -1,267 +1,230 @@
 
 import React, { useState } from 'react';
-import { useAIGenerator } from '@/hooks/useAIGenerator';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { huggingFaceService } from '@/services/ai/HuggingFaceService';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
-import { Loader2, Sparkles, RefreshCw } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Card, CardContent } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { useAIGenerator } from '@/hooks/useAIGenerator';
+import { Loader2, Download, RefreshCw, Info } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const NSFWImageGenerator: React.FC = () => {
-  const [name, setName] = useState('Lucia');
-  const [age, setAge] = useState('25');
-  const [ethnicity, setEthnicity] = useState('');
-  const [style, setStyle] = useState('');
-  const [clothing, setClothing] = useState('');
-  const [background, setBackground] = useState('');
-  const [pose, setPose] = useState('');
-  const [customPrompt, setCustomPrompt] = useState('');
+  const [prompt, setPrompt] = useState('');
+  const [negativePrompt, setNegativePrompt] = useState('');
+  const [selectedModel, setSelectedModel] = useState('playground-v2.5');
+  const [steps, setSteps] = useState(30);
   const [guidanceScale, setGuidanceScale] = useState(7.5);
-  const [useCustomPrompt, setUseCustomPrompt] = useState(false);
+  const [enableSafety, setEnableSafety] = useState(false);
   
-  const { 
-    generateContent, 
-    clearResult, 
-    loading, 
-    result, 
-    error 
-  } = useAIGenerator({
-    defaultModel: 'stablediffusionapi/realistic-vision-v5',
-    contentType: 'image'
+  const { generateContent, clearResult, loading, result, error } = useAIGenerator({
+    contentType: 'image',
+    defaultModel: 'playground-v2.5'
   });
   
+  const { toast } = useToast();
+  
+  const availableModels = huggingFaceService.getAvailableModels('image')
+    .filter(model => model.nsfw);
+  
   const handleGenerate = async () => {
-    const prompt = useCustomPrompt 
-      ? customPrompt
-      : `${name}, ${age} years old, ${ethnicity}, ${style} style, wearing ${clothing}, in ${background}, ${pose} pose, high resolution, professional photography, detailed skin texture, photorealistic, 8k`;
+    if (!prompt.trim()) {
+      toast({
+        title: "Prompt required",
+        description: "Please enter a prompt to generate an image",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    const negativePrompt = 'deformed, bad anatomy, disfigured, poorly drawn, extra limbs, blurry, watermark, logo, bad lighting';
-    
-    await generateContent({
-      prompt,
-      negativePrompt,
-      guidanceScale,
-      model: 'stablediffusionapi/realistic-vision-v5'
-    });
+    try {
+      await generateContent({
+        prompt,
+        model: selectedModel,
+        nsfw: true,
+        extra: {
+          negative_prompt: negativePrompt,
+          steps,
+          guidance_scale: guidanceScale,
+          safety_filter: enableSafety
+        }
+      });
+    } catch (err: any) {
+      toast({
+        title: "Generation Failed",
+        description: err.message || "Failed to generate image",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const handleDownload = () => {
+    if (result?.url) {
+      const link = document.createElement('a');
+      link.href = result.url;
+      link.download = `generated-image-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid gap-6 lg:grid-cols-2">
       <Card>
-        <CardHeader>
-          <CardTitle>NSFW Image Generator</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="guided" onValueChange={(value) => setUseCustomPrompt(value === 'custom')}>
-            <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="guided">Guided</TabsTrigger>
-              <TabsTrigger value="custom">Custom Prompt</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="guided" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input 
-                    id="name" 
-                    value={name} 
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Character name"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="age">Age</Label>
-                  <Input 
-                    id="age" 
-                    value={age} 
-                    onChange={(e) => setAge(e.target.value)}
-                    placeholder="Character age"
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="ethnicity">Ethnicity</Label>
-                <Select value={ethnicity} onValueChange={setEthnicity}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select ethnicity" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Asian">Asian</SelectItem>
-                    <SelectItem value="Black">Black</SelectItem>
-                    <SelectItem value="Latina">Latina</SelectItem>
-                    <SelectItem value="White">White</SelectItem>
-                    <SelectItem value="Middle Eastern">Middle Eastern</SelectItem>
-                    <SelectItem value="Indian">Indian</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="style">Style</Label>
-                <Select value={style} onValueChange={setStyle}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select style" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Glamour">Glamour</SelectItem>
-                    <SelectItem value="Fashion">Fashion</SelectItem>
-                    <SelectItem value="Artistic">Artistic</SelectItem>
-                    <SelectItem value="Casual">Casual</SelectItem>
-                    <SelectItem value="Elegant">Elegant</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="clothing">Clothing</Label>
-                <Select value={clothing} onValueChange={setClothing}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select clothing" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Elegant dress">Elegant dress</SelectItem>
-                    <SelectItem value="Business attire">Business attire</SelectItem>
-                    <SelectItem value="Casual outfit">Casual outfit</SelectItem>
-                    <SelectItem value="Swimwear">Swimwear</SelectItem>
-                    <SelectItem value="Evening gown">Evening gown</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="background">Background</Label>
-                <Select value={background} onValueChange={setBackground}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select background" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Luxury hotel suite">Luxury hotel suite</SelectItem>
-                    <SelectItem value="Beach sunset">Beach sunset</SelectItem>
-                    <SelectItem value="City skyline">City skyline</SelectItem>
-                    <SelectItem value="Studio backdrop">Studio backdrop</SelectItem>
-                    <SelectItem value="Garden setting">Garden setting</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="pose">Pose</Label>
-                <Select value={pose} onValueChange={setPose}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select pose" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Standing">Standing</SelectItem>
-                    <SelectItem value="Sitting">Sitting</SelectItem>
-                    <SelectItem value="Lying down">Lying down</SelectItem>
-                    <SelectItem value="Walking">Walking</SelectItem>
-                    <SelectItem value="Portrait">Portrait</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="custom" className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="custom-prompt">Custom Prompt</Label>
-                <Textarea
-                  id="custom-prompt"
-                  value={customPrompt}
-                  onChange={(e) => setCustomPrompt(e.target.value)}
-                  placeholder="Enter your detailed prompt for image generation..."
-                  className="h-36 resize-none"
-                />
-              </div>
-            </TabsContent>
-          </Tabs>
+        <CardContent className="p-6 space-y-4">
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium">Image Prompt</h3>
+            <Textarea
+              placeholder="Describe the image you want to generate..."
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              rows={4}
+              className="w-full"
+            />
+          </div>
           
-          <div className="mt-6 space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <Label htmlFor="guidance-scale">Guidance Scale (creativity)</Label>
-                <span className="text-muted-foreground">{guidanceScale}</span>
-              </div>
-              <Slider
-                id="guidance-scale"
-                min={1}
-                max={20}
-                step={0.1}
-                value={[guidanceScale]}
-                onValueChange={([value]) => setGuidanceScale(value)}
-              />
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium">Negative Prompt</h3>
+            <Textarea
+              placeholder="Elements to avoid in the generated image..."
+              value={negativePrompt}
+              onChange={(e) => setNegativePrompt(e.target.value)}
+              rows={2}
+              className="w-full"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium">Model</h3>
+            <Select value={selectedModel} onValueChange={setSelectedModel}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Model" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableModels.map(model => (
+                  <SelectItem key={model.id} value={model.id}>
+                    {model.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium">Steps: {steps}</h3>
             </div>
-            
+            <Slider
+              value={[steps]}
+              min={10}
+              max={50}
+              step={1}
+              onValueChange={(values) => setSteps(values[0])}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium">Guidance Scale: {guidanceScale}</h3>
+            </div>
+            <Slider
+              value={[guidanceScale]}
+              min={1}
+              max={15}
+              step={0.5}
+              onValueChange={(values) => setGuidanceScale(values[0])}
+            />
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="safety-mode"
+              checked={enableSafety}
+              onCheckedChange={setEnableSafety}
+            />
+            <label htmlFor="safety-mode" className="text-sm font-medium">
+              Enable safety filter
+            </label>
+          </div>
+          
+          <div className="flex items-center space-x-2 pt-2">
             <Button 
-              className="w-full" 
-              onClick={handleGenerate}
-              disabled={loading}
+              onClick={handleGenerate} 
+              disabled={loading || !prompt.trim()}
+              className="flex-1"
             >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Generating...
                 </>
-              ) : (
-                <>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Generate Image
-                </>
-              )}
+              ) : 'Generate Image'}
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={clearResult}
+              disabled={!result && !error}
+            >
+              <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
         </CardContent>
       </Card>
       
       <Card>
-        <CardHeader>
-          <CardTitle className="flex justify-between items-center">
-            Generated Image
-            {result && (
+        <CardContent className="p-6 flex flex-col items-center justify-center min-h-[400px] relative">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center text-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin mb-4" />
+              <p className="text-muted-foreground">Generating your image...</p>
+              <p className="text-sm text-muted-foreground mt-2">This may take up to a minute</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center text-center p-8 border border-destructive/20 rounded-lg bg-destructive/10">
+              <Info className="h-8 w-8 text-destructive mb-4" />
+              <p className="font-medium text-destructive">Error generating image</p>
+              <p className="text-sm text-muted-foreground mt-2">{error}</p>
               <Button 
-                variant="ghost" 
-                size="icon" 
+                variant="outline" 
+                className="mt-4"
                 onClick={clearResult}
               >
-                <RefreshCw className="h-4 w-4" />
+                Try Again
               </Button>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[500px] flex items-center justify-center border rounded-md overflow-hidden bg-muted/30">
-            {loading && (
-              <div className="flex flex-col items-center">
-                <Loader2 className="h-10 w-10 animate-spin mb-2" />
-                <p className="text-muted-foreground">Generating image...</p>
+            </div>
+          ) : result?.url ? (
+            <div className="flex flex-col items-center w-full">
+              <div className="relative w-full aspect-square rounded-lg overflow-hidden border bg-muted/50">
+                <img 
+                  src={result.url} 
+                  alt="Generated image"
+                  className="w-full h-full object-cover"
+                />
               </div>
-            )}
-            
-            {!loading && error && (
-              <div className="text-center p-4 text-destructive">
-                <p>Error: {error}</p>
+              <div className="flex items-center justify-center w-full mt-4">
+                <Button onClick={handleDownload} className="flex items-center">
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Image
+                </Button>
               </div>
-            )}
-            
-            {!loading && !error && !result && (
-              <div className="text-center text-muted-foreground">
-                <p>Your generated image will appear here</p>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-center p-8">
+              <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center mb-4">
+                <Info className="h-10 w-10 text-muted-foreground" />
               </div>
-            )}
-            
-            {!loading && !error && result?.url && (
-              <img 
-                src={result.url} 
-                alt="Generated NSFW image"
-                className="max-w-full max-h-full object-contain"
-              />
-            )}
-          </div>
+              <p className="text-lg font-medium">No image generated yet</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Enter a prompt and click generate to create an image
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

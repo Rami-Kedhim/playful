@@ -1,223 +1,167 @@
 
-import { ContentType } from '@/types/ai';
+/**
+ * Central service for interacting with Hugging Face models
+ */
 
 export interface GenerationParams {
   prompt: string;
   model?: string;
-  negativePrompt?: string;
-  width?: number;
-  height?: number;
-  steps?: number;
-  contentType?: ContentType;
-  websiteUrl?: string; // For content scraping
-  options?: Record<string, any>;
+  maxLength?: number;
+  temperature?: number;
+  topP?: number;
+  topK?: number;
+  repetitionPenalty?: number;
+  seed?: number;
+  safety?: boolean;
+  nsfw?: boolean;
+  extra?: Record<string, any>;
 }
 
 export interface GenerationResult {
   success: boolean;
-  error?: string;
+  content?: string;
   url?: string;
-  text?: string;
-  metadata?: any;
-  processingTime?: number;
-  source?: string; // For scraped content
+  error?: string;
+  meta?: Record<string, any>;
+}
+
+interface ModelInfo {
+  id: string;
+  name: string;
+  type: 'text' | 'image' | 'video' | 'multimodal';
+  nsfw: boolean;
+  recommended: boolean;
 }
 
 class HuggingFaceService {
-  private readonly baseUrl: string;
-  private readonly apiKey: string | null;
+  private apiKey?: string;
+  private models: ModelInfo[] = [
+    // Text models
+    { id: 'gpt2', name: 'GPT-2', type: 'text', nsfw: false, recommended: true },
+    { id: 'llama3-8b', name: 'Llama 3 (8B)', type: 'text', nsfw: false, recommended: true },
+    
+    // Image models
+    { id: 'stable-diffusion-v1-5', name: 'Stable Diffusion v1.5', type: 'image', nsfw: false, recommended: true },
+    { id: 'sdxl', name: 'Stable Diffusion XL', type: 'image', nsfw: false, recommended: true },
+    { id: 'playground-v2.5', name: 'Playground v2.5', type: 'image', nsfw: true, recommended: true },
+    
+    // Video models
+    { id: 'zeroscope-v2', name: 'Zeroscope V2', type: 'video', nsfw: false, recommended: true },
+    
+    // Multimodal models
+    { id: 'llava-13b', name: 'LLaVA-13B', type: 'multimodal', nsfw: false, recommended: true },
+  ];
 
-  constructor() {
-    this.baseUrl = import.meta.env.VITE_HUGGINGFACE_API_URL || 'https://api-inference.huggingface.co/models';
-    this.apiKey = import.meta.env.VITE_HUGGINGFACE_API_KEY || null;
+  constructor(apiKey?: string) {
+    this.apiKey = apiKey;
   }
 
-  // Main content generation method
+  /**
+   * Set the Hugging Face API key
+   */
+  setApiKey(apiKey: string): void {
+    this.apiKey = apiKey;
+  }
+
+  /**
+   * Generate content based on parameters
+   */
   async generateContent(params: GenerationParams): Promise<GenerationResult> {
+    // Check if API key is set
+    if (!this.apiKey && !import.meta.env.VITE_HUGGING_FACE_API_KEY) {
+      console.error('Hugging Face API key not set');
+      return { 
+        success: false, 
+        error: 'API key not configured. Please set your Hugging Face API key.' 
+      };
+    }
+
     try {
-      console.log(`Generating ${params.contentType || 'content'} with model: ${params.model || 'default'}`);
+      const apiKey = this.apiKey || import.meta.env.VITE_HUGGING_FACE_API_KEY;
       
-      // If there's a website URL, first try to scrape content
-      if (params.websiteUrl) {
-        const scrapedContent = await this.scrapeWebsiteContent(params.websiteUrl, params.contentType);
-        if (scrapedContent.success) {
-          return scrapedContent;
-        }
-        // Fall back to generation if scraping fails
+      // Mock implementation (would be replaced with actual API calls)
+      console.log(`Generating content with model: ${params.model || 'default'}`);
+      console.log(`Prompt: ${params.prompt}`);
+      
+      if (params.nsfw === true && !this.isNsfwModelAvailable(params.model)) {
+        return {
+          success: false,
+          error: 'NSFW content generation requested but no suitable model is available'
+        };
       }
+
+      // For now, return mock data based on content type
+      const model = this.getModelInfo(params.model);
       
-      // Choose the appropriate generation method based on content type
-      if (params.contentType === 'image') {
-        return await this.generateImage(params);
-      } else if (params.contentType === 'video') {
-        return await this.generateVideo(params);
+      if (model?.type === 'image') {
+        return {
+          success: true,
+          url: 'https://placeholder.com/400x400',
+          meta: { width: 400, height: 400, model: params.model }
+        };
+      } else if (model?.type === 'video') {
+        return {
+          success: true,
+          url: 'https://placeholder.com/video.mp4',
+          meta: { duration: 10, model: params.model }
+        };
       } else {
-        return await this.generateText(params);
+        // Default to text
+        return {
+          success: true,
+          content: `Generated response for: ${params.prompt}`,
+          meta: { tokens: params.prompt.length * 2, model: params.model }
+        };
       }
-    } catch (error: any) {
-      console.error('Content generation failed:', error);
+    } catch (error) {
+      console.error('Error generating content:', error);
       return {
         success: false,
-        error: error.message || 'Content generation failed'
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
       };
     }
   }
 
-  // Get recommended model for content type
-  getRecommendedModel(type: ContentType | 'general' = 'general'): string {
-    switch (type) {
-      case 'text':
-        return 'gpt2';
-      case 'image':
-        return 'stabilityai/stable-diffusion-xl-base-1.0';
-      case 'video':
-        return 'damo-vilab/text-to-video-ms-1.7b';
-      case 'multimodal':
-        return 'openai/clip-vit-large-patch14-336';
-      default:
-        return 'gpt2';
+  /**
+   * Get available models based on content type
+   */
+  getAvailableModels(type?: 'text' | 'image' | 'video' | 'multimodal' | 'general'): ModelInfo[] {
+    if (!type || type === 'general') {
+      return this.models;
     }
+    
+    return this.models.filter(model => model.type === type);
   }
 
-  // Get available models by type
-  getAvailableModels(type?: ContentType): { id: string, name: string }[] {
-    switch (type) {
-      case 'text':
-        return [
-          { id: 'gpt2', name: 'GPT-2' },
-          { id: 'google/flan-t5-xxl', name: 'Flan-T5 XXL' },
-          { id: 'facebook/opt-1.3b', name: 'OPT 1.3B' }
-        ];
-      case 'image':
-        return [
-          { id: 'stabilityai/stable-diffusion-xl-base-1.0', name: 'Stable Diffusion XL' },
-          { id: 'runwayml/stable-diffusion-v1-5', name: 'Stable Diffusion 1.5' },
-          { id: 'CompVis/ldm-text2im-large-256', name: 'Latent Diffusion' }
-        ];
-      case 'video':
-        return [
-          { id: 'damo-vilab/text-to-video-ms-1.7b', name: 'Text2Video-Zero' }
-        ];
-      default:
-        return [
-          { id: 'gpt2', name: 'GPT-2' },
-          { id: 'stabilityai/stable-diffusion-xl-base-1.0', name: 'Stable Diffusion XL' },
-          { id: 'damo-vilab/text-to-video-ms-1.7b', name: 'Text2Video-Zero' }
-        ];
-    }
+  /**
+   * Get recommended model for a specific content type
+   */
+  getRecommendedModel(type: 'text' | 'image' | 'video' | 'multimodal' | 'general'): string {
+    const models = this.getAvailableModels(type);
+    const recommended = models.find(model => model.recommended);
+    return recommended?.id || models[0]?.id || '';
   }
 
-  // Website content scraping
-  private async scrapeWebsiteContent(url: string, contentType?: ContentType): Promise<GenerationResult> {
-    try {
-      console.log(`Scraping content from: ${url}`);
-      
-      // This would typically call a backend service or API that handles the scraping
-      const scrapeEndpoint = '/api/scrape';
-      
-      const response = await fetch(scrapeEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ url, contentType })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Scraping failed: ${response.status} ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      
-      return {
-        success: true,
-        text: data.text,
-        url: data.imageUrl,
-        metadata: data.metadata,
-        source: url
-      };
-    } catch (error: any) {
-      console.warn('Content scraping failed:', error);
-      return {
-        success: false,
-        error: `Scraping failed: ${error.message}`
-      };
-    }
+  /**
+   * Get detailed information about a model
+   */
+  getModelInfo(modelId?: string): ModelInfo | undefined {
+    if (!modelId) return undefined;
+    return this.models.find(model => model.id === modelId);
   }
 
-  // Implementation of specific content generation methods
-  private async generateText(params: GenerationParams): Promise<GenerationResult> {
-    try {
-      const model = params.model || this.getRecommendedModel('text');
-      const startTime = Date.now();
-      
-      // This implementation is a placeholder - in a real app, this would call the Hugging Face API
-      // For now, we'll just simulate a response
-      
-      await this.simulateNetworkDelay();
-      
-      return {
-        success: true,
-        text: `Generated text based on: "${params.prompt}"`,
-        processingTime: Date.now() - startTime
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: `Text generation failed: ${error.message}`
-      };
-    }
-  }
-
-  private async generateImage(params: GenerationParams): Promise<GenerationResult> {
-    try {
-      const model = params.model || this.getRecommendedModel('image');
-      const startTime = Date.now();
-      
-      // Placeholder implementation
-      await this.simulateNetworkDelay();
-      
-      return {
-        success: true,
-        url: `https://picsum.photos/${params.width || 512}/${params.height || 512}`,
-        processingTime: Date.now() - startTime
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: `Image generation failed: ${error.message}`
-      };
-    }
-  }
-
-  private async generateVideo(params: GenerationParams): Promise<GenerationResult> {
-    try {
-      const model = params.model || this.getRecommendedModel('video');
-      const startTime = Date.now();
-      
-      // Placeholder implementation
-      await this.simulateNetworkDelay();
-      
-      return {
-        success: true,
-        url: "https://example.com/placeholder-video.mp4",
-        processingTime: Date.now() - startTime
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: `Video generation failed: ${error.message}`
-      };
-    }
-  }
-
-  // Helper to simulate API latency
-  private async simulateNetworkDelay(min = 500, max = 2000): Promise<void> {
-    const delay = Math.floor(Math.random() * (max - min + 1)) + min;
-    return new Promise(resolve => setTimeout(resolve, delay));
+  /**
+   * Check if NSFW model is available
+   */
+  isNsfwModelAvailable(modelId?: string): boolean {
+    if (!modelId) return false;
+    const model = this.getModelInfo(modelId);
+    return model?.nsfw || false;
   }
 }
 
-// Export singleton instance
+// Export a singleton instance
 export const huggingFaceService = new HuggingFaceService();
+
+// For backward compatibility
 export default huggingFaceService;

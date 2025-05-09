@@ -1,32 +1,42 @@
 
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import { useThemeToggle } from "@/hooks/useThemeToggle";
 
 type ThemeProviderProps = {
   children: ReactNode;
   defaultTheme?: string;
   storageKey?: string;
+  forcedTheme?: string;
+  enableSystem?: boolean;
 };
 
 type ThemeContextType = {
-  theme: string | undefined;
+  theme: string;
   setTheme: (theme: string) => void;
   isDark: boolean;
   toggleTheme: () => void;
 };
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextType>({
+  theme: "dark",
+  setTheme: () => {},
+  isDark: true,
+  toggleTheme: () => {},
+});
 
 export function ThemeProvider({
   children,
   defaultTheme = "dark",
   storageKey = "vite-ui-theme",
+  forcedTheme = "dark", // Force dark mode for consistency
+  enableSystem = false,
   ...props
 }: ThemeProviderProps) {
   const [mounted, setMounted] = useState(false);
+  const [theme, setThemeState] = useState<string>(defaultTheme);
+  const isDark = theme === "dark";
 
   // Ensure mounting state is tracked for client-side rendering
   useEffect(() => {
@@ -34,33 +44,37 @@ export function ThemeProvider({
     return () => setMounted(false);
   }, []);
 
-  return (
-    <NextThemesProvider
-      defaultTheme={defaultTheme}
-      storageKey={storageKey}
-      forcedTheme="dark"
-      {...props}
-    >
-      <InnerThemeProvider>{children}</InnerThemeProvider>
-    </NextThemesProvider>
-  );
-}
+  // Function to toggle theme (not used in this implementation since we're forcing dark mode)
+  const toggleTheme = () => {
+    // No-op since we're forcing dark mode
+    console.log("Theme toggle attempted, but dark mode is forced");
+  };
 
-function InnerThemeProvider({ children }: { children: ReactNode }) {
-  const { theme, isDark, toggleTheme, mounted } = useThemeToggle();
+  // Function to set theme (not used in this implementation since we're forcing dark mode)
+  const setTheme = (newTheme: string) => {
+    // No-op since we're forcing dark mode
+    console.log(`Theme change attempted to ${newTheme}, but dark mode is forced`);
+  };
 
-  // Create context value with added setTheme function to match expected interface
   const value = {
-    theme,
-    setTheme: () => {}, // No-op function since we're forcing dark mode
-    isDark,
+    theme: "dark",
+    setTheme,
+    isDark: true,
     toggleTheme,
   };
 
   return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
+    <NextThemesProvider 
+      defaultTheme={defaultTheme}
+      storageKey={storageKey}
+      forcedTheme={forcedTheme} 
+      enableSystem={enableSystem}
+      {...props}
+    >
+      <ThemeContext.Provider value={value}>
+        {children}
+      </ThemeContext.Provider>
+    </NextThemesProvider>
   );
 }
 
@@ -71,3 +85,5 @@ export const useTheme = () => {
   }
   return context;
 };
+
+export default ThemeProvider;
