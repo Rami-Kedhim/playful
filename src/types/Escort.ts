@@ -108,4 +108,5 @@ export interface ExtendedEscort extends Escort {
   tags: string[];
   imageUrl: string;
   profileImage: string;
+  price: number; // Make required in extended version
 }

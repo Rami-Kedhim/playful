@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Escort } from '@/types/escort';
 import EscortCard from '@/components/escorts/EscortCard';
@@ -46,8 +47,8 @@ const EscortResults: React.FC<EscortResultsProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {escorts.map((escort) => {
             // Create a safely normalized escort object with required properties
-            const providesInPersonServices = escort.providesInPersonServices || false;
-            const providesVirtualContent = escort.providesVirtualContent || false;
+            const providesInPersonServices = escort.providesInPersonServices ?? false;
+            const providesVirtualContent = escort.providesVirtualContent ?? false;
             const featured = escort.featured || false;
 
             return (
@@ -65,9 +66,11 @@ const EscortResults: React.FC<EscortResultsProps> = ({
                 verified={escort.isVerified || escort.verified || false}
                 gender={escort.gender}
                 sexualOrientation={escort.sexualOrientation}
-                availableNow={escort.isAvailable || escort.availableNow || false}
+                availableNow={escort.availableNow || escort.isAvailable || false}
                 responseRate={escort.responseRate}
                 featured={featured}
+                providesInPersonServices={providesInPersonServices}
+                providesVirtualContent={providesVirtualContent}
               />
             );
           })}

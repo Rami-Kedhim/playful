@@ -21,30 +21,24 @@ interface BookingDialogProps {
 const BookingDialog: React.FC<BookingDialogProps> = ({ 
   escort, 
   isOpen, 
-  onClose, 
-  onSubmit 
+  onClose 
 }) => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState<string>('');
   const [duration, setDuration] = useState<string>('1 hour');
   
-  // Determine service types with fallback to true for both if unspecified
-  const providesInPersonServices = escort.providesInPersonServices !== undefined 
-    ? escort.providesInPersonServices 
-    : true;
-    
-  const providesVirtualContent = escort.providesVirtualContent !== undefined
-    ? escort.providesVirtualContent
-    : true;
-    
+  // Define service type availability with safe defaults
+  const hasInPersonServices = escort.providesInPersonServices ?? true;
+  const hasVirtualServices = escort.providesVirtualContent ?? false;
+  
   // Default availability options based on escort type
   const getServiceOptions = () => {
     // Safely access these properties with fallbacks
-    if (providesInPersonServices && providesVirtualContent) {
+    if (hasInPersonServices && hasVirtualServices) {
       return ['In-person', 'Virtual'];
-    } else if (providesInPersonServices) {
+    } else if (hasInPersonServices) {
       return ['In-person'];
-    } else if (providesVirtualContent) {
+    } else if (hasVirtualServices) {
       return ['Virtual'];
     }
     

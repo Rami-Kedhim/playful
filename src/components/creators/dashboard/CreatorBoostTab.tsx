@@ -8,7 +8,8 @@ import BoostStatusCard from "./boost/BoostStatusCard";
 import BoostPackageSelection from "./boost/BoostPackageSelection";
 import BoostPurchaseConfirmation from "./boost/BoostPurchaseConfirmation";
 import BoostAnalytics from "./boost/BoostAnalytics";
-import { BoostStatus } from "@/types/boost";
+import { BoostStatus as PulseBoostStatus } from "@/types/pulse-boost";
+import { BoostStatus as BoostStatusType } from "@/types/boost";
 import { toDate } from '@/utils/formatters';
 
 interface CreatorBoostTabProps {
@@ -83,6 +84,24 @@ const CreatorBoostTab: React.FC<CreatorBoostTabProps> = ({
   };
   
   const selectedBoostPackage = packages.find(p => p.id === selectedPackage);
+
+  // Convert BoostStatus between types to fix compatibility issues
+  const convertBoostStatus = (status: BoostStatusType): PulseBoostStatus => {
+    return {
+      isActive: status.isActive,
+      packageId: status.packageId,
+      expiresAt: status.expiresAt,
+      startedAt: status.startedAt,
+      timeRemaining: status.timeRemaining,
+      remainingTime: status.remainingTime,
+      packageName: status.packageName,
+      progress: status.progress
+    };
+  };
+
+  // Use pulseBoostStatus instead of boostStatus when passing to components
+  // that expect PulseBoostStatus
+  const pulseBoostStatus: PulseBoostStatus = convertBoostStatus(boostStatus);
 
   // Fix the mock status creation to use proper types
   const createMockBoostStatus = (active: boolean): BoostStatus => {

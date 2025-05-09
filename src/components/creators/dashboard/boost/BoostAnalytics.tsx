@@ -27,8 +27,11 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
     description: "Track the performance of your boosts"
   };
 
-  // Check if boostStatus exists and has isActive property
-  const isBoostActive = boostStatus && 'isActive' in boostStatus ? boostStatus.isActive : false;
+  // Convert error to object type if it's a string
+  const errorObj = typeof error === 'string' ? { message: error } : error;
+
+  // Check if boostStatus exists and if it has isActive property
+  const isActiveBoost = boostStatus && boostStatus.isActive;
 
   return (
     <div className="space-y-6">
@@ -43,7 +46,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
             {loading ? (
               <div>Loading...</div>
             ) : error ? (
-              <div>Error: {error}</div>
+              <div>Error: {errorObj?.message || 'Unknown error'}</div>
             ) : (
               <div>{analytics?.totalBoosts || 0}</div>
             )}
@@ -58,7 +61,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
             {loading ? (
               <div>Loading...</div>
             ) : error ? (
-              <div>Error: {error}</div>
+              <div>Error: {errorObj?.message || 'Unknown error'}</div>
             ) : (
               <div>{analytics?.activeBoosts || 0}</div>
             )}
@@ -73,7 +76,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
             {loading ? (
               <div>Loading...</div>
             ) : error ? (
-              <div>Error: {error}</div>
+              <div>Error: {errorObj?.message || 'Unknown error'}</div>
             ) : (
               <div>{analytics?.averageBoostScore || 0}</div>
             )}
@@ -82,7 +85,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
         
         <HermesOxumQueueVisualization 
           userId={profileId} 
-          activeBoosts={boostStatus?.isActive ? 1 : 0}
+          activeBoosts={isActiveBoost ? 1 : 0}
         />
       </div>
     </div>

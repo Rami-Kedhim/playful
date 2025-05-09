@@ -65,7 +65,24 @@ export interface EnhancedBoostStatus extends PulseBoostStatus {
   isActive: boolean; // This property is required
 }
 
-// Redefine other types used in the files
+// Redefine BoostStatus for compatibility
+export interface BoostStatus {
+  isActive: boolean;
+  packageId?: string;
+  expiresAt?: Date;
+  startedAt?: Date;
+  timeRemaining?: string;
+  remainingTime?: string;
+  packageName?: string;
+  boostPackage?: BoostPackage;
+  progress?: number;
+  startTime?: Date;
+  endTime?: Date;
+  activeBoostId?: string;
+  boostMultiplier?: number;
+}
+
+// Update the BoostPackage interface
 export interface BoostPackage {
   id: string;
   name: string;
@@ -80,18 +97,4 @@ export interface BoostPackage {
   color?: string;
   badgeColor?: string;
   boost_power?: number;
-}
-
-// Update the BoostStatus interface to match usage
-export interface BoostStatus {
-  isActive: boolean;
-  packageName?: string;
-  startTime?: Date;
-  endTime?: Date;
-  remainingTime?: string;
-  packageId?: string;
-  progress?: number;
-  startedAt?: Date;
-  expiresAt?: Date;
-  timeRemaining?: string;
 }
