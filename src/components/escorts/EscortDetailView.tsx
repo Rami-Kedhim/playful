@@ -1,232 +1,177 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { 
-  Calendar, 
-  Star, 
-  MapPin, 
-  MessageSquare, 
-  Heart,
-  Clock,
-  CheckCircle,
-  Shield
-} from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useState } from 'react';
 import { Escort } from '@/types/Escort';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Gallery, ImageGallery } from "@/components/ui/gallery";
+import { MapPin, Phone, Calendar, DollarSign, Star, Shield } from "lucide-react";
+import EscortProfile from './detail/EscortProfile';
+import ProfileTabs from './detail/ProfileTabs';
+import ProfileActions from './detail/ProfileActions';
 
 interface EscortDetailViewProps {
   escort: Escort;
-  onContactClick?: () => void;
-  onBookingClick?: () => void;
-  onFavoriteClick?: () => void;
-  isFavorite?: boolean;
+  onBookNow: () => void;
+  onMessage: () => void;
+  onShare: () => void;
 }
 
-const EscortDetailView: React.FC<EscortDetailViewProps> = ({ 
+const EscortDetailView: React.FC<EscortDetailViewProps> = ({
   escort,
-  onContactClick,
-  onBookingClick,
-  onFavoriteClick,
-  isFavorite = false
+  onBookNow,
+  onMessage,
+  onShare
 }) => {
-  const { 
-    name, 
-    age, 
-    location, 
-    gender, 
-    rating, 
-    reviewCount, 
-    price, 
-    tags, 
-    imageUrl,
-    isVerified,
-    availableNow,
-    responseRate
-  } = escort;
-
-  // Mock data for services and availability
-  const services = [
-    'Dinner Date', 
-    'Travel Companion', 
-    'Cultural Events', 
-    'Business Functions',
-    'Private Parties'
-  ];
+  const [activeTab, setActiveTab] = useState('gallery');
   
-  const availability = [
-    { day: 'Monday', times: ['Evening'] },
-    { day: 'Tuesday', times: ['Afternoon', 'Evening'] },
-    { day: 'Wednesday', times: ['Morning', 'Afternoon', 'Evening'] },
-    { day: 'Thursday', times: ['Afternoon', 'Evening'] },
-    { day: 'Friday', times: ['Evening'] },
-    { day: 'Saturday', times: ['All Day'] },
-    { day: 'Sunday', times: ['All Day'] },
-  ];
-  
-  // Mock description
-  const description = `
-    I'm ${name}, a ${age}-year-old ${gender === 'female' ? 'woman' : 'man'} based in ${location}. 
-    I offer sophisticated companionship for various social occasions, from business events to cultural outings.
-    With my excellent conversational skills and adaptable personality, I ensure a memorable and enjoyable 
-    experience for my clients. I am well-traveled, educated, and passionate about creating genuine connections.
-  `;
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {/* Left column - Image gallery */}
-      <div className="md:col-span-1">
-        <div className="relative rounded-lg overflow-hidden mb-4">
-          <img 
-            src={imageUrl} 
-            alt={name} 
-            className="w-full h-auto object-cover aspect-[3/4]" 
-          />
-          {isVerified && (
-            <Badge className="absolute top-2 left-2 bg-primary text-white flex items-center gap-1">
-              <CheckCircle className="h-3 w-3" />
-              Verified
-            </Badge>
-          )}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-2">
+        <EscortProfile escort={escort} />
+        
+        <div className="mt-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-3 mb-6">
+              <TabsTrigger value="gallery">Gallery</TabsTrigger>
+              <TabsTrigger value="rates">Rates</TabsTrigger>
+              <TabsTrigger value="reviews">Reviews</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="gallery">
+              <Card>
+                <CardContent className="p-4">
+                  <Gallery>
+                    {(escort.images || []).map((image, index) => (
+                      <ImageGallery key={index} src={image} alt={`${escort.name} - Photo ${index + 1}`} />
+                    ))}
+                  </Gallery>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="rates">
+              <Card>
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-medium mb-4">Rates</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {escort.rates?.hourly && (
+                      <div className="flex justify-between items-center p-3 border rounded-lg">
+                        <span>1 Hour</span>
+                        <span className="font-semibold">${escort.rates.hourly}</span>
+                      </div>
+                    )}
+                    {escort.rates?.twoHour && (
+                      <div className="flex justify-between items-center p-3 border rounded-lg">
+                        <span>2 Hours</span>
+                        <span className="font-semibold">${escort.rates.twoHour}</span>
+                      </div>
+                    )}
+                    {escort.rates?.overnight && (
+                      <div className="flex justify-between items-center p-3 border rounded-lg">
+                        <span>Overnight</span>
+                        <span className="font-semibold">${escort.rates.overnight}</span>
+                      </div>
+                    )}
+                    {escort.rates?.weekend && (
+                      <div className="flex justify-between items-center p-3 border rounded-lg">
+                        <span>Weekend</span>
+                        <span className="font-semibold">${escort.rates.weekend}</span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="reviews">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-medium">Reviews</h3>
+                    <div className="flex items-center">
+                      <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                      <span className="ml-1 font-semibold">{escort.rating?.toFixed(1) || "N/A"}</span>
+                      <span className="text-muted-foreground ml-1">
+                        ({escort.reviewCount || 0} {escort.reviewCount === 1 ? 'review' : 'reviews'})
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Review list would go here */}
+                  <div className="text-center py-8 text-muted-foreground">
+                    No reviews available yet
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
         
-        <div className="grid grid-cols-3 gap-2">
-          {/* Placeholder for additional images */}
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="aspect-square bg-muted rounded-md"></div>
-          ))}
-        </div>
+        <ProfileTabs escort={escort} />
       </div>
       
-      {/* Middle column - Primary info */}
-      <div className="md:col-span-2">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold">{name}</h1>
-            <div className="flex items-center text-muted-foreground mt-1">
-              <MapPin className="h-4 w-4 mr-1" />
-              <span>{location}</span>
-              <span className="mx-2">•</span>
-              <span>{age} years</span>
+      <div className="lg:col-span-1">
+        <Card className="sticky top-4">
+          <CardContent className="p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">{escort.name}</h2>
+              <div className="flex items-center">
+                <MapPin className="h-4 w-4 text-muted-foreground mr-1" />
+                <span className="text-sm text-muted-foreground">{escort.location}</span>
+              </div>
             </div>
-          </div>
-          <Button 
-            variant={isFavorite ? "secondary" : "outline"}
-            size="icon"
-            onClick={onFavoriteClick}
-          >
-            <Heart className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-          </Button>
-        </div>
-        
-        <div className="flex flex-wrap items-center gap-2 mb-6">
-          {tags.map((tag) => (
-            <Badge key={tag} variant="secondary">{tag}</Badge>
-          ))}
-        </div>
-        
-        <Card className="mb-6">
-          <CardContent className="p-4">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-              <div className="p-3">
-                <div className="flex items-center justify-center gap-1 text-amber-500 mb-1">
-                  <Star className="h-4 w-4 fill-amber-500" />
-                  <span className="font-medium">{rating}</span>
-                </div>
-                <p className="text-xs text-muted-foreground">{reviewCount} reviews</p>
+            
+            {escort.price && (
+              <div className="flex items-center justify-center p-4 bg-secondary/30 rounded-lg mb-6">
+                <DollarSign className="h-5 w-5 text-primary mr-1" />
+                <span className="text-xl font-semibold">${escort.price}</span>
+                <span className="text-muted-foreground ml-1">/ hour</span>
               </div>
+            )}
+            
+            <ProfileActions 
+              escort={escort}
+              onBookingOpen={onBookNow}
+              onMessageOpen={onMessage}
+              onShareOpen={onShare}
+            />
+            
+            <div className="mt-6 pt-4 border-t">
+              <div className="flex items-center mb-3">
+                <Phone className="h-4 w-4 mr-2" />
+                <span className="font-medium">Contact Availability</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Available for contact between 10 AM - 10 PM
+              </p>
+            </div>
+            
+            <div className="mt-4 pt-4 border-t">
+              <div className="flex items-center mb-3">
+                <Calendar className="h-4 w-4 mr-2" />
+                <span className="font-medium">Booking Notice</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Please book at least 2 hours in advance
+              </p>
+            </div>
+            
+            <div className="mt-4 pt-4 border-t">
+              <div className="flex items-center mb-3">
+                <Shield className="h-4 w-4 mr-2" />
+                <span className="font-medium">Security & Trust</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Your privacy and security are our top priorities. All communications and bookings are confidential.
+              </p>
               
-              <div className="p-3">
-                <div className="font-medium mb-1">${price}/hr</div>
-                <p className="text-xs text-muted-foreground">Starting rate</p>
-              </div>
-              
-              <div className="p-3">
-                <div className="flex items-center justify-center gap-1 mb-1">
-                  <Clock className="h-4 w-4 text-green-500" />
-                  <span className="font-medium">{responseRate}%</span>
-                </div>
-                <p className="text-xs text-muted-foreground">Response rate</p>
-              </div>
-              
-              <div className="p-3">
-                <div className="font-medium text-green-500 mb-1">
-                  {availableNow ? 'Available Now' : 'Not Available'}
-                </div>
-                <p className="text-xs text-muted-foreground">Status</p>
-              </div>
+              <Button variant="outline" className="w-full mt-4">
+                Report an Issue
+              </Button>
             </div>
           </CardContent>
         </Card>
-        
-        <div className="flex gap-4 mb-8">
-          <Button className="flex-1" onClick={onBookingClick}>
-            <Calendar className="mr-2 h-4 w-4" />
-            Book Now
-          </Button>
-          <Button variant="outline" className="flex-1" onClick={onContactClick}>
-            <MessageSquare className="mr-2 h-4 w-4" />
-            Contact
-          </Button>
-        </div>
-        
-        <Tabs defaultValue="about">
-          <TabsList className="w-full mb-6">
-            <TabsTrigger value="about">About</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
-            <TabsTrigger value="availability">Availability</TabsTrigger>
-            <TabsTrigger value="reviews">Reviews</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="about">
-            <h3 className="text-lg font-medium mb-3">About {name}</h3>
-            <p className="text-muted-foreground leading-relaxed mb-4">{description}</p>
-            
-            {isVerified && (
-              <div className="flex items-center p-3 rounded-lg bg-primary/5 border border-primary/20 mb-4">
-                <Shield className="h-5 w-5 text-primary mr-3" />
-                <div>
-                  <h4 className="font-medium">Verified Profile</h4>
-                  <p className="text-sm text-muted-foreground">
-                    This escort's identity has been verified by our team.
-                  </p>
-                </div>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="services">
-            <h3 className="text-lg font-medium mb-3">Services Offered</h3>
-            <ul className="grid grid-cols-2 gap-2">
-              {services.map((service) => (
-                <li key={service} className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  {service}
-                </li>
-              ))}
-            </ul>
-          </TabsContent>
-          
-          <TabsContent value="availability">
-            <h3 className="text-lg font-medium mb-3">Weekly Availability</h3>
-            <div className="space-y-2">
-              {availability.map(({ day, times }) => (
-                <div key={day} className="flex justify-between p-2 border-b">
-                  <span className="font-medium">{day}</span>
-                  <span>{times.join(', ')}</span>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="reviews">
-            <h3 className="text-lg font-medium mb-3">Client Reviews</h3>
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">Client reviews will appear here.</p>
-            </div>
-          </TabsContent>
-        </Tabs>
       </div>
     </div>
   );

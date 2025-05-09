@@ -2,119 +2,92 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { UnifiedLayout } from '@/layouts';
-import { 
-  Image, 
-  MessageSquare, 
-  Film, 
-  Brain, 
-  Sparkles 
-} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
-const HomePage: React.FC = () => {
+const HomePage = () => {
   return (
-    <UnifiedLayout title="AI Content Creation" showFooter={true}>
-      <div className="container mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">AI Content Creation Suite</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Generate professional content using our advanced AI tools
-          </p>
+    <div className="container mx-auto px-4 py-8">
+      <section className="mb-12 text-center">
+        <h1 className="text-4xl font-bold mb-4">Welcome to UberEscorts</h1>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          The premier platform for escorts, content creators, and clients to connect safely and securely.
+        </p>
+      </section>
+
+      <section className="mb-12">
+        <h2 className="text-2xl font-bold mb-6 text-center">Platform Features</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>AI-Enhanced Platform</CardTitle>
+              <CardDescription>
+                Powered by Lucie, Hermes, and Orus
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>
+                Our advanced AI systems help you connect, boost visibility, and maintain security across the platform.
+              </p>
+            </CardContent>
+            <CardFooter>
+              <Link to="/enhanced-ai">
+                <Button variant="outline">Try Enhanced AI</Button>
+              </Link>
+            </CardFooter>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Generate Content</CardTitle>
+              <CardDescription>
+                AI-powered content creation
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>
+                Create compelling descriptions, captions, and more with our AI generation tools.
+              </p>
+            </CardContent>
+            <CardFooter>
+              <Link to="/generate">
+                <Button variant="outline">Create Content</Button>
+              </Link>
+            </CardFooter>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Media Generation</CardTitle>
+              <CardDescription>
+                Generate images tailored for adult content
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>
+                Use our specialized media generation tools to create high-quality visuals.
+              </p>
+            </CardContent>
+            <CardFooter>
+              <Link to="/media-generation">
+                <Button variant="outline">Generate Media</Button>
+              </Link>
+            </CardFooter>
+          </Card>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 my-8">
-          <FeatureCard
-            title="AI Image Generator"
-            description="Create stunning AI-generated images using Hugging Face models"
-            icon={<Image className="h-5 w-5" />}
-            linkTo="/media-generation"
-            buttonText="Generate Images"
-          />
-
-          <FeatureCard
-            title="NSFW Image Generator"
-            description="Create NSFW content with specialized AI models"
-            icon={<Image className="h-5 w-5" />}
-            linkTo="/nsfw-image-generator"
-            buttonText="Generate NSFW"
-          />
-
-          <FeatureCard
-            title="Enhanced AI Studio"
-            description="Advanced generation with DeepSeek and other high-quality models"
-            icon={<Sparkles className="h-5 w-5" />}
-            linkTo="/enhanced-ai"
-            buttonText="Advanced Studio"
-            highlight={true}
-          />
-
-          <FeatureCard
-            title="Talk with Lucie"
-            description="Chat with our AI assistant for personalized help"
-            icon={<MessageSquare className="h-5 w-5" />}
-            linkTo="/lucie-talk"
-            buttonText="Chat Now"
-          />
-
-          <FeatureCard
-            title="Video Generation"
-            description="Create short video clips using AI"
-            icon={<Film className="h-5 w-5" />}
-            linkTo="/media-generation"
-            buttonText="Generate Videos"
-          />
-
-          <FeatureCard
-            title="Neural Analytics"
-            description="Advanced insights using AI brain hub"
-            icon={<Brain className="h-5 w-5" />}
-            linkTo="/brain-hub"
-            buttonText="View Analytics"
-          />
+      </section>
+      
+      <section className="text-center">
+        <h2 className="text-2xl font-bold mb-6">Experience Our Ecosystem</h2>
+        <div className="flex flex-wrap justify-center gap-4">
+          <Link to="/nsfw-image-generator">
+            <Button>NSFW Image Generator</Button>
+          </Link>
+          <Link to="/lucie-talk">
+            <Button variant="outline">Chat with Lucie</Button>
+          </Link>
         </div>
-      </div>
-    </UnifiedLayout>
-  );
-};
-
-interface FeatureCardProps {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  linkTo: string;
-  buttonText: string;
-  highlight?: boolean;
-}
-
-const FeatureCard: React.FC<FeatureCardProps> = ({ 
-  title, 
-  description, 
-  icon, 
-  linkTo, 
-  buttonText,
-  highlight = false 
-}) => {
-  return (
-    <div className={`border rounded-lg p-6 ${
-      highlight 
-        ? 'border-primary/50 bg-primary/5 shadow-lg shadow-primary/10' 
-        : 'border-border'
-    }`}>
-      <div className="flex items-center gap-2 mb-3">
-        {icon}
-        <h2 className="text-lg font-medium">{title}</h2>
-        {highlight && (
-          <span className="px-2 py-0.5 text-xs bg-primary text-primary-foreground rounded-full">
-            New
-          </span>
-        )}
-      </div>
-      <p className="text-muted-foreground mb-6 text-sm">{description}</p>
-      <Button asChild variant={highlight ? "default" : "outline"} className="w-full">
-        <Link to={linkTo}>
-          {buttonText}
-        </Link>
-      </Button>
+      </section>
     </div>
   );
 };

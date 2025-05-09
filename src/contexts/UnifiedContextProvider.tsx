@@ -4,10 +4,11 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { FavoritesProvider } from '@/contexts/FavoritesContext';
 import { WalletProvider } from '@/contexts/WalletContext';
 import { BoostProvider } from '@/contexts/BoostContext';
-// We'll use the theme provider from the App component rather than including it here
+import { ThemeProvider } from '@/components/theme-provider';
 
 interface UnifiedContextProviderProps {
   children: ReactNode;
+  storageKey?: string;
 }
 
 /**
@@ -15,18 +16,21 @@ interface UnifiedContextProviderProps {
  * to provide a cleaner and more maintainable provider tree
  */
 export const UnifiedContextProvider: React.FC<UnifiedContextProviderProps> = ({ 
-  children 
+  children,
+  storageKey = "vite-ui-theme"
 }) => {
   return (
-    <AuthProvider>
-      <FavoritesProvider>
-        <WalletProvider>
-          <BoostProvider>
-            {children}
-          </BoostProvider>
-        </WalletProvider>
-      </FavoritesProvider>
-    </AuthProvider>
+    <ThemeProvider defaultTheme="dark" forcedTheme="dark" enableSystem={false} storageKey={storageKey}>
+      <AuthProvider>
+        <FavoritesProvider>
+          <WalletProvider>
+            <BoostProvider>
+              {children}
+            </BoostProvider>
+          </WalletProvider>
+        </FavoritesProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

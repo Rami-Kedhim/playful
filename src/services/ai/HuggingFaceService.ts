@@ -1,215 +1,223 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
-
-export interface AIModelInfo {
-  id: string;
-  name: string;
-  type: 'text' | 'image' | 'video' | 'multimodal';
-  description?: string;
-  useCase?: string;
-}
+import { ContentType } from '@/types/ai';
 
 export interface GenerationParams {
   prompt: string;
   model?: string;
   negativePrompt?: string;
-  guidanceScale?: number;
-  steps?: number;
   width?: number;
   height?: number;
-  seed?: number;
+  steps?: number;
+  contentType?: ContentType;
+  websiteUrl?: string; // For content scraping
   options?: Record<string, any>;
 }
 
 export interface GenerationResult {
-  url?: string;
-  text?: string;
   success: boolean;
   error?: string;
+  url?: string;
+  text?: string;
+  metadata?: any;
   processingTime?: number;
+  source?: string; // For scraped content
 }
 
-/**
- * Central service for handling all Hugging Face API integrations
- */
-export class HuggingFaceService {
-  // Recommended models for different use cases
-  private readonly RECOMMENDED_MODELS = {
-    nsfw: 'stablediffusionapi/realistic-vision-v5',
-    general: 'black-forest-labs/FLUX.1-schnell',
-    portrait: 'lykon/dreamshaper-8',
-    video: 'cerspense/zeroscope_v2_576w',
-    text: 'deepseek-ai/deepseek-llm-67b-chat',
-    multimodal: 'deepseek-ai/deepseek-vl-7b-chat'
-  };
-  
-  /**
-   * Get available AI models for content generation
-   */
-  public getAvailableModels(type?: 'text' | 'image' | 'video' | 'multimodal'): AIModelInfo[] {
-    const allModels = [
-      {
-        id: 'deepseek-ai/deepseek-vl-7b-chat',
-        name: 'DeepSeek Vision-Language 7B',
-        type: 'multimodal' as const,
-        description: 'Multimodal model that can understand both text and images',
-        useCase: 'Content analysis and generation based on visual inputs'
-      },
-      {
-        id: 'deepseek-ai/deepseek-llm-67b-chat',
-        name: 'DeepSeek LLM 67B',
-        type: 'text' as const,
-        description: 'Large language model for text generation',
-        useCase: 'Detailed text content creation and conversations'
-      },
-      {
-        id: 'black-forest-labs/FLUX.1-schnell',
-        name: 'FLUX Schnell',
-        type: 'image' as const,
-        description: 'Fast image generation model',
-        useCase: 'Quick, high-quality image generation'
-      },
-      {
-        id: 'stablediffusionapi/realistic-vision-v5',
-        name: 'Realistic Vision v5',
-        type: 'image' as const,
-        description: 'Specialized in realistic image generation',
-        useCase: 'Detailed human portraits and realistic scenarios'
-      },
-      {
-        id: 'lykon/dreamshaper-8',
-        name: 'Dreamshaper 8',
-        type: 'image' as const,
-        description: 'Creative and artistic image generation',
-        useCase: 'Artistic and stylized content creation'
-      },
-      {
-        id: 'cerspense/zeroscope_v2_576w',
-        name: 'Zeroscope v2',
-        type: 'video' as const,
-        description: 'Video generation from text descriptions',
-        useCase: 'Short video clips and animations'
-      }
-    ];
-    
-    return type ? allModels.filter(model => model.type === type) : allModels;
+class HuggingFaceService {
+  private readonly baseUrl: string;
+  private readonly apiKey: string | null;
+
+  constructor() {
+    this.baseUrl = import.meta.env.VITE_HUGGINGFACE_API_URL || 'https://api-inference.huggingface.co/models';
+    this.apiKey = import.meta.env.VITE_HUGGINGFACE_API_KEY || null;
   }
-  
-  /**
-   * Generate content using Hugging Face APIs via Supabase Edge Functions
-   */
-  public async generateContent(params: GenerationParams): Promise<GenerationResult> {
+
+  // Main content generation method
+  async generateContent(params: GenerationParams): Promise<GenerationResult> {
     try {
-      const startTime = performance.now();
+      console.log(`Generating ${params.contentType || 'content'} with model: ${params.model || 'default'}`);
       
-      // Determine the content type based on the model or fallback to default
-      let contentType = 'image';
-      
-      if (params.model?.includes('zeroscope')) {
-        contentType = 'video';
-      } else if (params.model?.includes('deepseek-llm') || params.model?.includes('llama')) {
-        contentType = 'text';
-      } else if (params.model?.includes('deepseek-vl')) {
-        contentType = 'multimodal';
-      }
-      
-      // Select the appropriate edge function based on content type
-      let functionName = 'generate-media';
-      
-      if (contentType === 'text') {
-        functionName = 'generate-ai-message';
-      } else if (params.model?.includes('realistic-vision') || contentType === 'nsfw') {
-        functionName = 'generate-nsfw-image';
-      }
-      
-      // Show loading toast
-      toast({
-        title: `Generating ${contentType}...`,
-        description: "Please wait while we create your content...",
-      });
-      
-      // Call the appropriate Supabase Edge Function
-      const { data, error } = await supabase.functions.invoke(functionName, {
-        body: {
-          prompt: params.prompt,
-          modelId: params.model,
-          negative_prompt: params.negativePrompt,
-          guidance_scale: params.guidanceScale || 7.5,
-          num_inference_steps: params.steps || 30,
-          width: params.width || 1024,
-          height: params.height || 1024,
-          ...params.options
+      // If there's a website URL, first try to scrape content
+      if (params.websiteUrl) {
+        const scrapedContent = await this.scrapeWebsiteContent(params.websiteUrl, params.contentType);
+        if (scrapedContent.success) {
+          return scrapedContent;
         }
-      });
-      
-      if (error) throw new Error(error.message);
-      
-      const endTime = performance.now();
-      const processingTime = endTime - startTime;
-      
-      // Handle binary responses (e.g., images, videos)
-      if (data instanceof ArrayBuffer) {
-        const contentTypeHeader = contentType === 'video' ? 'video/mp4' : 'image/png';
-        const blob = new Blob([data], { type: contentTypeHeader });
-        const url = URL.createObjectURL(blob);
-        
-        toast({
-          title: "Content Generated",
-          description: `Your ${contentType} was created successfully!`,
-        });
-        
-        return { url, success: true, processingTime };
+        // Fall back to generation if scraping fails
       }
       
-      // Handle text/JSON responses
-      if (typeof data === 'string') {
-        return { text: data, success: true, processingTime };
-      } else if (data?.text) {
-        return { text: data.text, success: true, processingTime };
-      } else if (data?.url) {
-        return { url: data.url, success: true, processingTime };
+      // Choose the appropriate generation method based on content type
+      if (params.contentType === 'image') {
+        return await this.generateImage(params);
+      } else if (params.contentType === 'video') {
+        return await this.generateVideo(params);
+      } else {
+        return await this.generateText(params);
       }
-      
-      // Handle error in response
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-      
-      toast({
-        title: "Content Generated",
-        description: `Your ${contentType} was created successfully!`,
-      });
-      
-      return { 
-        url: typeof data === 'string' ? data : data?.url, 
-        text: data?.text,
-        success: true, 
-        processingTime 
+    } catch (error: any) {
+      console.error('Content generation failed:', error);
+      return {
+        success: false,
+        error: error.message || 'Content generation failed'
       };
-      
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to generate content';
-      console.error('AI content generation error:', errorMessage);
-      
-      toast({
-        title: "Generation Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      
-      return { success: false, error: errorMessage };
     }
   }
-  
-  /**
-   * Get the recommended model for a specific use case
-   */
-  public getRecommendedModel(useCase: keyof typeof this.RECOMMENDED_MODELS): string {
-    return this.RECOMMENDED_MODELS[useCase] || this.RECOMMENDED_MODELS.general;
+
+  // Get recommended model for content type
+  getRecommendedModel(type: ContentType | 'general' = 'general'): string {
+    switch (type) {
+      case 'text':
+        return 'gpt2';
+      case 'image':
+        return 'stabilityai/stable-diffusion-xl-base-1.0';
+      case 'video':
+        return 'damo-vilab/text-to-video-ms-1.7b';
+      case 'multimodal':
+        return 'openai/clip-vit-large-patch14-336';
+      default:
+        return 'gpt2';
+    }
+  }
+
+  // Get available models by type
+  getAvailableModels(type?: ContentType): { id: string, name: string }[] {
+    switch (type) {
+      case 'text':
+        return [
+          { id: 'gpt2', name: 'GPT-2' },
+          { id: 'google/flan-t5-xxl', name: 'Flan-T5 XXL' },
+          { id: 'facebook/opt-1.3b', name: 'OPT 1.3B' }
+        ];
+      case 'image':
+        return [
+          { id: 'stabilityai/stable-diffusion-xl-base-1.0', name: 'Stable Diffusion XL' },
+          { id: 'runwayml/stable-diffusion-v1-5', name: 'Stable Diffusion 1.5' },
+          { id: 'CompVis/ldm-text2im-large-256', name: 'Latent Diffusion' }
+        ];
+      case 'video':
+        return [
+          { id: 'damo-vilab/text-to-video-ms-1.7b', name: 'Text2Video-Zero' }
+        ];
+      default:
+        return [
+          { id: 'gpt2', name: 'GPT-2' },
+          { id: 'stabilityai/stable-diffusion-xl-base-1.0', name: 'Stable Diffusion XL' },
+          { id: 'damo-vilab/text-to-video-ms-1.7b', name: 'Text2Video-Zero' }
+        ];
+    }
+  }
+
+  // Website content scraping
+  private async scrapeWebsiteContent(url: string, contentType?: ContentType): Promise<GenerationResult> {
+    try {
+      console.log(`Scraping content from: ${url}`);
+      
+      // This would typically call a backend service or API that handles the scraping
+      const scrapeEndpoint = '/api/scrape';
+      
+      const response = await fetch(scrapeEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ url, contentType })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Scraping failed: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      return {
+        success: true,
+        text: data.text,
+        url: data.imageUrl,
+        metadata: data.metadata,
+        source: url
+      };
+    } catch (error: any) {
+      console.warn('Content scraping failed:', error);
+      return {
+        success: false,
+        error: `Scraping failed: ${error.message}`
+      };
+    }
+  }
+
+  // Implementation of specific content generation methods
+  private async generateText(params: GenerationParams): Promise<GenerationResult> {
+    try {
+      const model = params.model || this.getRecommendedModel('text');
+      const startTime = Date.now();
+      
+      // This implementation is a placeholder - in a real app, this would call the Hugging Face API
+      // For now, we'll just simulate a response
+      
+      await this.simulateNetworkDelay();
+      
+      return {
+        success: true,
+        text: `Generated text based on: "${params.prompt}"`,
+        processingTime: Date.now() - startTime
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: `Text generation failed: ${error.message}`
+      };
+    }
+  }
+
+  private async generateImage(params: GenerationParams): Promise<GenerationResult> {
+    try {
+      const model = params.model || this.getRecommendedModel('image');
+      const startTime = Date.now();
+      
+      // Placeholder implementation
+      await this.simulateNetworkDelay();
+      
+      return {
+        success: true,
+        url: `https://picsum.photos/${params.width || 512}/${params.height || 512}`,
+        processingTime: Date.now() - startTime
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: `Image generation failed: ${error.message}`
+      };
+    }
+  }
+
+  private async generateVideo(params: GenerationParams): Promise<GenerationResult> {
+    try {
+      const model = params.model || this.getRecommendedModel('video');
+      const startTime = Date.now();
+      
+      // Placeholder implementation
+      await this.simulateNetworkDelay();
+      
+      return {
+        success: true,
+        url: "https://example.com/placeholder-video.mp4",
+        processingTime: Date.now() - startTime
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: `Video generation failed: ${error.message}`
+      };
+    }
+  }
+
+  // Helper to simulate API latency
+  private async simulateNetworkDelay(min = 500, max = 2000): Promise<void> {
+    const delay = Math.floor(Math.random() * (max - min + 1)) + min;
+    return new Promise(resolve => setTimeout(resolve, delay));
   }
 }
 
-// Export a singleton instance
+// Export singleton instance
 export const huggingFaceService = new HuggingFaceService();
 export default huggingFaceService;

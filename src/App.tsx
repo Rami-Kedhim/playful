@@ -1,7 +1,6 @@
 
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import HomePage from '@/pages/HomePage';
 import GeneratePage from '@/pages/GeneratePage';
@@ -28,21 +27,19 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider storageKey="vite-ui-theme">
-      <UnifiedContextProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/generate" element={<GeneratePage />} />
-            <Route path="/enhanced-ai" element={<EnhancedAIPage />} />
-            <Route path="/media-generation" element={<MediaGenerationPage />} />
-            <Route path="/nsfw-image-generator" element={<NSFWImageGeneratorPage />} />
-            <Route path="/lucie-talk" element={<LucieTalkPage />} />
-          </Routes>
-        </BrowserRouter>
-        <Toaster />
-      </UnifiedContextProvider>
-    </ThemeProvider>
+    <UnifiedContextProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/generate" element={<GeneratePage />} />
+          <Route path="/enhanced-ai" element={<EnhancedAIPage />} />
+          <Route path="/media-generation" element={<MediaGenerationPage />} />
+          <Route path="/nsfw-image-generator" element={<NSFWImageGeneratorPage />} />
+          <Route path="/lucie-talk" element={<LucieTalkPage />} />
+        </Routes>
+      </BrowserRouter>
+      <Toaster />
+    </UnifiedContextProvider>
   );
 }
 

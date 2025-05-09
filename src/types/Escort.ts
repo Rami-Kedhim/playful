@@ -1,129 +1,96 @@
 
-// Unified Escort interface with full properties matching usage in components
-
-export type EscortServiceType = 'in-person' | 'virtual' | 'both' | string;
-
-export interface Video {
-  id: string;
-  url: string;
-  thumbnail?: string;
-  title?: string;
-  duration?: number;
-  isPublic?: boolean;
-}
-
-export interface Availability {
-  day: string;
-  slots?: {
-    start: string;
-    end: string;
-  }[];
-}
+import { VerificationLevel } from './verification';
 
 export interface Rates {
   hourly?: number;
-  twoHours?: number;
-  twoHour?: number; // legacy
+  twoHour?: number;
   overnight?: number;
   weekend?: number;
-  incall?: Record<string, number | string>;
-  outcall?: Record<string, number | string>;
+  halfHour?: number;
+  [key: string]: number | undefined; // Add this index signature for compatibility
 }
-
-export interface Stats {
-  viewCount?: number;
-  favoriteCount?: number;
-  reviewCount?: number;
-  height?: string | number;
-  weight?: string | number;
-  bust?: string | number;
-  waist?: string | number;
-  hips?: string | number;
-  measurements?: string;
-}
-
-export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium' | string;
 
 export interface Escort {
   id: string;
   name: string;
-  username?: string;
   age?: number;
-  gender?: string;
-  sexualOrientation?: string;
-  orientation?: string;
-  location?: string;
   bio?: string;
+  location?: string;
+  city?: string; // Additional field for city
+  gender?: string;
+  services?: string[];
+  photos?: string[];
+  rates?: Rates;
+  price?: number; 
+  responseRate?: number;
+  languages?: string[];
+  availability?: string[];
+  contactInfo?: ContactInfo;
+  verificationLevel?: VerificationLevel;
+  tags?: string[];
+  reviewScore?: number;
+  reviewCount?: number;
+  boosted?: boolean;
+  boostLevel?: number;
+  boostExpiration?: string;
   description?: string;
-  profileImage?: string;
-  imageUrl?: string;
-  avatar?: string;
+  featured?: boolean;
+  shortDescription?: string;
+  reviews?: any[];
+  
+  // Fields for compatibility
   avatarUrl?: string;
-  avatar_url?: string;
-  images?: string[];
-  gallery?: string[];
-  gallery_images?: string[];
-  videos?: Video[];
   isVerified?: boolean;
   verified?: boolean;
-  is_verified?: boolean;
-  verificationLevel?: VerificationLevel;
-  verification_level?: VerificationLevel; // legacy
-  price?: number;
   rating?: number;
-  reviewCount?: number;
-  reviews?: any[];
-  serviceType?: EscortServiceType | string;
-  services?: string[];
-  tags?: string[];
-  languages?: string[];
-  ethnicity?: string;
-  bodyType?: string;
-  height?: string | number;
-  weight?: string | number;
-  hairColor?: string;
-  eyeColor?: string;
-  availability?: Availability[] | string[] | Record<string, any>;
-  nextAvailable?: string;
   availableNow?: boolean;
-  providesInPersonServices?: boolean;
-  providesVirtualContent?: boolean;
-  profileType?: string;
-  featured?: boolean;
-  is_featured?: boolean;
-  boostLevel?: number;
-  responseRate?: number;
-  isAI?: boolean;
+  profileImage?: string;
+  images?: string[];
+  imageUrl?: string;
+  avatar?: string;
+  avatar_url?: string;
+  clientsServed?: number;
+  lastActive?: string | Date;
   isFavorited?: boolean;
-  created_at?: string | Date;
-  updated_at?: string | Date;
-  userId?: string;
-  rates?: Rates;
-  stats?: Stats;
-  lastActive?: string | Date; // For EscortCard lastActive prop
-  measurements?: string;
-  payment_methods?: string[];
-  deposit_required?: boolean;
-  [key: string]: any;
+  gallery?: string[];
 }
 
-export interface Booking {
-  id: string;
-  escortId: string;
-  escortName?: string;
-  clientId?: string;
-  userId?: string;
-  date: string | Date;
-  time?: string;
-  startTime?: string;
-  endTime?: string;
-  duration: number; // minutes
-  service: string;
-  serviceType?: string;
-  status: string | 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'rejected';
-  price: number;
+export interface ContactInfo {
+  email?: string;
+  phone?: string;
+  website?: string;
+  socialMedia?: Record<string, string>;
+}
+
+export interface EscortFilters {
+  services?: string[];
   location?: string;
-  notes?: string;
-  createdAt: string | Date;
-  updatedAt?: string | Date;
+  priceRange?: [number, number];
+  age?: [number, number];
+  languages?: string[];
+  availability?: string[];
+  verificationLevel?: VerificationLevel | string;
+  sortBy?: string;
+  tags?: string[];
+  minPrice?: number;
+  maxPrice?: number;
+  minAge?: number;
+  maxAge?: number;
+  gender?: string[];
+  serviceType?: string;
+  verifiedOnly?: boolean;
+  rating?: number;
+}
+
+// Re-exporting common types for backward compatibility
+export type ServiceType = "in-call" | "out-call" | "virtual" | "massage" | "dinner";
+
+export interface Availability {
+  monday?: string[];
+  tuesday?: string[];
+  wednesday?: string[];
+  thursday?: string[];
+  friday?: string[];
+  saturday?: string[];
+  sunday?: string[];
 }

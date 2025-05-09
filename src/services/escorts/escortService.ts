@@ -1,5 +1,5 @@
 
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 import { EscortScraper } from '@/services/scrapers/EscortScraper';
 
 class EscortService {

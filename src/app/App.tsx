@@ -70,7 +70,7 @@ const App = () => {
   
   return (
     <BrowserRouter>
-      <UnifiedContextProvider defaultTheme="dark">
+      <UnifiedContextProvider>
         <AppRoutes />
         <Toaster />
       </UnifiedContextProvider>

@@ -1,13 +1,6 @@
 
-// Fix properties to match Escort type and fix array includes call with safeguards
-
-import { Escort, Rates } from '@/types/escort';
-
-interface EscortRates {
-  hourly: number;
-  halfHour: number;
-  overnight: number;
-}
+import { Escort, Rates } from '@/types/Escort';
+import { VerificationLevel } from '@/types/verification';
 
 export class EscortScraper {
   private baseUrl: string;
@@ -56,7 +49,7 @@ export class EscortScraper {
     const mockEscorts = this.generateMockEscorts(5);
     return mockEscorts.filter(escort =>
       escort.name.toLowerCase().includes(query.toLowerCase()) ||
-      escort.location?.toLowerCase().includes(query.toLowerCase() ?? "") ||
+      (escort.location?.toLowerCase().includes(query.toLowerCase()) ?? false) ||
       (escort.services?.some(s => s.toLowerCase().includes(query.toLowerCase())) ?? false)
     );
   }
@@ -100,7 +93,7 @@ export class EscortScraper {
         rates,
         rating: Math.random() * 2 + 3,
         reviewCount: Math.floor(Math.random() * 50) + 5,
-        verified: Math.random() > 0.5,
+        verificationLevel: Math.random() > 0.5 ? VerificationLevel.VERIFIED : VerificationLevel.NONE,
         isVerified: Math.random() > 0.5,
         featured: Math.random() > 0.8
       };
