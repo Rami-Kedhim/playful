@@ -1,43 +1,40 @@
 
-// Define verification status as values, not just types
-export const VERIFICATION_STATUS = {
-  PENDING: 'pending',
-  IN_REVIEW: 'in_review',
-  APPROVED: 'approved',
-  REJECTED: 'rejected'
-} as const;
-
-export type VerificationStatus = typeof VERIFICATION_STATUS[keyof typeof VERIFICATION_STATUS];
-
-// Define verification levels as a proper enum that can be used as values
 export enum VerificationLevel {
-  NONE = 'none',
-  BASIC = 'basic',
-  VERIFIED = 'verified',
-  ENHANCED = 'enhanced',
-  PREMIUM = 'premium'
+  NONE = "none",
+  BASIC = "basic",
+  VERIFIED = "verified",
+  ENHANCED = "enhanced",
+  PREMIUM = "premium"
 }
+
+export const VERIFICATION_LEVELS = {
+  NONE: "none" as VerificationLevel,
+  BASIC: "basic" as VerificationLevel,
+  VERIFIED: "verified" as VerificationLevel,
+  ENHANCED: "enhanced" as VerificationLevel,
+  PREMIUM: "premium" as VerificationLevel,
+};
+
+// Compatibility alias for components using the old reference
+export const VERIFICATION_LEVEL = VERIFICATION_LEVELS;
 
 export interface VerificationDocument {
   id: string;
   type: string;
   fileUrl: string;
-  uploadedAt: string;
   status: 'pending' | 'approved' | 'rejected';
-  filePath?: string;
-  documentType?: string;
-  notes?: string;
+  uploadedAt: string;
 }
 
 export interface VerificationRequest {
   id: string;
   userId: string;
-  status: VerificationStatus;
-  verificationLevel: VerificationLevel;
+  status: 'pending' | 'in_review' | 'approved' | 'rejected';
   documents: VerificationDocument[];
+  verificationLevel: VerificationLevel;
   submittedAt: string;
   updatedAt?: string;
   rejectionReason?: string;
-  reviewer_notes?: string;
-  created_at?: string;
 }
+
+// Add any additional verification-related types here

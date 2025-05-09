@@ -6,7 +6,7 @@ export interface PulseBoost {
   name: string; // Added missing property
   description: string; // Added missing property
   price: number; // Added missing property
-  duration: number; // Added missing property
+  duration: string; // Changed to string to match formatDuration parameter
   features: string[]; // Added missing property
   isMostPopular?: boolean; // Added missing property
   boostLevel?: number;
@@ -25,7 +25,7 @@ export interface BoostPackage {
   price_ubx?: number; // Added for backward compatibility
   boost_power?: number; // Added for backward compatibility
   boostLevel?: number; // Added for backward compatibility
-  duration?: number; // in days
+  duration?: string; // Changed from number to string type
   position?: number;
   visibility?: number;
   features?: string[];
