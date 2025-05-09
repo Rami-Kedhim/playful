@@ -66,4 +66,17 @@ export interface BoostManagerHook {
   isEligible: boolean;
   eligibilityReason?: string;
   refreshStatus: () => void;
+  // Add missing properties
+  eligibility?: {
+    isEligible: boolean;
+    reason?: string;
+    reasons?: string[];
+  };
+  dailyBoostUsage?: number;
+  dailyBoostLimit?: number;
+  purchaseBoost?: (profileId: string, packageId: string) => Promise<boolean>;
+  formatBoostDuration?: (duration: string) => string;
+  getBoostAnalytics?: () => Promise<any>;
+  fetchBoostPackages?: () => Promise<BoostPackage[]>;
+  adaptGetBoostPrice?: (fn?: (pkg: BoostPackage) => number) => number;
 }

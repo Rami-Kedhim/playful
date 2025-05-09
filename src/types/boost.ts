@@ -1,4 +1,3 @@
-
 import { VerificationLevel } from "./verification";
 
 export interface PulseBoost {
@@ -27,7 +26,7 @@ export interface BoostPackage {
   boostLevel?: number; // Added for backward compatibility
   duration?: string; // Changed from number to string type
   position?: number;
-  visibility?: number;
+  visibility?: number | string; // Allow both string and number
   features?: string[];
   isMostPopular?: boolean;
   isPopular?: boolean; // Added for backward compatibility
@@ -35,7 +34,7 @@ export interface BoostPackage {
 
 export interface BoostStatus {
   isActive: boolean;
-  remainingTime?: string;  // Make this optional to fix useBoostStatusBase errors
+  remainingTime?: string | number;  // Allow both string and number
   packageId?: string;
   packageName?: string;
   startedAt?: Date;
@@ -53,7 +52,11 @@ export interface BoostStatus {
 export interface BoostEligibility {
   isEligible: boolean;
   reasons?: string[];
+  reason?: string; // Add for backward compatibility
   nextEligibleTime?: string;
+  remainingBoosts?: number;
+  maxBoostsPerDay?: number;
+  eligible?: boolean; // For backward compatibility
 }
 
 export interface HermesStatus {

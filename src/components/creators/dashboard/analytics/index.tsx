@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -14,7 +13,7 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
   return (
     <div className="space-y-2">
       <h2 className="text-3xl font-bold">{title}</h2>
-      <p className="text-muted-foreground">{description}</p>
+      <p className="text-muted-foreground mt-1">{description}</p>
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 // Verification levels enum
 export enum VerificationLevel {
   NONE = "none",
@@ -16,6 +15,9 @@ export interface VerificationDocument {
   fileUrl: string;
   uploadedAt: string;
   status: 'pending' | 'approved' | 'rejected';
+  notes?: string;
+  filePath?: string;
+  documentType?: string;
 }
 
 export interface VerificationRequest {

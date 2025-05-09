@@ -1,237 +1,184 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { BoostPackage, BoostStatus, BoostEligibility } from "@/types/boost";
-import { useBoostManager } from "@/hooks/boost/useBoostManager";
-import BoostPackages from "@/components/boost/BoostPackageSelection";
-import BoostActivePackage from "@/components/boost/BoostActivePackage";
-import BoostEligibilityAlert from "@/components/creators/dashboard/boost/BoostEligibilityAlert";
-import { HermesOxumQueueVisualization } from "@/components/creators/dashboard/boost/HermesOxumQueueVisualization";
-import { HermesStatus } from '@/types/pulse-boost';
+import React, { useState, useEffect } from 'react';
+import { useBoostManager } from '@/hooks/boost';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert'; // Import Alert components
+import { AlertCircle } from 'lucide-react'; // Import AlertCircle icon
+import BoostPackageSelection from './boost/BoostPackageSelection';
+import BoostPurchaseConfirmation from './boost/BoostPurchaseConfirmation';
+import BoostStatus from './boost/BoostStatus';
+import HermesOxumQueueVisualization from './boost/HermesOxumQueueVisualization'; // Fixed import
+import { BoostStatus as BoostStatusType, BoostPackage, BoostEligibility } from '@/types/boost';
+import { BoostManagerContainerProps } from './boost/types';
 
-interface CreatorBoostTabProps {
-  profileId?: string;
-  creatorId?: string;
-  profileCompleteness?: number;
-  isVerified?: boolean;
-  rating?: number;
-  profileCreatedDate?: Date;
-  country?: string;
-  role?: "verified" | "regular" | "AI";
-  ubxBalance?: number;
+interface CreatorBoostTabProps extends BoostManagerContainerProps {
+  onClose: () => void;
 }
 
 const CreatorBoostTab: React.FC<CreatorBoostTabProps> = ({
   profileId,
-  creatorId,
   profileCompleteness,
   isVerified,
   rating,
   profileCreatedDate,
   country,
   role,
-  ubxBalance
+  ubxBalance,
+  onClose
 }) => {
-  const { toast } = useToast();
-  const [selectedPackage, setSelectedPackage] = useState<BoostPackage | null>(null);
-  const [boostPackages, setBoostPackages] = useState<BoostPackage[]>([]);
-  const [boostStatus, setBoostStatus] = useState<BoostStatus>({ isActive: false });
-  const [eligibility, setEligibility] = useState<BoostEligibility>({ isEligible: false });
-  const [hermesStatus, setHermesStatus] = useState<HermesStatus>({
-    position: 0,
-    activeUsers: 0,
-    estimatedVisibility: 0,
-    lastUpdateTime: '',
-    boostScore: 0,
-    effectivenessScore: 0
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [localBoostStatus, setLocalBoostStatus] = useState<BoostStatusType>({
+    isActive: false,
+    remainingTime: '',
+    packageName: '',
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [dailyBoostUsage, setDailyBoostUsage] = useState<number>(0);
-  const [dailyBoostLimit, setDailyBoostLimit] = useState<number>(3);
-
-  const {
-    boostStatus: managedBoostStatus,
-    eligibility: managedEligibility,
-    packages,
-    dailyBoostUsage: managedDailyBoostUsage,
-    dailyBoostLimit: managedDailyBoostLimit,
-    purchaseBoost,
-    cancelBoost,
-    formatBoostDuration,
-    getBoostAnalytics,
-    fetchBoostPackages,
-    adaptGetBoostPrice,
-    hermesStatus: managedHermesStatus
-  } = useBoostManager({ profileId: profileId || creatorId });
-
-  useEffect(() => {
-    if (managedBoostStatus) {
-      setBoostStatus(managedBoostStatus);
-    }
-    if (managedEligibility) {
-      setEligibility(managedEligibility);
-    }
-    if (packages) {
-      setBoostPackages(packages);
-    }
-    if (managedDailyBoostUsage !== undefined) {
-      setDailyBoostUsage(managedDailyBoostUsage);
-    }
-    if (managedDailyBoostLimit !== undefined) {
-      setDailyBoostLimit(managedDailyBoostLimit);
-    }
-    if (managedHermesStatus) {
-      setHermesStatus(managedHermesStatus);
-    }
-  }, [
-    managedBoostStatus,
-    managedEligibility,
-    packages,
-    managedDailyBoostUsage,
-    managedDailyBoostLimit,
-    managedHermesStatus
-  ]);
+  const [localPackages, setLocalPackages] = useState<BoostPackage[]>([]);
 
   const handleSelectPackage = (packageId: string) => {
-    const selected = boostPackages.find((pkg) => pkg.id === packageId);
-    setSelectedPackage(selected || null);
+    setSelectedPackage(packageId);
   };
 
-  const handleBoost = async () => {
-    if (!selectedPackage) {
-      toast({
-        title: "No package selected",
-        description: "Please select a boost package to continue.",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleContinueToPayment = () => {
+    // Implement logic to continue to payment
+    console.log('Continue to payment for package:', selectedPackage);
+  };
 
-    setLoading(true);
+  const handleBack = () => {
+    // Implement logic to go back
+    console.log('Go back to package selection');
+  };
+
+  const handlePurchase = async () => {
+    if (!profileId || !selectedPackage) return;
+
+    setIsSubmitting(true);
     try {
-      const success = await purchaseBoost(selectedPackage);
-      if (success) {
-        toast({
-          title: "Boost activated",
-          description: `Your profile is now boosted with ${selectedPackage.name}.`,
-        });
-      } else {
-        toast({
-          title: "Failed to activate boost",
-          description: "There was an error activating your boost. Please try again.",
-          variant: "destructive",
-        });
+      if (purchaseBoost) {
+        await purchaseBoost(profileId, selectedPackage);
+        refreshStatus();
       }
-    } catch (error: any) {
-      setError(error.message || "Failed to purchase boost");
-      toast({
-        title: "Failed to activate boost",
-        description: error.message || "There was an error activating your boost. Please try again.",
-        variant: "destructive",
-      });
+    } catch (error) {
+      console.error('Failed to purchase boost:', error);
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleCancel = async () => {
-    setLoading(true);
+    setIsSubmitting(true);
     try {
-      const success = await cancelBoost();
-      if (success) {
-        toast({
-          title: "Boost cancelled",
-          description: "Your active boost has been cancelled.",
-        });
-      } else {
-        toast({
-          title: "Failed to cancel boost",
-          description: "There was an error cancelling your boost. Please try again.",
-          variant: "destructive",
-        });
+      if (cancelBoost) {
+        await cancelBoost();
+        refreshStatus();
       }
-    } catch (error: any) {
-      setError(error.message || "Failed to cancel boost");
-      toast({
-        title: "Failed to cancel boost",
-        description: error.message || "There was an error cancelling your boost. Please try again.",
-        variant: "destructive",
-      });
+    } catch (error) {
+      console.error('Failed to cancel boost:', error);
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
-    return true;
   };
 
-  const renderBoostPackages = () => {
-    return (
-      <BoostPackages 
-        packages={boostPackages}
-        selected={selectedPackage?.id || ""}
-        onSelect={(id) => handleSelectPackage(id)}
-        onBoost={handleBoost}
-        isLoading={loading}
-        eligibility={eligibility}
-        boostStatus={boostStatus}
-      />
-    );
+  const getBoostPrice = () => {
+    if (!selectedPackage || !adaptGetBoostPrice) return 0;
+    const selectedBoostPackage = packages.find(pkg => pkg.id === selectedPackage);
+    return adaptGetBoostPrice(selectedBoostPackage?.price_ubx);
   };
 
+  const selectedBoostPackage = packages.find(p => p.id === selectedPackage);
+
+  // When using the imported hook
+  const {
+    boostStatus,
+    hermesStatus,
+    loading,
+    error,
+    packages,
+    activateBoost,
+    cancelBoost,
+    isEligible,
+    eligibilityReason,
+    refreshStatus,
+    eligibility, // Now available in the type
+    dailyBoostUsage, // Now available in the type
+    dailyBoostLimit, // Now available in the type
+    purchaseBoost, // Now available in the type
+    formatBoostDuration, // Now available in the type
+    getBoostAnalytics, // Now available in the type
+    fetchBoostPackages, // Now available in the type
+    adaptGetBoostPrice, // Now available in the type
+  } = useBoostManager(profileId); // profileId is now allowed to be string or object
+
+  // Fix type assertions for state handling
+  const localBoostStatus: BoostStatusType = {
+    isActive: boostStatus?.isActive || false,
+    remainingTime: boostStatus?.remainingTime || '',
+    packageName: boostStatus?.packageName || '',
+  };
+
+  // In the useEffect, update with proper type conversion
+  useEffect(() => {
+    if (boostStatus) {
+      const convertedStatus: BoostStatusType = {
+        isActive: boostStatus.isActive,
+        remainingTime: boostStatus.remainingTime?.toString() || '',
+        // Add other necessary properties
+        packageName: boostStatus.packageName,
+        packageId: boostStatus.packageId,
+        startedAt: boostStatus.startedAt,
+        expiresAt: boostStatus.expiresAt,
+        progress: boostStatus.progress,
+      };
+      setLocalBoostStatus(convertedStatus);
+    }
+
+    if (packages) {
+      const convertedPackages: BoostPackage[] = packages.map(pkg => ({
+        id: pkg.id,
+        name: pkg.name,
+        description: pkg.description,
+        price: pkg.price,
+        price_ubx: pkg.price_ubx,
+        visibility: pkg.visibility,
+        features: pkg.features,
+        duration: pkg.duration,
+      }));
+      setLocalPackages(convertedPackages);
+    }
+  }, [boostStatus, packages]);
+
+  // Fix BoostPackageSelection props
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Boost Status</CardTitle>
-          <CardDescription>View your current boost status and manage your active boosts.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {boostStatus.isActive ? (
-            <BoostActivePackage
-              boostStatus={boostStatus}
-              formatDuration={formatBoostDuration}
-              onCancel={handleCancel}
-            />
-          ) : (
-            <BoostEligibilityAlert eligible={eligibility.isEligible} reason={eligibility.reason} />
-          )}
-        </CardContent>
-      </Card>
+      <BoostStatus
+        boostStatus={localBoostStatus}
+        eligibility={{ eligible: isEligible, reason: eligibilityReason }}
+        profileCompleteness={profileCompleteness || 0}
+        rating={rating || 0}
+        country={country || 'Unknown'}
+        role={role || 'regular'}
+        ubxBalance={ubxBalance || 0}
+        boostPackages={localPackages}
+        selectedPackage={selectedPackage} // Change from selected to selectedPackage
+        onSelectPackage={handleSelectPackage} // Change from onSelect to onSelectPackage
+        onPurchase={handlePurchase}
+        onCancel={handleCancel}
+        getBoostPrice={getBoostPrice}
+        loading={isSubmitting}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Boost Packages</CardTitle>
-          <CardDescription>Select a boost package to increase your profile visibility.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {eligibility.isEligible ? (
-            renderBoostPackages()
-          ) : (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                You are not eligible for boosting at this time. {eligibility.reason}
-              </AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Hermes Queue Position</CardTitle>
-          <CardDescription>
-            Your position in the visibility queue
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <HermesOxumQueueVisualization 
-            userId={profileId} 
-            activeBoosts={boostStatus?.isActive ? 1 : 0}
-          />
-        </CardContent>
-      </Card>
+      <HermesOxumQueueVisualization profileId={profileId} activeBoosts={boostStatus?.isActive ? 1 : 0} />
+
+      {!isEligible && (
+        <Card>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            <AlertDescription>
+              {eligibility?.reason || eligibility?.reasons?.[0]}
+            </AlertDescription>
+          </Alert>
+        </Card>
+      )}
     </div>
   );
 };
