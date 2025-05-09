@@ -1,73 +1,89 @@
 
-import { useEffect, useState } from 'react';
-import { BoostAnalytics } from '@/types/pulse-boost';
+import { useState, useEffect } from 'react';
 
-/**
- * Hook to fetch boost analytics data
- */
-export function useBoostAnalytics(userId: string) {
-  const [analytics, setAnalytics] = useState<BoostAnalytics | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+export interface AnalyticsData {
+  totalBoosts: number;
+  activeBoosts: number;
+  averageBoostScore: number;
+  boostHistory: Array<{
+    date: Date;
+    score: number;
+  }>;
+  views?: number;
+  impressions?: {
+    value: number;
+    change?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+  };
+  interactions?: {
+    value: number;
+    change?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+  };
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+}
+
+export const useBoostAnalytics = (userId: string) => {
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   useEffect(() => {
-    const fetchAnalytics = async () => {
+    const fetchData = async () => {
       if (!userId) {
         setLoading(false);
         return;
       }
-      
+
       try {
-        setLoading(true);
-        
-        // Mock data for demo purposes - in production would call API
-        const mockData: BoostAnalytics = {
-          totalBoosts: 3,
-          activeBoosts: 1,
-          averageBoostScore: 85,
-          boostHistory: [
-            { date: new Date(Date.now() - 86400000 * 7), score: 75 },
-            { date: new Date(Date.now() - 86400000 * 6), score: 78 },
-            { date: new Date(Date.now() - 86400000 * 5), score: 80 },
-            { date: new Date(Date.now() - 86400000 * 4), score: 82 },
-            { date: new Date(Date.now() - 86400000 * 3), score: 84 },
-            { date: new Date(Date.now() - 86400000 * 2), score: 86 },
-            { date: new Date(Date.now() - 86400000), score: 85 },
-          ],
-          views: 243,
-          impressions: {
-            value: 1250,
-            change: 35,
-            withBoost: 850
-          },
-          interactions: {
-            value: 68,
-            change: 22
-          }
-        };
-        
-        setAnalytics(mockData);
+        // Simulate API call with mock data
+        setTimeout(() => {
+          const mockData: AnalyticsData = {
+            totalBoosts: 5,
+            activeBoosts: 1,
+            averageBoostScore: 78,
+            boostHistory: [
+              { date: new Date('2023-01-01'), score: 65 },
+              { date: new Date('2023-01-08'), score: 72 },
+              { date: new Date('2023-01-15'), score: 78 },
+              { date: new Date('2023-01-22'), score: 82 },
+              { date: new Date('2023-01-29'), score: 85 },
+            ],
+            views: 234,
+            impressions: {
+              value: 1245,
+              change: 23,
+              withBoost: 1245,
+              withoutBoost: 856
+            },
+            interactions: {
+              value: 89,
+              change: 34,
+              withBoost: 89,
+              withoutBoost: 42
+            },
+            additionalViews: 389,
+            engagementIncrease: 111,
+            rankingPosition: 12
+          };
+          
+          setAnalytics(mockData);
+          setLoading(false);
+        }, 1000);
       } catch (err) {
-        console.error('Error fetching boost analytics:', err);
-        setError('Failed to load boost analytics');
-      } finally {
+        setError('Failed to fetch analytics data');
         setLoading(false);
       }
     };
-    
-    fetchAnalytics();
+
+    fetchData();
   }, [userId]);
-  
-  return {
-    analytics,
-    loading,
-    error,
-    refetch: () => {
-      setLoading(true);
-      setError(null);
-      // Refetch logic would go here
-    }
-  };
-}
+
+  return { analytics, loading, error };
+};
 
 export default useBoostAnalytics;

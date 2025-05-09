@@ -8,9 +8,11 @@ import { BoostPackage } from "@/types/boost";
 
 interface BoostPackageGridProps {
   packages: BoostPackage[];
-  selectedPackage: string | null;
+  selectedPackageId?: string | null;
+  selectedPackage?: string | null;
   onSelect: (id: string) => void;
-  onActivate: () => void;
+  onSelectPackage?: (pkg: any) => void;
+  onActivate?: () => void;
   isLoading?: boolean;
   formatDuration?: (duration: string) => string;
 }
@@ -18,11 +20,26 @@ interface BoostPackageGridProps {
 const BoostPackageGrid: React.FC<BoostPackageGridProps> = ({
   packages,
   selectedPackage,
+  selectedPackageId,
   onSelect,
+  onSelectPackage,
   onActivate,
   isLoading = false,
   formatDuration = (duration) => duration || ''
 }) => {
+  // Use either selectedPackage or selectedPackageId
+  const selected = selectedPackageId || selectedPackage;
+  
+  // Use either onSelect or onSelectPackage
+  const handleSelect = (id: string) => {
+    if (onSelectPackage) {
+      const pkg = packages.find(p => p.id === id);
+      onSelectPackage(pkg);
+    } else if (onSelect) {
+      onSelect(id);
+    }
+  };
+
   if (!packages || packages.length === 0) {
     return (
       <Card>
@@ -42,9 +59,9 @@ const BoostPackageGrid: React.FC<BoostPackageGridProps> = ({
         <Card 
           key={pkg.id}
           className={`transition-all cursor-pointer ${
-            selectedPackage === pkg.id ? "ring-2 ring-primary" : "hover:shadow-md"
+            selected === pkg.id ? "ring-2 ring-primary" : "hover:shadow-md"
           }`}
-          onClick={() => onSelect(pkg.id)}
+          onClick={() => handleSelect(pkg.id)}
         >
           <CardHeader className="pb-2">
             <div className="flex justify-between items-start">
@@ -77,10 +94,13 @@ const BoostPackageGrid: React.FC<BoostPackageGridProps> = ({
               ))}
             </div>
             
-            {selectedPackage === pkg.id && (
+            {selected === pkg.id && onActivate && (
               <Button 
                 className="w-full mt-4" 
-                onClick={onActivate}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onActivate();
+                }}
                 disabled={isLoading}
               >
                 {isLoading ? "Processing..." : "Select This Package"}

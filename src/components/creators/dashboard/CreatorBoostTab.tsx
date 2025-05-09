@@ -1,307 +1,237 @@
-import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import HermesOxumQueueVisualization from '@/components/creators/dashboard/boost/HermesOxumQueueVisualization';
-import { BoostStatus } from '@/types/pulse-boost';
-import { BoostPackages } from '@/components/boost/dialog';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { BoostPackage, BoostStatus, BoostEligibility } from "@/types/boost";
+import { useBoostManager } from "@/hooks/boost/useBoostManager";
+import BoostPackages from "@/components/boost/BoostPackageSelection";
+import BoostActivePackage from "@/components/boost/BoostActivePackage";
+import BoostEligibilityAlert from "@/components/creators/dashboard/boost/BoostEligibilityAlert";
+import { HermesOxumQueueVisualization } from "@/components/creators/dashboard/boost/HermesOxumQueueVisualization";
+import { HermesStatus } from '@/types/pulse-boost';
 
 interface CreatorBoostTabProps {
   profileId?: string;
-  boostStatus?: BoostStatus;
-  boostPackages?: any[];
-  onBoostPurchase?: (packageId: string) => void;
-  onBoostCancel?: () => void;
-  isBoostActive?: boolean;
-  activeBoostRemainingTime?: string;
-  activeBoostName?: string;
-  activeBoostDescription?: string;
-  activeBoostPrice?: number;
-  activeBoostFeatures?: string[];
-  activeBoostColor?: string;
-  activeBoostBadgeColor?: string;
-  activeBoostVisibility?: string;
-  activeBoostVisibilityIncrease?: number;
-  activeBoostDuration?: string;
-  activeBoostDurationMinutes?: number;
-  activeBoostBoostPower?: number;
-  activeBoostIsMostPopular?: boolean;
-  activeBoostIsPopular?: boolean;
-  activeBoostIsRecommended?: boolean;
-  activeBoostIsActive?: boolean;
-  activeBoostStartTime?: Date;
-  activeBoostEndTime?: Date;
-  activeBoostStatus?: string;
-  activeBoostProgress?: number;
-  activeBoostTimeRemaining?: string;
-  activeBoostIsExpiring?: boolean;
-  activeBoostExpiresAt?: string;
-  activeBoostLevel?: number;
-  activeBoostType?: string;
-  activeBoostModifiers?: Record<string, number>;
-  activeBoostPackageName?: string;
-  activeBoostPackageId?: string;
-  activeBoostStartedAt?: Date;
-  activeBoostQueuePosition?: number;
-  activeBoostTotalInQueue?: number;
-  activeBoostEstimatedWaitTime?: number;
-  activeBoostScore?: number;
-  activeBoostEffectivenessScore?: number;
-  activeBoostMetrics?: any;
-  activeBoostAnalytics?: any;
-  activeBoostAnalyticsTotalBoosts?: number;
-  activeBoostAnalyticsActiveBoosts?: number;
-  activeBoostAnalyticsAverageBoostScore?: number;
-  activeBoostAnalyticsBoostHistory?: any[];
-  activeBoostAnalyticsViews?: number;
-  activeBoostAnalyticsImpressions?: any;
-  activeBoostAnalyticsInteractions?: any;
-  activeBoostAnalyticsAdditionalViews?: number;
-  activeBoostAnalyticsEngagementIncrease?: number;
-  activeBoostAnalyticsRankingPosition?: number;
-  activeBoostAnalyticsViewsWithBoost?: number;
-  activeBoostAnalyticsViewsWithoutBoost?: number;
-  activeBoostAnalyticsInteractionsWithBoost?: number;
-  activeBoostAnalyticsInteractionsWithoutBoost?: number;
-  activeBoostAnalyticsImpressionsWithBoost?: number;
-  activeBoostAnalyticsImpressionsWithoutBoost?: number;
-  activeBoostAnalyticsImpressionsIncrease?: number;
-  activeBoostAnalyticsInteractionsIncrease?: number;
-  activeBoostAnalyticsImpressionsChange?: number;
-  activeBoostAnalyticsInteractionsChange?: number;
-  activeBoostAnalyticsImpressionsValue?: number;
-  activeBoostAnalyticsInteractionsValue?: number;
-  activeBoostAnalyticsImpressionsWithBoostValue?: number;
-  activeBoostAnalyticsImpressionsWithoutBoostValue?: number;
-  activeBoostAnalyticsInteractionsWithBoostValue?: number;
-  activeBoostAnalyticsInteractionsWithoutBoostValue?: number;
-  activeBoostAnalyticsImpressionsIncreaseValue?: number;
-  activeBoostAnalyticsInteractionsIncreaseValue?: number;
-  activeBoostAnalyticsImpressionsChangeValue?: number;
-  activeBoostAnalyticsInteractionsChangeValue?: number;
-  activeBoostAnalyticsImpressionsWithBoostChange?: number;
-  activeBoostAnalyticsImpressionsWithoutBoostChange?: number;
-  activeBoostAnalyticsInteractionsWithBoostChange?: number;
-  activeBoostAnalyticsInteractionsWithoutBoostChange?: number;
-  activeBoostAnalyticsImpressionsWithBoostIncrease?: number;
-  activeBoostAnalyticsImpressionsWithoutBoostIncrease?: number;
-  activeBoostAnalyticsInteractionsWithBoostIncrease?: number;
-  activeBoostAnalyticsInteractionsWithoutBoostIncrease?: number;
-  activeBoostAnalyticsImpressionsWithBoostIncreaseValue?: number;
-  activeBoostAnalyticsImpressionsWithoutBoostIncreaseValue?: number;
-  activeBoostAnalyticsInteractionsWithBoostIncreaseValue?: number;
-  activeBoostAnalyticsInteractionsWithoutBoostIncreaseValue?: number;
-  activeBoostAnalyticsImpressionsWithBoostChangeValue?: number;
-  activeBoostAnalyticsImpressionsWithoutBoostChangeValue?: number;
-  activeBoostAnalyticsInteractionsWithBoostChangeValue?: number;
-  activeBoostAnalyticsInteractionsWithoutBoostChangeValue?: number;
-  activeBoostAnalyticsImpressionsWithBoostIncreaseChange?: number;
-  activeBoostAnalyticsImpressionsWithoutBoostIncreaseChange?: number;
-  activeBoostAnalyticsInteractionsWithBoostIncreaseChange?: number;
-  activeBoostAnalyticsInteractionsWithoutBoostIncreaseChange?: number;
-  activeBoostAnalyticsImpressionsWithBoostIncreaseValueChange?: number;
-  activeBoostAnalyticsImpressionsWithoutBoostIncreaseValueChange?: number;
-  activeBoostAnalyticsInteractionsWithBoostIncreaseValueChange?: number;
-  activeBoostAnalyticsInteractionsWithoutBoostIncreaseValueChange?: number;
-  activeBoostAnalyticsImpressionsWithBoostChangeValueChange?: number;
-  activeBoostAnalyticsImpressionsWithoutBoostChangeValueChange?: number;
-  activeBoostAnalyticsInteractionsWithBoostChangeValueChange?: number;
-  activeBoostAnalyticsInteractionsWithoutBoostChangeValueChange?: number;
-  activeBoostAnalyticsImpressionsWithBoostIncreaseValueValue?: number;
-  activeBoostAnalyticsImpressionsWithoutBoostIncreaseValueValue?: number;
-  activeBoostAnalyticsInteractionsWithBoostIncreaseValueValue?: number;
-  activeBoostAnalyticsInteractionsWithoutBoostIncreaseValueValue?: number;
-  activeBoostAnalyticsImpressionsWithBoostChangeValueValue?: number;
-  activeBoostAnalyticsImpressionsWithoutBoostChangeValueValue?: number;
-  activeBoostAnalyticsInteractionsWithBoostChangeValueValue?: number;
-  activeBoostAnalyticsInteractionsWithoutBoostChangeValueValue?: number;
-  activeBoostAnalyticsImpressionsWithBoostIncreaseValueValueChange?: number;
-  activeBoostAnalyticsImpressionsWithoutBoostIncreaseValueValueChange?: number;
-  activeBoostAnalyticsInteractionsWithBoostIncreaseValueValueChange?: number;
-  activeBoostAnalyticsInteractionsWithoutBoostIncreaseValueValueChange?: number;
-  activeBoostAnalyticsImpressionsWithBoostChangeValueValueChange?: number;
-  activeBoostAnalyticsImpressionsWithoutBoostChangeValueValueChange?: number;
-  activeBoostAnalyticsInteractionsWithBoostChangeValueValueChange?: number;
-  activeBoostAnalyticsInteractionsWithoutBoostChangeValueValueChange?: number;
+  creatorId?: string;
+  profileCompleteness?: number;
+  isVerified?: boolean;
+  rating?: number;
+  profileCreatedDate?: Date;
+  country?: string;
+  role?: "verified" | "regular" | "AI";
+  ubxBalance?: number;
 }
 
 const CreatorBoostTab: React.FC<CreatorBoostTabProps> = ({
   profileId,
-  boostStatus,
-  boostPackages,
-  onBoostPurchase,
-  onBoostCancel,
-  isBoostActive,
-  activeBoostRemainingTime,
-  activeBoostName,
-  activeBoostDescription,
-  activeBoostPrice,
-  activeBoostFeatures,
-  activeBoostColor,
-  activeBoostBadgeColor,
-  activeBoostVisibility,
-  activeBoostVisibilityIncrease,
-  activeBoostDuration,
-  activeBoostDurationMinutes,
-  activeBoostBoostPower,
-  activeBoostIsMostPopular,
-  activeBoostIsPopular,
-  activeBoostIsRecommended,
-  activeBoostIsActive,
-  activeBoostStartTime,
-  activeBoostEndTime,
-  activeBoostStatus,
-  activeBoostProgress,
-  activeBoostTimeRemaining,
-  activeBoostIsExpiring,
-  activeBoostExpiresAt,
-  activeBoostLevel,
-  activeBoostType,
-  activeBoostModifiers,
-  activeBoostPackageName,
-  activeBoostPackageId,
-  activeBoostStartedAt,
-  activeBoostQueuePosition,
-  activeBoostTotalInQueue,
-  activeBoostEstimatedWaitTime,
-  activeBoostScore,
-  activeBoostEffectivenessScore,
-  activeBoostMetrics,
-  activeBoostAnalytics,
-  activeBoostAnalyticsTotalBoosts,
-  activeBoostAnalyticsActiveBoosts,
-  activeBoostAnalyticsAverageBoostScore,
-  activeBoostAnalyticsBoostHistory,
-  activeBoostAnalyticsViews,
-  activeBoostAnalyticsImpressions,
-  activeBoostAnalyticsInteractions,
-  activeBoostAnalyticsAdditionalViews,
-  activeBoostAnalyticsEngagementIncrease,
-  activeBoostAnalyticsRankingPosition,
-  activeBoostAnalyticsViewsWithBoost,
-  activeBoostAnalyticsViewsWithoutBoost,
-  activeBoostAnalyticsInteractionsWithBoost,
-  activeBoostAnalyticsInteractionsWithoutBoost,
-  activeBoostAnalyticsImpressionsWithBoostValue,
-  activeBoostAnalyticsImpressionsWithoutBoostValue,
-  activeBoostAnalyticsInteractionsWithBoostValue,
-  activeBoostAnalyticsInteractionsWithoutBoostValue,
-  activeBoostAnalyticsImpressionsIncreaseValue,
-  activeBoostAnalyticsInteractionsIncreaseValue,
-  activeBoostAnalyticsImpressionsChangeValue,
-  activeBoostAnalyticsInteractionsChangeValue,
-  activeBoostAnalyticsImpressionsWithBoostChange,
-  activeBoostAnalyticsImpressionsWithoutBoostChange,
-  activeBoostAnalyticsInteractionsWithBoostChange,
-  activeBoostAnalyticsInteractionsWithoutBoostChange,
-  activeBoostAnalyticsImpressionsWithBoostIncrease,
-  activeBoostAnalyticsImpressionsWithoutBoostIncrease,
-  activeBoostAnalyticsInteractionsWithBoostIncrease,
-  activeBoostAnalyticsInteractionsWithoutBoostIncrease,
-  activeBoostAnalyticsImpressionsWithBoostIncreaseValueChange,
-  activeBoostAnalyticsImpressionsWithoutBoostIncreaseValueChange,
-  activeBoostAnalyticsInteractionsWithBoostIncreaseValueChange,
-  activeBoostAnalyticsInteractionsWithoutBoostIncreaseValueChange,
-  activeBoostAnalyticsImpressionsWithBoostChangeValueChange,
-  activeBoostAnalyticsImpressionsWithoutBoostChangeValueChange,
-  activeBoostAnalyticsInteractionsWithBoostChangeValueChange,
-  activeBoostAnalyticsInteractionsWithoutBoostChangeValueChange,
-  activeBoostAnalyticsImpressionsWithBoostIncreaseValueValue,
-  activeBoostAnalyticsImpressionsWithoutBoostIncreaseValueValue,
-  activeBoostAnalyticsInteractionsWithBoostIncreaseValueValue,
-  activeBoostAnalyticsInteractionsWithoutBoostIncreaseValueValue,
-  activeBoostAnalyticsImpressionsWithBoostChangeValueValue,
-  activeBoostAnalyticsImpressionsWithoutBoostChangeValueValue,
-  activeBoostAnalyticsInteractionsWithBoostChangeValueValue,
-  activeBoostAnalyticsInteractionsWithoutBoostChangeValueValue,
-  activeBoostAnalyticsImpressionsWithBoostIncreaseValueValueChange,
-  activeBoostAnalyticsImpressionsWithoutBoostIncreaseValueValueChange,
-  activeBoostAnalyticsInteractionsWithBoostIncreaseValueValueChange,
-  activeBoostAnalyticsInteractionsWithoutBoostIncreaseValueValueChange,
-  activeBoostAnalyticsImpressionsWithBoostChangeValueValueChange,
-  activeBoostAnalyticsImpressionsWithoutBoostChangeValueValueChange,
-  activeBoostAnalyticsInteractionsWithBoostChangeValueValueChange,
-  activeBoostAnalyticsInteractionsWithoutBoostChangeValueValueChange,
+  creatorId,
+  profileCompleteness,
+  isVerified,
+  rating,
+  profileCreatedDate,
+  country,
+  role,
+  ubxBalance
 }) => {
-  const activeBoostCount = boostStatus?.isActive ? 1 : 0;
+  const { toast } = useToast();
+  const [selectedPackage, setSelectedPackage] = useState<BoostPackage | null>(null);
+  const [boostPackages, setBoostPackages] = useState<BoostPackage[]>([]);
+  const [boostStatus, setBoostStatus] = useState<BoostStatus>({ isActive: false });
+  const [eligibility, setEligibility] = useState<BoostEligibility>({ isEligible: false });
+  const [hermesStatus, setHermesStatus] = useState<HermesStatus>({
+    position: 0,
+    activeUsers: 0,
+    estimatedVisibility: 0,
+    lastUpdateTime: '',
+    boostScore: 0,
+    effectivenessScore: 0
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [dailyBoostUsage, setDailyBoostUsage] = useState<number>(0);
+  const [dailyBoostLimit, setDailyBoostLimit] = useState<number>(3);
+
+  const {
+    boostStatus: managedBoostStatus,
+    eligibility: managedEligibility,
+    packages,
+    dailyBoostUsage: managedDailyBoostUsage,
+    dailyBoostLimit: managedDailyBoostLimit,
+    purchaseBoost,
+    cancelBoost,
+    formatBoostDuration,
+    getBoostAnalytics,
+    fetchBoostPackages,
+    adaptGetBoostPrice,
+    hermesStatus: managedHermesStatus
+  } = useBoostManager({ profileId: profileId || creatorId });
+
+  useEffect(() => {
+    if (managedBoostStatus) {
+      setBoostStatus(managedBoostStatus);
+    }
+    if (managedEligibility) {
+      setEligibility(managedEligibility);
+    }
+    if (packages) {
+      setBoostPackages(packages);
+    }
+    if (managedDailyBoostUsage !== undefined) {
+      setDailyBoostUsage(managedDailyBoostUsage);
+    }
+    if (managedDailyBoostLimit !== undefined) {
+      setDailyBoostLimit(managedDailyBoostLimit);
+    }
+    if (managedHermesStatus) {
+      setHermesStatus(managedHermesStatus);
+    }
+  }, [
+    managedBoostStatus,
+    managedEligibility,
+    packages,
+    managedDailyBoostUsage,
+    managedDailyBoostLimit,
+    managedHermesStatus
+  ]);
+
+  const handleSelectPackage = (packageId: string) => {
+    const selected = boostPackages.find((pkg) => pkg.id === packageId);
+    setSelectedPackage(selected || null);
+  };
+
+  const handleBoost = async () => {
+    if (!selectedPackage) {
+      toast({
+        title: "No package selected",
+        description: "Please select a boost package to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const success = await purchaseBoost(selectedPackage);
+      if (success) {
+        toast({
+          title: "Boost activated",
+          description: `Your profile is now boosted with ${selectedPackage.name}.`,
+        });
+      } else {
+        toast({
+          title: "Failed to activate boost",
+          description: "There was an error activating your boost. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      setError(error.message || "Failed to purchase boost");
+      toast({
+        title: "Failed to activate boost",
+        description: error.message || "There was an error activating your boost. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    setLoading(true);
+    try {
+      const success = await cancelBoost();
+      if (success) {
+        toast({
+          title: "Boost cancelled",
+          description: "Your active boost has been cancelled.",
+        });
+      } else {
+        toast({
+          title: "Failed to cancel boost",
+          description: "There was an error cancelling your boost. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      setError(error.message || "Failed to cancel boost");
+      toast({
+        title: "Failed to cancel boost",
+        description: error.message || "There was an error cancelling your boost. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+    return true;
+  };
+
+  const renderBoostPackages = () => {
+    return (
+      <BoostPackages 
+        packages={boostPackages}
+        selected={selectedPackage?.id || ""}
+        onSelect={(id) => handleSelectPackage(id)}
+        onBoost={handleBoost}
+        isLoading={loading}
+        eligibility={eligibility}
+        boostStatus={boostStatus}
+      />
+    );
+  };
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="packages">Boost Packages</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="overview" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Active Boost</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {boostStatus?.isActive ? (
-                <div>
-                  <p>Your profile is currently boosted!</p>
-                  <p>Time remaining: {boostStatus.remainingTime}</p>
-                </div>
-              ) : (
-                <p>No active boost</p>
-              )}
-            </CardContent>
-          </Card>
-          
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardHeader>
-                <CardTitle>Total Boosts</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {activeBoostAnalyticsTotalBoosts}
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Active Boosts</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {activeBoostAnalyticsActiveBoosts}
-              </CardContent>
-            </Card>
-            
-            <HermesOxumQueueVisualization 
-              userId={profileId} 
-              activeBoosts={activeBoostCount}
+      <Card>
+        <CardHeader>
+          <CardTitle>Boost Status</CardTitle>
+          <CardDescription>View your current boost status and manage your active boosts.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {boostStatus.isActive ? (
+            <BoostActivePackage
+              boostStatus={boostStatus}
+              formatDuration={formatBoostDuration}
+              onCancel={handleCancel}
             />
-          </div>
-          
-          <div>
-            {/* Additional overview content */}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="packages" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Boost Packages</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <BoostPackages />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="analytics" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Boost Analytics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Boost analytics content */}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          ) : (
+            <BoostEligibilityAlert eligible={eligibility.isEligible} reason={eligibility.reason} />
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Boost Packages</CardTitle>
+          <CardDescription>Select a boost package to increase your profile visibility.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {eligibility.isEligible ? (
+            renderBoostPackages()
+          ) : (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                You are not eligible for boosting at this time. {eligibility.reason}
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Hermes Queue Position</CardTitle>
+          <CardDescription>
+            Your position in the visibility queue
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <HermesOxumQueueVisualization 
+            userId={profileId} 
+            activeBoosts={boostStatus?.isActive ? 1 : 0}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 };

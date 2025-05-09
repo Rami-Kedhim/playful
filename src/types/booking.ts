@@ -1,64 +1,46 @@
 
-import { z } from "zod";
-
-export interface BookingFormData {
-  date: Date;
-  time: string;
-  duration: string;
-  name: string;
-  email: string;
-  phone: string;
-  message: string;
-}
-
-export const bookingFormSchema = z.object({
-  date: z.date({
-    required_error: "A date is required.",
-  }),
-  time: z.string({
-    required_error: "Please select a time.",
-  }),
-  duration: z.string({
-    required_error: "Please select a duration.",
-  }),
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  email: z.string().email({
-    message: "Please enter a valid email.",
-  }),
-  phone: z.string().min(5, {
-    message: "Please enter a valid phone number.",
-  }),
-  message: z.string().optional(),
-});
-
-export type BookingFormValues = z.infer<typeof bookingFormSchema>;
+import { Escort } from './escort';
 
 export interface Booking {
   id: string;
   escortId: string;
-  escortName: string;
-  userId: string;
-  date: string | Date;
-  time: string;
-  duration: string;
+  clientId: string;
+  startTime: Date | string;
+  endTime: Date | string;
+  duration: number;
+  status: BookingStatus;
+  service: string;
   location: string;
   price: number;
-  status: 'confirmed' | 'pending' | 'cancelled';
-  message?: string;
-  createdAt: string | Date;
-  updatedAt: string | Date;
+  notes?: string;
+  createdAt: Date | string;
+  escort?: Escort;
+  client?: any;
 }
 
-export interface UberBooking {
-  id: string;
-  clientId: string;
-  providerId: string;
-  startTime: Date;
-  endTime: Date;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  price: number;
+export type BookingStatus = 
+  | 'pending' 
+  | 'confirmed' 
+  | 'completed' 
+  | 'cancelled' 
+  | 'rejected';
+
+export interface BookingRequest {
+  escortId: string;
+  startTime: Date | string;
+  endTime?: Date | string;
+  duration: number;
+  service: string;
+  location: string;
+  notes?: string;
+}
+
+export interface BookingFilters {
+  status?: BookingStatus[];
+  startDate?: Date;
+  endDate?: Date;
+  escortId?: string;
+  clientId?: string;
+  service?: string;
   location?: string;
-  paymentStatus: 'pending' | 'paid' | 'refunded';
 }

@@ -7,22 +7,30 @@ import { BoostPackage } from "@/types/boost";
 
 interface BoostPurchaseConfirmationProps {
   selectedPackage: BoostPackage | null;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   onCancel: () => void;
-  isLoading: boolean;
+  onPurchase?: () => void;
+  onBack?: () => void;
+  isLoading?: boolean;
+  loading?: boolean;
   error?: string | null;
   success?: boolean;
   formatDuration?: (duration: string) => string;
+  ubxBalance?: number;
 }
 
 const BoostPurchaseConfirmation: React.FC<BoostPurchaseConfirmationProps> = ({
   selectedPackage,
   onConfirm,
   onCancel,
+  onPurchase,
+  onBack,
   isLoading,
+  loading,
   error,
   success,
-  formatDuration = (duration) => duration || ''
+  formatDuration = (duration) => duration || '',
+  ubxBalance
 }) => {
   // Form Validation
   const [agreed, setAgreed] = useState(false);
@@ -30,6 +38,27 @@ const BoostPurchaseConfirmation: React.FC<BoostPurchaseConfirmationProps> = ({
   if (!selectedPackage) {
     return null;
   }
+
+  // Use either onConfirm or onPurchase
+  const handleConfirm = () => {
+    if (onPurchase) {
+      onPurchase();
+    } else if (onConfirm) {
+      onConfirm();
+    }
+  };
+
+  // Use either onCancel or onBack
+  const handleCancel = () => {
+    if (onBack) {
+      onBack();
+    } else if (onCancel) {
+      onCancel();
+    }
+  };
+
+  // Use either isLoading or loading
+  const isProcessing = isLoading || loading;
   
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -70,6 +99,12 @@ const BoostPurchaseConfirmation: React.FC<BoostPurchaseConfirmationProps> = ({
                 <span>Price:</span>
                 <span className="font-bold">{selectedPackage.price_ubx || selectedPackage.price} UBX</span>
               </div>
+              {ubxBalance !== undefined && (
+                <div className="flex justify-between mb-2">
+                  <span>Your Balance:</span>
+                  <span>{ubxBalance} UBX</span>
+                </div>
+              )}
             </div>
             
             <div>
@@ -92,20 +127,20 @@ const BoostPurchaseConfirmation: React.FC<BoostPurchaseConfirmationProps> = ({
       
       <CardFooter className={`flex ${success || error ? 'justify-center' : 'justify-between'}`}>
         {success ? (
-          <Button onClick={onCancel}>
+          <Button onClick={handleCancel}>
             Close
           </Button>
         ) : error ? (
-          <Button onClick={onCancel}>
+          <Button onClick={handleCancel}>
             Try Again
           </Button>
         ) : (
           <>
-            <Button variant="outline" onClick={onCancel} disabled={isLoading}>
+            <Button variant="outline" onClick={handleCancel} disabled={isProcessing}>
               Cancel
             </Button>
-            <Button onClick={onConfirm} disabled={!agreed || isLoading}>
-              {isLoading ? (
+            <Button onClick={handleConfirm} disabled={!agreed || isProcessing}>
+              {isProcessing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Processing...

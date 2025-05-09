@@ -31,7 +31,8 @@ const HermesOxumQueueVisualization: React.FC<HermesOxumQueueVisualizationProps> 
     setQueuePosition(position);
     
     // Calculate progress based on position in queue
-    setProgress(((totalInQueue - position) / totalInQueue) * 100);
+    const calculatedProgress = ((totalInQueue - position) / totalInQueue) * 100;
+    setProgress(calculatedProgress);
     
   }, [totalInQueue]);
   

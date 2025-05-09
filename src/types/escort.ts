@@ -132,6 +132,12 @@ export interface Escort {
   providesVirtualContent?: boolean;
 }
 
+export interface ExtendedEscort extends Escort {
+  providesInPersonServices: boolean;
+  providesVirtualContent: boolean;
+  featured?: boolean;
+}
+
 export interface ContactInfo {
   email?: string;
   phone?: string;
@@ -157,12 +163,6 @@ export interface EscortFilters {
   serviceType?: string;
   verifiedOnly?: boolean;
   rating?: number;
-}
-
-// Extended escort type for profile completion hook
-export interface ExtendedEscort extends Escort {
-  providesInPersonServices: boolean;
-  providesVirtualContent: boolean;
 }
 
 // Re-export VerificationLevel for backward compatibility

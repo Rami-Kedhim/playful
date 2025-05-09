@@ -52,8 +52,8 @@ const BoostPackageSelection = ({
       
       <BoostPackageGrid 
         packages={packages}
-        onSelectPackage={(pkg) => onSelectPackage(pkg.id)}
         selectedPackageId={selectedPackage}
+        onSelect={onSelectPackage}
       />
       
       <div className="flex justify-end">
