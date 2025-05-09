@@ -1,51 +1,5 @@
-
-import { User } from './user';
+import { User, UserProfile } from './user';
 import { Session } from '@supabase/supabase-js';
-
-export enum UserRole {
-  ADMIN = "admin",
-  MODERATOR = "moderator",
-  CLIENT = "client",
-  ESCORT = "escort",
-  CREATOR = "creator"
-}
-
-export interface UserProfile {
-  id: string;
-  userId: string;
-  username?: string;
-  fullName?: string;
-  name?: string;
-  bio?: string;
-  avatarUrl?: string;
-  avatar_url?: string; // For backward compatibility
-  preferences?: Record<string, any>;
-  verified?: boolean;
-  is_verified?: boolean; // For backward compatibility
-  isVerified?: boolean;  // For standardization
-  createdAt: string;
-  updatedAt?: string;
-  gender?: string;
-  location?: string;
-  sexual_orientation?: string;
-  website?: string;
-  phone?: string;
-  ubxBalance?: number;
-  ubx_balance?: number; // For backward compatibility
-  isBoosted?: boolean;
-  is_boosted?: boolean; // For backward compatibility
-  subscription_tier?: string;
-  role?: string;
-  roles?: string[];
-  verification_status?: string;
-  verification_level?: string;
-  verification_submitted?: boolean;
-}
-
-export type VerificationLevel = 'none' | 'basic' | 'full';
-export type UserStatus = 'active' | 'suspended' | 'banned' | 'pending';
-export type SubscriptionTier = 'free' | 'basic' | 'premium' | 'vip';
-export type DatabaseGender = 'male' | 'female' | 'other' | 'trans' | 'non-binary';
 
 export interface AuthUser extends User {}
 
@@ -55,3 +9,50 @@ export interface AuthResult {
   session?: Session;
   error?: string;
 }
+
+export interface AuthContextType {
+  user: AuthUser | null;
+  profile: UserProfile | null;
+  loading: boolean;
+  isLoading: boolean;
+  error: string | null;
+  isAuthenticated: boolean;
+  initialized: boolean;
+  
+  // Authentication methods
+  login: (email: string, password: string) => Promise<AuthResult>;
+  logout: () => Promise<boolean>;
+  signIn: (email: string, password: string) => Promise<AuthResult>;
+  signOut: () => Promise<boolean>;
+  register: (email: string, password: string, confirmPassword: string) => Promise<AuthResult>;
+  
+  // User management methods
+  updateUser: (userData: Partial<User>) => Promise<boolean>;
+  updateUserProfile: (profileData: Partial<UserProfile>) => Promise<boolean>;
+  updateProfile: (profileData: Partial<UserProfile>) => Promise<boolean>;
+  loadUserProfile: () => Promise<UserProfile | null>;
+  refreshProfile: () => Promise<void>;
+  
+  // Password related methods
+  sendPasswordResetEmail: (email: string) => Promise<boolean>;
+  resetPassword: (password: string, token: string) => Promise<boolean>;
+  requestPasswordReset: (email: string) => Promise<boolean>;
+  verifyEmail: (token: string) => Promise<boolean>;
+  updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
+  
+  // Other methods
+  deleteAccount: () => Promise<boolean>;
+  checkRole: (role: string) => boolean;
+}
+
+export interface AuthState {
+  user: AuthUser | null;
+  profile: UserProfile | null;
+  isLoading: boolean;
+  userRoles: string[];
+}
+
+export type DatabaseGender = 'male' | 'female' | 'other' | 'trans' | 'non-binary';
+
+// Re-export types from user.ts to avoid circular dependencies
+export type { User, UserProfile, UserRole } from './user';

@@ -1,8 +1,10 @@
 
 import { VerificationLevel } from './verification';
 
+// Service types
 export type ServiceType = "in-call" | "out-call" | "virtual" | "massage" | "dinner";
 
+// Availability schema
 export interface Availability {
   monday?: string[];
   tuesday?: string[];
@@ -11,18 +13,28 @@ export interface Availability {
   friday?: string[];
   saturday?: string[];
   sunday?: string[];
-  days?: string[]; // Added for EscortAbout.tsx
-  day?: string; // Added for EscortAvailability.tsx
+  days?: string[]; // For EscortAbout.tsx
+  day?: string; // For EscortAvailability.tsx
 }
 
+// Video content
 export interface Video {
   id: string;
   url: string;
   thumbnail?: string;
+  thumbnailUrl?: string;
   title?: string;
   duration?: number;
+  viewCount?: number;
+  createdAt?: string;
+  isPremium?: boolean;
+  views?: number;
+  isPublished?: boolean;
+  escortId?: string;
+  videoUrl?: string;
 }
 
+// Pricing rates
 export interface Rates {
   hourly?: number;
   twoHour?: number;
@@ -31,16 +43,19 @@ export interface Rates {
   halfHour?: number;
   incall?: Record<string, number | string>;
   outcall?: Record<string, number | string>;
-  [key: string]: number | string | Record<string, number | string> | undefined; // Add this index signature for compatibility
+  [key: string]: number | string | Record<string, number | string> | undefined;
 }
 
+// Main escort profile interface
 export interface Escort {
   id: string;
   name: string;
   age?: number;
   bio?: string;
+  description?: string;
+  shortDescription?: string;
   location?: string;
-  city?: string; // Additional field for city
+  city?: string;
   gender?: string;
   services?: string[];
   photos?: string[];
@@ -57,36 +72,47 @@ export interface Escort {
   boosted?: boolean;
   boostLevel?: number;
   boostExpiration?: string;
-  description?: string;
   featured?: boolean;
-  shortDescription?: string;
   reviews?: any[];
   
-  // Fields for compatibility with existing components
+  // Visual media properties
   avatarUrl?: string;
-  isVerified?: boolean;
-  verified?: boolean;     // For compatibility with different naming conventions
-  rating?: number;
-  availableNow?: boolean;
   profileImage?: string;
   images?: string[];
   imageUrl?: string;
   avatar?: string;
   avatar_url?: string;
-  clientsServed?: number;
-  lastActive?: string | Date;
-  isFavorited?: boolean;
   gallery?: string[];
-  gallery_images?: string[]; // Added for MediaSection
-  videos?: Video[]; // Added for MediaSection
-  height?: string | number; // Support for both string and number types
-  weight?: string | number; // Added for EscortDetails
-  measurements?: string; // Added for EscortDetails
-  hairColor?: string; // Added for EscortDetails
-  eyeColor?: string; // Added for EscortDetails
-  ethnicity?: string; // Added for EscortDetails
-  sexualOrientation?: string; // Added for EscortDetailTabs
-  stats?: { // Added for AboutTab
+  gallery_images?: string[];
+  videos?: Video[];
+  
+  // Verification properties
+  isVerified?: boolean;
+  verified?: boolean;
+  
+  // Rating and metrics
+  rating?: number;
+  clientsServed?: number;
+  
+  // Availability properties
+  availableNow?: boolean;
+  lastActive?: string | Date;
+  
+  // User relationship properties
+  isFavorited?: boolean;
+  
+  // Physical characteristics
+  height?: string | number;
+  weight?: string | number;
+  measurements?: string;
+  hairColor?: string;
+  eyeColor?: string;
+  ethnicity?: string;
+  bodyType?: string;
+  sexualOrientation?: string;
+  
+  // Additional profile details
+  stats?: {
     height?: string | number;
     weight?: string | number;
     bust?: string | number;
@@ -94,15 +120,16 @@ export interface Escort {
     hips?: string | number;
     reviewCount?: number;
   };
-  interests?: string[]; // Added for AboutTab
-  payment_methods?: string[]; // Added for RatesTab
-  deposit_required?: boolean; // Added for RatesTab
-  specialties?: string[]; // Added for ServicesTab
-  limitations?: string[]; // Added for ServicesTab
-  locations?: string[]; // Added for BookingForm
-  providesInPersonServices?: boolean; // Added for EscortResults & BookingDialog
-  providesVirtualContent?: boolean; // Added for EscortResults & BookingDialog
-  bodyType?: string; // Added for EscortAbout
+  interests?: string[];
+  payment_methods?: string[];
+  deposit_required?: boolean;
+  specialties?: string[];
+  limitations?: string[];
+  locations?: string[];
+  
+  // Service capability flags
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
 }
 
 export interface ContactInfo {
@@ -132,11 +159,8 @@ export interface EscortFilters {
   rating?: number;
 }
 
-// Added for profile completion hook to work with extended escort type
+// Extended escort type for profile completion hook
 export interface ExtendedEscort extends Escort {
   providesInPersonServices: boolean;
   providesVirtualContent: boolean;
 }
-
-// Export VerificationLevel for EscortAbout.tsx
-export { VerificationLevel };

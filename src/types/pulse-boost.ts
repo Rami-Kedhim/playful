@@ -18,7 +18,9 @@ export interface BoostPackage {
   badgeColor?: string;
   boost_power?: number;
   boostMultiplier?: number;
-  isMostPopular?: boolean; // Added missing property
+  isMostPopular?: boolean;
+  isPopular?: boolean;
+  isRecommended?: boolean;
 }
 
 export interface BoostPurchaseRequest {
@@ -42,7 +44,6 @@ export interface BoostAnalytics {
     date: Date;
     score: number;
   }>;
-  // Add these properties to fix the errors in useBoostOperations.ts
   views?: number;
   impressions?: {
     value: number;
@@ -71,30 +72,15 @@ export interface BoostHistory {
 
 export interface EnhancedBoostStatus {
   isActive: boolean;
-  remainingTime: string;  // in "1h 30m" format
-  timeRemaining: string;  // Same as remainingTime for backward compatibility
+  remainingTime: string;
+  timeRemaining: string;
   percentRemaining: number;
   expiresAt: Date | null;
   startedAt: Date | null;
   isExpired: boolean;
-  remainingMinutes?: number; // in minutes
+  remainingMinutes?: number;
   packageName?: string;
   progress?: number;
-}
-
-// Adding additional types needed by the system
-export interface UserProfile {
-  id: string;
-  username: string;
-  email: string;
-  profileType: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface UserCredentials {
-  email: string;
-  password: string;
 }
 
 export interface PulseBoost {
@@ -120,4 +106,33 @@ export interface PulseBoost {
   isPopular?: boolean;
   isRecommended?: boolean;
   isActive?: boolean;
+}
+
+export interface BoostStatus {
+  isActive: boolean;
+  isExpiring?: boolean;
+  expiresAt?: string | Date;
+  remainingTime?: number | string; 
+  boostLevel?: number;
+  boostType?: string;
+  modifiers?: Record<string, number>;
+  packageName?: string;
+  packageId?: string;
+  startedAt?: Date | string;
+  progress?: number;
+  timeRemaining?: string;
+}
+
+export interface HermesStatus {
+  queuePosition?: number;
+  totalInQueue?: number;
+  estimatedWaitTime?: number;
+  score?: number;
+}
+
+export interface BoostEligibility {
+  isEligible: boolean;
+  reason?: string;
+  requiredLevel?: string;
+  cooldownRemaining?: number;
 }

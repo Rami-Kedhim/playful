@@ -1,97 +1,73 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { BoostAnalytics } from '@/types/pulse-boost';
 
-export interface AnalyticsData {
-  views: number;
-  impressions: {
-    value: number;
-    change?: number;
-    withBoost?: number;
-  };
-  interactions: {
-    value: number;
-    change?: number;
-  };
-  totalBoosts?: number;
-  activeBoosts?: number;
-  averageBoostScore?: number;
-  boostHistory?: Array<{
-    date: Date;
-    score: number;
-  }>;
-  // Add missing properties that are used in other components
-  additionalViews?: number;
-  engagementIncrease?: number;
-  rankingPosition?: number;
-}
-
-export interface BoostAnalytics {
-  totalBoosts: number;
-  activeBoosts: number;
-  averageBoostScore: number;
-  boostHistory: Array<{
-    date: Date;
-    score: number;
-  }>;
-  views?: number;
-  impressions?: {
-    value: number;
-    change?: number;
-    withBoost?: number;
-  };
-  interactions?: {
-    value: number;
-    change?: number;
-  };
-}
-
-export const useBoostAnalytics = (userId: string) => {
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
+/**
+ * Hook to fetch boost analytics data
+ */
+export function useBoostAnalytics(userId: string) {
+  const [analytics, setAnalytics] = useState<BoostAnalytics | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  
   useEffect(() => {
     const fetchAnalytics = async () => {
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
+      
       try {
-        // Mock analytics data
-        setTimeout(() => {
-          setAnalytics({
-            views: 120,
-            impressions: {
-              value: 450,
-              change: 15,
-              withBoost: 675
-            },
-            interactions: {
-              value: 45,
-              change: 22
-            },
-            totalBoosts: 3,
-            activeBoosts: 1,
-            averageBoostScore: 7.8,
-            additionalViews: 55,
-            engagementIncrease: 18,
-            rankingPosition: 12,
-            boostHistory: [
-              { date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), score: 7.2 },
-              { date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), score: 7.5 },
-              { date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), score: 7.8 },
-              { date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), score: 8.1 },
-              { date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), score: 7.9 },
-              { date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), score: 8.0 },
-              { date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), score: 8.2 }
-            ]
-          });
-          setLoading(false);
-        }, 1000);
-      } catch (err: any) {
-        setError(err);
+        setLoading(true);
+        
+        // Mock data for demo purposes - in production would call API
+        const mockData: BoostAnalytics = {
+          totalBoosts: 3,
+          activeBoosts: 1,
+          averageBoostScore: 85,
+          boostHistory: [
+            { date: new Date(Date.now() - 86400000 * 7), score: 75 },
+            { date: new Date(Date.now() - 86400000 * 6), score: 78 },
+            { date: new Date(Date.now() - 86400000 * 5), score: 80 },
+            { date: new Date(Date.now() - 86400000 * 4), score: 82 },
+            { date: new Date(Date.now() - 86400000 * 3), score: 84 },
+            { date: new Date(Date.now() - 86400000 * 2), score: 86 },
+            { date: new Date(Date.now() - 86400000), score: 85 },
+          ],
+          views: 243,
+          impressions: {
+            value: 1250,
+            change: 35,
+            withBoost: 850
+          },
+          interactions: {
+            value: 68,
+            change: 22
+          }
+        };
+        
+        setAnalytics(mockData);
+      } catch (err) {
+        console.error('Error fetching boost analytics:', err);
+        setError('Failed to load boost analytics');
+      } finally {
         setLoading(false);
       }
     };
-
+    
     fetchAnalytics();
   }, [userId]);
+  
+  return {
+    analytics,
+    loading,
+    error,
+    refetch: () => {
+      setLoading(true);
+      setError(null);
+      // Refetch logic would go here
+    }
+  };
+}
 
-  return { analytics, loading, error };
-};
+export default useBoostAnalytics;

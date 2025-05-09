@@ -1,69 +1,87 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RecommendedAction } from '@/types/core-systems';
+import { cn } from '@/lib/utils';
 
 interface RecommendedActionsProps {
   actions: RecommendedAction[];
-  onActionTaken?: (actionId: string) => void;
-  title?: string;
+  onActionClick?: (action: RecommendedAction) => void;
+  className?: string;
+  limit?: number;
   loading?: boolean;
-  emptyMessage?: string;
 }
 
 const RecommendedActions: React.FC<RecommendedActionsProps> = ({
-  actions,
-  onActionTaken,
-  title = "Recommended Actions",
-  loading = false,
-  emptyMessage = "No recommended actions at this time."
+  actions = [],
+  onActionClick,
+  className,
+  limit = 3,
+  loading = false
 }) => {
-  const [actionsState, setActionsState] = useState<RecommendedAction[]>(actions);
+  // Filter and sort actions by priority
+  const prioritizedActions = actions
+    .filter(action => action.status !== 'completed')
+    .sort((a, b) => b.priority - a.priority)
+    .slice(0, limit);
 
-  const handleActionClick = (actionId: string) => {
-    // Find the action
-    const action = actionsState.find(a => a.id === actionId);
-    if (!action) return;
+  if (loading) {
+    return (
+      <Card className={cn("w-full", className)}>
+        <CardHeader>
+          <CardTitle>Recommended Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="h-12 bg-gray-200 dark:bg-gray-800 animate-pulse rounded"></div>
+            <div className="h-12 bg-gray-200 dark:bg-gray-800 animate-pulse rounded"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
-    // Update the actions state to remove this action
-    setActionsState(prevActions => prevActions.filter(a => a.id !== actionId));
-
-    // Notify parent component
-    if (onActionTaken) {
-      onActionTaken(actionId);
-    }
-  };
+  if (prioritizedActions.length === 0) {
+    return (
+      <Card className={cn("w-full", className)}>
+        <CardHeader>
+          <CardTitle>Recommended Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">No actions recommended at this time.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card>
+    <Card className={cn("w-full", className)}>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle>Recommended Actions</CardTitle>
       </CardHeader>
       <CardContent>
-        {loading ? (
-          <div className="text-center py-4">Loading recommendations...</div>
-        ) : actionsState.length === 0 ? (
-          <div className="text-center text-muted-foreground py-4">{emptyMessage}</div>
-        ) : (
-          <div className="space-y-4">
-            {actionsState.map((action) => (
-              <div key={action.id} className="flex justify-between items-start gap-4 p-3 bg-muted/50 rounded-md">
-                <div>
-                  <h3 className="font-medium">{action.title}</h3>
-                  <p className="text-sm text-muted-foreground">{action.description}</p>
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleActionClick(action.id)}
-                >
-                  {action.action || "Take Action"}
-                </Button>
+        <div className="space-y-2">
+          {prioritizedActions.map((action) => (
+            <Button
+              key={action.id}
+              variant="outline"
+              className="w-full justify-start text-left h-auto py-3 flex items-center gap-2"
+              onClick={() => onActionClick?.(action)}
+            >
+              {/* Render icon if available */}
+              {action.icon && (
+                <span className="text-primary">
+                  {/* Icon would go here */}
+                </span>
+              )}
+              <div>
+                <div className="font-medium">{action.title}</div>
+                <div className="text-xs text-muted-foreground">{action.description}</div>
               </div>
-            ))}
-          </div>
-        )}
+            </Button>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

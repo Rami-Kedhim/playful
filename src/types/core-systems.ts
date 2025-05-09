@@ -1,5 +1,5 @@
 
-// Core system type definitions
+// Core systems type definitions
 
 export interface RecommendedAction {
   id: string;
@@ -28,4 +28,49 @@ export interface SystemMetrics {
   responseTime: number;
   errorRate: number;
   lastUpdated: Date;
+}
+
+export interface AnalyticsData {
+  views: number;
+  impressions: {
+    value: number;
+    change?: number;
+    withBoost?: number;
+  };
+  interactions: {
+    value: number;
+    change?: number;
+  };
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+}
+
+// System health and integrity types
+export interface SystemStatus {
+  operational: boolean;
+  status: 'operational' | 'degraded' | 'offline';
+  latency: number;
+  lastCheck: Date;
+}
+
+export interface SystemIntegrityResult {
+  valid: boolean;
+  warnings: string[];
+  errors: string[];
+}
+
+export interface SystemHealthMetrics {
+  cpu: number;
+  memory: number;
+  storage: number;
+  network: number;
+  overallHealth: number;
+}
+
+export interface SessionValidationResult {
+  isValid: boolean;
+  userId: string | null;
+  expiry: Date | null;
+  reason?: string;
 }

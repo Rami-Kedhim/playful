@@ -1,98 +1,81 @@
-
-import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import BoostAnalyticsCard from "./BoostAnalyticsCard";
-import BoostHistoryTable from "./BoostHistoryTable";
-import HermesOxumQueueVisualization from "./HermesOxumQueueVisualization";
-import { AnalyticsData } from "@/hooks/boost/useBoostAnalytics";
+import React from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import HermesOxumQueueVisualization from '@/components/creators/dashboard/boost/HermesOxumQueueVisualization';
+import { useBoostAnalytics } from '@/hooks/boost/useBoostAnalytics';
+import { BoostStatus } from '@/types/pulse-boost';
+import { AnalyticsHeader } from '../analytics';
+import { AnalyticsStats } from '../analytics';
+import { AnalyticsCharts } from '../analytics';
+import { AnalyticsSummary } from '../analytics';
 
 interface BoostAnalyticsProps {
-  isActive: boolean;
-  getAnalytics: () => Promise<AnalyticsData | null>;
-  creatorId: string; // Added creatorId prop
+  profileId?: string;
+  boostStatus?: BoostStatus;
 }
 
-const BoostAnalytics = ({ isActive, getAnalytics, creatorId }: BoostAnalyticsProps) => {
-  const [boostHistory, setBoostHistory] = useState<any[]>([]);
-  const [historyLoading, setHistoryLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Fetch boost history data
-    const fetchHistory = async () => {
-      try {
-        setHistoryLoading(true);
-        // Mock history data
-        setTimeout(() => {
-          setBoostHistory([
-            {
-              id: "history-1",
-              startDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-              endDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-              boostPackage: {
-                id: "boost-1",
-                name: "Weekend Boost",
-                duration: "72:00:00",
-                price_lucoin: 120
-              },
-              price: 120
-            },
-            {
-              id: "history-2",
-              startDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
-              endDate: new Date(Date.now() - 17 * 24 * 60 * 60 * 1000),
-              boostPackage: {
-                id: "boost-2",
-                name: "24 Hour Boost",
-                duration: "24:00:00",
-                price_lucoin: 50
-              },
-              price: 50
-            }
-          ]);
-          setHistoryLoading(false);
-        }, 1000);
-      } catch (err: any) {
-        setError(err.message || "Failed to fetch history data");
-        setHistoryLoading(false);
-      }
-    };
-
-    fetchHistory();
-  }, []);
-
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          {error}
-        </AlertDescription>
-      </Alert>
-    );
-  }
+const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
+  profileId,
+  boostStatus,
+}) => {
+  const { analytics, loading, error } = useBoostAnalytics(profileId || "");
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <BoostAnalyticsCard 
-          isActive={isActive} 
-          getAnalytics={getAnalytics}
-        />
+      <AnalyticsHeader title="Boost Analytics" description="Track the performance of your boosts" />
+      
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Boosts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div>Loading...</div>
+            ) : error ? (
+              <div>Error: {error}</div>
+            ) : (
+              <div>{analytics?.totalBoosts || 0}</div>
+            )}
+          </CardContent>
+        </Card>
         
-        {/* Add the Hermes-Oxum Queue Visualization when boost is active */}
-        {isActive && creatorId && (
-          <HermesOxumQueueVisualization userId={creatorId} profileId={creatorId} />
-        )}
+        <Card>
+          <CardHeader>
+            <CardTitle>Active Boosts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div>Loading...</div>
+            ) : error ? (
+              <div>Error: {error}</div>
+            ) : (
+              <div>{analytics?.activeBoosts || 0}</div>
+            )}
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Average Boost Score</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div>Loading...</div>
+            ) : error ? (
+              <div>Error: {error}</div>
+            ) : (
+              <div>{analytics?.averageBoostScore || 0}</div>
+            )}
+          </CardContent>
+        </Card>
+        
+        <HermesOxumQueueVisualization 
+          userId={profileId} 
+          activeBoosts={boostStatus?.isActive ? 1 : 0}
+        />
       </div>
       
-      <BoostHistoryTable 
-        history={boostHistory}
-        loading={historyLoading}
-      />
     </div>
   );
 };

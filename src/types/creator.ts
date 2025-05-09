@@ -1,5 +1,7 @@
 
-// Fix missing exports for ContentCreator and related types
+import { VerificationLevel } from './verification';
+
+// Main ContentCreator interface
 export interface ContentCreator {
   id: string;
   username?: string;
@@ -35,7 +37,35 @@ export interface ContentCreator {
   subscriptionPrice?: number;
 }
 
-// Added exports for CreatorPayout and PayoutRequest for payout system compatibility
+// Original Creator interface for backward compatibility
+export interface Creator {
+  id: string;
+  name: string;
+  bio?: string;
+  avatarUrl?: string;
+  location?: string;
+  rating?: number;
+  services?: string[];
+  verificationLevel?: VerificationLevel;
+  isVerified?: boolean;
+  tags?: string[];
+  rates?: Record<string, number>;
+  price?: number;
+  responseRate?: number;
+  
+  // Additional fields for compatibility with Escort type
+  age?: number;
+  photos?: string[];
+  languages?: string[];
+  availability?: string[];
+  reviewScore?: number;
+  reviewCount?: number;
+  boosted?: boolean;
+  boostLevel?: number;
+  boostExpiration?: string;
+}
+
+// Creator payout types
 export interface CreatorPayout {
   id: string;
   creatorId: string;
@@ -53,6 +83,7 @@ export interface PayoutRequest {
   payoutDetails: Record<string, any>;
 }
 
+// Creator content types
 export interface CreatorContent {
   id: string;
   creatorId: string;
@@ -82,7 +113,7 @@ export interface CreatorContent {
 }
 
 export interface CreatorAnalytics {
-  id?: string; // added optional id to fix ts error
+  id?: string;
   views: number;
   likes: number;
   shares: number;
@@ -92,6 +123,30 @@ export interface CreatorAnalytics {
   period?: 'day' | 'week' | 'month' | 'year';
 }
 
-// Import the Creator type from the original file to maintain backward compatibility
-import { Creator, Rates } from './Creator';
-export type { Creator, Rates };
+// Creator review types
+export interface CreatorReview {
+  id: string;
+  reviewer_id: string;
+  creator_id: string;
+  rating: number;
+  comment?: string;
+  created_at: Date | string;
+  reviewer?: {
+    id: string;
+    username: string;
+    avatar_url?: string;
+  };
+}
+
+export interface PaginatedReviewsResponse {
+  data: CreatorReview[];
+  total: number;
+}
+
+export interface ReviewStats {
+  averageRating: number;
+  totalReviews: number;
+}
+
+// Re-export Rates type from escort.ts
+export { type Rates } from './escort';

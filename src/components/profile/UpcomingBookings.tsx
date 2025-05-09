@@ -1,129 +1,82 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calendar, Clock, MapPin } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { CalendarDays, Clock, MapPin, User, X } from 'lucide-react';
-
-export interface Booking {
-  id: string;
-  escortId: string;
-  escortName: string;
-  location: string;
-  date: string | Date;
-  time: string;
-  duration: string;
-  status: 'confirmed' | 'pending' | 'cancelled';
-  price: number;
-}
+import { Booking } from '@/types/booking';
 
 interface UpcomingBookingsProps {
   bookings: Booking[];
-  onCancelBooking?: (bookingId: string) => void;
+  isLoading?: boolean;
 }
 
-const UpcomingBookings: React.FC<UpcomingBookingsProps> = ({ 
-  bookings,
-  onCancelBooking 
+const UpcomingBookings: React.FC<UpcomingBookingsProps> = ({
+  bookings = [],
+  isLoading = false
 }) => {
-  const statusColors = {
-    confirmed: "bg-green-500",
-    pending: "bg-amber-500",
-    cancelled: "bg-red-500"
-  };
-  
-  const durationLabels: Record<string, string> = {
-    "1hour": "1 Hour",
-    "2hours": "2 Hours",
-    "3hours": "3 Hours",
-    "overnight": "Overnight (8 Hours)"
-  };
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Upcoming Bookings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[1, 2].map(i => (
+              <div key={i} className="animate-pulse">
+                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-1"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (bookings.length === 0) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Upcoming Bookings</CardTitle>
-          <CardDescription>You have no upcoming bookings</CardDescription>
         </CardHeader>
-        <CardContent className="flex items-center justify-center py-8 text-muted-foreground">
-          <div className="text-center">
-            <CalendarDays className="mx-auto h-10 w-10 opacity-50 mb-2" />
-            <p>No bookings scheduled</p>
-          </div>
+        <CardContent>
+          <p className="text-muted-foreground">You have no upcoming bookings.</p>
         </CardContent>
       </Card>
     );
   }
-  
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Upcoming Bookings</CardTitle>
-        <CardDescription>Your scheduled appointments</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {bookings.map((booking) => (
-          <div 
-            key={booking.id} 
-            className="border rounded-lg p-4 flex flex-col md:flex-row justify-between gap-4"
-          >
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold">{booking.escortName}</h3>
-                <Badge 
-                  variant="outline" 
-                  className={`${statusColors[booking.status]} text-white border-none`}
-                >
-                  {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                </Badge>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-sm">
-                <div className="flex items-center text-muted-foreground">
-                  <CalendarDays className="h-4 w-4 mr-2" />
-                  <span>
-                    {typeof booking.date === 'string' 
-                      ? booking.date 
-                      : formatDate(booking.date)
-                    }
-                  </span>
+      <CardContent>
+        <div className="space-y-4">
+          {bookings.map((booking) => (
+            <div key={booking.id} className="border rounded-md p-4">
+              <h3 className="font-medium">{booking.escortName}</h3>
+              <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" /> 
+                  <span>{formatDate(booking.date, 'PPP')}</span>
                 </div>
-                
-                <div className="flex items-center text-muted-foreground">
-                  <Clock className="h-4 w-4 mr-2" />
-                  <span>{booking.time} ({durationLabels[booking.duration] || booking.duration})</span>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" /> 
+                  <span>{booking.time} ({booking.duration})</span>
                 </div>
-                
-                <div className="flex items-center text-muted-foreground">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  <span>{booking.location}</span>
-                </div>
-                
-                <div className="flex items-center text-muted-foreground">
-                  <User className="h-4 w-4 mr-2" />
-                  <span>Booking ID: {booking.id.substring(0, 8)}</span>
-                </div>
+                {booking.location && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" /> 
+                    <span>{booking.location}</span>
+                  </div>
+                )}
               </div>
             </div>
-            
-            <div className="flex items-center gap-2 self-end md:self-center">
-              <span className="font-semibold">${booking.price}</span>
-              {booking.status !== 'cancelled' && onCancelBooking && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
-                  onClick={() => onCancelBooking(booking.id)}
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  Cancel
-                </Button>
-              )}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

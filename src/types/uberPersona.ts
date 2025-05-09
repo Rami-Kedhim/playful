@@ -1,6 +1,7 @@
 
 /**
  * UberPersona type definitions
+ * Unified type system for all persona types across the platform
  */
 
 export type ID = string;
@@ -14,27 +15,38 @@ export interface UberPersona {
   displayName?: string;
   avatarUrl?: string;
   imageUrl?: string;
-  profileImageUrl?: string; // Added for compatibility
+  profileImageUrl?: string;
   location?: string;
   isVerified?: boolean;
   isOnline?: boolean;
-  isActive?: boolean; // Added for compatibility
+  isActive?: boolean;
   tags?: string[];
   rating?: number;
   reviewCount?: number;
   isPremium?: boolean;
-  isFeatured?: boolean; // Add this property
-  isAI?: boolean; // Add this property
-  reviews?: any[]; // Add the reviews property
+  isFeatured?: boolean;
+  isAI?: boolean;
+  reviews?: any[];
   availability?: Array<{ start: Date; end: Date; }> | { nextAvailable: Date; };
   boostScore?: number;
+  description?: string;
+  personality?: string;
+  traits?: string[];
+  interests?: string[];
+  mood?: string;
+  energyLevel?: number;
+  lastModified?: Date | string;
+  createdAt?: Date | string;
+  services?: string[];
+  languages?: string[];
+  
   systemMetadata?: {
     boostScore?: number;
     lastActive?: Date;
     createdAt?: Date;
     profileViews?: number;
     lastSynced?: Date;
-    source?: string; // Added for compatibility
+    source?: string;
     tagsGeneratedByAI?: boolean;
     hilbertSpaceVector?: any[];
     statusFlags?: {
@@ -44,11 +56,7 @@ export interface UberPersona {
       isSubscriber?: boolean;
     }
   };
-  services?: string[];
-  bio?: string;
-  description?: string;
-  languages?: string[];
-  traits?: string[];
+  
   stats?: {
     views?: number;
     likes?: number;
@@ -56,9 +64,10 @@ export interface UberPersona {
     completion?: number;
     responseRate?: number;
     responseTime?: number;
-    rating?: number; // Added for compatibility
+    rating?: number;
     reviewCount?: number;
   };
+  
   monetization?: {
     hourlyRate?: number;
     packages?: Array<{
@@ -71,9 +80,10 @@ export interface UberPersona {
     acceptsUbx?: boolean;
     minRate?: number;
     maxRate?: number;
-    meetingPrice?: number; // Added for compatibility
-    acceptsLucoin?: boolean; // Added for compatibility
+    meetingPrice?: number;
+    acceptsLucoin?: boolean;
   };
+  
   roleFlags?: {
     isEscort?: boolean;
     isCreator?: boolean;
@@ -82,6 +92,7 @@ export interface UberPersona {
     isVerified?: boolean;
     isFeatured?: boolean;
   };
+  
   capabilities?: {
     hasPhotos?: boolean;
     hasVideos?: boolean;
@@ -94,13 +105,58 @@ export interface UberPersona {
     hasRealMeets?: boolean;
     hasVirtualMeets?: boolean;
   };
-  // For PersonaService compatibility
-  data?: UberPersona[];
-  meta?: {
-    pagination?: {
-      total?: number;
-      page?: number;
-      pageSize?: number;
-    };
-  };
 }
+
+export interface UberPersonaFeatures {
+  hasPhotos: boolean;
+  hasVideos: boolean;
+  hasStories: boolean;
+  hasChat: boolean;
+  hasBooking: boolean;
+  hasLiveStream: boolean;
+  hasExclusiveContent: boolean;
+  hasContent: boolean;
+  hasRealMeets: boolean;
+  hasVirtualMeets: boolean;
+}
+
+export interface UberPersonaPricing {
+  acceptsLucoin: boolean;
+  acceptsTips: boolean;
+  subscriptionPrice: number;
+  unlockingPrice: number;
+  boostingActive: boolean;
+  meetingPrice: number;
+}
+
+export interface PersonaSearchParams {
+  query?: string;
+  location?: string;
+  type?: string[];
+  tags?: string[];
+  isVerified?: boolean;
+  isOnline?: boolean;
+  isPremium?: boolean;
+  limit?: number;
+  offset?: number;
+  page?: number;
+  sort?: string;
+}
+
+export const normalizeUberPersonaFeatures = (features: UberPersonaFeatures | string[]): UberPersonaFeatures => {
+  if (Array.isArray(features)) {
+    return {
+      hasPhotos: features.includes('photos'),
+      hasVideos: features.includes('videos'),
+      hasStories: features.includes('stories'),
+      hasChat: features.includes('chat'),
+      hasBooking: features.includes('booking'),
+      hasLiveStream: features.includes('livestream'),
+      hasExclusiveContent: features.includes('exclusive'),
+      hasContent: features.includes('content'),
+      hasRealMeets: features.includes('realmeets'),
+      hasVirtualMeets: features.includes('virtualmeets')
+    };
+  }
+  return features as UberPersonaFeatures;
+};

@@ -1,4 +1,6 @@
 
+// Verification system types
+
 export enum VerificationLevel {
   NONE = "none",
   BASIC = "basic",
@@ -15,23 +17,47 @@ export interface VerificationDocument {
   fileUrl: string;
   uploadedAt: string;
   status: 'pending' | 'approved' | 'rejected';
-  notes?: string; // Added for DocumentPreview.tsx
-  filePath?: string; // Added for DocumentPreview.tsx
-  documentType?: string; // Added for DocumentPreview.tsx
+  notes?: string;
+  filePath?: string;
+  documentType?: string;
 }
 
 export interface VerificationRequest {
   id: string;
   userId: string;
-  profile_id?: string; // Added for review components
+  profile_id?: string;
   status: VerificationStatus;
   verificationLevel: VerificationLevel;
-  requested_level?: string; // Added for ReviewRequestModal.tsx
-  requestedLevel?: string; // Added for backward compatibility
+  requested_level?: string;
+  requestedLevel?: string;
   documents: VerificationDocument[];
   submittedAt: string;
   updatedAt?: string;
-  created_at?: string; // Added for VerificationReviewPanel
+  created_at?: string;
   rejectionReason?: string;
-  reviewed_at?: string; // Added for VerificationReviewPanel
+  reviewed_at?: string;
+}
+
+export interface VerificationChecks {
+  hasPhoneVerification?: boolean;
+  hasEmailVerification?: boolean;
+  hasPaymentVerification?: boolean;
+  hasCommunityReviews?: boolean;
+}
+
+export interface VerificationEligibilityResponse {
+  canSubmit: boolean;
+  reason?: string;
+  cooldownRemaining?: number;
+}
+
+export interface VerificationSubmissionResponse {
+  success: boolean;
+  message: string;
+  requestId?: string;
+}
+
+export interface VerificationStatusResponse {
+  status: VerificationStatus;
+  lastRequest?: VerificationRequest;
 }
