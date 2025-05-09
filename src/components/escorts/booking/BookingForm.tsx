@@ -2,8 +2,8 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Escort } from '@/types/escort';
 import {
   Form,
   FormControl,
@@ -14,15 +14,40 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Escort } from '@/types/escort';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 import { CalendarIcon } from 'lucide-react';
-import { bookingFormSchema, BookingFormValues } from './types';
+import { cn } from '@/lib/utils';
 
-interface BookingFormProps {
+// Define bookingFormSchema
+const bookingFormSchema = z.object({
+  date: z.date({
+    required_error: "A date is required.",
+  }),
+  time: z.string({
+    required_error: "Please select a time.",
+  }),
+  duration: z.string({
+    required_error: "Please select a duration.",
+  }),
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email.",
+  }),
+  phone: z.string().min(5, {
+    message: "Please enter a valid phone number.",
+  }),
+  message: z.string().optional(),
+});
+
+type BookingFormValues = z.infer<typeof bookingFormSchema>;
+
+export interface BookingFormProps {
   escort: Escort;
   bookingType: 'in-person' | 'virtual';
   onSubmit: (values: BookingFormValues) => void;
@@ -42,27 +67,27 @@ const BookingForm: React.FC<BookingFormProps> = ({ escort, bookingType, onSubmit
     },
   });
 
-  // Available time slots for booking
   const timeSlots = [
     "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", 
     "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"
   ];
 
-  // Available session durations
   const durations = ["1 hour", "2 hours", "3 hours", "Overnight"];
-  
-  // Handle form submission
+
+  // Get locations from escort with fallback
+  const locationOptions = escort.location ? [escort.location] : [];
+  if (escort.locations && Array.isArray(escort.locations)) {
+    escort.locations.forEach(location => {
+      if (!locationOptions.includes(location)) {
+        locationOptions.push(location);
+      }
+    });
+  }
+
   const handleSubmitForm = (values: BookingFormValues) => {
     onSubmit(values);
   };
-  
-  // Get location options - use the main location or any other available locations
-  const locationOptions = [escort.location || 'Default Location'];
-  
-  if (escort.location) {
-    locationOptions.push(escort.location);
-  }
-  
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-4">
@@ -213,7 +238,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ escort, bookingType, onSubmit
         />
 
         <Button type="submit" className="w-full">
-          Submit Booking Request
+          Request Booking
         </Button>
       </form>
     </Form>

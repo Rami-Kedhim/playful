@@ -1,53 +1,29 @@
 
-import { Escort } from './Escort';
+export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'rejected';
 
 export interface Booking {
   id: string;
   escortId: string;
   clientId: string;
-  escort?: Escort;
-  date?: Date | string;
-  time?: string;
-  duration?: string | number;
+  escortName?: string;
+  date: Date | string;
+  time: string;
+  duration: string;
   location?: string;
-  status: 'pending' | 'confirmed' | 'canceled' | 'completed' | 'rejected';
-  createdAt: Date | string;
-  updatedAt?: Date | string;
-  notes?: string;
+  status: BookingStatus;
   price?: number;
   totalPrice?: number;
-  escortName?: string; // Add missing property
-  type?: 'incall' | 'outcall' | 'virtual';
-  paymentStatus?: 'pending' | 'paid' | 'refunded';
-  paymentMethod?: string;
-  specialRequests?: string;
-  clientName?: string;
-  clientAvatar?: string;
+  message?: string;
+  createdAt: Date | string;
+  updatedAt?: Date | string;
 }
 
-export interface BookingFilter {
-  status?: string[];
-  date?: {
-    from?: Date;
-    to?: Date;
-  };
-  escortId?: string;
-  clientId?: string;
-}
-
-export interface BookingStats {
-  total: number;
-  pending: number;
-  confirmed: number;
-  canceled: number;
-  completed: number;
-  revenue: number;
-}
-
-export enum BookingStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  CANCELED = 'canceled',
-  COMPLETED = 'completed',
-  REJECTED = 'rejected'
+export interface BookingSlot {
+  id: string;
+  escortId: string;
+  startTime: Date | string;
+  endTime: Date | string;
+  status: 'available' | 'booked' | 'unavailable';
+  price: number;
+  isVirtual?: boolean;
 }

@@ -8,15 +8,24 @@ interface HermesOxumQueueVisualizationProps {
   userId?: string;
   profileId?: string;
   activeBoosts?: number;
+  // Add the props that were causing TypeScript errors
+  activeUsers?: number; 
+  visibilityScore?: number;
+  impressions?: number;
+  engagement?: number;
 }
 
 const HermesOxumQueueVisualization: React.FC<HermesOxumQueueVisualizationProps> = ({
   userId,
   profileId,
-  activeBoosts = 0
+  activeBoosts = 0,
+  activeUsers,
+  visibilityScore,
+  impressions,
+  engagement
 }) => {
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
-  const [totalInQueue, setTotalInQueue] = useState<number>(100);
+  const [totalInQueue, setTotalInQueue] = useState<number>(activeUsers || 100);
   const [progress, setProgress] = useState(0);
   
   // Use userId or profileId depending on which is provided

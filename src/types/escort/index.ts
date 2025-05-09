@@ -17,4 +17,20 @@ export interface Escort {
   videos?: import('../Escort').Video[];
   locations?: string[];
   // ... other properties can be optional
+  images?: string[];
+  rating?: number;
+  reviewCount?: number;
+  tags?: string[];
+  imageUrl?: string;
+  profileImage?: string;
+  verified?: boolean;
+  isVerified?: boolean;
+  availableNow?: boolean;
+  responseRate?: number;
+  location?: string;
+  age?: number;
+  sexualOrientation?: string;
+  lastActive?: Date | string;
+  featured?: boolean;
+  contentStats?: any; // Added to fix escortProfiles.ts errors
 }

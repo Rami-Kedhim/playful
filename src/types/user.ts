@@ -1,25 +1,22 @@
-
 export interface User {
   id: string;
   email?: string;
   username?: string;
   displayName?: string;
+  name?: string; // Add missing property
+  website?: string; // Add missing property
+  bio?: string; // Add missing property
+  avatarUrl?: string; // Add missing property
+  avatar_url?: string; // Add missing property
   profileImageUrl?: string;
   roles?: string[];
+  role?: string; // Add missing property
   emailVerified?: boolean;
   phoneVerified?: boolean;
   isVerified?: boolean;
   ubxBalance?: number;
   created_at?: Date | string;
-  
-  // Additional properties needed by various components
-  name?: string;
-  website?: string;
-  bio?: string;
-  user_metadata?: Record<string, any>;
-  avatarUrl?: string;
-  avatar_url?: string;
-  role?: string;
+  user_metadata?: Record<string, any>; // Add missing property
 }
 
 // Add UserProfile interface
@@ -33,15 +30,15 @@ export interface UserProfile {
   username?: string;
   displayName?: string;
   avatar_url?: string;
-  avatarUrl?: string;
-  location?: string;
+  avatarUrl?: string; // Add missing property
+  location?: string; // Add missing property
   services?: string[];
   languages?: string[];
   rates?: Record<string, number>;
   verification_level?: string;
-  verified?: boolean;
-  is_verified?: boolean;
-  availability?: any;
+  verified?: boolean; // Add missing property
+  is_verified?: boolean; // Add missing property
+  availability?: any; // Add missing property for RatesTab.tsx
 }
 
 // Add missing auth types
