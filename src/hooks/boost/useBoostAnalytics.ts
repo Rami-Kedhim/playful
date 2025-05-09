@@ -19,6 +19,10 @@ export interface AnalyticsData {
     date: Date;
     score: number;
   }>;
+  // Add missing properties that are used in other components
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
 }
 
 export interface BoostAnalytics {
@@ -65,6 +69,9 @@ export const useBoostAnalytics = (userId: string) => {
             totalBoosts: 3,
             activeBoosts: 1,
             averageBoostScore: 7.8,
+            additionalViews: 55,
+            engagementIncrease: 18,
+            rankingPosition: 12,
             boostHistory: [
               { date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), score: 7.2 },
               { date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), score: 7.5 },

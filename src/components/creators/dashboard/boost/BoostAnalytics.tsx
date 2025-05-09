@@ -85,7 +85,7 @@ const BoostAnalytics = ({ isActive, getAnalytics, creatorId }: BoostAnalyticsPro
         
         {/* Add the Hermes-Oxum Queue Visualization when boost is active */}
         {isActive && creatorId && (
-          <HermesOxumQueueVisualization profileId={creatorId} />
+          <HermesOxumQueueVisualization userId={creatorId} profileId={creatorId} />
         )}
       </div>
       

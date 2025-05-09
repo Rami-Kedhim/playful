@@ -5,22 +5,22 @@ import { Progress } from "@/components/ui/progress";
 import { useBoostAnalytics } from '@/hooks/boost/useBoostAnalytics';
 
 interface HermesOxumQueueVisualizationProps {
-  userId: string;
+  userId?: string;
   activeBoosts?: number;
-  profileId?: string; // Add profileId prop to fix TypeScript errors
+  profileId?: string;
 }
 
 const HermesOxumQueueVisualization: React.FC<HermesOxumQueueVisualizationProps> = ({
   userId,
   activeBoosts = 0,
-  profileId // Add profileId to component props
+  profileId
 }) => {
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
   const [totalInQueue, setTotalInQueue] = useState<number>(100);
   const [progress, setProgress] = useState(0);
   
   // Use userId or profileId depending on which is provided
-  const userIdToUse = profileId || userId;
+  const userIdToUse = userId || profileId || "";
   
   // Fix the argument error by providing the userId
   const { analytics, loading } = useBoostAnalytics(userIdToUse);
@@ -30,9 +30,7 @@ const HermesOxumQueueVisualization: React.FC<HermesOxumQueueVisualizationProps> 
     const position = Math.floor(Math.random() * 50) + 1;
     setQueuePosition(position);
     
-    // Fix the argument error by adjusting the parameters
-    // This is a simple fix without knowing the actual implementation
-    // We're using only position now
+    // Calculate progress based on position in queue
     setProgress(((totalInQueue - position) / totalInQueue) * 100);
     
   }, [totalInQueue]);

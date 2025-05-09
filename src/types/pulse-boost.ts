@@ -18,6 +18,7 @@ export interface BoostPackage {
   badgeColor?: string;
   boost_power?: number;
   boostMultiplier?: number;
+  isMostPopular?: boolean; // Added missing property
 }
 
 export interface BoostPurchaseRequest {

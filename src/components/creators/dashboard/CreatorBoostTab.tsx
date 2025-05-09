@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,7 +81,7 @@ const CreatorBoostTab: React.FC<CreatorBoostTabProps> = ({ isActive, getAnalytic
 
         {/* Add the Hermes-Oxum Queue Visualization when boost is active */}
         {isActive && creatorId && (
-          <HermesOxumQueueVisualization profileId={creatorId} />
+          <HermesOxumQueueVisualization userId={creatorId} profileId={creatorId} />
         )}
       </div>
 
