@@ -17,7 +17,12 @@ const EscortDetailView: React.FC<EscortDetailViewProps> = ({ escort }) => {
       return subRates?.[subType] || null;
     }
     
-    return rateType ? (escort.rates[rateType] as number | undefined) || null : null;
+    if (rateType) {
+      const rate = escort.rates[rateType];
+      return (typeof rate === 'number') ? rate : null;
+    }
+    
+    return null;
   };
 
   const formatRateDisplay = (rate: number | null): string => {

@@ -36,7 +36,7 @@ export interface Video {
 
 // Pricing rates
 export interface Rates {
-  [key: string]: number;
+  [key: string]: number | Record<string, number>;
   // Common rates
   hourly?: number;
   overnight?: number;
@@ -90,6 +90,8 @@ export interface Escort {
   photos?: string[];
   reviews?: any[];
   gallery?: string[];
+  gallery_images?: string[];
+  videos?: Video[];
   contactInfo?: {
     email?: string;
     phone?: string;
@@ -99,6 +101,16 @@ export interface Escort {
   profileType?: string;
   boostLevel?: number;
   isAI?: boolean;
+  hairColor?: string;
+  eyeColor?: string;
+  ethnicity?: string;
+  measurements?: string;
+  stats?: {
+    averageRating?: number;
+    totalReviews?: number;
+  };
+  specialties?: string[];
+  limitations?: string[];
 }
 
 export interface ExtendedEscort extends Escort {

@@ -53,7 +53,7 @@ export interface Creator {
   rates?: Record<string, number>;
   price?: number;
   responseRate?: number;
-  gender: string; // Make this required for compatibility with Escort
+  gender?: string; // Made optional
   
   // Additional fields for compatibility with Escort type
   age?: number;
