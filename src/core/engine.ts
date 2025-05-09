@@ -1,6 +1,6 @@
 
 import { oxum } from './Oxum';
-import { lucieAI } from './Lucie';
+import { lucie, lucieAI } from './Lucie'; // Import both names for compatibility
 import { uberCore } from './UberCore';
 import { hermes } from './Hermes';
 import { automaticSEO } from './AutomaticSEO';

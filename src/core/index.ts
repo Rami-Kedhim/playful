@@ -1,6 +1,6 @@
 
 // Core module exports
-import { LucieAI } from './Lucie';
+import { lucie, lucieAI } from './Lucie';
 import { oxum } from './Oxum';
 import { UberCore } from './UberCore';
 import { hermes } from './Hermes';
@@ -12,6 +12,8 @@ import { initializeSystem, shutdownSystem } from './engine';
 export {
   oxum,
   hermes,
+  lucie,
+  lucieAI,
   initializeSystem,
   shutdownSystem,
   automaticSEO,
@@ -22,8 +24,6 @@ export {
 export * from './utils';
 
 // Initialize and export
-const lucieAI = new LucieAI();
-// Remove the type casting that was causing errors
 const uberCore = new UberCore(lucieAI);
 
-export { lucieAI, uberCore };
+export { uberCore };

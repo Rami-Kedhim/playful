@@ -1,5 +1,5 @@
 
-import { lucieAI } from '@/core/Lucie';
+import { lucieAI, lucie } from '@/core/Lucie';
 import { 
   GenerateContentResult, 
   ModerateContentParams, 
@@ -102,4 +102,4 @@ export const lucieOrchestrator = new LucieOrchestratorAdapter();
 export default lucieOrchestrator;
 
 // Export lucieAI for backward compatibility
-export { lucieAI };
+export { lucieAI, lucie };

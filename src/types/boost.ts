@@ -1,22 +1,32 @@
+import { VerificationLevel } from "./verification";
+
+export interface PulseBoost {
+  id: string;
+  name: string; // Added missing property
+  description: string; // Added missing property
+  price: number; // Added missing property
+  duration: number; // Added missing property
+  features: string[]; // Added missing property
+  isMostPopular?: boolean; // Added missing property
+  boostLevel?: number;
+  position: number;
+  visibility: number;
+  promotionRadius: number;
+  includedFeatures?: string[];
+  extraServices?: string[];
+}
 
 export interface BoostPackage {
   id: string;
-  name: string;
-  description: string;
+  name?: string;
+  description?: string;
   price: number;
-  price_ubx: number;
-  durationMinutes: number;
-  duration: string;
-  features: string[];
-  visibility: string;
-  visibility_increase: number;
-  color?: string;
-  badgeColor?: string;
-  boost_power?: number;
-  boostMultiplier?: number;
-  isPopular?: boolean;
+  duration?: number; // in days
+  position?: number;
+  visibility?: number;
+  boostLevel?: number; // Add this property for compatibility
+  features?: string[];
   isMostPopular?: boolean;
-  isRecommended?: boolean;
 }
 
 export interface BoostStatus {
@@ -92,15 +102,6 @@ export interface BoostAnalyticsItem {
   change: number;
   icon?: React.ReactNode;
   formatter?: (value: number) => string;
-}
-
-export interface PulseBoost {
-  id: string;
-  profileId: string;
-  packageId: string;
-  startTime: Date;
-  endTime: Date;
-  status: 'active' | 'expired' | 'cancelled';
 }
 
 export interface EnhancedBoostStatus extends BoostStatus {

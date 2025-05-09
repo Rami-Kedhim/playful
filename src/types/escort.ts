@@ -30,20 +30,20 @@ export interface Escort {
   boosted?: boolean;
   boostLevel?: number;
   boostExpiration?: string;
+  gender?: string;
+  description?: string;
+  featured?: boolean;
   
   // Add fields for Creator compatibility
   avatarUrl?: string;
   isVerified?: boolean;
   rating?: number;
-  
-  // Additional fields needed from the Escort.ts file
-  gender?: string;
-  profileImage?: string;
-  images?: string[];
   verified?: boolean;
   availableNow?: boolean;
-  description?: string;
-  featured?: boolean;
+  
+  // Additional fields needed from the Escort.ts file
+  profileImage?: string;
+  images?: string[];
 }
 
 export interface ContactInfo {

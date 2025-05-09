@@ -8,7 +8,16 @@ export const VERIFICATION_STATUS = {
 };
 
 export type VerificationStatus = typeof VERIFICATION_STATUS[keyof typeof VERIFICATION_STATUS];
-export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
+
+// Define verification levels as constant values
+export const VERIFICATION_LEVEL = {
+  NONE: 'none',
+  BASIC: 'basic',
+  ENHANCED: 'enhanced',
+  PREMIUM: 'premium'
+};
+
+export type VerificationLevel = typeof VERIFICATION_LEVEL[keyof typeof VERIFICATION_LEVEL];
 
 export interface VerificationDocument {
   id: string;
@@ -16,6 +25,9 @@ export interface VerificationDocument {
   fileUrl: string;
   uploadedAt: string;
   status: 'pending' | 'approved' | 'rejected';
+  filePath?: string; // Add missing property used in DocumentPreview
+  documentType?: string; // Add missing property used in DocumentPreview
+  notes?: string; // Add missing property used in DocumentPreview
 }
 
 export interface VerificationRequest {
