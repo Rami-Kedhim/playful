@@ -118,3 +118,6 @@ export interface EnhancedBoostStatus extends BoostStatus {
   timeRemaining?: string;
   boostPackage?: BoostPackage;
 }
+
+// Export this type definition to ensure compatibility
+export type { BoostStatus as EnhancedBoostStatus };

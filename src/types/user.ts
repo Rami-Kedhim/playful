@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email?: string;
@@ -29,11 +30,18 @@ export interface UserProfile {
   phone?: string;
   website?: string;
   name?: string;
+  username?: string;
   displayName?: string;
   avatar_url?: string;
+  avatarUrl?: string;
+  location?: string;
   services?: string[];
   languages?: string[];
   rates?: Record<string, number>;
+  verification_level?: string;
+  verified?: boolean;
+  is_verified?: boolean;
+  availability?: any;
 }
 
 // Add missing auth types

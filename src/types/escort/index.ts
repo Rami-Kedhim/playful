@@ -10,5 +10,11 @@ export interface Escort {
   name: string;
   gender: string;
   price: number;  // Required property for compatibility
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  isAvailable?: boolean;
+  gallery_images?: string[];
+  videos?: import('../Escort').Video[];
+  locations?: string[];
   // ... other properties can be optional
 }

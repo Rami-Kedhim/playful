@@ -2,16 +2,18 @@
 export interface Escort {
   id: string;
   name: string;
+  gender: string; // Required property for compatibility
   age?: number;
-  gender: string; // Required property
   location?: string;
-  locations?: string[]; // Adding locations property
+  locations?: string[]; // Add locations array property
   bio?: string;
+  description?: string;
   rating?: number;
-  price?: number;
+  price: number; // Required in extended version
   images?: string[];
   services?: string[];
   isVerified?: boolean;
+  verified?: boolean;
   featured?: boolean;
   isAI?: boolean;
   profileType?: string;
@@ -23,7 +25,7 @@ export interface Escort {
   };
   rates?: Record<string, any>;
   gallery?: string[];
-  gallery_images?: string[]; // Add support for gallery_images
+  gallery_images?: string[]; // Add gallery_images property
   stats?: Record<string, any>;
   height?: string | number;
   weight?: string | number;
@@ -43,28 +45,37 @@ export interface Escort {
   lastActive?: Date | string;
   clientsServed?: number;
   verificationLevel?: string;
-  availability?: EscortAvailability;
+  availability?: EscortAvailability; // Make sure this is the correct type
   payment_methods?: string[];
   deposit_required?: boolean;
-  
-  // Add missing properties
   languages?: string[];
   profileImage?: string;
   imageUrl?: string;
-  verified?: boolean;
   reviewCount?: number;
   tags?: string[];
   availableNow?: boolean;
   isAvailable?: boolean; // Add this property
   responseRate?: number;
-  description?: string;
   subscriptionPrice?: number;
+  providesInPersonServices?: boolean; // Add this property
+  providesVirtualContent?: boolean; // Add this property
   videos?: Video[]; // Add videos array
-  
-  // Add service type flags
-  providesInPersonServices?: boolean;
-  providesVirtualContent?: boolean;
-  created_at?: Date | string;
+}
+
+// Define the Video interface
+export interface Video {
+  id: string;
+  title?: string;
+  thumbnailUrl?: string;
+  thumbnail?: string;
+  videoUrl?: string;
+  duration?: number;
+  viewCount?: number;
+  views?: number;
+  createdAt?: string;
+  isPremium?: boolean;
+  isPublished?: boolean;
+  escortId?: string;
 }
 
 export interface EscortAvailability {
@@ -83,22 +94,6 @@ export interface EscortAvailability {
 // Export as Availability for components that import it
 export type Availability = EscortAvailability;
 
-// Add Video interface
-export interface Video {
-  id: string;
-  title?: string;
-  thumbnailUrl?: string;
-  thumbnail?: string;
-  videoUrl?: string;
-  duration?: number;
-  viewCount?: number;
-  views?: number;
-  createdAt?: string;
-  isPremium?: boolean;
-  isPublished?: boolean;
-  escortId?: string;
-}
-
 // Create ExtendedEscort type that includes all required properties
 export interface ExtendedEscort extends Escort {
   providesInPersonServices: boolean;
@@ -108,5 +103,5 @@ export interface ExtendedEscort extends Escort {
   tags: string[];
   imageUrl: string;
   profileImage: string;
-  price: number; // Make required in extended version
+  isAvailable: boolean;
 }

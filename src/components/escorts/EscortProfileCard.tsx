@@ -1,149 +1,65 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { StarIcon, MapPin, Clock, DollarSign, Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import { Escort } from '@/types/escort';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import ServiceTypeBadge from './ServiceTypeBadge';
+import { CheckCircle, MapPin, DollarSign } from 'lucide-react';
 
 interface EscortProfileCardProps {
   escort: Escort & {
     providesVirtualContent?: boolean;
     providesInPersonServices?: boolean;
   };
-  onClick?: () => void;
-  onBookNow?: () => void;
 }
 
-const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
-  escort,
-  onClick,
-  onBookNow,
-}) => {
-  const getHourlyRate = () => {
-    if (escort.price !== undefined && escort.price !== null) return escort.price;
-    if (escort.rates && escort.rates.hourly !== undefined) return escort.rates.hourly;
-    return null;
-  };
-
-  const getServiceType = (): "both" | "in-person" | "virtual" => {
-    if (escort.providesInPersonServices && escort.providesVirtualContent) {
-      return 'both';
-    } else if (escort.providesInPersonServices) {
-      return 'in-person';
-    } else if (escort.providesVirtualContent) {
-      return 'virtual';
-    }
-    // Return 'in-person' explicitly as fallback, never empty string
-    return 'in-person';
-  };
-
-  const getAvatarImage = () => {
-    return (
-      escort.profileImage ||
-      escort.imageUrl ||
-      escort.avatarUrl ||
-      escort.avatar ||
-      escort.avatar_url ||
-      '/placeholder-avatar.png'
-    );
-  };
-
-  const getDisplayName = () => {
-    return escort.name || 'Anonymous';
-  };
-
-  const isVerified = () => {
-    return escort.isVerified || escort.verified || false;
-  };
-
-  const isAvailable = () => {
-    return escort.availableNow || escort.isAvailable || false;
-  };
-
+const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ escort }) => {
+  // Safely check for isAvailable property
+  const isAvailableNow = escort.isAvailable || escort.availableNow || false;
+  
   return (
-    <Card
-      className="overflow-hidden h-full transition-all hover:shadow-md cursor-pointer"
-      onClick={onClick}
-    >
+    <Card className="overflow-hidden transition-transform hover:-translate-y-1">
       <div className="relative">
-        <Avatar className="w-full h-48 rounded-none">
-          <AvatarImage src={getAvatarImage()} className="object-cover" />
-          <AvatarFallback className="rounded-none">
-            {getDisplayName().substring(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
-          <ServiceTypeBadge serviceType={getServiceType()} />
-
-          {isAvailable() && (
-            <Badge variant="default" className="bg-green-500 text-white">
-              Available Now
-            </Badge>
-          )}
-        </div>
-
-        {escort.tags && escort.tags.length > 0 && (
-          <div className="absolute bottom-2 left-2">
-            <Badge variant="secondary" className="bg-black/70 text-white text-xs">
-              {escort.tags[0]}
-              {escort.tags.length > 1 ? ` +${escort.tags.length - 1}` : ''}
-            </Badge>
-          </div>
+        <img 
+          src={escort.imageUrl || escort.profileImage || (escort.images && escort.images[0]) || '/placeholder-profile.jpg'} 
+          alt={escort.name} 
+          className="w-full h-48 object-cover"
+        />
+        {escort.verified && (
+          <Badge className="absolute top-2 right-2 bg-blue-600">
+            <CheckCircle className="h-3 w-3 mr-1" /> Verified
+          </Badge>
+        )}
+        {isAvailableNow && (
+          <Badge className="absolute bottom-2 left-2 bg-green-600">
+            Available Now
+          </Badge>
         )}
       </div>
-
       <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-medium">{getDisplayName()}</h3>
-
-          {escort.rating !== undefined && (
-            <div className="flex items-center">
-              <StarIcon className="h-4 w-4 text-yellow-400 mr-1" />
-              <span className="text-sm">{escort.rating.toFixed(1)}</span>
-            </div>
-          )}
+        <div className="flex justify-between items-start mb-3">
+          <h3 className="text-lg font-semibold">{escort.name}</h3>
+          <Badge variant="outline">{escort.gender}</Badge>
         </div>
-
-        <div className="space-y-1 mb-3">
-          {escort.location && (
-            <div className="flex items-center text-sm text-gray-600">
-              <MapPin className="w-3.5 h-3.5 mr-1" />
-              <span>{escort.location}</span>
-            </div>
-          )}
-
-          {isVerified() && (
-            <div className="flex items-center text-sm text-green-600">
-              <Check className="w-3.5 h-3.5 mr-1" />
-              <span>Verified</span>
-            </div>
-          )}
-
-          {getHourlyRate() !== null && (
-            <div className="flex items-center text-sm">
-              <DollarSign className="w-3.5 h-3.5 mr-1" />
-              <span>${getHourlyRate()}/hr</span>
-            </div>
-          )}
+        <div className="flex items-center text-sm text-muted-foreground mb-2">
+          <MapPin className="h-4 w-4 mr-1" />
+          {escort.location || 'Unknown location'}
         </div>
-
-        {onBookNow && (
-          <Button
-            size="sm"
-            className="w-full mt-2"
-            onClick={(e) => {
-              e.stopPropagation();
-              onBookNow();
-            }}
-          >
-            <Clock className="mr-2 h-4 w-4" />
-            Book Now
-          </Button>
-        )}
+        <div className="flex items-center text-sm text-muted-foreground mb-4">
+          <DollarSign className="h-4 w-4 mr-1" />
+          {`$${escort.price || 'Contact for rates'}`}
+        </div>
+        <div className="flex flex-wrap gap-1 mb-4">
+          {escort.tags?.slice(0, 3).map((tag, index) => (
+            <Badge key={index} variant="secondary" className="text-xs">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+        <Link to={`/escorts/${escort.id}`} className="w-full block">
+          <Button variant="default" className="w-full">View Profile</Button>
+        </Link>
       </CardContent>
     </Card>
   );

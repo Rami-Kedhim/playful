@@ -1,124 +1,150 @@
 
-// Core system interfaces
+/**
+ * Core Systems Type Definitions
+ */
 
-// HermesSystem
+/**
+ * Hermes System for managing visibility and recommendations
+ */
 export interface HermesSystem {
-  getVisibilityScore: (profileId: string) => Promise<number>;
-  getEngagementScore: (profileId: string) => Promise<number>;
-  getRankingScore: (profileId: string) => Promise<number>;
+  name: string;
+  version: string;
   getInsights: (profileId: string) => Promise<HermesInsight[]>;
-  calculateVisibilityScore: (profileData: any) => number;
-  getRecommendedContent: (userId: string) => Promise<any[]>;
-  trackUserActivity: (userId: string, activity: any) => Promise<void>;
-  optimize: (profileId: string, options?: any) => Promise<OptimizationResult>;
-  getBoostEffectiveness: (profileId: string) => Promise<number>;
+  getVisibilityScore?: (profileId: string) => Promise<number>;
+  getEngagementScore?: (profileId: string) => Promise<number>;
+  getRankingScore?: (profileId: string) => Promise<number>;
+  calculateVisibilityScore?: (params: any) => number;
+  getRecommendedContent?: (userId: string, options?: any) => Promise<any[]>;
+  trackUserActivity?: (userId: string, activity: any) => Promise<void>;
+  optimize?: (profileId: string) => Promise<OptimizationResult>;
 }
 
 export interface HermesInsight {
   id: string;
-  profileId: string;
-  score: number;
-  recommendation: string;
-  impact: number;
-  category: string;
-  priority: 'high' | 'medium' | 'low';
   title?: string;
   type?: string;
+  description?: string;
+  score: number;
+  actionable: boolean;
+  recommendation?: string;
+  impact: 'high' | 'medium' | 'low';
+  category: string;
+  timestamp: number;
 }
 
-export interface OptimizationResult {
-  success: boolean;
-  changes: string[];
-  scoreImprovement: number;
-}
-
-// OxumSystem
+/**
+ * Oxum System for profile boosting and promotion
+ */
 export interface OxumSystem {
-  calculateBoostFactor: (amount: number) => number;
-  getActiveBoosts: (profileId: string) => Promise<any[]>;
-  getBoostedProfiles: () => Promise<string[]>;
-  getBoostPackages: () => Promise<any[]>;
-  calculateBoostScore: (profileId: string) => Promise<number>;
-  getProfileRanking: (profileId: string) => Promise<number>;
-  optimizeVisibility: (profileId: string) => Promise<any>;
+  name: string;
+  version: string;
+  boostProfile: (profileId: string, boostParams: any) => Promise<boolean>;
+  getBoostStatus: (profileId: string) => Promise<any>;
+  getBoostPackages?: () => Promise<any[]>;
+  calculateBoostScore?: (profileId: string) => Promise<number>;
+  getProfileRanking?: (profileId: string) => Promise<any>;
+  optimizeVisibility?: (profileId: string) => Promise<any>;
+  calculateBoostFactor?: (params: any) => number;
+  getActiveBoosts?: () => Promise<any[]>;
+  getBoostedProfiles?: (options?: any) => Promise<any[]>;
 }
 
-// LucieAISystem
+/**
+ * Lucie AI System for content generation and moderation
+ */
 export interface LucieAISystem {
+  name: string;
+  version: string;
   generateContent: (params: GenerateContentParams) => Promise<GenerateContentResult>;
-  moderateContent: (params: ModerateContentParams) => Promise<ModerateContentResult>;
+  moderateContent: (content: string, options?: any) => Promise<ModerateContentResult>;
   analyzeSentiment: (text: string) => Promise<SentimentAnalysisResult>;
-  generateImage: (prompt: string) => Promise<GenerateImageResult>;
+  summarizeText: (text: string, maxLength?: number) => Promise<string>;
+  translateText: (text: string, targetLanguage: string) => Promise<string>;
 }
 
 export interface GenerateContentParams {
   prompt: string;
-  options?: {
-    maxTokens?: number;
-    temperature?: number;
-    stopSequences?: string[];
-  };
+  maxTokens?: number;
+  temperature?: number;
+  format?: string;
+  options?: Record<string, any>;
 }
 
 export interface GenerateContentResult {
   content: string;
-  totalTokens?: number;
+  tokens: number;
+  moderationFlags?: string[];
   moderated?: boolean;
-  tokens?: number;
 }
 
 export interface ModerateContentParams {
   content: string;
-  type?: string;
   strictness?: number;
+  categories?: string[];
+  type?: string;
 }
 
 export interface ModerateContentResult {
   safe: boolean;
-  violations: string[];
-  score: number;
   isSafe?: boolean;
+  categories: string[];
+  score: number;
+  blockedCategories?: string[];
   issues?: string[];
+}
+
+export interface SentimentAnalysisParams {
+  text: string;
+  detailed?: boolean;
 }
 
 export interface SentimentAnalysisResult {
   sentiment: 'positive' | 'negative' | 'neutral' | 'mixed';
   score: number;
   confidence: number;
-  metadata: any;
+  metadata?: any;
 }
 
-// Adding SentimentAnalysisParams
-export interface SentimentAnalysisParams {
-  text: string;
-  options?: {
-    language?: string;
-    model?: string;
-  };
+/**
+ * Orus System for security and session management
+ */
+export interface OrusSystem {
+  name: string;
+  version: string;
+  validateSession: (token: string) => Promise<SessionValidationResult>;
+  checkPermissions: (userId: string, resource: string, action: string) => Promise<boolean>;
+  generateToken: (userId: string, options?: any) => Promise<string>;
+  revokeToken: (token: string) => Promise<boolean>;
 }
 
-export interface GenerateImageResult {
-  url: string;
-  width: number;
-  height: number;
+export interface SessionValidationResult {
+  valid: boolean;
+  userId?: string;
+  expires?: Date;
+  expiresAt?: Date;
 }
 
-// UberCoreSystem
+/**
+ * UberCore System for core platform services
+ */
 export interface UberCoreSystem {
+  name: string;
+  version: string;
   getSystemStatus: () => Promise<SystemStatus>;
   checkSystemIntegrity: () => SystemIntegrityResult;
-  getSystemHealthMetrics: () => Promise<SystemHealthMetrics>;
-  registerSystem: (system: any) => void;
-  deregisterSystem: (systemName: string) => void;
+  getSystemMetrics: () => SystemHealthMetrics;
+  registerSystem: (system: any) => boolean;
+  deregisterSystem: (systemName: string) => boolean;
   validateSession: (token: string) => SessionValidationResult;
 }
 
 export interface SystemStatus {
-  status: 'operational' | 'degraded' | 'maintenance' | 'error';
-  message?: string;
-  subsystems?: Record<string, 'operational' | 'degraded' | 'maintenance' | 'error'>;
+  operational: boolean;
   isOperational?: boolean;
-  lastCheck?: Date | string;
+  lastCheck?: Date;
+  version?: string;
+  systemsOnline: number;
+  timestamp: number;
 }
 
 export interface SystemIntegrityResult {
@@ -126,21 +152,34 @@ export interface SystemIntegrityResult {
   dataIntegrity: boolean;
   networkSecurity: boolean;
   database?: boolean;
-  valid?: boolean;
+  status?: 'ok' | 'warning' | 'error';
+  errors?: string[];
+}
+
+export interface SystemMetrics {
+  uptime: number;
+  requestCount: number;
+  errorRate: number;
+  responseTime: number;
 }
 
 export interface SystemHealthMetrics {
-  memory: number;
-  storage: number;
-  network: number;
-  services: Record<string, number>;
-  load?: number;
-  cpu?: number;
+  cpuUsage: number;
+  memoryUsage: number;
+  diskUsage: number;
+  networkLatency: number;
+  activeUsers: number;
+  services: {
+    [key: string]: boolean;
+  };
 }
 
-export interface SessionValidationResult {
-  valid: boolean;
-  userId?: string;
-  expires?: Date | string;
-  isValid?: boolean;
+/**
+ * Optimization result returned by various optimization functions
+ */
+export interface OptimizationResult {
+  success: boolean;
+  improvements: string[];
+  score: number;
+  recommendations: string[];
 }

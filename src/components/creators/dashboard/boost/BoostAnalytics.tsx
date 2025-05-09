@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import HermesOxumQueueVisualization from '@/components/creators/dashboard/boost/HermesOxumQueueVisualization';
 import { useBoostAnalytics } from '@/hooks/boost/useBoostAnalytics';
-import { BoostStatus } from '@/types/pulse-boost';
+import { BoostStatus } from '@/types/boost';
 import { AnalyticsHeader, AnalyticsHeaderProps } from '../analytics';
 import { AnalyticsStats } from '../analytics';
 import { AnalyticsCharts } from '../analytics';
@@ -28,10 +28,10 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
   };
 
   // Convert error to object type if it's a string
-  const errorObj = typeof error === 'string' ? { message: error } : error;
+  const errorObj = typeof error === 'string' ? { message: error } : error || null;
 
   // Check if boostStatus exists and if it has isActive property
-  const isActiveBoost = boostStatus && boostStatus.isActive;
+  const isActiveBoost = boostStatus && (boostStatus.isActive === true);
 
   return (
     <div className="space-y-6">
@@ -45,7 +45,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
           <CardContent>
             {loading ? (
               <div>Loading...</div>
-            ) : error ? (
+            ) : errorObj ? (
               <div>Error: {errorObj?.message || 'Unknown error'}</div>
             ) : (
               <div>{analytics?.totalBoosts || 0}</div>
@@ -60,7 +60,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
           <CardContent>
             {loading ? (
               <div>Loading...</div>
-            ) : error ? (
+            ) : errorObj ? (
               <div>Error: {errorObj?.message || 'Unknown error'}</div>
             ) : (
               <div>{analytics?.activeBoosts || 0}</div>
@@ -75,7 +75,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
           <CardContent>
             {loading ? (
               <div>Loading...</div>
-            ) : error ? (
+            ) : errorObj ? (
               <div>Error: {errorObj?.message || 'Unknown error'}</div>
             ) : (
               <div>{analytics?.averageBoostScore || 0}</div>
