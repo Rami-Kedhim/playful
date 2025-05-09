@@ -1,6 +1,5 @@
 
-// Fix import of Toast from "@/hooks/use-toast" because Toast is not exported (only toast and useToast)
-
-import { useToast, toast } from "@/hooks/use-toast";
+// Re-export toast and useToast from the hooks directory
+import { useToast, toast } from "@/hooks/use-toast.tsx";
 
 export { useToast, toast };
