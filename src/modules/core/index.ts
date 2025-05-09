@@ -1,29 +1,14 @@
 
-import { UberCore } from '@/core/UberCore';
-import { Hermes } from '@/core/Hermes';
-import { Oxum } from '@/core/Oxum';
-import { LucieAI } from '@/core/Lucie';
-import { Orus } from '@/core/Orus';
-import { HermesOrusOxum } from '@/core/HermesOrusOxum';
-import { neuralHub } from '@/core/neuralHub';
+// Correct exports from core systems
+import { hermes } from '@/core/Hermes';
+import { oxum } from '@/core/Oxum';
+import { lucie } from '@/core/Lucie';
+import { hermesOrusOxum } from '@/core/HermesOrusOxum';
 
-// Export the core modules
+// Re-export correctly
 export {
-  UberCore,
-  Hermes,
-  Oxum,
-  LucieAI,
-  Orus,
-  HermesOrusOxum,
-  neuralHub
+  hermes,
+  oxum,
+  lucie,
+  hermesOrusOxum
 };
-
-// Export initialized instances of the core modules
-export { uberCore } from '@/core/UberCore';
-export { hermes } from '@/core/Hermes';
-export { oxum } from '@/core/Oxum';
-export { lucieAI } from '@/core/Lucie';
-export { orus } from '@/core/Orus';
-
-// Export the core module utility functions
-export * from '@/utils/core';

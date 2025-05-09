@@ -31,7 +31,7 @@ export default function VerificationStatusTab() {
   }
 
   // Using string comparison to avoid enum issues
-  const isApproved = status === "approved" || status === VERIFICATION_STATUS.APPROVED;
+  const isApproved = status.status === "approved" || status.status === VERIFICATION_STATUS.APPROVED;
 
   return (
     <div className="space-y-6">

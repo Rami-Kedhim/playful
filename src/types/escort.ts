@@ -35,6 +35,15 @@ export interface Escort {
   avatarUrl?: string;
   isVerified?: boolean;
   rating?: number;
+  
+  // Additional fields needed from the Escort.ts file
+  gender?: string;
+  profileImage?: string;
+  images?: string[];
+  verified?: boolean;
+  availableNow?: boolean;
+  description?: string;
+  featured?: boolean;
 }
 
 export interface ContactInfo {

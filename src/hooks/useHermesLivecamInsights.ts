@@ -1,67 +1,77 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { hermes } from '@/core/Hermes';
-import { HermesInsight } from '@/types/core-systems';
+import { useState, useCallback } from 'react';
+import { useHermesInsights } from './useHermesInsights';
+import type { HermesInsight } from '@/types/core-systems';
 
-export const useHermesLivecamInsights = (profileId?: string) => {
-  const [insights, setInsights] = useState<HermesInsight[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export interface LivecamInsight {
+  recommendedProfileId?: string;
+  popularCategory?: string;
+  trendingTag?: string;
+  isLoading: boolean;
+  error?: string;
+}
 
-  const fetchInsights = useCallback(async () => {
-    if (!profileId) return;
+export function useHermesLivecamInsights(userId?: string) {
+  const { reportUserAction, insights: baseInsightsRaw } = useHermesInsights();
 
-    setLoading(true);
-    try {
-      // Mock data - replace with actual Hermes API call
-      const mockInsights: HermesInsight[] = [
-        { type: 'views', title: 'Profile Views', description: 'Number of profile views', value: 123 },
-        { type: 'impressions', title: 'Search Impressions', description: 'Number of times profile appeared in search', value: 456 },
-        { type: 'conversion', title: 'Conversion Rate', description: 'Profile view to contact ratio', value: 0.25 }
-      ];
+  const baseInsights = baseInsightsRaw as HermesInsight[];
 
-      setInsights(mockInsights);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch Hermes insights');
-    } finally {
-      setLoading(false);
-    }
-  }, [profileId]);
+  const [livecamInsights, setLivecamInsights] = useState<LivecamInsight>({ isLoading: false });
 
-  useEffect(() => {
-    fetchInsights();
-  }, [fetchInsights]);
+  const recordLivecamView = useCallback(
+    async (streamerId: string, category?: string) => {
+      if (!userId) {
+        console.warn('Cannot report to HERMES: missing userId');
+        return;
+      }
+      try {
+        setLivecamInsights(prev => ({ ...prev, isLoading: true }));
 
-  const getMetrics = useCallback(() => {
-    if (!insights || insights.length === 0) return null;
-    
-    const viewsInsight = insights.find(i => i.type === 'views');
-    const impressionsInsight = insights.find(i => i.type === 'impressions');
-    const ratioInsight = insights.find(i => i.type === 'conversion');
-    
-    return {
-      views: viewsInsight?.value ?? 0,
-      impressions: impressionsInsight?.value ?? 0,
-      ratio: ratioInsight?.value ?? 0
-    };
-  }, [insights]);
+        // Correct reportUserAction usage; call with two arguments respectively
+        await reportUserAction('viewed_livecam', streamerId);
 
-  const reportUserAction = useCallback((actionType: string, category: string) => {
-    if (!profileId) return;
-    
-    // Mock Hermes event tracking
-    hermes.trackEvent(actionType, {
-      profileId,
-      category
-    });
-  }, [profileId]);
+        const recommendedInsight = baseInsights.find(ins => ins.type === 'recommendedProfileId');
+        const popularCategoryInsight = baseInsights.find(ins => ins.type === 'popularCategory');
+        const trendingTagInsight = baseInsights.find(ins => ins.type === 'trendingTag');
+
+        setLivecamInsights({
+          recommendedProfileId: (recommendedInsight as any)?.value,
+          popularCategory: (popularCategoryInsight as any)?.value,
+          trendingTag: (trendingTagInsight as any)?.value,
+          isLoading: false,
+        });
+      } catch (error) {
+        console.error('Error getting livecam insights:', error);
+        setLivecamInsights(prev => ({
+          ...prev,
+          isLoading: false,
+          error: 'Failed to get livecam insights',
+        }));
+      }
+    },
+    [userId, reportUserAction, baseInsights],
+  );
+
+  const recordLivecamSession = useCallback(
+    async (streamerId: string, duration: number, category?: string) => {
+      await reportUserAction('livecam_session', streamerId);
+    },
+    [reportUserAction],
+  );
+
+  const recordLivecamTip = useCallback(
+    async (streamerId: string, amount: number, message?: string) => {
+      await reportUserAction('livecam_tip', streamerId);
+    },
+    [reportUserAction],
+  );
 
   return {
-    insights,
-    loading,
-    error,
-    fetchInsights,
-    getMetrics,
-    reportUserAction
+    livecamInsights,
+    recordLivecamView,
+    recordLivecamSession,
+    recordLivecamTip,
   };
-};
+}
+
+export default useHermesLivecamInsights;

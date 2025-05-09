@@ -1,14 +1,5 @@
 
-// Unified verification type definitions
-
-export enum VerificationLevel {
-  NONE = 'none',
-  BASIC = 'basic',
-  ENHANCED = 'enhanced',
-  PREMIUM = 'premium',
-  VERIFIED = 'verified'
-}
-
+// Define verification status as values, not just types
 export const VERIFICATION_STATUS = {
   PENDING: 'pending',
   IN_REVIEW: 'in_review',
@@ -16,7 +7,8 @@ export const VERIFICATION_STATUS = {
   REJECTED: 'rejected'
 };
 
-export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
+export type VerificationStatus = typeof VERIFICATION_STATUS[keyof typeof VERIFICATION_STATUS];
+export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
 
 export interface VerificationDocument {
   id: string;
@@ -24,13 +16,6 @@ export interface VerificationDocument {
   fileUrl: string;
   uploadedAt: string;
   status: 'pending' | 'approved' | 'rejected';
-  notes?: string;
-  reviewedAt?: string;
-  reviewedBy?: string;
-  
-  // Additional properties needed by components
-  filePath?: string;
-  documentType?: string;
 }
 
 export interface VerificationRequest {
@@ -42,30 +27,6 @@ export interface VerificationRequest {
   submittedAt: string;
   updatedAt?: string;
   rejectionReason?: string;
-  verifiedDate?: string;
-  
-  // Additional properties needed by admin components
-  profile_id?: string;
-  created_at?: string;
-  reviewed_at?: string;
-  requested_level?: string;
-  requestedLevel?: string;
-}
-
-export interface VerificationStats {
-  totalPending: number;
-  totalApproved: number;
-  totalRejected: number;
-  averageProcessingTime: number; // in hours
-  pendingByLevel: Record<VerificationLevel, number>;
-}
-
-export interface VerificationSettings {
-  requiredDocumentsByLevel: Record<
-    VerificationLevel, 
-    { documentTypes: string[]; minimumCount: number }
-  >;
-  processingTimeEstimate: number; // in hours
-  autoApproveBasic: boolean;
-  requireFaceMatch: boolean;
+  reviewer_notes?: string; // Adding this for compatibility
+  created_at?: string; // Adding this for compatibility
 }

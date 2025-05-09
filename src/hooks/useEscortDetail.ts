@@ -1,119 +1,61 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import escortService from '@/services/escorts/escortService';
 import { Escort } from '@/types/escort';
-import { useToast } from '@/components/ui/use-toast';
-import { useWallet } from '@/hooks/useWallet';
 
-/**
- * Hook for detailed escort profile interactions
- */
-export const useEscortDetail = (escortId?: string) => {
-  const { toast } = useToast();
-  const { balance } = useWallet();
-  
-  const [escort, setEscort] = useState<Escort | null>(null);
-  const [loading, setLoading] = useState(true);
+export const useEscortDetail = (
+  escortId: string | undefined,
+  initialData?: Escort | null
+) => {
+  const [escort, setEscort] = useState<Escort | null>(initialData || null);
+  const [loading, setLoading] = useState<boolean>(!initialData);
   const [error, setError] = useState<string | null>(null);
-  const [isFavorite, setIsFavorite] = useState(false);
-  
-  // Load escort data
+
   useEffect(() => {
-    if (!escortId) {
-      setError("Escort ID is required");
-      setLoading(false);
-      return;
-    }
-    
-    // Simulate fetching escort data
-    const fetchEscortData = async () => {
+    const fetchEscortDetail = async () => {
+      if (!escortId) {
+        setEscort(null);
+        setLoading(false);
+        return;
+      }
+
+      if (initialData) {
+        setEscort(initialData);
+        setLoading(false);
+        return;
+      }
+
       try {
-        // Placeholder for actual API call
-        // In a real app this would be from an API
-        const fakeEscort: Escort = {
-          id: escortId,
-          name: "Sample Escort",
-          age: 25,
-          location: "New York",
-          gender: "female",
-          rating: 4.8,
-          reviewCount: 24,
-          verified: true,
-          rates: { hourly: 200 },
-          bio: "Professional companion for your special events",
-          price: 200,
-          images: ["/assets/escorts/profile1.jpg"],
-          services: ["Dinner Date", "Event Companion"],
-          isVerified: true,
-          featured: false,
-          contactInfo: {
-            email: "sample@example.com",
-            phone: "+1234567890",
-            website: "https://example.com/sample"
-          }
+        setLoading(true);
+        const data = await escortService.getEscortById(escortId);
+        
+        // Add any missing fields that might be expected
+        const enhancedData: Escort = {
+          ...data,
+          // These fields are expected in some components
+          isVerified: data.verified || data.isVerified,
+          // Only add gender if needed and not already present
+          ...(data.gender ? {} : { gender: 'Not specified' }),
         };
         
-        setEscort(fakeEscort);
-        setIsFavorite(Math.random() > 0.6);
+        setEscort(enhancedData);
         setError(null);
-      } catch (err) {
-        console.error("Error loading escort details:", err);
-        setError("Failed to load escort details");
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch escort details');
         setEscort(null);
       } finally {
         setLoading(false);
       }
     };
-    
-    fetchEscortData();
-  }, [escortId]);
-  
-  // Handle booking request
-  const handleBookingRequest = useCallback((startTime: Date, endTime: Date, serviceType: string) => {
-    if (!escort) return;
-    
-    // Calculate estimated price based on duration and rates
-    const durationHours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
-    const hourlyRate = escort.rates?.hourly || 200;
-    const estimatedPrice = Math.round(durationHours * hourlyRate);
-    
-    // Check wallet balance
-    if (balance < estimatedPrice) {
-      toast({
-        title: "Insufficient funds",
-        description: "Please add more funds to your wallet",
-        variant: "destructive",
-      });
-      return false;
-    }
-    
-    toast({
-      title: "Booking request sent!",
-      description: `Your booking request with ${escort.name} has been sent`,
-    });
-    
-    return true;
-  }, [escort, balance, toast]);
-  
-  // Toggle favorite status
-  const toggleFavorite = useCallback(() => {
-    setIsFavorite(current => !current);
-    
-    toast({
-      title: isFavorite ? "Removed from favorites" : "Added to favorites",
-      description: isFavorite 
-        ? `${escort?.name} removed from your favorites` 
-        : `${escort?.name} added to your favorites`,
-    });
-  }, [escort, isFavorite, toast]);
-  
+
+    fetchEscortDetail();
+  }, [escortId, initialData]);
+
   return {
     escort,
     loading,
     error,
-    isFavorite,
-    toggleFavorite,
-    handleBookingRequest,
-    canBook: balance >= (escort?.rates?.hourly || 200)
+    setEscort,
   };
 };
 

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { toast } from '@/components/ui/use-toast';
-import { VerificationStatus as VerificationStatusEnum } from '@/types/verification';
+import { VERIFICATION_STATUS } from '@/types/verification';
 
 export interface VerificationStatus {
   status: string;
@@ -21,15 +21,15 @@ export const useVerificationStatus = () => {
   return {
     status: {
       status: mainHook.status,
-      canSubmit: mainHook.status !== VerificationStatusEnum.PENDING && mainHook.status !== VerificationStatusEnum.IN_REVIEW,
-      isVerified: mainHook.status === VerificationStatusEnum.APPROVED,
+      canSubmit: mainHook.status !== VERIFICATION_STATUS.PENDING && mainHook.status !== VERIFICATION_STATUS.IN_REVIEW,
+      isVerified: mainHook.status === VERIFICATION_STATUS.APPROVED,
       lastSubmitted: mainHook.verificationRequest?.submittedAt || mainHook.verificationRequest?.created_at || null,
       reason: mainHook.verificationRequest?.rejectionReason || mainHook.verificationRequest?.reviewer_notes
     },
     loading: mainHook.loading,
     error: mainHook.error,
     verificationRequest: mainHook.verificationRequest,
-    isVerified: mainHook.status === VerificationStatusEnum.APPROVED,
+    isVerified: mainHook.status === VERIFICATION_STATUS.APPROVED,
     submitVerification: () => {
       console.log('Submit verification placeholder');
       return Promise.resolve(true);

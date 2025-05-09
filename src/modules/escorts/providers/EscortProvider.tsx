@@ -10,7 +10,7 @@ import React, {
   ReactNode,
 } from 'react';
 import escortService from '@/services/escorts/escortService';
-import { Escort } from '@/types/Escort';
+import { Escort } from '@/types/escort';
 
 interface EscortContextType {
   escorts: Escort[];
