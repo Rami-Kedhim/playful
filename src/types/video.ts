@@ -4,6 +4,7 @@ export interface Video {
   title: string;
   thumbnailUrl: string;
   videoUrl: string;
+  thumbnail?: string;
   duration: number;
   viewCount: number;
   views: number;
@@ -12,3 +13,5 @@ export interface Video {
   isPublished: boolean;
   escortId: string;
 }
+
+// Export the Video interface for direct usage elsewhere

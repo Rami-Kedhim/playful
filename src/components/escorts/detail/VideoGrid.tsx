@@ -1,6 +1,5 @@
-
 import React from "react";
-import { Video } from "@/types/escort";
+import { Video } from "@/types/Escort";
 import { Card, CardContent } from "@/components/ui/card";
 import { Play, Lock } from "lucide-react";
 

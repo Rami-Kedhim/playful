@@ -5,6 +5,7 @@ export interface Escort {
   age?: number;
   gender: string; // Required property
   location?: string;
+  locations?: string[]; // Adding locations property
   bio?: string;
   rating?: number;
   price?: number;
@@ -22,6 +23,7 @@ export interface Escort {
   };
   rates?: Record<string, any>;
   gallery?: string[];
+  gallery_images?: string[]; // Add support for gallery_images
   stats?: Record<string, any>;
   height?: string | number;
   weight?: string | number;
@@ -53,9 +55,16 @@ export interface Escort {
   reviewCount?: number;
   tags?: string[];
   availableNow?: boolean;
+  isAvailable?: boolean; // Add this property
   responseRate?: number;
   description?: string;
   subscriptionPrice?: number;
+  videos?: Video[]; // Add videos array
+  
+  // Add service type flags
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  created_at?: Date | string;
 }
 
 export interface EscortAvailability {
@@ -73,3 +82,30 @@ export interface EscortAvailability {
 
 // Export as Availability for components that import it
 export type Availability = EscortAvailability;
+
+// Add Video interface
+export interface Video {
+  id: string;
+  title?: string;
+  thumbnailUrl?: string;
+  thumbnail?: string;
+  videoUrl?: string;
+  duration?: number;
+  viewCount?: number;
+  views?: number;
+  createdAt?: string;
+  isPremium?: boolean;
+  isPublished?: boolean;
+  escortId?: string;
+}
+
+// Create ExtendedEscort type that includes all required properties
+export interface ExtendedEscort extends Escort {
+  providesInPersonServices: boolean;
+  providesVirtualContent: boolean;
+  featured: boolean;
+  reviewCount: number;
+  tags: string[];
+  imageUrl: string;
+  profileImage: string;
+}

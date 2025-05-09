@@ -1,4 +1,3 @@
-
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -58,7 +57,12 @@ const BookingForm: React.FC<BookingFormProps> = ({ escort, onSubmit }) => {
     },
   });
 
-  const locations = escort.location ? [escort.location] : (escort.locations || []);
+  // Instead of escort.locations, use escort.location as fallback
+  const locationOptions = escort.locations 
+    ? escort.locations.map((loc) => ({ value: loc, label: loc }))
+    : escort.location 
+      ? [{ value: escort.location, label: escort.location }] 
+      : [{ value: "default", label: "Default Location" }];
 
   const timeSlots = [
     "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", 
@@ -169,7 +173,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ escort, onSubmit }) => {
           )}
         />
 
-        {locations.length > 0 && (
+        {locationOptions.length > 0 && (
           <FormField
             control={form.control}
             name="location"
@@ -183,9 +187,9 @@ const BookingForm: React.FC<BookingFormProps> = ({ escort, onSubmit }) => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {locations.map((location) => (
-                      <SelectItem key={location} value={location}>
-                        {location}
+                    {locationOptions.map((location) => (
+                      <SelectItem key={location.value} value={location.value}>
+                        {location.label}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -1,13 +1,14 @@
+
 import { VerificationLevel } from "./verification";
 
 export interface PulseBoost {
   id: string;
-  name: string; // Added missing property
-  description: string; // Added missing property
-  price: number; // Added missing property
-  duration: string; // Changed to string to match formatDuration parameter
-  features: string[]; // Added missing property
-  isMostPopular?: boolean; // Added missing property
+  name: string; 
+  description: string;
+  price: number; 
+  duration: string;
+  features: string[];
+  isMostPopular?: boolean;
   boostLevel?: number;
   position: number;
   visibility: number;
@@ -18,23 +19,23 @@ export interface PulseBoost {
 
 export interface BoostPackage {
   id: string;
-  name?: string;
-  description?: string;
+  name: string;
+  description: string;
   price: number;
-  price_ubx?: number; // Added for backward compatibility
-  boost_power?: number; // Added for backward compatibility
-  boostLevel?: number; // Added for backward compatibility
-  duration?: string; // Changed from number to string type
+  price_ubx?: number;
+  boost_power?: number;
+  boostLevel?: number;
+  duration?: string;
   position?: number;
-  visibility?: number | string; // Allow both string and number
+  visibility?: number | string;
   features?: string[];
   isMostPopular?: boolean;
-  isPopular?: boolean; // Added for backward compatibility
+  isPopular?: boolean;
 }
 
 export interface BoostStatus {
   isActive: boolean;
-  remainingTime?: string | number;  // Allow both string and number
+  remainingTime?: string | number;
   packageId?: string;
   packageName?: string;
   startedAt?: Date;
@@ -46,17 +47,17 @@ export interface BoostStatus {
   startTime?: Date | string;
   endTime?: Date | string;
   timeRemaining?: string;
-  isExpiring?: boolean; // Added for compatibility
+  isExpiring?: boolean;
 }
 
 export interface BoostEligibility {
   isEligible: boolean;
   reasons?: string[];
-  reason?: string; // Add for backward compatibility
+  reason?: string;
   nextEligibleTime?: string;
   remainingBoosts?: number;
   maxBoostsPerDay?: number;
-  eligible?: boolean; // For backward compatibility
+  eligible?: boolean;
 }
 
 export interface HermesStatus {
@@ -66,8 +67,8 @@ export interface HermesStatus {
   lastUpdateTime: string;
   boostScore: number;
   effectivenessScore: number;
-  isActive?: boolean; // Added for compatibility
-  metrics?: any; // Added for compatibility
+  isActive?: boolean;
+  metrics?: any;
 }
 
 export interface BoostAnalytics {

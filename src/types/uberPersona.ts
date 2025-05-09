@@ -9,7 +9,7 @@ export interface UberPersona {
   rating?: number;
   reviewCount?: number;
   location?: string;
-  displayName?: string;
+  displayName?: string; // Add displayName
   description?: string;
   bio?: string;
   languages?: string[];

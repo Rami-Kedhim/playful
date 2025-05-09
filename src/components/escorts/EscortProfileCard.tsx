@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -60,7 +59,7 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
   };
 
   const isAvailable = () => {
-    return escort.isAvailable || false;
+    return escort.isAvailable || escort.availableNow || false;
   };
 
   return (

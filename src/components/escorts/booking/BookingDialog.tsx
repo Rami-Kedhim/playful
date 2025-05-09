@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -29,17 +28,23 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
   const [time, setTime] = useState<string>('');
   const [duration, setDuration] = useState<string>('1 hour');
   
+  // Determine service types with fallback to true for both if unspecified
+  const providesInPersonServices = escort.providesInPersonServices !== undefined 
+    ? escort.providesInPersonServices 
+    : true;
+    
+  const providesVirtualContent = escort.providesVirtualContent !== undefined
+    ? escort.providesVirtualContent
+    : true;
+    
   // Default availability options based on escort type
   const getServiceOptions = () => {
     // Safely access these properties with fallbacks
-    const providesInPerson = escort.providesInPersonServices ?? true;
-    const providesVirtual = escort.providesVirtualContent ?? false;
-    
-    if (providesInPerson && providesVirtual) {
+    if (providesInPersonServices && providesVirtualContent) {
       return ['In-person', 'Virtual'];
-    } else if (providesInPerson) {
+    } else if (providesInPersonServices) {
       return ['In-person'];
-    } else if (providesVirtual) {
+    } else if (providesVirtualContent) {
       return ['Virtual'];
     }
     

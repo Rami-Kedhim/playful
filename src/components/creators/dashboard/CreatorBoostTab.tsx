@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -10,6 +9,7 @@ import BoostPackageSelection from "./boost/BoostPackageSelection";
 import BoostPurchaseConfirmation from "./boost/BoostPurchaseConfirmation";
 import BoostAnalytics from "./boost/BoostAnalytics";
 import { BoostStatus } from "@/types/boost";
+import { toDate } from '@/utils/formatters';
 
 interface CreatorBoostTabProps {
   profileId: string;
@@ -83,6 +83,28 @@ const CreatorBoostTab: React.FC<CreatorBoostTabProps> = ({
   };
   
   const selectedBoostPackage = packages.find(p => p.id === selectedPackage);
+
+  // Fix the mock status creation to use proper types
+  const createMockBoostStatus = (active: boolean): BoostStatus => {
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+    if (!active) {
+      return {
+        isActive: false,
+      };
+    }
+
+    return {
+      isActive: true,
+      packageName: "24 Hour Boost",
+      startedAt: now,
+      expiresAt: expiresAt,
+      timeRemaining: "23:59:59",
+      progress: 5,
+      packageId: "boost-24h"
+    };
+  };
 
   return (
     <div className="space-y-6">

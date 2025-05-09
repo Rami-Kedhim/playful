@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +36,13 @@ const UserProfile: React.FC<UserProfileProps> = ({ hideSignOut = false }) => {
   const initials = username.slice(0, 2).toUpperCase();
   const avatarUrl = user.avatarUrl || user.avatar_url;
 
+  // Format the created_at date with a fallback
+  const formattedDate = user.created_at 
+    ? (typeof user.created_at === 'string' 
+      ? new Date(user.created_at).toLocaleDateString() 
+      : user.created_at.toLocaleDateString())
+    : 'N/A';
+
   return (
     <Card>
       <CardHeader>
@@ -55,7 +61,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ hideSignOut = false }) => {
       <CardContent className="space-y-2">
         <div className="flex items-center gap-2">
           <User className="h-4 w-4 opacity-70" />
-          <span className="text-sm text-muted-foreground">Member since {new Date(user.created_at || '').toLocaleDateString()}</span>
+          <span className="text-sm text-muted-foreground">Member since {formattedDate}</span>
         </div>
       </CardContent>
       

@@ -27,6 +27,9 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
     description: "Track the performance of your boosts"
   };
 
+  // Check if boostStatus exists and has isActive property
+  const isBoostActive = boostStatus && 'isActive' in boostStatus ? boostStatus.isActive : false;
+
   return (
     <div className="space-y-6">
       <AnalyticsHeader {...headerProps} />
