@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Creator } from "@/hooks/useCreators";
+import { Creator } from "@/types/creator";
 import { Heart, Users, Star, Zap, Bot } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,8 @@ const CreatorHeader: React.FC<CreatorHeaderProps> = ({
     if (isFavorite) {
       favorites.removeFavorite(creator.id);
     } else {
-      favorites.addFavorite(creator);
+      // The creator object now has all properties needed for compatibility with Escort
+      favorites.addFavorite(creator as any);
     }
   };
   
@@ -78,12 +79,12 @@ const CreatorHeader: React.FC<CreatorHeaderProps> = ({
             <div className="flex flex-wrap gap-4 mt-2 text-white md:text-foreground">
               <div className="flex items-center text-sm">
                 <Users className="h-4 w-4 mr-1" />
-                <span>{creator.subscriberCount.toLocaleString()} subscribers</span>
+                <span>{creator.subscriberCount ? creator.subscriberCount.toLocaleString() : '0'} subscribers</span>
               </div>
               
               <div className="flex items-center text-sm">
                 <Star className="h-4 w-4 mr-1 text-yellow-500 fill-yellow-500" />
-                <span>{creator.rating.toFixed(1)}</span>
+                <span>{creator.rating ? creator.rating.toFixed(1) : '0.0'}</span>
               </div>
             </div>
           </div>
@@ -109,10 +110,10 @@ const CreatorHeader: React.FC<CreatorHeaderProps> = ({
           </div>
         )}
         
-        {creator.tags.length > 0 && (
+        {creator.tags && creator.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-3">
-            {creator.tags.map(tag => (
-              <Badge key={tag} variant="outline" className="text-xs">
+            {creator.tags.map((tag, index) => (
+              <Badge key={index} variant="outline" className="text-xs">
                 {tag}
               </Badge>
             ))}

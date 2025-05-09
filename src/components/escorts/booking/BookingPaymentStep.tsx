@@ -1,21 +1,27 @@
 
 import React from 'react';
-import { Escort } from '@/types/Escort';
-import { Booking } from '@/types/booking';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { format } from 'date-fns';
-import { Check, Clock, DollarSign, MapPin } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { format } from 'date-fns';
+import { Escort } from '@/types/escort';
+import { Booking } from '@/types/booking';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { formatCurrency } from '@/utils/formatters';
 
 interface BookingPaymentStepProps {
   escort: Escort;
   booking: Partial<Booking>;
   onBack: () => void;
   onComplete: () => void;
-  isSubmitting: boolean;
+  isSubmitting?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -24,165 +30,120 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
   escort,
   booking,
   onBack,
-  onComplete,
-  isSubmitting,
+  isSubmitting = false,
   onConfirm,
-  onCancel,
+  onCancel
 }) => {
-  // Normalize height if necessary as string (optional enhancement)
-  const normalizedEscort = {
-    ...escort,
-    height: escort.height !== undefined && typeof escort.height !== 'string'
-      ? String(escort.height)
-      : escort.height,
+  // Calculate the price based on the duration selected
+  const calculatePrice = () => {
+    // Handle cases where height might not be the right type
+    if (escort.height !== undefined && typeof escort.height !== 'string') {
+      escort = {
+        ...escort,
+        height: String(escort.height)
+      };
+    }
+    
+    // Safely get the price from rates if available
+    const getRate = () => {
+      if (escort.rates) {
+        if (booking.duration === '1 hour') return escort.rates.hourly || escort.price;
+        if (booking.duration === '2 hours') return escort.rates.twoHours || (escort.price * 1.8);
+        if (booking.duration === '3 hours') return escort.price * 2.5;
+        if (booking.duration === 'Overnight') return escort.rates.overnight || (escort.price * 5);
+      }
+      return escort.price;
+    };
+
+    return getRate();
   };
 
-  const formatDate = (dateString: string | Date | undefined) => {
-    if (!dateString) return 'N/A';
-    return format(new Date(dateString), 'EEEE, MMMM d, yyyy');
-  };
-
-  const formatTime = (timeString: string | undefined) => {
-    if (!timeString) return 'N/A';
-    return timeString;
-  };
-
-  const formatDuration = (duration: number | undefined) => {
-    if (!duration) return 'N/A';
-    if (duration === 60) return '1 hour';
-    if (duration === 120) return '2 hours';
-    if (duration === 180) return '3 hours';
-    if (duration === 240) return '4 hours';
-    if (duration > 240) return 'Overnight';
-    return `${duration} minutes`;
-  };
-
-  const calculateTotal = () => {
-    const basePrice = booking.price || 0;
-    const serviceFee = Math.round(basePrice * 0.05);
-    return basePrice + serviceFee;
-  };
+  const price = calculatePrice();
+  const commission = Math.round(price * 0.15); // Example commission calculation
+  const total = price + commission;
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Booking Confirmation</CardTitle>
-        <CardDescription>
-          Review your booking details before confirming
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Avatar className="h-12 w-12">
-            <AvatarImage src={normalizedEscort.profileImage || normalizedEscort.imageUrl || normalizedEscort.avatar} />
-            <AvatarFallback>{normalizedEscort.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h3 className="font-medium">{normalizedEscort.name}</h3>
-            {normalizedEscort.location && (
-              <div className="flex items-center text-sm text-muted-foreground">
-                <MapPin className="h-3.5 w-3.5 mr-1" />
-                <span>{normalizedEscort.location}</span>
+    <Dialog open onOpenChange={onCancel}>
+      <DialogContent className="sm:max-w-[550px]">
+        <DialogHeader>
+          <DialogTitle>Confirm Your Booking</DialogTitle>
+          <DialogDescription>
+            Please review your booking details and confirm payment to proceed.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="mt-4 space-y-6">
+          {/* Escort info */}
+          <div className="flex items-center space-x-4">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={escort.imageUrl || escort.profileImage} />
+              <AvatarFallback>{escort.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="font-semibold">{escort.name}</h3>
+              <p className="text-sm text-muted-foreground">{escort.location}</p>
+            </div>
+          </div>
+
+          {/* Booking details */}
+          <Card>
+            <CardContent className="p-4 space-y-4">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <p className="text-sm text-muted-foreground">Date</p>
+                  <p className="font-medium">
+                    {booking.date ? format(new Date(booking.date), 'PPP') : 'Not specified'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Time</p>
+                  <p className="font-medium">{booking.time || 'Not specified'}</p>
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-3 bg-muted/30 p-4 rounded-md">
-          <div className="flex justify-between">
-            <div className="flex items-center text-sm">
-              <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span>Date</span>
-            </div>
-            <span className="text-sm font-medium">{formatDate(booking.date)}</span>
-          </div>
-          <div className="flex justify-between">
-            <div className="flex items-center text-sm">
-              <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span>Time</span>
-            </div>
-            <span className="text-sm font-medium">{formatTime(booking.startTime)}</span>
-          </div>
-          <div className="flex justify-between">
-            <div className="flex items-center text-sm">
-              <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span>Duration</span>
-            </div>
-            <span className="text-sm font-medium">{formatDuration(booking.duration)}</span>
-          </div>
-          {booking.service && (
-            <div className="flex justify-between">
-              <div className="flex items-center text-sm">
-                <Check className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span>Service</span>
+              <div>
+                <p className="text-sm text-muted-foreground">Duration</p>
+                <p className="font-medium">{booking.duration || '1 hour'}</p>
               </div>
-              <span className="text-sm font-medium capitalize">{booking.service}</span>
-            </div>
-          )}
-          {booking.location && (
-            <div className="flex justify-between">
-              <div className="flex items-center text-sm">
-                <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span>Location</span>
+
+              <Separator />
+
+              {/* Price breakdown */}
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <p>Base Rate</p>
+                  <p>{formatCurrency(price)}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p>Platform Fee</p>
+                  <p>{formatCurrency(commission)}</p>
+                </div>
+                <Separator />
+                <div className="flex justify-between font-semibold">
+                  <p>Total</p>
+                  <p>{formatCurrency(total)}</p>
+                </div>
               </div>
-              <span className="text-sm font-medium">{booking.location}</span>
-            </div>
-          )}
-        </div>
+            </CardContent>
+          </Card>
 
-        <Separator />
+          <div className="pt-2">
+            <p className="text-sm text-muted-foreground mb-2">
+              By confirming, you agree to our terms of service and privacy policy.
+              Payment will be processed securely upon confirmation from the escort.
+            </p>
+          </div>
 
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span className="text-sm">Base price</span>
-            <span className="text-sm font-medium">${booking.price}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm">Service fee</span>
-            <span className="text-sm font-medium">${Math.round((booking.price || 0) * 0.05)}</span>
-          </div>
-          <div className="flex justify-between font-medium">
-            <span>Total</span>
-            <span>${calculateTotal()}</span>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onBack} disabled={isSubmitting}>
+              Back
+            </Button>
+            <Button onClick={onConfirm} disabled={isSubmitting}>
+              {isSubmitting ? 'Processing...' : 'Confirm Booking'}
+            </Button>
           </div>
         </div>
-
-        <div className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-md text-sm text-amber-800 dark:text-amber-300">
-          <p className="flex items-center">
-            <DollarSign className="h-4 w-4 mr-2 flex-shrink-0" />
-            <span>
-              A deposit of ${Math.round(calculateTotal() * 0.2)} will be charged now to secure your booking.
-            </span>
-          </p>
-        </div>
-      </CardContent>
-      <CardFooter className="flex flex-col space-y-2">
-        <Button 
-          className="w-full" 
-          onClick={onConfirm}
-          disabled={isSubmitting}
-        >
-          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isSubmitting ? "Processing..." : "Confirm & Pay"}
-        </Button>
-        <div className="flex justify-between w-full">
-          <Button 
-            variant="outline" 
-            onClick={onBack}
-            disabled={isSubmitting}
-          >
-            Back
-          </Button>
-          <Button 
-            variant="ghost" 
-            onClick={onCancel}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-        </div>
-      </CardFooter>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 };
 

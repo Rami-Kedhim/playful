@@ -82,7 +82,6 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
           activeBoosts={boostStatus?.isActive ? 1 : 0}
         />
       </div>
-      
     </div>
   );
 };

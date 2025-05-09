@@ -1,11 +1,9 @@
 
-// Fix import to unify to '@/types/Escort' and normalize height to string type
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { bookingService } from '@/services/bookingService';
-import { Escort } from '@/types/Escort'; // unified import casing
+import { Escort } from '@/types/escort';
 import { Booking } from '@/types/booking';
 import { toast } from '@/components/ui/use-toast';
 import BookingDialog from '../detail/booking/BookingDialog';
@@ -161,4 +159,3 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
 };
 
 export default BookingFlow;
-

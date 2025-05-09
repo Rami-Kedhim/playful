@@ -1,26 +1,17 @@
 
-import React from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React from 'react';
+import { AnalyticsHeaderProps } from './index';
 
-interface AnalyticsHeaderProps {
-  timeRange: string;
-  setTimeRange: (value: string) => void;
-}
-
-const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({ 
-  timeRange, 
-  setTimeRange 
+const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
+  title,
+  description,
+  children
 }) => {
   return (
-    <div className="flex justify-between items-center">
-      <h2 className="text-2xl font-bold">Analytics</h2>
-      <Tabs value={timeRange} onValueChange={setTimeRange}>
-        <TabsList>
-          <TabsTrigger value="7days">7 Days</TabsTrigger>
-          <TabsTrigger value="30days">30 Days</TabsTrigger>
-          <TabsTrigger value="90days">90 Days</TabsTrigger>
-        </TabsList>
-      </Tabs>
+    <div className="mb-6">
+      <h2 className="text-2xl font-bold">{title}</h2>
+      <p className="text-muted-foreground">{description}</p>
+      {children}
     </div>
   );
 };

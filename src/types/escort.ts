@@ -40,6 +40,11 @@ export interface Rates {
   // Common rates
   hourly?: number;
   overnight?: number;
+  twoHours?: number;
+  weekend?: number;
+  // Service-specific rates
+  incall?: Record<string, number>;
+  outcall?: Record<string, number>;
 }
 
 // Main escort profile interface
@@ -60,26 +65,46 @@ export interface Escort {
   description?: string;
   verificationLevel?: VerificationLevel;
   isVerified?: boolean;
+  verified?: boolean;
   isAvailable?: boolean;
   boosted?: boolean;
   featured?: boolean;
-  // Add missing properties
+  // Add missing properties that are used across components
   rates?: Rates;
   avatarUrl?: string;
   avatar?: string;
   avatar_url?: string;
   height?: string | number;
+  weight?: string | number;
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
-  availability?: string[];
+  availability?: string[] | Availability | string;
   sexualOrientation?: string;
   responseRate?: number;
+  services?: string[];
+  languages?: string[];
+  payment_methods?: string[];
+  deposit_required?: boolean;
+  city?: string;
+  shortDescription?: string;
+  photos?: string[];
+  reviews?: any[];
+  gallery?: string[];
+  contactInfo?: {
+    email?: string;
+    phone?: string;
+    website?: string;
+    socialMedia?: Record<string, string>;
+  };
+  profileType?: string;
+  boostLevel?: number;
+  isAI?: boolean;
 }
 
 export interface ExtendedEscort extends Escort {
   providesInPersonServices: boolean;
   providesVirtualContent: boolean;
-  featured?: boolean;
+  featured: boolean;
 }
 
 export interface ContactInfo {

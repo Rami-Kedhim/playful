@@ -1,35 +1,24 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, MessageSquare, Heart } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Escort } from '@/types/Escort'; // Fixed casing to match the most commonly used import
+import { Escort } from '@/types/escort';
 import { formatCurrency } from '@/lib/utils';
-import { useFavorites } from '@/contexts/FavoritesContext';
 
 interface EscortContactCardProps {
   escort: Escort;
-  isFavorite: boolean;
-  onBookingClick: () => void;
-  onMessageClick: () => void;
+  onContactRequest?: () => void;
+  isFavorite?: boolean;
+  onFavoriteToggle?: () => void;
 }
 
 const EscortContactCard: React.FC<EscortContactCardProps> = ({
   escort,
-  isFavorite,
-  onBookingClick,
-  onMessageClick
+  onContactRequest,
+  isFavorite = false,
+  onFavoriteToggle
 }) => {
-  const { addFavorite, removeFavorite } = useFavorites();
-  
-  const handleFavoriteClick = () => {
-    if (isFavorite) {
-      removeFavorite(escort.id);
-    } else {
-      addFavorite(escort);
-    }
-  };
-  
   return (
     <Card>
       <CardHeader>
@@ -51,7 +40,12 @@ const EscortContactCard: React.FC<EscortContactCardProps> = ({
             <div>
               <p className="text-sm font-medium mb-1">Availability</p>
               <div className="text-sm text-muted-foreground">
-                Available by appointment
+                {typeof escort.availability === 'string' 
+                  ? escort.availability 
+                  : Array.isArray(escort.availability)
+                  ? escort.availability.join(', ')
+                  : 'Available by appointment'
+                }
               </div>
             </div>
           )}
@@ -68,24 +62,26 @@ const EscortContactCard: React.FC<EscortContactCardProps> = ({
       </CardContent>
       
       <CardFooter className="flex flex-col space-y-3">
-        <Button onClick={onBookingClick} className="w-full gap-2">
+        <Button onClick={() => {}} className="w-full gap-2">
           <Calendar className="h-4 w-4" />
           Book Now
         </Button>
         
-        <Button variant="outline" onClick={onMessageClick} className="w-full gap-2">
+        <Button variant="outline" onClick={onContactRequest} className="w-full gap-2">
           <MessageSquare className="h-4 w-4" />
           Send Message
         </Button>
         
-        <Button 
-          variant="ghost" 
-          onClick={handleFavoriteClick} 
-          className={`w-full gap-2 ${isFavorite ? 'text-red-500' : ''}`}
-        >
-          <Heart className="h-4 w-4" fill={isFavorite ? 'currentColor' : 'none'} />
-          {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-        </Button>
+        {onFavoriteToggle && (
+          <Button 
+            variant="ghost" 
+            onClick={onFavoriteToggle} 
+            className={`w-full gap-2 ${isFavorite ? 'text-red-500' : ''}`}
+          >
+            <Heart className="h-4 w-4" fill={isFavorite ? 'currentColor' : 'none'} />
+            {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

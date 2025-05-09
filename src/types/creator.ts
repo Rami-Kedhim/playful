@@ -53,7 +53,7 @@ export interface Creator {
   rates?: Record<string, number>;
   price?: number;
   responseRate?: number;
-  gender?: string; // Added gender property for compatibility with Escort type
+  gender: string; // Make this required for compatibility with Escort
   
   // Additional fields for compatibility with Escort type
   age?: number;
@@ -68,6 +68,11 @@ export interface Creator {
   imageUrl?: string;
   profileImage?: string;
   images?: string[];
+  username?: string;
+  subscriberCount?: number;
+  isPremium?: boolean;
+  isAI?: boolean;
+  featured?: boolean;
 }
 
 // Creator payout types

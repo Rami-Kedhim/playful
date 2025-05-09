@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StarIcon, MapPin, Clock, DollarSign, Check } from 'lucide-react';
-import { Escort } from '@/types/Escort';
+import { Escort } from '@/types/escort';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ServiceTypeBadge from './ServiceTypeBadge';
 
@@ -60,7 +60,7 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
   };
 
   const isAvailable = () => {
-    return escort.availableNow || false;
+    return escort.isAvailable || false;
   };
 
   return (
@@ -150,4 +150,3 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
 };
 
 export default EscortProfileCard;
-
