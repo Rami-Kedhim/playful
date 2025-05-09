@@ -44,6 +44,17 @@ export interface Escort {
   availability?: EscortAvailability;
   payment_methods?: string[];
   deposit_required?: boolean;
+  
+  // Add missing properties
+  languages?: string[];
+  profileImage?: string;
+  imageUrl?: string;
+  verified?: boolean;
+  reviewCount?: number;
+  tags?: string[];
+  availableNow?: boolean;
+  responseRate?: number;
+  description?: string;
   subscriptionPrice?: number;
 }
 

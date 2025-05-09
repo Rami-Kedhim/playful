@@ -67,8 +67,32 @@ export interface PulseBoost {
   startDate: Date;
   endDate: Date;
   status: string;
+  // Adding missing properties for components that use them
+  name: string;
+  description: string;
+  price: number;
+  price_ubx?: number;
+  duration: string;
+  features: string[];
+  durationMinutes?: number;
+  isMostPopular?: boolean;
+  visibility?: string;
+  visibility_increase?: number;
+  color?: string;
+  badgeColor?: string;
 }
 
-export type EnhancedBoostStatus = 'active' | 'expired' | 'pending' | 'cancelled';
-
 export type BoostStatus = 'active' | 'inactive' | 'pending' | 'expired';
+
+// Redefine EnhancedBoostStatus to be an object type instead of a string union
+export interface EnhancedBoostStatus {
+  isActive: boolean;
+  packageId?: string;
+  packageName?: string;
+  expiresAt?: Date;
+  startedAt?: Date;
+  timeRemaining?: string;
+  progress?: number;
+  remainingTime?: string;
+  boostPackage?: BoostPackage;
+}

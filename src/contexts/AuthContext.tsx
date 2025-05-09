@@ -1,7 +1,7 @@
 
 import React, { ReactNode } from 'react';
 import { useAuthContext as useBaseAuthContext, AuthContext } from '@/hooks/auth/useAuthContext';
-import type { AuthContextType } from '@/types/auth';
+import type { AuthContextType } from '@/types/user';
 
 // Provider component that wraps the app and makes auth object available to children
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {

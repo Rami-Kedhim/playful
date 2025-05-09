@@ -1,47 +1,50 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Booking } from '@/types/booking';
-import { formatDate } from '@/lib/utils';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock } from "lucide-react";
+import { formatDate } from "@/utils/formatters";
+import { Booking } from "@/components/escorts/booking/types";
 
 interface UpcomingBookingsProps {
   bookings: Booking[];
-  isLoading?: boolean; // Add the missing property
-  title?: string;
-  emptyMessage?: string;
-  maxItems?: number;
+  isLoading?: boolean;
+  onViewBooking?: (booking: Booking) => void;
 }
 
 const UpcomingBookings: React.FC<UpcomingBookingsProps> = ({
-  bookings,
+  bookings = [],
   isLoading = false,
-  title = "Upcoming Bookings",
-  emptyMessage = "No upcoming bookings",
-  maxItems = 5
+  onViewBooking
 }) => {
-  const displayBookings = bookings.slice(0, maxItems);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'canceled': return 'bg-red-100 text-red-800';
-      case 'completed': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>{title}</CardTitle>
+          <CardTitle>Upcoming Bookings</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex justify-center p-4">
-            <div className="animate-pulse">Loading bookings...</div>
+          <div className="space-y-2">
+            {[1, 2].map(i => (
+              <div key={i} className="p-4 border rounded-md animate-pulse">
+                <div className="h-4 bg-muted rounded w-1/3 mb-2"></div>
+                <div className="h-3 bg-muted rounded w-1/4"></div>
+              </div>
+            ))}
           </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (bookings.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Upcoming Bookings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-sm">You have no upcoming bookings.</p>
         </CardContent>
       </Card>
     );
@@ -50,39 +53,54 @@ const UpcomingBookings: React.FC<UpcomingBookingsProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle>Upcoming Bookings</CardTitle>
       </CardHeader>
       <CardContent>
-        {displayBookings.length === 0 ? (
-          <p className="text-center text-muted-foreground py-4">{emptyMessage}</p>
-        ) : (
-          <div className="space-y-4">
-            {displayBookings.map((booking) => (
-              <div key={booking.id} className="flex justify-between items-center border-b pb-4">
+        <div className="space-y-3">
+          {bookings.map(booking => (
+            <div 
+              key={booking.id} 
+              className="p-4 border rounded-md hover:bg-accent/5 transition-colors cursor-pointer"
+              onClick={() => onViewBooking && onViewBooking(booking)}
+            >
+              <div className="flex justify-between items-start">
                 <div>
-                  <p className="font-medium">{booking.escortName || 'Unnamed Escort'}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="font-medium">{booking.escortName || "Unnamed Escort"}</h3>
+                  <div className="flex items-center mt-1 text-sm text-muted-foreground">
+                    <Calendar className="h-3 w-3 mr-1" />
                     {formatDate(booking.date, { 
                       year: 'numeric', 
                       month: 'short', 
                       day: 'numeric' 
                     })}
-                  </p>
-                  <p className="text-xs">{booking.duration} hrs</p>
+                    <Clock className="h-3 w-3 ml-3 mr-1" />
+                    {booking.time}, {booking.duration}
+                  </div>
                 </div>
-                <div className="text-right">
-                  <Badge className={getStatusColor(booking.status)}>
-                    {booking.status}
-                  </Badge>
-                  <p className="text-sm mt-1">${booking.price || booking.totalPrice || 0}</p>
-                </div>
+                <Badge variant={getStatusVariant(booking.status)}>
+                  {booking.status}
+                </Badge>
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
+};
+
+const getStatusVariant = (status: string) => {
+  switch (status) {
+    case 'confirmed':
+      return 'success';
+    case 'pending':
+      return 'outline';
+    case 'rejected':
+    case 'cancelled':
+      return 'destructive';
+    default:
+      return 'secondary';
+  }
 };
 
 export default UpcomingBookings;

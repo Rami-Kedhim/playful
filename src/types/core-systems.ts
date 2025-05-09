@@ -1,111 +1,106 @@
 
 export interface SystemStatus {
-  online: boolean;
-  uptime: number;
-  performance: number;
-  lastChecked: Date;
-  isActive?: boolean; // Add this property to fix errors
+  isActive?: boolean;
+  lastCheckTime: Date;
+  componentStatus: Record<string, boolean>;
 }
 
 export interface SystemMetrics {
-  cpu: number;
-  memory: number;
-  storage: number;
-  network: number;
-  latency: number;
+  uptime: number;
+  requestsPerSecond: number;
+  averageResponseTime: number;
+  errorRate: number;
 }
 
-// Alias for use in components
 export type SystemHealthMetrics = SystemMetrics;
 
 export interface SessionValidationResult {
-  isValid: boolean;
+  valid: boolean;
+  expires?: Date;
   userId?: string;
-  expiresAt?: Date;
-  valid?: boolean; // Add this property to fix errors
+  sessionId?: string;
 }
 
 export interface SystemIntegrityResult {
-  status: boolean;
-  timestamp: Date;
-  details?: string;
-  valid?: boolean; // Add this property to fix errors
-  integrity?: boolean; // Add this property to fix errors
+  integrity: boolean;
+  details: {
+    filesChecked: number;
+    corruptionDetected: boolean;
+    unauthorized: boolean;
+  };
 }
 
 export interface HermesSystem {
-  getInsights(): Promise<HermesInsight[]>;
-  processFeedback(userId: string, data: any): Promise<boolean>;
-  calculateVisibilityScore(profileId: string): Promise<number>;
-  // Add other methods used by components
+  calculateTimeImpact(currentHour?: number): number;
+  calculateVisibilityScore(startScore: number, timeSinceLastTop: number): number;
+  updateSystemLoad(load: number): void;
 }
 
 export interface HermesInsight {
-  id: string;
-  userId: string;
-  type: string;
-  content: string;
   timestamp: Date;
-  score?: number;
+  score: number;
+  recommendation: string;
 }
 
 export interface OxumSystem {
-  getSystemStatus(): Promise<SystemStatus>;
-  validateSession(sessionId: string): Promise<SessionValidationResult>;
-  checkIntegrity(): Promise<SystemIntegrityResult>;
-  // Add other methods used by components
+  addNode(nodeId: string, weight: number): boolean;
+  removeNode(nodeId: string): boolean;
+  calculateNodeValue(nodeId: string): number;
+  balanceNetwork(): void;
 }
 
 export interface UberCoreSystem {
-  initialize(): Promise<boolean>;
-  validateSession(userId: string): SessionValidationResult;
-  checkSystemIntegrity(): SystemIntegrityResult;
+  validateSession(token: string): Promise<SessionValidationResult>;
+  checkSystemIntegrity(): Promise<SystemIntegrityResult>;
   getSystemMetrics(): SystemMetrics;
-  // Add other methods used by components
 }
 
 export interface LucieAISystem {
   generateContent(params: GenerateContentParams): Promise<GenerateContentResult>;
   moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
   analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult>;
-  // Add other methods used by components
 }
 
 export interface GenerateContentParams {
   prompt: string;
-  context?: any;
-  length?: number;
+  maxTokens?: number;
   temperature?: number;
+  format?: 'text' | 'json' | 'html';
 }
 
 export interface GenerateContentResult {
   content: string;
-  tokens: number;
-  success: boolean;
-  error?: string;
+  usage: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
 }
 
 export interface ModerateContentParams {
   content: string;
-  user_id?: string;
-  context?: string;
+  categories?: string[];
+  threshold?: number;
 }
 
 export interface ModerateContentResult {
-  approved: boolean;
-  score: number;
-  reasons?: string[];
-  success: boolean;
+  flagged: boolean;
+  categories: Record<string, number>;
+  overall_score: number;
+  action_recommended: string;
 }
 
 export interface SentimentAnalysisParams {
-  content: string;
+  text: string;
   detailed?: boolean;
 }
 
 export interface SentimentAnalysisResult {
-  score: number;
   sentiment: 'positive' | 'negative' | 'neutral';
-  details?: Record<string, number>;
-  success: boolean;
+  confidence: number;
+  details?: {
+    emotions: Record<string, number>;
+    topics: string[];
+    intent: string;
+  };
 }

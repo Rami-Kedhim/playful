@@ -33,12 +33,12 @@ const BoostStatusIndicator: React.FC<BoostStatusIndicatorProps> = ({ status }) =
               <Zap className="mr-1 h-3 w-3" />
               Boost Active
             </Badge>
-            <span className="text-sm font-medium">{status.packageName}</span>
+            <span className="text-sm font-medium">{status.packageName || 'Unknown Package'}</span>
           </div>
           
           <div className="flex items-center text-sm text-muted-foreground">
             <Clock className="mr-1 h-3 w-3" />
-            {status.timeRemaining} remaining
+            {status.timeRemaining || 'Unknown time'} remaining
           </div>
         </div>
         
@@ -47,7 +47,7 @@ const BoostStatusIndicator: React.FC<BoostStatusIndicatorProps> = ({ status }) =
             <span>Progress</span>
             <span>{Math.round(status.progress || 0)}%</span>
           </div>
-          <Progress value={status.progress} className="h-2" />
+          <Progress value={status.progress || 0} className="h-2" />
         </div>
         
         <div className="text-xs text-muted-foreground">

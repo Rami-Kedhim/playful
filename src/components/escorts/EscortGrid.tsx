@@ -1,11 +1,18 @@
 
 import React from 'react';
-import { Escort } from '@/types/Escort'; // Updated to consistent casing
+import { Escort } from '@/types/Escort'; 
 import EscortCard from './EscortCard';
 
 export interface ExtendedEscort extends Escort {
   sexualOrientation?: string;
   lastActive?: string | Date;
+  reviewCount?: number;
+  tags?: string[];
+  imageUrl?: string;
+  profileImage?: string;
+  verified?: boolean;
+  availableNow?: boolean;
+  responseRate?: number;
 }
 
 interface EscortGridProps {
