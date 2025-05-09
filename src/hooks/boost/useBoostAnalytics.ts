@@ -1,127 +1,90 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-// Define the AnalyticsData interface
 export interface AnalyticsData {
   views: number;
-  additionalViews: number;
-  engagementIncrease: number;
-  rankingPosition: number;
-  conversionRate: number;
-  messageRate: number;
-  bookingRate: number;
-  change?: number;
-  withBoost?: number;
-  withoutBoost?: number;
-  boostEfficiency?: number;
-  remainingTime?: string;
-  impressions?: {
-    today?: number;
-    yesterday?: number;
-    weeklyAverage?: number;
-    withBoost?: number;
-    withoutBoost?: number;
-    increase?: number;
+  impressions: {
+    value: number;
     change?: number;
-    value?: number;
+    withBoost?: number;
+  };
+  interactions: {
+    value: number;
+    change?: number;
+  };
+  totalBoosts?: number;
+  activeBoosts?: number;
+  averageBoostScore?: number;
+  boostHistory?: Array<{
+    date: Date;
+    score: number;
+  }>;
+}
+
+export interface BoostAnalytics {
+  totalBoosts: number;
+  activeBoosts: number;
+  averageBoostScore: number;
+  boostHistory: Array<{
+    date: Date;
+    score: number;
+  }>;
+  views?: number;
+  impressions?: {
+    value: number;
+    change?: number;
+    withBoost?: number;
   };
   interactions?: {
-    today?: number;
-    yesterday?: number;
-    weeklyAverage?: number;
-    withBoost?: number;
-    withoutBoost?: number;
-    increase?: number;
+    value: number;
     change?: number;
-    value?: number;
-  };
-  rank?: {
-    current?: number;
-    previous?: number;
-    change?: number;
-  };
-  conversions?: number;
-  timeActive?: string;
-  trending?: boolean;
-  roi?: number;
-  clicks?: {
-    today?: number;
-    yesterday?: number;
-    lastWeek?: number;
-    thisWeek?: number;
-    change?: number;
-    total?: number;
   };
 }
 
-// Define the BoostAnalytics interface extending AnalyticsData
-export interface BoostAnalytics extends AnalyticsData {
-  // Additional properties specific to BoostAnalytics
-  boostEfficiency?: number;
-  remainingTime?: string;
-}
+export const useBoostAnalytics = (userId: string) => {
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-export const useBoostAnalytics = (initialData?: Partial<BoostAnalytics>) => {
-  const [analytics, setAnalytics] = useState<BoostAnalytics>({
-    views: initialData?.views || 0,
-    additionalViews: initialData?.additionalViews || 0,
-    engagementIncrease: initialData?.engagementIncrease || 0,
-    rankingPosition: initialData?.rankingPosition || 0,
-    conversionRate: initialData?.conversionRate || 0,
-    messageRate: initialData?.messageRate || 0,
-    bookingRate: initialData?.bookingRate || 0,
-    change: initialData?.change || 0,
-    withBoost: initialData?.withBoost || 0,
-    withoutBoost: initialData?.withoutBoost || 0,
-    boostEfficiency: initialData?.boostEfficiency || 0,
-    remainingTime: initialData?.remainingTime || '',
-  });
-
-  const updateAnalytics = (data: Partial<BoostAnalytics>) => {
-    setAnalytics(prev => ({ ...prev, ...data }));
-  };
-
-  // Mock function to simulate refreshing analytics data
-  const refreshAnalytics = async (): Promise<void> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Update with random data
-    setAnalytics({
-      views: Math.floor(Math.random() * 1000),
-      additionalViews: Math.floor(Math.random() * 500),
-      engagementIncrease: Math.random() * 0.5,
-      rankingPosition: Math.floor(Math.random() * 10) + 1,
-      conversionRate: Math.random() * 0.25,
-      messageRate: Math.random() * 0.15,
-      bookingRate: Math.random() * 0.1,
-      change: Math.random() * 0.3,
-      withBoost: Math.floor(Math.random() * 1000),
-      withoutBoost: Math.floor(Math.random() * 500),
-      boostEfficiency: Math.random() * 0.9,
-      remainingTime: '12:34:56',
-      conversions: Math.floor(Math.random() * 20),
-      impressions: {
-        value: Math.floor(Math.random() * 1000),
-        change: Math.random() * 0.3,
-        withBoost: Math.floor(Math.random() * 1000),
-        withoutBoost: Math.floor(Math.random() * 500),
-      },
-      interactions: {
-        value: Math.floor(Math.random() * 500),
-        change: Math.random() * 0.3,
-        withBoost: Math.floor(Math.random() * 500),
-        withoutBoost: Math.floor(Math.random() * 250),
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        // Mock analytics data
+        setTimeout(() => {
+          setAnalytics({
+            views: 120,
+            impressions: {
+              value: 450,
+              change: 15,
+              withBoost: 675
+            },
+            interactions: {
+              value: 45,
+              change: 22
+            },
+            totalBoosts: 3,
+            activeBoosts: 1,
+            averageBoostScore: 7.8,
+            boostHistory: [
+              { date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), score: 7.2 },
+              { date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), score: 7.5 },
+              { date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), score: 7.8 },
+              { date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), score: 8.1 },
+              { date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), score: 7.9 },
+              { date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), score: 8.0 },
+              { date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), score: 8.2 }
+            ]
+          });
+          setLoading(false);
+        }, 1000);
+      } catch (err: any) {
+        setError(err);
+        setLoading(false);
       }
-    });
-  };
+    };
 
-  return {
-    analytics,
-    updateAnalytics,
-    refreshAnalytics
-  };
+    fetchAnalytics();
+  }, [userId]);
+
+  return { analytics, loading, error };
 };
-
-// Export the interfaces and hook
-export default useBoostAnalytics;

@@ -2,23 +2,28 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { useBoostAnalytics } from '@/hooks/useBoostAnalytics';
+import { useBoostAnalytics } from '@/hooks/boost/useBoostAnalytics';
 
 interface HermesOxumQueueVisualizationProps {
   userId: string;
-  activeBoosts: number;
+  activeBoosts?: number;
+  profileId?: string; // Add profileId prop to fix TypeScript errors
 }
 
 const HermesOxumQueueVisualization: React.FC<HermesOxumQueueVisualizationProps> = ({
   userId,
-  activeBoosts = 0
+  activeBoosts = 0,
+  profileId // Add profileId to component props
 }) => {
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
   const [totalInQueue, setTotalInQueue] = useState<number>(100);
   const [progress, setProgress] = useState(0);
   
+  // Use userId or profileId depending on which is provided
+  const userIdToUse = profileId || userId;
+  
   // Fix the argument error by providing the userId
-  const { analytics, loading } = useBoostAnalytics(userId);
+  const { analytics, loading } = useBoostAnalytics(userIdToUse);
   
   useEffect(() => {
     // Simulate queue position - in production this would come from Hermes

@@ -100,6 +100,7 @@ export interface Escort {
   locations?: string[]; // Added for BookingForm
   providesInPersonServices?: boolean; // Added for EscortResults
   providesVirtualContent?: boolean; // Added for EscortResults
+  bodyType?: string; // Added for EscortAbout
 }
 
 export interface ContactInfo {
@@ -130,7 +131,7 @@ export interface EscortFilters {
 }
 
 // Added for profile completion hook to work with extended escort type
-export type ExtendedEscort = Escort & {
-  providesInPersonServices?: boolean;
-  providesVirtualContent?: boolean;
-};
+export interface ExtendedEscort extends Escort {
+  providesInPersonServices: boolean;
+  providesVirtualContent: boolean;
+}
