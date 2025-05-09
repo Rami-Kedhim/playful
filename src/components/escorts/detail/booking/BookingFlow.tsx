@@ -6,9 +6,9 @@ import { bookingService } from '@/services/bookingService';
 import { Escort } from '@/types/escort';
 import { Booking } from '@/types/booking';
 import { toast } from '@/components/ui/use-toast';
-import BookingDialog from '../detail/booking/BookingDialog';
+import BookingDialog from './BookingDialog'; // Updated path
 import BookingConfirmation from './BookingConfirmation';
-import BookingPaymentStep from './BookingPaymentStep';
+import BookingPaymentStep from './BookingPaymentStep'; // Updated path
 
 interface BookingFlowProps {
   escort: Escort;

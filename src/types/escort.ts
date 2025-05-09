@@ -47,6 +47,19 @@ export interface Rates {
   outcall?: Record<string, number>;
 }
 
+// Stats interface for escort profile
+export interface EscortStats {
+  averageRating?: number;
+  totalReviews?: number;
+  reviewCount?: number;
+  height?: string | number;
+  weight?: string | number;
+  bust?: string | number;
+  waist?: string | number;
+  hips?: string | number;
+  rating?: number; // Added this since it's being used
+}
+
 // Main escort profile interface
 export interface Escort {
   id: string;
@@ -61,15 +74,15 @@ export interface Escort {
   imageUrl?: string;
   profileImage?: string;
   images?: string[];
+  // Added missing properties below
   bio?: string;
   description?: string;
-  verificationLevel?: VerificationLevel;
+  verificationLevel?: VerificationLevel | string;
   isVerified?: boolean;
   verified?: boolean;
   isAvailable?: boolean;
   boosted?: boolean;
   featured?: boolean;
-  // Properties that were missing before
   rates?: Rates;
   avatarUrl?: string;
   avatar?: string;
@@ -98,16 +111,7 @@ export interface Escort {
     website?: string;
     socialMedia?: Record<string, string>;
   };
-  stats?: {
-    averageRating?: number;
-    totalReviews?: number;
-    reviewCount?: number;
-    height?: string | number;
-    weight?: string | number;
-    bust?: string | number;
-    waist?: string | number;
-    hips?: string | number;
-  };
+  stats?: EscortStats;
   profileType?: string;
   boostLevel?: number;
   isAI?: boolean;
@@ -158,4 +162,4 @@ export interface EscortFilters {
 }
 
 // Export Video type to solve module import errors
-export type { Video };
+export { Video };

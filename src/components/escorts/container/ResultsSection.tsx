@@ -99,39 +99,21 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
     <div>
       <EscortResults
         escorts={escorts}
-        clearFilters={clearFilters}
+        isLoading={isLoading}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         totalPages={totalPages}
-        isLoading={isLoading}
       />
 
       {totalPages > 1 && (
-        <Pagination className="mt-8">
-          <div className="flex justify-center items-center space-x-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-
-            <div className="flex items-center space-x-2">
-              {renderPageNumbers()}
-            </div>
-
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </Pagination>
+        <div className="mt-8">
+          <Pagination 
+            totalPages={totalPages} 
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+            className="mx-auto flex w-full justify-center" 
+          />
+        </div>
       )}
     </div>
   );

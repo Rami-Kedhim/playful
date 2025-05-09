@@ -8,11 +8,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 interface BookingConfirmationProps {
   escort: Escort;
-  bookingDate: Date;
-  bookingTime: string;
-  duration: string;
-  location: string;
+  bookingDate?: Date;
+  bookingTime?: string;
+  duration?: string;
+  location?: string;
   onClose: () => void;
+  status?: string; // Add status prop
 }
 
 const BookingConfirmation = ({ 
@@ -20,15 +21,16 @@ const BookingConfirmation = ({
   bookingDate, 
   bookingTime, 
   duration, 
-  location, 
+  location,
+  status = 'pending',
   onClose 
 }: BookingConfirmationProps) => {
-  const formattedDate = bookingDate.toLocaleDateString(undefined, {
+  const formattedDate = bookingDate?.toLocaleDateString(undefined, {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  });
+  }) || 'Date to be confirmed';
 
   return (
     <Dialog open={true} onOpenChange={() => onClose()}>
@@ -44,6 +46,7 @@ const BookingConfirmation = ({
             <CardTitle>Booking Details</CardTitle>
             <CardDescription>
               You have successfully booked {escort.name}.
+              {status && <span className="ml-2 text-primary">{status}</span>}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
@@ -61,7 +64,7 @@ const BookingConfirmation = ({
               <div>
                 <p className="text-sm font-medium leading-none">Time</p>
                 <p className="text-sm text-muted-foreground">
-                  {bookingTime} ({duration})
+                  {bookingTime || 'Time to be confirmed'} ({duration || 'Duration to be confirmed'})
                 </p>
               </div>
             </div>
@@ -69,7 +72,7 @@ const BookingConfirmation = ({
               <MapPin className="h-4 w-4 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium leading-none">Location</p>
-                <p className="text-sm text-muted-foreground">{location}</p>
+                <p className="text-sm text-muted-foreground">{location || 'Location to be confirmed'}</p>
               </div>
             </div>
           </CardContent>

@@ -11,12 +11,12 @@ interface PaginationProps {
   className?: string;
 }
 
-export const Pagination = ({
+export const Pagination: React.FC<PaginationProps> = ({
   totalPages,
   currentPage,
   onPageChange,
   className,
-}: PaginationProps) => {
+}) => {
   // Don't render pagination if there's only one page or less
   if (totalPages <= 1) return null;
 

@@ -1,251 +1,233 @@
 
-// Fix import to use '@/types/Escort' instead of '@/types/escort' to unify imports and avoid casing issues
-
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Escort } from '@/types/Escort';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { CalendarIcon, Clock, DollarSign, MapPin } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Escort } from '@/types/Escort'; // Fixed import casing
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
-import ServiceTypeBadgeLabel from '../../filters/ServiceTypeBadgeLabel';
+import { Calendar, Clock, CreditCard, Users, MessageSquare } from 'lucide-react';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { BookingFormData } from './types';
 
-export interface BookingDialogProps {
-  escort: Escort & { providesVirtualContent?: boolean; providesInPersonServices?: boolean };
+interface BookingDialogProps {
+  escort: Escort;
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (bookingDetails: any) => Promise<void>;
-  onCancel?: () => void;
-  onBookNow?: () => void;
+  onSubmit: (data: BookingFormData) => void;
 }
 
-const BookingDialog = ({
+const BookingDialog: React.FC<BookingDialogProps> = ({
   escort,
   isOpen,
   onClose,
-  onSubmit,
-  onCancel,
-  onBookNow,
-}: BookingDialogProps) => {
-  const [date, setDate] = useState<Date | undefined>(undefined);
-  const [timeSlot, setTimeSlot] = useState<string | null>(null);
-  const [duration, setDuration] = useState<string>("1hour");
-  const [message, setMessage] = useState<string>("");
-  
-  const getServiceType = () => {
-    if (escort.providesInPersonServices && escort.providesVirtualContent) {
-      return "both";
-    } else if (escort.providesInPersonServices) {
-      return "in-person";
-    } else if (escort.providesVirtualContent) {
-      return "virtual";
-    }
-    return "in-person";
-  };
-  
-  const serviceType = getServiceType();
-  
-  const availableTimeSlots = ["10:00 AM", "1:00 PM", "4:00 PM", "7:00 PM", "10:00 PM"];
-  
-  const getPriceForDuration = (durationType: string): number => {
-    const basePrice = escort.price || 0;
-    
-    switch (durationType) {
-      case "1hour":
-        return basePrice;
-      case "2hours":
-        return basePrice * 1.8; // Slight discount for 2 hours
-      case "3hours":
-        return basePrice * 2.5; // More discount for 3 hours
-      case "overnight":
-        return basePrice * 6; // Overnight rate
-      default:
-        return basePrice;
+  onSubmit
+}) => {
+  const [step, setStep] = useState<number>(1);
+  const [formData, setFormData] = useState<BookingFormData>({
+    date: new Date(),
+    time: '',
+    duration: '1hr',
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
+  });
+
+  const handleNext = () => {
+    if (step < 3) {
+      setStep(step + 1);
+    } else {
+      handleSubmit();
     }
   };
-  
-  const getDurationLabel = (durationType: string): string => {
-    switch (durationType) {
-      case "1hour": return "1 Hour";
-      case "2hours": return "2 Hours";
-      case "3hours": return "3 Hours";
-      case "overnight": return "Overnight (8 Hours)";
-      default: return "1 Hour";
+
+  const handlePrev = () => {
+    if (step > 1) {
+      setStep(step - 1);
     }
   };
-  
-  const handleSubmit = async () => {
-    if (!date || !timeSlot) {
-      return;
-    }
-    
-    if (onBookNow) {
-      onBookNow();
-    } else if (onSubmit) {
-      const bookingDetails = {
-        date,
-        startTime: timeSlot,
-        endTime: timeSlot, // Simplified, real app would calculate
-        duration: duration === "overnight" ? 8 : parseInt(duration) || 1,
-        service: duration,
-        price: getPriceForDuration(duration),
-        notes: message,
-      };
-      await onSubmit(bookingDetails);
-    }
-    
-    onClose();
+
+  const handleSubmit = () => {
+    onSubmit(formData);
   };
-  
-  const handleDialogClose = () => {
-    setDate(undefined);
-    setTimeSlot(null);
-    setDuration("1hour");
-    setMessage("");
-    
-    if (onCancel) onCancel();
-    
-    onClose();
+
+  const handleChange = (field: keyof BookingFormData, value: any) => {
+    setFormData({ ...formData, [field]: value });
   };
-  
-  return (
-    <Dialog open={isOpen} onOpenChange={handleDialogClose}>
-      <DialogContent className="max-w-md sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            Book an Appointment
-            {serviceType && <ServiceTypeBadgeLabel type={serviceType} />}
-          </DialogTitle>
-          <DialogDescription>
-            Schedule time with {escort.name}. Please select your preferred date and time.
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+  const timeSlots = [
+    '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', 
+    '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM',
+    '6:00 PM', '7:00 PM', '8:00 PM', '9:00 PM',
+  ];
+
+  const durations = [
+    { value: '30min', label: '30 Minutes' },
+    { value: '1hr', label: '1 Hour' },
+    { value: '2hrs', label: '2 Hours' },
+    { value: '3hrs', label: '3 Hours' },
+  ];
+
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <div className="space-y-4">
             <div>
-              <h3 className="text-sm font-medium mb-2">Select Date</h3>
-              <Calendar
+              <h3 className="text-lg font-medium mb-2">Select Date</h3>
+              <CalendarComponent
                 mode="single"
-                selected={date}
-                onSelect={setDate}
-                className="border rounded-md pointer-events-auto"
+                selected={formData.date}
+                onSelect={(date) => handleChange('date', date)}
+                className="rounded-md border"
                 disabled={(date) => date < new Date()}
               />
             </div>
             
             <div>
-              <h3 className="text-sm font-medium mb-2">Select Time</h3>
-              {date ? (
-                <div className="grid grid-cols-2 gap-2">
-                  {availableTimeSlots.map((slot) => (
-                    <Button
-                      key={slot}
-                      variant={timeSlot === slot ? "default" : "outline"}
-                      onClick={() => setTimeSlot(slot)}
-                      className="justify-start"
-                    >
-                      <Clock className="h-4 w-4 mr-2" />
-                      {slot}
-                    </Button>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-40 border rounded-md bg-muted/30">
-                  <p className="text-sm text-muted-foreground">Please select a date first</p>
-                </div>
-              )}
-              
-              <h3 className="text-sm font-medium mb-2 mt-4">Duration</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {["1hour", "2hours", "3hours", "overnight"].map((option) => (
+              <h3 className="text-lg font-medium mb-2">Select Time</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {timeSlots.map((time) => (
                   <Button
-                    key={option}
-                    variant={duration === option ? "default" : "outline"}
-                    onClick={() => setDuration(option)}
-                    className="justify-start"
+                    key={time}
+                    variant={formData.time === time ? 'default' : 'outline'}
+                    onClick={() => handleChange('time', time)}
+                    className="text-sm"
                   >
-                    <Clock className="h-4 w-4 mr-2" />
-                    {getDurationLabel(option)}
+                    {time}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-medium mb-2">Duration</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {durations.map((duration) => (
+                  <Button
+                    key={duration.value}
+                    variant={formData.duration === duration.value ? 'default' : 'outline'}
+                    onClick={() => handleChange('duration', duration.value)}
+                  >
+                    {duration.label}
                   </Button>
                 ))}
               </div>
             </div>
           </div>
-          
-          <Separator />
-          
-          <div>
-            <h3 className="text-sm font-medium mb-2">Additional Requests</h3>
-            <Textarea 
-              placeholder="Any special requests or notes for your appointment..."
-              className="resize-none"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              aria-label="Additional requests"
-            />
+        );
+      
+      case 2:
+        return (
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium mb-1">Name</label>
+              <input
+                id="name"
+                type="text"
+                value={formData.name}
+                onChange={(e) => handleChange('name', e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                placeholder="Your name"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
+              <input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                placeholder="Your email"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium mb-1">Phone</label>
+              <input
+                id="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => handleChange('phone', e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                placeholder="Your phone number"
+              />
+            </div>
           </div>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex justify-between items-center mb-4">
-                <div className="font-medium">Booking Summary</div>
-                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                  {getDurationLabel(duration)}
-                </Badge>
+        );
+      
+      case 3:
+        return (
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="message" className="block text-sm font-medium mb-1">Message (Optional)</label>
+              <textarea
+                id="message"
+                value={formData.message}
+                onChange={(e) => handleChange('message', e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 h-32 resize-none"
+                placeholder="Any special requests or information..."
+              />
+            </div>
+            
+            <div className="border rounded-md p-4 space-y-2">
+              <h4 className="font-medium">Booking Summary</h4>
+              <div className="grid grid-cols-2 text-sm gap-y-1">
+                <div className="text-muted-foreground">Date:</div>
+                <div>{formData.date.toDateString()}</div>
+                <div className="text-muted-foreground">Time:</div>
+                <div>{formData.time}</div>
+                <div className="text-muted-foreground">Duration:</div>
+                <div>{formData.duration}</div>
               </div>
-              
-              <div className="space-y-2 text-sm">
-                {date && timeSlot && (
-                  <div className="flex justify-between">
-                    <div className="flex items-center text-muted-foreground">
-                      <CalendarIcon className="h-4 w-4 mr-2" />
-                      Date & Time
-                    </div>
-                    <div>{format(date, "PP")} at {timeSlot}</div>
-                  </div>
-                )}
-                
-                <div className="flex justify-between">
-                  <div className="flex items-center text-muted-foreground">
-                    <MapPin className="h-4 w-4 mr-2" />
-                    Location
-                  </div>
-                  <div>{escort.location}</div>
-                </div>
-                
-                {escort.price && (
-                  <div className="flex justify-between font-medium">
-                    <div className="flex items-center">
-                      <DollarSign className="h-4 w-4 mr-2" />
-                      Total Price
-                    </div>
-                    <div>${getPriceForDuration(duration)} LC</div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </div>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Book {escort.name}</DialogTitle>
+        </DialogHeader>
         
-        <DialogFooter className="flex justify-end gap-2 mt-2">
-          <Button variant="outline" onClick={handleDialogClose}>Cancel</Button>
+        <div className="flex items-center justify-center mb-4">
+          <div className="flex items-center space-x-2">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+              <Calendar className="h-4 w-4" />
+            </div>
+            <div className={`h-px w-4 ${step > 1 ? 'bg-primary' : 'bg-muted'}`}></div>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+              <Users className="h-4 w-4" />
+            </div>
+            <div className={`h-px w-4 ${step > 2 ? 'bg-primary' : 'bg-muted'}`}></div>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 3 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+              <MessageSquare className="h-4 w-4" />
+            </div>
+          </div>
+        </div>
+
+        {renderStep()}
+        
+        <div className="flex justify-between mt-4">
           <Button 
-            onClick={handleSubmit}
-            disabled={!date || !timeSlot}
+            variant="outline" 
+            onClick={step === 1 ? onClose : handlePrev}
           >
-            Confirm Booking
+            {step === 1 ? 'Cancel' : 'Back'}
           </Button>
-        </DialogFooter>
+          <Button onClick={handleNext}>
+            {step < 3 ? 'Next' : 'Submit Booking'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
 };
 
 export default BookingDialog;
-
