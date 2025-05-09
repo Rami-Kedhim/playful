@@ -1,11 +1,11 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Loader2, Zap, ZapOff, Clock, TrendingUp, Calendar } from 'lucide-react';
+import { Zap, XCircle } from 'lucide-react';
 import { BoostStatus } from '@/types/boost';
+import { formatDate } from '@/utils/formatters';
 
 interface BoostStatusCardProps {
   boostStatus: BoostStatus;
@@ -22,131 +22,72 @@ const BoostStatusCard: React.FC<BoostStatusCardProps> = ({
   dailyBoostUsage,
   dailyBoostLimit
 }) => {
-  const [cancelLoading, setCancelLoading] = useState(false);
-  
-  const handleCancel = async () => {
-    if (cancelLoading) return;
+  // Calculate remaining time percentage for the progress bar
+  const calculateProgress = (): number => {
+    if (!boostStatus.isActive) return 0;
     
-    setCancelLoading(true);
-    try {
-      await onCancel();
-    } catch (error) {
-      console.error('Error cancelling boost:', error);
-    } finally {
-      setCancelLoading(false);
-    }
+    const now = new Date();
+    const startTime = boostStatus.startedAt ? new Date(boostStatus.startedAt) : now;
+    const endTime = boostStatus.expiresAt ? new Date(boostStatus.expiresAt) : now;
+    
+    const totalDuration = endTime.getTime() - startTime.getTime();
+    const elapsed = now.getTime() - startTime.getTime();
+    
+    if (totalDuration <= 0) return 0;
+    
+    // Calculate remaining percentage
+    const remainingPercent = 100 - (elapsed / totalDuration * 100);
+    return Math.max(0, Math.min(100, remainingPercent));
   };
-  
-  if (boostStatus.isActive) {
-    // Calculate progress if not provided
-    const progress = boostStatus.progress || 0;
-    
-    // Handle expiration date formatting
-    let expiresAtDisplay = 'Unknown';
-    if (boostStatus.expiresAt) {
-      try {
-        const expiresDate = typeof boostStatus.expiresAt === 'string' 
-          ? new Date(boostStatus.expiresAt)
-          : boostStatus.expiresAt;
-        
-        expiresAtDisplay = expiresDate.toLocaleDateString(undefined, {
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-      } catch (e) {
-        // If expiresAt is not a valid date string, use a fallback
-        expiresAtDisplay = String(boostStatus.expiresAt);
-      }
-    }
-    
-    // Get package name
-    const packageName = boostStatus.packageName || 'Standard Boost';
-    
+
+  if (!boostStatus.isActive) {
     return (
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center text-base font-medium">
-              <Zap className="h-5 w-5 mr-2 text-yellow-500" />
-              Boost Active
-            </CardTitle>
-            <Badge variant="secondary">
-              {packageName}
-            </Badge>
+      <Card className="bg-muted/20">
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <XCircle className="h-5 w-5" />
+            <span>No active boost</span>
           </div>
-          <CardDescription>
-            Your profile currently has increased visibility
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Boost Progress</span>
-              <span>{Math.round(progress)}% Complete</span>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const progress = calculateProgress();
+
+  return (
+    <Card className="border-primary/10 bg-primary/5">
+      <CardContent className="pt-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <div className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-amber-500" />
+              <h3 className="font-medium">
+                {boostStatus.packageName || 'Profile Boost'} Active
+              </h3>
             </div>
-            <Progress value={progress} className="h-2" />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-secondary/20 p-3 rounded-md flex flex-col items-center">
-              <Clock className="h-4 w-4 mb-1 text-muted-foreground" />
-              <span className="text-sm font-semibold">{boostStatus.remainingTime || '16h 32m'}</span>
-              <span className="text-xs text-muted-foreground">Remaining</span>
-            </div>
-            <div className="bg-secondary/20 p-3 rounded-md flex flex-col items-center">
-              <Calendar className="h-4 w-4 mb-1 text-muted-foreground" />
-              <span className="text-sm font-semibold">{expiresAtDisplay}</span>
-              <span className="text-xs text-muted-foreground">Expires</span>
+            
+            <p className="text-sm text-muted-foreground mt-1">
+              Expires {boostStatus.expiresAt ? formatDate(boostStatus.expiresAt) : 'soon'}
+            </p>
+            
+            <div className="mt-4">
+              <div className="flex justify-between text-xs mb-1">
+                <span>Boost remaining</span>
+                <span>{Math.round(progress)}%</span>
+              </div>
+              <Progress value={progress} className="h-2" />
             </div>
           </div>
           
           <Button 
             variant="outline" 
-            onClick={handleCancel}
-            disabled={cancelLoading || loading}
-            className="w-full"
+            size="sm" 
+            onClick={onCancel}
+            disabled={loading}
           >
-            {cancelLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Cancelling...
-              </>
-            ) : (
-              <>
-                <ZapOff className="mr-2 h-4 w-4" />
-                Cancel Boost
-              </>
-            )}
+            {loading ? 'Cancelling...' : 'Cancel Boost'}
           </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-  
-  // Not active state
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center text-base font-medium">
-          <Zap className="h-5 w-5 mr-2 text-muted-foreground" />
-          No Active Boost
-        </CardTitle>
-        <CardDescription>
-          You don't have any active profile boosts
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="bg-muted p-3 rounded-md">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <TrendingUp className="h-4 w-4 mr-2 text-muted-foreground" />
-            <span>Boost your profile to increase visibility and reach more users</span>
-          </div>
-        </div>
-        
-        <div className="text-center text-xs text-muted-foreground">
-          <p>You have used {dailyBoostUsage} of {dailyBoostLimit} daily boosts</p>
         </div>
       </CardContent>
     </Card>

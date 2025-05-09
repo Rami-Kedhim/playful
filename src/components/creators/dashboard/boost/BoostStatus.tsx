@@ -100,6 +100,7 @@ const BoostStatus = ({
                   ubxBalance={ubxBalance}
                   onBack={() => setActiveStep('select')}
                   onPurchase={onPurchase}
+                  onCancel={onCancel} // Pass the onCancel prop correctly
                   loading={loading}
                 />
               )

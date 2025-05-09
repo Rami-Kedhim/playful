@@ -1,3 +1,4 @@
+
 import { VerificationLevel } from './verification';
 
 // Service types
@@ -72,6 +73,7 @@ export interface Escort {
   providesVirtualContent?: boolean;
   availability?: string[];
   sexualOrientation?: string;
+  responseRate?: number;
 }
 
 export interface ExtendedEscort extends Escort {
@@ -106,6 +108,3 @@ export interface EscortFilters {
   verifiedOnly?: boolean;
   rating?: number;
 }
-
-// Re-export VerificationLevel for backward compatibility
-// export { VerificationLevel };

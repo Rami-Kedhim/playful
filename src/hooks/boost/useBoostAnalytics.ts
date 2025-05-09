@@ -5,7 +5,7 @@ export interface AnalyticsData {
   totalBoosts: number;
   activeBoosts: number;
   averageBoostScore: number;
-  boostHistory: Array<{
+  boostHistory?: Array<{
     date: Date;
     score: number;
   }>;
@@ -13,77 +13,57 @@ export interface AnalyticsData {
   impressions?: {
     value: number;
     change?: number;
-    withBoost?: number;
-    withoutBoost?: number;
   };
   interactions?: {
     value: number;
     change?: number;
-    withBoost?: number;
-    withoutBoost?: number;
   };
   additionalViews?: number;
-  engagementIncrease?: number;
-  rankingPosition?: number;
 }
 
-export const useBoostAnalytics = (userId: string) => {
+export const useBoostAnalytics = (profileId: string) => {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!userId) {
+    const fetchAnalytics = async () => {
+      if (!profileId) {
         setLoading(false);
         return;
       }
 
+      setLoading(true);
       try {
-        // Simulate API call with mock data
-        setTimeout(() => {
-          const mockData: AnalyticsData = {
-            totalBoosts: 5,
-            activeBoosts: 1,
-            averageBoostScore: 78,
-            boostHistory: [
-              { date: new Date('2023-01-01'), score: 65 },
-              { date: new Date('2023-01-08'), score: 72 },
-              { date: new Date('2023-01-15'), score: 78 },
-              { date: new Date('2023-01-22'), score: 82 },
-              { date: new Date('2023-01-29'), score: 85 },
-            ],
-            views: 234,
-            impressions: {
-              value: 1245,
-              change: 23,
-              withBoost: 1245,
-              withoutBoost: 856
-            },
-            interactions: {
-              value: 89,
-              change: 34,
-              withBoost: 89,
-              withoutBoost: 42
-            },
-            additionalViews: 389,
-            engagementIncrease: 111,
-            rankingPosition: 12
-          };
-          
-          setAnalytics(mockData);
-          setLoading(false);
-        }, 1000);
-      } catch (err) {
-        setError('Failed to fetch analytics data');
+        // In a real application, this would be an API call
+        await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API delay
+        
+        // Mock data
+        setAnalytics({
+          totalBoosts: 5,
+          activeBoosts: 1,
+          averageBoostScore: 78,
+          views: 432,
+          impressions: {
+            value: 1254,
+            change: 23.5
+          },
+          interactions: {
+            value: 87,
+            change: 12.3
+          },
+          additionalViews: 145
+        });
+      } catch (err: any) {
+        setError(err.message || 'Failed to load analytics');
+        console.error('Error loading boost analytics:', err);
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [userId]);
+    fetchAnalytics();
+  }, [profileId]);
 
   return { analytics, loading, error };
 };
-
-export default useBoostAnalytics;

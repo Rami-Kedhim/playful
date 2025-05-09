@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import HermesOxumQueueVisualization from '@/components/creators/dashboard/boost/HermesOxumQueueVisualization';
 import { useBoostAnalytics } from '@/hooks/boost/useBoostAnalytics';
 import { BoostStatus } from '@/types/pulse-boost';
-import { AnalyticsHeader } from '../analytics';
+import { AnalyticsHeader, AnalyticsHeaderProps } from '../analytics';
 import { AnalyticsStats } from '../analytics';
 import { AnalyticsCharts } from '../analytics';
 import { AnalyticsSummary } from '../analytics';
@@ -20,9 +21,15 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
 }) => {
   const { analytics, loading, error } = useBoostAnalytics(profileId || "");
 
+  // Custom header props because AnalyticsHeader accepts title/description
+  const headerProps: AnalyticsHeaderProps = {
+    title: "Boost Analytics",
+    description: "Track the performance of your boosts"
+  };
+
   return (
     <div className="space-y-6">
-      <AnalyticsHeader title="Boost Analytics" description="Track the performance of your boosts" />
+      <AnalyticsHeader {...headerProps} />
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>

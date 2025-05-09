@@ -35,6 +35,7 @@ export interface ContentCreator {
   tags?: string[];
   age?: number;
   subscriptionPrice?: number;
+  gender?: string; // Added gender property for compatibility with Escort type
 }
 
 // Original Creator interface for backward compatibility
@@ -52,6 +53,7 @@ export interface Creator {
   rates?: Record<string, number>;
   price?: number;
   responseRate?: number;
+  gender?: string; // Added gender property for compatibility with Escort type
   
   // Additional fields for compatibility with Escort type
   age?: number;
@@ -63,6 +65,9 @@ export interface Creator {
   boosted?: boolean;
   boostLevel?: number;
   boostExpiration?: string;
+  imageUrl?: string;
+  profileImage?: string;
+  images?: string[];
 }
 
 // Creator payout types
