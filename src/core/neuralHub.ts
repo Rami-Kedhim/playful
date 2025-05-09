@@ -1,4 +1,3 @@
-
 /**
  * Neural Hub - Central processor for AI and machine learning operations in UberEscorts
  * Integrates with Lucie AI and other core systems for advanced functionality
@@ -120,6 +119,20 @@ class NeuralHub {
     hermes.trackEvent('personalization_request', { userId });
     
     return result;
+  }
+  
+  generateText(prompt: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          // Process the prompt and generate text
+          const generatedText = `Generated text based on: ${prompt}`;
+          resolve(generatedText);
+        } catch (error) {
+          reject(error);
+        }
+      }, 500);
+    });
   }
   
   getStatus() {

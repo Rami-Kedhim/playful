@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Clock, CheckCircle, AlertTriangle, FileCheck } from 'lucide-react';
-import { VerificationRequest, VERIFICATION_STATUS } from '@/types/verification';
+import { VerificationRequest, VerificationStatus, VERIFICATION_STATUS } from '@/types/verification';
 
 interface VerificationTimelineProps {
   verificationRequest: VerificationRequest;

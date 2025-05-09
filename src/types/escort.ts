@@ -74,7 +74,8 @@ export interface Escort {
   imageUrl?: string;
   profileImage?: string;
   images?: string[];
-  // Added missing properties below
+  
+  // Added missing properties
   bio?: string;
   description?: string;
   verificationLevel?: VerificationLevel | string;
@@ -119,13 +120,15 @@ export interface Escort {
   eyeColor?: string;
   ethnicity?: string;
   measurements?: string;
+  bodyType?: string; // Added missing bodyType property
   specialties?: string[];
   limitations?: string[];
   isFavorited?: boolean;
   lastActive?: string | Date;
   clientsServed?: number;
   interests?: string[];
-  locations?: string[]; // For BookingForm.tsx
+  locations?: string[];
+  subscriptionPrice?: number; // Added for escortProfiles.ts
 }
 
 export interface ExtendedEscort extends Escort {
@@ -161,5 +164,5 @@ export interface EscortFilters {
   rating?: number;
 }
 
-// Export Video type to solve module import errors
+// Export Video type explicitly
 export { Video };

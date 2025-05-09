@@ -1,13 +1,16 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Clock, MapPin } from 'lucide-react';
-import { formatDate } from '@/lib/utils';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Booking } from '@/types/booking';
+import { formatDate } from '@/lib/utils';
+import { Calendar, Clock, MapPin, DollarSign } from 'lucide-react';
 
 interface UpcomingBookingsProps {
   bookings: Booking[];
-  isLoading?: boolean;
+  loading?: boolean;
+  onViewBooking?: (booking: Booking) => void;
+  onCancelBooking?: (booking: Booking) => void;
 }
 
 const UpcomingBookings: React.FC<UpcomingBookingsProps> = ({

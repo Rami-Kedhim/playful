@@ -30,6 +30,7 @@ export interface UberPersona {
   availability?: Array<{ start: Date; end: Date; }> | { nextAvailable: Date; };
   boostScore?: number;
   description?: string;
+  bio?: string; // Added missing property
   personality?: string;
   traits?: string[];
   interests?: string[];

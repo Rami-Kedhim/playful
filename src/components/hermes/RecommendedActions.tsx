@@ -1,89 +1,86 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RecommendedAction } from '@/types/core-systems';
-import { cn } from '@/lib/utils';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChevronRight, BarChart, Lightbulb, TrendingUp } from 'lucide-react';
+
+export interface RecommendedAction {
+  id: string;
+  title: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+  type: 'boost' | 'verify' | 'complete' | 'optimize';
+  action: string;
+  status?: 'pending' | 'completed' | 'in_progress'; // Add status property
+  onClick?: () => void;
+}
 
 interface RecommendedActionsProps {
   actions: RecommendedAction[];
   onActionClick?: (action: RecommendedAction) => void;
-  className?: string;
-  limit?: number;
-  loading?: boolean;
 }
 
-const RecommendedActions: React.FC<RecommendedActionsProps> = ({
-  actions = [],
-  onActionClick,
-  className,
-  limit = 3,
-  loading = false
+const RecommendedActions: React.FC<RecommendedActionsProps> = ({ 
+  actions, 
+  onActionClick 
 }) => {
-  // Filter and sort actions by priority
-  const prioritizedActions = actions
-    .filter(action => action.status !== 'completed')
-    .sort((a, b) => b.priority - a.priority)
-    .slice(0, limit);
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'text-red-500';
+      case 'medium': return 'text-amber-500';
+      case 'low': return 'text-green-500';
+      default: return 'text-muted-foreground';
+    }
+  };
 
-  if (loading) {
-    return (
-      <Card className={cn("w-full", className)}>
-        <CardHeader>
-          <CardTitle>Recommended Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="h-12 bg-gray-200 dark:bg-gray-800 animate-pulse rounded"></div>
-            <div className="h-12 bg-gray-200 dark:bg-gray-800 animate-pulse rounded"></div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (prioritizedActions.length === 0) {
-    return (
-      <Card className={cn("w-full", className)}>
-        <CardHeader>
-          <CardTitle>Recommended Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">No actions recommended at this time.</p>
-        </CardContent>
-      </Card>
-    );
-  }
+  const getActionIcon = (type: string) => {
+    switch (type) {
+      case 'boost': return <TrendingUp className="h-8 w-8 text-primary" />;
+      case 'verify': return <Lightbulb className="h-8 w-8 text-amber-500" />;
+      case 'complete': return <ChevronRight className="h-8 w-8 text-green-500" />;
+      default: return <BarChart className="h-8 w-8 text-blue-500" />;
+    }
+  };
 
   return (
-    <Card className={cn("w-full", className)}>
-      <CardHeader>
-        <CardTitle>Recommended Actions</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          {prioritizedActions.map((action) => (
-            <Button
-              key={action.id}
-              variant="outline"
-              className="w-full justify-start text-left h-auto py-3 flex items-center gap-2"
-              onClick={() => onActionClick?.(action)}
-            >
-              {/* Render icon if available */}
-              {action.icon && (
-                <span className="text-primary">
-                  {/* Icon would go here */}
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold">Recommended Actions</h2>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {actions.map(action => (
+          <Card key={action.id} className="overflow-hidden">
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-start">
+                {getActionIcon(action.type)}
+                <span className={`text-sm font-medium ${getPriorityColor(action.priority)}`}>
+                  {action.priority.toUpperCase()}
                 </span>
-              )}
-              <div>
-                <div className="font-medium">{action.title}</div>
-                <div className="text-xs text-muted-foreground">{action.description}</div>
               </div>
-            </Button>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+              <CardTitle className="text-lg">{action.title}</CardTitle>
+              <CardDescription>{action.description}</CardDescription>
+            </CardHeader>
+            <CardContent className="pb-2">
+              <div className="text-sm text-muted-foreground">
+                {action.status && (
+                  <div className="mb-2">
+                    Status: <span className="font-medium">{action.status}</span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => action.onClick ? action.onClick() : onActionClick?.(action)}
+              >
+                {action.action}
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    </div>
   );
 };
 

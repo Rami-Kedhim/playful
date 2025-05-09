@@ -1,5 +1,5 @@
 
-// Fix import of Escort type to consistent casing; fix property names in data to match type (remove invalid 'gender' property as not in Escort interface)
+// Fix import of Escort type to consistent casing; fix property names in data to match type
 
 import { Escort } from '@/types/Escort';
 
@@ -9,7 +9,7 @@ export const escortData: Escort[] = [
     id: "1",
     name: "Sofia",
     age: 25,
-    // Removed gender property because it does not exist on Escort
+    gender: "female", // Add required gender property
     location: "New York",
     bio: "Elegant and sophisticated companion for your events",
     rating: 4.9,
@@ -38,7 +38,7 @@ export const escortData: Escort[] = [
     id: "2",
     name: "Marcus",
     age: 28,
-    // Removed gender as above 
+    gender: "male", // Add required gender property
     location: "Los Angeles",
     bio: "Professional model and personal trainer available as your premium escort",
     rating: 4.8,

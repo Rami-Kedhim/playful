@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { CheckCircle2, Clock, AlertTriangle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { VERIFICATION_STATUS } from '@/types/verification';
+import { VerificationStatus, VERIFICATION_STATUS } from '@/types/verification';
 
 interface TimelineStep {
   title: string;

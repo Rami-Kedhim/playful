@@ -1,50 +1,53 @@
 
-import { Escort } from './escort';
+import { Escort } from './Escort';
 
 export interface Booking {
   id: string;
   escortId: string;
   clientId: string;
-  startTime?: Date | string;
-  endTime?: Date | string;
-  duration: string; // Changed from number to string to match component usage
-  status: BookingStatus;
-  service?: string;
-  location?: string;
-  price?: number;
-  notes?: string;
-  createdAt: Date | string;
   escort?: Escort;
-  client?: any;
-  date?: Date | string; // Add date to match component usage
-  time?: string; // Add time to match component usage
-  message?: string; // Add message to match component usage
-  totalPrice?: number; // Add totalPrice for consistency
-}
-
-export type BookingStatus = 
-  | 'pending' 
-  | 'confirmed' 
-  | 'completed' 
-  | 'cancelled' 
-  | 'rejected';
-
-export interface BookingRequest {
-  escortId: string;
-  startTime: Date | string;
-  endTime?: Date | string;
-  duration: string; // Changed from number to string
-  service?: string;
+  date?: Date | string;
+  time?: string;
+  duration?: string | number;
   location?: string;
+  status: 'pending' | 'confirmed' | 'canceled' | 'completed' | 'rejected';
+  createdAt: Date | string;
+  updatedAt?: Date | string;
   notes?: string;
+  price?: number;
+  totalPrice?: number;
+  escortName?: string; // Add missing property
+  type?: 'incall' | 'outcall' | 'virtual';
+  paymentStatus?: 'pending' | 'paid' | 'refunded';
+  paymentMethod?: string;
+  specialRequests?: string;
+  clientName?: string;
+  clientAvatar?: string;
 }
 
-export interface BookingFilters {
-  status?: BookingStatus[];
-  startDate?: Date;
-  endDate?: Date;
+export interface BookingFilter {
+  status?: string[];
+  date?: {
+    from?: Date;
+    to?: Date;
+  };
   escortId?: string;
   clientId?: string;
-  service?: string;
-  location?: string;
+}
+
+export interface BookingStats {
+  total: number;
+  pending: number;
+  confirmed: number;
+  canceled: number;
+  completed: number;
+  revenue: number;
+}
+
+export enum BookingStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  CANCELED = 'canceled',
+  COMPLETED = 'completed',
+  REJECTED = 'rejected'
 }

@@ -36,12 +36,13 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setError(null);
     
     try {
-      // Mock escorts with matching Escort type properties, removed rating that was not defined in Escort type
+      // Fix mock escorts to include required gender field
       const mockEscorts: Escort[] = [
         {
           id: "1",
           name: "Emma",
           age: 28,
+          gender: "female", // Add missing gender field
           location: "New York",
           reviewCount: 120,
           verified: true,
@@ -64,6 +65,7 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
           id: "2",
           name: "Sophia",
           age: 26,
+          gender: "female", // Add missing gender field
           location: "Los Angeles",
           reviewCount: 95,
           verified: true,
@@ -109,4 +111,3 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     </EscortContext.Provider>
   );
 };
-

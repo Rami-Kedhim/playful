@@ -1,4 +1,3 @@
-
 import { SystemStatus, SessionValidationResult, UberCoreSystem, SystemIntegrityResult, SystemHealthMetrics } from '@/types/core-systems';
 import { UberWallet } from './UberWallet';
 import { OxumSystem } from '@/types/core-systems';
@@ -25,21 +24,14 @@ export class UberCore implements UberCoreSystem {
   
   public getSystemStatus(): SystemStatus {
     // Mock system status implementation
-    return {
-      operational: true,
-      isActive: true,
-      services: {
-        auth: 'active',
-        analytics: 'active',
-        ai: 'active',
-        wallet: 'active',
-        seo: 'active'
-      },
-      queueLength: 0,
-      processing: false,
-      uptime: 100,
-      lastReboot: new Date().toISOString()
+    const systemStatus: SystemStatus = {
+      isOperational: true,
+      lastCheck: new Date(),
+      version: '1.0.0',
+      uptime: 0,
+      isActive: true // This property is now allowed with our updated type definitions
     };
+    return systemStatus;
   }
   
   public async checkSystemIntegrity(): Promise<SystemIntegrityResult> {

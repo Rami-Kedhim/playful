@@ -1,18 +1,21 @@
 
-// Verification status types
-export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
-
-// Verification level enum
 export enum VerificationLevel {
   NONE = 'none',
   BASIC = 'basic',
-  VERIFIED = 'verified',
   ENHANCED = 'enhanced',
-  PREMIUM = 'premium'
+  PREMIUM = 'premium',
+  VERIFIED = 'verified'
 }
 
-// For backwards compatibility
-export const VERIFICATION_LEVEL = VerificationLevel;
+export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
+
+// Use this constant to match the VERIFICATION_STATUS that is imported in several files
+export const VERIFICATION_STATUS = {
+  PENDING: 'pending',
+  IN_REVIEW: 'in_review',
+  APPROVED: 'approved',
+  REJECTED: 'rejected'
+};
 
 export interface VerificationDocument {
   id: string;
@@ -20,7 +23,6 @@ export interface VerificationDocument {
   fileUrl: string;
   uploadedAt: string;
   status: 'pending' | 'approved' | 'rejected';
-  // Add missing properties
   notes?: string;
   filePath?: string;
   documentType?: string;
@@ -35,4 +37,11 @@ export interface VerificationRequest {
   submittedAt: string;
   updatedAt?: string;
   rejectionReason?: string;
+  
+  // Add missing properties
+  profile_id?: string;
+  created_at?: string;
+  reviewed_at?: string;
+  requested_level?: string;
+  requestedLevel?: string;
 }

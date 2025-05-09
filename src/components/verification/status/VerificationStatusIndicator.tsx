@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Clock, AlertTriangle, Shield } from 'lucide-react';
-import { VERIFICATION_STATUS } from '@/types/verification';
+import { VerificationStatus, VERIFICATION_STATUS } from '@/types/verification';
 
 interface VerificationStatusIndicatorProps {
   status: 'unverified' | 'pending' | 'verified' | 'rejected';

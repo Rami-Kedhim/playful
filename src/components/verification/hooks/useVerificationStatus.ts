@@ -1,7 +1,6 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/auth';
-import { VerificationRequest, VERIFICATION_STATUS } from '@/types/verification';
+import { VerificationRequest, VerificationStatus, VERIFICATION_STATUS } from '@/types/verification';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useVerificationStatus = () => {

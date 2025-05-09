@@ -1,148 +1,53 @@
 
-/**
- * Pulse Boost System Type Definitions
- */
+import { UserRole } from './user';
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email?: string;
+  role?: UserRole;
+  avatarUrl?: string;
+  boostPoints?: number;
+  lastActive?: Date;
+  memberSince?: Date;
+  subscriptionTier?: 'free' | 'premium' | 'enterprise';
+  verificationStatus?: 'unverified' | 'pending' | 'verified';
+  preferredCategories?: string[];
+  settings?: {
+    notifications: boolean;
+    theme: 'light' | 'dark' | 'system';
+    visibility: 'public' | 'private';
+  };
+}
 
 export interface BoostPackage {
   id: string;
   name: string;
-  description: string;
+  points: number;
   price: number;
-  price_ubx: number;
-  duration: string;
-  durationMinutes: number;
+  discount?: number;
   features: string[];
-  visibility: string;
-  visibility_increase: number;
-  color?: string;
-  badgeColor?: string;
-  boost_power?: number;
-  boostMultiplier?: number;
-  isMostPopular?: boolean;
-  isPopular?: boolean;
-  isRecommended?: boolean;
+  duration: number; // in days
 }
 
-export interface BoostPurchaseRequest {
-  profileId: string;
-  packageId: string;
-}
-
-export interface BoostPurchaseResult {
+export interface BoostResult {
   success: boolean;
-  boostId?: string;
-  error?: string | null;
-  message?: string;
-  transactionId?: string;
+  pointsUsed: number;
+  remainingPoints: number;
+  boostScore: number;
+  previousRank?: number;
+  newRank?: number;
+  estimatedViews?: number;
 }
 
-export interface BoostAnalytics {
-  totalBoosts: number;
-  activeBoosts: number;
-  averageBoostScore: number;
-  boostHistory: Array<{
-    date: Date;
-    score: number;
-  }>;
-  views?: number;
-  impressions?: {
-    value: number;
-    change?: number;
-    withBoost?: number;
-  };
-  interactions?: {
-    value: number;
-    change?: number;
-  };
-  additionalViews?: number;
-  engagementIncrease?: number;
-  rankingPosition?: number;
-}
-
-// Alias to fix the reference in useBoostManager.ts
-export type BoostAnalyticsData = BoostAnalytics;
-
-export interface BoostHistory {
-  items: Array<{
-    id: string;
-    packageId: string;
-    startDate: Date;
-    endDate: Date;
-    price: number;
-    status: string;
-  }>;
-}
-
-export interface EnhancedBoostStatus {
-  isActive: boolean;
-  remainingTime: string;
-  timeRemaining: string;
-  percentRemaining: number;
-  expiresAt: Date | null;
-  startedAt: Date | null;
-  isExpired: boolean;
-  remainingMinutes?: number;
-  packageName?: string;
-  progress?: number;
-}
-
-export interface PulseBoost {
-  id: string;
+export interface PulseScore {
   profileId: string;
-  packageId: string;
-  startTime: Date;
-  endTime: Date;
-  status: string;
-  // Adding required properties that were missing
-  name: string;
-  description: string;
-  duration: string;
-  price: number;
-  price_ubx?: number;
-  features: string[];
-  visibility?: string | number;
-  visibility_increase?: number;
-  color?: string;
-  badgeColor?: string;
-  durationMinutes?: number;
-  boost_power?: number;
-  isMostPopular?: boolean;
-  isPopular?: boolean;
-  isRecommended?: boolean;
-  isActive?: boolean;
-}
-
-export interface BoostStatus {
-  isActive: boolean;
-  isExpiring?: boolean;
-  expiresAt?: string | Date;
-  remainingTime?: number | string; 
-  boostLevel?: number;
-  boostType?: string;
-  modifiers?: Record<string, number>;
-  packageName?: string;
-  packageId?: string;
-  startedAt?: Date | string;
-  progress?: number;
-  timeRemaining?: string;
-}
-
-export interface HermesStatus {
-  queuePosition?: number;
-  totalInQueue?: number;
-  estimatedWaitTime?: number;
-  score?: number;
-  position?: number;
-  activeUsers?: number;
-  estimatedVisibility?: number;
-  lastUpdateTime?: string;
-  boostScore?: number;
-  effectivenessScore?: number;
-}
-
-export interface BoostEligibility {
-  isEligible: boolean;
-  reason?: string;
-  requiredLevel?: string;
-  cooldownRemaining?: number;
+  score: number;
+  lastUpdated: Date;
+  components: {
+    activity: number;
+    engagement: number;
+    quality: number;
+    popularity: number;
+  };
 }

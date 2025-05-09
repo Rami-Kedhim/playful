@@ -1,143 +1,143 @@
-
-import React from "react";
-import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { CalendarIcon, Clock, MapPin, Users } from "lucide-react";
-import { Escort, VerificationLevel } from "@/types/Escort";
-import { useTranslation } from "react-i18next";
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Escort } from '@/types/Escort';
+import { CalendarDays, Clock, MapPin } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface EscortAboutProps {
   escort: Escort;
 }
 
 const EscortAbout: React.FC<EscortAboutProps> = ({ escort }) => {
-  const { t } = useTranslation();
-
-  // Helper function to format array data or text
-  const formatList = (items: string[] | undefined) => {
-    if (!items || items.length === 0) return "Not specified";
-    return Array.isArray(items) ? items.join(", ") : items;
-  };
-
-  // Format availability information
-  const formatAvailability = () => {
-    if (!escort.availability) return "Not specified";
-
-    if (Array.isArray(escort.availability) && typeof escort.availability[0] === "string") {
-      // Handle string array format
-      return escort.availability.join(", ");
+  // Helper function to get availability days safely
+  const getAvailabilityDays = (): string[] => {
+    if (!escort.availability) return [];
+    
+    if (Array.isArray(escort.availability)) {
+      return escort.availability as string[];
     }
-
-    if (Array.isArray(escort.availability) && typeof escort.availability[0] === "object") {
-      // Handle object format
-      const availObj = escort.availability[0];
-      if (availObj && "days" in availObj && Array.isArray(availObj.days)) {
-        return availObj.days.join(", ");
+    
+    if (typeof escort.availability === 'object') {
+      // Check if it has days property
+      if ('days' in escort.availability && Array.isArray(escort.availability.days)) {
+        return escort.availability.days;
       }
+      
+      // Otherwise collect day names that are present
+      const days = [];
+      const availObj = escort.availability as any;
+      if (availObj.monday) days.push('Monday');
+      if (availObj.tuesday) days.push('Tuesday');
+      if (availObj.wednesday) days.push('Wednesday');
+      if (availObj.thursday) days.push('Thursday');
+      if (availObj.friday) days.push('Friday');
+      if (availObj.saturday) days.push('Saturday');
+      if (availObj.sunday) days.push('Sunday');
+      return days;
     }
-
-    return "Available upon request";
+    
+    if (typeof escort.availability === 'string') {
+      return [escort.availability];
+    }
+    
+    return [];
   };
-
-  const verificationLevel = (escort.verificationLevel || "none") as VerificationLevel;
-
+  
+  const availabilityDays = getAvailabilityDays();
+  const lastActive = escort.lastActive ? new Date(escort.lastActive) : null;
+  
   return (
     <div className="space-y-6">
-      {/* Bio section */}
-      <Card className="p-4">
-        <h3 className="text-lg font-medium mb-2">{t("About Me")}</h3>
-        <p className="text-muted-foreground">
-          {escort.bio || escort.description || "No bio information available."}
-        </p>
-      </Card>
-
-      {/* Personal information */}
-      <Card className="p-4">
-        <h3 className="text-lg font-medium mb-4">{t("Personal Information")}</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Age</p>
-            <p className="font-medium">{escort.age || "Not specified"}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Gender</p>
-            <p className="font-medium">{escort.gender || "Not specified"}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Ethnicity</p>
-            <p className="font-medium">{escort.ethnicity || "Not specified"}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Body Type</p>
-            <p className="font-medium">{escort.bodyType || "Not specified"}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Height</p>
-            <p className="font-medium">{escort.height || "Not specified"}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Weight</p>
-            <p className="font-medium">{escort.weight || "Not specified"}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Hair Color</p>
-            <p className="font-medium">{escort.hairColor || "Not specified"}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Eye Color</p>
-            <p className="font-medium">{escort.eyeColor || "Not specified"}</p>
-          </div>
-        </div>
-      </Card>
-
-      {/* Location and availability */}
-      <Card className="p-4">
-        <h3 className="text-lg font-medium mb-4">{t("Location & Availability")}</h3>
-        <div className="space-y-4">
-          <div className="flex items-start gap-2">
-            <MapPin className="h-5 w-5 text-primary mt-0.5" />
-            <div>
-              <p className="font-medium">{escort.location || "Location not specified"}</p>
-              <p className="text-sm text-muted-foreground">
-                {escort.services?.includes("Travel") ? "Available for travel" : "Local services"}
-              </p>
+      <Card className="overflow-hidden">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold mb-2">About {escort.name}</h3>
+          
+          <p className="text-muted-foreground mb-4">
+            {escort.description || escort.bio || "No description available"}
+          </p>
+          
+          <Separator className="my-4" />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h4 className="font-medium">Details</h4>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">{escort.location || "Location not specified"}</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">
+                    {lastActive 
+                      ? `Last active ${format(lastActive, "MMM d, yyyy")}`
+                      : "Activity not available"}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">
+                    {availabilityDays.length > 0
+                      ? `Available on ${availabilityDays.join(", ")}`
+                      : "Availability not specified"}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <h4 className="font-medium">Appearance</h4>
+              
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                {escort.age && (
+                  <>
+                    <span className="text-muted-foreground">Age:</span>
+                    <span>{escort.age}</span>
+                  </>
+                )}
+                
+                {escort.height && (
+                  <>
+                    <span className="text-muted-foreground">Height:</span>
+                    <span>{String(escort.height)}</span>
+                  </>
+                )}
+                
+                {escort.weight && (
+                  <>
+                    <span className="text-muted-foreground">Weight:</span>
+                    <span>{String(escort.weight)}</span>
+                  </>
+                )}
+                
+                {escort.bodyType && (
+                  <>
+                    <span className="text-muted-foreground">Body Type:</span>
+                    <span>{escort.bodyType}</span>
+                  </>
+                )}
+                
+                {escort.hairColor && (
+                  <>
+                    <span className="text-muted-foreground">Hair:</span>
+                    <span>{escort.hairColor}</span>
+                  </>
+                )}
+                
+                {escort.eyeColor && (
+                  <>
+                    <span className="text-muted-foreground">Eyes:</span>
+                    <span>{escort.eyeColor}</span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-
-          <div className="flex items-start gap-2">
-            <CalendarIcon className="h-5 w-5 text-primary mt-0.5" />
-            <div>
-              <p className="font-medium">Availability</p>
-              <p className="text-sm text-muted-foreground">{formatAvailability()}</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-2">
-            <Clock className="h-5 w-5 text-primary mt-0.5" />
-            <div>
-              <p className="font-medium">Response Time</p>
-              <p className="text-sm text-muted-foreground">
-                {escort.responseRate
-                  ? `${escort.responseRate}% response rate`
-                  : "Usually responds within 24 hours"}
-              </p>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Languages and other information */}
-      <Card className="p-4">
-        <h3 className="text-lg font-medium mb-4">{t("Additional Information")}</h3>
-        <div className="space-y-4">
-          <div className="flex items-start gap-2">
-            <Users className="h-5 w-5 text-primary mt-0.5" />
-            <div>
-              <p className="font-medium">Languages</p>
-              <p className="text-sm text-muted-foreground">{formatList(escort.languages)}</p>
-            </div>
-          </div>
-        </div>
+        </CardContent>
       </Card>
     </div>
   );

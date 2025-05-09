@@ -40,6 +40,21 @@ export interface User {
   roles?: string[];
   isVerified?: boolean;
   user_metadata?: Record<string, any>;
+  // Add missing properties
+  username?: string;
+  website?: string;
+  bio?: string;
+  avatarUrl?: string;
+  avatar_url?: string;
+}
+
+export interface AuthContextType {
+  user: User | null;
+  login: (credentials: LoginCredentials) => Promise<void>;
+  logout: () => void;
+  register: (userData: any) => Promise<void>;
+  isLoading: boolean;
+  error: string | null;
 }
 
 export interface LoginCredentials {

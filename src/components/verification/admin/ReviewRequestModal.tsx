@@ -40,7 +40,11 @@ const ReviewRequestModal: React.FC<ReviewRequestModalProps> = ({
     await onReject(request.id, notes);
   };
   
-  const requestedLevel = request?.requested_level || request?.requestedLevel || 'unknown';
+  // Safely get requested level
+  const getRequestedLevel = () => {
+    if (!request) return 'unknown';
+    return request.requested_level || request.requestedLevel || request.verificationLevel || 'unknown';
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -59,7 +63,7 @@ const ReviewRequestModal: React.FC<ReviewRequestModalProps> = ({
               <div className="capitalize">{statusLower}</div>
 
               <div className="font-medium">Requested Level:</div>
-              <div className="capitalize">{requestedLevel}</div>
+              <div className="capitalize">{getRequestedLevel()}</div>
             </div>
 
             <div className="space-y-2">

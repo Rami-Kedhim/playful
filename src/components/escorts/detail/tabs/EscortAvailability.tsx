@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Escort } from '@/types/Escort'; // fixed import casing consistent
+import { Escort, Availability } from '@/types/Escort'; // fixed import casing consistent
 
 import { Calendar } from '@/components/ui/calendar';
 
@@ -18,14 +17,40 @@ const EscortAvailability: React.FC<EscortAvailabilityProps> = ({ escort }) => {
       // If it's already an array, convert items to strings
       return escort.availability.map(item => {
         if (typeof item === 'string') return item;
-        if (typeof item === 'object' && item !== null && 'day' in item) {
-          return item.day;
-        }
         return '';
       }).filter(Boolean);
     }
     
-    // If it's not an array, return empty array
+    if (typeof escort.availability === 'object') {
+      // If it's an object with a day property
+      if ('day' in escort.availability && typeof escort.availability.day === 'string') {
+        return [escort.availability.day];
+      }
+      
+      // If it has days property
+      if ('days' in escort.availability && Array.isArray(escort.availability.days)) {
+        return escort.availability.days;
+      }
+      
+      // Otherwise collect day names that are present
+      const days = [];
+      const availObj = escort.availability as Availability;
+      if (availObj.monday) days.push('Monday');
+      if (availObj.tuesday) days.push('Tuesday');
+      if (availObj.wednesday) days.push('Wednesday');
+      if (availObj.thursday) days.push('Thursday');
+      if (availObj.friday) days.push('Friday');
+      if (availObj.saturday) days.push('Saturday');
+      if (availObj.sunday) days.push('Sunday');
+      return days;
+    }
+    
+    // If it's a string
+    if (typeof escort.availability === 'string') {
+      return [escort.availability];
+    }
+    
+    // If it's none of the above, return empty array
     return [];
   };
   
@@ -77,4 +102,3 @@ const EscortAvailability: React.FC<EscortAvailabilityProps> = ({ escort }) => {
 };
 
 export default EscortAvailability;
-

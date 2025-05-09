@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useVerificationStatus } from "@/hooks/verification/useVerificationStatus";
 import { Shield, Loader2, BadgeCheck } from "lucide-react";
 import VerificationTimeline from "../status/VerificationTimeline";
-import { VERIFICATION_STATUS } from "@/types/verification";
+import { VerificationStatus, VERIFICATION_STATUS } from '@/types/verification';
 
 export default function VerificationStatusTab() {
   const { status, loading, verificationRequest } = useVerificationStatus();
