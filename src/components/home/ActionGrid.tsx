@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Users, Wallet, Boxes, MessageSquare } from 'lucide-react';
 import { AppPaths } from '@/routes/routeConfig';
 
-const ActionGrid = () => {
+export const ActionGrid: React.FC = () => {
   const actions = [
     {
       title: 'Enter Metaverse',
@@ -18,24 +18,24 @@ const ActionGrid = () => {
     {
       title: 'Top-up Wallet',
       description: 'Add UBX tokens to your account',
+      url: '/wallet',
       icon: <Wallet className="h-10 w-10 text-green-400" />,
-      url: AppPaths.WALLET,
       bgColor: 'bg-gradient-to-br from-green-900/30 to-green-700/20',
       borderColor: 'border-green-500/30'
     },
     {
       title: 'Meet Companions',
       description: 'Discover virtual AI companions',
+      url: '/ai-companion',
       icon: <Users className="h-10 w-10 text-blue-400" />,
-      url: AppPaths.AI_COMPANION,
       bgColor: 'bg-gradient-to-br from-blue-900/30 to-blue-700/20',
       borderColor: 'border-blue-500/30'
     },
     {
       title: 'Chat & Messages',
       description: 'View your conversations',
+      url: '/messages',
       icon: <MessageSquare className="h-10 w-10 text-amber-400" />,
-      url: AppPaths.MESSAGES,
       bgColor: 'bg-gradient-to-br from-amber-900/30 to-amber-700/20',
       borderColor: 'border-amber-500/30'
     }
@@ -65,5 +65,3 @@ const ActionGrid = () => {
     </section>
   );
 };
-
-export default ActionGrid;

@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
-import HomePage from '@/pages/HomePage';
+import HomePage from '@/pages/index';
 import GeneratePage from '@/pages/GeneratePage';
 import EnhancedAIPage from '@/pages/EnhancedAIPage';
 import MediaGenerationPage from '@/pages/MediaGenerationPage';
@@ -44,3 +44,4 @@ function App() {
 }
 
 export default App;
+

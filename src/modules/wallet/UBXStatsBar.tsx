@@ -1,59 +1,36 @@
 
 import React from 'react';
-import { Users, Zap, Star } from 'lucide-react';
-import { formatCurrency } from '@/lib/utils';
+import { formatNumber } from '@/utils/formatters';
 
-interface UBXStat {
-  label: string;
-  value: string | number;
-  icon?: React.ReactNode;
-  change?: number;
-}
-
-export const UBXStatsBar = () => {
-  const stats: UBXStat[] = [
-    {
-      label: 'Active Users',
-      value: '14,328',
-      icon: <Users className="h-5 w-5 text-primary" />,
-      change: 12
-    },
-    {
-      label: 'UBX Market Cap',
-      value: formatCurrency(1245890),
-      icon: <Zap className="h-5 w-5 text-primary" />,
-      change: 8
-    },
-    {
-      label: 'Verified Escorts',
-      value: '3,827',
-      icon: <Star className="h-5 w-5 text-primary" />,
-      change: 15
-    }
-  ];
-
+export const UBXStatsBar: React.FC = () => {
+  // In a real app, these would come from an API or context
+  const stats = {
+    totalTransactions: 2543897,
+    activeUsers: 128764,
+    marketCap: 153000000,
+    ubxPrice: 1.23
+  };
+  
   return (
-    <div className="container mx-auto px-4">
-      <div className="bg-card/80 backdrop-blur-sm border rounded-lg py-6 px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {stats.map((stat, index) => (
-            <div key={index} className="flex items-center gap-4">
-              {stat.icon && (
-                <div className="p-3 bg-primary/10 rounded-full">
-                  {stat.icon}
-                </div>
-              )}
-              <div>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-                <p className="text-2xl font-bold">{stat.value}</p>
-                {stat.change !== undefined && (
-                  <p className={`text-xs ${stat.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {stat.change >= 0 ? '+' : ''}{stat.change}% from last month
-                  </p>
-                )}
-              </div>
-            </div>
-          ))}
+    <div className="bg-background border-y">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex flex-wrap justify-center md:justify-between gap-4">
+          <div className="text-center md:text-left">
+            <span className="text-xs text-muted-foreground block">UBX PRICE</span>
+            <span className="font-semibold">${stats.ubxPrice.toFixed(2)} USD</span>
+          </div>
+          <div className="text-center">
+            <span className="text-xs text-muted-foreground block">MARKET CAP</span>
+            <span className="font-semibold">${formatNumber(stats.marketCap)}</span>
+          </div>
+          <div className="text-center">
+            <span className="text-xs text-muted-foreground block">TOTAL TRANSACTIONS</span>
+            <span className="font-semibold">{formatNumber(stats.totalTransactions)}</span>
+          </div>
+          <div className="text-center md:text-right">
+            <span className="text-xs text-muted-foreground block">ACTIVE USERS</span>
+            <span className="font-semibold">{formatNumber(stats.activeUsers)}</span>
+          </div>
         </div>
       </div>
     </div>
