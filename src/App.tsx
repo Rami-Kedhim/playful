@@ -1,63 +1,44 @@
 
 import React, { useEffect } from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { Toaster } from '@/components/ui/toaster';
-import { ThemeProvider } from '@/components/ui/theme-provider';
-import { UberEcosystemProvider } from '@/contexts/UberEcosystemContext';
-import { ServiceTypeProvider } from '@/contexts/ServiceTypeContext';
-import { FavoritesProvider } from '@/contexts/FavoritesContext';
-import AppRoutes from '@/app/AppRoutes';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
+import HomePage from '@/pages/HomePage';
+import GeneratePage from '@/pages/GeneratePage';
+import EnhancedAIPage from '@/pages/EnhancedAIPage'; // Import the new page
+import MediaGenerationPage from '@/pages/MediaGenerationPage';
+import NSFWImageGeneratorPage from '@/pages/NSFWImageGeneratorPage';
+import LucieTalkPage from '@/pages/lucie/LucieTalkPage';
 import { initializeSystem, shutdownSystem } from '@/core/engine';
-import { toast } from '@/components/ui/use-toast';
 
 function App() {
+  // Initialize the Uber Escorts core system on app start
   useEffect(() => {
-    // Initialize UberCore system
-    const initCore = async () => {
-      try {
-        console.log('Initializing UberEscorts system...');
-        const initialized = await initializeSystem();
-        
-        if (initialized) {
-          console.info('UberEscorts system initialized successfully');
-        } else {
-          console.error('Failed to initialize UberEscorts system');
-          toast({
-            title: "Initialization Failed",
-            description: "System will operate with limited functionality.",
-            variant: "destructive"
-          });
-        }
-      } catch (error) {
-        console.error('Error during system initialization:', error);
-        toast({
-          title: "System Error",
-          description: "An unexpected error occurred during initialization.",
-          variant: "destructive"
-        });
-      }
+    const init = async () => {
+      await initializeSystem();
     };
-    
-    initCore();
-    
+
+    init();
+
+    // Clean up when the app is closed
     return () => {
-      // Shutdown UberEscorts when app unmounts
       shutdownSystem();
     };
   }, []);
 
   return (
-    <ThemeProvider defaultTheme="light" storageKey="uberescorts-theme">
-      <UberEcosystemProvider>
-        <ServiceTypeProvider>
-          <FavoritesProvider>
-            <BrowserRouter>
-              <AppRoutes />
-              <Toaster />
-            </BrowserRouter>
-          </FavoritesProvider>
-        </ServiceTypeProvider>
-      </UberEcosystemProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/generate" element={<GeneratePage />} />
+          <Route path="/enhanced-ai" element={<EnhancedAIPage />} />
+          <Route path="/media-generation" element={<MediaGenerationPage />} />
+          <Route path="/nsfw-image-generator" element={<NSFWImageGeneratorPage />} />
+          <Route path="/lucie-talk" element={<LucieTalkPage />} />
+        </Routes>
+      </BrowserRouter>
+      <Toaster />
     </ThemeProvider>
   );
 }

@@ -8,6 +8,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// List of supported models for NSFW content
+const SUPPORTED_MODELS = {
+  'realistic': 'stablediffusionapi/realistic-vision-v5',
+  'deepseek': 'deepseek-ai/deepseek-vl-7b-chat',
+  'realistic_xl': 'stabilityai/stable-diffusion-xl-base-1.0',
+  'dream_shaper': 'lykon/dreamshaper-8',
+  'photo_real': 'minimaxir/sdxl-wrong-lora',
+  'anime': 'hakurei/waifu-diffusion'
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -23,7 +33,8 @@ serve(async (req) => {
 
     // Parse request body
     const { 
-      model = 'stablediffusionapi/realistic-vision-v5',
+      model = 'realistic',
+      modelId,
       name = 'Lucia',
       age = '25',
       ethnicity = 'Latina',
@@ -32,29 +43,56 @@ serve(async (req) => {
       clothing = 'Elegant dress',
       background = 'Luxury hotel suite',
       pose = 'Seductive',
-      tags = []
+      tags = [],
+      customPrompt = '',
+      negativePrompt = 'deformed, bad anatomy, disfigured, poorly drawn, extra limbs, blurry, watermark, logo, bad lighting'
     } = await req.json();
 
-    // Construct the prompt
-    const prompt = `${name}, ${age} years old, ${ethnicity}, ${style} style, ${skinTone} skin tone, wearing ${clothing}, in ${background}, ${pose} pose, ${tags.join(', ')}`;
+    // Get model ID from supported models or use custom provided modelId
+    const selectedModelId = modelId || SUPPORTED_MODELS[model] || SUPPORTED_MODELS.realistic;
+
+    // Construct the prompt - use custom if provided or build from parameters
+    const prompt = customPrompt || 
+      `${name}, ${age} years old, ${ethnicity}, ${style} style, ${skinTone} skin tone, wearing ${clothing}, in ${background}, ${pose} pose, ${tags.join(', ')}, high resolution, professional photography, detailed skin texture, photorealistic, 8k`;
 
     console.log(`Generating image with prompt: ${prompt}`);
-    console.log(`Using model: ${model}`);
+    console.log(`Using model: ${selectedModelId}`);
+
+    // Configure the parameters based on the selected model
+    const requestBody = {
+      inputs: prompt,
+      parameters: {
+        negative_prompt: negativePrompt,
+        guidance_scale: 7.5,
+        num_inference_steps: 30,
+        width: 1024,
+        height: 1024,
+        safety_checker: false  // Disable safety checker for NSFW content
+      },
+      options: {
+        wait_for_model: true,
+        use_gpu: true
+      }
+    };
+
+    // Special handling for DeepSeek model which has a different API structure
+    if (selectedModelId.includes('deepseek')) {
+      requestBody.parameters = {
+        max_new_tokens: 4096,
+        temperature: 0.7,
+        top_p: 0.9
+      };
+    }
 
     // Make request to Hugging Face API
-    const apiUrl = `https://api-inference.huggingface.co/models/${model}`;
+    const apiUrl = `https://api-inference.huggingface.co/models/${selectedModelId}`;
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${HF_TOKEN}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        inputs: prompt,
-        options: {
-          wait_for_model: true
-        }
-      })
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {

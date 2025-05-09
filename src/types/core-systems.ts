@@ -1,4 +1,3 @@
-
 export interface HermesInsight {
   type: string;
   title: string;
@@ -112,6 +111,7 @@ export interface RecommendedAction {
   priority: number;
   cta?: string;
   link?: string;
+  action?: string;
 }
 
 export interface UberCoreSystem {
