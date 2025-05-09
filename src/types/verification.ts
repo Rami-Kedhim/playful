@@ -18,23 +18,36 @@ export const VERIFICATION_LEVELS = {
 // Compatibility alias for components using the old reference
 export const VERIFICATION_LEVEL = VERIFICATION_LEVELS;
 
+export enum VerificationStatus {
+  PENDING = "pending",
+  IN_REVIEW = "in_review",
+  APPROVED = "approved",
+  REJECTED = "rejected"
+}
+
 export interface VerificationDocument {
   id: string;
   type: string;
+  documentType?: string; // Added for DocumentPreview component
   fileUrl: string;
+  filePath?: string; // Added for DocumentPreview component
   status: 'pending' | 'approved' | 'rejected';
   uploadedAt: string;
+  notes?: string; // Added for DocumentPreview component
+  reviewer_notes?: string; // Added for consistency
+  reviewed_at?: string;
+  reviewed_by?: string;
 }
 
 export interface VerificationRequest {
   id: string;
   userId: string;
-  status: 'pending' | 'in_review' | 'approved' | 'rejected';
+  profile_id?: string; // Added for compatibility
+  status: VerificationStatus | string;
   documents: VerificationDocument[];
   verificationLevel: VerificationLevel;
+  requested_level?: VerificationLevel; // Added for compatibility
   submittedAt: string;
   updatedAt?: string;
   rejectionReason?: string;
 }
-
-// Add any additional verification-related types here

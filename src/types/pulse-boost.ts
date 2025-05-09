@@ -103,4 +103,20 @@ export interface PulseBoost {
   startTime: Date;
   endTime: Date;
   status: string;
+  name: string;
+  description: string;
+  duration: string;
+  price: number;
+  price_ubx?: number;
+  features: string[];
+  visibility?: string | number;
+  visibility_increase?: number;
+  color?: string;
+  badgeColor?: string;
+  durationMinutes?: number;
+  boost_power?: number;
+  isMostPopular?: boolean;
+  isPopular?: boolean;
+  isRecommended?: boolean;
+  isActive?: boolean;
 }
