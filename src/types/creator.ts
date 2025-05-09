@@ -1,3 +1,4 @@
+
 // Fix missing exports for ContentCreator and related types
 export interface ContentCreator {
   id: string;
@@ -90,3 +91,7 @@ export interface CreatorAnalytics {
   topContent?: string[];
   period?: 'day' | 'week' | 'month' | 'year';
 }
+
+// Import the Creator type from the original file to maintain backward compatibility
+import { Creator, Rates } from './Creator';
+export type { Creator, Rates };

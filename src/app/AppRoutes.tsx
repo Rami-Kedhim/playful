@@ -3,28 +3,18 @@ import React, { Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { AppPaths } from '@/routes/routeConfig';
 
-// Import pages directly instead of using routes array
+// Import the one page we know exists
 import HomePage from '@/pages/index';
-import AppPage from '@/pages/app';
-import BrainHubPage from '@/pages/brain-hub';
-import ProfilePage from '@/pages/profile';
-import WalletPage from '@/pages/wallet';
-import SearchPage from '@/pages/search';
-import EscortsPage from '@/pages/escorts';
-import VerificationPage from '@/pages/verification';
-import ModerationPage from '@/pages/moderation';
-import AdminPage from '@/pages/admin';
-import MetaversePage from '@/pages/metaverse';
-import AICompanionsPage from '@/pages/ai-companions';
-import MessagesPage from '@/pages/messages';
-import PulseBoostPage from '@/pages/pulse-boost';
-import SettingsPage from '@/pages/settings';
-import PersonasPage from '@/pages/personas';
-import LuciePage from '@/pages/lucie';
-import OxumPage from '@/pages/oxum';
-import HermesPage from '@/pages/hermes';
-import OrusPage from '@/pages/orus';
-import NotFoundPage from '@/pages/not-found';
+
+// Create a placeholder component for pages that don't exist yet
+const PlaceholderPage = ({ pageName }: { pageName: string }) => (
+  <div className="container mx-auto py-12">
+    <h1 className="text-3xl font-bold mb-6">{pageName}</h1>
+    <div className="p-6 bg-secondary/20 rounded-lg">
+      <p>This page is under development. Content will be available soon.</p>
+    </div>
+  </div>
+);
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -41,26 +31,26 @@ const AppRoutes = () => {
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
         <Route path={AppPaths.HOME} element={<HomePage />} />
-        <Route path={AppPaths.APP} element={<AppPage />} />
-        <Route path={AppPaths.BRAIN_HUB} element={<BrainHubPage />} />
-        <Route path={AppPaths.PROFILE} element={<ProfilePage />} />
-        <Route path={AppPaths.WALLET} element={<WalletPage />} />
-        <Route path={AppPaths.SEARCH} element={<SearchPage />} />
-        <Route path={AppPaths.ESCORTS} element={<EscortsPage />} />
-        <Route path={AppPaths.VERIFICATION} element={<VerificationPage />} />
-        <Route path={AppPaths.MODERATION} element={<ModerationPage />} />
-        <Route path={AppPaths.ADMIN} element={<AdminPage />} />
-        <Route path={AppPaths.METAVERSE} element={<MetaversePage />} />
-        <Route path={AppPaths.AI_COMPANION} element={<AICompanionsPage />} />
-        <Route path={AppPaths.MESSAGES} element={<MessagesPage />} />
-        <Route path={AppPaths.PULSE_BOOST} element={<PulseBoostPage />} />
-        <Route path={AppPaths.SETTINGS} element={<SettingsPage />} />
-        <Route path={AppPaths.PERSONAS} element={<PersonasPage />} />
-        <Route path={AppPaths.LUCIE} element={<LuciePage />} />
-        <Route path={AppPaths.OXUM} element={<OxumPage />} />
-        <Route path={AppPaths.HERMES} element={<HermesPage />} />
-        <Route path={AppPaths.ORUS} element={<OrusPage />} />
-        <Route path="*" element={<NotFoundPage />} />
+        <Route path={AppPaths.APP} element={<PlaceholderPage pageName="App" />} />
+        <Route path={AppPaths.BRAIN_HUB} element={<PlaceholderPage pageName="Brain Hub" />} />
+        <Route path={AppPaths.PROFILE} element={<PlaceholderPage pageName="Profile" />} />
+        <Route path={AppPaths.WALLET} element={<PlaceholderPage pageName="Wallet" />} />
+        <Route path={AppPaths.SEARCH} element={<PlaceholderPage pageName="Search" />} />
+        <Route path={AppPaths.ESCORTS} element={<PlaceholderPage pageName="Escorts" />} />
+        <Route path={AppPaths.VERIFICATION} element={<PlaceholderPage pageName="Verification" />} />
+        <Route path={AppPaths.MODERATION} element={<PlaceholderPage pageName="Moderation" />} />
+        <Route path={AppPaths.ADMIN} element={<PlaceholderPage pageName="Admin" />} />
+        <Route path={AppPaths.METAVERSE} element={<PlaceholderPage pageName="Metaverse" />} />
+        <Route path={AppPaths.AI_COMPANION} element={<PlaceholderPage pageName="AI Companions" />} />
+        <Route path={AppPaths.MESSAGES} element={<PlaceholderPage pageName="Messages" />} />
+        <Route path={AppPaths.PULSE_BOOST} element={<PlaceholderPage pageName="Pulse Boost" />} />
+        <Route path={AppPaths.SETTINGS} element={<PlaceholderPage pageName="Settings" />} />
+        <Route path={AppPaths.PERSONAS} element={<PlaceholderPage pageName="Personas" />} />
+        <Route path={AppPaths.LUCIE} element={<PlaceholderPage pageName="Lucie" />} />
+        <Route path={AppPaths.OXUM} element={<PlaceholderPage pageName="Oxum" />} />
+        <Route path={AppPaths.HERMES} element={<PlaceholderPage pageName="Hermes" />} />
+        <Route path={AppPaths.ORUS} element={<PlaceholderPage pageName="Orus" />} />
+        <Route path="*" element={<PlaceholderPage pageName="Not Found" />} />
       </Routes>
     </Suspense>
   );

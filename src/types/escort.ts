@@ -18,18 +18,23 @@ export interface Escort {
   services?: string[];
   photos?: string[];
   rates?: Rates;
-  price?: number; // Added for compatibility with components
-  responseRate?: number; // Added for compatibility with components
+  price?: number; 
+  responseRate?: number;
   languages?: string[];
   availability?: string[];
   contactInfo?: ContactInfo;
-  verificationLevel: VerificationLevel;
+  verificationLevel?: VerificationLevel;
   tags?: string[];
   reviewScore?: number;
   reviewCount?: number;
   boosted?: boolean;
   boostLevel?: number;
   boostExpiration?: string;
+  
+  // Add fields for Creator compatibility
+  avatarUrl?: string;
+  isVerified?: boolean;
+  rating?: number;
 }
 
 export interface ContactInfo {

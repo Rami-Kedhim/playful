@@ -1,12 +1,19 @@
 
 export interface PulseBoost {
   id: string;
+  profileId?: string;
+  packageId?: string;
+  startTime?: Date;
+  endTime?: Date;
+  status?: string;
+  
+  // Additional properties needed by PulseBoostManager
   name: string;
-  description?: string;
-  duration: string; // e.g., "1d", "7d", "30d"
+  description: string;
+  duration: string;
   price: number;
   price_ubx?: number;
-  features?: string[];
+  features: string[];
   visibility?: string | number;
   visibility_increase?: number;
   color?: string;

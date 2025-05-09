@@ -20,9 +20,25 @@ const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({
   // Destructure values from the hook
   const { boostStatus, hermesStatus, loading } = boostManager;
   
-  // Function to format remaining time
-  const formatRemainingTime = (seconds?: number): string => {
-    if (!seconds) return '0h 0m';
+  // Function to format remaining time - fixed to handle string or number
+  const formatRemainingTime = (timeValue?: string | number): string => {
+    if (!timeValue) return '0h 0m';
+    
+    // Convert to seconds if it's a string that can be parsed to a number
+    let seconds: number;
+    if (typeof timeValue === 'string') {
+      // Try to parse as a number first
+      const parsedValue = parseInt(timeValue, 10);
+      if (!isNaN(parsedValue)) {
+        seconds = parsedValue;
+      } else {
+        // If it's a formatted string like "1h 30m", just return it
+        return timeValue;
+      }
+    } else {
+      seconds = timeValue;
+    }
+    
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     return `${hours}h ${minutes}m`;
