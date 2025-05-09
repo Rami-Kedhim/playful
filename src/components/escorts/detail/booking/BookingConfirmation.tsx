@@ -13,7 +13,7 @@ interface BookingConfirmationProps {
   duration?: string;
   location?: string;
   onClose: () => void;
-  status?: string; // Add status prop
+  status?: string; // Status property is now properly included
 }
 
 const BookingConfirmation = ({ 

@@ -111,7 +111,6 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
             totalPages={totalPages} 
             currentPage={currentPage}
             onPageChange={handlePageChange}
-            className="mx-auto flex w-full justify-center" 
           />
         </div>
       )}

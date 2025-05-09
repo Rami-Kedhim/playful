@@ -6,9 +6,10 @@ import { bookingService } from '@/services/bookingService';
 import { Escort } from '@/types/escort';
 import { Booking } from '@/types/booking';
 import { toast } from '@/components/ui/use-toast';
-import BookingDialog from './BookingDialog'; // Updated path
+import BookingDialog from './BookingDialog'; 
 import BookingConfirmation from './BookingConfirmation';
-import BookingPaymentStep from './BookingPaymentStep'; // Updated path
+import BookingPaymentStep from './BookingPaymentStep';
+import { BookingFormValues } from './types';
 
 interface BookingFlowProps {
   escort: Escort;
@@ -58,7 +59,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     return escort;
   }, [escort]);
 
-  const handleDetailsSubmit = async (bookingDetails: any) => {
+  const handleDetailsSubmit = async (bookingDetails: BookingFormValues) => {
     if (!user) {
       toast({
         title: 'Authentication Required',
