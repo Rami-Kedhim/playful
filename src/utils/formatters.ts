@@ -38,6 +38,20 @@ export const formatPrice = (price: number, currency: string = 'USD'): string => 
 };
 
 /**
+ * Format a currency value to a string
+ * @param value The value to format
+ * @param currency Currency code (default: USD)
+ * @param locale Locale string (default: en-US)
+ * @returns Formatted currency string
+ */
+export const formatCurrency = (value: number, currency: string = 'USD', locale: string = 'en-US'): string => {
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currency,
+  }).format(value);
+};
+
+/**
  * Format a number with commas
  * @param num The number to format
  * @returns Formatted number string
