@@ -1,99 +1,65 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { useAIGenerator } from '@/hooks/useAIGenerator';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Download, Image, RefreshCcw, Trash2 } from 'lucide-react';
-import { useNSFWImageGenerator } from '@/hooks/ai/useNSFWImageGenerator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-
-const ethnicities = [
-  'Asian', 'Black', 'Caucasian', 'Hispanic', 'Latina', 
-  'Middle Eastern', 'Mixed'
-];
-
-const styles = [
-  'Glamour', 'Artistic', 'Casual', 'Professional', 'Candid',
-  'Fashion', 'Boudoir', 'Lifestyle'
-];
-
-const clothingTypes = [
-  'Elegant dress', 'Casual outfit', 'Business attire', 'Swimwear',
-  'Lingerie', 'Evening gown', 'Workout clothes', 'Minimalist'
-];
-
-const backgrounds = [
-  'Luxury hotel suite', 'Beach sunset', 'Urban cityscape', 'Studio setting',
-  'Modern apartment', 'Natural landscape', 'Nightclub', 'Poolside'
-];
-
-const poses = [
-  'Standing', 'Sitting', 'Lying down', 'Leaning', 'Casual',
-  'Professional', 'Seductive', 'Playful'
-];
+import { Slider } from '@/components/ui/slider';
+import { Loader2, Sparkles, RefreshCw } from 'lucide-react';
 
 const NSFWImageGenerator: React.FC = () => {
   const [name, setName] = useState('Lucia');
   const [age, setAge] = useState('25');
-  const [ethnicity, setEthnicity] = useState('Latina');
-  const [style, setStyle] = useState('Glamour');
-  const [clothingType, setClothingType] = useState('Elegant dress');
-  const [background, setBackground] = useState('Luxury hotel suite');
-  const [pose, setPose] = useState('Seductive');
-  const [prompt, setPrompt] = useState('');
-  const [additionalTags, setAdditionalTags] = useState('');
+  const [ethnicity, setEthnicity] = useState('');
+  const [style, setStyle] = useState('');
+  const [clothing, setClothing] = useState('');
+  const [background, setBackground] = useState('');
+  const [pose, setPose] = useState('');
+  const [customPrompt, setCustomPrompt] = useState('');
+  const [guidanceScale, setGuidanceScale] = useState(7.5);
+  const [useCustomPrompt, setUseCustomPrompt] = useState(false);
   
-  const { generateImage, resetImage, loading, imageUrl, error } = useNSFWImageGenerator();
+  const { 
+    generateContent, 
+    clearResult, 
+    loading, 
+    result, 
+    error 
+  } = useAIGenerator({
+    defaultModel: 'stablediffusionapi/realistic-vision-v5',
+    contentType: 'image'
+  });
   
-  const handleGenerateClick = async () => {
-    // Build the complete prompt
-    const fullPrompt = prompt || `${name}, ${age} years old, ${ethnicity}, ${style} style, wearing ${clothingType}, in ${background}, ${pose} pose${additionalTags ? ', ' + additionalTags : ''}`;
+  const handleGenerate = async () => {
+    const prompt = useCustomPrompt 
+      ? customPrompt
+      : `${name}, ${age} years old, ${ethnicity}, ${style} style, wearing ${clothing}, in ${background}, ${pose} pose, high resolution, professional photography, detailed skin texture, photorealistic, 8k`;
     
-    // Generate the image
-    await generateImage({
-      name,
-      age,
-      ethnicity,
-      style,
-      clothing: clothingType,
-      background,
-      pose,
-      tags: additionalTags.split(',').map(tag => tag.trim()).filter(tag => tag)
+    const negativePrompt = 'deformed, bad anatomy, disfigured, poorly drawn, extra limbs, blurry, watermark, logo, bad lighting';
+    
+    await generateContent({
+      prompt,
+      negativePrompt,
+      guidanceScale,
+      model: 'stablediffusionapi/realistic-vision-v5'
     });
   };
   
-  const handleDownloadClick = () => {
-    if (imageUrl) {
-      // Create a temporary link to download the image
-      const a = document.createElement('a');
-      a.href = imageUrl;
-      a.download = `nsfw-image-${Date.now()}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-  };
-
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <Card className="lg:col-span-2">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Card>
         <CardHeader>
-          <CardTitle>Image Generator</CardTitle>
-          <CardDescription>
-            Create custom AI-generated images using our free APIs
-          </CardDescription>
+          <CardTitle>NSFW Image Generator</CardTitle>
         </CardHeader>
-        
         <CardContent>
-          <Tabs defaultValue="guided">
-            <TabsList className="mb-4">
+          <Tabs defaultValue="guided" onValueChange={(value) => setUseCustomPrompt(value === 'custom')}>
+            <TabsList className="grid w-full grid-cols-2 mb-4">
               <TabsTrigger value="guided">Guided</TabsTrigger>
-              <TabsTrigger value="advanced">Advanced</TabsTrigger>
+              <TabsTrigger value="custom">Custom Prompt</TabsTrigger>
             </TabsList>
             
             <TabsContent value="guided" className="space-y-4">
@@ -102,9 +68,9 @@ const NSFWImageGenerator: React.FC = () => {
                   <Label htmlFor="name">Name</Label>
                   <Input 
                     id="name" 
-                    value={name}
+                    value={name} 
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Character name" 
+                    placeholder="Character name"
                   />
                 </div>
                 
@@ -112,9 +78,9 @@ const NSFWImageGenerator: React.FC = () => {
                   <Label htmlFor="age">Age</Label>
                   <Input 
                     id="age" 
-                    value={age}
+                    value={age} 
                     onChange={(e) => setAge(e.target.value)}
-                    placeholder="25" 
+                    placeholder="Character age"
                   />
                 </div>
               </div>
@@ -126,9 +92,12 @@ const NSFWImageGenerator: React.FC = () => {
                     <SelectValue placeholder="Select ethnicity" />
                   </SelectTrigger>
                   <SelectContent>
-                    {ethnicities.map((item) => (
-                      <SelectItem key={item} value={item}>{item}</SelectItem>
-                    ))}
+                    <SelectItem value="Asian">Asian</SelectItem>
+                    <SelectItem value="Black">Black</SelectItem>
+                    <SelectItem value="Latina">Latina</SelectItem>
+                    <SelectItem value="White">White</SelectItem>
+                    <SelectItem value="Middle Eastern">Middle Eastern</SelectItem>
+                    <SelectItem value="Indian">Indian</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -140,23 +109,27 @@ const NSFWImageGenerator: React.FC = () => {
                     <SelectValue placeholder="Select style" />
                   </SelectTrigger>
                   <SelectContent>
-                    {styles.map((item) => (
-                      <SelectItem key={item} value={item}>{item}</SelectItem>
-                    ))}
+                    <SelectItem value="Glamour">Glamour</SelectItem>
+                    <SelectItem value="Fashion">Fashion</SelectItem>
+                    <SelectItem value="Artistic">Artistic</SelectItem>
+                    <SelectItem value="Casual">Casual</SelectItem>
+                    <SelectItem value="Elegant">Elegant</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="clothing">Clothing</Label>
-                <Select value={clothingType} onValueChange={setClothingType}>
+                <Select value={clothing} onValueChange={setClothing}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select clothing" />
                   </SelectTrigger>
                   <SelectContent>
-                    {clothingTypes.map((item) => (
-                      <SelectItem key={item} value={item}>{item}</SelectItem>
-                    ))}
+                    <SelectItem value="Elegant dress">Elegant dress</SelectItem>
+                    <SelectItem value="Business attire">Business attire</SelectItem>
+                    <SelectItem value="Casual outfit">Casual outfit</SelectItem>
+                    <SelectItem value="Swimwear">Swimwear</SelectItem>
+                    <SelectItem value="Evening gown">Evening gown</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -168,9 +141,11 @@ const NSFWImageGenerator: React.FC = () => {
                     <SelectValue placeholder="Select background" />
                   </SelectTrigger>
                   <SelectContent>
-                    {backgrounds.map((item) => (
-                      <SelectItem key={item} value={item}>{item}</SelectItem>
-                    ))}
+                    <SelectItem value="Luxury hotel suite">Luxury hotel suite</SelectItem>
+                    <SelectItem value="Beach sunset">Beach sunset</SelectItem>
+                    <SelectItem value="City skyline">City skyline</SelectItem>
+                    <SelectItem value="Studio backdrop">Studio backdrop</SelectItem>
+                    <SelectItem value="Garden setting">Garden setting</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -182,117 +157,113 @@ const NSFWImageGenerator: React.FC = () => {
                     <SelectValue placeholder="Select pose" />
                   </SelectTrigger>
                   <SelectContent>
-                    {poses.map((item) => (
-                      <SelectItem key={item} value={item}>{item}</SelectItem>
-                    ))}
+                    <SelectItem value="Standing">Standing</SelectItem>
+                    <SelectItem value="Sitting">Sitting</SelectItem>
+                    <SelectItem value="Lying down">Lying down</SelectItem>
+                    <SelectItem value="Walking">Walking</SelectItem>
+                    <SelectItem value="Portrait">Portrait</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              
+            </TabsContent>
+            
+            <TabsContent value="custom" className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="tags">Additional Tags (comma separated)</Label>
-                <Input 
-                  id="tags" 
-                  value={additionalTags}
-                  onChange={(e) => setAdditionalTags(e.target.value)}
-                  placeholder="high quality, detailed, perfect lighting" 
+                <Label htmlFor="custom-prompt">Custom Prompt</Label>
+                <Textarea
+                  id="custom-prompt"
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  placeholder="Enter your detailed prompt for image generation..."
+                  className="h-36 resize-none"
                 />
               </div>
             </TabsContent>
-            
-            <TabsContent value="advanced">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="custom-prompt">Custom Prompt</Label>
-                  <Textarea 
-                    id="custom-prompt"
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Enter a detailed prompt for your image generation"
-                    rows={5}
-                  />
-                </div>
-              </div>
-            </TabsContent>
           </Tabs>
-        </CardContent>
-        
-        <CardFooter className="flex justify-between flex-wrap gap-2">
-          <div>
+          
+          <div className="mt-6 space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <Label htmlFor="guidance-scale">Guidance Scale (creativity)</Label>
+                <span className="text-muted-foreground">{guidanceScale}</span>
+              </div>
+              <Slider
+                id="guidance-scale"
+                min={1}
+                max={20}
+                step={0.1}
+                value={[guidanceScale]}
+                onValueChange={([value]) => setGuidanceScale(value)}
+              />
+            </div>
+            
             <Button 
-              variant="outline" 
-              size="sm"
-              onClick={resetImage}
-              disabled={loading || !imageUrl}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Reset
-            </Button>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={handleDownloadClick}
-              disabled={loading || !imageUrl}
-              variant="outline"
-              size="sm"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Download
-            </Button>
-            <Button 
-              onClick={handleGenerateClick} 
+              className="w-full" 
+              onClick={handleGenerate}
               disabled={loading}
             >
               {loading ? (
                 <>
-                  <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Generating...
                 </>
               ) : (
                 <>
-                  <Image className="h-4 w-4 mr-2" />
+                  <Sparkles className="mr-2 h-4 w-4" />
                   Generate Image
                 </>
               )}
             </Button>
           </div>
-        </CardFooter>
+        </CardContent>
       </Card>
       
-      <div className="lg:col-span-1">
-        <Card className="h-full flex flex-col">
-          <CardHeader>
-            <CardTitle>Preview</CardTitle>
-            <CardDescription>
-              Generated image preview
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent className="flex-grow flex items-center justify-center">
-            {error ? (
-              <div className="text-center p-4 text-red-500">
-                <p>Error: {error}</p>
-              </div>
-            ) : imageUrl ? (
-              <img 
-                src={imageUrl} 
-                alt="Generated NSFW" 
-                className="max-w-full max-h-[500px] rounded-md object-contain"
-              />
-            ) : (
-              <div className="text-center p-8 text-muted-foreground bg-muted/30 rounded-md w-full h-full min-h-[300px] flex items-center justify-center">
-                <div>
-                  <Image className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                  <p>No image generated yet</p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Complete the form and click Generate
-                  </p>
-                </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex justify-between items-center">
+            Generated Image
+            {result && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={clearResult}
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[500px] flex items-center justify-center border rounded-md overflow-hidden bg-muted/30">
+            {loading && (
+              <div className="flex flex-col items-center">
+                <Loader2 className="h-10 w-10 animate-spin mb-2" />
+                <p className="text-muted-foreground">Generating image...</p>
               </div>
             )}
-          </CardContent>
-        </Card>
-      </div>
+            
+            {!loading && error && (
+              <div className="text-center p-4 text-destructive">
+                <p>Error: {error}</p>
+              </div>
+            )}
+            
+            {!loading && !error && !result && (
+              <div className="text-center text-muted-foreground">
+                <p>Your generated image will appear here</p>
+              </div>
+            )}
+            
+            {!loading && !error && result?.url && (
+              <img 
+                src={result.url} 
+                alt="Generated NSFW image"
+                className="max-w-full max-h-full object-contain"
+              />
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

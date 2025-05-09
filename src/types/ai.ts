@@ -1,47 +1,44 @@
 
-export interface ModerateContentParams {
-  content: string;
-  userId?: string;
-  strictness?: 'low' | 'medium' | 'high';
-  contentType?: string;
-  type?: string;
-}
+export type ContentType = 'text' | 'image' | 'video' | 'multimodal';
 
-export interface ModerationResult {
-  isAppropriate: boolean;
-  score: number;
-  categories: {
-    [key: string]: number;
-  };
-  message?: string;
-}
-
-export interface AIModelPreference {
+export interface AIModel {
   id: string;
   name: string;
+  type: ContentType;
   description?: string;
-  isDefault?: boolean;
-  contextLength?: number;
-  provider?: string;
-  capabilities?: string[];
-  settings?: Record<string, any>;
-  model?: string;
-  systemPrompt?: string;
-  temperature?: number;
+  useCase?: string;
 }
 
-export interface AIProvider {
-  id: string;
-  name: string;
-  models: AIModelPreference[];
-  apiKey?: string;
-  baseUrl?: string;
-  isEnabled?: boolean;
-  defaultModel?: string;
-  capabilities?: {
-    streaming?: boolean;
-    functionCalling?: boolean;
-    vision?: boolean;
-    audio?: boolean;
-  };
+export interface AIGenerationOptions {
+  prompt: string;
+  model?: string;
+  negativePrompt?: string;
+  guidanceScale?: number;
+  steps?: number;
+  width?: number;
+  height?: number;
+  options?: Record<string, any>;
+}
+
+export interface AIGenerationResult {
+  url?: string;
+  text?: string;
+  success: boolean;
+  error?: string;
+  processingTime?: number;
+}
+
+export interface NSFWImageGenerationParams {
+  model?: string;
+  name?: string;
+  age?: string;
+  ethnicity?: string;
+  style?: string;
+  skinTone?: string;
+  clothing?: string;
+  background?: string;
+  pose?: string;
+  tags?: string[];
+  customPrompt?: string;
+  negativePrompt?: string;
 }
