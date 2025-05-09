@@ -1,77 +1,71 @@
 
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { Play } from 'lucide-react';
-import { Video } from '@/types/Escort';
+import React from "react";
+import { Video } from "@/types/escort";
+import { Card, CardContent } from "@/components/ui/card";
+import { Play, Lock } from "lucide-react";
 
 interface VideoGridProps {
   videos: Video[];
-  onVideoClick?: (video: Video, index: number) => void;
-  className?: string;
 }
 
-const VideoGrid: React.FC<VideoGridProps> = ({ 
-  videos, 
-  onVideoClick,
-  className
-}) => {
+const VideoGrid: React.FC<VideoGridProps> = ({ videos }) => {
   if (!videos || videos.length === 0) {
     return (
-      <div className="flex items-center justify-center h-40 bg-muted rounded-md">
+      <div className="text-center py-8">
         <p className="text-muted-foreground">No videos available</p>
       </div>
     );
   }
-  
-  const formatDuration = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-  
+
   return (
-    <div className={cn("grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3", className)}>
-      {videos.map((video, index) => (
-        <div 
-          key={video.id}
-          className="relative rounded-md overflow-hidden cursor-pointer group"
-          onClick={() => onVideoClick?.(video, index)}
-        >
-          <div className="aspect-video bg-black/10">
-            <img 
-              src={video.thumbnail} 
-              alt={video.title || 'Video'} 
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
-          
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="bg-black/50 rounded-full p-3 group-hover:bg-primary transition-colors">
-              <Play className="w-8 h-8 text-white" />
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {videos.map((video) => (
+        <Card key={video.id} className="overflow-hidden">
+          <div className="relative">
+            <div className="aspect-video bg-muted">
+              <img
+                src={video.thumbnailUrl || video.thumbnail || "/placeholder-video.jpg"}
+                alt={video.title || "Video"}
+                className="w-full h-full object-cover"
+              />
+              {video.isPremium && (
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                  <div className="flex flex-col items-center">
+                    <Lock className="h-8 w-8 text-primary mb-2" />
+                    <span className="text-white text-sm font-medium">
+                      Premium Content
+                    </span>
+                  </div>
+                </div>
+              )}
+              {!video.isPremium && (
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                  <div className="rounded-full bg-primary/90 p-4">
+                    <Play className="h-8 w-8 text-white" fill="white" />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-          
-          {video.duration && (
-            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-              {formatDuration(video.duration)}
+          <CardContent className="p-3">
+            <h3 className="font-medium line-clamp-1">
+              {video.title || "Untitled Video"}
+            </h3>
+            <div className="flex justify-between text-sm text-muted-foreground mt-1">
+              <span>{formatDuration(video.duration || 0)}</span>
+              <span>{video.viewCount || video.views || 0} views</span>
             </div>
-          )}
-          
-          {video.isPublic && (
-            <div className="absolute top-2 right-2 bg-primary/80 text-white text-xs px-2 py-1 rounded">
-              Premium
-            </div>
-          )}
-          
-          <div className="p-2">
-            <h4 className="font-medium text-sm line-clamp-1">{video.title}</h4>
-            <p className="text-xs text-muted-foreground">{(video as any).viewCount ?? 0} views</p>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );
 };
+
+function formatDuration(seconds: number): string {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+}
 
 export default VideoGrid;

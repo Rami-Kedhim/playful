@@ -1,104 +1,140 @@
 
-import { memo, useCallback } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
+import React from "react";
 import EscortResults from "@/components/escorts/EscortResults";
-import SearchBar from "@/components/escorts/SearchBar";
-import ActiveFiltersDisplay from "./ActiveFiltersDisplay";
-import useActiveFilters from "@/hooks/escort-filters/useActiveFilters";
+import { Pagination } from "@/components/ui/pagination";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Escort } from "@/types/escort";
 
 interface ResultsSectionProps {
-  filterState: any;
-  combinedIsLoading: boolean;
+  escorts: Escort[];
+  totalPages: number;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  clearFilters: () => void;
+  isLoading?: boolean;
+  resultsPerPage?: number;
+  totalEscorts?: number;
 }
 
-const ResultsSection = memo<ResultsSectionProps>(({ filterState, combinedIsLoading }) => {
-  // Get active filters using our hook
-  const { activeFilters, activeFilterCount } = useActiveFilters(filterState);
-  
-  // Memoize handlers for filter removal
-  const handleRemoveFilter = useCallback((filter: { key: string; label: string; value?: string | number }) => {
-    switch (filter.key) {
-      case 'searchQuery':
-        filterState.setSearchQuery?.('');
-        break;
-      case 'location':
-        filterState.setLocation?.('');
-        break;
-      case 'serviceTypeFilter':
-        filterState.setServiceTypeFilter?.('');
-        break;
-      case 'verifiedOnly':
-        filterState.setVerifiedOnly?.(false);
-        break;
-      case 'availableNow':
-        filterState.setAvailableNow?.(false);
-        break;
-      case 'ratingMin':
-        filterState.setRatingMin?.(0);
-        break;
-      case 'priceRange':
-        filterState.setPriceRange?.([0, 500]);
-        break;
-      case 'ageRange':
-        filterState.setAgeRange?.([21, 50]);
-        break;
-      case 'selectedGenders':
-        filterState.setSelectedGenders?.([]);
-        break;
-      case 'selectedOrientations':
-        filterState.setSelectedOrientations?.([]);
-        break;
-      case 'selectedServices':
-        filterState.setSelectedServices?.([]);
-        break;
-      default:
-        break;
+const ResultsSection: React.FC<ResultsSectionProps> = ({
+  escorts,
+  totalPages,
+  currentPage,
+  setCurrentPage,
+  clearFilters,
+  isLoading = false,
+  resultsPerPage = 12,
+  totalEscorts = 0,
+}) => {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    searchParams.set('page', page.toString());
+    setSearchParams(searchParams);
+  };
+
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
-  }, [filterState]);
+
+    if (startPage > 1) {
+      pageNumbers.push(
+        <Button
+          key="1"
+          variant="outline"
+          size="icon"
+          onClick={() => handlePageChange(1)}
+        >
+          1
+        </Button>
+      );
+      if (startPage > 2) {
+        pageNumbers.push(<span key="ellipsis1">...</span>);
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(
+        <Button
+          key={i}
+          variant={i === currentPage ? "default" : "outline"}
+          size="icon"
+          onClick={() => handlePageChange(i)}
+        >
+          {i}
+        </Button>
+      );
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        pageNumbers.push(<span key="ellipsis2">...</span>);
+      }
+      pageNumbers.push(
+        <Button
+          key={totalPages}
+          variant="outline"
+          size="icon"
+          onClick={() => handlePageChange(totalPages)}
+        >
+          {totalPages}
+        </Button>
+      );
+    }
+
+    return pageNumbers;
+  };
 
   return (
-    <div className="lg:col-span-3">
-      <SearchBar
-        searchQuery={filterState.searchQuery || ""}
-        setSearchQuery={filterState.setSearchQuery || (() => {})}
-        sortBy={filterState.sortBy || "newest"}
-        setSortBy={filterState.setSortBy || (() => {})}
-      />
-
-      {/* Active Filters display - only show in mobile view */}
-      <div className="lg:hidden mb-6">
-        <ActiveFiltersDisplay 
-          activeFilters={activeFilters}
-          onRemoveFilter={handleRemoveFilter}
-          onClearAllFilters={filterState.clearFilters || (() => {})}
-          showFilterCount={true}
-        />
-      </div>
-
-      {/* No results alert */}
-      {!combinedIsLoading && filterState.filteredEscorts && filterState.filteredEscorts.length === 0 && (
-        <Alert variant="warning" className="mb-6">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>No results found</AlertTitle>
-          <AlertDescription>
-            No escorts match your current filters. Try adjusting your criteria or clearing some filters.
-          </AlertDescription>
-        </Alert>
-      )}
-
+    <div>
       <EscortResults
-        escorts={filterState.filteredEscorts || []}
-        clearFilters={filterState.clearFilters}
-        currentPage={filterState.currentPage || 1}
-        setCurrentPage={filterState.setCurrentPage || (() => {})}
-        totalPages={filterState.totalPages || 1}
-        isLoading={combinedIsLoading}
+        escorts={escorts}
+        clearFilters={clearFilters}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
+        isLoading={isLoading}
       />
+
+      {totalPages > 1 && (
+        <Pagination className="mt-8">
+          <div className="flex justify-center items-center space-x-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            <div className="flex items-center space-x-2">
+              {renderPageNumbers()}
+            </div>
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </Pagination>
+      )}
     </div>
   );
-});
-
-ResultsSection.displayName = 'ResultsSection';
+};
 
 export default ResultsSection;

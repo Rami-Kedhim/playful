@@ -69,7 +69,7 @@ export interface Escort {
   isAvailable?: boolean;
   boosted?: boolean;
   featured?: boolean;
-  // Add all missing properties
+  // Properties that were missing before
   rates?: Rates;
   avatarUrl?: string;
   avatar?: string;
@@ -98,6 +98,16 @@ export interface Escort {
     website?: string;
     socialMedia?: Record<string, string>;
   };
+  stats?: {
+    averageRating?: number;
+    totalReviews?: number;
+    reviewCount?: number;
+    height?: string | number;
+    weight?: string | number;
+    bust?: string | number;
+    waist?: string | number;
+    hips?: string | number;
+  };
   profileType?: string;
   boostLevel?: number;
   isAI?: boolean;
@@ -105,13 +115,13 @@ export interface Escort {
   eyeColor?: string;
   ethnicity?: string;
   measurements?: string;
-  stats?: {
-    averageRating?: number;
-    totalReviews?: number;
-  };
   specialties?: string[];
   limitations?: string[];
   isFavorited?: boolean;
+  lastActive?: string | Date;
+  clientsServed?: number;
+  interests?: string[];
+  locations?: string[]; // For BookingForm.tsx
 }
 
 export interface ExtendedEscort extends Escort {
@@ -146,3 +156,6 @@ export interface EscortFilters {
   verifiedOnly?: boolean;
   rating?: number;
 }
+
+// Export Video type to solve module import errors
+export type { Video };
