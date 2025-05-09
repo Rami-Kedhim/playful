@@ -22,7 +22,9 @@ const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
   formatDuration
 }) => {
   // Use formatted duration if available
-  const duration = formatDuration ? formatDuration(pkg.duration) : pkg.duration;
+  const duration = formatDuration && pkg.duration 
+    ? formatDuration(pkg.duration) 
+    : pkg.duration || '';
   
   return (
     <div

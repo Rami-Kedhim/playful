@@ -1,81 +1,123 @@
 
-import { AlertCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { BoostPackage } from "@/types/boost";
-import { formatBoostDuration } from "@/utils/boostCalculator";
 
 interface BoostPurchaseConfirmationProps {
-  selectedPackage: BoostPackage | undefined;
-  ubxBalance: number;
-  onBack: () => void;
-  onPurchase: () => void;
-  loading: boolean;
+  selectedPackage: BoostPackage | null;
+  onConfirm: () => void;
+  onCancel: () => void;
+  isLoading: boolean;
+  error?: string | null;
+  success?: boolean;
+  formatDuration?: (duration: string) => string;
 }
 
-const BoostPurchaseConfirmation = ({
+const BoostPurchaseConfirmation: React.FC<BoostPurchaseConfirmationProps> = ({
   selectedPackage,
-  ubxBalance,
-  onBack,
-  onPurchase,
-  loading
-}: BoostPurchaseConfirmationProps) => {
-  const insufficientBalance = selectedPackage && 
-    ubxBalance < selectedPackage.price_ubx;
-
+  onConfirm,
+  onCancel,
+  isLoading,
+  error,
+  success,
+  formatDuration = (duration) => duration || ''
+}) => {
+  // Form Validation
+  const [agreed, setAgreed] = useState(false);
+  
+  if (!selectedPackage) {
+    return null;
+  }
+  
   return (
-    <div className="space-y-6">
-      <div className="bg-muted p-4 rounded-md">
-        <h3 className="font-medium mb-2">Confirm Your Purchase</h3>
-        
-        <div className="grid grid-cols-2 gap-2">
-          <div className="text-sm text-muted-foreground">Package:</div>
-          <div>
-            {selectedPackage?.name}
-          </div>
-          
-          <div className="text-sm text-muted-foreground">Duration:</div>
-          <div>
-            {formatBoostDuration(selectedPackage?.duration || "")}
-          </div>
-          
-          <div className="text-sm text-muted-foreground">Price:</div>
-          <div className="font-medium">
-            {selectedPackage?.price_ubx} UBX
-          </div>
-          
-          <div className="text-sm text-muted-foreground">Current Balance:</div>
-          <div className={insufficientBalance ? "text-red-500" : ""}>
-            {ubxBalance} UBX
-          </div>
-        </div>
-        
-        {insufficientBalance && (
-          <Alert variant="destructive" className="mt-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Insufficient Balance</AlertTitle>
-            <AlertDescription>
-              You don't have enough UBX to purchase this boost. Please add more credits to your account.
-            </AlertDescription>
-          </Alert>
-        )}
-      </div>
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle>Confirm Boost Purchase</CardTitle>
+        <CardDescription>
+          You're about to purchase a boost for your profile
+        </CardDescription>
+      </CardHeader>
       
-      <div className="flex justify-between">
-        <Button 
-          variant="outline" 
-          onClick={onBack}
-        >
-          Back
-        </Button>
-        <Button 
-          onClick={onPurchase} 
-          disabled={loading || insufficientBalance}
-        >
-          Complete Purchase
-        </Button>
-      </div>
-    </div>
+      <CardContent className="space-y-4">
+        {success ? (
+          <div className="flex flex-col items-center py-6 text-center">
+            <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
+            <h3 className="text-xl font-medium">Boost Activated!</h3>
+            <p className="text-muted-foreground mt-1">
+              Your profile is now boosted and will receive increased visibility
+            </p>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center py-6 text-center">
+            <AlertCircle className="h-16 w-16 text-red-500 mb-4" />
+            <h3 className="text-xl font-medium">Purchase Failed</h3>
+            <p className="text-muted-foreground mt-1">{error}</p>
+          </div>
+        ) : (
+          <>
+            <div className="bg-muted p-4 rounded-md">
+              <div className="flex justify-between mb-2">
+                <span>Package:</span>
+                <span className="font-medium">{selectedPackage.name}</span>
+              </div>
+              <div className="flex justify-between mb-2">
+                <span>Duration:</span>
+                <span>{formatDuration(selectedPackage.duration || '')}</span>
+              </div>
+              <div className="flex justify-between mb-2">
+                <span>Price:</span>
+                <span className="font-bold">{selectedPackage.price_ubx || selectedPackage.price} UBX</span>
+              </div>
+            </div>
+            
+            <div>
+              <div className="flex items-start mb-4">
+                <input
+                  id="terms"
+                  type="checkbox"
+                  className="h-4 w-4 mt-1"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                />
+                <label htmlFor="terms" className="ml-2 text-sm text-muted-foreground">
+                  I understand that this boost will be active immediately and the UBX credits will be deducted from my account.
+                </label>
+              </div>
+            </div>
+          </>
+        )}
+      </CardContent>
+      
+      <CardFooter className={`flex ${success || error ? 'justify-center' : 'justify-between'}`}>
+        {success ? (
+          <Button onClick={onCancel}>
+            Close
+          </Button>
+        ) : error ? (
+          <Button onClick={onCancel}>
+            Try Again
+          </Button>
+        ) : (
+          <>
+            <Button variant="outline" onClick={onCancel} disabled={isLoading}>
+              Cancel
+            </Button>
+            <Button onClick={onConfirm} disabled={!agreed || isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Confirm Purchase"
+              )}
+            </Button>
+          </>
+        )}
+      </CardFooter>
+    </Card>
   );
 };
 

@@ -61,7 +61,7 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({ level }) => {
   };
 
   // Convert level to string for lookup
-  const levelKey = typeof level === 'string' ? level.toLowerCase() : VerificationLevel[level];
+  const levelKey = level.toString();
   const badge = badgeConfigurations[levelKey] || badgeConfigurations[VerificationLevel.BASIC];
 
   return (

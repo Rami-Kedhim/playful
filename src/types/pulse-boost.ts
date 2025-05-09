@@ -54,6 +54,9 @@ export interface BoostAnalytics {
     value: number;
     change?: number;
   };
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
 }
 
 // Alias to fix the reference in useBoostManager.ts
@@ -90,6 +93,7 @@ export interface PulseBoost {
   startTime: Date;
   endTime: Date;
   status: string;
+  // Adding required properties that were missing
   name: string;
   description: string;
   duration: string;
@@ -128,6 +132,12 @@ export interface HermesStatus {
   totalInQueue?: number;
   estimatedWaitTime?: number;
   score?: number;
+  position?: number;
+  activeUsers?: number;
+  estimatedVisibility?: number;
+  lastUpdateTime?: string;
+  boostScore?: number;
+  effectivenessScore?: number;
 }
 
 export interface BoostEligibility {

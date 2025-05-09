@@ -6,14 +6,14 @@ import { useBoostAnalytics } from '@/hooks/boost/useBoostAnalytics';
 
 interface HermesOxumQueueVisualizationProps {
   userId?: string;
-  activeBoosts?: number;
   profileId?: string;
+  activeBoosts?: number;
 }
 
 const HermesOxumQueueVisualization: React.FC<HermesOxumQueueVisualizationProps> = ({
   userId,
-  activeBoosts = 0,
-  profileId
+  profileId,
+  activeBoosts = 0
 }) => {
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
   const [totalInQueue, setTotalInQueue] = useState<number>(100);

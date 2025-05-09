@@ -164,3 +164,6 @@ export interface ExtendedEscort extends Escort {
   providesInPersonServices: boolean;
   providesVirtualContent: boolean;
 }
+
+// Re-export VerificationLevel for backward compatibility
+// export { VerificationLevel };

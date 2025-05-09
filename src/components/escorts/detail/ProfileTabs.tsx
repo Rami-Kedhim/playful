@@ -1,6 +1,6 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Escort } from "@/types/Escort";
+import { Escort } from "@/types/escort";
 import { VerificationLevel } from "@/types/verification";
 import AboutTab from "./profile/AboutTab";
 import ServicesTab from "./profile/ServicesTab";
@@ -15,26 +15,37 @@ interface ProfileTabsProps {
 
 const ProfileTabs = ({ escort }: ProfileTabsProps) => {
   // Normalize the verificationLevel prop to a string type compatible with VerificationBadge
-  let verificationLevel: "none" | "basic" | "enhanced" | "premium" = "none";
+  let verificationLevel: VerificationLevel;
   
   if (escort.verificationLevel) {
-    // Convert to string if it's an enum value
-    const level = typeof escort.verificationLevel === 'string' 
-      ? escort.verificationLevel 
-      : String(escort.verificationLevel);
-    
-    // Map verification levels to expected values
-    if (level === VerificationLevel.NONE || level === "none") {
-      verificationLevel = "none";
-    } else if (level === VerificationLevel.BASIC || level === "basic") {
-      verificationLevel = "basic";
-    } else if (level === VerificationLevel.VERIFIED || level === "verified") {
-      verificationLevel = "basic"; // Map verified to basic for now
-    } else if (level === VerificationLevel.PREMIUM || level === "premium") {
-      verificationLevel = "premium";
-    } else if (level === VerificationLevel.ENHANCED || level === "enhanced") {
-      verificationLevel = "enhanced";
+    // Convert to proper enum value if it's a string
+    if (typeof escort.verificationLevel === 'string') {
+      switch(escort.verificationLevel) {
+        case "none":
+          verificationLevel = VerificationLevel.NONE;
+          break;
+        case "basic":
+          verificationLevel = VerificationLevel.BASIC;
+          break;
+        case "verified":
+          verificationLevel = VerificationLevel.VERIFIED;
+          break;
+        case "premium":
+          verificationLevel = VerificationLevel.PREMIUM;
+          break;
+        case "enhanced":
+          verificationLevel = VerificationLevel.ENHANCED;
+          break;
+        default:
+          verificationLevel = VerificationLevel.NONE;
+          break;
+      }
+    } else {
+      // It's already an enum value
+      verificationLevel = escort.verificationLevel;
     }
+  } else {
+    verificationLevel = VerificationLevel.NONE;
   }
 
   return (

@@ -30,7 +30,7 @@ const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
         </div>
         <h3 className="font-medium text-lg">{boostPackage.name}</h3>
         <div className="text-sm text-muted-foreground my-2">
-          {formatDuration(boostPackage.duration)}
+          {formatDuration(boostPackage.duration || '')}
         </div>
         <div className="mt-2 font-bold text-lg">
           {boostPackage.price_ubx || boostPackage.price} UBX

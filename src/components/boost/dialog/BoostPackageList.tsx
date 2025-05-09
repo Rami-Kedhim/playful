@@ -38,7 +38,7 @@ const BoostPackageList = ({
             <div className="text-center">
               <h3 className="font-medium">{pkg.name}</h3>
               <div className="text-sm text-muted-foreground my-2">
-                {formatBoostDuration(pkg.duration)}
+                {formatBoostDuration(pkg.duration || '')}
               </div>
               <div className="flex items-center justify-center gap-1 mt-2">
                 <Zap className="h-4 w-4 text-yellow-500" />

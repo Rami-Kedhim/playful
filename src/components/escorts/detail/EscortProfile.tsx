@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Escort } from '@/types/Escort';  // Using consistent casing
+import { Escort } from '@/types/escort';  // Using consistent casing
 import { VerificationLevel } from '@/types/verification';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -12,11 +13,32 @@ interface EscortProfileProps {
 
 const EscortProfile: React.FC<EscortProfileProps> = ({ escort, loading = false }) => {
   // Cast or convert the verificationLevel to the proper enum type
-  const verificationLevel = escort.verificationLevel 
-    ? (typeof escort.verificationLevel === 'string' 
-      ? escort.verificationLevel as VerificationLevel 
-      : escort.verificationLevel)
-    : VerificationLevel.NONE;
+  let verificationLevel: VerificationLevel;
+  
+  if (typeof escort.verificationLevel === 'string') {
+    switch(escort.verificationLevel) {
+      case 'none':
+        verificationLevel = VerificationLevel.NONE;
+        break;
+      case 'basic':
+        verificationLevel = VerificationLevel.BASIC;
+        break;
+      case 'verified':
+        verificationLevel = VerificationLevel.VERIFIED;
+        break;
+      case 'enhanced':
+        verificationLevel = VerificationLevel.ENHANCED;
+        break;
+      case 'premium':
+        verificationLevel = VerificationLevel.PREMIUM;
+        break;
+      default:
+        verificationLevel = VerificationLevel.NONE;
+        break;
+    }
+  } else {
+    verificationLevel = escort.verificationLevel || VerificationLevel.NONE;
+  }
 
   // Use the processed verification level for all component needs
   const normalizedEscort: Escort = {

@@ -21,7 +21,7 @@ const BoostPackages = ({
   packages, 
   selected, // Changed parameter name from selectedId to selected
   onSelect,
-  formatDuration = (duration) => duration,
+  formatDuration = (duration) => duration || '',
   disabled = false,
   dailyUsage = 0,
   dailyLimit = 5,
@@ -62,7 +62,7 @@ const BoostPackages = ({
                   <div className="space-y-1">
                     <div className="font-medium">{pkg.name}</div>
                     <div className="text-sm text-muted-foreground">
-                      {formatDuration(pkg.duration)}
+                      {formatDuration(pkg.duration || '')}
                     </div>
                     {pkg.features && pkg.features.length > 0 && (
                       <ul className="text-xs space-y-1 mt-1">
