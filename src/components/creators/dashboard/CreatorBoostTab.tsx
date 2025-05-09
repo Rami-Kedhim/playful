@@ -1,178 +1,214 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BoostPackage, BoostStatus } from '@/hooks/boost/types';
-import { useToast } from '@/hooks/use-toast';
-import BoostAnalytics from './boost/BoostAnalytics';
-import { toDate } from '@/utils/formatters';
-
-// Mock data for development purposes
-const mockBoostPackages = [
-  {
-    id: 'basic',
-    name: 'Basic Boost',
-    description: 'Increase your profile visibility for 24 hours',
-    price: 50,
-    price_ubx: 50,
-    duration: '24:00:00',
-    durationMinutes: 1440,
-    features: ['Increased profile visibility', 'Higher search ranking'],
-    visibility: 'medium',
-    visibility_increase: 25,
-  },
-  {
-    id: 'premium',
-    name: 'Premium Boost',
-    description: 'Maximum visibility for 3 days with premium placement',
-    price: 120,
-    price_ubx: 120,
-    duration: '72:00:00',
-    durationMinutes: 4320,
-    features: ['Maximum profile visibility', 'Top search results', 'Featured on homepage'],
-    visibility: 'high',
-    visibility_increase: 75,
-    isMostPopular: true,
-  }
-] as BoostPackage[];
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { useBoost } from "@/hooks/useBoost";
+import { formatCurrency } from "@/utils/formatters";
+import BoostStatusCard from "./boost/BoostStatusCard";
+import BoostPackageSelection from "./boost/BoostPackageSelection";
+import BoostPurchaseConfirmation from "./boost/BoostPurchaseConfirmation";
+import BoostAnalytics from "./boost/BoostAnalytics";
+import { BoostStatus } from "@/types/boost";
 
 interface CreatorBoostTabProps {
-  userId: string;
+  profileId: string;
+  profileCompleteness?: number;
+  rating?: number;
+  isVerified?: boolean;
+  country?: string;
+  role?: 'verified' | 'regular' | 'AI';
+  ubxBalance?: number;
 }
 
-const CreatorBoostTab: React.FC<CreatorBoostTabProps> = ({ userId }) => {
-  const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<string>('status');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
-  const [boostStatus, setBoostStatus] = useState<BoostStatus>({
-    isActive: false,
-    expiresAt: '',
-    packageName: '',
-    packageId: '',
-  });
+const CreatorBoostTab: React.FC<CreatorBoostTabProps> = ({
+  profileId,
+  profileCompleteness = 70,
+  rating = 4.5,
+  isVerified = true,
+  country = "United States",
+  role = 'verified',
+  ubxBalance = 100
+}) => {
+  const {
+    boostStatus,
+    packages,
+    boostProfile,
+    cancelBoost,
+    loading,
+    error,
+    eligibility,
+    hermesStatus
+  } = useBoost();
   
-  // Function to calculate boost price based on user's profile
-  const getBoostPrice = () => {
-    return 100; // Default base price
-  };
+  const [activeTab, setActiveTab] = useState("packages");
+  const [selectedPackage, setSelectedPackage] = useState<string>("");
+  const [activeStep, setActiveStep] = useState<"select" | "confirm">("select");
   
-  // Simulate purchasing a boost package
-  const handlePurchaseBoost = async () => {
-    if (!selectedPackage) return;
-    
-    setIsLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      
-      // Update status with the newly purchased boost
-      const purchasedPackage = mockBoostPackages.find(pkg => pkg.id === selectedPackage);
-      if (purchasedPackage) {
-        const now = new Date();
-        const expirationDate = new Date(now.getTime() + purchasedPackage.durationMinutes * 60 * 1000);
-        
-        setBoostStatus({
-          isActive: true,
-          expiresAt: expirationDate.toISOString(),
-          startedAt: now.toISOString(),
-          packageName: purchasedPackage.name,
-          packageId: purchasedPackage.id,
-        });
-        
-        toast({
-          title: "Boost purchased!",
-          description: `Your ${purchasedPackage.name} is now active.`,
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Purchase failed",
-        description: "There was an error processing your purchase.",
-        variant: "destructive",
-      });
-      console.error("Purchase error:", error);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSelectPackage = (packageId: string) => {
+    setSelectedPackage(packageId);
   };
 
-  // Cancel the active boost
-  const handleCancelBoost = async () => {
-    setIsLoading(true);
+  const handleContinueToPayment = () => {
+    if (!selectedPackage) {
+      console.error("No package selected");
+      return;
+    }
+    setActiveStep("confirm");
+  };
+  
+  const handlePurchase = async () => {
+    if (!selectedPackage) return;
+    
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      
-      setBoostStatus({
-        isActive: false,
-        expiresAt: '',
-        packageName: '',
-        packageId: '',
-      });
-      
-      toast({
-        title: "Boost cancelled",
-        description: "Your boost has been cancelled.",
-      });
+      await boostProfile(profileId, selectedPackage);
+      setActiveTab("status");
+      setActiveStep("select");
     } catch (error) {
-      toast({
-        title: "Cancellation failed",
-        description: "There was an error cancelling your boost.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      console.error("Failed to purchase boost", error);
     }
   };
   
-  // Convert string dates to proper Date objects
-  const formattedBoostStatus = {
-    ...boostStatus,
-    expiresAt: boostStatus.expiresAt ? toDate(boostStatus.expiresAt) : undefined,
-    startedAt: boostStatus.startedAt ? toDate(boostStatus.startedAt) : undefined,
+  const handleCancel = async () => {
+    try {
+      await cancelBoost();
+    } catch (error) {
+      console.error("Failed to cancel boost", error);
+    }
   };
   
+  const getBoostPrice = () => {
+    const selected = packages.find(p => p.id === selectedPackage);
+    return selected?.price_ubx || 0;
+  };
+  
+  const selectedBoostPackage = packages.find(p => p.id === selectedPackage);
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Profile Boost</CardTitle>
-        <CardDescription>
-          Increase your profile visibility and attract more visitors
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="status">Status</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          </TabsList>
+    <div className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="packages">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="status">Status</TabsTrigger>
+          <TabsTrigger value="packages">Boost Packages</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="status" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Current Boost Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <BoostStatusCard
+                boostStatus={boostStatus}
+                onCancel={handleCancel}
+                loading={loading}
+                dailyBoostUsage={0}
+                dailyBoostLimit={3}
+              />
+            </CardContent>
+          </Card>
           
-          <TabsContent value="status" className="space-y-4">
-            {/* Status content would be rendered here */}
-            <div className="bg-muted/50 rounded-lg p-4 mb-4">
-              <h3 className="font-medium mb-2">Current Status</h3>
-              {formattedBoostStatus.isActive ? (
-                <div>
-                  <p className="text-green-600">Your profile is currently boosted!</p>
-                  <p className="text-sm text-muted-foreground">
-                    {formattedBoostStatus.packageName} expires on{' '}
-                    {formattedBoostStatus.expiresAt?.toLocaleString()}
-                  </p>
+          {/* Analytics Summary Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Impact Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Current Position</p>
+                  <p className="text-2xl font-bold">{hermesStatus.position}</p>
                 </div>
-              ) : (
-                <p className="text-muted-foreground">You don't have an active boost.</p>
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="analytics">
-            <BoostAnalytics 
-              profileId={userId} 
-              boostStatus={formattedBoostStatus}
-            />
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+                
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Profile Views</p>
+                  <p className="text-2xl font-bold">+47%</p>
+                </div>
+                
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Visibility Score</p>
+                  <p className="text-2xl font-bold">{hermesStatus.boostScore}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="packages">
+          {!boostStatus.isActive ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Boost Your Profile</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {activeStep === "select" ? (
+                  <BoostPackageSelection
+                    profileCompleteness={profileCompleteness}
+                    rating={rating}
+                    country={country}
+                    role={role}
+                    packages={packages}
+                    selectedPackage={selectedPackage}
+                    onSelectPackage={handleSelectPackage}
+                    onContinue={handleContinueToPayment}
+                    getBoostPrice={getBoostPrice}
+                    loading={loading}
+                  />
+                ) : (
+                  <BoostPurchaseConfirmation
+                    selectedPackage={selectedBoostPackage}
+                    ubxBalance={ubxBalance}
+                    onBack={() => setActiveStep("select")}
+                    onPurchase={handlePurchase}
+                    onCancel={() => setActiveStep("select")}
+                    loading={loading}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="bg-primary/5">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-medium mb-2">Your Profile is Currently Boosted</h3>
+                <p className="text-muted-foreground mb-4">
+                  Your profile is currently being boosted and receiving enhanced visibility.
+                  You cannot purchase a new boost package until the current boost expires.
+                </p>
+                
+                <div className="mb-4 mt-6 bg-muted/50 p-4 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Current Boost Package</p>
+                  <p className="text-lg font-semibold">{boostStatus.packageName || "Standard Boost"}</p>
+                </div>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => setActiveTab("status")}
+                  className="w-full"
+                >
+                  View Boost Status
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="analytics">
+          <BoostAnalytics
+            profileId={profileId}
+            boostStatus={{
+              isActive: boostStatus.isActive,
+              expiresAt: boostStatus.expiresAt,
+              startedAt: boostStatus.startedAt,
+              packageName: boostStatus.packageName,
+              packageId: boostStatus.packageId,
+              progress: boostStatus.progress,
+              timeRemaining: boostStatus.timeRemaining
+            } as BoostStatus}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

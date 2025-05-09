@@ -35,3 +35,11 @@ export function formatDate(date: string | Date | undefined, options?: Intl.DateT
   
   return dateObj.toLocaleDateString(undefined, defaultOptions);
 }
+
+/**
+ * Convert string to Date object
+ */
+export function toDate(dateString: string | Date): Date {
+  if (dateString instanceof Date) return dateString;
+  return new Date(dateString);
+}

@@ -52,3 +52,50 @@ export interface PulseBoostManager {
   eligibilityReason?: string;
   refreshStatus: () => void;
 }
+
+// Define EnhancedBoostStatus as an interface, not a string union
+export interface EnhancedBoostStatus {
+  isActive: boolean;
+  packageId?: string;
+  packageName?: string;
+  expiresAt?: Date;
+  startedAt?: Date;
+  timeRemaining?: string;
+  progress?: number;
+  remainingTime?: string;
+  boostPackage?: BoostPackage;
+  isExpiring?: boolean;
+  boostLevel?: number;
+  boostType?: string;
+  modifiers?: Record<string, number>;
+}
+
+// Redefine other types used in the files
+export interface BoostPackage {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  price_ubx: number;
+  duration: string;
+  durationMinutes: number;
+  features: string[];
+  visibility: string;
+  visibility_increase: number;
+  color?: string;
+  badgeColor?: string;
+  boost_power?: number;
+}
+
+// Update the BoostStatus interface to match usage
+export interface BoostStatus {
+  isActive: boolean;
+  packageName?: string;
+  startTime?: Date;
+  endTime?: Date;
+  remainingTime?: string;
+  packageId?: string;
+  progress?: number;
+  startedAt?: Date;
+  expiresAt?: Date;
+}

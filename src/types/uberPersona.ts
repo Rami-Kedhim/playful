@@ -9,6 +9,13 @@ export interface UberPersona {
   rating?: number;
   reviewCount?: number;
   location?: string;
+  displayName?: string;
+  description?: string;
+  bio?: string;
+  languages?: string[];
+  traits?: string[];
+  tags?: string[];
+  isPremium?: boolean;
   features?: {
     hasChat?: boolean;
     hasPhotos?: boolean;
@@ -29,5 +36,27 @@ export interface UberPersona {
     boostingActive?: boolean;
     meetingPrice?: number;
   };
-  bio?: string; // Add missing bio property
+  stats?: {
+    views?: number;
+    likes?: number;
+    bookings?: number;
+    completion?: number;
+    responseRate?: number;
+    responseTime?: number | string;
+    rating?: number;
+  };
+  monetization?: {
+    hourlyRate?: number;
+    minRate?: number;
+    maxRate?: number;
+    acceptsUbx?: boolean;
+    meetingPrice?: number;
+    packages?: Array<{
+      id: string;
+      name: string;
+      price: number;
+      duration: string;
+      description?: string;
+    }>;
+  };
 }

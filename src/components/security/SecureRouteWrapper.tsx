@@ -1,90 +1,77 @@
 
 import React, { useEffect, useState } from 'react';
-import { orus } from '@/core/Orus';
-import { Shield, AlertTriangle } from 'lucide-react';
+import { Outlet, Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/hooks/auth/useAuthContext';
+import { uberCore } from '@/core/UberCore';
+import { Card } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
+import { SessionValidationResult, SystemIntegrityResult } from '@/types/core-systems';
 
 interface SecureRouteWrapperProps {
-  children: React.ReactNode;
-  minimumSecurityLevel?: 'standard' | 'enhanced' | 'maximum';
+  requireAuth?: boolean;
+  allowedRoles?: string[];
+  redirectTo?: string;
 }
 
-const SecureRouteWrapper: React.FC<SecureRouteWrapperProps> = ({ 
-  children, 
-  minimumSecurityLevel = 'standard'
+const SecureRouteWrapper: React.FC<SecureRouteWrapperProps> = ({
+  requireAuth = true,
+  allowedRoles,
+  redirectTo = '/auth'
 }) => {
-  const [isSecure, setIsSecure] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [securityMessage, setSecurityMessage] = useState('Initializing security protocols...');
+  const { user, isAuthenticated, checkRole } = useAuth();
+  const location = useLocation();
+  const [isValidating, setIsValidating] = useState(true);
+  const [sessionValid, setSessionValid] = useState(true);
+  const [integrityValid, setIntegrityValid] = useState(true);
 
   useEffect(() => {
-    const verifySecurityProtocols = async () => {
+    const validateSession = async () => {
       try {
-        // Check session security
-        const token = localStorage.getItem('session_token') || '';
-        const sessionSecurity = await orus.validateSession(token);
+        // Get current session ID from localStorage or cookies
+        const sessionId = localStorage.getItem('sessionId') || 'default-session';
         
-        // Check system integrity
-        const integrityCheck = await orus.checkIntegrity();
+        const [sessionResult, integrityResult] = await Promise.all([
+          uberCore.validateSession(sessionId),
+          uberCore.checkSystemIntegrity()
+        ]);
         
-        // Security level threshold determination
-        let secure = false;
-        
-        if (minimumSecurityLevel === 'maximum') {
-          secure = sessionSecurity.isValid && integrityCheck.valid && 
-                   (integrityCheck.integrity ? integrityCheck.integrity > 90 : false);
-          setSecurityMessage('Maximum security protocols active.');
-        } else if (minimumSecurityLevel === 'enhanced') {
-          secure = sessionSecurity.isValid && integrityCheck.valid && 
-                   (integrityCheck.integrity ? integrityCheck.integrity > 70 : false);
-          setSecurityMessage('Enhanced security protocols active.');
-        } else {
-          secure = sessionSecurity.isValid && integrityCheck.valid;
-          setSecurityMessage('Standard security protocols active.');
-        }
-        
-        setIsSecure(secure);
+        setSessionValid(sessionResult.valid);
+        setIntegrityValid(integrityResult.valid);
       } catch (error) {
-        console.error('Security verification error:', error);
-        setSecurityMessage('Security check failed. Proceeding with caution.');
-        setIsSecure(false);
+        console.error('Session validation failed', error);
+        setSessionValid(false);
       } finally {
-        setIsLoading(false);
+        setIsValidating(false);
       }
     };
     
-    verifySecurityProtocols();
-  }, [minimumSecurityLevel]);
-
-  if (isLoading) {
+    validateSession();
+  }, [location.pathname]);
+  
+  if (isValidating) {
     return (
-      <div className="flex items-center justify-center p-4 bg-muted/30 rounded-lg">
-        <Shield className="h-5 w-5 text-primary animate-pulse mr-2" />
-        <span>Verifying security protocols...</span>
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="p-8 flex flex-col items-center">
+          <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
+          <h2 className="text-xl font-semibold">Validating secure session...</h2>
+        </Card>
       </div>
     );
   }
-
-  return (
-    <>
-      {isSecure ? (
-        <div>
-          <div className="flex items-center text-xs text-green-500 my-2">
-            <Shield className="h-3 w-3 mr-1" />
-            <span>{securityMessage}</span>
-          </div>
-          {children}
-        </div>
-      ) : (
-        <div>
-          <div className="flex items-center text-xs text-amber-500 my-2">
-            <AlertTriangle className="h-3 w-3 mr-1" />
-            <span>Security protocols compromised. Proceed with caution.</span>
-          </div>
-          {children}
-        </div>
-      )}
-    </>
-  );
+  
+  if (!sessionValid || !integrityValid) {
+    return <Navigate to="/error/security" replace />;
+  }
+  
+  if (requireAuth && !isAuthenticated) {
+    return <Navigate to={redirectTo} state={{ from: location }} replace />;
+  }
+  
+  if (allowedRoles && allowedRoles.length > 0 && (!user || !allowedRoles.some(role => checkRole(role)))) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+  
+  return <Outlet />;
 };
 
 export default SecureRouteWrapper;

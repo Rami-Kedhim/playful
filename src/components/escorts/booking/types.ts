@@ -41,6 +41,7 @@ export interface Booking {
   id: string;
   escortId: string;
   clientId: string;
+  escortName?: string; // Add escortName property
   date: string | Date;
   time: string;
   duration: string; // Using string to match form values

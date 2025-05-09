@@ -2,10 +2,10 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { EscortAvailability } from '@/types/Escort';
+import type { EscortAvailability as EscortAvailabilityType } from '@/types/Escort';
 
 interface EscortAvailabilityProps {
-  availability?: EscortAvailability;
+  availability?: EscortAvailabilityType;
 }
 
 const EscortAvailabilityDisplay: React.FC<EscortAvailabilityProps> = ({ availability }) => {
@@ -58,7 +58,7 @@ const EscortAvailabilityDisplay: React.FC<EscortAvailabilityProps> = ({ availabi
   );
 };
 
-const EscortAvailability: React.FC<{ escort: { availability?: EscortAvailability } }> = ({ escort }) => {
+const EscortAvailability: React.FC<{ escort: { availability?: EscortAvailabilityType } }> = ({ escort }) => {
   return (
     <Card>
       <CardHeader>
