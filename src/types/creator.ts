@@ -160,3 +160,13 @@ export interface ReviewStats {
 
 // Re-export Rates type from escort.ts
 export { type Rates } from './escort';
+
+// Export the interface for AnalyticsHeader component props
+export interface AnalyticsHeaderProps {
+  title: string;
+  subtitle?: string;
+  periodSelector?: boolean;
+  onPeriodChange?: (period: string) => void;
+  selectedPeriod?: string;
+  periodOptions?: Array<{ label: string; value: string }>;
+}

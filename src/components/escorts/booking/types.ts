@@ -1,5 +1,6 @@
 
 import { z } from "zod";
+import { BookingStatus } from "@/types/booking";
 
 export interface BookingFormData {
   date: Date;
@@ -35,14 +36,15 @@ export const bookingFormSchema = z.object({
 
 export type BookingFormValues = z.infer<typeof bookingFormSchema>;
 
+// Re-export Booking type from the main types file
 export interface Booking {
   id: string;
   escortId: string;
   clientId: string;
   date: string | Date;
   time: string;
-  duration: string;
-  status: string;
+  duration: string; // Using string to match form values
+  status: BookingStatus;
   createdAt: string | Date;
   updatedAt?: string | Date;
   price?: number;

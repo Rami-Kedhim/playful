@@ -7,7 +7,7 @@ export interface Booking {
   clientId: string;
   startTime: Date | string;
   endTime: Date | string;
-  duration: number;
+  duration: string; // Changed from number to string to match component usage
   status: BookingStatus;
   service: string;
   location: string;
@@ -16,6 +16,10 @@ export interface Booking {
   createdAt: Date | string;
   escort?: Escort;
   client?: any;
+  date?: Date | string; // Add date to match component usage
+  time?: string; // Add time to match component usage
+  message?: string; // Add message to match component usage
+  totalPrice?: number; // Add totalPrice for consistency
 }
 
 export type BookingStatus = 
@@ -29,7 +33,7 @@ export interface BookingRequest {
   escortId: string;
   startTime: Date | string;
   endTime?: Date | string;
-  duration: number;
+  duration: string; // Changed from number to string
   service: string;
   location: string;
   notes?: string;

@@ -69,7 +69,7 @@ export interface Escort {
   isAvailable?: boolean;
   boosted?: boolean;
   featured?: boolean;
-  // Add missing properties that are used across components
+  // Add all missing properties
   rates?: Rates;
   avatarUrl?: string;
   avatar?: string;
@@ -111,6 +111,7 @@ export interface Escort {
   };
   specialties?: string[];
   limitations?: string[];
+  isFavorited?: boolean;
 }
 
 export interface ExtendedEscort extends Escort {

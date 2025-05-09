@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Escort, Video } from "@/types/Escort";
+import { Escort, Video } from "@/types/escort";
 import GalleryGrid from "./GalleryGrid";
 import VideoGrid from "./VideoGrid";
 

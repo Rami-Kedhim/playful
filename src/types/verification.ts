@@ -20,6 +20,10 @@ export interface VerificationDocument {
   fileUrl: string;
   uploadedAt: string;
   status: 'pending' | 'approved' | 'rejected';
+  // Add missing properties
+  notes?: string;
+  filePath?: string;
+  documentType?: string;
 }
 
 export interface VerificationRequest {

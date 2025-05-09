@@ -84,12 +84,14 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     setIsSubmitting(true);
 
     try {
+      // Ensure the duration is a string to match the updated Booking type
       const bookingData = {
         ...booking,
         id: `booking-${Date.now().toString().substring(8, 13)}-${Math.random().toString(36).substring(2, 7)}`,
         createdAt: new Date(),
         status: BookingStatus.PENDING,
-        totalPrice: booking.price || 0
+        totalPrice: booking.price || 0,
+        duration: booking.duration?.toString() || ''
       } as unknown as Booking;
 
       const result = await bookingService.createBooking(bookingData);
