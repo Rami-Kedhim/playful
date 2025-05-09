@@ -1,111 +1,85 @@
 
-import type { LucieAISystem, GenerateContentResult } from '@/types/core-systems';
+import type { LucieAISystem, GenerateContentResult, ModerateContentParams, ModerateContentResult, SentimentAnalysisParams, SentimentAnalysisResult } from '@/types/core-systems';
 
 class LucieAI implements LucieAISystem {
-  private isInitialized = false;
-  private systemPrompt = "You are Lucie AI, a helpful assistant for UberEscorts platform.";
+  private initialized = false;
   
   async initialize(): Promise<void> {
-    console.log('info: LucieAI initializing...');
-    
-    // Initialize LucieAI core systems
-    this.isInitialized = true;
-    
-    console.log('info: Lucie AI system initialized');
+    console.log('Initializing Lucie AI system...');
+    this.initialized = true;
+    return Promise.resolve();
   }
-
-  private checkInitialized() {
-    if (!this.isInitialized) {
-      throw new Error("LucieAI is not initialized. Call initialize() first.");
+  
+  async generateContent(prompt: string, options?: any): Promise<GenerateContentResult> {
+    if (!this.initialized) {
+      await this.initialize();
     }
-  }
-
-  // Helper method to simulate AI responses
-  private async simulateAIProcess() {
-    const delay = Math.random() * 1000 + 500; // 500-1500ms delay
-    return new Promise(resolve => setTimeout(resolve, delay));
-  }
-
-  // Generate content based on a prompt
-  async generateContent(prompt: string, options: any = {}): Promise<GenerateContentResult> {
-    this.checkInitialized();
     
-    await this.simulateAIProcess();
-    
-    // Simple content generation implementation
-    const responses = [
-      "I'd be happy to help with that!",
-      "Based on your request, I suggest...",
-      "Let me analyze that for you...",
-      "Here's what I think about this situation..."
-    ];
-    
-    const selectedResponse = responses[Math.floor(Math.random() * responses.length)];
-    
+    // Simple mock implementation
     return {
-      content: `${selectedResponse} ${prompt}`,
-      tokens: prompt.split(' ').length * 2,
-      moderationFlags: [],
-    };
-  }
-
-  // Generate escort profile description
-  async generateProfileDescription(profile: any): Promise<GenerateContentResult> {
-    this.checkInitialized();
-    
-    await this.simulateAIProcess();
-    
-    const gender = profile.gender || 'person';
-    const age = profile.age || 'adult';
-    const location = profile.location || 'your area';
-    
-    const description = `A charming ${age} year old ${gender} based in ${location}, offering premium companionship services. Professional, discreet, and passionate about creating unforgettable experiences tailored to your desires.`;
-    
-    return {
-      content: description,
-      tokens: description.split(' ').length,
+      content: `Generated content for: ${prompt}`,
+      tokens: prompt.length * 2,
+      moderated: false,
       moderationFlags: []
     };
   }
-
-  // Shutdown the AI system
-  async shutdown(): Promise<void> {
-    console.log('info: Shutting down LucieAI...');
-    this.isInitialized = false;
-  }
   
-  // Add methods that are used in other files
-  async moderateContent(params: any): Promise<any> {
+  async moderateContent(params: ModerateContentParams): Promise<ModerateContentResult> {
+    // Mock implementation
+    const isSafe = !params.content.includes('inappropriate') && !params.content.includes('unsafe');
+    
     return {
-      isSafe: true,
-      safe: true,
-      score: 0.1,
-      issues: [],
-      blockedCategories: [],
-      category: 'clean',
-      action: 'allow'
+      isSafe,
+      safe: isSafe,
+      score: isSafe ? 0.1 : 0.8,
+      issues: isSafe ? [] : ['Potentially unsafe content'],
+      blockedCategories: isSafe ? [] : ['unsafe'],
+      category: isSafe ? 'safe' : 'unsafe',
+      action: isSafe ? 'allow' : 'flag'
     };
   }
   
-  async analyzeSentiment(params: any): Promise<any> {
+  async analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult> {
+    // Mock implementation
+    const text = params.text.toLowerCase();
+    let sentiment = 'neutral';
+    let score = 0.5;
+    
+    if (text.includes('love') || text.includes('happy') || text.includes('great')) {
+      sentiment = 'positive';
+      score = 0.8;
+    } else if (text.includes('hate') || text.includes('bad') || text.includes('awful')) {
+      sentiment = 'negative';
+      score = 0.2;
+    }
+    
     return {
-      score: 0.5,
-      sentiment: 'neutral',
-      confidence: 0.8
+      score,
+      sentiment,
+      confidence: 0.9
     };
   }
   
   getSystemStatus(): any {
     return {
+      operational: this.initialized,
       modules: {
         aiGeneration: 'online',
         contentModeration: 'online',
         sentimentAnalysis: 'online'
-      }
+      },
+      lastUpdate: new Date().toISOString()
     };
+  }
+  
+  async shutdown(): Promise<void> {
+    console.log('Shutting down Lucie AI system...');
+    this.initialized = false;
+    return Promise.resolve();
   }
 }
 
-// Export the instance as both lucie and lucieAI for backward compatibility
-export const lucie = new LucieAI();
-export const lucieAI = lucie; // Export with both names for compatibility
+// Export the class
+export const lucieAI = new LucieAI();
+// Also export as 'lucie' for compatibility with existing code
+export const lucie = lucieAI;

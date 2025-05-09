@@ -1,3 +1,4 @@
+
 export interface HermesInsight {
   type: string;
   title: string;
@@ -27,6 +28,9 @@ export interface OxumSystem {
   initialize(): Promise<boolean>;
   boostAllocationEigen(profileId: string, boostLevel: number): Promise<number[]>;
   calculateScore?(inputs: number[]): Promise<number>;
+  shutdown(): void;
+  checkSystemStatus?(): { operational: boolean; traffic?: number; loadFactor?: number };
+  processPayment?(amount: number, currency: string): Promise<boolean>;
 }
 
 export interface HermesSystem {
@@ -62,4 +66,60 @@ export interface SentimentAnalysisResult {
 export interface GenerateContentParams {
   prompt: string;
   options?: Record<string, any>;
+}
+
+export interface SystemStatus {
+  operational: boolean;
+  isActive: boolean;
+  services?: Record<string, string>;
+  queueLength?: number;
+  processing?: boolean;
+  uptime?: number;
+  lastReboot?: string;
+}
+
+export interface SystemIntegrityResult {
+  valid: boolean;
+  status: string;
+  errors: string[];
+  warnings: string[];
+  lastChecked: string;
+  integrity: number;
+  checks?: Record<string, boolean>;
+}
+
+export interface SystemHealthMetrics {
+  cpu: number;
+  memory: number;
+  storage: number;
+  network: number;
+  load: number;
+}
+
+export interface SessionValidationResult {
+  isValid: boolean;
+  userId: string;
+  expiresAt: string;
+  username: string;
+  timestamp: string;
+}
+
+export interface RecommendedAction {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  priority: number;
+  cta?: string;
+  link?: string;
+}
+
+export interface UberCoreSystem {
+  initialize(): Promise<boolean>;
+  getSystemStatus(): SystemStatus;
+  checkSystemIntegrity(): Promise<SystemIntegrityResult>;
+  getSystemHealthMetrics(): Promise<SystemHealthMetrics>;
+  getSystemHealth(): Promise<SystemHealthMetrics>;
+  validateSession(token: string): Promise<SessionValidationResult>;
+  checkSubsystemHealth(): { name: string, status: string, health: number }[];
 }

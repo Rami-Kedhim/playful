@@ -1,3 +1,4 @@
+
 import { VerificationLevel } from "./verification";
 
 export interface PulseBoost {
@@ -21,12 +22,15 @@ export interface BoostPackage {
   name?: string;
   description?: string;
   price: number;
+  price_ubx?: number; // Added for backward compatibility
+  boost_power?: number; // Added for backward compatibility
+  boostLevel?: number; // Added for backward compatibility
   duration?: number; // in days
   position?: number;
   visibility?: number;
-  boostLevel?: number; // Add this property for compatibility
   features?: string[];
   isMostPopular?: boolean;
+  isPopular?: boolean; // Added for backward compatibility
 }
 
 export interface BoostStatus {
@@ -43,6 +47,7 @@ export interface BoostStatus {
   startTime?: Date | string;
   endTime?: Date | string;
   timeRemaining?: string;
+  isExpiring?: boolean; // Added for compatibility
 }
 
 export interface BoostEligibility {
@@ -59,6 +64,7 @@ export interface HermesStatus {
   boostScore: number;
   effectivenessScore: number;
   isActive?: boolean; // Added for compatibility
+  metrics?: any; // Added for compatibility
 }
 
 export interface BoostAnalytics {

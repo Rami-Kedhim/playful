@@ -26,5 +26,9 @@ export const hermesOrusOxum = {
   recordProfileView: (profileId: string, viewerId: string) => {
     console.log(`Recording view of profile ${profileId} by ${viewerId}`);
     return true;
+  },
+  shutdown: () => {
+    console.log('Shutting down Hermes-Orus-Oxum connection');
+    return true;
   }
 };
