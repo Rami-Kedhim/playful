@@ -5,8 +5,21 @@ import * as React from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 import { type ThemeProviderProps } from "next-themes/dist/types"
 
+/**
+ * Unified theme provider component that ensures consistent theme context across the application
+ * Always uses dark theme in this implementation for consistency
+ */
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  return <NextThemesProvider defaultTheme="dark" forcedTheme="dark" {...props}>{children}</NextThemesProvider>
+  return (
+    <NextThemesProvider 
+      defaultTheme="dark" 
+      forcedTheme="dark" 
+      enableSystem={false}
+      {...props}
+    >
+      {children}
+    </NextThemesProvider>
+  )
 }
 
 // Add useTheme export for compatibility

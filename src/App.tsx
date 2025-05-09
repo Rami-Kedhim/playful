@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import HomePage from '@/pages/HomePage';
 import GeneratePage from '@/pages/GeneratePage';
-import EnhancedAIPage from '@/pages/EnhancedAIPage'; // Import the new page
+import EnhancedAIPage from '@/pages/EnhancedAIPage';
 import MediaGenerationPage from '@/pages/MediaGenerationPage';
 import NSFWImageGeneratorPage from '@/pages/NSFWImageGeneratorPage';
 import LucieTalkPage from '@/pages/lucie/LucieTalkPage';
@@ -27,7 +27,7 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+    <ThemeProvider storageKey="vite-ui-theme">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<HomePage />} />

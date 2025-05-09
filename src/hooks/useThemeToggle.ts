@@ -11,6 +11,10 @@ export const useThemeToggle = () => {
     if (typeof document !== 'undefined') {
       document.documentElement.classList.add('dark');
     }
+
+    return () => {
+      setMounted(false);
+    };
   }, []);
   
   return {

@@ -4,11 +4,10 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { FavoritesProvider } from '@/contexts/FavoritesContext';
 import { WalletProvider } from '@/contexts/WalletContext';
 import { BoostProvider } from '@/contexts/BoostContext';
-import { ThemeProvider } from '@/components/ui/theme-provider';
+// We'll use the theme provider from the App component rather than including it here
 
 interface UnifiedContextProviderProps {
   children: ReactNode;
-  defaultTheme?: string;
 }
 
 /**
@@ -16,21 +15,18 @@ interface UnifiedContextProviderProps {
  * to provide a cleaner and more maintainable provider tree
  */
 export const UnifiedContextProvider: React.FC<UnifiedContextProviderProps> = ({ 
-  children, 
-  defaultTheme = 'dark' 
+  children 
 }) => {
   return (
-    <ThemeProvider defaultTheme={defaultTheme}>
-      <AuthProvider>
-        <FavoritesProvider>
-          <WalletProvider>
-            <BoostProvider>
-              {children}
-            </BoostProvider>
-          </WalletProvider>
-        </FavoritesProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <FavoritesProvider>
+        <WalletProvider>
+          <BoostProvider>
+            {children}
+          </BoostProvider>
+        </WalletProvider>
+      </FavoritesProvider>
+    </AuthProvider>
   );
 };
 
