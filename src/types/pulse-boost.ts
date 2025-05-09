@@ -25,9 +25,17 @@ export interface BoostPackage {
   name: string;
   points: number;
   price: number;
+  price_ubx: number;
   discount?: number;
   features: string[];
   duration: number; // in days
+  durationMinutes: number;
+  description: string;
+  visibility: string;
+  visibility_increase: number;
+  color?: string;
+  badgeColor?: string;
+  boost_power?: number;
 }
 
 export interface BoostResult {
@@ -51,3 +59,16 @@ export interface PulseScore {
     popularity: number;
   };
 }
+
+export interface PulseBoost {
+  id: string;
+  profileId: string;
+  packageId: string;
+  startDate: Date;
+  endDate: Date;
+  status: string;
+}
+
+export type EnhancedBoostStatus = 'active' | 'expired' | 'pending' | 'cancelled';
+
+export type BoostStatus = 'active' | 'inactive' | 'pending' | 'expired';

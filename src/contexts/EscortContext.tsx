@@ -1,113 +1,107 @@
 
-// Fix import to use unified Escort type and remove incompatible properties (rating not defined in Escort type in context)
-
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { Escort } from '@/types/Escort';
 
-interface EscortContextProps {
+interface EscortContextType {
   escorts: Escort[];
+  featuredEscorts: Escort[];
   loading: boolean;
   error: string | null;
-  getEscortById: (id: string) => Escort | null;
-  refreshEscorts: () => Promise<void>;
+  getEscortById: (id: string) => Escort | undefined;
+  toggleFavorite: (id: string) => void;
 }
 
-const EscortContext = createContext<EscortContextProps>({
-  escorts: [],
-  loading: false,
-  error: null,
-  getEscortById: () => null,
-  refreshEscorts: async () => {}
-});
+const EscortContext = createContext<EscortContextType | undefined>(undefined);
 
-export const useEscortContext = () => useContext(EscortContext);
+export const useEscorts = () => {
+  const context = useContext(EscortContext);
+  if (!context) {
+    throw new Error('useEscorts must be used within an EscortProvider');
+  }
+  return context;
+};
 
-export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [escorts, setEscorts] = useState<Escort[]>([]);
-  const [loading, setLoading] = useState(true);
+export const EscortProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getEscortById = (id: string): Escort | null => {
-    return escorts.find(escort => escort.id === id) || null;
-  };
-
-  const refreshEscorts = async (): Promise<void> => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Fix mock escorts to include required gender field
-      const mockEscorts: Escort[] = [
-        {
-          id: "1",
-          name: "Emma",
-          age: 28,
-          gender: "female", // Add missing gender field
-          location: "New York",
-          reviewCount: 120,
-          verified: true,
-          tags: ["massage", "dinner", "events"],
-          price: 250,
-          imageUrl: "https://example.com/emma.jpg",
-          availableNow: true,
-          bio: "Professional companion for your special events",
-          services: ["Dinner Date", "Event Companion"],
-          images: ["/assets/escorts/profile1.jpg"],
-          isVerified: true,
-          featured: false,
-          contactInfo: {
-            email: "emma@example.com",
-            phone: "+1234567890",
-            website: "https://example.com/emma"
-          }
-        },
-        {
-          id: "2",
-          name: "Sophia",
-          age: 26,
-          gender: "female", // Add missing gender field
-          location: "Los Angeles",
-          reviewCount: 95,
-          verified: true,
-          tags: ["companionship", "travel", "dinner"],
-          price: 300,
-          imageUrl: "https://example.com/sophia.jpg",
-          availableNow: false,
-          bio: "Elegant companion for all occasions",
-          services: ["Dinner Date", "Travel Companion"],
-          images: ["/assets/escorts/profile2.jpg"],
-          isVerified: true,
-          featured: true,
-          contactInfo: {
-            email: "sophia@example.com",
-            phone: "+1234567891",
-            website: "https://example.com/sophia"
-          }
-        }
-      ];
-      
-      setEscorts(mockEscorts);
-    } catch (err) {
-      console.error("Failed to fetch escorts:", err);
-      setError("Failed to load escorts. Please try again later.");
-    } finally {
-      setLoading(false);
+  // Example escort data
+  const [escorts, setEscorts] = useState<Escort[]>([
+    {
+      id: '1',
+      name: 'Jessica',
+      age: 24,
+      gender: 'female', // Add required gender field
+      location: 'New York',
+      reviewCount: 48,
+      verified: true,
+      tags: ['GFE', 'Massage', 'Dinner Date'],
+      price: 350,
+      imageUrl: '/images/escorts/escort1.jpg',
+      availableNow: true,
+      bio: 'Sophisticated and elegant companion for your every desire.',
+      services: ['Massage', 'Dinner Date', 'GFE'],
+      images: ['/images/escorts/escort1.jpg', '/images/escorts/escort1-2.jpg'],
+      isVerified: true,
+      featured: false,
+      contactInfo: {
+        phone: '+1-555-123-4567',
+        email: 'jessica@example.com'
+      }
+    },
+    {
+      id: '2',
+      name: 'Emma',
+      age: 26,
+      gender: 'female', // Add required gender field
+      location: 'Los Angeles',
+      reviewCount: 32,
+      verified: true,
+      tags: ['Travel Companion', 'GFE', 'Massage'],
+      price: 400,
+      imageUrl: '/images/escorts/escort2.jpg',
+      availableNow: false,
+      bio: 'Professional model and elite companion for discerning gentlemen.',
+      services: ['Travel Companion', 'GFE', 'Massage'],
+      images: ['/images/escorts/escort2.jpg', '/images/escorts/escort2-2.jpg'],
+      isVerified: true,
+      featured: true,
+      contactInfo: {
+        phone: '+1-555-987-6543',
+        email: 'emma@example.com'
+      }
     }
+  ]);
+
+  const getEscortById = (id: string) => {
+    return escorts.find(escort => escort.id === id);
   };
 
-  React.useEffect(() => {
-    refreshEscorts();
-  }, []);
+  const toggleFavorite = (id: string) => {
+    setEscorts(prev => prev.map(escort => {
+      if (escort.id === id) {
+        return { ...escort, isFavorited: !escort.isFavorited };
+      }
+      return escort;
+    }));
+  };
+
+  const featuredEscorts = escorts.filter(escort => escort.featured);
+
+  const value = {
+    escorts,
+    featuredEscorts,
+    loading,
+    error,
+    getEscortById,
+    toggleFavorite
+  };
 
   return (
-    <EscortContext.Provider value={{ 
-      escorts, 
-      loading, 
-      error,
-      getEscortById,
-      refreshEscorts
-    }}>
+    <EscortContext.Provider value={value}>
       {children}
     </EscortContext.Provider>
   );
 };
+
+export default EscortContext;

@@ -1,144 +1,148 @@
+
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Escort } from '@/types/Escort';
-import { CalendarDays, Clock, MapPin } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 interface EscortAboutProps {
   escort: Escort;
 }
 
 const EscortAbout: React.FC<EscortAboutProps> = ({ escort }) => {
-  // Helper function to get availability days safely
-  const getAvailabilityDays = (): string[] => {
-    if (!escort.availability) return [];
-    
-    if (Array.isArray(escort.availability)) {
-      return escort.availability as string[];
+  // Function to handle undefined availability object
+  const getAvailabilityDays = () => {
+    if (!escort.availability || !escort.availability.days) {
+      return [];
     }
-    
-    if (typeof escort.availability === 'object') {
-      // Check if it has days property
-      if ('days' in escort.availability && Array.isArray(escort.availability.days)) {
-        return escort.availability.days;
-      }
-      
-      // Otherwise collect day names that are present
-      const days = [];
-      const availObj = escort.availability as any;
-      if (availObj.monday) days.push('Monday');
-      if (availObj.tuesday) days.push('Tuesday');
-      if (availObj.wednesday) days.push('Wednesday');
-      if (availObj.thursday) days.push('Thursday');
-      if (availObj.friday) days.push('Friday');
-      if (availObj.saturday) days.push('Saturday');
-      if (availObj.sunday) days.push('Sunday');
-      return days;
-    }
-    
-    if (typeof escort.availability === 'string') {
-      return [escort.availability];
-    }
-    
-    return [];
+    return escort.availability.days;
   };
-  
-  const availabilityDays = getAvailabilityDays();
-  const lastActive = escort.lastActive ? new Date(escort.lastActive) : null;
-  
+
   return (
-    <div className="space-y-6">
-      <Card className="overflow-hidden">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-2">About {escort.name}</h3>
-          
-          <p className="text-muted-foreground mb-4">
-            {escort.description || escort.bio || "No description available"}
-          </p>
-          
-          <Separator className="my-4" />
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h4 className="font-medium">Details</h4>
-              
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{escort.location || "Location not specified"}</span>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">
-                    {lastActive 
-                      ? `Last active ${format(lastActive, "MMM d, yyyy")}`
-                      : "Activity not available"}
+    <div className="space-y-8">
+      {/* Bio Section */}
+      <section>
+        <h3 className="text-xl font-semibold mb-4">About Me</h3>
+        <p className="text-gray-700 leading-relaxed">{escort.bio || 'No bio available.'}</p>
+      </section>
+
+      {/* Availability Section */}
+      <section>
+        <h3 className="text-xl font-semibold mb-4">Availability</h3>
+        {escort.availability ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {getAvailabilityDays().length > 0 ? (
+              getAvailabilityDays().map((day, index) => (
+                <div key={index} className="flex justify-between border-b pb-2">
+                  <span className="font-medium">{day.day}</span>
+                  <span className={day.available ? "text-green-600" : "text-red-600"}>
+                    {day.available ? 'Available' : 'Not Available'}
                   </span>
                 </div>
-                
-                <div className="flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">
-                    {availabilityDays.length > 0
-                      ? `Available on ${availabilityDays.join(", ")}`
-                      : "Availability not specified"}
-                  </span>
-                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No specific availability information provided.</p>
+            )}
+
+            {escort.availability.notes && (
+              <div className="col-span-1 md:col-span-2 mt-2">
+                <h4 className="font-medium">Notes:</h4>
+                <p className="text-gray-600">{escort.availability.notes}</p>
               </div>
+            )}
+          </div>
+        ) : (
+          <p className="text-gray-500">No availability information provided.</p>
+        )}
+      </section>
+
+      {/* Stats Section */}
+      {escort.stats && (
+        <section>
+          <h3 className="text-xl font-semibold mb-4">Profile Stats</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-gray-50 p-3 rounded-lg text-center">
+              <div className="text-2xl font-bold text-primary">{escort.clientsServed || 0}</div>
+              <div className="text-sm text-gray-600">Clients Served</div>
             </div>
-            
-            <div className="space-y-4">
-              <h4 className="font-medium">Appearance</h4>
-              
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                {escort.age && (
-                  <>
-                    <span className="text-muted-foreground">Age:</span>
-                    <span>{escort.age}</span>
-                  </>
-                )}
-                
-                {escort.height && (
-                  <>
-                    <span className="text-muted-foreground">Height:</span>
-                    <span>{String(escort.height)}</span>
-                  </>
-                )}
-                
-                {escort.weight && (
-                  <>
-                    <span className="text-muted-foreground">Weight:</span>
-                    <span>{String(escort.weight)}</span>
-                  </>
-                )}
-                
-                {escort.bodyType && (
-                  <>
-                    <span className="text-muted-foreground">Body Type:</span>
-                    <span>{escort.bodyType}</span>
-                  </>
-                )}
-                
-                {escort.hairColor && (
-                  <>
-                    <span className="text-muted-foreground">Hair:</span>
-                    <span>{escort.hairColor}</span>
-                  </>
-                )}
-                
-                {escort.eyeColor && (
-                  <>
-                    <span className="text-muted-foreground">Eyes:</span>
-                    <span>{escort.eyeColor}</span>
-                  </>
-                )}
+            <div className="bg-gray-50 p-3 rounded-lg text-center">
+              <div className="text-2xl font-bold text-primary">
+                {escort.lastActive ? formatDate(escort.lastActive, { 
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                }) : 'N/A'}
               </div>
+              <div className="text-sm text-gray-600">Last Active</div>
+            </div>
+            <div className="bg-gray-50 p-3 rounded-lg text-center">
+              <div className="text-2xl font-bold text-primary">{escort.rating || 'N/A'}</div>
+              <div className="text-sm text-gray-600">Rating</div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </section>
+      )}
+
+      {/* Physical Attributes Section */}
+      <section>
+        <h3 className="text-xl font-semibold mb-4">Physical Attributes</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-2">
+          {escort.bodyType && (
+            <div className="flex justify-between border-b pb-1">
+              <span className="text-gray-600">Body Type:</span>
+              <span className="font-medium">{escort.bodyType}</span>
+            </div>
+          )}
+          {escort.height && (
+            <div className="flex justify-between border-b pb-1">
+              <span className="text-gray-600">Height:</span>
+              <span className="font-medium">{escort.height}</span>
+            </div>
+          )}
+          {escort.weight && (
+            <div className="flex justify-between border-b pb-1">
+              <span className="text-gray-600">Weight:</span>
+              <span className="font-medium">{escort.weight}</span>
+            </div>
+          )}
+          {escort.measurements && (
+            <div className="flex justify-between border-b pb-1">
+              <span className="text-gray-600">Measurements:</span>
+              <span className="font-medium">{escort.measurements}</span>
+            </div>
+          )}
+          {escort.hairColor && (
+            <div className="flex justify-between border-b pb-1">
+              <span className="text-gray-600">Hair Color:</span>
+              <span className="font-medium">{escort.hairColor}</span>
+            </div>
+          )}
+          {escort.eyeColor && (
+            <div className="flex justify-between border-b pb-1">
+              <span className="text-gray-600">Eye Color:</span>
+              <span className="font-medium">{escort.eyeColor}</span>
+            </div>
+          )}
+          {escort.ethnicity && (
+            <div className="flex justify-between border-b pb-1">
+              <span className="text-gray-600">Ethnicity:</span>
+              <span className="font-medium">{escort.ethnicity}</span>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Interests Section */}
+      {escort.interests && escort.interests.length > 0 && (
+        <section>
+          <h3 className="text-xl font-semibold mb-4">Interests</h3>
+          <div className="flex flex-wrap gap-2">
+            {escort.interests.map((interest, index) => (
+              <span key={index} className="bg-gray-100 px-3 py-1 rounded-full text-sm">
+                {interest}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };

@@ -1,137 +1,111 @@
 
-// Core system types
-
 export interface SystemStatus {
-  isActive?: boolean;
-  isOperational: boolean;
-  lastCheck: Date;
-  version: string;
+  online: boolean;
   uptime: number;
+  performance: number;
+  lastChecked: Date;
+  isActive?: boolean; // Add this property to fix errors
 }
 
 export interface SystemMetrics {
-  cpuUsage: number;
-  memoryUsage: number;
-  requestsPerMinute: number;
-  averageResponseTime: number;
-  errorRate: number;
-  activeConnections: number;
+  cpu: number;
+  memory: number;
+  storage: number;
+  network: number;
+  latency: number;
 }
 
+// Alias for use in components
 export type SystemHealthMetrics = SystemMetrics;
 
-// Hermes System Interfaces
+export interface SessionValidationResult {
+  isValid: boolean;
+  userId?: string;
+  expiresAt?: Date;
+  valid?: boolean; // Add this property to fix errors
+}
+
+export interface SystemIntegrityResult {
+  status: boolean;
+  timestamp: Date;
+  details?: string;
+  valid?: boolean; // Add this property to fix errors
+  integrity?: boolean; // Add this property to fix errors
+}
+
 export interface HermesSystem {
-  id: string;
-  name: string;
-  calculateVisibilityScore: (data: any) => number;
-  generateInsight: (data: any) => HermesInsight;
-  status: SystemStatus;
+  getInsights(): Promise<HermesInsight[]>;
+  processFeedback(userId: string, data: any): Promise<boolean>;
+  calculateVisibilityScore(profileId: string): Promise<number>;
+  // Add other methods used by components
 }
 
 export interface HermesInsight {
   id: string;
+  userId: string;
+  type: string;
+  content: string;
   timestamp: Date;
-  score: number;
-  recommendation: string;
-  data: any;
-  confidence: number;
+  score?: number;
 }
 
-// Lucie AI System Interfaces
+export interface OxumSystem {
+  getSystemStatus(): Promise<SystemStatus>;
+  validateSession(sessionId: string): Promise<SessionValidationResult>;
+  checkIntegrity(): Promise<SystemIntegrityResult>;
+  // Add other methods used by components
+}
+
+export interface UberCoreSystem {
+  initialize(): Promise<boolean>;
+  validateSession(userId: string): SessionValidationResult;
+  checkSystemIntegrity(): SystemIntegrityResult;
+  getSystemMetrics(): SystemMetrics;
+  // Add other methods used by components
+}
+
 export interface LucieAISystem {
-  id: string;
-  name: string;
-  version: string;
-  status: SystemStatus;
-  generateContent: (params: GenerateContentParams) => Promise<GenerateContentResult>;
-  moderateContent: (params: ModerateContentParams) => Promise<ModerateContentResult>;
-  analyzeSentiment: (params: SentimentAnalysisParams) => Promise<SentimentAnalysisResult>;
+  generateContent(params: GenerateContentParams): Promise<GenerateContentResult>;
+  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
+  analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult>;
+  // Add other methods used by components
 }
 
 export interface GenerateContentParams {
   prompt: string;
   context?: any;
-  maxLength?: number;
+  length?: number;
   temperature?: number;
-  format?: string;
 }
 
 export interface GenerateContentResult {
   content: string;
-  metadata: {
-    tokensUsed: number;
-    generationTime: number;
-    model: string;
-  };
-  status: 'success' | 'error' | 'partial';
+  tokens: number;
+  success: boolean;
   error?: string;
 }
 
 export interface ModerateContentParams {
   content: string;
-  contentType: 'text' | 'image' | 'video';
-  strictness?: 'low' | 'medium' | 'high';
+  user_id?: string;
+  context?: string;
 }
 
 export interface ModerateContentResult {
-  isApproved: boolean;
-  reasons?: string[];
+  approved: boolean;
   score: number;
-  categories: {
-    [category: string]: number;
-  };
+  reasons?: string[];
+  success: boolean;
 }
 
 export interface SentimentAnalysisParams {
-  text: string;
+  content: string;
   detailed?: boolean;
 }
 
 export interface SentimentAnalysisResult {
+  score: number;
   sentiment: 'positive' | 'negative' | 'neutral';
-  score: number;
-  entities?: Array<{
-    entity: string;
-    sentiment: 'positive' | 'negative' | 'neutral';
-    score: number;
-  }>;
-}
-
-// Oxum System Interfaces
-export interface OxumSystem {
-  id: string;
-  name: string;
-  version: string;
-  status: SystemStatus;
-  metrics: SystemMetrics;
-}
-
-// Validation Results
-export interface SessionValidationResult {
-  isValid: boolean;
-  userId?: string;
-  sessionId?: string;
-  expiration?: Date;
-  permissions?: string[];
-  error?: string;
-}
-
-export interface SystemIntegrityResult {
-  isIntact: boolean;
-  score: number;
-  issues: string[];
-  recommendations: string[];
-  lastCheck: Date;
-}
-
-// UberCore System Interface
-export interface UberCoreSystem {
-  id: string;
-  name: string;
-  version: string;
-  status: SystemStatus;
-  validateSession: (token: string) => Promise<SessionValidationResult>;
-  checkSystemIntegrity: () => Promise<SystemIntegrityResult>;
-  getSystemMetrics: () => SystemMetrics;
+  details?: Record<string, number>;
+  success: boolean;
 }

@@ -1,3 +1,4 @@
+
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { formatCurrency as formatCurrencyUtil } from "@/utils/formatters";
@@ -35,3 +36,6 @@ export function formatDate(date: string | Date | undefined, options?: Intl.DateT
   
   return dateObj.toLocaleDateString(undefined, defaultOptions);
 }
+
+// Export it for components that import it directly
+export { formatDate };

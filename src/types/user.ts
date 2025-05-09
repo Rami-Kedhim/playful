@@ -1,4 +1,3 @@
-
 export interface UserProfile {
   id: string;
   name: string;
@@ -30,6 +29,22 @@ export interface UserProfile {
   services?: string[];
   languages?: string[];
   user_metadata?: Record<string, any>;
+  bodyType?: string;
+  height?: string | number;
+  weight?: string | number;
+  hairColor?: string;
+  eyeColor?: string;
+  ethnicity?: string;
+  sexualOrientation?: string;
+  measurements?: string;
+  clientsServed?: number;
+  lastActive?: Date | string;
+  stats?: Record<string, any>;
+  interests?: string[];
+  specialties?: string[];
+  limitations?: string[];
+  payment_methods?: string[];
+  deposit_required?: boolean;
 }
 
 export interface User {
@@ -40,26 +55,61 @@ export interface User {
   roles?: string[];
   isVerified?: boolean;
   user_metadata?: Record<string, any>;
-  // Add missing properties
   username?: string;
   website?: string;
   bio?: string;
   avatarUrl?: string;
   avatar_url?: string;
+  profileImageUrl?: string;
+  ubxBalance?: number;
+  ubx_balance?: number;
 }
 
 export interface AuthContextType {
   user: User | null;
-  login: (credentials: LoginCredentials) => Promise<void>;
-  logout: () => void;
-  register: (userData: any) => Promise<void>;
+  profile: UserProfile | null;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  logout: () => Promise<boolean>;
+  register: (email: string, password: string, confirmPassword?: string) => Promise<AuthResult>;
   isLoading: boolean;
+  loading: boolean;
   error: string | null;
+  isAuthenticated: boolean;
+  initialized: boolean;
+  
+  // Authentication methods
+  signIn: (email: string, password: string) => Promise<AuthResult>;
+  signOut: () => Promise<boolean>;
+  
+  // User management methods
+  updateUser: (userData: Partial<User>) => Promise<boolean>;
+  updateUserProfile: (profileData: Partial<UserProfile>) => Promise<boolean>;
+  updateProfile: (profileData: Partial<UserProfile>) => Promise<boolean>;
+  loadUserProfile: () => Promise<UserProfile | null>;
+  refreshProfile: () => Promise<void>;
+  
+  // Password related methods
+  sendPasswordResetEmail: (email: string) => Promise<boolean>;
+  resetPassword: (password: string, token: string) => Promise<boolean>;
+  requestPasswordReset: (email: string) => Promise<boolean>;
+  verifyEmail: (token: string) => Promise<boolean>;
+  updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
+  
+  // Other methods
+  deleteAccount: () => Promise<boolean>;
+  checkRole: (role: string) => boolean;
 }
 
 export interface LoginCredentials {
   email: string;
   password: string;
+}
+
+export interface AuthResult {
+  success: boolean;
+  user?: User;
+  error?: string;
+  session?: any;
 }
 
 export type UserRole = 'admin' | 'moderator' | 'creator' | 'escort' | 'client' | 'user';

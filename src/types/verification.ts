@@ -17,6 +17,15 @@ export const VERIFICATION_STATUS = {
   REJECTED: 'rejected'
 };
 
+// Also add VERIFICATION_LEVEL constant for components using it
+export const VERIFICATION_LEVEL = {
+  NONE: 'none',
+  BASIC: 'basic',
+  ENHANCED: 'enhanced',
+  PREMIUM: 'premium',
+  VERIFIED: 'verified'
+};
+
 export interface VerificationDocument {
   id: string;
   type: string;
