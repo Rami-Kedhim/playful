@@ -7,47 +7,31 @@ export enum VerificationLevel {
   PREMIUM = "premium"
 }
 
-export const VERIFICATION_LEVELS = {
-  NONE: "none" as VerificationLevel,
-  BASIC: "basic" as VerificationLevel,
-  VERIFIED: "verified" as VerificationLevel,
-  ENHANCED: "enhanced" as VerificationLevel,
-  PREMIUM: "premium" as VerificationLevel,
-};
-
-// Compatibility alias for components using the old reference
-export const VERIFICATION_LEVEL = VERIFICATION_LEVELS;
-
-export enum VerificationStatus {
-  PENDING = "pending",
-  IN_REVIEW = "in_review",
-  APPROVED = "approved",
-  REJECTED = "rejected"
-}
+export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
 
 export interface VerificationDocument {
   id: string;
   type: string;
-  documentType?: string; // Added for DocumentPreview component
   fileUrl: string;
-  filePath?: string; // Added for DocumentPreview component
-  status: 'pending' | 'approved' | 'rejected';
   uploadedAt: string;
-  notes?: string; // Added for DocumentPreview component
-  reviewer_notes?: string; // Added for consistency
-  reviewed_at?: string;
-  reviewed_by?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  notes?: string; // Added for DocumentPreview.tsx
+  filePath?: string; // Added for DocumentPreview.tsx
+  documentType?: string; // Added for DocumentPreview.tsx
 }
 
 export interface VerificationRequest {
   id: string;
   userId: string;
-  profile_id?: string; // Added for compatibility
-  status: VerificationStatus | string;
-  documents: VerificationDocument[];
+  profile_id?: string; // Added for review components
+  status: VerificationStatus;
   verificationLevel: VerificationLevel;
-  requested_level?: VerificationLevel; // Added for compatibility
+  requested_level?: string; // Added for ReviewRequestModal.tsx
+  requestedLevel?: string; // Added for backward compatibility
+  documents: VerificationDocument[];
   submittedAt: string;
   updatedAt?: string;
+  created_at?: string; // Added for VerificationReviewPanel
   rejectionReason?: string;
+  reviewed_at?: string; // Added for VerificationReviewPanel
 }

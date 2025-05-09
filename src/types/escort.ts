@@ -11,6 +11,8 @@ export interface Availability {
   friday?: string[];
   saturday?: string[];
   sunday?: string[];
+  days?: string[]; // Added for EscortAbout.tsx
+  day?: string; // Added for EscortAvailability.tsx
 }
 
 export interface Video {
@@ -98,8 +100,8 @@ export interface Escort {
   specialties?: string[]; // Added for ServicesTab
   limitations?: string[]; // Added for ServicesTab
   locations?: string[]; // Added for BookingForm
-  providesInPersonServices?: boolean; // Added for EscortResults
-  providesVirtualContent?: boolean; // Added for EscortResults
+  providesInPersonServices?: boolean; // Added for EscortResults & BookingDialog
+  providesVirtualContent?: boolean; // Added for EscortResults & BookingDialog
   bodyType?: string; // Added for EscortAbout
 }
 
@@ -135,3 +137,6 @@ export interface ExtendedEscort extends Escort {
   providesInPersonServices: boolean;
   providesVirtualContent: boolean;
 }
+
+// Export VerificationLevel for EscortAbout.tsx
+export { VerificationLevel };
