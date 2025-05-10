@@ -3,7 +3,7 @@ import Hermes from './Hermes';
 import LucieAI from './Lucie';
 import Oxum from './Oxum';
 import UberCore from './UberCore';
-import Orus from './Orus';
+import { Orus } from './Orus';
 
 // Create instances
 const hermes = new Hermes();

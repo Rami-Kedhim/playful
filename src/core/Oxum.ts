@@ -23,6 +23,17 @@ export class Oxum implements OxumSystem {
     }
   }
 
+  // Add this method to fix the BoostManagerContainer error
+  async boostAllocationEigen(profileId: string, boostLevel: number): Promise<any> {
+    // Mock implementation
+    return {
+      allocation: [0.4, 0.3, 0.2, 0.1],
+      profileId,
+      boostLevel,
+      timestamp: new Date()
+    };
+  }
+
   async validateSession(token: string): Promise<boolean> {
     if (!token) return false;
     

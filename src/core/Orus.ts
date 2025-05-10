@@ -4,7 +4,7 @@ import { SystemStatus, SystemIntegrityResult } from '@/types/core-systems';
 /**
  * ORUS: Operational Resource Utilization System
  */
-class Orus {
+export class Orus {
   /**
    * Get system status
    */
@@ -34,4 +34,4 @@ class Orus {
   }
 }
 
-export const orus = new Orus();
+export default Orus;

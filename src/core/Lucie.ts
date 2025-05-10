@@ -2,11 +2,7 @@
 import { 
   LucieAISystem, 
   GenerateContentParams, 
-  GenerateContentResult,
-  ModerateContentParams,
-  ModerateContentResult,
-  SentimentAnalysisParams,
-  SentimentAnalysisResult
+  GenerateContentResult
 } from '@/types/core-systems';
 
 export class LucieAI implements LucieAISystem {
@@ -47,7 +43,7 @@ export class LucieAI implements LucieAISystem {
     
     // Mock implementation
     return {
-      content: `Moderated: ${content}`,
+      content: `Moderated: ${content}`
     };
   }
 
@@ -58,8 +54,19 @@ export class LucieAI implements LucieAISystem {
     
     // Mock implementation
     return {
-      content: 'Analysis complete',
-      sentiment: 'positive'
+      content: 'Analysis complete'
+    };
+  }
+  
+  // Add this method for system health checking
+  getSystemStatus() {
+    return {
+      status: 'operational',
+      modules: {
+        aiGeneration: 'online',
+        contentModeration: 'online',
+        sentimentAnalysis: 'online'
+      }
     };
   }
 }

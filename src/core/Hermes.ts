@@ -1,3 +1,4 @@
+
 import { HermesSystem, HermesInsight } from '@/types/core-systems'; 
 
 // Updated Hermes class to implement HermesSystem interface
@@ -26,6 +27,26 @@ export class Hermes implements HermesSystem {
   // Keep any existing methods
   async getInsights(): Promise<HermesInsight[]> {
     return this.insights;
+  }
+  
+  // Add helper methods for components that reference these
+  routeFlow(data: { source: string; destination: string; params: any }): void {
+    console.log(`Route flow from ${data.source} to ${data.destination}`, data.params);
+  }
+  
+  connect(options: { system: string; connectionId: string; metadata: any; userId: string }): void {
+    console.log(`Connected to ${options.system}`, options);
+  }
+  
+  calculateVisibilityScore(profileId: string): number {
+    return 85; // Mock implementation
+  }
+  
+  recommendNextAction(userId: string): { action: string; confidence: number } {
+    return {
+      action: 'complete_profile',
+      confidence: 0.9
+    };
   }
 }
 

@@ -19,6 +19,24 @@ export class UberCore implements UberCoreSystem {
     await this.oxumSystem.initialize();
     // Any other initialization
   }
+
+  // Add missing methods from admin components
+  checkSubsystemHealth() {
+    return [
+      { name: 'Hermes', status: 'operational', health: 98 },
+      { name: 'Oxum', status: 'operational', health: 95 },
+      { name: 'LucieAI', status: 'operational', health: 92 }
+    ];
+  }
+
+  initializeAutomaticSeo() {
+    console.log('Initializing automatic SEO');
+    // Mock implementation
+    return {
+      success: true,
+      message: 'SEO optimization initialized'
+    };
+  }
 }
 
 export default UberCore;

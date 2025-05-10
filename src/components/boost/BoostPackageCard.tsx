@@ -22,7 +22,10 @@ const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
 }) => {
   const formatVisibility = (value: string | number | undefined): string => {
     if (value === undefined || value === null) return '';
-    return typeof value === 'number' ? `${value.toString()}%` : value;
+    if (typeof value === 'number') {
+      return `${value}%`;
+    }
+    return value;
   };
 
   return (
@@ -45,7 +48,7 @@ const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
 
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium">Duration:</span>
-        <span className="text-primary">{formatDuration(pkg.duration)}</span>
+        <span className="text-primary">{formatDuration(pkg.duration?.toString() || '')}</span>
       </div>
 
       {pkg.visibility && (

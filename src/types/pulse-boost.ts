@@ -21,6 +21,7 @@ export interface BoostPackage {
   isPopular?: boolean;
   isMostPopular?: boolean;
   boostMultiplier?: number;
+  boostPackage?: any;
 }
 
 export interface BoostStatus {
@@ -39,6 +40,7 @@ export interface BoostStatus {
   startedAt?: Date | string;
   startTime?: Date | string;
   endTime?: Date | string;
+  boostPackage?: BoostPackage;
 }
 
 export interface HermesStatus {
@@ -62,6 +64,17 @@ export interface BoostAnalytics {
   clicks: number;
   conversionRate: number;
   engagementScore: number;
+  totalBoosts?: number;
+  activeBoosts?: number;
+  averageBoostScore?: number;
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  views?: number;
+  interactions?: {
+    value: number;
+    change?: number;
+  };
 }
 
 export interface UserBoost {
@@ -94,12 +107,46 @@ export interface AnalyticsData {
   impressions?: {
     value: number;
     change?: number;
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+    increase?: number;
   };
   interactions?: {
     value: number;
     change?: number;
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+    increase?: number;
   };
   additionalViews?: number;
   engagementIncrease?: number;
   rankingPosition?: number;
+  rank?: {
+    current: number;
+    previous: number;
+    change: number;
+  };
+  conversionRate?: number;
+  messageRate?: number;
+  bookingRate?: number;
+}
+
+export interface UserProfile {
+  id: string;
+  user_id: string;
+  username?: string;
+  email?: string;
+  name?: string;
+  avatar_url?: string;
+  avatarUrl?: string;
+  profileImageUrl?: string;
+  ubxBalance?: number;
+  ubx_balance?: number;
+  is_escort?: boolean;
 }
