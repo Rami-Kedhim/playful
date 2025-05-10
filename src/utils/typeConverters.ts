@@ -2,6 +2,8 @@
 import { Escort as EscortType } from '@/types/Escort';
 import { Escort as EscortTypeLower } from '@/types/escort';
 import { AvailabilityDay } from '@/types/availability';
+import { BoostStatus as BoostStatusType } from '@/types/boost';
+import { BoostStatus as PulseBoostStatusType } from '@/types/pulse-boost';
 
 // Normalize the video objects to ensure compatible types
 export const normalizeVideoType = (video: any): { id?: string; url: string; thumbnail?: string; title?: string; duration?: number } => {
@@ -62,11 +64,56 @@ export const ensureEscortTypeCompatibility = (escort: any): EscortType => {
 };
 
 // Helper function to convert between boost status types
-export const convertBoostStatus = (status: any): any => {
+export const convertBoostStatus = (status: any): BoostStatusType => {
   return {
     ...status,
     isExpiring: status.isExpiring || false,
     expiresAt: status.expiresAt ? new Date(status.expiresAt) : undefined,
     startedAt: status.startedAt ? new Date(status.startedAt) : undefined,
+    timeRemaining: typeof status.timeRemaining === 'number' 
+      ? String(status.timeRemaining) 
+      : status.timeRemaining || '',
+    remainingTime: typeof status.remainingTime === 'number'
+      ? String(status.remainingTime)
+      : status.remainingTime || '',
+  };
+};
+
+// Normalize UberPersona to ensure all required properties exist
+export const normalizeUberPersona = (persona: any) => {
+  return {
+    ...persona,
+    id: persona.id || '',
+    name: persona.name || '',
+    type: persona.type || '',
+    displayName: persona.displayName || persona.name || '',
+    isVerified: persona.isVerified || false,
+    isOnline: persona.isOnline || false,
+    isAI: persona.isAI || false,
+    isPremium: persona.isPremium || false,
+    location: persona.location || '',
+    tags: persona.tags || [],
+    bio: persona.bio || '',
+    languages: persona.languages || [],
+    traits: persona.traits || [],
+    stats: {
+      ...(persona.stats || {}),
+      popularity: persona.stats?.popularity || 0,
+      intelligence: persona.stats?.intelligence || 0,
+      charm: persona.stats?.charm || 0,
+      energy: persona.stats?.energy || 0,
+      views: persona.stats?.views || 0,
+      likes: persona.stats?.likes || 0,
+      responseRate: persona.stats?.responseRate || 0,
+      responseTime: persona.stats?.responseTime || 0,
+    },
+    monetization: {
+      ...(persona.monetization || {}),
+      hourlyRate: persona.monetization?.hourlyRate || 0,
+      packages: persona.monetization?.packages || [],
+      acceptsUbx: persona.monetization?.acceptsUbx || false,
+      acceptsFiat: persona.monetization?.acceptsFiat || false,
+      meetingPrice: persona.monetization?.meetingPrice || 0,
+    }
   };
 };

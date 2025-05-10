@@ -12,13 +12,13 @@ export interface PulseBoost {
   description: string;
   duration: string;
   price: number;
-  price_ubx?: number;
+  price_ubx: number;
   features: string[];
   visibility?: string | number;
-  visibility_increase?: number;
+  visibility_increase: number;
   color?: string;
   badgeColor?: string;
-  durationMinutes?: number;
+  durationMinutes: number;
   boost_power?: number;
   isMostPopular?: boolean;
   isPopular?: boolean;
@@ -30,7 +30,7 @@ export interface PulseBoostStatus {
   isActive: boolean;
   isExpiring?: boolean;
   expiresAt?: string | Date;
-  remainingTime?: number | string; // in seconds or formatted time
+  remainingTime?: string; // in seconds or formatted time
   boostLevel?: number;
   boostType?: string;
   modifiers?: Record<string, number>;
@@ -63,6 +63,9 @@ export interface EnhancedBoostStatus extends PulseBoostStatus {
   boostPackage?: BoostPackage;
   packageId?: string;
   isActive: boolean; // This property is required
+  remainingMinutes?: number;
+  percentRemaining?: number;
+  isExpired?: boolean;
 }
 
 // Redefine BoostStatus for compatibility

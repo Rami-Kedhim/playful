@@ -46,7 +46,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
       
       setIsDialogOpen(false);
     } catch (error) {
-      console.error("Booking submission error:", error);
+      console.error("Booking error:", error);
       toast({
         title: "Booking failed",
         description: "There was an error sending your booking request. Please try again.",

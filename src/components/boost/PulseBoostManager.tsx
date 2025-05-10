@@ -3,6 +3,13 @@ import React, { useState, useEffect } from 'react';
 import BoostStatusDisplay from './BoostStatusDisplay';
 import BoostDialog from './dialog/BoostDialog';
 import { pulseBoostService } from '@/services/boost/pulseBoostService';
+import { 
+  convertPulseBoostPackageToBoostPackage,
+  convertBoostStatusToPulseBoostStatus,
+  convertBoostPackageToPulseBoostPackage,
+  convertBoostPackagesArrayToPulseBoostPackagesArray,
+  convertBoostEligibilityToPulseBoostEligibility
+} from '@/utils/boost/typeConverters';
 import { BoostPackage, BoostStatus, BoostEligibility } from '@/types/boost';
 
 interface PulseBoostManagerProps {
@@ -21,6 +28,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
   
   const [eligibility, setEligibility] = useState<BoostEligibility>({
     eligible: true,
+    isEligible: true,
     reasons: []
   });
   
@@ -33,15 +41,17 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
         setLoading(true);
         
         // Fetch boost packages
-        const packages = await Promise.resolve(pulseBoostService.getBoostPackages());
-        setBoostPackages(packages);
+        const packages = await pulseBoostService.getBoostPackages();
+        // Convert the packages to the appropriate type
+        const convertedPackages = packages.map(pkg => convertPulseBoostPackageToBoostPackage(pkg));
+        setBoostPackages(convertedPackages);
         
         // Simulate getting boost status from API
         // In a real implementation, this would be a call to pulseBoostService.getBoostStatus(profileId)
-        const mockActiveStatus: BoostStatus = {
+        const mockActiveStatus = {
           isActive: Math.random() > 0.5, // Randomly set as active or not for demo
           packageName: 'Premium Boost',
-          packageId: packages[1]?.id,
+          packageId: convertedPackages[1]?.id,
           progress: 65,
           remainingTime: '17h 23m',
           isExpiring: Math.random() > 0.7 // Randomly set as expiring
@@ -71,7 +81,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
       
       if (selectedPackage) {
         // Update boost status with the newly purchased boost
-        const newStatus: BoostStatus = {
+        const newStatus = {
           isActive: true,
           packageName: selectedPackage.name,
           packageId: selectedPackage.id,
@@ -119,6 +129,11 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
     }
   };
 
+  // Convert types for passing to BoostDialog
+  const pulseBoostStatus = convertBoostStatusToPulseBoostStatus(boostStatus);
+  const pulseEligibility = convertBoostEligibilityToPulseBoostEligibility(eligibility);
+  const pulsePackages = convertBoostPackagesArrayToPulseBoostPackagesArray(boostPackages);
+
   return (
     <div className="space-y-6">
       <BoostStatusDisplay
@@ -132,9 +147,9 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         profileId={profileId}
-        boostStatus={boostStatus}
-        eligibility={eligibility}
-        packages={boostPackages}
+        boostStatus={pulseBoostStatus}
+        eligibility={pulseEligibility}
+        packages={pulsePackages}
         onBoost={handleApplyBoost}
         onCancel={handleCancelBoost}
         selectedPackage=""

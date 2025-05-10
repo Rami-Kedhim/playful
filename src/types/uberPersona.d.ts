@@ -1,5 +1,4 @@
 
-
 export interface UberPersona {
   id: string;
   name: string;
@@ -39,6 +38,7 @@ export interface UberPersona {
     likes?: number;
     responseRate?: number;
     responseTime?: number | string;
+    rating?: number;
   };
   monetization?: {
     hourlyRate?: number;
@@ -54,4 +54,3 @@ export interface UberPersona {
     meetingPrice?: number;
   };
 }
-
