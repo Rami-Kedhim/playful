@@ -31,7 +31,7 @@ const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({
 
   const handleDelete = async () => {
     try {
-      // Call deleteAccount without passing any arguments since the signature doesn't expect any
+      // Call deleteAccount without any arguments - it doesn't expect any
       await deleteAccount();
       
       toast({

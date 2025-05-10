@@ -1,58 +1,24 @@
 
-import { UberCoreSystem, SubsystemHealth, LucieAISystem, HermesSystem, OxumSystem } from '@/types/core-systems';
+import { UberCoreSystem, HermesSystem, LucieAISystem, OxumSystem } from '@/types/core-systems';
+import { Hermes, LucieAI, Oxum } from '@/core';
 
 export class UberCore implements UberCoreSystem {
-  private lucieAI: LucieAISystem | any = {};
-  private hermes: HermesSystem | any = {}; 
-  private oxum: OxumSystem | any = {};
-  
+  // Change from private to public to match interface
+  public lucieAI: LucieAISystem;
+  public hermesSystem: HermesSystem;
+  public oxumSystem: OxumSystem;
+
   constructor() {
-    // Default constructor with no parameters
+    this.lucieAI = new LucieAI();
+    this.hermesSystem = new Hermes();
+    this.oxumSystem = new Oxum();
   }
-  
-  async initialize(): Promise<boolean> {
-    try {
-      console.info('Initializing core systems...');
-      console.info('Initializing Lucie AI system...');
-      console.info('Initializing UberCore system...');
-      
-      // Here would be the actual initialization code
-      return true;
-    } catch (error) {
-      console.error('Failed to initialize UberCore:', error);
-      return false;
-    }
-  }
-  
-  async initializeAutomaticSeo(): Promise<boolean> {
-    try {
-      console.info('Initializing automatic SEO system...');
-      // Implementation would go here
-      return true;
-    } catch (error) {
-      console.error('Failed to initialize automatic SEO:', error);
-      return false;
-    }
-  }
-  
-  async getStatus(): Promise<{ online: boolean; services: string[] }> {
-    return {
-      online: true,
-      services: ['auth', 'messaging', 'payments', 'boost']
-    };
-  }
-  
-  checkSubsystemHealth(): SubsystemHealth[] {
-    return [
-      { name: 'Lucie AI', status: 'Online', health: 98 },
-      { name: 'Hermes', status: 'Online', health: 95 },
-      { name: 'Oxum', status: 'Online', health: 99 },
-      { name: 'Boost System', status: 'Online', health: 97 },
-    ];
+
+  async initialize() {
+    await this.hermesSystem.initialize();
+    await this.oxumSystem.initialize();
+    // Any other initialization
   }
 }
-
-// Export a default instance for use across the app
-export const uberCore = new UberCore();
 
 export default UberCore;

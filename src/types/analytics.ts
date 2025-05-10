@@ -49,3 +49,16 @@ export interface MetricTimeSeriesData {
   data: MetricDataPoint[];
   color?: string;
 }
+
+// Add DetailedMetricViewProps interface
+export interface DetailedMetricViewProps {
+  title?: string;
+  description?: string;
+  value?: number | string;
+  unit?: string;
+  change?: number;
+  trendData?: Array<{name: string, value: number}>;
+  onBack: () => void;
+  metric?: any;
+  data?: Array<{date?: string, name?: string, value: number}>;
+}

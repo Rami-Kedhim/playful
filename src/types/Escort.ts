@@ -42,4 +42,14 @@ export interface Escort {
   rates?: any;
   rate?: number; // For backward compatibility
   created_at?: string; // For sorting/filtering
+  
+  // Properties referenced in components
+  avatar_url?: string;
+  avatarUrl?: string;
+  profileImage?: string;
+  imageUrl?: string;
+  tags?: string[];
+  availableNow?: boolean;
+  isAvailable?: boolean;
+  reviewCount?: number;
 }

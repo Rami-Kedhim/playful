@@ -8,6 +8,7 @@ export interface BoostManagerHook {
   hermesStatus: HermesStatus;
   isLoadingPackages: boolean;
   isLoadingUserBoosts: boolean;
+  loading?: boolean; // Add loading property
   purchaseBoost: (packageId: string) => Promise<boolean>;
   cancelBoost: (boostId: string) => Promise<boolean>;
   refreshBoostData: () => Promise<void>;

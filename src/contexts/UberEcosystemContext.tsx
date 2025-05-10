@@ -1,6 +1,6 @@
-
-import React, { createContext, useContext, ReactNode } from 'react';
-import { UserProfile } from '@/types/pulse-boost';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/auth/useAuth';
+import { UserProfile } from '@/types/user'; // Fixed import from user.ts instead of pulse-boost
 
 export interface UberEcosystemContextType {
   user?: UserProfile | null;

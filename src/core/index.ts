@@ -1,31 +1,29 @@
 
-// Core module exports
-import { lucie, lucieAI } from './Lucie';
-import { oxum } from './Oxum';
-import { UberCore } from './UberCore';
-import { hermes } from './Hermes';
-import { uberWallet } from './UberWallet';
-import { automaticSEO } from './AutomaticSEO';
-import { initializeSystem, shutdownSystem } from './engine';
-import { lucieOrchestrator } from './LucieOrchestratorAdapter';
+import Hermes from './Hermes';
+import LucieAI from './Lucie';
+import Oxum from './Oxum';
+import UberCore from './UberCore';
+import Orus from './Orus';
 
-// Initialize the UberCore instance
-const uberCore = new UberCore(lucieAI);
+// Create instances
+const hermes = new Hermes();
+const lucieAI = new LucieAI();
+const oxum = new Oxum();
+const orus = new Orus();
 
-// Export the initialized instances
+// Fix the initialization call to match the updated constructor
+const uberCore = new UberCore();
+
+// Export instances and classes
 export {
-  oxum,
   hermes,
-  lucie,
   lucieAI,
-  UberCore,
+  oxum,
+  orus,
   uberCore,
-  initializeSystem,
-  shutdownSystem,
-  automaticSEO,
-  uberWallet,
-  lucieOrchestrator
+  Hermes,
+  LucieAI,
+  Oxum,
+  UberCore,
+  Orus
 };
-
-// Export any utility functions that components might need
-export * from './utils';
