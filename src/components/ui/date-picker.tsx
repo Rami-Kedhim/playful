@@ -11,18 +11,21 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-interface DatePickerProps {
+export interface DatePickerProps {
   selected?: Date;
   onSelect?: (date: Date) => void;
   disabled?: (date: Date) => boolean;
   className?: string;
+  // We'll add a "label" prop instead of "placeholder" to maintain type safety
+  label?: string;
 }
 
 export const DatePicker: React.FC<DatePickerProps> = ({
   selected,
   onSelect,
   disabled,
-  className
+  className,
+  label = "Pick a date"
 }) => {
   return (
     <Popover>
@@ -32,7 +35,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           className={cn("w-full justify-start text-left font-normal", className)}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {selected ? format(selected, "PPP") : <span>Pick a date</span>}
+          {selected ? format(selected, "PPP") : <span>{label}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
@@ -42,6 +45,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           onSelect={onSelect}
           disabled={disabled}
           initialFocus
+          className="p-3 pointer-events-auto"
         />
       </PopoverContent>
     </Popover>

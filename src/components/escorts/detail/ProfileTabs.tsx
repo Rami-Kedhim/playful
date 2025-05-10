@@ -7,25 +7,39 @@ import RatesTab from "./profile/RatesTab";
 import SafetyTips from "./SafetyTips";
 import VerificationBadge from "./VerificationBadge";
 import { Shield, UserCheck, DollarSign, Info } from "lucide-react";
-import { convertEscortType } from "@/utils/typeConverters";
-import type { Escort as EscortNew } from "@/types/escort";
+import { convertEscortType, ensureCompatibleAvailabilityDays } from "@/utils/typeConverters";
+import type { Escort } from "@/types/Escort";
 
 interface ProfileTabsProps {
   escort: any; // Use any to avoid circular type references
 }
 
 const ProfileTabs = ({ escort }: ProfileTabsProps) => {
-  // Convert escort to compatible type
-  const normalizedEscort = convertEscortType(escort) as EscortNew;
+  // Convert escort to compatible type with proper processing to ensure type safety
+  const processedEscort = React.useMemo(() => {
+    const convertedEscort = convertEscortType(escort);
+    
+    // Additional processing to ensure compatibility with the specific EscortAvailability type
+    if (convertedEscort && convertedEscort.availability && 
+        typeof convertedEscort.availability === 'object' && 
+        !Array.isArray(convertedEscort.availability)) {
+      const availObj = convertedEscort.availability as any;
+      if (availObj.days) {
+        availObj.days = ensureCompatibleAvailabilityDays(availObj.days);
+      }
+    }
+    
+    return convertedEscort as Escort; // Cast to Escort type expected by components
+  }, [escort]);
   
   // Normalize the verificationLevel prop to a string type compatible with VerificationBadge
   let verificationLevel: "none" | "basic" | "enhanced" | "premium" = "none";
   
-  if (normalizedEscort.verificationLevel) {
+  if (processedEscort.verificationLevel) {
     // Convert to string if it's an enum value
-    const level = typeof normalizedEscort.verificationLevel === 'string' 
-      ? normalizedEscort.verificationLevel 
-      : String(normalizedEscort.verificationLevel);
+    const level = typeof processedEscort.verificationLevel === 'string' 
+      ? processedEscort.verificationLevel 
+      : String(processedEscort.verificationLevel);
     
     // Map verification levels to expected values
     if (level === VerificationLevel.NONE || level === "none") {
@@ -64,15 +78,15 @@ const ProfileTabs = ({ escort }: ProfileTabsProps) => {
         </TabsList>
 
         <TabsContent value="about">
-          <AboutTab escort={normalizedEscort} />
+          <AboutTab escort={processedEscort} />
         </TabsContent>
 
         <TabsContent value="services">
-          <ServicesTab escort={normalizedEscort} />
+          <ServicesTab escort={processedEscort} />
         </TabsContent>
 
         <TabsContent value="rates">
-          <RatesTab escort={normalizedEscort} />
+          <RatesTab escort={processedEscort} />
         </TabsContent>
 
         <TabsContent value="safety">

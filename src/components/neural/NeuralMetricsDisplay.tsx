@@ -1,131 +1,129 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { NeuralMetricsDisplayProps } from '@/types/analytics';
-import { TrendingDown, TrendingUp, Clock, CheckCircle, Users, ThumbsUp } from 'lucide-react';
+import { ArrowDown, ArrowUp, Brain, Clock, BarChart4, ThumbsUp } from 'lucide-react';
 
-export const NeuralMetricsDisplay: React.FC<NeuralMetricsDisplayProps> = ({
+interface NeuralMetricsDisplayProps {
+  metrics: {
+    responseTime: number;
+    accuracy: number;
+    engagement: number;
+    satisfaction: number;
+  };
+  trend?: {
+    responseTime: number[];
+    accuracy: number[];
+    engagement: number[];
+    satisfaction: number[];
+  };
+  period?: string;
+  refreshInterval?: number;
+}
+
+const MetricCard = ({
+  title,
+  value,
+  icon,
+  trend,
+  suffix = '',
+}: {
+  title: string;
+  value: number;
+  icon: React.ReactNode;
+  trend?: number[];
+  suffix?: string;
+}) => {
+  const trendChange = trend && trend.length > 1
+    ? ((trend[trend.length - 1] - trend[0]) / trend[0] * 100).toFixed(1)
+    : null;
+  
+  const isPositive = trendChange && parseFloat(trendChange) >= 0;
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        {icon}
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}{suffix}</div>
+        {trendChange && (
+          <p className={`text-xs flex items-center ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+            {isPositive ? (
+              <ArrowUp className="h-3 w-3 mr-1" />
+            ) : (
+              <ArrowDown className="h-3 w-3 mr-1" />
+            )}
+            {isPositive ? '+' : ''}{trendChange}% change
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const NeuralMetricsDisplay: React.FC<NeuralMetricsDisplayProps> = ({
   metrics,
   trend,
-  period,
-  title,
-  refreshInterval
+  period = 'Last 24 hours',
+  refreshInterval = 60,
 }) => {
-  return (
-    <div>
-      {title && <h2 className="text-xl font-semibold mb-4">{title}</h2>}
+  const [lastRefresh, setLastRefresh] = React.useState<Date>(new Date());
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Response Time</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.responseTime}ms</div>
-            {trend && (
-              <div className="flex items-center pt-1 text-xs">
-                {trend.responseTime[trend.responseTime.length - 1] < trend.responseTime[0] ? (
-                  <>
-                    <TrendingDown className="h-3 w-3 mr-1 text-green-500" />
-                    <span className="text-green-500">Improved</span>
-                  </>
-                ) : (
-                  <>
-                    <TrendingUp className="h-3 w-3 mr-1 text-red-500" />
-                    <span className="text-red-500">Slower</span>
-                  </>
-                )}
-                <span className="text-muted-foreground ml-1">{period}</span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Accuracy</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.accuracy}%</div>
-            {trend && (
-              <div className="flex items-center pt-1 text-xs">
-                {trend.accuracy[trend.accuracy.length - 1] > trend.accuracy[0] ? (
-                  <>
-                    <TrendingUp className="h-3 w-3 mr-1 text-green-500" />
-                    <span className="text-green-500">Improved</span>
-                  </>
-                ) : (
-                  <>
-                    <TrendingDown className="h-3 w-3 mr-1 text-red-500" />
-                    <span className="text-red-500">Decreased</span>
-                  </>
-                )}
-                <span className="text-muted-foreground ml-1">{period}</span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Engagement</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.engagement}%</div>
-            {trend && (
-              <div className="flex items-center pt-1 text-xs">
-                {trend.engagement[trend.engagement.length - 1] > trend.engagement[0] ? (
-                  <>
-                    <TrendingUp className="h-3 w-3 mr-1 text-green-500" />
-                    <span className="text-green-500">Improved</span>
-                  </>
-                ) : (
-                  <>
-                    <TrendingDown className="h-3 w-3 mr-1 text-red-500" />
-                    <span className="text-red-500">Decreased</span>
-                  </>
-                )}
-                <span className="text-muted-foreground ml-1">{period}</span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Satisfaction</CardTitle>
-            <ThumbsUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.satisfaction}%</div>
-            {trend && (
-              <div className="flex items-center pt-1 text-xs">
-                {trend.satisfaction[trend.satisfaction.length - 1] > trend.satisfaction[0] ? (
-                  <>
-                    <TrendingUp className="h-3 w-3 mr-1 text-green-500" />
-                    <span className="text-green-500">Improved</span>
-                  </>
-                ) : (
-                  <>
-                    <TrendingDown className="h-3 w-3 mr-1 text-red-500" />
-                    <span className="text-red-500">Decreased</span>
-                  </>
-                )}
-                <span className="text-muted-foreground ml-1">{period}</span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+  // Set up refresh interval
+  React.useEffect(() => {
+    if (!refreshInterval) return;
+    
+    const timer = setInterval(() => {
+      setLastRefresh(new Date());
+      // In a real app, you'd fetch new data here
+    }, refreshInterval * 1000);
+    
+    return () => clearInterval(timer);
+  }, [refreshInterval]);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Neural System Metrics</h2>
+        <div className="text-xs text-muted-foreground">
+          {period} • Updated {lastRefresh.toLocaleTimeString()}
+        </div>
       </div>
       
-      {refreshInterval && (
-        <p className="text-xs text-muted-foreground mt-2">
-          Data refreshes every {refreshInterval} seconds
-        </p>
-      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <MetricCard
+          title="Response Time"
+          value={metrics.responseTime}
+          suffix="ms"
+          icon={<Clock className="h-4 w-4 text-muted-foreground" />}
+          trend={trend?.responseTime}
+        />
+        
+        <MetricCard
+          title="Accuracy"
+          value={metrics.accuracy}
+          suffix="%"
+          icon={<Brain className="h-4 w-4 text-muted-foreground" />}
+          trend={trend?.accuracy}
+        />
+        
+        <MetricCard
+          title="Engagement"
+          value={metrics.engagement}
+          suffix="%"
+          icon={<BarChart4 className="h-4 w-4 text-muted-foreground" />}
+          trend={trend?.engagement}
+        />
+        
+        <MetricCard
+          title="Satisfaction"
+          value={metrics.satisfaction}
+          suffix="%"
+          icon={<ThumbsUp className="h-4 w-4 text-muted-foreground" />}
+          trend={trend?.satisfaction}
+        />
+      </div>
     </div>
   );
 };

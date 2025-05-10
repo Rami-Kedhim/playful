@@ -43,7 +43,8 @@ export function convertEscortType(escort: any): EscortTypeNew {
     }
   }
 
-  return convertedEscort;
+  // Add a type cast to force TypeScript to accept the converted escort
+  return convertedEscort as EscortTypeNew;
 }
 
 /**

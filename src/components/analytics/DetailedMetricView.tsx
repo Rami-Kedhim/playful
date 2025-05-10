@@ -21,21 +21,29 @@ const DetailedMetricView: React.FC<DetailedMetricViewProps> = ({
   const displayTitle = title || metric?.title || '';
   const displayDescription = description || metric?.description || '';
   
-  // Map data if it has date instead of name to ensure compatibility with PerformanceChart
-  const formattedData = data.length > 0 ? data.map(item => {
-    if ('date' in item && !('name' in item)) {
-      return {
-        name: item.date as string,
-        value: item.value
-      };
-    }
-    return item;
-  }) : trendData;
+  // Ensure data is properly formatted for the chart
+  const formattedData = React.useMemo(() => {
+    if (data.length > 0) {
+      return data.map(item => {
+        if ('date' in item && !('name' in item)) {
+          return {
+            name: item.date,
+            value: item.value
+          };
+        }
+        return item;
+      });
+    } 
+    return trendData;
+  }, [data, trendData]);
   
-  const chartData = formattedData.map(item => ({
-    name: 'name' in item ? item.name : '',
-    value: item.value
-  }));
+  // Map data to ensure it has name/value structure required by PerformanceChart
+  const chartData = React.useMemo(() => {
+    return formattedData.map(item => ({
+      name: typeof item === 'object' && item !== null ? ('name' in item ? item.name : '') : '',
+      value: typeof item === 'object' && item !== null ? ('value' in item ? item.value : 0) : 0
+    }));
+  }, [formattedData]);
   
   // Format change as percentage or absolute value
   const formatChange = () => {

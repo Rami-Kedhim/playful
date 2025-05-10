@@ -9,8 +9,8 @@ import BookingDialog from './BookingDialog';
 import BookingConfirmation from './BookingConfirmation';
 import BookingPaymentStep from './BookingPaymentStep';
 import { BookingFormValues } from './types';
-import { convertEscortType } from '@/utils/typeConverters';
-import type { Escort as EscortNew } from '@/types/escort';
+import { convertEscortType, ensureCompatibleAvailabilityDays } from '@/utils/typeConverters';
+import type { Escort } from '@/types/Escort';
 
 interface BookingFlowProps {
   escort: any; // Use any to avoid type compatibility issues
@@ -49,9 +49,21 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     }
   }, [isOpen]);
 
-  // Always use convertEscortType to normalize the escort object
-  const normalizedEscort = React.useMemo(() => {
-    return convertEscortType(escort) as EscortNew;
+  // Process escort data to ensure compatibility
+  const processedEscort = React.useMemo(() => {
+    const convertedEscort = convertEscortType(escort);
+    
+    // Additional processing to ensure compatibility with the specific EscortAvailability type
+    if (convertedEscort && convertedEscort.availability && 
+        typeof convertedEscort.availability === 'object' && 
+        !Array.isArray(convertedEscort.availability)) {
+      const availObj = convertedEscort.availability as any;
+      if (availObj.days) {
+        availObj.days = ensureCompatibleAvailabilityDays(availObj.days);
+      }
+    }
+    
+    return convertedEscort as Escort; // Cast to Escort type expected by components
   }, [escort]);
 
   const handleDetailsSubmit = async (bookingDetails: BookingFormValues) => {
@@ -66,7 +78,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     }
 
     setBooking({
-      escortId: normalizedEscort.id,
+      escortId: processedEscort.id,
       clientId: user.id,
       ...bookingDetails,
     });
@@ -119,7 +131,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
       case 'select':
         return (
           <BookingDialog
-            escort={normalizedEscort}
+            escort={processedEscort}
             isOpen={isOpen}
             onClose={onClose}
             onSubmit={handleDetailsSubmit}
@@ -129,7 +141,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
       case 'payment':
         return (
           <BookingPaymentStep
-            escort={normalizedEscort}
+            escort={processedEscort}
             booking={booking as Partial<Booking>}
             onBack={() => setCurrentStep('select')}
             onComplete={handlePaymentComplete}
@@ -142,7 +154,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
       case 'confirmation':
         return (
           <BookingConfirmation
-            escort={normalizedEscort}
+            escort={processedEscort}
             status={realTimeStatus || BookingStatus.PENDING}
             onClose={onClose}
           />

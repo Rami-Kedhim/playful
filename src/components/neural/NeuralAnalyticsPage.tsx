@@ -5,6 +5,35 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import NeuralMetricsDisplay from './NeuralMetricsDisplay';
 import PerformanceChart from './PerformanceChart';
 
+// Add missing interfaces needed for the NeuralMetricsDisplay component
+interface NeuralMetricsDisplayProps {
+  metrics: {
+    responseTime: number;
+    accuracy: number;
+    engagement: number;
+    satisfaction: number;
+  };
+  trend?: {
+    responseTime: number[];
+    accuracy: number[];
+    engagement: number[];
+    satisfaction: number[];
+  };
+  period?: string;
+  refreshInterval?: number;
+}
+
+// Add missing interface for PerformanceChart
+interface PerformanceChartProps {
+  data: Array<{ name: string; value: number }>;
+  title?: string;
+  description?: string;
+  height?: number;
+  color?: string;
+  dataKey?: string;
+  onRefresh?: () => void;
+}
+
 const NeuralAnalyticsPage: React.FC = () => {
   // Mock data
   const mockMetrics = {
@@ -44,7 +73,6 @@ const NeuralAnalyticsPage: React.FC = () => {
           metrics={mockMetrics}
           trend={mockTrend}
           period="Last 7 days"
-          title="System Performance Metrics"
           refreshInterval={30}
         />
         
