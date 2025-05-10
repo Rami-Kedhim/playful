@@ -34,12 +34,7 @@ const BookingPersonalInfo: React.FC<BookingPersonalInfoProps> = ({ control, disa
           <FormItem>
             <FormLabel>Email</FormLabel>
             <FormControl>
-              <Input 
-                type="email" 
-                placeholder="your.email@example.com" 
-                disabled={disabled} 
-                {...field} 
-              />
+              <Input type="email" placeholder="Your email" disabled={disabled} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -51,14 +46,9 @@ const BookingPersonalInfo: React.FC<BookingPersonalInfoProps> = ({ control, disa
         name="phone"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Phone</FormLabel>
+            <FormLabel>Phone Number</FormLabel>
             <FormControl>
-              <Input 
-                type="tel" 
-                placeholder="+1 (555) 123-4567" 
-                disabled={disabled} 
-                {...field} 
-              />
+              <Input placeholder="Your phone number" disabled={disabled} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>

@@ -9,12 +9,15 @@ import FinanceManagement from './FinanceManagement';
 import ConfigSettings from './ConfigSettings';
 import ContentModeration from './ContentModeration';
 import SystemStatus from './SystemStatus';
-import { uberCore } from '@/core';
+import { UberCore } from '@/core';
 
 const AdminDashboard: React.FC = () => {
   useEffect(() => {
+    // Create a temporary UberCore instance for initialization
+    const core = new UberCore(null);
+    
     // Initialize SEO automation
-    uberCore.initializeAutomaticSeo();
+    core.initializeAutomaticSeo();
   }, []);
   
   return (

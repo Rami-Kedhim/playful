@@ -1,89 +1,74 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Escort } from '@/types/Escort';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import BookingForm from './BookingForm';
-import { BookingFormValues } from './types';
+import BookingForm, { BookingFormProps } from './BookingForm';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface BookingDialogProps {
   escort: Escort;
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit?: (bookingData: BookingFormValues) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: BookingFormProps['onSubmit'];
 }
 
 const BookingDialog: React.FC<BookingDialogProps> = ({
   escort,
-  isOpen,
-  onClose,
-  onSubmit
+  open,
+  onOpenChange,
+  onSubmit,
 }) => {
-  const [selectedType, setSelectedType] = useState<'in-person' | 'virtual' | null>(null);
-  
-  // Normalize the service availability properties
-  const hasInPersonServices = escort.providesInPersonServices ?? false;
-  const hasVirtualServices = escort.providesVirtualContent ?? false;
-  
-  const handleBookingSubmit = (formData: BookingFormValues) => {
-    if (onSubmit) {
-      onSubmit(formData);
+  const [selectedBookingType, setSelectedBookingType] = React.useState<'in-person' | 'virtual'>('in-person');
+
+  // Determine which booking types are available
+  const hasInPersonServices = escort.providesInPersonServices !== false; // Default to true if undefined
+  const hasVirtualServices = escort.providesVirtualContent === true;
+
+  // Default to in-person if available, otherwise virtual
+  React.useEffect(() => {
+    if (!hasInPersonServices && hasVirtualServices) {
+      setSelectedBookingType('virtual');
+    } else {
+      setSelectedBookingType('in-person');
     }
-    onClose();
-  };
-  
+  }, [hasInPersonServices, hasVirtualServices]);
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Book an appointment with {escort.name}</DialogTitle>
           <DialogDescription>
-            Select your desired appointment type and fill in the details.
+            Fill out the form below to request a booking
           </DialogDescription>
         </DialogHeader>
-        
-        {selectedType === null ? (
-          <div className="space-y-4 py-4">
-            <h3 className="text-sm font-medium">Select appointment type:</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-                variant="outline"
-                className={`p-4 h-auto flex flex-col items-center justify-center ${!hasInPersonServices ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={() => hasInPersonServices && setSelectedType('in-person')}
-                disabled={!hasInPersonServices}
-              >
-                <div className="font-semibold">In-Person</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {hasInPersonServices ? 'Available' : 'Not Available'}
-                </div>
-              </Button>
-              <Button
-                variant="outline"
-                className={`p-4 h-auto flex flex-col items-center justify-center ${!hasVirtualServices ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={() => hasVirtualServices && setSelectedType('virtual')}
-                disabled={!hasVirtualServices}
-              >
-                <div className="font-semibold">Virtual</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {hasVirtualServices ? 'Available' : 'Not Available'}
-                </div>
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <BookingForm 
-              escort={escort} 
-              bookingType={selectedType}
-              onSubmit={handleBookingSubmit}
-            />
-            <DialogFooter className="mt-4">
-              <Button variant="outline" onClick={() => setSelectedType(null)}>
-                Back
-              </Button>
-            </DialogFooter>
-          </>
+
+        {/* Booking type tabs if both types are available */}
+        {hasInPersonServices && hasVirtualServices && (
+          <Tabs 
+            value={selectedBookingType} 
+            onValueChange={(value) => setSelectedBookingType(value as 'in-person' | 'virtual')}
+            className="mb-4"
+          >
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="in-person">In Person</TabsTrigger>
+              <TabsTrigger value="virtual">Virtual</TabsTrigger>
+            </TabsList>
+          </Tabs>
         )}
+
+        {/* Booking form with appropriate type */}
+        <BookingForm 
+          escort={escort} 
+          onSubmit={onSubmit}
+          bookingType={selectedBookingType}
+        />
       </DialogContent>
     </Dialog>
   );

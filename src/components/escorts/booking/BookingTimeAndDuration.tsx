@@ -16,18 +16,18 @@ const BookingTimeAndDuration: React.FC<BookingTimeAndDurationProps> = ({
   durations,
   disabled = false 
 }) => {
-  // Generate time slots in 30 minute increments
-  const timeSlots = Array.from({ length: 48 }, (_, i) => {
-    const hour = Math.floor(i / 2);
-    const minute = i % 2 === 0 ? '00' : '30';
-    const amPm = hour < 12 ? 'AM' : 'PM';
-    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-    
-    return {
-      value: `${hour.toString().padStart(2, '0')}:${minute}`,
-      label: `${displayHour}:${minute} ${amPm}`
-    };
-  });
+  // Generate time slots from 9AM to 11PM in 30-minute increments
+  const timeSlots = React.useMemo(() => {
+    const slots = [];
+    for (let hour = 9; hour <= 23; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        const displayTime = `${hour % 12 || 12}:${minute.toString().padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}`;
+        slots.push({ value: timeString, label: displayTime });
+      }
+    }
+    return slots;
+  }, []);
 
   return (
     <>
@@ -48,10 +48,8 @@ const BookingTimeAndDuration: React.FC<BookingTimeAndDurationProps> = ({
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {timeSlots.map((time) => (
-                  <SelectItem key={time.value} value={time.value}>
-                    {time.label}
-                  </SelectItem>
+                {timeSlots.map((slot) => (
+                  <SelectItem key={slot.value} value={slot.value}>{slot.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

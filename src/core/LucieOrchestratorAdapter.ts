@@ -1,84 +1,91 @@
 
-import { LucieAISystem, GenerateContentParams, GenerateContentResult, ModerateContentResult } from '@/types/core-systems';
+export interface GenerateContentParams {
+  prompt: string;
+  options?: any;
+}
 
-/**
- * Adapter that orchestrates calls to LucieAI system
- */
-export class LucieOrchestratorAdapter {
-  private lucieAI: LucieAISystem;
+export interface GenerateContentResult {
+  toString: () => string;
+}
 
-  constructor(lucieAI: LucieAISystem) {
-    this.lucieAI = lucieAI;
-  }
+export interface ModerateContentParams {
+  content: string;
+  options?: any;
+}
 
-  /**
-   * Check if content is safe
-   */
-  public async isSafeContent(content: string): Promise<boolean> {
+export interface ModerateContentResult {
+  safe: boolean;
+  category?: string;
+  score?: number;
+}
+
+export interface SentimentAnalysisParams {
+  text: string;
+  options?: any;
+}
+
+export interface SentimentAnalysisResult {
+  sentiment: "positive" | "negative" | "neutral" | "mixed";
+  score: number;
+}
+
+class LucieOrchestratorAdapter {
+  // Generate AI content
+  async generateContent(params: GenerateContentParams): Promise<GenerateContentResult> {
     try {
-      // Safety check for empty or just whitespace content
-      if (!content || content.trim() === '') {
-        return true;
-      }
-
-      const truncatedContent = content.length > 1000 ? content.substring(0, 1000) + '...' : content;
-      
-      const result = await this.lucieAI.moderateContent({
-        content: truncatedContent,
-        strictness: 'medium'
-      });
-
-      // If no flags are triggered, content is safe
-      return !result.flagged;
-    } catch (error) {
-      console.error('Error checking content safety:', error);
-      // Default to safe in case of error to prevent blocking legitimate content
-      return true;
-    }
-  }
-
-  /**
-   * Generate content with LucieAI
-   */
-  public async generateContent(params: GenerateContentParams): Promise<GenerateContentResult> {
-    return await this.lucieAI.generateContent(params);
-  }
-
-  /**
-   * Moderate content through LucieAI
-   */
-  public async moderateContent(content: string, strictness: 'low' | 'medium' | 'high' = 'medium'): Promise<ModerateContentResult> {
-    try {
-      const result = await this.lucieAI.moderateContent({
-        content,
-        strictness
-      });
+      // In a real implementation, this would call an AI service
+      const result = {
+        content: `Generated content for: ${params.prompt.substring(0, 50)}...`,
+        toString: function() {
+          return this.content;
+        }
+      };
       
       return result;
     } catch (error) {
-      console.error('Error moderating content:', error);
-      return {
-        flagged: true,
-        reason: 'Error during content moderation'
-      };
+      console.error("Error generating content:", error);
+      throw error;
+    }
+  }
+  
+  // Check if content is safe
+  async isSafeContent(content: string): Promise<boolean> {
+    try {
+      // In a real implementation, this would call a moderation service
+      // For demo purposes, we'll consider most content safe except a few keywords
+      const unsafeKeywords = ["harmful", "violent", "explicit"];
+      return !unsafeKeywords.some(keyword => 
+        content.toLowerCase().includes(keyword)
+      );
+    } catch (error) {
+      console.error("Error checking content safety:", error);
+      return false;
     }
   }
 
-  /**
-   * Analyze sentiment of text
-   */
-  public async analyzeSentiment(text: string): Promise<string> {
+  // Moderate content
+  async moderateContent(params: ModerateContentParams): Promise<ModerateContentResult> {
     try {
-      const result = await this.lucieAI.analyzeSentiment({
-        text
-      });
-      
-      return result.sentiment;
+      // In a real implementation, this would call a moderation service
+      return {
+        safe: true,
+        category: "acceptable",
+        score: 0.9
+      };
     } catch (error) {
-      console.error('Error analyzing sentiment:', error);
-      return 'neutral';
+      console.error("Error moderating content:", error);
+      throw error;
     }
+  }
+  
+  // Analyze sentiment
+  async analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult> {
+    // In a real implementation, this would call a sentiment analysis service
+    return {
+      sentiment: "positive",
+      score: 0.85
+    };
   }
 }
 
-export const lucieOrchestrator = new LucieOrchestratorAdapter(null as any); // This will be initialized properly in the index file
+export const lucieOrchestrator = new LucieOrchestratorAdapter();

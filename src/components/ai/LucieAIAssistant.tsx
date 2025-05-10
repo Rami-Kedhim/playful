@@ -22,21 +22,29 @@ const LucieAIAssistant: React.FC<LucieAIAssistantProps> = ({
     
     setIsLoading(true);
     try {
-      // Check content moderation
-      const isSafe = await lucieOrchestrator.isSafeContent(prompt);
-      
-      if (!isSafe) {
-        setResult("I'm sorry, but I can't respond to that type of content.");
-        return;
+      // Check content moderation if the method exists
+      if (lucieOrchestrator.isSafeContent) {
+        const isSafe = await lucieOrchestrator.isSafeContent(prompt);
+        
+        if (!isSafe) {
+          setResult("I'm sorry, but I can't respond to that type of content.");
+          return;
+        }
       }
       
       // Generate content
       const content = await lucieOrchestrator.generateContent({ 
-        prompt,
-        maxTokens: 1000
+        prompt: prompt
       });
       
-      const generatedText = typeof content === 'string' ? content : content.text || '';
+      // Handle the result as string or object
+      let generatedText = '';
+      if (typeof content === 'string') {
+        generatedText = content;
+      } else if (content && typeof content === 'object') {
+        generatedText = content.toString();
+      }
+      
       setResult(generatedText);
       if (onGenerate) onGenerate(generatedText);
     } catch (error) {

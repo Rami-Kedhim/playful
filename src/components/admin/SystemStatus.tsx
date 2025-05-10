@@ -5,7 +5,7 @@ import { UberCore } from '@/core';
 
 const SystemStatus: React.FC = () => {
   // Create a UberCore instance
-  const uberCore = new UberCore(null as any); // Temporary solution
+  const uberCore = new UberCore(null); // Temporary solution
   const systemHealth = uberCore.checkSubsystemHealth();
 
   return (

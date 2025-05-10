@@ -2,29 +2,7 @@
 export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
 export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium' | 'verified';
 
-export interface VerificationDocument {
-  id: string;
-  type: string;
-  fileUrl: string;
-  uploadedAt: string;
-  status: 'pending' | 'approved' | 'rejected';
-  notes?: string;
-  filePath?: string;
-  documentType?: string;
-}
-
-export interface VerificationRequest {
-  id: string;
-  userId: string;
-  status: VerificationStatus;
-  verificationLevel: VerificationLevel;
-  documents: VerificationDocument[];
-  submittedAt: string;
-  updatedAt?: string;
-  rejectionReason?: string;
-}
-
-// Define EscortAvailability interface for better type checking
+// Define EscortAvailabilityDay interface for better type checking
 export interface EscortAvailabilityDay {
   day: string;
   available: boolean;
@@ -143,34 +121,6 @@ export interface ExtendedEscort extends Escort {
   featured: boolean;
 }
 
-export interface ContactInfo {
-  email?: string;
-  phone?: string;
-  website?: string;
-  socialMedia?: Record<string, string>;
-}
-
-export interface EscortFilters {
-  services?: string[];
-  location?: string;
-  priceRange?: [number, number];
-  age?: [number, number];
-  languages?: string[];
-  availability?: string[];
-  verificationLevel?: VerificationLevel | string;
-  sortBy?: string;
-  tags?: string[];
-  minPrice?: number;
-  maxPrice?: number;
-  minAge?: number;
-  maxAge?: number;
-  gender?: string[];
-  serviceType?: string;
-  verifiedOnly?: boolean;
-  rating?: number;
-}
-
-// Video content
 export interface Video {
   id: string;
   url: string;

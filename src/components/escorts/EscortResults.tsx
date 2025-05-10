@@ -11,16 +11,30 @@ interface EscortResultsProps {
   limit?: number;
   showViewAll?: boolean;
   viewAllLink?: string;
+  escorts?: Escort[];
+  isLoading?: boolean;
+  currentPage?: number;
+  setCurrentPage?: (page: number) => void;
+  totalPages?: number;
 }
 
 const EscortResults: React.FC<EscortResultsProps> = ({
   serviceType,
   limit = 12,
   showViewAll = true,
-  viewAllLink = '/escorts'
+  viewAllLink = '/escorts',
+  escorts: externalEscorts,
+  isLoading: externalLoading,
+  currentPage,
+  setCurrentPage,
+  totalPages
 }) => {
-  const { escorts, loading } = useEscortContext();
+  const contextValue = useEscortContext();
   const { filters } = useFilters();
+  
+  // Use either provided escorts or those from context
+  const escorts = externalEscorts || contextValue.escorts;
+  const loading = externalLoading !== undefined ? externalLoading : contextValue.loading;
   
   // Filter escorts based on serviceType if provided
   const filteredEscorts = React.useMemo(() => {
@@ -91,6 +105,35 @@ const EscortResults: React.FC<EscortResultsProps> = ({
           <Button variant="outline" asChild>
             <a href={viewAllLink}>View All</a>
           </Button>
+        </div>
+      )}
+      
+      {/* Pagination if available */}
+      {currentPage !== undefined && setCurrentPage && totalPages && totalPages > 1 && (
+        <div className="flex justify-center mt-6">
+          <div className="flex space-x-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage <= 1}
+            >
+              Previous
+            </Button>
+            
+            <span className="px-4 py-2 text-sm">
+              Page {currentPage} of {totalPages}
+            </span>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage >= totalPages}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       )}
     </div>

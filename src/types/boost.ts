@@ -1,4 +1,5 @@
 
+// Update the BoostPackage interface to include all required fields
 export interface BoostPackage {
   id: string;
   name: string;
@@ -12,8 +13,12 @@ export interface BoostPackage {
   features?: string[];
   recommended?: boolean;
   position?: number;
+  isMostPopular?: boolean;
+  isPopular?: boolean;
+  boost_power?: number;
 }
 
+// Update the BoostStatus interface with all necessary fields
 export interface BoostStatus {
   isActive: boolean;
   expiresAt?: Date | string | null;
@@ -22,7 +27,24 @@ export interface BoostStatus {
   packageName?: string;
   startedAt?: Date | string;
   remainingTime?: string | number;
+  timeRemaining?: string | number;
   timeProgress?: number;
+  progress?: number;
+  startTime?: Date | string;
+  endTime?: Date | string;
+  boostPackage?: BoostPackage;
+}
+
+// Update BoostEligibility to use eligible instead of isEligible
+export interface BoostEligibility {
+  eligible: boolean;
+  reason?: string;
+  reasons?: string[];
+  cooldownRemaining?: number;
+  dailyBoostsRemaining?: number;
+  level?: number;
+  requiredVerificationLevel?: string;
+  nextEligibleTime?: string;
 }
 
 export interface HermesStatus {
@@ -37,15 +59,8 @@ export interface HermesStatus {
     conversion?: number;
   };
   isActive?: boolean;
-}
-
-export interface BoostEligibility {
-  eligible: boolean;
-  reason?: string;
-  cooldownRemaining?: number;
-  dailyBoostsRemaining?: number;
-  level?: number;
-  requiredVerificationLevel?: string;
+  boostScore?: number;
+  effectivenessScore?: number;
 }
 
 export interface BoostAnalyticsData {
