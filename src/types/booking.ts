@@ -1,29 +1,27 @@
 
-export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'rejected';
+export enum BookingStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+  REJECTED = 'rejected'
+}
 
 export interface Booking {
   id: string;
   escortId: string;
   clientId: string;
   escortName?: string;
-  date: Date | string;
+  date: string | Date;
   time: string;
   duration: string;
-  location?: string;
   status: BookingStatus;
+  createdAt: string | Date;
+  updatedAt?: string | Date;
   price?: number;
-  totalPrice?: number;
+  location?: string;
   message?: string;
-  createdAt: Date | string;
-  updatedAt?: Date | string;
-}
-
-export interface BookingSlot {
-  id: string;
-  escortId: string;
-  startTime: Date | string;
-  endTime: Date | string;
-  status: 'available' | 'booked' | 'unavailable';
-  price: number;
-  isVirtual?: boolean;
+  totalPrice?: number;
+  type?: 'in-person' | 'virtual';
+  paymentStatus?: 'pending' | 'paid' | 'refunded';
 }

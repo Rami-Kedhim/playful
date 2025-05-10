@@ -2,8 +2,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Escort } from "@/types/Escort";
-import type { EscortAvailability as EscortAvailabilityType } from "@/types/Escort";
+import { Escort, EscortAvailability as EscortAvailabilityType } from "@/types/Escort";
 import { Calendar, Clock } from "lucide-react";
 
 interface EscortAvailabilityProps {
@@ -26,10 +25,38 @@ const EscortAvailability: React.FC<EscortAvailabilityProps> = ({ escort }) => {
   // Get availability days from the escort availability
   let availabilityDays: { day: string; available: boolean; hours?: { start: string; end: string }[] }[] = [];
   
-  const availability = escort.availability as EscortAvailabilityType;
-  
-  if (availability.days && Array.isArray(availability.days)) {
-    availabilityDays = availability.days;
+  if (typeof escort.availability === 'object' && !Array.isArray(escort.availability)) {
+    // It's an EscortAvailability object
+    const availability = escort.availability as EscortAvailabilityType;
+    
+    if (availability.days && Array.isArray(availability.days)) {
+      availabilityDays = availability.days;
+    } else {
+      // Create availability days from individual day properties if available
+      const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      availabilityDays = daysOfWeek
+        .filter(day => availability[day as keyof EscortAvailabilityType])
+        .map(day => ({
+          day: day.charAt(0).toUpperCase() + day.slice(1),
+          available: Array.isArray(availability[day as keyof EscortAvailabilityType]) && 
+                    (availability[day as keyof EscortAvailabilityType] as string[]).length > 0
+        }));
+    }
+  } else if (Array.isArray(escort.availability)) {
+    // It's an array of available days
+    availabilityDays = escort.availability.map(day => ({
+      day,
+      available: true
+    }));
+  } else if (typeof escort.availability === 'string') {
+    // It's a string description of availability
+    availabilityDays = [
+      {
+        day: 'Availability',
+        available: true,
+        hours: [{ start: 'See', end: 'description' }]
+      }
+    ];
   }
 
   return (
@@ -37,9 +64,9 @@ const EscortAvailability: React.FC<EscortAvailabilityProps> = ({ escort }) => {
       <CardContent className="p-6">
         <div className="grid grid-cols-1 gap-4">
           {availabilityDays.length > 0 ? (
-            availabilityDays.map((dayInfo) => (
+            availabilityDays.map((dayInfo, idx) => (
               <div
-                key={dayInfo.day}
+                key={idx}
                 className="flex items-center justify-between border-b pb-2"
               >
                 <div className="flex items-center">
@@ -80,14 +107,14 @@ const EscortAvailability: React.FC<EscortAvailabilityProps> = ({ escort }) => {
           )}
         </div>
 
-        {availability.notes && (
+        {typeof escort.availability === 'object' && 
+          !Array.isArray(escort.availability) &&
+          (escort.availability as EscortAvailabilityType).notes && (
           <div className="mt-4 text-sm text-muted-foreground">
             <h4 className="font-medium text-foreground mb-1">Notes:</h4>
-            <p>{availability.notes}</p>
+            <p>{(escort.availability as EscortAvailabilityType).notes}</p>
           </div>
         )}
-
-        {/* Add availability notes from escort if they exist */}
       </CardContent>
     </Card>
   );

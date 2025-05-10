@@ -1,116 +1,87 @@
 
-import { useState } from 'react';
-import { BoostPackage, BoostPurchaseResult, BoostAnalytics } from '@/types/pulse-boost';
-import { AnalyticsData } from '@/types/analytics';
-import { useToast } from '@/components/ui/use-toast';
+import { useState, useCallback } from 'react';
+import { toast } from '@/components/ui/use-toast';
 
-// This hook provides operations for managing profile boosts
-const useBoostOperations = (profileId: string) => {
-  const [isPurchasing, setIsPurchasing] = useState(false);
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
-  const { toast } = useToast();
+export interface BoostOperationsResult {
+  isLoading: boolean;
+  error: string | null;
+  boostProfile: (profileId: string, packageId: string) => Promise<boolean>;
+  cancelBoost: (boostId?: string) => Promise<boolean>;
+}
 
-  // Function to purchase a boost package
-  const purchaseBoost = async (boostPackage: BoostPackage): Promise<BoostPurchaseResult> => {
-    setIsPurchasing(true);
+const useBoostOperations = (): BoostOperationsResult => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const boostProfile = useCallback(async (profileId: string, packageId: string): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
     
     try {
-      // Simulate API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Simulated successful purchase
-      const result: BoostPurchaseResult = {
-        success: true,
-        boostId: `boost-${Date.now()}`,
-        transactionId: `txn-${Date.now()}`
-      };
-      
+      // Successfully boosted
       toast({
-        title: "Boost Purchased",
-        description: `You've successfully purchased the ${boostPackage.name} package.`,
-        variant: "default",
+        title: "Profile Boosted",
+        description: "Your profile boost has been applied successfully.",
       });
       
-      return result;
-    } catch (error) {
-      console.error('Error purchasing boost:', error);
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage);
       
       toast({
-        title: "Purchase Failed",
-        description: "There was an error processing your purchase. Please try again.",
+        title: "Boost Failed",
+        description: errorMessage,
         variant: "destructive",
       });
       
-      return {
-        success: false,
-        message: "Transaction failed. Please try again."
-      };
+      return false;
     } finally {
-      setIsPurchasing(false);
+      setIsLoading(false);
     }
-  };
+  }, []);
 
-  // Function to fetch analytics data for current boosts
-  const fetchAnalytics = async (): Promise<AnalyticsData> => {
+  const cancelBoost = useCallback(async (boostId?: string): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      // Simulate API call with timeout
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Generate fake data
-      const data: AnalyticsData = {
-        views: Math.floor(Math.random() * 1000),
-        impressions: {
-          today: Math.floor(Math.random() * 500),
-          yesterday: Math.floor(Math.random() * 400),
-          weeklyAverage: Math.floor(Math.random() * 450),
-          withBoost: Math.floor(Math.random() * 300),
-          withoutBoost: Math.floor(Math.random() * 150),
-          increase: Math.floor(Math.random() * 100),
-          change: Math.floor(Math.random() * 30),
-          value: Math.floor(Math.random() * 500),
-        },
-        interactions: {
-          today: Math.floor(Math.random() * 100),
-          yesterday: Math.floor(Math.random() * 80),
-          weeklyAverage: Math.floor(Math.random() * 90),
-          withBoost: Math.floor(Math.random() * 70),
-          withoutBoost: Math.floor(Math.random() * 40),
-          increase: Math.floor(Math.random() * 30),
-          change: Math.floor(Math.random() * 20),
-          value: Math.floor(Math.random() * 100),
-        },
-        rank: {
-          current: Math.floor(Math.random() * 50) + 1,
-          previous: Math.floor(Math.random() * 100) + 20,
-          change: Math.floor(Math.random() * 15),
-        },
-        additionalViews: Math.floor(Math.random() * 200),
-        engagementIncrease: Math.floor(Math.random() * 40),
-        rankingPosition: Math.floor(Math.random() * 10) + 1,
-        totalBoosts: Math.floor(Math.random() * 5) + 1,
-        activeBoosts: Math.floor(Math.random() * 2),
-        averageBoostScore: Math.floor(Math.random() * 90) + 10,
-        conversionRate: Math.random() * 10, // Added this property
-        boostHistory: Array.from({ length: 10 }, (_, i) => ({
-          date: new Date(Date.now() - i * 86400000),
-          score: Math.floor(Math.random() * 100)
-        }))
-      };
+      // Successfully cancelled
+      toast({
+        title: "Boost Cancelled",
+        description: "Your profile boost has been cancelled successfully.",
+      });
       
-      setAnalyticsData(data);
-      return data;
-    } catch (error) {
-      console.error('Error fetching analytics:', error);
-      throw error;
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage);
+      
+      toast({
+        title: "Cancellation Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      
+      return false;
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, []);
 
   return {
-    isPurchasing,
-    analyticsData,
-    purchaseBoost,
-    fetchAnalytics
+    isLoading,
+    error,
+    boostProfile,
+    cancelBoost
   };
 };
 
+export { useBoostOperations };
 export default useBoostOperations;

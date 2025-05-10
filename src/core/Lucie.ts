@@ -1,85 +1,140 @@
 
-import type { LucieAISystem, GenerateContentResult, ModerateContentParams, ModerateContentResult, SentimentAnalysisParams, SentimentAnalysisResult } from '@/types/core-systems';
+import { 
+  LucieAISystem, 
+  GenerateContentParams, 
+  GenerateContentResult,
+  ModerateContentParams, 
+  ModerateContentResult,
+  SentimentAnalysisParams,
+  SentimentAnalysisResult
+} from '@/types/core-systems';
 
-class LucieAI implements LucieAISystem {
-  private initialized = false;
+export class LucieAI implements LucieAISystem {
+  private isInitialized = false;
   
   async initialize(): Promise<void> {
     console.log('Initializing Lucie AI system...');
-    this.initialized = true;
-    return Promise.resolve();
+    this.isInitialized = true;
   }
   
-  async generateContent(prompt: string, options?: any): Promise<GenerateContentResult> {
-    if (!this.initialized) {
+  shutdown(): void {
+    console.log('Shutting down Lucie AI system...');
+    this.isInitialized = false;
+  }
+  
+  // Implement interface method with correct parameters
+  async generateContent(params: GenerateContentParams): Promise<GenerateContentResult> {
+    // Check if system is initialized
+    if (!this.isInitialized) {
       await this.initialize();
     }
     
-    // Simple mock implementation
+    console.log(`Generating content with prompt: ${params.prompt}`);
+    
+    // Simulate AI generating content
+    const content = `This is AI-generated content based on: ${params.prompt}`;
+    
     return {
-      content: `Generated content for: ${prompt}`,
-      tokens: prompt.length * 2,
-      moderated: false,
-      moderationFlags: []
+      content,
+      rating: 'G',
+      metadata: { tokens: content.length / 4 }
     };
   }
   
-  async moderateContent(params: ModerateContentParams): Promise<ModerateContentResult> {
-    // Mock implementation
-    const isSafe = !params.content.includes('inappropriate') && !params.content.includes('unsafe');
+  // Implement interface method with correct parameters
+  async moderateContent(content: string, options?: any): Promise<ModerateContentResult> {
+    // Check if system is initialized
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    
+    console.log(`Moderating content: ${content.substring(0, 20)}...`);
+    
+    // Simulate content moderation
+    const hasProhibitedWords = content.match(/fuck|shit|ass/i);
     
     return {
-      isSafe,
-      safe: isSafe,
-      score: isSafe ? 0.1 : 0.8,
-      issues: isSafe ? [] : ['Potentially unsafe content'],
-      blockedCategories: isSafe ? [] : ['unsafe'],
-      category: isSafe ? 'safe' : 'unsafe',
-      action: isSafe ? 'allow' : 'flag'
+      isApproved: !hasProhibitedWords,
+      score: hasProhibitedWords ? 0.85 : 0.15,
+      category: hasProhibitedWords ? 'offensive_language' : 'clean',
+      reason: hasProhibitedWords ? 'Prohibited language detected' : undefined
     };
   }
   
-  async analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult> {
-    // Mock implementation
-    const text = params.text.toLowerCase();
-    let sentiment = 'neutral';
-    let score = 0.5;
+  // Implement interface method with correct parameters
+  async analyzeSentiment(text: string): Promise<SentimentAnalysisResult> {
+    // Check if system is initialized
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
     
-    if (text.includes('love') || text.includes('happy') || text.includes('great')) {
-      sentiment = 'positive';
-      score = 0.8;
-    } else if (text.includes('hate') || text.includes('bad') || text.includes('awful')) {
-      sentiment = 'negative';
-      score = 0.2;
+    console.log(`Analyzing sentiment: ${text.substring(0, 20)}...`);
+    
+    // Simple sentiment analysis based on keywords
+    const positiveWords = ['good', 'great', 'excellent', 'happy', 'love'];
+    const negativeWords = ['bad', 'awful', 'terrible', 'sad', 'hate'];
+    
+    let positiveScore = 0;
+    let negativeScore = 0;
+    
+    // Count positive and negative keywords
+    const words = text.toLowerCase().split(/\s+/);
+    words.forEach(word => {
+      if (positiveWords.includes(word)) positiveScore++;
+      if (negativeWords.includes(word)) negativeScore++;
+    });
+    
+    // Determine sentiment
+    let sentiment: "positive" | "negative" | "neutral" | "mixed";
+    let score = 0;
+    
+    if (positiveScore > negativeScore) {
+      sentiment = "positive";
+      score = positiveScore / words.length;
+    } else if (negativeScore > positiveScore) {
+      sentiment = "negative";
+      score = -negativeScore / words.length;
+    } else if (positiveScore > 0 && positiveScore === negativeScore) {
+      sentiment = "mixed";
+      score = 0;
+    } else {
+      sentiment = "neutral";
+      score = 0;
     }
     
     return {
-      score,
       sentiment,
-      confidence: 0.9
+      score: Math.abs(score),
+      confidence: 0.7 + Math.random() * 0.2
     };
   }
   
-  getSystemStatus(): any {
-    return {
-      operational: this.initialized,
-      modules: {
-        aiGeneration: 'online',
-        contentModeration: 'online',
-        sentimentAnalysis: 'online'
-      },
-      lastUpdate: new Date().toISOString()
-    };
-  }
-  
-  async shutdown(): Promise<void> {
-    console.log('Shutting down Lucie AI system...');
-    this.initialized = false;
-    return Promise.resolve();
+  async categorizeText(text: string): Promise<string[]> {
+    // Simulate text categorization
+    console.log(`Categorizing text: ${text.substring(0, 20)}...`);
+    
+    // Extract potential categories based on keywords
+    const categories = [];
+    
+    if (text.match(/money|payment|finance|cost|price/i)) {
+      categories.push('finance');
+    }
+    
+    if (text.match(/health|wellness|doctor|medical|therapy/i)) {
+      categories.push('health');
+    }
+    
+    if (text.match(/tech|computer|software|hardware|app/i)) {
+      categories.push('technology');
+    }
+    
+    if (categories.length === 0) {
+      categories.push('general');
+    }
+    
+    return categories;
   }
 }
 
-// Export the class
 export const lucieAI = new LucieAI();
-// Also export as 'lucie' for compatibility with existing code
-export const lucie = lucieAI;
+export const lucie = lucieAI; // For backward compatibility

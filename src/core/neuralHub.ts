@@ -1,153 +1,58 @@
-/**
- * Neural Hub - Central processor for AI and machine learning operations in UberEscorts
- * Integrates with Lucie AI and other core systems for advanced functionality
- */
 
 import { lucieAI } from './Lucie';
-import { hermes } from './Hermes';
 import { oxum } from './Oxum';
+import { hermes } from './Hermes';
+import { GenerateContentParams } from '@/types/core-systems';
 
+/**
+ * Neural hub for integrating AI functions across systems
+ */
 class NeuralHub {
-  private initialized = false;
-  private processingQueue: Array<any> = [];
-  
-  async initialize() {
-    if (this.initialized) return true;
-    
+  /**
+   * Initialize hub and subsystems
+   */
+  async initialize(): Promise<boolean> {
     try {
-      // Initialize connected systems
-      await lucieAI.initialize();
+      await Promise.all([
+        lucieAI.initialize(),
+        oxum.initialize()
+      ]);
       
-      this.initialized = true;
-      console.log('Neural Hub initialized successfully');
       return true;
     } catch (error) {
-      console.error('Failed to initialize Neural Hub:', error);
+      console.error('Failed to initialize neural hub:', error);
       return false;
     }
   }
   
-  async generateRecommendations(userId: string, context: any = {}) {
-    if (!this.initialized) await this.initialize();
-    
-    try {
-      // Use Lucie for content generation
-      const prompt = `Generate personalized recommendations for user ${userId} based on context: ${JSON.stringify(context)}`;
-      const result = await lucieAI.generateContent({ prompt });
-      
-      // Track with Hermes
-      hermes.trackEvent('neural_recommendations_generated', { userId });
-      
-      return {
-        success: true,
-        recommendations: result.content.split('\n').filter(Boolean)
-      };
-    } catch (error) {
-      console.error('Error generating recommendations:', error);
-      return {
-        success: false,
-        error: 'Failed to generate recommendations'
-      };
-    }
-  }
-  
-  async analyzeContent(content: string, type: 'text' | 'image') {
-    if (!this.initialized) await this.initialize();
-    
-    try {
-      // Run content moderation
-      const modResult = await lucieAI.moderateContent({ content, type });
-      
-      // If text, also analyze sentiment
-      let sentiment = null;
-      if (type === 'text') {
-        sentiment = await lucieAI.analyzeSentiment({ text: content });
-      }
-      
-      return {
-        moderation: modResult,
-        sentiment,
-        timestamp: new Date().toISOString()
-      };
-    } catch (error) {
-      console.error('Error analyzing content:', error);
-      return {
-        error: 'Content analysis failed',
-        timestamp: new Date().toISOString()
-      };
-    }
-  }
-  
-  async processRequest(requestType: string, data: any) {
-    if (!this.initialized) await this.initialize();
-    
-    // Add to processing queue
-    this.processingQueue.push({ requestType, data, timestamp: Date.now() });
-    
-    switch (requestType) {
-      case 'optimize_visibility':
-        return this.optimizeVisibility(data.profileId);
-      case 'personalization':
-        return this.personalize(data.userId, data.context);
-      case 'content_analysis':
-        return this.analyzeContent(data.content, data.type);
-      default:
-        return { error: 'Unknown request type' };
-    }
-  }
-  
-  async optimizeVisibility(profileId: string) {
-    // Calculate optimal visibility parameters using Oxum's scoring
-    const inputs = [0.8, 0.6, 0.9]; // Example values
-    const score = await oxum.calculateScore(inputs);
-    
-    return {
-      score,
-      recommendations: [
-        'Add more profile details',
-        'Upload additional photos',
-        'Complete verification process'
-      ]
+  /**
+   * Process text with enhanced AI capabilities
+   */
+  async processText(prompt: string): Promise<string> {
+    // Create proper params object
+    const params: GenerateContentParams = {
+      prompt
     };
-  }
-  
-  async personalize(userId: string, context: any = {}) {
-    // Using Lucie for personalization
-    const result = await this.generateRecommendations(userId, context);
     
-    // Log with Hermes for analytics
-    hermes.trackEvent('personalization_request', { userId });
-    
-    return result;
+    const result = await lucieAI.generateContent(params);
+    return result.content;
   }
   
-  generateText(prompt: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        try {
-          // Process the prompt and generate text
-          const generatedText = `Generated text based on: ${prompt}`;
-          resolve(generatedText);
-        } catch (error) {
-          reject(error);
-        }
-      }, 500);
-    });
+  /**
+   * Calculate boost score for profile
+   */
+  async calculateBoostScore(profileId: string): Promise<number> {
+    const score = await hermes.calculateBoostScore(profileId);
+    return score;
   }
   
-  getStatus() {
-    return {
-      initialized: this.initialized,
-      queueLength: this.processingQueue.length,
-      connections: {
-        lucie: lucieAI ? 'connected' : 'disconnected',
-        hermes: hermes ? 'connected' : 'disconnected',
-        oxum: oxum ? 'connected' : 'disconnected'
-      }
-    };
+  /**
+   * Analyze image and extract features
+   */
+  async analyzeImage(imageUrl: string): Promise<any> {
+    const features = await oxum.processImageFeatures(imageUrl);
+    return features;
   }
 }
 
-// Export a singleton instance
 export const neuralHub = new NeuralHub();
-export default neuralHub;

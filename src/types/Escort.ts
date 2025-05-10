@@ -8,9 +8,9 @@ export interface VerificationDocument {
   fileUrl: string;
   uploadedAt: string;
   status: 'pending' | 'approved' | 'rejected';
-  notes?: string; // Added missing property
-  filePath?: string; // Added missing property
-  documentType?: string; // Added missing property
+  notes?: string;
+  filePath?: string;
+  documentType?: string;
 }
 
 export interface VerificationRequest {
@@ -24,6 +24,27 @@ export interface VerificationRequest {
   rejectionReason?: string;
 }
 
+// Define EscortAvailability interface for better type checking
+export interface EscortAvailabilityDay {
+  day: string;
+  available: boolean;
+  hours?: { start: string; end: string }[];
+}
+
+export interface EscortAvailability {
+  monday?: string[];
+  tuesday?: string[];
+  wednesday?: string[];
+  thursday?: string[];
+  friday?: string[];
+  saturday?: string[];
+  sunday?: string[];
+  days?: EscortAvailabilityDay[];
+  day?: string;
+  notes?: string;
+  isAvailableNow?: boolean;
+}
+
 export interface Escort {
   id: string;
   name: string;
@@ -35,21 +56,21 @@ export interface Escort {
   price: number;
   tags?: string[];
   imageUrl?: string;
-  profileImage?: string;  // For compatibility with different naming conventions
-  images?: string[];      // For compatibility with array-based image storage
+  profileImage?: string;
+  images?: string[];
   isVerified?: boolean;
-  verified?: boolean;     // For compatibility with different naming conventions
+  verified?: boolean;
   availableNow?: boolean;
-  isAvailable?: boolean;  // Add the missing property
+  isAvailable?: boolean;
   responseRate?: number;
   description?: string;
   services?: string[];
   languages?: string[];
-  providesInPersonServices?: boolean; // Add the missing property
-  providesVirtualContent?: boolean;   // Add the missing property
-  locations?: string[];              // Add the missing property
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  locations?: string[];
   
-  // Adding all the properties being used in components
+  // Additional properties
   bio?: string;
   sexualOrientation?: string;
   height?: string | number;
@@ -58,6 +79,7 @@ export interface Escort {
   hairColor?: string;
   eyeColor?: string;
   ethnicity?: string;
+  bodyType?: string;
   stats?: {
     averageRating?: number;
     totalReviews?: number;
@@ -91,23 +113,13 @@ export interface Escort {
   limitations?: string[];
   interests?: string[];
   
-  // For gallery and media
+  // Gallery and media
   gallery?: string[];
   gallery_images?: string[];
   videos?: Video[];
   
-  // Additional properties used in some components
-  availability?: string[] | {
-    monday?: string[];
-    tuesday?: string[];
-    wednesday?: string[];
-    thursday?: string[];
-    friday?: string[];
-    saturday?: string[];
-    sunday?: string[];
-    days?: string[];
-    day?: string;
-  } | string;
+  // Additional fields
+  availability?: EscortAvailability | string[] | string;
   featured?: boolean;
   boosted?: boolean;
   boostLevel?: number;
@@ -121,7 +133,8 @@ export interface Escort {
   };
   city?: string;
   shortDescription?: string;
-  contentStats?: any; // Added for compatibility with escortProfiles.ts
+  contentStats?: any;
+  subscriptionPrice?: number;
 }
 
 export interface ExtendedEscort extends Escort {
@@ -174,5 +187,6 @@ export interface Video {
   videoUrl?: string;
 }
 
-// Export Video type explicitly
+// Explicitly export types
 export { Video };
+export type { EscortAvailability };

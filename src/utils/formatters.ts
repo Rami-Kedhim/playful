@@ -1,72 +1,70 @@
 
-import { format, formatDistanceToNow } from 'date-fns';
+/**
+ * Format a number with commas as thousands separators
+ */
+export function formatNumber(value: number): string {
+  return new Intl.NumberFormat('en-US').format(value);
+}
 
 /**
- * Formats a date to a string 
- * @param date The date to format
- * @param formatString Optional format string (default: MMM d, yyyy)
- * @returns Formatted date string
+ * Format a number as currency (USD by default)
  */
-export const formatDate = (date: Date | string, formatString: string = 'MMM d, yyyy'): string => {
-  if (!date) return '';
-  const dateObj = toDate(date);
-  return format(dateObj, formatString);
-};
-
-/**
- * Format a date as relative time (e.g., "2 hours ago")
- * @param date The date to format
- * @returns Relative time string
- */
-export const formatRelativeTime = (date: Date | string): string => {
-  if (!date) return '';
-  const dateObj = toDate(date);
-  return formatDistanceToNow(dateObj, { addSuffix: true });
-};
-
-/**
- * Format a price to a currency string
- * @param price The price to format
- * @param currency Currency code (default: USD)
- * @returns Formatted price string
- */
-export const formatPrice = (price: number, currency: string = 'USD'): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency,
-  }).format(price);
-};
-
-/**
- * Format a currency value to a string
- * @param value The value to format
- * @param currency Currency code (default: USD)
- * @param locale Locale string (default: en-US)
- * @returns Formatted currency string
- */
-export const formatCurrency = (value: number, currency: string = 'USD', locale: string = 'en-US'): string => {
+export function formatCurrency(
+  amount: number, 
+  currency: string = 'USD', 
+  locale: string = 'en-US'
+): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
-  }).format(value);
-};
+  }).format(amount);
+}
 
 /**
- * Format a number with commas
- * @param num The number to format
- * @returns Formatted number string
+ * Format a date as a string
  */
-export const formatNumber = (num: number): string => {
-  return new Intl.NumberFormat('en-US').format(num);
-};
+export function formatDate(
+  date: Date | string,
+  options: Intl.DateTimeFormatOptions = { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  }
+): string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return new Intl.DateTimeFormat('en-US', options).format(dateObj);
+}
 
 /**
- * Convert a value to a Date object
- * @param value Date string or Date object
- * @returns Date object
+ * Format file size in bytes to human readable format
  */
-export const toDate = (value: Date | string): Date => {
-  if (value instanceof Date) return value;
-  if (typeof value === 'string') return new Date(value);
-  return new Date();
-};
+export function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 Bytes';
+  
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+/**
+ * Format a duration in seconds to minutes and seconds
+ */
+export function formatDuration(seconds: number): string {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  
+  if (minutes === 0) {
+    return `${remainingSeconds}s`;
+  }
+  
+  return `${minutes}m ${remainingSeconds}s`;
+}
+
+/**
+ * Format a percentage
+ */
+export function formatPercentage(value: number, decimals: number = 1): string {
+  return `${value.toFixed(decimals)}%`;
+}

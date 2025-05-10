@@ -1,99 +1,109 @@
-import { SystemStatus, SessionValidationResult, UberCoreSystem, SystemIntegrityResult, SystemHealthMetrics } from '@/types/core-systems';
-import { UberWallet } from './UberWallet';
-import { OxumSystem } from '@/types/core-systems';
-import { automaticSEO } from './AutomaticSEO';
+
+import { 
+  SystemStatus, 
+  SystemIntegrityResult, 
+  SystemHealthMetrics,
+  SessionValidationResult,
+  UberCoreSystem,
+  LucieAISystem
+} from '@/types/core-systems';
 
 export class UberCore implements UberCoreSystem {
-  private lucieAI: any; // Using any since we don't have the actual implementation
-  private oxumSystem: OxumSystem;
-  private wallet: UberWallet;
-  private automaticSeo: any;
+  private lucieAI: LucieAISystem;
   
-  constructor(lucieAI?: any, oxumSystem?: OxumSystem) {
+  constructor(lucieAI: LucieAISystem) {
     this.lucieAI = lucieAI;
-    this.oxumSystem = oxumSystem || {} as OxumSystem;
-    this.wallet = new UberWallet();
-    this.automaticSeo = automaticSEO;
   }
   
-  public async initialize(): Promise<boolean> {
-    console.log('UberCore initializing...');
-    // In a real implementation, would initialize subsystems
-    return true;
-  }
-  
-  public getSystemStatus(): SystemStatus {
-    // Mock system status implementation
-    const systemStatus: SystemStatus = {
-      isOperational: true,
-      lastCheck: new Date(),
+  /**
+   * Get the current system status
+   */
+  async getSystemStatus(): Promise<SystemStatus> {
+    // This would check various components in a real application
+    console.log('Getting system status...');
+    
+    return {
+      status: 'operational',
       version: '1.0.0',
-      uptime: 0,
-      isActive: true // This property is now allowed with our updated type definitions
+      lastChecked: new Date(),
+      components: {
+        api: 'operational',
+        database: 'operational',
+        auth: 'operational',
+        storage: 'operational'
+      },
+      uptime: 3600 // seconds
     };
-    return systemStatus;
   }
   
-  public async checkSystemIntegrity(): Promise<SystemIntegrityResult> {
-    // Mock system integrity check
+  /**
+   * Check system integrity
+   */
+  async checkSystemIntegrity(): Promise<SystemIntegrityResult> {
+    console.log('Checking system integrity...');
+    
+    // This would perform actual integrity checks in a real system
     return {
-      valid: true,
-      status: 'ok',
-      errors: [],
-      warnings: [],
-      lastChecked: new Date().toISOString(),
-      integrity: 100,
-      checks: {
-        database: true,
-        cache: true,
-        filesystem: true,
-        network: true
-      }
+      codeIntegrity: true,
+      dataIntegrity: true,
+      networkSecurity: true,
+      timestamp: new Date(),
+      valid: true // Added for backward compatibility
     };
   }
   
-  public async getSystemHealthMetrics(): Promise<SystemHealthMetrics> {
-    // Mock system health metrics
+  /**
+   * Get system health metrics
+   */
+  getSystemHealthMetrics(): SystemHealthMetrics {
+    console.log('Getting system health metrics...');
+    
     return {
-      cpu: 10,
-      memory: 20,
-      storage: 5,
-      network: 15,
-      load: 12
+      memoryUsage: 0.42,
+      responseTime: 120, // ms
+      activeUsers: 1275,
+      errorRate: 0.003,
+      cpu: 32, // percent
+      memory: 68, // percent
+      disk: 41 // percent
     };
   }
   
-  public async getSystemHealth(): Promise<SystemHealthMetrics> {
-    return this.getSystemHealthMetrics();
-  }
-  
-  public async validateSession(token: string): Promise<SessionValidationResult> {
-    // Mock session validation
+  /**
+   * Validate a user session
+   */
+  async validateSession(token: string): Promise<SessionValidationResult> {
+    console.log(`Validating session token: ${token.substring(0, 8)}...`);
+    
+    // This would verify the token cryptographically in a real system
+    const isValid = token && token.length > 10;
+    
     return {
-      isValid: true,
-      userId: 'user-1',
-      expiresAt: new Date(Date.now() + 3600 * 1000).toISOString(),
-      username: 'user1',
-      timestamp: new Date().toISOString()
+      userId: isValid ? 'user-123' : '',
+      isValid: isValid,
+      expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
+      sessionType: 'standard',
+      valid: isValid // Added for backward compatibility
     };
   }
   
-  public initializeAutomaticSeo(): boolean {
-    // Call initialize method on automaticSEO
-    return this.automaticSeo.initialize();
-  }
-  
-  public checkSubsystemHealth(): { name: string, status: string, health: number }[] {
-    // Mock subsystem health check
-    return [
-      { name: 'auth', status: 'operational', health: 100 },
-      { name: 'ai', status: 'operational', health: 95 },
-      { name: 'analytics', status: 'operational', health: 97 },
-      { name: 'wallet', status: 'operational', health: 99 },
-      { name: 'seo', status: 'operational', health: 98 }
-    ];
+  /**
+   * Initialize the core system
+   */
+  async initialize(): Promise<boolean> {
+    console.log('Initializing UberCore system...');
+    
+    try {
+      // Perform initialization tasks
+      await Promise.all([
+        this.lucieAI.initialize()
+      ]);
+      
+      console.log('UberCore system initialized successfully');
+      return true;
+    } catch (error) {
+      console.error('Failed to initialize UberCore:', error);
+      return false;
+    }
   }
 }
-
-// Export an instance for easy import
-export const uberCore = new UberCore();

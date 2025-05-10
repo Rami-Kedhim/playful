@@ -1,6 +1,4 @@
 
-// Fix typing and import Escort from '@/types/Escort' to unify types across codebase
-
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Escort, VerificationLevel } from '@/types/Escort';

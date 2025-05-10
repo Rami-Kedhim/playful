@@ -1,105 +1,97 @@
 
-import { lucieAI, lucie } from '@/core/Lucie';
 import { 
-  GenerateContentResult, 
-  ModerateContentParams, 
-  ModerateContentResult, 
-  SentimentAnalysisResult,
+  GenerateContentParams,
+  GenerateContentResult,
+  ModerateContentParams,
+  ModerateContentResult,
   SentimentAnalysisParams,
-  GenerateContentParams
+  SentimentAnalysisResult
 } from '@/types/core-systems';
+import { lucieAI } from './Lucie';
 
 /**
- * Adapter for the Lucie AI system to orchestrate calls and handle responses
+ * Adapter for Lucie AI system with middleware functionality
  */
 export class LucieOrchestratorAdapter {
   /**
-   * Generate content with predefined error handling
+   * Process user input and generate content through Lucie AI
    */
-  async generateContent(prompt: string, options: Record<string, any> = {}): Promise<string> {
+  async generateContent(params: GenerateContentParams): Promise<GenerateContentResult> {
     try {
-      // Create params object for lucieAI
-      const params: GenerateContentParams = {
-        prompt,
-        options
-      };
+      // Log the request (in a real system, this might go to analytics)
+      console.log(`Content generation request: ${params.prompt.substring(0, 20)}...`);
       
-      // Use generateContent from lucieAI
-      const result: GenerateContentResult = await lucieAI.generateContent(params);
+      // Execute generation via Lucie
+      const result = await lucieAI.generateContent(params);
       
-      // Extract the content string from the result
-      return result.content;
-    } catch (error: any) {
-      console.error('Error generating content with Lucie:', error);
-      return `Sorry, I couldn't process that request. ${error.message || ''}`;
-    }
-  }
-  
-  /**
-   * Check if content passes moderation
-   */
-  async isSafeContent(content: string, contentType: 'text' | 'image' | 'video' = 'text'): Promise<boolean> {
-    try {
-      const params: ModerateContentParams = {
-        content,
-        type: contentType
-      };
-      
-      const result: ModerateContentResult = await lucieAI.moderateContent(params);
-      return result.isSafe || result.safe || false; // Check both properties
-    } catch (error) {
-      console.error('Error checking content safety:', error);
-      return false; // Default to unsafe if error occurs
-    }
-  }
-  
-  /**
-   * Get detailed moderation results
-   */
-  async getContentModerationDetails(content: string, contentType: 'text' | 'image' | 'video' = 'text'): Promise<ModerateContentResult> {
-    try {
-      const params: ModerateContentParams = {
-        content,
-        type: contentType,
-      };
-      
-      const result = await lucieAI.moderateContent(params);
-      
-      return result;
-    } catch (error) {
-      console.error('Error in content moderation:', error);
+      // Post-process result if needed (e.g., add metadata)
       return {
-        isSafe: false,
-        safe: false,
-        score: 1.0,
-        issues: ['Error processing moderation request'],
-        blockedCategories: [],
-        category: 'error',
-        action: 'block'
+        ...result,
+        metadata: {
+          ...result.metadata,
+          processed: new Date().toISOString()
+        }
+      };
+    } catch (error) {
+      console.error('Content generation error:', error);
+      return {
+        content: 'Sorry, I encountered an error while generating content.',
+        rating: 'G'
       };
     }
   }
   
   /**
-   * Analyze sentiment of text
+   * Run content moderation
+   */
+  async moderateContent(content: string, options?: any): Promise<ModerateContentResult> {
+    try {
+      // Format params to match LucieAI interface
+      const params: ModerateContentParams = {
+        content,
+        context: options?.context,
+        strictness: options?.strictness || 1.0
+      };
+      
+      // Get moderation result
+      const result = await lucieAI.moderateContent(content, options);
+      
+      // Enhance result with category
+      return {
+        ...result,
+        category: result.category || 'general'
+      };
+    } catch (error) {
+      console.error('Content moderation error:', error);
+      return {
+        isApproved: false,
+        score: 1.0,
+        reason: 'Moderation system error'
+      };
+    }
+  }
+  
+  /**
+   * Analyze text sentiment
    */
   async analyzeSentiment(text: string): Promise<SentimentAnalysisResult> {
     try {
-      return await lucieAI.analyzeSentiment({ text });
+      // Format params to match LucieAI interface
+      const params: SentimentAnalysisParams = {
+        text
+      };
+      
+      // Analyze sentiment
+      return await lucieAI.analyzeSentiment(text);
     } catch (error) {
-      console.error('Error analyzing sentiment:', error);
+      console.error('Sentiment analysis error:', error);
       return {
-        score: 0,
         sentiment: 'neutral',
+        score: 0,
         confidence: 0
       };
     }
   }
 }
 
-// Export singleton instance
 export const lucieOrchestrator = new LucieOrchestratorAdapter();
-export default lucieOrchestrator;
-
-// Export lucieAI for backward compatibility
-export { lucieAI, lucie };

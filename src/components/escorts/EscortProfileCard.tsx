@@ -15,8 +15,8 @@ interface EscortProfileCardProps {
 }
 
 const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ escort }) => {
-  // Safely check for isAvailable property
-  const isAvailableNow = escort.isAvailable || escort.availableNow || false;
+  // Safely check for availableNow or isAvailable property
+  const isAvailableNow = escort.availableNow || escort.isAvailable || false;
   
   return (
     <Card className="overflow-hidden transition-transform hover:-translate-y-1">

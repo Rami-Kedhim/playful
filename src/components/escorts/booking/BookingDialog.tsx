@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { Escort } from '@/types/escort';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import BookingForm from '../detail/booking/BookingForm';
-import { BookingFormValues } from '../detail/booking/types';
+import BookingForm from './BookingForm';
+import { BookingFormValues } from './types';
 
 interface BookingDialogProps {
   escort: Escort;

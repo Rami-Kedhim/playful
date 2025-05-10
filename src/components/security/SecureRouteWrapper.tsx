@@ -1,77 +1,87 @@
 
 import React, { useEffect, useState } from 'react';
-import { Outlet, Navigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
-import { uberCore } from '@/core/UberCore';
+import { uberCore } from '@/core';
 import { Card } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
-import { SessionValidationResult, SystemIntegrityResult } from '@/types/core-systems';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, ShieldAlert } from 'lucide-react';
 
 interface SecureRouteWrapperProps {
-  requireAuth?: boolean;
-  allowedRoles?: string[];
-  redirectTo?: string;
+  children: React.ReactNode;
+  requiredRole?: string;
+  fallbackPath?: string;
 }
 
 const SecureRouteWrapper: React.FC<SecureRouteWrapperProps> = ({
-  requireAuth = true,
-  allowedRoles,
-  redirectTo = '/auth'
+  children,
+  requiredRole,
+  fallbackPath = '/login'
 }) => {
-  const { user, isAuthenticated, checkRole } = useAuth();
-  const location = useLocation();
-  const [isValidating, setIsValidating] = useState(true);
-  const [sessionValid, setSessionValid] = useState(true);
-  const [integrityValid, setIntegrityValid] = useState(true);
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [isChecking, setIsChecking] = useState(true);
+  const [systemError, setSystemError] = useState<string | null>(null);
 
   useEffect(() => {
-    const validateSession = async () => {
+    const checkPermissions = async () => {
       try {
-        // Get current session ID from localStorage or cookies
-        const sessionId = localStorage.getItem('sessionId') || 'default-session';
+        // Check system integrity
+        const integrityResult = await uberCore.checkSystemIntegrity();
         
-        const [sessionResult, integrityResult] = await Promise.all([
-          uberCore.validateSession(sessionId),
-          uberCore.checkSystemIntegrity()
-        ]);
+        // Check if the system integrity is valid (using isValid as the property doesn't exist)
+        if (integrityResult && (integrityResult.codeIntegrity === false || 
+            integrityResult.dataIntegrity === false || 
+            integrityResult.networkSecurity === false)) {
+          setSystemError('System integrity check failed. Please contact support.');
+          return;
+        }
         
-        setSessionValid(sessionResult.valid);
-        setIntegrityValid(integrityResult.valid);
+        // If not authenticated, redirect to login
+        if (!isAuthenticated) {
+          navigate(fallbackPath);
+          return;
+        }
+        
+        // Check role if required
+        if (requiredRole && (!user?.roles || !user.roles.includes(requiredRole))) {
+          navigate('/access-denied');
+          return;
+        }
+        
+        setIsChecking(false);
       } catch (error) {
-        console.error('Session validation failed', error);
-        setSessionValid(false);
-      } finally {
-        setIsValidating(false);
+        console.error('Security check error:', error);
+        setSystemError('An error occurred during security checks.');
       }
     };
     
-    validateSession();
-  }, [location.pathname]);
+    checkPermissions();
+  }, [user, isAuthenticated, requiredRole, navigate, fallbackPath]);
   
-  if (isValidating) {
+  if (systemError) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="p-8 flex flex-col items-center">
-          <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
-          <h2 className="text-xl font-semibold">Validating secure session...</h2>
-        </Card>
+      <Card className="p-8 max-w-md mx-auto mt-12 text-center">
+        <ShieldAlert className="w-12 h-12 mx-auto mb-4 text-red-500" />
+        <h2 className="text-xl font-bold mb-2">Security Error</h2>
+        <p className="mb-4 text-muted-foreground">{systemError}</p>
+        <Button onClick={() => window.location.reload()}>
+          Refresh Application
+        </Button>
+      </Card>
+    );
+  }
+  
+  if (isChecking) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh]">
+        <div className="animate-pulse h-6 w-6 rounded-full bg-primary mb-4"></div>
+        <p className="text-muted-foreground">Verifying security...</p>
       </div>
     );
   }
   
-  if (!sessionValid || !integrityValid) {
-    return <Navigate to="/error/security" replace />;
-  }
-  
-  if (requireAuth && !isAuthenticated) {
-    return <Navigate to={redirectTo} state={{ from: location }} replace />;
-  }
-  
-  if (allowedRoles && allowedRoles.length > 0 && (!user || !allowedRoles.some(role => checkRole(role)))) {
-    return <Navigate to="/unauthorized" replace />;
-  }
-  
-  return <Outlet />;
+  return <>{children}</>;
 };
 
 export default SecureRouteWrapper;

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +21,7 @@ export interface EscortCardProps {
   sexualOrientation?: string;
   availableNow?: boolean;
   responseRate?: number;
-  lastActive?: Date; // Added lastActive prop
+  lastActive?: Date; 
   featured?: boolean;
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;

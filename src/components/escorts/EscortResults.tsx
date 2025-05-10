@@ -50,7 +50,7 @@ const EscortResults: React.FC<EscortResultsProps> = ({
             const providesInPersonServices = escort.providesInPersonServices ?? false;
             const providesVirtualContent = escort.providesVirtualContent ?? false;
             const featured = escort.featured || false;
-            const isAvailable = escort.isAvailable || escort.availableNow || false;
+            const isAvailableNow = escort.availableNow || escort.isAvailable || false;
 
             return (
               <EscortCard
@@ -67,11 +67,12 @@ const EscortResults: React.FC<EscortResultsProps> = ({
                 verified={escort.isVerified || escort.verified || false}
                 gender={escort.gender}
                 sexualOrientation={escort.sexualOrientation}
-                availableNow={isAvailable}
+                availableNow={isAvailableNow}
                 responseRate={escort.responseRate}
                 featured={featured}
                 providesInPersonServices={providesInPersonServices}
                 providesVirtualContent={providesVirtualContent}
+                lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
               />
             );
           })}
