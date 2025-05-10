@@ -126,7 +126,7 @@ export interface Escort {
 
 export interface Video {
   id: string;
-  url: string;
+  url: string; // Make url required to match usage
   thumbnail?: string;
   thumbnailUrl?: string;
   title?: string;

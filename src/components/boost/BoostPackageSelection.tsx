@@ -9,7 +9,7 @@ interface BoostPackageSelectionProps {
   packages: BoostPackage[];
   selectedPackage: string | null;
   onSelectPackage: (packageId: string) => void;
-  formatBoostDuration: (duration: string) => string;
+  formatBoostDuration: (duration: string | number) => string;
   getBoostPrice?: () => number;
   isLoading?: boolean;
 }
@@ -48,12 +48,12 @@ const BoostPackageSelection: React.FC<BoostPackageSelectionProps> = ({
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {packages.map((pkg) => (
+        {packages.map((boostPackage) => (
           <BoostPackageCard
-            key={pkg.id}
-            pkg={pkg}
-            isSelected={selectedPackage === pkg.id}
-            onSelect={() => onSelectPackage(pkg.id)}
+            key={boostPackage.id}
+            package={boostPackage}
+            isSelected={selectedPackage === boostPackage.id}
+            onSelect={() => onSelectPackage(boostPackage.id)}
             formatDuration={formatBoostDuration}
           />
         ))}

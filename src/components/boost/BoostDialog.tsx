@@ -45,23 +45,18 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
     if (!boostEligibility) {
       return {
         eligible: false,
-        isEligible: false,
         reason: 'Unknown eligibility status',
         reasons: []
       };
     }
     
-    // Transform if needed (handling potential isEligible vs eligible property mismatch)
+    // Transform if needed (handling property mismatches)
     const eligibilityObj: BoostEligibility = {
-      eligible: boostEligibility.eligible || false,
-      isEligible: boostEligibility.eligible || boostEligibility.isEligible || false,
+      eligible: boostEligibility.eligible || boostEligibility.isEligible || false,
       reason: boostEligibility.reason || '',
-      reasons: boostEligibility.reasons || []
+      reasons: boostEligibility.reasons || [],
+      nextEligibleDate: boostEligibility.nextEligibleDate || boostEligibility.nextEligibleTime
     };
-
-    if (boostEligibility.nextEligibleTime) {
-      eligibilityObj.nextEligibleTime = boostEligibility.nextEligibleTime;
-    }
     
     return eligibilityObj;
   };

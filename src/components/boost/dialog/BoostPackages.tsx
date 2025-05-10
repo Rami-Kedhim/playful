@@ -14,7 +14,7 @@ interface BoostPackagesProps {
   usageCount: number;
   dailyLimit: number;
   getPrice?: () => number;
-  formatDuration?: (duration: string) => string;
+  formatDuration?: (duration: string | number) => string;
 }
 
 const BoostPackages: React.FC<BoostPackagesProps> = ({
@@ -26,7 +26,7 @@ const BoostPackages: React.FC<BoostPackagesProps> = ({
   usageCount,
   dailyLimit,
   getPrice,
-  formatDuration = (duration) => duration
+  formatDuration = (duration) => duration.toString()
 }) => {
   // Create normalized packages with required description field if missing
   const normalizedPackages = packages.map(pkg => ({
@@ -44,7 +44,7 @@ const BoostPackages: React.FC<BoostPackagesProps> = ({
         {normalizedPackages.map((pkg) => (
           <BoostPackageCard
             key={pkg.id}
-            pkg={pkg}
+            package={pkg}
             isSelected={selected === pkg.id}
             onSelect={() => onSelect(pkg.id)}
             isPopular={pkg.isPopular || pkg.isMostPopular}

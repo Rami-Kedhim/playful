@@ -28,8 +28,10 @@ export interface BoostPackage {
   isMostPopular?: boolean;
   badgeColor?: string;
   visibilityIncrease?: number;
-  // Add this property that was being used
+  // Add properties for compatibility
   packageName?: string;
+  visibility_increase?: number;
+  endTime?: Date | string;
 }
 
 export interface BoostEligibility {
@@ -37,8 +39,15 @@ export interface BoostEligibility {
   reasons: string[];
   nextEligibleDate?: string | Date;
   waitTime?: number;  // Time in minutes until eligible
-  // Additional properties used in the codebase
-  requirements?: string[];
+  // Add properties for backward compatibility
+  reason?: string;
+  nextEligibleTime?: string;
+  isEligible?: boolean;
+  requirements?: {
+    profileCompletion: boolean;
+    verification: boolean;
+    mediaUploaded: boolean;
+  };
 }
 
 export interface BoostStatus {
@@ -54,6 +63,9 @@ export interface BoostStatus {
   packageName?: string;
   startTime?: string | Date;
   packageId?: string;
+  // Add endTime for compatibility
+  endTime?: string | Date;
+  boostPackage?: BoostPackage;
 }
 
 export interface HermesStatus {
@@ -78,3 +90,6 @@ export interface BoostScoreResult {
   };
   recommendations: string[];
 }
+
+// Export AnalyticsData from pulse-boost.ts for backward compatibility
+export { AnalyticsData } from '@/types/analytics';

@@ -3,14 +3,13 @@ import React from 'react';
 import { TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import BoostEligibilityCheck from './BoostEligibilityCheck';
 import BoostPackageList from './dialog/BoostPackageList';
-import { BoostEligibility, BoostPackage, BoostStatus } from '@/types/pulse-boost';
+import { BoostEligibility, BoostStatus, BoostPackage } from '@/types/pulse-boost';
 
 interface BoostEligibilityCheckProps {
   eligibility: {
     eligible: boolean;
-    reason: string;
     reasons: string[];
-    nextEligibleTime?: string;
+    nextEligibleDate?: string;
   };
   onClose: () => void;
 }
@@ -18,33 +17,34 @@ interface BoostEligibilityCheckProps {
 interface BoostDialogTabsProps {
   boostStatus: BoostStatus | null;
   packages: BoostPackage[];
-  eligibility: BoostEligibility | null;
-  onBoostSuccess: () => void;
+  boostEligibility: BoostEligibility | null;
+  onSuccess: () => void;
   profileId?: string;
+  onClose: () => void;
 }
 
 const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   boostStatus,
   packages,
-  eligibility,
-  onBoostSuccess,
-  profileId
+  boostEligibility,
+  onSuccess,
+  profileId,
+  onClose
 }) => {
   const [activeTab, setActiveTab] = React.useState('boost-packages');
 
   const renderEligibility = () => {
-    if (!eligibility) return null;
+    if (!boostEligibility) return null;
     
     return (
       <div className="mb-4">
         <BoostEligibilityCheck 
           eligibility={{ 
-            eligible: eligibility.eligible, 
-            reason: eligibility.reason,
-            reasons: eligibility.reasons || [],
-            nextEligibleTime: eligibility.nextEligibleTime
+            eligible: boostEligibility.eligible, 
+            reasons: boostEligibility.reasons || [],
+            nextEligibleDate: boostEligibility.nextEligibleDate
           }}
-          onClose={() => {}} // Empty function to satisfy the prop requirement
+          onClose={onClose}
         />
       </div>
     );

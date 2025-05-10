@@ -17,9 +17,9 @@ const DetailedMetricView: React.FC<DetailedMetricViewProps> = ({
   metric,
   data = []
 }) => {
-  // Use either direct props or extract from metric object
-  const displayTitle = title || metric?.title || '';
-  const displayDescription = description || metric?.description || '';
+  // Use either direct props or extract from metric object if it's an object
+  const displayTitle = title || (metric && typeof metric === 'object' ? metric.title : '');
+  const displayDescription = description || (metric && typeof metric === 'object' ? metric.description : '');
   
   // Ensure data is properly formatted for the chart
   const formattedData = React.useMemo(() => {

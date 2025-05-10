@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import BoostDialogTabs from './BoostDialogTabs';
-import { useBoostPackages } from '@/hooks/boost/useBoostPackages';
+import useBoostPackages from '@/hooks/boost/useBoostPackages';
 import { BoostEligibility, BoostStatus, HermesStatus } from '@/types/pulse-boost';
 
 interface BoostDialogContainerProps {
@@ -91,7 +92,6 @@ const BoostDialogContainer = ({
           profileId={profileId}
           packages={packages || []}
           boostStatus={boostStatus}
-          hermesStatus={hermesStatus}
           boostEligibility={boostEligibility}
           onSuccess={handleBoostSuccess}
           onClose={() => setOpen(false)}

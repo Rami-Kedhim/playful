@@ -42,15 +42,24 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
     );
   }
 
+  // Create a complete AnalyticsData object with default values for missing properties
+  const completeAnalyticsData: AnalyticsData = {
+    totalBoosts: analyticsData?.totalBoosts || 0,
+    activeBoosts: analyticsData?.activeBoosts || 0,
+    averageBoostScore: analyticsData?.averageBoostScore || 0,
+    views: analyticsData?.views || 0,
+    impressions: analyticsData?.impressions || { value: 0, change: 0 },
+    interactions: analyticsData?.interactions || { value: 0, change: 0 },
+    additionalViews: analyticsData?.additionalViews || 0,
+    engagementIncrease: analyticsData?.engagementIncrease || 0,
+    rankingPosition: analyticsData?.rankingPosition || 0
+  };
+
   return (
     <div className="space-y-6">
       <BoostAnalyticsCard 
         isActive={isActive}
-        analyticsData={analyticsData || {
-          totalBoosts: 0,
-          activeBoosts: 0,
-          averageBoostScore: 0
-        }}
+        analyticsData={completeAnalyticsData}
       />
       
       <Card>

@@ -23,11 +23,18 @@ const BoostScoreCardContainer = ({ profileId, isOwnProfile }: BoostScoreCardCont
     await updateBoostScore(profileId);
   };
 
+  // Extract score from boostScore if it's not a number but has a score property
+  const numericScore = typeof boostScore === 'number' 
+    ? boostScore 
+    : boostScore && typeof boostScore === 'object' && 'score' in boostScore 
+      ? boostScore.score 
+      : null;
+
   return (
     <BoostScoreCard
       profileId={profileId}
       isOwnProfile={isOwnProfile}
-      boostScore={boostScore}
+      boostScore={numericScore}
       loading={loading}
       error={error}
       onRefresh={handleRefresh}

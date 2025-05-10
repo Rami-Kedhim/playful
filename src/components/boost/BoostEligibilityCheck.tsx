@@ -7,9 +7,8 @@ import { AlertCircle, Clock, CheckCircle } from 'lucide-react';
 interface BoostEligibilityCheckProps {
   eligibility: {
     eligible: boolean;
-    reason: string;
     reasons: string[];
-    nextEligibleTime?: string;
+    nextEligibleDate?: string;
   };
   onClose: () => void;
 }
@@ -36,7 +35,7 @@ const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({
       <AlertTitle>This profile cannot be boosted</AlertTitle>
       <AlertDescription className="space-y-2">
         <div>
-          {eligibility.reason || "This profile is not eligible for boosting at this time."}
+          {"This profile is not eligible for boosting at this time."}
         </div>
         
         {eligibility.reasons && eligibility.reasons.length > 0 && (
@@ -47,10 +46,10 @@ const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({
           </ul>
         )}
         
-        {eligibility.nextEligibleTime && (
+        {eligibility.nextEligibleDate && (
           <div className="flex items-center gap-2 mt-2 text-sm">
             <Clock className="h-4 w-4" />
-            <span>You can try again in {eligibility.nextEligibleTime}</span>
+            <span>You can try again in {eligibility.nextEligibleDate}</span>
           </div>
         )}
         

@@ -8,9 +8,8 @@ import { BoostEligibility, BoostPackage, BoostStatus } from '@/types/pulse-boost
 interface BoostEligibilityCheckProps {
   eligibility: {
     eligible: boolean;
-    reason: string;
     reasons: string[];
-    nextEligibleTime?: string;
+    nextEligibleDate?: string;
   };
   onClose?: () => void;
 }
@@ -40,11 +39,10 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
         <BoostEligibilityCheck 
           eligibility={{ 
             eligible: eligibility.eligible, 
-            reason: eligibility.reason,
             reasons: eligibility.reasons || [],
-            nextEligibleTime: eligibility.nextEligibleTime
+            nextEligibleDate: eligibility.nextEligibleDate || eligibility.nextEligibleTime
           }}
-          onClose={() => {}} // Add an empty function to satisfy the prop requirement
+          onClose={() => {}} // Empty function to satisfy the prop requirement
         />
       </div>
     );

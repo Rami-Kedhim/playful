@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,34 +7,54 @@ import { ArrowUp, Check } from 'lucide-react';
 import { BoostPackage } from '@/types/pulse-boost';
 
 interface BoostPackageCardProps {
-  boostPackage: BoostPackage;
-  onSelect?: (packageId: string) => void;
-  selected?: boolean;
+  package?: BoostPackage;
+  pkg?: BoostPackage;  // Alternative name for backward compatibility
+  isSelected: boolean;
+  onSelect: () => void;
+  formatDuration?: (duration: string | number) => string;
+  isPopular?: boolean;
   compact?: boolean;
 }
 
 const BoostPackageCard: React.FC<BoostPackageCardProps> = ({ 
-  boostPackage, 
+  package: boostPackage,
+  pkg,
+  isSelected = false,
   onSelect, 
-  selected = false,
+  formatDuration,
+  isPopular,
   compact = false
 }) => {
+  // Use either package or pkg prop for compatibility
+  const packageData = boostPackage || pkg;
+  
+  if (!packageData) {
+    return <div>Invalid package data</div>;
+  }
+  
   const handleSelect = () => {
     if (onSelect) {
-      onSelect(boostPackage.id);
+      onSelect();
     }
   };
 
-  // Fix the formatting by ensuring we convert number to string explicitly
-  const formattedPrice = `$${boostPackage.price.toString()}`;
+  // Format duration if formatDuration function is provided
+  const formattedDuration = formatDuration 
+    ? formatDuration(packageData.duration) 
+    : typeof packageData.duration === 'string' 
+      ? packageData.duration 
+      : `${packageData.duration}h`;
+
+  // Format price
+  const formattedPrice = `$${packageData.price.toString()}`;
   
   return (
     <Card className="border rounded-lg p-4 flex flex-col h-full hover:shadow-md transition-shadow cursor-pointer">
       <CardHeader>
-        <h3 className="text-lg font-semibold mb-2">{boostPackage.name}</h3>
+        <h3 className="text-lg font-semibold mb-2">{packageData.name}</h3>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground text-sm mb-4">{boostPackage.description}</p>
+        <p className="text-muted-foreground text-sm mb-4">{packageData.description}</p>
 
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium">Price:</span>
@@ -42,18 +63,18 @@ const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
 
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium">Duration:</span>
-          <span className="text-primary">{boostPackage.duration?.toString() || ''}</span>
+          <span className="text-primary">{formattedDuration}</span>
         </div>
 
-        {boostPackage.visibility && (
+        {packageData.visibility && (
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">Visibility:</span>
-            <span className="text-primary">{boostPackage.visibility}</span>
+            <span className="text-primary">{packageData.visibility}</span>
           </div>
         )}
       </CardContent>
       <CardFooter className="flex justify-between">
-        {(boostPackage.isMostPopular || selected) && (
+        {((packageData.isMostPopular || packageData.isPopular || isPopular) || isSelected) && (
           <Badge variant="outline" className="text-green-700">
             Most Popular
           </Badge>

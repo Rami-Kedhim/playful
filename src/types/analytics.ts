@@ -7,6 +7,11 @@ export interface NeuralMetricsDisplayProps {
     consistency: number;
   };
   showDetails?: boolean;
+  // Add missing properties used in the components
+  trend?: 'up' | 'down' | 'neutral';
+  period?: string;
+  title?: string;
+  refreshInterval?: number;
 }
 
 export interface MetricCardProps {
@@ -31,10 +36,10 @@ export interface DetailedMetricViewProps {
   loading?: boolean;
   insights?: string[];
   onBack?: () => void;
-  // Add these new properties from the error messages
+  // Add these properties that the component is using
   description?: string;
   trendData?: any[];
-  metric?: string;
+  metric?: any;
 }
 
 export interface AnalyticsData {
