@@ -32,12 +32,15 @@ export const AuthContext = createContext<AuthContextType>({
 });
 
 // Hook for using the auth context
-const useAuthContext = (): AuthContextType => {
+export const useAuthContext = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuthContext must be used within an AuthProvider');
   }
   return context;
 };
+
+// Export useAuth as an alias of useAuthContext for backward compatibility
+export const useAuth = useAuthContext;
 
 export default useAuthContext;

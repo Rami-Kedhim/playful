@@ -1,5 +1,5 @@
 
-import { useAuth } from './useAuthContext';
+import { useAuth } from '@/hooks/auth/useAuthContext';
 
 export const useAuthState = () => {
   const { 

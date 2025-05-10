@@ -1,6 +1,6 @@
 
 import React, { ReactNode } from 'react';
-import useAuthContext, { AuthContext } from '@/hooks/auth/useAuthContext';
+import useAuthContext, { AuthContext, useAuth } from '@/hooks/auth/useAuthContext';
 import type { AuthContextType } from '@/types/user';
 
 // Provider component that wraps the app and makes auth object available to children
@@ -18,6 +18,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 export { useAuthContext };
 
 // Export the useAuth hook as an alias to useAuthContext for backward compatibility
-export const useAuth = useAuthContext;
+export { useAuth };
 
 export default useAuth;
