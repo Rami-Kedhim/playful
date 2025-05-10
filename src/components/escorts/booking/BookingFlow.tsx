@@ -10,6 +10,7 @@ import BookingConfirmation from './BookingConfirmation';
 import BookingPaymentStep from './BookingPaymentStep';
 import { BookingFormValues } from './types';
 import { convertEscortType } from '@/utils/typeConverters';
+import type { Escort as EscortNew } from '@/types/escort';
 
 interface BookingFlowProps {
   escort: any; // Use any to avoid type compatibility issues
@@ -50,7 +51,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
 
   // Always use convertEscortType to normalize the escort object
   const normalizedEscort = React.useMemo(() => {
-    return convertEscortType(escort);
+    return convertEscortType(escort) as EscortNew;
   }, [escort]);
 
   const handleDetailsSubmit = async (bookingDetails: BookingFormValues) => {

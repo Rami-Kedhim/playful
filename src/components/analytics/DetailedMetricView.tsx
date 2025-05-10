@@ -32,6 +32,11 @@ const DetailedMetricView: React.FC<DetailedMetricViewProps> = ({
     return item;
   }) : trendData;
   
+  const chartData = formattedData.map(item => ({
+    name: 'name' in item ? item.name : '',
+    value: item.value
+  }));
+  
   // Format change as percentage or absolute value
   const formatChange = () => {
     const prefix = change >= 0 ? '+' : '';
@@ -71,28 +76,28 @@ const DetailedMetricView: React.FC<DetailedMetricViewProps> = ({
           <div>
             <h3 className="text-lg font-medium mb-2">Trend Analysis</h3>
             <PerformanceChart 
-              data={formattedData}
+              data={chartData}
               title=""
             />
           </div>
           
-          {formattedData && formattedData.length > 0 && (
+          {chartData && chartData.length > 0 && (
             <div>
               <h3 className="text-lg font-medium mb-2">Key Insights</h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <strong>Peak Value:</strong> {Math.max(...formattedData.map(d => d.value))}{unit}
+                  <strong>Peak Value:</strong> {Math.max(...chartData.map(d => d.value))}{unit}
                 </li>
                 <li>
-                  <strong>Minimum Value:</strong> {Math.min(...formattedData.map(d => d.value))}{unit}
+                  <strong>Minimum Value:</strong> {Math.min(...chartData.map(d => d.value))}{unit}
                 </li>
                 <li>
-                  <strong>Average:</strong> {(formattedData.reduce((sum, d) => sum + d.value, 0) / formattedData.length).toFixed(2)}{unit}
+                  <strong>Average:</strong> {(chartData.reduce((sum, d) => sum + d.value, 0) / chartData.length).toFixed(2)}{unit}
                 </li>
                 <li>
                   <strong>Volatility:</strong> {
                     (() => {
-                      const values = formattedData.map(d => d.value);
+                      const values = chartData.map(d => d.value);
                       const max = Math.max(...values);
                       const min = Math.min(...values);
                       return ((max - min) / ((max + min) / 2) * 100).toFixed(1);

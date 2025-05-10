@@ -39,12 +39,18 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
     totalBoosts: analytics?.totalBoosts || 0,
     activeBoosts: analytics?.activeBoosts || 0,
     averageBoostScore: analytics?.averageBoostScore || 0,
-    views: analytics?.views,
-    impressions: analytics?.impressions,
-    interactions: analytics?.interactions,
-    additionalViews: analytics?.additionalViews,
-    engagementIncrease: analytics?.engagementIncrease,
-    rankingPosition: analytics?.rankingPosition
+    views: analytics?.views || 0,
+    impressions: analytics?.impressions || {
+      value: 0,
+      change: 0
+    },
+    interactions: analytics?.interactions || {
+      value: 0,
+      change: 0
+    },
+    additionalViews: analytics?.additionalViews || 0,
+    engagementIncrease: analytics?.engagementIncrease || 0,
+    rankingPosition: analytics?.rankingPosition || 0
   };
 
   return (

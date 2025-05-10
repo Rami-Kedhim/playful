@@ -8,6 +8,7 @@ import SafetyTips from "./SafetyTips";
 import VerificationBadge from "./VerificationBadge";
 import { Shield, UserCheck, DollarSign, Info } from "lucide-react";
 import { convertEscortType } from "@/utils/typeConverters";
+import type { Escort as EscortNew } from "@/types/escort";
 
 interface ProfileTabsProps {
   escort: any; // Use any to avoid circular type references
@@ -15,7 +16,7 @@ interface ProfileTabsProps {
 
 const ProfileTabs = ({ escort }: ProfileTabsProps) => {
   // Convert escort to compatible type
-  const normalizedEscort = convertEscortType(escort);
+  const normalizedEscort = convertEscortType(escort) as EscortNew;
   
   // Normalize the verificationLevel prop to a string type compatible with VerificationBadge
   let verificationLevel: "none" | "basic" | "enhanced" | "premium" = "none";

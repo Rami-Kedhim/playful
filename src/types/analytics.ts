@@ -27,6 +27,11 @@ export interface AnalyticsData {
   additionalViews?: number;
   engagementIncrease?: number;
   rankingPosition?: number;
+  // Add any additional properties that may be needed
+  boostHistory?: Array<{
+    date: string;
+    score: number;
+  }>;
 }
 
 export interface ProfileAnalytics {
@@ -119,6 +124,8 @@ export interface NeuralMetricsDisplayProps {
     satisfaction: number[];
   };
   period?: string;
+  title?: string;
+  refreshInterval?: number;
 }
 
 export interface PerformanceChartProps {

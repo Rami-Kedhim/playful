@@ -8,6 +8,8 @@ import { EscortAvailabilityDay } from '@/types/Escort';
  * This is needed because we have two different Escort types with slightly different structures
  */
 export function convertEscortType(escort: any): EscortTypeNew {
+  if (!escort) return null;
+  
   const convertedEscort: EscortTypeNew = {
     ...escort,
     id: escort.id,
@@ -32,7 +34,7 @@ export function convertEscortType(escort: any): EscortTypeNew {
             availability.days = availability.days.map(day => ({
               day,
               available: true
-            })) as EscortAvailabilityDay[];
+            }));
           }
         }
       }
@@ -42,4 +44,31 @@ export function convertEscortType(escort: any): EscortTypeNew {
   }
 
   return convertedEscort;
+}
+
+/**
+ * Helper function to ensure EscortAvailabilityDay[] compatibility
+ * This resolves the issue with 'days' property in EscortAvailability
+ */
+export function ensureCompatibleAvailabilityDays(days: any): EscortAvailabilityDay[] {
+  if (!days) return [];
+  
+  if (Array.isArray(days)) {
+    if (days.length === 0) return [];
+    
+    // If it's already in the right format
+    if (typeof days[0] === 'object' && 'day' in days[0]) {
+      return days as EscortAvailabilityDay[];
+    }
+    
+    // If it's a string array, convert it
+    if (typeof days[0] === 'string') {
+      return days.map(day => ({
+        day,
+        available: true
+      }));
+    }
+  }
+  
+  return [];
 }
