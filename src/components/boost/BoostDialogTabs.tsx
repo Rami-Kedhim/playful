@@ -33,8 +33,7 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
           eligibility={{ 
             eligible: boostEligibility.eligible, 
             reasons: boostEligibility.reasons || [],
-            nextEligibleTime: boostEligibility.nextEligibleTime,
-            nextEligibleTime: boostEligibility.nextEligibleTime || boostEligibility.nextEligibleTime
+            nextEligibleTime: boostEligibility.nextEligibleTime
           }}
           onClose={onClose}
         />

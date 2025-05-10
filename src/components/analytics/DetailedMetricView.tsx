@@ -1,95 +1,115 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ArrowLeft, ArrowUp, ArrowDown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, HelpCircle } from 'lucide-react';
 import { DetailedMetricViewProps } from '@/types/analytics';
 
-const DetailedMetricView: React.FC<DetailedMetricViewProps> = ({
+const DetailedMetricView: React.FC<DetailedMetricViewProps> = ({ 
   title,
   value,
   previousValue,
   change,
-  unit = '',
-  timeframe = '7 days',
-  data = [],
-  loading = false,
-  insights = [],
+  unit,
+  timeframe,
+  data,
+  loading,
+  insights,
   onBack,
+  onClose,
   description,
   trendData,
   metric
 }) => {
-  // Handle title as either string or object with title and description
-  const metricTitle = typeof title === 'string' ? title : title.title;
-  const metricDescription = typeof title === 'string' ? description : title.description;
+  const renderTitle = () => {
+    if (typeof title === 'object') {
+      return (
+        <>
+          <CardTitle>{title.title}</CardTitle>
+          {title.description && <CardDescription>{title.description}</CardDescription>}
+        </>
+      );
+    }
+    return <CardTitle>{title}</CardTitle>;
+  };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        {onBack && (
-          <Button variant="ghost" size="sm" onClick={onBack} className="flex items-center gap-1">
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back</span>
-          </Button>
-        )}
-      </div>
-
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>{metricTitle}</CardTitle>
-            <Button variant="ghost" size="icon">
-              <HelpCircle className="h-4 w-4" />
+    <Card className="w-full">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div className="space-y-1">
+          {renderTitle()}
+        </div>
+        <div className="flex items-center gap-2">
+          {onBack && (
+            <Button variant="ghost" size="sm" onClick={onBack}>
+              <ArrowLeft className="h-4 w-4 mr-1" /> Back
             </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
-          {metricDescription && <p className="text-sm text-muted-foreground mt-1">{metricDescription}</p>}
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-300 rounded w-1/3 mb-4"></div>
-              <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-end gap-2">
-                  <div className="text-3xl font-bold">{value}{unit}</div>
-                  {change !== undefined && (
-                    <div className={`text-sm ${change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      {change >= 0 ? '+' : ''}{change}%
-                    </div>
-                  )}
-                </div>
-                {previousValue !== undefined && (
-                  <div className="text-sm text-muted-foreground mt-1">
-                    Previously: {previousValue}{unit} ({timeframe} ago)
+        ) : (
+          <div className="space-y-6">
+            <div className="flex items-baseline gap-4">
+              <div className="text-4xl font-bold">
+                {value}
+                {unit && <span className="text-lg ml-1">{unit}</span>}
+              </div>
+              
+              {change !== undefined && previousValue !== undefined && (
+                <div className="flex items-center text-sm">
+                  <div className={`flex items-center ${change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {change >= 0 ? (
+                      <ArrowUp className="h-4 w-4 mr-1" />
+                    ) : (
+                      <ArrowDown className="h-4 w-4 mr-1" />
+                    )}
+                    {Math.abs(change)}%
                   </div>
-                )}
-              </div>
-
-              {/* Chart would go here */}
-              <div className="h-40 bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center">
-                <span className="text-muted-foreground">Metric trend visualization</span>
-              </div>
-
-              {insights.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-medium mb-2">Insights</h4>
-                  <ul className="space-y-1">
-                    {insights.map((insight, i) => (
-                      <li key={i} className="text-sm">{insight}</li>
-                    ))}
-                  </ul>
+                  <span className="text-muted-foreground ml-2">
+                    vs. previous {timeframe || 'period'}
+                  </span>
                 </div>
               )}
             </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            
+            {description && (
+              <p className="text-sm text-muted-foreground">{description}</p>
+            )}
+            
+            {insights && insights.length > 0 && (
+              <div>
+                <h4 className="text-sm font-semibold mb-2">Insights</h4>
+                <ul className="space-y-1">
+                  {insights.map((insight, index) => (
+                    <li key={index} className="text-sm flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>{insight}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {trendData && (
+              <div className="mt-4">
+                <h4 className="text-sm font-semibold mb-2">Trend</h4>
+                <div className="h-40 w-full bg-muted/30 rounded-md flex items-center justify-center">
+                  <p className="text-sm text-muted-foreground">Trend visualization placeholder</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

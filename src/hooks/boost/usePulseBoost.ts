@@ -1,167 +1,101 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { pulseService } from '@/services/boost/pulseService';
 import { BoostStatus, BoostPackage } from '@/types/pulse-boost';
+import { pulseBoostService } from '@/services/boost/pulseBoostService';
 
-/**
- * usePulseBoost hook for managing escort boost status
- */
-export function usePulseBoost(userId?: string) {
-  // Initialize state with proper types
+export const usePulseBoost = (profileId?: string) => {
   const [boostStatus, setBoostStatus] = useState<BoostStatus>({
-    isActive: false,
-    timeRemaining: "0",
-    progress: 0,
-    expiresAt: null,
-    startedAt: null
+    isActive: false
   });
-
   const [packages, setPackages] = useState<BoostPackage[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [refreshCounter, setRefreshCounter] = useState(0);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Fetch boost packages
-  useEffect(() => {
-    const fetchPackages = async () => {
-      try {
-        const fetchedPackages = pulseService.getPackages();
-        setPackages(fetchedPackages);
-      } catch (err) {
-        console.error('Error fetching boost packages:', err);
-      }
-    };
-
-    fetchPackages();
-  }, []);
-
-  // Load user's active boost status
-  useEffect(() => {
-    const fetchBoostStatus = async () => {
-      if (!userId) return;
-
-      setLoading(true);
-      try {
-        // Get mock boost purchase for the user
-        const activePurchase = pulseService.getMockBoostPurchase(userId);
-
-        if (activePurchase) {
-          // Get package details
-          const packageDetails = packages.find(pkg => pkg.id === activePurchase.packageId);
-          const durationInMinutes = packageDetails?.durationMinutes || 0;
-
-          // Calculate boost status
-          const calculatedStatus = pulseService.calculateBoostStatus(
-            activePurchase.startTime,
-            durationInMinutes
-          );
-
-          setBoostStatus({
-            isActive: calculatedStatus.isActive,
-            timeRemaining: calculatedStatus.timeRemaining || "0",
-            progress: 100 - (calculatedStatus.percentRemaining || 0),
-            expiresAt: calculatedStatus.expiresAt || null,
-            startedAt: calculatedStatus.startedAt || null,
-            packageName: packageDetails?.name,
-            packageId: packageDetails?.id
-          });
-        } else {
-          // No active boost
-          setBoostStatus({
-            isActive: false,
-            timeRemaining: "0",
-            progress: 0,
-            expiresAt: null,
-            startedAt: null
-          });
-        }
-      } catch (err) {
-        console.error('Error fetching boost status:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBoostStatus();
-  }, [userId, refreshCounter, packages]);
-
-  // Manually refresh the boost status
-  const refreshStatus = useCallback(() => {
-    setRefreshCounter(prev => prev + 1);
-  }, []);
-
-  // Purchase a boost for the user
-  const purchaseBoost = useCallback(async (packageId: string) => {
-    if (!userId) return { success: false, message: 'User ID is required' };
-
+  const fetchBoostStatus = useCallback(async () => {
+    if (!profileId) return;
+    
     try {
       setLoading(true);
-      
-      // Find package details
-      const boostPackage = packages.find(p => p.id === packageId);
-      if (!boostPackage) {
-        return { success: false, message: 'Invalid package selected' };
-      }
-
-      const now = new Date();
-      const startDate = now;
-      const endDate = new Date(now.getTime() + boostPackage.durationMinutes * 60 * 1000);
-
-      // Update the boost status immediately for better UX
-      setBoostStatus({
-        isActive: true,
-        timeRemaining: String(boostPackage.durationMinutes),
-        progress: 0,
-        expiresAt: endDate,
-        startedAt: startDate,
-        packageName: boostPackage.name,
-        packageId: boostPackage.id
-      });
-
-      // Perform purchase operation (mocked)
-      // In a real app, this would call an API endpoint
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      refreshStatus();
-      return { success: true, message: 'Boost activated successfully' };
-    } catch (error: any) {
-      console.error('Error purchasing boost:', error);
-      return { 
-        success: false, 
-        message: error.message || 'Failed to purchase boost'
-      };
+      const data = await pulseBoostService.getBoostStatus(profileId);
+      setBoostStatus(data);
+    } catch (error) {
+      console.error('Error fetching boost status:', error);
     } finally {
       setLoading(false);
     }
-  }, [userId, packages, refreshStatus]);
+  }, [profileId]);
 
-  // Format the remaining time as a human-readable string
-  const getFormattedTimeRemaining = useCallback(() => {
-    const timeStr = boostStatus.timeRemaining || "0";
-    
-    // Try to parse the timeRemaining string - it could be in minutes or in a format like "2h 30m"
-    if (timeStr.includes('h') || timeStr.includes('m')) {
-      return timeStr;
+  const fetchBoostPackages = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await pulseBoostService.getBoostPackages();
+      setPackages(data);
+    } catch (error) {
+      console.error('Error fetching boost packages:', error);
+    } finally {
+      setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    fetchBoostStatus();
+    fetchBoostPackages();
+  }, [fetchBoostStatus, fetchBoostPackages]);
+
+  const purchaseBoost = async (packageId: string) => {
+    if (!profileId) return { success: false, message: 'No profile ID provided' };
     
-    // Assume it's minutes
-    const minutes = parseInt(timeStr, 10);
-    const hours = Math.floor(minutes / 60);
-    const remainingMins = minutes % 60;
-    
-    if (hours > 0) {
-      return `${hours}h ${remainingMins}m`;
+    try {
+      setLoading(true);
+      const result = await pulseBoostService.purchaseBoost(profileId, packageId);
+      
+      if (result.success) {
+        await fetchBoostStatus();
+        return { success: true, message: 'Boost purchased successfully' };
+      } else {
+        return { success: false, message: result.message };
+      }
+    } catch (error) {
+      console.error('Error purchasing boost:', error);
+      return { success: false, message: 'An error occurred while purchasing boost' };
+    } finally {
+      setLoading(false);
     }
-    return `${remainingMins}m`;
-  }, [boostStatus.timeRemaining]);
+  };
+
+  const getFormattedTimeRemaining = () => {
+    if (!boostStatus.isActive || !boostStatus.expiresAt) return 'No active boost';
+    
+    const expiry = boostStatus.expiresAt instanceof Date 
+      ? boostStatus.expiresAt 
+      : new Date(boostStatus.expiresAt);
+    
+    const now = new Date();
+    const timeDiff = expiry.getTime() - now.getTime();
+    
+    if (timeDiff <= 0) return 'Expired';
+    
+    // Calculate days, hours, minutes
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (days > 0) {
+      return `${days} day${days > 1 ? 's' : ''} ${hours}h remaining`;
+    } else if (hours > 0) {
+      return `${hours}h ${minutes}m remaining`;
+    } else {
+      return `${minutes} minute${minutes !== 1 ? 's' : ''} remaining`;
+    }
+  };
 
   return {
     boostStatus,
     packages,
     loading,
-    refreshStatus,
+    refreshStatus: fetchBoostStatus,
     purchaseBoost,
     getFormattedTimeRemaining
   };
-}
+};
 
 export default usePulseBoost;

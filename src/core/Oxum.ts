@@ -1,5 +1,5 @@
 
-import { OxumSystem } from "@/types/core-systems";
+import { OxumSystem } from '@/types/core-systems';
 
 export class Oxum implements OxumSystem {
   private authToken: string | null = null;
@@ -57,6 +57,21 @@ export class Oxum implements OxumSystem {
     const allowedActions = this.permissions[userRole] || [];
     
     return allowedActions.includes(action);
+  }
+  
+  getSystemStatus(): { isOperational: boolean; performance: number; lastUpdate: string } {
+    return {
+      isOperational: true,
+      performance: 98,
+      lastUpdate: new Date().toISOString()
+    };
+  }
+  
+  checkSystemStatus(): { operational: boolean; services: string[] } {
+    return {
+      operational: true,
+      services: ['core', 'security', 'analytics']
+    };
   }
 }
 

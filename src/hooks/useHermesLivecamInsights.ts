@@ -1,72 +1,53 @@
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { HermesInsight } from '@/types/core-systems';
+import { hermes } from '@/core';
 
-// Mock data for insights
-const mockInsights = [
-  {
-    id: '1',
-    timestamp: Date.now() - 1000 * 60 * 60 * 2, // 2 hours ago
-    category: 'performance',
-    content: 'Your cam sessions have shown a 15% increase in engagement over the last week.',
-    confidence: 0.85,
-    metadata: { type: 'performance' }
-  },
-  {
-    id: '2',
-    timestamp: Date.now() - 1000 * 60 * 60 * 6, // 6 hours ago
-    category: 'optimization',
-    content: 'Consider scheduling more sessions during 8-10 PM EST, when your audience is most active.',
-    confidence: 0.92,
-    metadata: { type: 'scheduling' }
-  },
-  {
-    id: '3',
-    timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
-    category: 'content',
-    content: 'Your themed sessions are generating 3x more tips than regular sessions.',
-    confidence: 0.78,
-    metadata: { type: 'content' }
-  }
-] as HermesInsight[];
-
-export const useHermesLivecamInsights = (profileId?: string) => {
+export const useHermesLivecamInsights = (livecamId?: string) => {
   const [insights, setInsights] = useState<HermesInsight[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchInsights = async () => {
-      setLoading(true);
-      // In a real app, this would make an API call
-      // For demo purposes, we'll use mock data
-      setTimeout(() => {
-        setInsights(mockInsights);
-        setLoading(false);
-      }, 800);
-    };
-
-    if (profileId) {
-      fetchInsights();
+  const [error, setError] = useState<string | null>(null);
+  
+  const fetchInsights = useCallback(async () => {
+    if (!livecamId) {
+      setInsights([]);
+      setLoading(false);
+      return;
     }
-  }, [profileId]);
-
-  const getPerformanceInsights = () => {
-    return insights.filter(insight => insight.metadata?.type === 'performance');
-  };
-
-  const getSchedulingInsights = () => {
-    return insights.filter(insight => insight.metadata?.type === 'scheduling');
-  };
-
-  const getContentInsights = () => {
-    return insights.filter(insight => insight.metadata?.type === 'content');
-  };
-
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Call the Hermes system to get insights
+      const hermesInsights = await hermes.getInsights();
+      setInsights(hermesInsights as HermesInsight[]);
+    } catch (err: any) {
+      console.error('Error fetching Hermes insights:', err);
+      setError(err.message || 'Failed to fetch insights');
+      setInsights([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [livecamId]);
+  
+  useEffect(() => {
+    fetchInsights();
+  }, [fetchInsights]);
+  
+  const getPerformanceInsights = () => insights.filter(insight => insight.category === 'performance');
+  const getViewerInsights = () => insights.filter(insight => insight.category === 'viewer');
+  const getContentInsights = () => insights.filter(insight => insight.category === 'content');
+  
   return {
     insights,
     loading,
-    getPerformanceInsights,
-    getSchedulingInsights,
-    getContentInsights
+    error,
+    refreshInsights: fetchInsights,
+    performanceInsights: getPerformanceInsights(),
+    viewerInsights: getViewerInsights(),
+    contentInsights: getContentInsights()
   };
 };
+
+export default useHermesLivecamInsights;

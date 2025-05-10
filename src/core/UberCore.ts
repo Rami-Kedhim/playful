@@ -1,6 +1,8 @@
 
 import { UberCoreSystem, HermesSystem, LucieAISystem, OxumSystem } from '@/types/core-systems';
-import { Hermes, LucieAI, Oxum } from '@/core';
+import { LucieAI, lucieAI } from './Lucie';
+import { Hermes } from './Hermes';
+import { Oxum } from './Oxum';
 
 export class UberCore implements UberCoreSystem {
   // Change from private to public to match interface
@@ -9,7 +11,7 @@ export class UberCore implements UberCoreSystem {
   public oxumSystem: OxumSystem;
 
   constructor() {
-    this.lucieAI = new LucieAI();
+    this.lucieAI = lucieAI;
     this.hermesSystem = new Hermes();
     this.oxumSystem = new Oxum();
   }
@@ -39,4 +41,5 @@ export class UberCore implements UberCoreSystem {
   }
 }
 
+export const uberCore = new UberCore();
 export default UberCore;

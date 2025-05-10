@@ -1,103 +1,75 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 import { NeuralMetricsDisplayProps } from '@/types/analytics';
-import { Activity, BarChart3, Clock, Shield } from 'lucide-react';
 
 const NeuralMetricsDisplay: React.FC<NeuralMetricsDisplayProps> = ({
   metrics,
-  showDetails = false,
-  trend, // Now properly defined in NeuralMetricsDisplayProps
-  period, // Now properly defined in NeuralMetricsDisplayProps
-  title, // Now properly defined in NeuralMetricsDisplayProps
-  refreshInterval // Now properly defined in NeuralMetricsDisplayProps
+  isLoading = false
 }) => {
-  return (
-    <div className="space-y-4">
-      {title && (
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">{title}</h3>
-          {period && <span className="text-sm text-muted-foreground">{period}</span>}
-        </div>
-      )}
-      
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <MetricCard
-          icon={<Shield className="h-5 w-5 text-blue-500" />}
-          title="Accuracy"
-          value={metrics.accuracy}
-          unit="%"
-          trend={trend}
-        />
-        
-        <MetricCard
-          icon={<Clock className="h-5 w-5 text-green-500" />}
-          title="Speed"
-          value={metrics.speed}
-          unit="%"
-          trend={trend}
-        />
-        
-        <MetricCard
-          icon={<Activity className="h-5 w-5 text-purple-500" />}
-          title="Completeness"
-          value={metrics.completeness}
-          unit="%"
-          trend={trend}
-        />
-        
-        <MetricCard
-          icon={<BarChart3 className="h-5 w-5 text-amber-500" />}
-          title="Consistency"
-          value={metrics.consistency}
-          unit="%"
-          trend={trend}
-        />
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[1, 2, 3].map((i) => (
+          <Card key={i} className="animate-pulse">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">
+                <div className="h-4 bg-muted rounded w-24"></div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-6 bg-muted rounded w-16 mb-2"></div>
+              <div className="h-4 bg-muted rounded w-20"></div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-      
-      {showDetails && (
-        <Card className="mt-4">
-          <CardContent className="pt-6">
-            <div className="space-y-1 text-sm">
-              <p>Last refreshed: {new Date().toLocaleTimeString()}</p>
-              {refreshInterval && <p>Auto-refresh: Every {refreshInterval / 1000} seconds</p>}
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {metrics.map((metric, idx) => (
+        <Card key={idx}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">{metric.title}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-baseline justify-between">
+              <p className="text-2xl font-semibold">
+                {metric.value}
+                {metric.unit && <span className="text-sm ml-1">{metric.unit}</span>}
+              </p>
+              
+              {metric.change !== undefined && (
+                <div 
+                  className={`flex items-center text-xs ${
+                    metric.change > 0 
+                      ? 'text-green-500' 
+                      : metric.change < 0 
+                        ? 'text-red-500' 
+                        : 'text-gray-500'
+                  }`}
+                >
+                  {metric.change > 0 ? (
+                    <ArrowUp className="h-3 w-3 mr-1" />
+                  ) : metric.change < 0 ? (
+                    <ArrowDown className="h-3 w-3 mr-1" />
+                  ) : (
+                    <Minus className="h-3 w-3 mr-1" />
+                  )}
+                  {Math.abs(metric.change)}%
+                </div>
+              )}
             </div>
+            {metric.timespan && (
+              <p className="text-xs text-muted-foreground mt-1">{metric.timespan}</p>
+            )}
           </CardContent>
         </Card>
-      )}
+      ))}
     </div>
-  );
-};
-
-const MetricCard: React.FC<{
-  icon: React.ReactNode;
-  title: string;
-  value: number;
-  unit?: string;
-  trend?: 'up' | 'down' | 'neutral';
-}> = ({ icon, title, value, unit = '', trend }) => {
-  return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm text-muted-foreground">{title}</span>
-          {icon}
-        </div>
-        <div className="flex items-baseline">
-          <span className="text-2xl font-bold">{value}</span>
-          {unit && <span className="ml-1 text-sm text-muted-foreground">{unit}</span>}
-        </div>
-        {trend && (
-          <div className={`flex items-center mt-2 text-xs ${
-            trend === 'up' ? 'text-green-500' :
-            trend === 'down' ? 'text-red-500' : 'text-gray-500'
-          }`}>
-            {trend === 'up' ? '↑ ' : trend === 'down' ? '↓ ' : '→ '}
-            {trend === 'up' ? 'Improving' : trend === 'down' ? 'Declining' : 'Stable'}
-          </div>
-        )}
-      </CardContent>
-    </Card>
   );
 };
 

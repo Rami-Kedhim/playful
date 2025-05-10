@@ -80,6 +80,8 @@ export interface BoostStatus {
   endTime?: Date;
   activeBoostId?: string;
   boostMultiplier?: number;
+  level?: number;
+  remainingDays?: number;
 }
 
 // Update the BoostPackage interface
@@ -97,4 +99,21 @@ export interface BoostPackage {
   color?: string;
   badgeColor?: string;
   boost_power?: number;
+  isMostPopular?: boolean;
+}
+
+export interface HermesStatus {
+  score: number;
+  position: number;
+  estimatedVisibility: number;
+  recommendations: string[];
+  lastUpdated: Date;
+}
+
+export interface BoostEligibility {
+  eligible: boolean;
+  isEligible?: boolean;
+  reason?: string;
+  reasons?: string[];
+  nextEligibleTime?: Date | string;
 }

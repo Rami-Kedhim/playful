@@ -1,55 +1,14 @@
 
 import { UberPersona } from '@/types/uberPersona';
-
-export interface LucieAISystem {
-  initialize(): Promise<void>;
-  generateContent(params: GenerateContentParams): Promise<GenerateContentResult>;
-  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
-  analyzeUserBehavior(userId: string, data: any): Promise<any>;
-  getSentimentAnalysis(text: string): Promise<SentimentAnalysisResult>;
-  predictNextAction(userId: string, context: any): Promise<RecommendedAction>;
-}
-
-export interface GenerateContentParams {
-  prompt: string;
-  maxLength?: number;
-  temperature?: number;
-  format?: string;
-  options?: {
-    temperature?: number;
-    maxTokens?: number;
-  };
-}
-
-export interface GenerateContentResult {
-  content: string;
-  metadata?: Record<string, any>;
-}
-
-export interface ModerateContentParams {
-  content: string;
-  contentType: string;
-  strictness?: number;
-}
-
-export interface ModerateContentResult {
-  approved: boolean;
-  reason?: string;
-  score: number;
-  flags?: string[];
-}
-
-export interface SentimentAnalysisResult {
-  score: number;
-  sentiment: 'positive' | 'negative' | 'neutral';
-  confidence: number;
-}
-
-export interface RecommendedAction {
-  actionType: string;
-  confidence: number;
-  metadata?: Record<string, any>;
-}
+import { 
+  LucieAISystem, 
+  GenerateContentParams, 
+  GenerateContentResult, 
+  ModerateContentParams, 
+  ModerateContentResult, 
+  SentimentAnalysisResult, 
+  RecommendedAction 
+} from '@/types/core-systems';
 
 export class LucieAI implements LucieAISystem {
   async initialize(): Promise<void> {

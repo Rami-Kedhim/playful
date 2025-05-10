@@ -1,176 +1,81 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { uberCore } from '@/core/UberCore';
+import { useState, useEffect } from 'react';
+import { uberCore } from '@/core';
+import { SystemHealthMetrics } from '@/types/core-systems';
 
-/**
- * Neural monitoring hook for system performance
- */
-export function useUberCoreNeuralMonitor() {
-  const [health, setHealth] = useState({
-    status: 'ok',
-    metrics: {
-      load: 0,
-      memory: 0,
-      latency: 0,
-      errorRate: 0,
-      averageResponseTime: 0,
-      cpuUsage: 0,
-      memoryUsage: 0
-    },
-    timestamp: new Date().toISOString()
+export const useUberCoreNeuralMonitor = () => {
+  const [systemHealth, setSystemHealth] = useState<SystemHealthMetrics>({
+    cpu: 0,
+    memory: 0,
+    disk: 0,
+    network: 0,
+    overall: 0
   });
+  const [subsystemStatus, setSubsystemStatus] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<null | string>(null);
-  const [isMonitoring, setIsMonitoring] = useState(false);
-  const [performanceReport, setPerformanceReport] = useState<any>(null);
-  const [systemStatus, setSystemStatus] = useState<any>(null);
-  const [systemMetrics, setSystemMetrics] = useState<any>(null);
-  const [subsystemHealth, setSubsystemHealth] = useState<any[]>([]);
-  
-  const performHealthCheck = useCallback(() => {
-    try {
-      // Generate mock health data since we don't have direct access to uberCore.getSystemHealth
-      const mockMetrics = {
-        load: Math.random() * 100,
-        memory: Math.random() * 100,
-        latency: Math.random() * 50,
-        errorRate: Math.random() * 0.05,
-        averageResponseTime: Math.random() * 200,
-        cpuUsage: Math.random() * 100,
-        memoryUsage: Math.random() * 100
-      };
-      
-      return {
-        status: mockMetrics.errorRate < 0.05 ? 'ok' : 'degraded',
-        metrics: mockMetrics,
-        timestamp: new Date().toISOString()
-      };
-    } catch (error) {
-      console.error('Error during neural health check:', error);
-      return {
-        status: 'error',
-        metrics: {
-          load: 0,
-          memory: 0,
-          latency: 0,
-          errorRate: 1,
-          averageResponseTime: 0,
-          cpuUsage: 0,
-          memoryUsage: 0
-        },
-        timestamp: new Date().toISOString(),
-        error: String(error)
-      };
-    }
+  useEffect(() => {
+    // Fetch initial system health
+    fetchSystemHealth();
+    
+    // Polling interval for continuous monitoring
+    const interval = setInterval(fetchSystemHealth, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
   
-  const refreshHealth = useCallback(async () => {
+  const fetchSystemHealth = async () => {
     setLoading(true);
-    setError(null);
     
     try {
-      const newHealth = performHealthCheck();
-      setHealth(newHealth);
-    } catch (err: any) {
-      setError(err?.message || 'Failed to refresh health');
+      // Get subsystem health from UberCore
+      const healthData = uberCore.checkSubsystemHealth();
+      setSubsystemStatus(healthData);
+      
+      // Generate mock system metrics
+      setSystemHealth({
+        cpu: Math.floor(Math.random() * 30) + 65,  // 65-95%
+        memory: Math.floor(Math.random() * 40) + 50, // 50-90%
+        disk: Math.floor(Math.random() * 20) + 70,  // 70-90%
+        network: Math.floor(Math.random() * 30) + 60, // 60-90%
+        overall: Math.floor(Math.random() * 15) + 80  // 80-95%
+      });
+    } catch (error) {
+      console.error('Failed to fetch system health:', error);
     } finally {
       setLoading(false);
     }
-  }, [performHealthCheck]);
-
-  const startMonitoring = useCallback(() => {
-    setIsMonitoring(true);
-    refreshHealth();
-    
-    // Get actual system status from uberCore
-    const status = uberCore.getSystemStatus();
-    // Get subsystem health from uberCore
-    const subHealth = uberCore.checkSubsystemHealth();
-    
-    setSystemStatus(status);
-    setSubsystemHealth(subHealth);
-    
-    setPerformanceReport({
-      timestamp: new Date().toISOString(),
-      overallHealth: 'good',
-      metrics: {
-        cpuUsage: Math.random() * 100,
-        memoryUsage: Math.random() * 100
-      }
-    });
-    
-    setSystemMetrics({
-      load: Math.random() * 100,
-      memory: Math.random() * 100,
-      latency: Math.random() * 100,
-      cpuUsage: Math.random() * 100,
-      memoryUsage: Math.random() * 100,
-      errorRate: Math.random() * 0.05,
-      averageResponseTime: Math.random() * 200
-    });
-  }, [refreshHealth]);
+  };
   
-  const stopMonitoring = useCallback(() => {
-    setIsMonitoring(false);
-  }, []);
-  
-  const refreshData = useCallback(() => {
-    refreshHealth();
+  const restartSubsystem = async (subsystem: string) => {
+    console.log(`Restarting subsystem: ${subsystem}`);
     
-    // Refresh mock data
-    if (isMonitoring) {
-      setPerformanceReport({
-        timestamp: new Date().toISOString(),
-        overallHealth: 'good',
-        metrics: {
-          cpuUsage: Math.random() * 100,
-          memoryUsage: Math.random() * 100
-        }
-      });
+    try {
+      // Mock restart process with a delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      setSystemMetrics({
-        load: Math.random() * 100,
-        memory: Math.random() * 100,
-        latency: Math.random() * 100,
-        cpuUsage: Math.random() * 100,
-        memoryUsage: Math.random() * 100,
-        errorRate: Math.random() * 0.05,
-        averageResponseTime: Math.random() * 200
-      });
+      // Refresh health data after restart
+      fetchSystemHealth();
       
-      // Update subsystem health from uberCore
-      setSubsystemHealth(uberCore.checkSubsystemHealth());
+      return {
+        success: true,
+        message: `${subsystem} restarted successfully`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to restart ${subsystem}`
+      };
     }
-  }, [refreshHealth, isMonitoring]);
-  
-  useEffect(() => {
-    refreshHealth();
-    
-    const intervalId = setInterval(() => {
-      if (isMonitoring) {
-        refreshHealth();
-      }
-    }, 30000);
-    
-    return () => clearInterval(intervalId);
-  }, [refreshHealth, isMonitoring]);
+  };
   
   return {
-    health,
+    systemHealth,
+    subsystemStatus,
     loading,
-    error,
-    refreshHealth,
-    isMonitoring,
-    performanceReport,
-    systemStatus,
-    systemMetrics,
-    subsystemHealth,
-    isLoading: loading,
-    startMonitoring,
-    stopMonitoring,
-    refreshData
+    refreshSystemHealth: fetchSystemHealth,
+    restartSubsystem
   };
-}
+};
 
 export default useUberCoreNeuralMonitor;

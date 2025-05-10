@@ -22,4 +22,26 @@ export interface UberPersona {
   isFeatured?: boolean;
   isAI?: boolean;
   description?: string;
+  displayName?: string;
+  tags?: string[];
+  bio?: string;
+  roleFlags?: number;
+  isActive?: boolean;
+  stats?: {
+    popularity?: number;
+    intelligence?: number;
+    charm?: number;
+    energy?: number;
+  };
+  monetization?: {
+    hourlyRate?: number;
+    packages?: {
+      name: string;
+      price: number;
+      duration: string;
+      description: string;
+    }[];
+    acceptsUbx?: boolean;
+    acceptsFiat?: boolean;
+  };
 }

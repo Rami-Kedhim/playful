@@ -48,12 +48,12 @@ const BoostPackageSelection: React.FC<BoostPackageSelectionProps> = ({
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {packages.map((boostPackage) => (
+        {packages.map((pkg) => (
           <BoostPackageCard
-            key={boostPackage.id}
-            pkg={boostPackage}
-            isSelected={selectedPackage === boostPackage.id}
-            onSelect={() => onSelectPackage(boostPackage.id)}
+            key={pkg.id}
+            pkg={pkg}
+            isSelected={selectedPackage === pkg.id}
+            onSelect={() => onSelectPackage(pkg.id)}
             formatDuration={formatBoostDuration}
           />
         ))}

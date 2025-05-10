@@ -64,6 +64,7 @@ export interface Escort {
   imageUrl?: string;
   profileImage?: string;
   reviewCount?: number;
+  avatar?: string;
 }
 
 export type VerificationLevel = 'NONE' | 'BASIC' | 'VERIFIED' | 'PREMIUM';

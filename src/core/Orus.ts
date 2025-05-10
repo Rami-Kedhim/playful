@@ -1,35 +1,43 @@
 
-import { SystemStatus, SystemIntegrityResult } from '@/types/core-systems';
+import { SystemIntegrityResult, SessionValidationResult } from '@/types/core-systems';
 
-/**
- * ORUS: Operational Resource Utilization System
- */
 export class Orus {
-  /**
-   * Get system status
-   */
-  async getStatus(): Promise<SystemStatus> {
+  validateSession(token: string): SessionValidationResult {
+    if (!token) {
+      return { isValid: false, reason: 'No token provided' };
+    }
+    
+    // Mock implementation
     return {
-      status: 'operational',
-      version: '1.0.0',
-      lastChecked: new Date(),
-      components: {
-        security: 'operational',
-        core: 'operational'
-      }
+      isValid: true,
+      userId: 'user-123',
+      expiry: new Date(Date.now() + 24 * 60 * 60 * 1000)
     };
   }
   
-  /**
-   * Check security integrity
-   */
-  verifyIntegrity(): SystemIntegrityResult {
+  checkIntegrity(): SystemIntegrityResult {
+    // Mock implementation
     return {
-      codeIntegrity: true,
-      dataIntegrity: true,
-      networkSecurity: true,
-      timestamp: new Date(),
-      valid: true
+      isValid: true,
+      overallStatus: 'Operational',
+      modules: {
+        authentication: 'active',
+        encryption: 'active',
+        validation: 'active'
+      },
+      recommendations: [
+        'Scheduled security scan recommended',
+        'Update token rotation policy'
+      ],
+      timestamp: new Date()
+    };
+  }
+  
+  getSystemStatus(): { isOperational: boolean; performance: number; lastUpdate: string } {
+    return {
+      isOperational: true,
+      performance: 97,
+      lastUpdate: new Date().toISOString()
     };
   }
 }

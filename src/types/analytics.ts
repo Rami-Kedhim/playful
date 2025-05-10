@@ -1,3 +1,4 @@
+
 export interface AnalyticsData {
   additionalViews?: number;
   engagementIncrease?: number;
@@ -67,4 +68,15 @@ export interface ExtendedMetricCardProps extends MetricCardProps {
   variant?: 'default' | 'positive' | 'negative' | 'neutral';
   footer?: React.ReactNode;
   description?: string;
+}
+
+export interface NeuralMetricsDisplayProps {
+  metrics: {
+    title: string;
+    value: number;
+    unit?: string;
+    change?: number;
+    timespan?: string;
+  }[];
+  isLoading?: boolean;
 }
