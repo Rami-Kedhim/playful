@@ -50,5 +50,6 @@ export interface UberPersona {
     }[];
     acceptsUbx?: boolean;
     acceptsFiat?: boolean;
+    meetingPrice?: number;
   };
 }

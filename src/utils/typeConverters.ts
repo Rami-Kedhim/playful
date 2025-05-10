@@ -44,3 +44,29 @@ export const ensureCompatibleAvailabilityDays = (days: AvailabilityDay[] | undef
     endTime: day.endTime || "17:00"
   }));
 };
+
+// Add a helper function to ensure escort objects are compatible
+export const ensureEscortTypeCompatibility = (escort: any): EscortType => {
+  if (!escort) return {} as EscortType;
+  
+  return {
+    ...escort,
+    gender: escort.gender || 'female', // Ensure gender is always defined
+    id: escort.id || '',
+    name: escort.name || '',
+    location: escort.location || '',
+    services: escort.services || [],
+    rating: escort.rating || 0,
+    price: escort.price || 0,
+  } as EscortType;
+};
+
+// Helper function to convert between boost status types
+export const convertBoostStatus = (status: any): any => {
+  return {
+    ...status,
+    isExpiring: status.isExpiring || false,
+    expiresAt: status.expiresAt ? new Date(status.expiresAt) : undefined,
+    startedAt: status.startedAt ? new Date(status.startedAt) : undefined,
+  };
+};

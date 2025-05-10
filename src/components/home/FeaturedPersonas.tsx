@@ -55,7 +55,7 @@ const FeaturedPersonas: React.FC<FeaturedPersonasProps> = ({ personas = [], isLo
     );
   };
 
-  const getTypeLabel = (type: UberPersona['type']) => {
+  const getTypeLabel = (type?: string) => {
     if (!type) return 'Unknown';
     
     switch (type) {

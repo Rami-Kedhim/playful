@@ -1,3 +1,4 @@
+
 // User role types
 export type UserRole = 'USER' | 'ADMIN' | 'MODERATOR' | 'ESCORT' | 'CLIENT';
 
@@ -31,7 +32,7 @@ export interface PulseBoost {
 export interface BoostPackage {
   id: string;
   name: string;
-  description?: string;
+  description: string;
   price: number;
   price_ubx?: number;
   duration: string;
@@ -105,8 +106,8 @@ export interface BoostHistory {
 export interface BoostStatus {
   isActive: boolean;
   packageId?: string;
-  expiresAt?: Date;
-  startedAt?: Date;
+  expiresAt?: Date | string;
+  startedAt?: Date | string;
   timeRemaining?: string | number;
   remainingTime?: string | number;
   packageName?: string;
@@ -116,6 +117,10 @@ export interface BoostStatus {
   endTime?: Date;
   activeBoostId?: string;
   boostMultiplier?: number;
+  isExpiring?: boolean;
+  boostLevel?: number;
+  level?: number;
+  remainingDays?: number;
 }
 
 export interface BoostEligibility {

@@ -1,67 +1,182 @@
-
 import React, { useState } from 'react';
-import { convertEscortType } from '@/utils/typeConverters';
-import BookingDialog from './BookingDialog';
-import { useToast } from '@/components/ui/use-toast';
-import type { Escort } from '@/types/escort';
+import { convertEscortType, ensureEscortTypeCompatibility } from '@/utils/typeConverters';
+import BookingCalendar from './BookingCalendar';
+import BookingTimeSlots from './BookingTimeSlots';
+import BookingDuration from './BookingDuration';
+import BookingContactInfo from './BookingContactInfo';
+import BookingMessage from './BookingMessage';
+import BookingConfirmation from './BookingConfirmation';
+import { BookingFormData } from './types';
+import { Escort } from '@/types/Escort';
 
 interface BookingFlowProps {
-  escort: any; // We'll convert this to proper Escort type internally
-  initialStep?: string;
-  onComplete?: () => void;
+  escort: Escort;
+  onComplete: (data: BookingFormData) => void;
+  onCancel: () => void;
 }
 
-// This component serves as a wrapper around the booking process
-// It handles converting the escort from any source to the proper type
-const BookingFlow: React.FC<BookingFlowProps> = ({
-  escort,
-  initialStep = 'details',
-  onComplete
+const BookingFlow: React.FC<BookingFlowProps> = ({ 
+  escort, 
+  onComplete, 
+  onCancel 
 }) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [currentStep, setCurrentStep] = useState(initialStep);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+  // Convert escort type to ensure compatibility
+  const compatibleEscort = ensureEscortTypeCompatibility(escort);
+  
+  const [formData, setFormData] = useState<BookingFormData>({
+    date: null,
+    time: '',
+    duration: '60',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    message: '',
+  });
 
-  // Convert the escort to ensure type compatibility
-  const processedEscort = React.useMemo(() => {
-    return convertEscortType(escort);
-  }, [escort]);
+  const [step, setStep] = useState(1);
 
-  const handleBookingSubmit = async (bookingDetails: any) => {
-    try {
-      setIsSubmitting(true);
-      // Simulated API call to submit booking
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: "Booking Request Sent",
-        description: `Your booking request with ${processedEscort.name} has been sent.`
-      });
-      
-      if (onComplete) {
-        onComplete();
-      }
-      
-      setIsDialogOpen(false);
-    } catch (error) {
-      console.error("Booking submission error:", error);
-      toast({
-        title: "Booking failed",
-        description: "There was an error sending your booking request. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
+  const nextStep = () => {
+    setStep(step + 1);
+  };
+
+  const prevStep = () => {
+    setStep(step - 1);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
+  };
+
+  const handleDateChange = (date: Date | null) => {
+    setFormData(prevData => ({
+      ...prevData,
+      date: date
+    }));
+  };
+
+  const handleSubmit = () => {
+    onComplete(formData);
+  };
+
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <BookingCalendar
+            form={{
+              control: {
+                register: () => ({}),
+                setValue: (name: string, value: any) => {
+                  setFormData(prevData => ({ ...prevData, [name]: value }));
+                },
+                getValues: () => formData,
+              },
+              watch: () => formData.date,
+              formState: { errors: {} },
+            }}
+          />
+        );
+      case 2:
+        return (
+          <BookingTimeSlots
+            form={{
+              control: {
+                register: () => ({}),
+                setValue: (name: string, value: any) => {
+                  setFormData(prevData => ({ ...prevData, [name]: value }));
+                },
+                getValues: () => formData,
+              },
+              watch: () => formData.time,
+              formState: { errors: {} },
+            }}
+          />
+        );
+      case 3:
+        return (
+          <BookingDuration
+            form={{
+              control: {
+                register: () => ({}),
+                setValue: (name: string, value: any) => {
+                  setFormData(prevData => ({ ...prevData, [name]: value }));
+                },
+                getValues: () => formData,
+              },
+              watch: () => formData.duration,
+              formState: { errors: {} },
+            }}
+          />
+        );
+      case 4:
+        return (
+          <BookingContactInfo
+            form={{
+              control: {
+                register: () => ({}),
+                setValue: (name: string, value: any) => {
+                  setFormData(prevData => ({ ...prevData, [name]: value }));
+                },
+                getValues: () => formData,
+              },
+              watch: (name: string) => formData[name],
+              formState: { errors: {} },
+            }}
+          />
+        );
+      case 5:
+        return (
+          <BookingMessage
+            form={{
+              control: {
+                register: () => ({}),
+                setValue: (name: string, value: any) => {
+                  setFormData(prevData => ({ ...prevData, [name]: value }));
+                },
+                getValues: () => formData,
+              },
+              watch: () => formData.message,
+              formState: { errors: {} },
+            }}
+          />
+        );
+      case 6:
+        return (
+          <BookingConfirmation
+            formData={formData}
+            escort={compatibleEscort}
+          />
+        );
+      default:
+        return null;
     }
   };
 
   return (
-    <BookingDialog 
-      escort={processedEscort} 
-      isOpen={isDialogOpen} 
-      onClose={() => setIsDialogOpen(false)}
-    />
+    <div className="space-y-4">
+      {renderStep()}
+      <div className="flex justify-between">
+        {step > 1 && (
+          <button onClick={prevStep} className="px-4 py-2 bg-gray-200 text-gray-700 rounded">
+            Previous
+          </button>
+        )}
+        {step < 6 ? (
+          <button onClick={nextStep} className="px-4 py-2 bg-blue-500 text-white rounded">
+            Next
+          </button>
+        ) : (
+          <button onClick={handleSubmit} className="px-4 py-2 bg-green-500 text-white rounded">
+            Confirm Booking
+          </button>
+        )}
+      </div>
+    </div>
   );
 };
 
