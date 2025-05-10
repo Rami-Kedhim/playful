@@ -1,53 +1,72 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { HermesInsight } from '@/types/core-systems';
 import { hermes } from '@/core';
+import { HermesInsight } from '@/types/core-systems';
 
-export const useHermesLivecamInsights = (livecamId?: string) => {
-  const [insights, setInsights] = useState<HermesInsight[]>([]);
-  const [loading, setLoading] = useState(true);
+export interface LivecamInsight {
+  id: string;
+  title: string;
+  description: string;
+  category?: string;
+  value?: number;
+  trend?: 'up' | 'down' | 'flat';
+  priority: number;
+}
+
+export const useHermesLivecamInsights = (streamId: string) => {
+  const [insights, setInsights] = useState<LivecamInsight[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
   const fetchInsights = useCallback(async () => {
-    if (!livecamId) {
-      setInsights([]);
+    if (!streamId) {
       setLoading(false);
       return;
     }
     
     try {
       setLoading(true);
-      setError(null);
       
-      // Call the Hermes system to get insights
+      // Get insights from Hermes
       const hermesInsights = await hermes.getInsights();
-      setInsights(hermesInsights as HermesInsight[]);
-    } catch (err: any) {
+      
+      // Map Hermes insights to our format and filter for livecam
+      const livecamInsights = hermesInsights
+        .filter(insight => {
+          // Add a type check or default value for category
+          const category = insight.type || '';
+          return category.includes('livecam') || category.includes('stream');
+        })
+        .map(insight => ({
+          id: insight.id,
+          title: insight.title,
+          description: insight.description,
+          category: insight.type,
+          priority: insight.priority,
+          value: insight.metadata?.value,
+          trend: insight.metadata?.trend
+        }));
+      
+      setInsights(livecamInsights);
+      setError(null);
+    } catch (err) {
       console.error('Error fetching Hermes insights:', err);
-      setError(err.message || 'Failed to fetch insights');
-      setInsights([]);
+      setError('Failed to load insights');
     } finally {
       setLoading(false);
     }
-  }, [livecamId]);
+  }, [streamId]);
   
   useEffect(() => {
     fetchInsights();
+    
+    // Refresh insights every 5 minutes
+    const interval = setInterval(fetchInsights, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
   }, [fetchInsights]);
   
-  const getPerformanceInsights = () => insights.filter(insight => insight.category === 'performance');
-  const getViewerInsights = () => insights.filter(insight => insight.category === 'viewer');
-  const getContentInsights = () => insights.filter(insight => insight.category === 'content');
-  
-  return {
-    insights,
-    loading,
-    error,
-    refreshInsights: fetchInsights,
-    performanceInsights: getPerformanceInsights(),
-    viewerInsights: getViewerInsights(),
-    contentInsights: getContentInsights()
-  };
+  return { insights, loading, error, refreshInsights: fetchInsights };
 };
 
 export default useHermesLivecamInsights;

@@ -1,164 +1,114 @@
 
-import React from 'react';
-import Layout from '@/layouts/Layout';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useEffect } from 'react';
+import { useSystemHealth } from '@/hooks/useSystemHealth';
 import { Button } from '@/components/ui/button';
-import { useUberCoreNeuralMonitor } from '@/hooks/useUberCoreNeuralMonitor';
-import { Brain, Heart, MessageSquare, Search, Shield, Users } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { AppPaths } from '@/routes/routeConfig';
+import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Shield, RefreshCw, AlertTriangle } from 'lucide-react';
 
 const Dashboard = () => {
-  const { health, refreshHealth, systemStatus } = useUberCoreNeuralMonitor();
+  const { systemHealth, loading, refreshSystemHealth, subsystemStatus, restartSubsystem } = useSystemHealth();
+  
+  useEffect(() => {
+    refreshSystemHealth();
+  }, [refreshSystemHealth]);
   
   return (
-    <Layout 
-      title="Dashboard" 
-      description="Welcome to UberEscorts ecosystem"
-    >
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="container mx-auto py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">System Dashboard</h1>
+        <Button onClick={refreshSystemHealth} variant="outline" size="sm" className="flex items-center gap-2">
+          <RefreshCw className="h-4 w-4" /> Refresh
+        </Button>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Brain className="h-5 w-5 text-primary" />
-              Neural Monitor
-            </CardTitle>
-            <CardDescription>System Health Status</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">System Uptime</CardTitle>
+            <Shield className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">System Status</p>
-                <p className="text-2xl font-bold">
-                  {health.status === 'ok' ? 'Operational' : 'Degraded'}
-                </p>
-              </div>
-              <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
-                health.status === 'ok' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
-              }`}>
-                {health.status === 'ok' ? '✓' : '!'}
-              </div>
+            <div className="text-2xl font-bold">
+              {loading ? '...' : `${systemHealth?.uptime || 0}%`}
             </div>
+            <p className="text-xs text-muted-foreground">
+              Last 30 days
+            </p>
           </CardContent>
-          <CardFooter>
-            <Button variant="outline" size="sm" onClick={() => refreshHealth()}>
-              Refresh Status
-            </Button>
-            <Link to={AppPaths.NEURAL_MONITOR} className="ml-auto">
-              <Button size="sm">
-                View Details
-              </Button>
-            </Link>
-          </CardFooter>
         </Card>
         
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
-              Escort Network
-            </CardTitle>
-            <CardDescription>Active escort connections</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Response Time</CardTitle>
+            <Shield className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">247</div>
-            <p className="text-xs text-muted-foreground">24 new in the last hour</p>
-            <div className="mt-4 h-2 rounded-full bg-secondary">
-              <div className="h-full w-4/5 rounded-full bg-primary"></div>
+            <div className="text-2xl font-bold">
+              {loading ? '...' : `${systemHealth?.responseTime || 0}ms`}
             </div>
+            <p className="text-xs text-muted-foreground">
+              Average response time
+            </p>
           </CardContent>
-          <CardFooter>
-            <Link to={AppPaths.ESCORTS} className="w-full">
-              <Button className="w-full">View Escorts</Button>
-            </Link>
-          </CardFooter>
         </Card>
         
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Search className="h-5 w-5 text-primary" />
-              SEO Performance
-            </CardTitle>
-            <CardDescription>Content optimization metrics</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Error Rate</CardTitle>
+            <Shield className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Visibility Score</p>
-                <p className="text-2xl font-bold">85%</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Profiles Optimized</p>
-                <p className="text-2xl font-bold">43</p>
-              </div>
+            <div className="text-2xl font-bold">
+              {loading ? '...' : `${systemHealth?.errorRate || 0}%`}
             </div>
+            <p className="text-xs text-muted-foreground">
+              Last 24 hours
+            </p>
           </CardContent>
-          <CardFooter>
-            <Link to={AppPaths.SEO} className="w-full">
-              <Button className="w-full">SEO Tools</Button>
-            </Link>
-          </CardFooter>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-primary" />
-              Messages
-            </CardTitle>
-            <CardDescription>Unread conversations</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">3 new since last login</p>
-          </CardContent>
-          <CardFooter>
-            <Link to={AppPaths.MESSAGES} className="w-full">
-              <Button className="w-full" variant="outline">View Messages</Button>
-            </Link>
-          </CardFooter>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Shield className="h-5 w-5 text-primary" />
-              Safety Center
-            </CardTitle>
-            <CardDescription>Protection features status</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">Active</div>
-            <p className="text-xs text-muted-foreground">All safety systems operational</p>
-          </CardContent>
-          <CardFooter>
-            <Link to={AppPaths.SAFETY} className="w-full">
-              <Button className="w-full" variant="outline">Safety Center</Button>
-            </Link>
-          </CardFooter>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Heart className="h-5 w-5 text-primary" />
-              Favorites
-            </CardTitle>
-            <CardDescription>Your favorite escorts</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">5</div>
-            <p className="text-xs text-muted-foreground">2 are online now</p>
-          </CardContent>
-          <CardFooter>
-            <Link to={AppPaths.FAVORITES} className="w-full">
-              <Button className="w-full" variant="outline">View Favorites</Button>
-            </Link>
-          </CardFooter>
         </Card>
       </div>
-    </Layout>
+      
+      <h2 className="text-xl font-bold mb-4">Subsystem Status</h2>
+      
+      {loading ? (
+        <div className="h-64 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {subsystemStatus.map((subsystem) => (
+            <Card key={subsystem.name}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 py-3">
+                <div>
+                  <CardTitle>{subsystem.name}</CardTitle>
+                  <CardDescription>{subsystem.status}</CardDescription>
+                </div>
+                {subsystem.status !== 'operational' && (
+                  <AlertTriangle className="h-5 w-5 text-amber-500" />
+                )}
+              </CardHeader>
+              <CardContent className="pb-2">
+                <Progress value={subsystem.health} className="h-2 w-full" />
+              </CardContent>
+              <CardFooter className="flex justify-between pt-2">
+                <p className="text-sm text-muted-foreground">Health: {subsystem.health}%</p>
+                {subsystem.status !== 'operational' && (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => restartSubsystem(subsystem.name)}
+                  >
+                    Restart
+                  </Button>
+                )}
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 

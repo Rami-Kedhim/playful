@@ -1,4 +1,6 @@
 
+// Update the HermesStatus interface and other boost-related types
+
 export interface BoostPackage {
   id: string;
   name: string;
@@ -54,6 +56,7 @@ export interface BoostPurchaseResult {
   boostId?: string;
   error?: string | null;
   message?: string;
+  transactionId?: string;
 }
 
 export interface HermesStatus {
@@ -65,6 +68,8 @@ export interface HermesStatus {
   boostScore?: number;
   effectivenessScore?: number;
   isActive?: boolean;
+  recommendations?: string[];
+  lastUpdated?: Date;
 }
 
 export interface UserBoost {
@@ -100,22 +105,54 @@ export interface BoostAnalytics {
 }
 
 export interface AnalyticsData {
-  views: number;
-  impressions: number;
-  clicks: number;
-  conversions: number;
-  boostScore: number;
-  visibilityScore: number;
-  positionChange: number;
-  timeRange: string;
+  views?: number;
+  impressions?: number;
+  clicks?: number;
+  conversions?: number;
+  boostScore?: number;
+  visibilityScore?: number;
+  positionChange?: number;
+  timeRange?: string;
+  totalBoosts?: number;
+  activeBoosts?: number;
+  averageBoostScore?: number;
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  interactions?: {
+    value: number;
+    change?: number;
+  };
+  today?: number;
+  yesterday?: number;
+  weeklyAverage?: number;
+  withBoost?: number;
+  withoutBoost?: number;
+  increase?: number;
+  change?: number;
+  value?: number;
 }
 
 export interface BoostScoreResult {
   score: number;
-  factors: {
+  factors?: {
     profileCompleteness: number;
     activityScore: number;
     engagementRate: number;
   };
-  recommendations: string[];
+  recommendations?: string[];
+}
+
+export interface EnhancedBoostStatus extends BoostStatus {
+  packageName?: string;
+  expiresAt?: Date;
+  startedAt?: Date;
+  timeRemaining?: string;
+  progress?: number;
+  boostPackage?: BoostPackage;
+  packageId?: string;
+  isActive: boolean; // This property is required
+  remainingMinutes?: number;
+  percentRemaining?: number;
+  isExpired?: boolean;
 }

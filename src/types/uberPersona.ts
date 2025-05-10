@@ -26,6 +26,7 @@ export interface UberPersona {
     responseRate?: number;
     responseTime?: number | string;
     rating?: number;
+    bookings?: number;
   };
   monetization?: {
     hourlyRate?: number;
@@ -45,4 +46,17 @@ export interface UberPersona {
   metadata?: Record<string, any>;
   roleFlags?: number;
   isActive?: boolean;
+  services?: string[];
+  imageUrl?: string;
+  profileImage?: string;
+  profileImageUrl?: string;
+  availability?: Array<{
+    start: Date | string;
+    end: Date | string;
+  }> | {
+    nextAvailable?: Date | string;
+    schedule?: Record<string, any>;
+  };
+  gender?: string;
+  bookings?: any[];
 }

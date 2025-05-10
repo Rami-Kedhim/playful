@@ -2,7 +2,6 @@
 import { lucieAI } from './Lucie';
 import { oxum } from './index';
 import { hermes } from './index';
-import { GenerateContentParams } from '@/types/core-systems';
 
 /**
  * Neural hub for integrating AI functions across systems
@@ -30,7 +29,7 @@ class NeuralHub {
    */
   async processText(prompt: string): Promise<string> {
     // Create proper params object
-    const params: GenerateContentParams = {
+    const params = {
       prompt
     };
     

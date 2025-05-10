@@ -11,6 +11,7 @@ export type {
   SystemHealthMetrics,
   SessionValidationResult,
   UberCoreSystem,
+  GenerateContentParams,
   RecommendedAction
 } from '@/types/core-systems';
 

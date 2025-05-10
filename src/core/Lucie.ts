@@ -1,4 +1,6 @@
 
+// Update the Lucie implementation to include the processInput method
+
 export interface LucieAI {
   initialized: boolean;
   initialize(): Promise<boolean>;
@@ -13,6 +15,7 @@ export interface LucieAI {
       sentimentAnalysis: 'online' | 'offline' | 'degraded';
     }
   };
+  processInput(input: string, context: any): Promise<string>;
 }
 
 export class LucieAI implements LucieAI {
@@ -55,6 +58,12 @@ export class LucieAI implements LucieAI {
       topics: ['general'],
       safetyCheck: { safe: true }
     };
+  }
+
+  async processInput(input: string, context: any): Promise<string> {
+    // Mock implementation
+    console.log(`Processing input: ${input}`);
+    return `Processed response for input: ${input}`;
   }
 
   getSystemStatus(): {

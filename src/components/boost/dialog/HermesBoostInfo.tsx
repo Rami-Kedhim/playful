@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Rocket } from 'lucide-react';
+import { ThumbsUp } from 'lucide-react';
 import { HermesStatus } from '@/types/pulse-boost';
 
 interface HermesBoostInfoProps {
@@ -10,41 +10,51 @@ interface HermesBoostInfoProps {
 }
 
 const HermesBoostInfo: React.FC<HermesBoostInfoProps> = ({ hermesStatus }) => {
+  const visibility = hermesStatus.estimatedVisibility || 0;
+  const position = hermesStatus.position || 0;
+  const score = hermesStatus.score || 0;
+
   return (
-    <Card className="border-none shadow-none bg-muted/50">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Rocket className="h-4 w-4 text-amber-500" />
-          <h3 className="font-medium text-sm">Visibility Score</h3>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <ThumbsUp className="h-5 w-5 text-primary" />
+          Hermes Optimizer Insights
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <div className="flex justify-between mb-1">
+            <span className="text-sm text-muted-foreground">Current Visibility</span>
+            <span className="text-sm font-medium">{visibility}%</span>
+          </div>
+          <Progress value={visibility} className="h-2" />
         </div>
         
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-2xl font-bold">{hermesStatus.score || 0}</span>
-            <span className="text-xs text-muted-foreground">Out of 100</span>
-          </div>
-          
-          <Progress value={hermesStatus.score || 0} className="h-2" />
-          
-          <p className="text-xs text-muted-foreground">
-            Estimated visibility: {hermesStatus.estimatedVisibility || 0}%
-          </p>
-          
-          {hermesStatus.recommendations && hermesStatus.recommendations.length > 0 && (
-            <div className="mt-3">
-              <h4 className="text-xs font-medium mb-1">Recommendations:</h4>
-              <ul className="text-xs space-y-1">
-                {hermesStatus.recommendations.map((rec, i) => (
-                  <li key={i} className="flex items-start gap-1">
-                    <span className="text-primary">•</span>
-                    <span>{rec}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+        <div className="space-y-1">
+          <span className="text-sm text-muted-foreground">Current Position</span>
+          <p className="text-lg font-semibold">#{position} in search results</p>
         </div>
+        
+        <div className="space-y-1">
+          <span className="text-sm text-muted-foreground">Boost Score</span>
+          <p className="text-lg font-semibold">{score}/100</p>
+        </div>
+        
+        {hermesStatus.recommendations && hermesStatus.recommendations.length > 0 && (
+          <div className="space-y-1">
+            <span className="text-sm text-muted-foreground">Recommendations</span>
+            <ul className="text-sm list-disc pl-5 space-y-1">
+              {hermesStatus.recommendations.map((rec, index) => (
+                <li key={index}>{rec}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </CardContent>
+      <CardFooter className="text-xs text-muted-foreground">
+        Last updated: {new Date().toLocaleTimeString()}
+      </CardFooter>
     </Card>
   );
 };

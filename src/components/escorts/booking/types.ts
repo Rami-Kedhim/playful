@@ -1,28 +1,12 @@
 
-import { Escort } from '@/types/Escort';
-
 export interface BookingFormData {
-  date?: Date;
-  time?: string;
-  duration?: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  message?: string;
-}
-
-export interface BookingFormValues {
-  date?: Date;
-  time?: string;
-  duration?: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  message?: string;
-}
-
-export interface BookingConfirmationProps {
-  escort: Escort;
-  formData: BookingFormData;
-  onClose?: () => void;
+  date: Date;
+  time: string;
+  duration: string;
+  location: string;
+  special_requests?: string;
+  service_type?: string;
+  meeting_type?: 'in_person' | 'virtual';
+  escort_id: string;
+  client_id?: string;
 }

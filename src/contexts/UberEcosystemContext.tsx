@@ -8,11 +8,15 @@ export interface UberEcosystemContextType {
   ready: boolean;
   oxum?: Oxum;
   lucieAI?: LucieAI;
+  user?: any; // Add user property
+  loading?: boolean; // Add loading property
 }
 
 const defaultContextValue: UberEcosystemContextType = {
   initialized: false,
-  ready: false
+  ready: false,
+  user: null,
+  loading: true
 };
 
 export const UberEcosystemContext = createContext<UberEcosystemContextType>(defaultContextValue);
@@ -34,14 +38,17 @@ export const UberEcosystemProvider: React.FC<{ children: React.ReactNode }> = ({
           initialized: true,
           ready: true,
           oxum: oxumInstance,
-          lucieAI
+          lucieAI,
+          user: null,  // Will be populated by auth system
+          loading: false
         });
       } catch (error) {
         console.error("Failed to initialize Uber ecosystem:", error);
         setState({
           ...state,
           initialized: true,
-          ready: false
+          ready: false,
+          loading: false
         });
       }
     };

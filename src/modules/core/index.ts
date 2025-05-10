@@ -1,7 +1,7 @@
 
 // Correct exports from core systems
-import { hermes } from '@/core/Hermes';
-import { oxum } from '@/core/Oxum';
+import { hermes } from '@/core';
+import { oxum } from '@/core';
 import { lucieAI } from '@/core/Lucie';
 import { hermesOrusOxum } from '@/core/HermesOrusOxum';
 

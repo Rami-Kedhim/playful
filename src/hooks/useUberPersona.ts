@@ -2,87 +2,108 @@
 import { useState, useEffect } from 'react';
 import { UberPersona } from '@/types/uberPersona';
 
-export const useUberPersona = (id?: string) => {
+// Mock data generator for UberPersona
+const generateMockPersona = (id: string): UberPersona => {
+  return {
+    id,
+    name: `Persona ${id.substring(0, 5)}`,
+    displayName: `Display Name ${id.substring(0, 5)}`,
+    description: 'A detailed description of this persona',
+    avatarUrl: `https://picsum.photos/seed/${id}/200`,
+    isOnline: Math.random() > 0.5,
+    isVerified: Math.random() > 0.3,
+    isPremium: Math.random() > 0.7,
+    isFeatured: Math.random() > 0.8,
+    location: 'New York, USA',
+    rating: Math.round((3.5 + Math.random() * 1.5) * 10) / 10,
+    tags: ['friendly', 'creative', 'energetic'],
+    bio: 'This is a brief bio about me and what I do.',
+    languages: ['English', 'Spanish'],
+    traits: ['creative', 'analytical', 'social'],
+    stats: {
+      popularity: Math.round(Math.random() * 100),
+      intelligence: Math.round(Math.random() * 100),
+      charm: Math.round(Math.random() * 100),
+      energy: Math.round(Math.random() * 100),
+      views: Math.round(Math.random() * 1000),
+      likes: Math.round(Math.random() * 500),
+      responseRate: Math.round(Math.random() * 100),
+      responseTime: `${Math.round(Math.random() * 60)} minutes`
+    },
+    monetization: {
+      hourlyRate: 50 + Math.round(Math.random() * 150),
+      packages: [
+        {
+          name: 'Basic',
+          price: 50,
+          duration: '1 hour',
+          description: 'Basic package with standard features'
+        },
+        {
+          name: 'Premium',
+          price: 100,
+          duration: '2 hours',
+          description: 'Premium package with all features'
+        }
+      ],
+      acceptsUbx: true,
+      acceptsFiat: true
+    },
+    roleFlags: 1,
+    isActive: true
+  };
+};
+
+export const useUberPersona = (personaId?: string) => {
   const [persona, setPersona] = useState<UberPersona | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
+  
   useEffect(() => {
-    if (!id) {
-      setLoading(false);
-      return;
-    }
-
     const fetchPersona = async () => {
+      if (!personaId) {
+        setLoading(false);
+        return;
+      }
+      
       try {
         setLoading(true);
-        // Mock data for demo purposes
-        const mockPersona: UberPersona = {
-          id: id,
-          name: `Persona ${id}`,
-          type: 'escort',
-          avatarUrl: 'https://example.com/avatar.jpg',
-          location: 'New York, US',
-          isVerified: true,
-          isActive: true,
-          tags: ['VIP', 'Premium'],
-          services: ['Companion', 'Event Escort'],
-          rating: 4.8,
-          reviewCount: 52,
-          isPremium: true,
-          systemMetadata: {
-            boostScore: 85,
-            lastActive: new Date(),
-            createdAt: new Date(),
-            profileViews: 1240,
-            lastSynced: new Date(),
-            source: 'API', // This is now valid because we added it to the type
-            tagsGeneratedByAI: false
-          },
-          roleFlags: {
-            isEscort: true,
-            isCreator: false,
-            isLivecam: false,
-            isAI: false,
-            isVerified: true
-          },
-          stats: {
-            views: 2450,
-            likes: 380,
-            bookings: 24,
-            completion: 98,
-            responseRate: 95,
-            responseTime: 15,
-            rating: 4.8 // This is now valid because we added it to the type
-          },
-          bio: 'Professional escort with 5+ years of experience...',
-          availability: [
-            {
-              start: new Date(),
-              end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-            }
-          ],
-          monetization: {
-            hourlyRate: 300,
-            minRate: 250,
-            maxRate: 500,
-            acceptsUbx: true,
-            meetingPrice: 300 // This is now valid because we added it to the type
-          }
-        };
         
-        setPersona(mockPersona);
-        setError(null);
-      } catch (err: any) {
-        console.error('Failed to fetch persona:', err);
-        setError(err.message || 'An error occurred');
-      } finally {
+        // In a real app, you would fetch from an API
+        // For now, generate mock data
+        setTimeout(() => {
+          const mockPersona = generateMockPersona(personaId);
+          
+          // Add flags
+          mockPersona.metadata = {
+            flags: {
+              isEscort: true,
+              isCreator: false,
+              isLivecam: false,
+              isAI: false,
+              isVerified: true
+            }
+          };
+          
+          setPersona(mockPersona);
+          setLoading(false);
+        }, 500);
+        
+      } catch (err) {
+        console.error('Error fetching persona:', err);
+        setError('Failed to load persona');
         setLoading(false);
       }
     };
-
+    
     fetchPersona();
-  }, [id]);
-
-  return { persona, loading, error };
+  }, [personaId]);
+  
+  return {
+    persona,
+    loading,
+    error
+  };
 };
+
+export default useUberPersona;
