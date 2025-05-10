@@ -1,4 +1,5 @@
 
+
 export interface UberPersona {
   id: string;
   name: string;
@@ -53,3 +54,4 @@ export interface UberPersona {
     meetingPrice?: number;
   };
 }
+

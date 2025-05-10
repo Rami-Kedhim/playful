@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import BoostStatusDisplay from './BoostStatusDisplay';
 import BoostDialog from './dialog/BoostDialog';
 import { pulseBoostService } from '@/services/boost/pulseBoostService';
-import { BoostPackage, BoostStatus, BoostEligibility } from '@/types/pulse-boost';
+import { BoostPackage, BoostStatus, BoostEligibility } from '@/types/boost';
 
 interface PulseBoostManagerProps {
   profileId: string;
@@ -33,7 +33,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
         setLoading(true);
         
         // Fetch boost packages
-        const packages = pulseBoostService.getBoostPackages();
+        const packages = await Promise.resolve(pulseBoostService.getBoostPackages());
         setBoostPackages(packages);
         
         // Simulate getting boost status from API
@@ -134,10 +134,7 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
         profileId={profileId}
         boostStatus={boostStatus}
         eligibility={eligibility}
-        packages={boostPackages.map(pkg => ({
-          ...pkg,
-          description: pkg.description || ''
-        }))}
+        packages={boostPackages}
         onBoost={handleApplyBoost}
         onCancel={handleCancelBoost}
         selectedPackage=""

@@ -37,6 +37,7 @@ export interface BoostPackage {
   price_ubx?: number;
   duration: string;
   durationMinutes?: number;
+  durationInSeconds?: number;
   features?: string[];
   visibility?: string;
   visibility_increase?: number;
@@ -46,6 +47,8 @@ export interface BoostPackage {
   boostMultiplier?: number;
   isMostPopular?: boolean;
   isRecommended?: boolean;
+  level?: number;
+  isPopular?: boolean;
 }
 
 export interface BoostPurchaseRequest {
@@ -72,6 +75,15 @@ export interface BoostAnalytics {
   additionalViews?: number;
   engagementIncrease?: number;
   rankingPosition?: number;
+  views?: number;
+  impressions?: {
+    value: number;
+    change?: number;
+  };
+  interactions?: {
+    value: number;
+    change?: number;
+  };
 }
 
 export interface BoostHistory {
@@ -94,10 +106,10 @@ export interface BoostHistory {
 export interface BoostStatus {
   isActive: boolean;
   packageId?: string;
-  expiresAt?: Date;
-  startedAt?: Date;
-  timeRemaining?: string;
-  remainingTime?: string;
+  expiresAt?: Date | string;
+  startedAt?: Date | string;
+  timeRemaining?: string | number;
+  remainingTime?: string | number;
   packageName?: string;
   boostPackage?: BoostPackage;
   progress?: number;
@@ -107,13 +119,13 @@ export interface BoostStatus {
   boostMultiplier?: number;
   isExpiring?: boolean;
   boostLevel?: number;
-  remainingDays?: number;
   level?: number;
+  remainingDays?: number;
 }
 
 export interface BoostEligibility {
-  isEligible: boolean;
-  eligible?: boolean; // For backward compatibility
+  isEligible?: boolean;
+  eligible?: boolean;
   reason?: string;
   reasons?: string[];
   nextEligibleTime?: string;
@@ -122,10 +134,10 @@ export interface BoostEligibility {
 }
 
 export interface HermesStatus {
-  position: number;
-  activeUsers: number;
-  estimatedVisibility: number;
-  lastUpdateTime: string;
+  position?: number;
+  activeUsers?: number;
+  estimatedVisibility?: number;
+  lastUpdateTime?: string;
   boostScore?: number;
   effectivenessScore?: number;
   isActive?: boolean;
@@ -144,39 +156,16 @@ export interface EnhancedBoostStatus {
   remainingTime?: string;
 }
 
-export interface BoostContextType {
-  boostStatus: BoostStatus;
-  eligibility: BoostEligibility;
-  packages: BoostPackage[];
-  boostPackages?: BoostPackage[];
-  loading: boolean;
-  error: string | null;
-  boostProfile: (profileId: string, packageId: string) => Promise<boolean>;
-  cancelBoost: () => Promise<boolean>;
-  getBoostAnalytics: () => Promise<any>;
-  fetchBoostPackages: () => Promise<BoostPackage[]>;
-  dailyBoostUsage?: number;
-  dailyBoostLimit?: number;
-  formatBoostDuration?: (duration: string) => string;
-  adaptGetBoostPrice?: (fn?: (pkg: BoostPackage) => number) => number;
-  hermesStatus?: HermesStatus;
-}
-
-export interface BoostDialogTabsProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  loading: boolean;
-  boostStatus: BoostStatus;
-  eligibility: BoostEligibility;
-  boostPackages: BoostPackage[];
-  selectedPackage: string;
-  setSelectedPackage: (id: string) => void;
-  handleBoost: () => Promise<boolean> | void;
-  handleCancel: () => Promise<boolean>;
-  dailyBoostUsage: number;
-  dailyBoostLimit: number;
-  handleDialogClose: () => void;
-  getBoostPrice?: () => number;
-  hermesStatus: HermesStatus;
-  formatBoostDuration?: (duration: string) => string;
+export interface BoostAnalyticsData {
+  totalBoosts: number;
+  activeBoosts: number;
+  viewIncrease: number;
+  engagementRate: number;
+  averageBoostScore: number;
+  historicalData: {
+    date: string;
+    views: number;
+    engagement: number;
+    score: number;
+  }[];
 }

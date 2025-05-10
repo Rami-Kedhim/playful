@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Zap, Clock } from "lucide-react";
-import { BoostStatus } from "@/types/pulse-boost";
+import { BoostStatus } from "@/types/boost";
 
 interface BoostStatusDisplayProps {
   boostStatus: BoostStatus;

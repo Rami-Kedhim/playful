@@ -4,6 +4,7 @@ import { convertEscortType } from '@/utils/typeConverters';
 import BookingDialog from './BookingDialog';
 import { useToast } from '@/components/ui/use-toast';
 import type { Escort } from '@/types/Escort';
+import { BookingFormValues } from './types';
 
 interface BookingFlowProps {
   escort: any; // We'll convert this to proper Escort type internally
@@ -28,7 +29,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
     return convertEscortType(escort);
   }, [escort]);
 
-  const handleBookingSubmit = async (bookingDetails: any) => {
+  const handleBookingSubmit = async (bookingDetails: BookingFormValues) => {
     try {
       setIsSubmitting(true);
       // Simulated API call to submit booking
@@ -61,6 +62,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
       escort={processedEscort as unknown as Escort} 
       isOpen={isDialogOpen} 
       onClose={() => setIsDialogOpen(false)}
+      onSubmit={handleBookingSubmit}
     />
   );
 };
