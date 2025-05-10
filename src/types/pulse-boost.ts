@@ -82,6 +82,7 @@ export interface BoostStatus {
   activeBoostId?: string;
   boostMultiplier?: number;
   level?: number; // Add this for CreatorBoostTab
+  remainingDays?: number; // Add this explicitly for PulseBoostManager
   remainingMinutes?: number; // Add this for usePulseBoost
   percentRemaining?: number; // Add this for usePulseBoost
 }

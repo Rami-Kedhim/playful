@@ -1,229 +1,199 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowRight, Zap, Timer } from 'lucide-react';
-import { usePulseBoost } from '@/hooks/boost/usePulseBoost';
+import { useToast } from '@/hooks/use-toast';
 import { BoostStatus, BoostPackage } from '@/types/pulse-boost';
-import BoostPackageCard from './BoostPackageCard';
-import BoostProgress from './BoostProgress';
-import { useToast } from '@/components/ui/use-toast';
+import { Sparkles } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import BoostDialog from './dialog/BoostDialog';
+import { pulseService } from '@/services/boost/pulseService';
 
 interface PulseBoostManagerProps {
   profileId?: string;
 }
 
 const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
-  const { toast } = useToast();
-  const {
-    boostStatus,
-    packages,
-    loading,
-    refreshStatus,
-    purchaseBoost,
-    getFormattedTimeRemaining,
-  } = usePulseBoost(profileId);
-  
-  const [localStatus, setLocalStatus] = useState<BoostStatus>({
+  const [boostStatus, setBoostStatus] = useState<BoostStatus>({
     isActive: false,
+    expiresAt: '',
+    timeRemaining: '',
+    boostLevel: 0,
+    isExpiring: false,
+    packageName: '',
+    progress: 0
   });
+  
+  const [packages, setPackages] = useState<BoostPackage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingAction, setLoadingAction] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (boostStatus) {
-      setLocalStatus({
-        ...boostStatus,
-        remainingDays: calculateRemainingDays(boostStatus)
-      });
-    }
-  }, [boostStatus]);
+    loadData();
+  }, [profileId]);
 
-  // Calculate remaining days for display purposes
-  const calculateRemainingDays = (status: BoostStatus): number => {
-    if (!status.expiresAt) return 0;
-    
-    const expiry = status.expiresAt instanceof Date 
-      ? status.expiresAt 
-      : new Date(status.expiresAt);
-    
-    const now = new Date();
-    const diff = expiry.getTime() - now.getTime();
-    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-  };
-
-  const handleSelectPackage = (packageId: string) => {
-    setSelectedPackage(packageId);
-  };
-
-  const handleActivateBoost = async () => {
-    if (!selectedPackage) {
-      toast({
-        title: "No package selected",
-        description: "Please select a boost package first",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const result = await purchaseBoost(selectedPackage);
-    
-    if (result.success) {
-      toast({
-        title: "Boost activated",
-        description: "Your profile boost has been successfully activated"
-      });
+  const loadData = async () => {
+    try {
+      setLoading(true);
       
-      // Update local status
-      const selectedBoostPackage = packages.find(pkg => pkg.id === selectedPackage);
-      if (selectedBoostPackage) {
-        // Calculate expiry date
-        const now = new Date();
-        const expiryDate = new Date(now);
-        expiryDate.setMinutes(expiryDate.getMinutes() + selectedBoostPackage.durationMinutes);
+      // Fetch boost packages
+      const availablePackages = pulseService.getPackages();
+      setPackages(availablePackages);
+      
+      // Mock active boost for demonstration
+      const mockBoost = Math.random() > 0.5;
+      
+      if (mockBoost) {
+        const expiryDate = new Date();
+        expiryDate.setHours(expiryDate.getHours() + Math.floor(Math.random() * 48 + 1));
         
-        setLocalStatus({
+        const startDate = new Date();
+        startDate.setHours(startDate.getHours() - 24);
+        
+        const expiresIn = formatDistanceToNow(expiryDate);
+        const progress = Math.round(((expiryDate.getTime() - Date.now()) / 
+                                     (expiryDate.getTime() - startDate.getTime())) * 100);
+        
+        setBoostStatus({
           isActive: true,
-          packageName: selectedBoostPackage.name,
-          packageId: selectedBoostPackage.id,
-          startedAt: now,
-          expiresAt: expiryDate,
-          boostPackage: selectedBoostPackage,
-          remainingDays: calculateRemainingDays({ isActive: true, expiresAt: expiryDate })
+          expiresAt: expiryDate.toISOString(),
+          startedAt: startDate.toISOString(),
+          packageName: 'Premium Boost',
+          timeRemaining: expiresIn,
+          packageId: '2',
+          boostLevel: 2,
+          progress: progress,
+          isExpiring: progress < 25
         });
       }
-      
-      // Reset selection
-      setSelectedPackage(null);
-    } else {
+    } catch (error) {
+      console.error('Error loading boost data:', error);
       toast({
-        title: "Boost activation failed",
-        description: result.message || "Failed to activate boost",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to load boost information',
+        variant: 'destructive'
       });
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Display active boost and boost packages
+  const handleApplyBoost = async (packageId: string) => {
+    try {
+      setLoadingAction(true);
+      
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const selectedPackage = packages.find(p => p.id === packageId);
+      
+      if (!selectedPackage) {
+        throw new Error('Invalid package');
+      }
+      
+      // Set a new boost status
+      const startDate = new Date();
+      const expiryDate = new Date();
+      expiryDate.setMinutes(expiryDate.getMinutes() + selectedPackage.durationMinutes);
+      
+      setBoostStatus({
+        isActive: true,
+        expiresAt: expiryDate.toISOString(),
+        startedAt: startDate.toISOString(),
+        packageName: selectedPackage.name,
+        timeRemaining: formatDistanceToNow(expiryDate),
+        packageId: packageId,
+        boostLevel: selectedPackage.isMostPopular ? 2 : 1,
+        progress: 100,
+        isExpiring: false
+      });
+      
+      toast({
+        title: 'Success!',
+        description: `Your profile has been boosted with ${selectedPackage.name}`,
+      });
+      
+      setShowDialog(false);
+      return true;
+    } catch (error) {
+      console.error('Error applying boost:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to apply boost',
+        variant: 'destructive'
+      });
+      return false;
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
+  const renderActiveBoost = () => {
+    if (!boostStatus.isActive) return null;
+    
+    return (
+      <Card className={boostStatus.isExpiring ? "border-orange-500" : "border-green-500"}>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center">
+            <Sparkles className="h-5 w-5 mr-2 text-amber-500" />
+            Active Boost
+          </CardTitle>
+          <CardDescription>
+            {boostStatus.packageName} expires in {boostStatus.timeRemaining}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-primary rounded-full" 
+              style={{ width: `${boostStatus.progress}%` }}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-1 text-right">
+            {boostStatus.progress}% remaining
+          </p>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-48">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {localStatus.isActive ? (
-        <Card className="p-6">
-          <h3 className="text-lg font-medium mb-4">Active Boost</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-semibold">{localStatus.packageName}</p>
-                <p className="text-sm text-muted-foreground">
-                  {getFormattedTimeRemaining()}
-                </p>
-              </div>
-              <BoostProgress status={localStatus} />
-            </div>
-            
-            <div className="bg-muted/50 p-4 rounded-md">
-              <h4 className="text-sm font-medium mb-2">Benefits</h4>
-              {localStatus.boostPackage && (
-                <ul className="text-sm space-y-1">
-                  {localStatus.boostPackage.features.map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <Zap className="h-3 w-3 text-amber-500" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        </Card>
-      ) : (
-        <Card className="p-6">
-          <h3 className="text-lg font-medium mb-4">Boost Your Profile</h3>
-          <p className="text-sm text-muted-foreground mb-6">
-            Increase your visibility and appear higher in search results.
+      {renderActiveBoost()}
+      
+      <div className="flex justify-between items-center">
+        <div>
+          <h3 className="text-xl font-semibold">Profile Visibility</h3>
+          <p className="text-muted-foreground">
+            {boostStatus.isActive 
+              ? "Your profile is receiving boosted visibility" 
+              : "Boost your profile to increase visibility"}
           </p>
-          
-          <Tabs defaultValue="packages" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="packages">Boost Packages</TabsTrigger>
-              <TabsTrigger value="info">How It Works</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="packages">
-              {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-64 bg-muted animate-pulse rounded-md"></div>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {packages.map((pkg) => (
-                      <BoostPackageCard
-                        key={pkg.id}
-                        pkg={pkg}
-                        isSelected={selectedPackage === pkg.id}
-                        onSelect={() => handleSelectPackage(pkg.id)}
-                      />
-                    ))}
-                  </div>
-                  
-                  <Button 
-                    onClick={handleActivateBoost} 
-                    disabled={!selectedPackage || loading}
-                    className="w-full"
-                  >
-                    <Zap className="mr-2 h-4 w-4" />
-                    Activate Boost
-                  </Button>
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="info" className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-md">
-                <h4 className="font-medium mb-2">How Boosting Works</h4>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-3">
-                    <div className="bg-primary/20 p-2 rounded-full">
-                      <Zap className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Increased Visibility</p>
-                      <p className="text-sm text-muted-foreground">
-                        Your profile appears higher in search results and recommendations.
-                      </p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="bg-primary/20 p-2 rounded-full">
-                      <Timer className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Limited Duration</p>
-                      <p className="text-sm text-muted-foreground">
-                        Boosts are active for their specified duration, starting immediately.
-                      </p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="bg-primary/20 p-2 rounded-full">
-                      <ArrowRight className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Real-time Results</p>
-                      <p className="text-sm text-muted-foreground">
-                        See the impact on your profile views and interactions instantly.
-                      </p>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </Card>
-      )}
+        </div>
+        <Button 
+          onClick={() => setShowDialog(true)}
+          disabled={loadingAction}
+        >
+          <Sparkles className="mr-2 h-4 w-4" />
+          {boostStatus.isActive ? "Upgrade Boost" : "Boost Profile"}
+        </Button>
+      </div>
+      
+      <BoostDialog
+        profileId={profileId || ''}
+        open={showDialog}
+        onClose={() => setShowDialog(false)}
+      />
     </div>
   );
 };

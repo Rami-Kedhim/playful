@@ -4,7 +4,8 @@ import { EnhancedButton } from "@/components/ui/enhanced-button";
 import { Heart, Calendar, MessageSquare, Share2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { useFavorites } from "@/contexts/FavoritesContext";
-import { Escort } from "@/types/Escort";
+import { Escort } from "@/types/escort";
+import { convertEscortType } from "@/utils/typeConverters";
 
 interface ProfileActionsProps {
   escort: Escort;
@@ -32,7 +33,9 @@ const ProfileActions = ({
         description: `${escort.name} has been removed from your favorites.`,
       });
     } else {
-      addFavorite(escort);
+      // Convert to ensure compatibility
+      const normalizedEscort = convertEscortType(escort);
+      addFavorite(normalizedEscort);
       toast({
         title: "Added to favorites",
         description: `${escort.name} has been added to your favorites.`,

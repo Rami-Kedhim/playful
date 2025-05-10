@@ -1,67 +1,90 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { BoostPackage } from '@/types/pulse-boost';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import BoostPackageCard from '../BoostPackageCard';
 
-interface BoostPackagesProps {
+export interface BoostPackagesProps {
   packages: BoostPackage[];
-  selectedPackage: string | null;
-  onSelectPackage: (packageId: string) => void;
-  isLoading?: boolean;
-  error?: string;
+  onBoost?: (packageId: string) => Promise<boolean>;
+  profileId: string;
+  onSuccess?: () => Promise<void>;
 }
 
-const BoostPackages: React.FC<BoostPackagesProps> = ({
-  packages,
-  selectedPackage,
-  onSelectPackage,
-  isLoading = false,
-  error
-}) => {
-  if (isLoading) {
-    return (
-      <div className="space-y-4 animate-pulse">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-gray-200 dark:bg-gray-800 h-40 rounded-lg"></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+const BoostPackages: React.FC<BoostPackagesProps> = ({ packages, onBoost, profileId, onSuccess }) => {
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
-    );
-  }
+  const handleSelectPackage = (packageId: string) => {
+    setSelectedPackage(packageId);
+  };
 
-  if (packages.length === 0) {
-    return (
-      <Alert variant="default">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          No boost packages are currently available. Please try again later.
-        </AlertDescription>
-      </Alert>
-    );
-  }
+  const handleApplyBoost = async () => {
+    if (!selectedPackage) {
+      toast({
+        title: 'No package selected',
+        description: 'Please select a boost package first.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Call the provided onBoost function if available, otherwise use a dummy success
+      const success = onBoost ? await onBoost(selectedPackage) : true;
+      
+      if (success) {
+        toast({
+          title: 'Boost applied successfully',
+          description: 'Your profile has been boosted!'
+        });
+        
+        if (onSuccess) {
+          await onSuccess();
+        }
+      } else {
+        toast({
+          title: 'Failed to apply boost',
+          description: 'Please try again or contact support.',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      console.error('Error applying boost:', error);
+      toast({
+        title: 'Error',
+        description: 'An unexpected error occurred',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {packages.map((pkg) => (
-        <BoostPackageCard
-          key={pkg.id}
-          pkg={pkg}
-          isSelected={selectedPackage === pkg.id}
-          onSelect={() => onSelectPackage(pkg.id)}
-        />
-      ))}
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {packages.map((pkg) => (
+          <BoostPackageCard
+            key={pkg.id}
+            pkg={pkg}
+            isSelected={selectedPackage === pkg.id}
+            onSelect={() => handleSelectPackage(pkg.id)}
+            formatDuration={(duration) => typeof duration === 'string' ? duration : `${duration} minutes`}
+          />
+        ))}
+      </div>
+
+      <Button 
+        className="w-full" 
+        disabled={!selectedPackage || isSubmitting}
+        onClick={handleApplyBoost}
+      >
+        {isSubmitting ? 'Applying boost...' : 'Apply Selected Boost'}
+      </Button>
     </div>
   );
 };

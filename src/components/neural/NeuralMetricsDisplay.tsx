@@ -1,75 +1,103 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
-import { NeuralMetricsDisplayProps } from '@/types/analytics';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowUp, ArrowDown, AlertCircle, BarChart } from 'lucide-react';
 
-const NeuralMetricsDisplay: React.FC<NeuralMetricsDisplayProps> = ({
+export interface NeuralMetricItem {
+  title: string;
+  value: number;
+  unit?: string;
+  change?: number;
+  timespan?: string;
+}
+
+export interface NeuralMetricsDisplayProps {
+  metrics: NeuralMetricItem[];
+  period?: string; // Make period optional
+  refreshInterval?: number;
+  loading?: boolean;
+}
+
+const NeuralMetricsDisplay: React.FC<NeuralMetricsDisplayProps> = ({ 
   metrics,
-  isLoading = false
+  period = '24h',
+  refreshInterval = 60,
+  loading = false 
 }) => {
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">
-                <div className="h-4 bg-muted rounded w-24"></div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-6 bg-muted rounded w-16 mb-2"></div>
-              <div className="h-4 bg-muted rounded w-20"></div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Neural Metrics</CardTitle>
+          <CardDescription>Loading metrics data...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-4">
+              <div className="h-12 w-12 rounded-full bg-secondary/20 animate-pulse"></div>
+              <div className="space-y-2">
+                <div className="h-4 w-24 bg-secondary/20 rounded animate-pulse"></div>
+                <div className="h-3 w-16 bg-secondary/20 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {metrics.map((metric, idx) => (
-        <Card key={idx}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">{metric.title}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline justify-between">
-              <p className="text-2xl font-semibold">
-                {metric.value}
-                {metric.unit && <span className="text-sm ml-1">{metric.unit}</span>}
-              </p>
-              
-              {metric.change !== undefined && (
-                <div 
-                  className={`flex items-center text-xs ${
-                    metric.change > 0 
-                      ? 'text-green-500' 
-                      : metric.change < 0 
-                        ? 'text-red-500' 
-                        : 'text-gray-500'
-                  }`}
-                >
-                  {metric.change > 0 ? (
-                    <ArrowUp className="h-3 w-3 mr-1" />
-                  ) : metric.change < 0 ? (
-                    <ArrowDown className="h-3 w-3 mr-1" />
-                  ) : (
-                    <Minus className="h-3 w-3 mr-1" />
-                  )}
-                  {Math.abs(metric.change)}%
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Neural Metrics</CardTitle>
+        <CardDescription>Performance for the past {period}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="metrics">
+          <TabsList className="mb-4">
+            <TabsTrigger value="metrics">Key Metrics</TabsTrigger>
+            <TabsTrigger value="trends">Trends</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="metrics">
+            <div className="space-y-4">
+              {metrics.map((metric, index) => (
+                <div key={index} className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm font-medium">{metric.title}</p>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <p className="text-2xl font-bold">{metric.value}{metric.unit}</p>
+                      {metric.change !== undefined && (
+                        <div className={`flex items-center ${metric.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                          {metric.change >= 0 ? (
+                            <ArrowUp className="h-4 w-4 mr-1" />
+                          ) : (
+                            <ArrowDown className="h-4 w-4 mr-1" />
+                          )}
+                          <span className="text-xs">{Math.abs(metric.change)}%</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <Progress value={metric.value} className="w-1/3" />
                 </div>
-              )}
+              ))}
             </div>
-            {metric.timespan && (
-              <p className="text-xs text-muted-foreground mt-1">{metric.timespan}</p>
-            )}
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+          </TabsContent>
+          
+          <TabsContent value="trends">
+            <div className="flex items-center justify-center h-40 border border-dashed rounded-md">
+              <div className="text-center">
+                <BarChart className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-muted-foreground">Trend visualization placeholder</p>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -32,10 +32,15 @@ export interface UberPersona {
     intelligence?: number;
     charm?: number;
     energy?: number;
+    views?: number;
+    likes?: number;
+    responseRate?: number;
+    responseTime?: number | string;
   };
   monetization?: {
     hourlyRate?: number;
     packages?: {
+      id?: string;
       name: string;
       price: number;
       duration: string;

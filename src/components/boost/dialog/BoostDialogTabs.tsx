@@ -1,71 +1,73 @@
 
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BoostStatus, BoostEligibility, BoostPackage } from '@/types/pulse-boost';
-import BoostActivePackage from './BoostActivePackage';
-import BoostEligibilityMessage from './BoostEligibilityMessage';
+import React from 'react';
+import { TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import BoostEligibilityCheck from '../BoostEligibilityCheck';
 import BoostPackages from './BoostPackages';
+import { BoostEligibility, BoostStatus, BoostPackage } from '@/types/pulse-boost';
 
 interface BoostDialogTabsProps {
-  boostStatus: BoostStatus;
-  eligibility: BoostEligibility;
+  boostStatus: BoostStatus | null;
   packages: BoostPackage[];
-  profileId: string;
-  onBoostSuccess: () => Promise<boolean>;
+  boostEligibility: BoostEligibility | null;
+  onSuccess: () => void;
+  profileId?: string;
+  onClose: () => void;
 }
 
 const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   boostStatus,
-  eligibility,
   packages,
+  boostEligibility,
+  onSuccess,
   profileId,
-  onBoostSuccess
+  onClose
 }) => {
-  const [activeTab, setActiveTab] = useState(
-    boostStatus.isActive ? 'active' : 'packages'
-  );
+  const [activeTab, setActiveTab] = React.useState('boost-packages');
 
-  const formatExpiryTime = (date: Date | string | undefined) => {
-    if (!date) return 'N/A';
+  const renderEligibility = () => {
+    if (!boostEligibility) return null;
     
-    const expiryDate = typeof date === 'string' ? new Date(date) : date;
-    return expiryDate.toLocaleString();
+    return (
+      <div className="mb-4">
+        <BoostEligibilityCheck 
+          eligibility={{ 
+            eligible: boostEligibility.eligible, 
+            reasons: boostEligibility.reasons || [],
+            nextEligibleTime: boostEligibility.nextEligibleTime
+          }}
+          onClose={onClose}
+        />
+      </div>
+    );
   };
 
   return (
-    <Tabs
-      defaultValue={boostStatus.isActive ? 'active' : 'packages'}
-      value={activeTab}
-      onValueChange={setActiveTab}
-      className="w-full"
-    >
-      <TabsList className="grid grid-cols-2 mb-4">
-        <TabsTrigger value="packages">Boost Packages</TabsTrigger>
-        <TabsTrigger value="active">Active Boost</TabsTrigger>
+    <>
+      {renderEligibility()}
+      <TabsList className="w-full">
+        <TabsTrigger value="boost-packages" onClick={() => setActiveTab('boost-packages')}>Boost Packages</TabsTrigger>
+        <TabsTrigger value="boost-status" onClick={() => setActiveTab('boost-status')}>Boost Status</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="packages">
-        {eligibility.eligible ? (
-          <BoostPackages 
-            packages={packages} 
-            onBoost={onBoostSuccess} 
-            profileId={profileId}
-          />
-        ) : (
-          <BoostEligibilityMessage reason={eligibility.reason} />
-        )}
-      </TabsContent>
-
-      <TabsContent value="active">
-        <BoostActivePackage
-          isActive={boostStatus.isActive}
-          packageName={boostStatus.packageName || 'N/A'}
-          expiresAt={formatExpiryTime(boostStatus.expiresAt)}
-          progress={boostStatus.progress || 0}
-          timeRemaining={boostStatus.timeRemaining || 'N/A'} 
+      <TabsContent value="boost-packages" className="mt-2">
+        <BoostPackages
+          packages={packages}
+          profileId={profileId || ''}
+          onSuccess={onSuccess}
         />
       </TabsContent>
-    </Tabs>
+
+      <TabsContent value="boost-status" className="mt-2">
+        {boostStatus ? (
+          <div>
+            <p>Active Boost: {boostStatus.packageName}</p>
+            <p>Expires: {boostStatus.expiresAt?.toString()}</p>
+          </div>
+        ) : (
+          <p>No active boost</p>
+        )}
+      </TabsContent>
+    </>
   );
 };
 

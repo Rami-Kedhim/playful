@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { Escort } from "@/types/Escort";
+import { Escort } from "@/types/escort";  // Using consistent casing
 import { Button } from "@/components/ui/button";
 import { Heart, MessageSquare, Calendar, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFavorites } from "@/contexts/FavoritesContext";
+import { convertEscortType } from "@/utils/typeConverters";
 
 interface EscortQuickActionsProps {
   escort: Escort;
@@ -25,7 +26,9 @@ const EscortQuickActions: React.FC<EscortQuickActionsProps> = ({
     if (isFavorite) {
       removeFavorite(escort.id);
     } else {
-      addFavorite(escort);
+      // Convert to ensure compatibility
+      const normalizedEscort = convertEscortType(escort);
+      addFavorite(normalizedEscort);
     }
   };
   

@@ -1,4 +1,3 @@
-
 export interface PulseBoost {
   id: string;
   profileId?: string;
@@ -108,6 +107,11 @@ export interface HermesStatus {
   estimatedVisibility: number;
   recommendations: string[];
   lastUpdated: Date;
+  boostScore?: number;
+  effectivenessScore?: number;
+  isActive?: boolean;
+  activeUsers?: number;
+  lastUpdateTime?: string;
 }
 
 export interface BoostEligibility {

@@ -1,51 +1,4 @@
 
-export interface AnalyticsData {
-  additionalViews?: number;
-  engagementIncrease?: number;
-  rankingPosition?: number;
-  views?: number;
-  totalBoosts?: number;
-  activeBoosts?: number;
-  averageBoostScore?: number;
-  impressions?: {
-    today?: number;
-    yesterday?: number;
-    weeklyAverage?: number;
-    withBoost?: number;
-    withoutBoost?: number;
-    increase?: number;
-    change?: number;
-    value?: number;
-  };
-  interactions?: {
-    today?: number;
-    yesterday?: number;
-    weeklyAverage?: number;
-    withBoost?: number;
-    withoutBoost?: number;
-    increase?: number;
-    change?: number;
-    value?: number;
-  };
-  rank?: {
-    current?: number;
-    previous?: number;
-    change?: number;
-  };
-  conversionRate?: number;
-  messageRate?: number;
-  bookingRate?: number;
-}
-
-export interface MetricCardProps {
-  title: string;
-  value: number | string;
-  change?: number;
-  unit?: string;
-  onClick?: () => void;
-  isLoading?: boolean;
-}
-
 export interface DetailedMetricViewProps {
   title: string | { title: string; description?: string };
   value?: number | string;
@@ -53,7 +6,7 @@ export interface DetailedMetricViewProps {
   change?: number;
   unit?: string;
   timeframe?: string;
-  data?: any;
+  data?: any[];
   loading?: boolean;
   insights?: string[];
   onBack?: () => void;
@@ -63,20 +16,39 @@ export interface DetailedMetricViewProps {
   metric?: string;
 }
 
-export interface ExtendedMetricCardProps extends MetricCardProps {
-  icon?: React.ReactNode;
-  variant?: 'default' | 'positive' | 'negative' | 'neutral';
-  footer?: React.ReactNode;
-  description?: string;
+export interface AnalyticsData {
+  metrics: {
+    views: number;
+    engagement: number;
+    conversion: number;
+    revenue: number;
+  };
+  trends: {
+    daily: any[];
+    weekly: any[];
+    monthly: any[];
+  };
+  comparisons: {
+    previousPeriod: {
+      views: number;
+      engagement: number;
+      conversion: number;
+      revenue: number;
+    };
+    industry: {
+      views: number;
+      engagement: number;
+      conversion: number;
+      revenue: number;
+    };
+  };
 }
 
-export interface NeuralMetricsDisplayProps {
-  metrics: {
-    title: string;
-    value: number;
-    unit?: string;
-    change?: number;
-    timespan?: string;
-  }[];
-  isLoading?: boolean;
+export interface NeuralMetric {
+  name: string;
+  value: number;
+  previousValue?: number;
+  change?: number;
+  target?: number;
+  history?: number[];
 }
