@@ -1,132 +1,157 @@
 
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { 
+  Card, 
+  CardContent, 
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { UberPersona } from '@/types/uberPersona';
-import { Clock, Globe, Award, Heart } from 'lucide-react';
+import { Globe, Heart, Award, Activity } from 'lucide-react';
+import { normalizeUberPersona } from '@/utils/typeConverters';
 
 interface PersonaAboutTabProps {
   persona: UberPersona;
 }
 
 const PersonaAboutTab: React.FC<PersonaAboutTabProps> = ({ persona }) => {
-  const { t } = useTranslation();
+  // Normalize persona to ensure all properties exist
+  const normalizedPersona = normalizeUberPersona(persona);
+  const { bio, languages, traits, stats } = normalizedPersona;
   
-  // Check if the persona has description data
-  const hasDescription = persona.description || persona.bio;
-  
-  // Check if the persona has language data
-  const hasLanguages = persona.languages && persona.languages.length > 0;
-  
-  // Check if the persona has traits data
-  const hasTraits = persona.traits && persona.traits.length > 0;
-  
-  // Check if the persona has stats data
-  const hasStats = persona.stats && 
-    (persona.stats.views || 
-     persona.stats.likes || 
-     persona.stats.responseRate || 
-     persona.stats.responseTime);
+  const hasLanguages = languages && languages.length > 0;
+  const hasTraits = traits && traits.length > 0;
+  const hasStats = stats && (
+    stats.popularity !== undefined ||
+    stats.intelligence !== undefined ||
+    stats.charm !== undefined ||
+    stats.energy !== undefined
+  );
 
   return (
-    <div className="space-y-6">
-      {/* Bio/Description Section */}
-      {hasDescription && (
+    <div className="grid gap-6 md:grid-cols-3">
+      <div className="md:col-span-2">
         <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-medium mb-2">{t('About')}</h3>
-            <p className="text-muted-foreground">
-              {persona.description || persona.bio}
+          <CardHeader>
+            <CardTitle>About</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground whitespace-pre-line">
+              {bio || 'No biography available.'}
             </p>
           </CardContent>
         </Card>
-      )}
-      
-      {/* Languages Section */}
-      {hasLanguages && (
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-medium mb-2">
-              <Globe className="inline-block mr-2 h-5 w-5" />
-              {t('Languages')}
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {persona.languages?.map((language, index) => (
-                <Badge key={index} variant="outline">
+
+        {hasLanguages && (
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                Languages
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2">
+              {languages.map((language, index) => (
+                <Badge key={index} variant="secondary">
                   {language}
                 </Badge>
               ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
-      {/* Traits Section */}
-      {hasTraits && (
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-medium mb-2">
-              <Heart className="inline-block mr-2 h-5 w-5" />
-              {t('Traits')}
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {persona.traits?.map((trait, index) => (
-                <Badge key={index} variant="secondary">
+            </CardContent>
+          </Card>
+        )}
+
+        {hasTraits && (
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Heart className="h-5 w-5" />
+                Personality Traits
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2">
+              {traits.map((trait, index) => (
+                <Badge key={index} variant="outline">
                   {trait}
                 </Badge>
               ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
-      {/* Stats Section */}
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
       {hasStats && (
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-medium mb-2">
-              <Award className="inline-block mr-2 h-5 w-5" />
-              {t('Stats')}
-            </h3>
-            
-            <div className="grid grid-cols-2 gap-4">
-              {persona.stats?.views !== undefined && (
-                <div className="bg-secondary/20 p-3 rounded-md">
-                  <div className="text-sm text-muted-foreground">Profile Views</div>
-                  <div className="text-xl font-semibold">{persona.stats.views.toLocaleString()}</div>
-                </div>
-              )}
-              
-              {persona.stats?.likes !== undefined && (
-                <div className="bg-secondary/20 p-3 rounded-md">
-                  <div className="text-sm text-muted-foreground">Likes</div>
-                  <div className="text-xl font-semibold">{persona.stats.likes.toLocaleString()}</div>
-                </div>
-              )}
-              
-              {persona.stats?.responseRate !== undefined && (
-                <div className="bg-secondary/20 p-3 rounded-md">
-                  <div className="text-sm text-muted-foreground">Response Rate</div>
-                  <div className="text-xl font-semibold">{persona.stats.responseRate}%</div>
-                </div>
-              )}
-              
-              {persona.stats?.responseTime !== undefined && (
-                <div className="bg-secondary/20 p-3 rounded-md">
-                  <div className="text-sm text-muted-foreground">Response Time</div>
-                  <div className="text-xl font-semibold">
-                    <Clock className="inline mr-1 h-4 w-4" />
-                    {typeof persona.stats.responseTime === 'string' ? 
-                      persona.stats.responseTime : 
-                      `${persona.stats.responseTime} min`
-                    }
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5" />
+                Stats
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {stats.popularity !== undefined && (
+                <div className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>Popularity</span>
+                    <span>{stats.popularity}%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary rounded-full" 
+                      style={{ width: `${stats.popularity}%` }}
+                    />
                   </div>
                 </div>
               )}
-            </div>
-          </CardContent>
-        </Card>
+              
+              {stats.intelligence !== undefined && (
+                <div className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>Intelligence</span>
+                    <span>{stats.intelligence}%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary rounded-full" 
+                      style={{ width: `${stats.intelligence}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {stats.charm !== undefined && (
+                <div className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>Charm</span>
+                    <span>{stats.charm}%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary rounded-full" 
+                      style={{ width: `${stats.charm}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {stats.energy !== undefined && (
+                <div className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>Energy</span>
+                    <span>{stats.energy}%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary rounded-full" 
+                      style={{ width: `${stats.energy}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );

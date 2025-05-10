@@ -1,110 +1,128 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { 
+  Card, 
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UberPersona } from '@/types/uberPersona';
-import { useToast } from '@/hooks/use-toast';
-import { Calendar, Clock, DollarSign } from 'lucide-react';
+import { Calendar, DollarSign } from 'lucide-react';
+import { normalizeUberPersona } from '@/utils/typeConverters';
 
 interface PersonaBookingTabProps {
   persona: UberPersona;
+  onBook?: () => void;
 }
 
-const PersonaBookingTab: React.FC<PersonaBookingTabProps> = ({ persona }) => {
-  const { toast } = useToast();
-  
-  // Check if monetization data exists
-  const hasMonetization = persona.monetization !== undefined;
-  const hasMonetizationPackages = hasMonetization && persona.monetization?.packages && persona.monetization.packages.length > 0;
-  
-  const handleBooking = (packageId?: string) => {
-    toast({
-      title: 'Booking Started',
-      description: packageId 
-        ? `You've selected the ${persona.monetization?.packages?.find(p => p.id === packageId)?.name} package` 
-        : 'Starting standard booking process',
-    });
+const PersonaBookingTab: React.FC<PersonaBookingTabProps> = ({ persona, onBook }) => {
+  // Normalize persona to ensure all properties exist
+  const normalizedPersona = normalizeUberPersona(persona);
+
+  // Check if the persona has monetization options
+  const hasMonetizationData = 
+    normalizedPersona.monetization && 
+    (normalizedPersona.monetization.hourlyRate > 0 || 
+     normalizedPersona.monetization.minRate > 0 ||
+     normalizedPersona.monetization.meetingPrice > 0);
+
+  // Format currency display
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', { 
+      style: 'currency', 
+      currency: 'USD',
+      minimumFractionDigits: 0
+    }).format(amount);
   };
 
-  if (!hasMonetization) {
-    return (
-      <Card className="mt-4">
-        <CardContent className="pt-6">
-          <div className="text-center py-8">
-            <h3 className="text-lg font-medium mb-2">No Booking Information</h3>
-            <p className="text-muted-foreground">
-              This profile doesn't have any booking information available.
-            </p>
-          </div>
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>Book a Session</CardTitle>
+          <CardDescription>
+            Schedule time with {normalizedPersona.name}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {hasMonetizationData ? (
+            <div className="space-y-4">
+              {normalizedPersona.monetization.hourlyRate > 0 && (
+                <div className="flex justify-between items-center">
+                  <span>Hourly Rate</span>
+                  <span className="font-bold">{formatCurrency(normalizedPersona.monetization.hourlyRate)}</span>
+                </div>
+              )}
+              
+              {normalizedPersona.monetization.minRate > 0 && normalizedPersona.monetization.maxRate > 0 && (
+                <div className="flex justify-between items-center">
+                  <span>Price Range</span>
+                  <span className="font-bold">
+                    {formatCurrency(normalizedPersona.monetization.minRate)} - {formatCurrency(normalizedPersona.monetization.maxRate)}
+                  </span>
+                </div>
+              )}
+              
+              {normalizedPersona.monetization.meetingPrice > 0 && (
+                <div className="flex justify-between items-center">
+                  <span>Meeting Price</span>
+                  <span className="font-bold">{formatCurrency(normalizedPersona.monetization.meetingPrice)}</span>
+                </div>
+              )}
+              
+              <div className="pt-4">
+                <Button className="w-full" onClick={onBook}>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  Book Now
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-muted-foreground">Pricing information not available.</p>
+              <Button className="mt-4" onClick={onBook}>
+                <Calendar className="mr-2 h-4 w-4" />
+                Contact for Booking
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Standard Rate Card */}
-      {persona.monetization?.hourlyRate && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">Standard Session</h3>
-              <span className="text-2xl font-bold">
-                ${persona.monetization.hourlyRate}/hr
-              </span>
-            </div>
-            <div className="flex items-center text-sm text-muted-foreground mb-4">
-              <Clock className="h-4 w-4 mr-2" />
-              <span>60 minutes</span>
-            </div>
-            <Button className="w-full" onClick={() => handleBooking()}>
-              Book Now
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Packages */}
-      {hasMonetizationPackages && (
-        <>
-          <h3 className="text-xl font-medium mt-6">Available Packages</h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            {persona.monetization?.packages?.map((pkg) => (
-              <Card key={pkg.id}>
-                <CardContent className="pt-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-medium">{pkg.name}</h3>
-                    <span className="text-2xl font-bold">${pkg.price}</span>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Service Packages</CardTitle>
+          <CardDescription>
+            Special packages and offerings
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {normalizedPersona.monetization?.packages && normalizedPersona.monetization.packages.length > 0 ? (
+            <div className="space-y-4">
+              {normalizedPersona.monetization.packages.map((pkg, index) => (
+                <div key={pkg.id || index} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium">{pkg.name}</h4>
+                      <p className="text-sm text-muted-foreground">{pkg.description}</p>
+                      <p className="text-xs mt-1">{pkg.duration}</p>
+                    </div>
+                    <div className="text-lg font-bold">{formatCurrency(pkg.price)}</div>
                   </div>
-                  <div className="flex items-center text-sm text-muted-foreground mb-2">
-                    <Clock className="h-4 w-4 mr-2" />
-                    <span>{pkg.duration}</span>
-                  </div>
-                  {pkg.description && (
-                    <p className="text-sm text-muted-foreground mb-4">{pkg.description}</p>
-                  )}
-                  <Button 
-                    className="w-full" 
-                    variant="outline"
-                    onClick={() => handleBooking(pkg.id)}
-                  >
-                    Select Package
+                  <Button variant="outline" className="w-full mt-2" size="sm">
+                    <DollarSign className="mr-2 h-3 w-3" />
+                    Select
                   </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </>
-      )}
-
-      {/* Availability Card */}
-      <Card className="mt-4">
-        <CardContent className="pt-6">
-          <h3 className="text-lg font-medium mb-4">Check Availability</h3>
-          <Button className="w-full" variant="secondary">
-            <Calendar className="h-4 w-4 mr-2" />
-            View Calendar
-          </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-muted-foreground">No service packages available.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -1,182 +1,137 @@
+
 import React, { useState } from 'react';
-import { convertEscortType, ensureEscortTypeCompatibility } from '@/utils/typeConverters';
-import BookingCalendar from './BookingCalendar';
-import BookingTimeSlots from './BookingTimeSlots';
-import BookingDuration from './BookingDuration';
-import BookingContactInfo from './BookingContactInfo';
-import BookingMessage from './BookingMessage';
-import BookingConfirmation from './BookingConfirmation';
-import { BookingFormData } from './types';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Calendar } from '@/components/ui/calendar';
+import { BookingFormValues } from '../../booking/types';
 import { Escort } from '@/types/Escort';
+import BookingConfirmation from './BookingConfirmation';
 
 interface BookingFlowProps {
   escort: Escort;
-  onComplete: (data: BookingFormData) => void;
-  onCancel: () => void;
 }
 
-const BookingFlow: React.FC<BookingFlowProps> = ({ 
-  escort, 
-  onComplete, 
-  onCancel 
-}) => {
-  // Convert escort type to ensure compatibility
-  const compatibleEscort = ensureEscortTypeCompatibility(escort);
-  
-  const [formData, setFormData] = useState<BookingFormData>({
-    date: null,
+const BookingFlow: React.FC<BookingFlowProps> = ({ escort }) => {
+  const [step, setStep] = useState<'details' | 'confirmation'>('details');
+  const [formData, setFormData] = useState<BookingFormValues>({
+    date: undefined,
     time: '',
-    duration: '60',
-    firstName: '',
-    lastName: '',
+    duration: '',
+    name: '',
     email: '',
     phone: '',
-    message: '',
+    message: ''
   });
-
-  const [step, setStep] = useState(1);
-
-  const nextStep = () => {
-    setStep(step + 1);
+  
+  const { register, handleSubmit, formState } = useForm<BookingFormValues>();
+  
+  const onSubmit: SubmitHandler<BookingFormValues> = (data) => {
+    setFormData(data);
+    setStep('confirmation');
+  };
+  
+  const handleBack = () => {
+    setStep('details');
   };
 
-  const prevStep = () => {
-    setStep(step - 1);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prevData => ({
-      ...prevData,
-      [name]: value
-    }));
-  };
-
-  const handleDateChange = (date: Date | null) => {
-    setFormData(prevData => ({
-      ...prevData,
-      date: date
-    }));
-  };
-
-  const handleSubmit = () => {
-    onComplete(formData);
-  };
-
-  const renderStep = () => {
-    switch (step) {
-      case 1:
-        return (
-          <BookingCalendar
-            form={{
-              control: {
-                register: () => ({}),
-                setValue: (name: string, value: any) => {
-                  setFormData(prevData => ({ ...prevData, [name]: value }));
-                },
-                getValues: () => formData,
-              },
-              watch: () => formData.date,
-              formState: { errors: {} },
-            }}
-          />
-        );
-      case 2:
-        return (
-          <BookingTimeSlots
-            form={{
-              control: {
-                register: () => ({}),
-                setValue: (name: string, value: any) => {
-                  setFormData(prevData => ({ ...prevData, [name]: value }));
-                },
-                getValues: () => formData,
-              },
-              watch: () => formData.time,
-              formState: { errors: {} },
-            }}
-          />
-        );
-      case 3:
-        return (
-          <BookingDuration
-            form={{
-              control: {
-                register: () => ({}),
-                setValue: (name: string, value: any) => {
-                  setFormData(prevData => ({ ...prevData, [name]: value }));
-                },
-                getValues: () => formData,
-              },
-              watch: () => formData.duration,
-              formState: { errors: {} },
-            }}
-          />
-        );
-      case 4:
-        return (
-          <BookingContactInfo
-            form={{
-              control: {
-                register: () => ({}),
-                setValue: (name: string, value: any) => {
-                  setFormData(prevData => ({ ...prevData, [name]: value }));
-                },
-                getValues: () => formData,
-              },
-              watch: (name: string) => formData[name],
-              formState: { errors: {} },
-            }}
-          />
-        );
-      case 5:
-        return (
-          <BookingMessage
-            form={{
-              control: {
-                register: () => ({}),
-                setValue: (name: string, value: any) => {
-                  setFormData(prevData => ({ ...prevData, [name]: value }));
-                },
-                getValues: () => formData,
-              },
-              watch: () => formData.message,
-              formState: { errors: {} },
-            }}
-          />
-        );
-      case 6:
-        return (
-          <BookingConfirmation
-            formData={formData}
-            escort={compatibleEscort}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+  if (step === 'confirmation') {
+    return (
+      <BookingConfirmation 
+        escort={escort} 
+        formData={formData}
+        onClose={handleBack}
+      />
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      {renderStep()}
-      <div className="flex justify-between">
-        {step > 1 && (
-          <button onClick={prevStep} className="px-4 py-2 bg-gray-200 text-gray-700 rounded">
-            Previous
-          </button>
-        )}
-        {step < 6 ? (
-          <button onClick={nextStep} className="px-4 py-2 bg-blue-500 text-white rounded">
-            Next
-          </button>
-        ) : (
-          <button onClick={handleSubmit} className="px-4 py-2 bg-green-500 text-white rounded">
-            Confirm Booking
-          </button>
-        )}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="date">Date</Label>
+        <div className="border rounded-md p-2">
+          <Calendar
+            mode="single"
+            selected={formData.date}
+            onSelect={(date) => setFormData({...formData, date: date || undefined})}
+            className="rounded-md border"
+          />
+        </div>
       </div>
-    </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="time">Time</Label>
+        <Input
+          id="time"
+          type="time"
+          {...register('time')}
+          defaultValue={formData.time}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="duration">Duration</Label>
+        <select
+          id="duration"
+          {...register('duration')}
+          defaultValue={formData.duration}
+          className="w-full p-2 border rounded-md"
+        >
+          <option value="">Select duration</option>
+          <option value="1 hour">1 hour</option>
+          <option value="2 hours">2 hours</option>
+          <option value="4 hours">4 hours</option>
+          <option value="Overnight">Overnight</option>
+        </select>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="name">Your Name</Label>
+        <Input
+          id="name"
+          type="text"
+          {...register('name')}
+          defaultValue={formData.name}
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          {...register('email')}
+          defaultValue={formData.email}
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="phone">Phone</Label>
+        <Input
+          id="phone"
+          type="tel"
+          {...register('phone')}
+          defaultValue={formData.phone}
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="message">Message (Optional)</Label>
+        <Textarea
+          id="message"
+          {...register('message')}
+          defaultValue={formData.message || ''}
+        />
+      </div>
+      
+      <div className="pt-4">
+        <Button type="submit" className="w-full">
+          Continue to Review
+        </Button>
+      </div>
+    </form>
   );
 };
 
