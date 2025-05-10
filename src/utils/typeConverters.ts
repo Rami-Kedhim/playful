@@ -13,7 +13,7 @@ export function convertEscortType(escort: any): EscortTypeNew {
   const convertedEscort: EscortTypeNew = {
     ...escort,
     id: escort.id,
-    name: escort.name,
+    name: escort.name || 'Unknown',
     gender: escort.gender || 'unknown',
     price: escort.price || 0,
   };
@@ -41,9 +41,11 @@ export function convertEscortType(escort: any): EscortTypeNew {
       
       convertedEscort.availability = availability;
     }
+  } else {
+    // Default availability if none is provided
+    convertedEscort.availability = { days: [] };
   }
 
-  // Add a type cast to force TypeScript to accept the converted escort
   return convertedEscort as EscortTypeNew;
 }
 

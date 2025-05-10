@@ -17,24 +17,24 @@ const SecureRouteWrapper: React.FC<SecureRouteWrapperProps> = ({
   escortOnly = false,
   clientOnly = false
 }) => {
-  const { isAuthenticated, isAdmin, isEscort, isClient, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const [authorized, setAuthorized] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (!loading) {
       if (!isAuthenticated) {
         setAuthorized(false);
-      } else if (adminOnly && !isAdmin) {
+      } else if (adminOnly && (!user?.roles?.includes('admin'))) {
         setAuthorized(false);
-      } else if (escortOnly && !isEscort) {
+      } else if (escortOnly && (!user?.roles?.includes('escort'))) {
         setAuthorized(false);
-      } else if (clientOnly && !isClient) {
+      } else if (clientOnly && (!user?.roles?.includes('client'))) {
         setAuthorized(false);
       } else {
         setAuthorized(true);
       }
     }
-  }, [loading, isAuthenticated, isAdmin, isEscort, isClient, adminOnly, escortOnly, clientOnly]);
+  }, [loading, isAuthenticated, user, adminOnly, escortOnly, clientOnly]);
 
   if (loading) {
     return (

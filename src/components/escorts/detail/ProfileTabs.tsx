@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VerificationLevel } from "@/types/verification";
 import AboutTab from "./profile/AboutTab";
@@ -35,7 +36,7 @@ const ProfileTabs = ({ escort }: ProfileTabsProps) => {
   // Normalize the verificationLevel prop to a string type compatible with VerificationBadge
   let verificationLevel: "none" | "basic" | "enhanced" | "premium" = "none";
   
-  if (processedEscort.verificationLevel) {
+  if (processedEscort?.verificationLevel) {
     // Convert to string if it's an enum value
     const level = typeof processedEscort.verificationLevel === 'string' 
       ? processedEscort.verificationLevel 

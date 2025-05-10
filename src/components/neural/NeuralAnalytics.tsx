@@ -1,17 +1,54 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DatePicker } from '@/components/ui/date-picker';
 import { Button } from '@/components/ui/button';
 import { RefreshCcw } from 'lucide-react';
+import NeuralMetricsDisplay from './NeuralMetricsDisplay';
+import useNeuralAnalytics from '@/hooks/useNeuralAnalytics';
+import PerformanceChart from '@/components/neural/PerformanceChart';
 
-// Create a placeholder component to fix the build
 const NeuralAnalytics: React.FC = () => {
-  const [startDate, setStartDate] = React.useState<Date>(new Date());
+  const [startDate, setStartDate] = React.useState<Date>(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)); // One week ago
   const [endDate, setEndDate] = React.useState<Date>(new Date());
+  const { analyticsData, detailedMetrics, loading, error, refreshAnalytics } = useNeuralAnalytics();
   
   const handleRefreshData = () => {
     console.log('Refreshing data...');
+    refreshAnalytics();
   };
+
+  // Sample performance metrics data for demonstration
+  const responseTimeData = [
+    { name: 'Mon', value: 120 },
+    { name: 'Tue', value: 132 },
+    { name: 'Wed', value: 101 },
+    { name: 'Thu', value: 134 },
+    { name: 'Fri', value: 90 },
+    { name: 'Sat', value: 110 },
+    { name: 'Sun', value: 120 },
+  ];
+
+  const accuracyData = [
+    { name: 'Mon', value: 94 },
+    { name: 'Tue', value: 92 },
+    { name: 'Wed', value: 97 },
+    { name: 'Thu', value: 95 },
+    { name: 'Fri', value: 98 },
+    { name: 'Sat', value: 96 },
+    { name: 'Sun', value: 97 },
+  ];
+
+  // Default metrics in case analytics data is not loaded yet
+  const defaultMetrics = {
+    responseTime: 120,
+    accuracy: 96,
+    engagement: 85,
+    satisfaction: 92
+  };
+
+  // Use actual metrics if available, otherwise use defaults
+  const metrics = analyticsData?.metrics || defaultMetrics;
 
   return (
     <div className="space-y-6">
@@ -41,14 +78,43 @@ const NeuralAnalytics: React.FC = () => {
         </CardContent>
       </Card>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Metrics Overview</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">Neural analytics data will appear here.</p>
-        </CardContent>
-      </Card>
+      {/* Display metrics overview */}
+      <NeuralMetricsDisplay 
+        metrics={metrics}
+        period={`${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`}
+        refreshInterval={60}
+      />
+      
+      {/* Performance charts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Response Time (ms)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PerformanceChart 
+              data={responseTimeData}
+              dataKey="value"
+              title="Response Time"
+              onRefresh={handleRefreshData}
+            />
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Accuracy (%)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PerformanceChart 
+              data={accuracyData}
+              dataKey="value"
+              title="Accuracy"
+              onRefresh={handleRefreshData}
+            />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

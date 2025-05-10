@@ -16,7 +16,6 @@ export interface DatePickerProps {
   onSelect?: (date: Date) => void;
   disabled?: (date: Date) => boolean;
   className?: string;
-  // We'll add a "label" prop instead of "placeholder" to maintain type safety
   label?: string;
 }
 

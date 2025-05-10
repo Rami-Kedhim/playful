@@ -1,80 +1,87 @@
+
 import React from 'react';
-import { useAuth } from '@/hooks/auth/useAuthContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Loader2, LogOut, User } from 'lucide-react';
+import { User } from '@/types/user';
 
 interface UserProfileProps {
-  hideSignOut?: boolean;
+  user: User;
+  showActions?: boolean;
+  onEdit?: () => void;
+  onContact?: () => void;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ hideSignOut = false }) => {
-  const { user, signOut, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="py-6">
-          <div className="flex justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
-  // Safely access username from either direct property or metadata
-  const username = user.username || 
-                  user.user_metadata?.username || 
-                  user.email?.split('@')[0] || 
-                  'User';
-  const initials = username.slice(0, 2).toUpperCase();
-  const avatarUrl = user.avatarUrl || user.avatar_url;
-
-  // Format the created_at date with a fallback
-  const formattedDate = user.created_at 
-    ? (typeof user.created_at === 'string' 
-      ? new Date(user.created_at).toLocaleDateString() 
-      : user.created_at.toLocaleDateString())
-    : 'N/A';
+const UserProfile: React.FC<UserProfileProps> = ({
+  user,
+  showActions = true,
+  onEdit,
+  onContact
+}) => {
+  const userBirthDate = user.birth_date ? new Date(user.birth_date) : null;
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-4">
-          <Avatar className="h-14 w-14">
-            <AvatarImage src={avatarUrl} />
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-          <div>
-            <CardTitle>{username}</CardTitle>
-            <CardDescription>{user.email}</CardDescription>
-          </div>
+    <Card className="w-full">
+      <CardHeader className="flex flex-row items-center gap-4">
+        <Avatar className="h-16 w-16">
+          <AvatarImage src={user.avatar_url || user.avatarUrl} alt={user.name || user.username || "User"} />
+          <AvatarFallback>
+            {user.name ? user.name.charAt(0).toUpperCase() : 
+             user.username ? user.username.charAt(0).toUpperCase() : "U"}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <CardTitle>{user.name || user.username || "User"}</CardTitle>
+          {user.username && user.username !== user.name && (
+            <CardDescription>@{user.username}</CardDescription>
+          )}
+          {user.location && (
+            <CardDescription>{user.location}</CardDescription>
+          )}
         </div>
       </CardHeader>
-      
-      <CardContent className="space-y-2">
-        <div className="flex items-center gap-2">
-          <User className="h-4 w-4 opacity-70" />
-          <span className="text-sm text-muted-foreground">Member since {formattedDate}</span>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          {user.email && (
+            <div>
+              <div className="font-medium">Email</div>
+              <div>{user.email}</div>
+            </div>
+          )}
+          {userBirthDate && (
+            <div>
+              <div className="font-medium">Birth Date</div>
+              <div>{userBirthDate.toLocaleDateString()}</div>
+            </div>
+          )}
+          {user.gender && (
+            <div>
+              <div className="font-medium">Gender</div>
+              <div>{user.gender}</div>
+            </div>
+          )}
+          {user.joined_date && (
+            <div>
+              <div className="font-medium">Joined</div>
+              <div>{new Date(user.joined_date).toLocaleDateString()}</div>
+            </div>
+          )}
         </div>
+        {user.bio && (
+          <div>
+            <div className="font-medium mb-1">Bio</div>
+            <p className="text-sm text-muted-foreground">{user.bio}</p>
+          </div>
+        )}
       </CardContent>
-      
-      {!hideSignOut && (
-        <CardFooter>
-          <Button 
-            variant="outline" 
-            className="w-full flex items-center gap-2"
-            onClick={() => signOut()}
-          >
-            <LogOut className="h-4 w-4" />
-            Sign Out
-          </Button>
+      {showActions && (
+        <CardFooter className="flex gap-2 justify-end">
+          {onContact && (
+            <Button variant="outline" onClick={onContact}>Contact</Button>
+          )}
+          {onEdit && (
+            <Button onClick={onEdit}>Edit Profile</Button>
+          )}
         </CardFooter>
       )}
     </Card>

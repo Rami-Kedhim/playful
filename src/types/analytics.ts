@@ -107,7 +107,7 @@ export interface DetailedMetricViewProps {
     unit: string;
     change: number;
   };
-  data?: Array<{ name: string; value: number }>;
+  data?: Array<{ name: string; value: number }> | Array<{ date: string; value: number }>;
 }
 
 export interface NeuralMetricsDisplayProps {

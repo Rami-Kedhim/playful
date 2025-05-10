@@ -25,13 +25,15 @@ const DetailedMetricView: React.FC<DetailedMetricViewProps> = ({
   const formattedData = React.useMemo(() => {
     if (data.length > 0) {
       return data.map(item => {
-        if ('date' in item && !('name' in item)) {
+        // Type checking with safeguards
+        const dataItem = item as any;
+        if (dataItem && ('date' in dataItem || 'name' in dataItem)) {
           return {
-            name: item.date,
-            value: item.value
+            name: 'date' in dataItem ? dataItem.date : 'name' in dataItem ? dataItem.name : '',
+            value: 'value' in dataItem ? dataItem.value : 0
           };
         }
-        return item;
+        return { name: '', value: 0 };
       });
     } 
     return trendData;

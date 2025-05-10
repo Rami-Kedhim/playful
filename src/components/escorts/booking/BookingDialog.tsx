@@ -16,12 +16,14 @@ interface BookingDialogProps {
   escort: Escort;
   isOpen: boolean;
   onClose: () => void;
+  onSubmit?: (bookingDetails: any) => Promise<void>;
 }
 
 const BookingDialog: React.FC<BookingDialogProps> = ({ 
   escort, 
   isOpen, 
-  onClose 
+  onClose,
+  onSubmit
 }) => {
   const [bookingType, setBookingType] = useState<'in-person' | 'virtual'>('in-person');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,13 +41,17 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
     setIsSubmitting(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: 'Booking request sent',
-        description: `Your booking request with ${escort.name} has been sent. They will contact you soon.`,
-      });
+      if (onSubmit) {
+        await onSubmit(formData);
+      } else {
+        // Default submission handler
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        toast({
+          title: 'Booking request sent',
+          description: `Your booking request with ${escort.name} has been sent. They will contact you soon.`,
+        });
+      }
       
       onClose();
     } catch (error) {
