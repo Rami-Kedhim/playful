@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import BoostAnalyticsCard from './BoostAnalyticsCard';
-import { AnalyticsData } from '@/types/pulse-boost';
+import { AnalyticsData } from '@/types/analytics';
 
 interface BoostAnalyticsProps {
   isActive: boolean;
@@ -17,10 +17,22 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
 }) => {
   const [historyLoading, setHistoryLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
 
   useEffect(() => {
-    setHistoryLoading(false);
-  }, []);
+    const fetchAnalytics = async () => {
+      try {
+        const data = await getAnalytics();
+        setAnalyticsData(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load analytics');
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, [getAnalytics]);
 
   if (error) {
     return (
@@ -33,8 +45,12 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
   return (
     <div className="space-y-6">
       <BoostAnalyticsCard 
-        isActive={isActive} 
-        getAnalytics={getAnalytics}
+        isActive={isActive}
+        analyticsData={analyticsData || {
+          totalBoosts: 0,
+          activeBoosts: 0,
+          averageBoostScore: 0
+        }}
       />
       
       <Card>

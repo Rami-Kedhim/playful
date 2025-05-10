@@ -34,10 +34,18 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
   // Check if boostStatus exists and if it has isActive property
   const isActiveBoost = boostStatus && (boostStatus.isActive === true);
 
-  // Safely access analytics properties with defaults
-  const totalBoosts = analytics?.totalBoosts || 0;
-  const activeBoosts = analytics?.activeBoosts || 0;
-  const averageBoostScore = analytics?.averageBoostScore || 0;
+  // Ensure analytics data has all necessary properties
+  const analyticData: AnalyticsData = {
+    totalBoosts: analytics?.totalBoosts || 0,
+    activeBoosts: analytics?.activeBoosts || 0,
+    averageBoostScore: analytics?.averageBoostScore || 0,
+    views: analytics?.views,
+    impressions: analytics?.impressions,
+    interactions: analytics?.interactions,
+    additionalViews: analytics?.additionalViews,
+    engagementIncrease: analytics?.engagementIncrease,
+    rankingPosition: analytics?.rankingPosition
+  };
 
   return (
     <div className="space-y-6">
@@ -54,7 +62,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
             ) : errorObj ? (
               <div>Error: {errorObj?.message || 'Unknown error'}</div>
             ) : (
-              <div>{totalBoosts}</div>
+              <div>{analyticData.totalBoosts}</div>
             )}
           </CardContent>
         </Card>
@@ -69,7 +77,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
             ) : errorObj ? (
               <div>Error: {errorObj?.message || 'Unknown error'}</div>
             ) : (
-              <div>{activeBoosts}</div>
+              <div>{analyticData.activeBoosts}</div>
             )}
           </CardContent>
         </Card>
@@ -84,7 +92,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
             ) : errorObj ? (
               <div>Error: {errorObj?.message || 'Unknown error'}</div>
             ) : (
-              <div>{averageBoostScore}</div>
+              <div>{analyticData.averageBoostScore}</div>
             )}
           </CardContent>
         </Card>

@@ -36,6 +36,7 @@ export interface User {
   created_at?: string;
   updated_at?: string;
   profileImageUrl?: string;
+  ubxBalance?: number;
 }
 
 export interface UserProfile {
@@ -86,4 +87,6 @@ export interface AuthContextType {
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signOut: () => Promise<boolean>;
   refreshProfile: () => Promise<void>;
+  updatePassword?: (oldPassword: string, newPassword: string) => Promise<boolean>;
+  deleteAccount?: (password: string) => Promise<boolean>;
 }

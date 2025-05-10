@@ -1,6 +1,5 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Escort } from "@/types/escort";
 import { VerificationLevel } from "@/types/verification";
 import AboutTab from "./profile/AboutTab";
 import ServicesTab from "./profile/ServicesTab";
@@ -8,20 +7,24 @@ import RatesTab from "./profile/RatesTab";
 import SafetyTips from "./SafetyTips";
 import VerificationBadge from "./VerificationBadge";
 import { Shield, UserCheck, DollarSign, Info } from "lucide-react";
+import { convertEscortType } from "@/utils/typeConverters";
 
 interface ProfileTabsProps {
-  escort: Escort;
+  escort: any; // Use any to avoid circular type references
 }
 
 const ProfileTabs = ({ escort }: ProfileTabsProps) => {
+  // Convert escort to compatible type
+  const normalizedEscort = convertEscortType(escort);
+  
   // Normalize the verificationLevel prop to a string type compatible with VerificationBadge
   let verificationLevel: "none" | "basic" | "enhanced" | "premium" = "none";
   
-  if (escort.verificationLevel) {
+  if (normalizedEscort.verificationLevel) {
     // Convert to string if it's an enum value
-    const level = typeof escort.verificationLevel === 'string' 
-      ? escort.verificationLevel 
-      : String(escort.verificationLevel);
+    const level = typeof normalizedEscort.verificationLevel === 'string' 
+      ? normalizedEscort.verificationLevel 
+      : String(normalizedEscort.verificationLevel);
     
     // Map verification levels to expected values
     if (level === VerificationLevel.NONE || level === "none") {
@@ -60,15 +63,15 @@ const ProfileTabs = ({ escort }: ProfileTabsProps) => {
         </TabsList>
 
         <TabsContent value="about">
-          <AboutTab escort={escort} />
+          <AboutTab escort={normalizedEscort} />
         </TabsContent>
 
         <TabsContent value="services">
-          <ServicesTab escort={escort} />
+          <ServicesTab escort={normalizedEscort} />
         </TabsContent>
 
         <TabsContent value="rates">
-          <RatesTab escort={escort} />
+          <RatesTab escort={normalizedEscort} />
         </TabsContent>
 
         <TabsContent value="safety">

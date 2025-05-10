@@ -9,9 +9,11 @@ import { toast } from '@/components/ui/use-toast';
 import BookingDialog from '../detail/booking/BookingDialog';
 import BookingConfirmation from './BookingConfirmation';
 import BookingPaymentStep from './BookingPaymentStep';
+import { BookingFormValues } from './types';
+import { convertEscortType } from '@/utils/typeConverters';
 
 interface BookingFlowProps {
-  escort: Escort;
+  escort: any; // Accept any type to avoid the circular reference issue
   isOpen: boolean;
   onClose: () => void;
 }
@@ -47,15 +49,17 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     }
   }, [isOpen]);
 
-  // Normalize escort object to have string height (if number)
+  // Convert escort to the compatible type
   const normalizedEscort = React.useMemo(() => {
-    if (escort.height !== undefined && typeof escort.height !== 'string') {
-      return {
-        ...escort,
-        height: String(escort.height),
-      };
+    // Use the converter utility
+    const convertedEscort = convertEscortType(escort);
+
+    // Ensure height is a string
+    if (convertedEscort.height !== undefined && typeof convertedEscort.height !== 'string') {
+      convertedEscort.height = String(convertedEscort.height);
     }
-    return escort;
+    
+    return convertedEscort;
   }, [escort]);
 
   const handleDetailsSubmit = async (bookingDetails: any) => {

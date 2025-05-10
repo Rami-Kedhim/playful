@@ -17,12 +17,17 @@ const UBXBalance: React.FC<UBXBalanceProps> = ({ onRecharge }) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Mock UBX balance - in a real app would come from user profile
-  const [balance, setBalance] = useState(user?.ubxBalance || 0);
+  // Get UBX balance safely
+  const ubxBalance = user && 'ubxBalance' in user ? user.ubxBalance || 0 : 0;
+  
+  // Track balance in state
+  const [balance, setBalance] = useState(ubxBalance);
 
   useEffect(() => {
     // Update balance when user changes
-    setBalance(user?.ubxBalance || 0);
+    if (user && 'ubxBalance' in user) {
+      setBalance(user.ubxBalance || 0);
+    }
   }, [user]);
 
   const handleAddFunds = async () => {
@@ -106,4 +111,3 @@ const UBXBalance: React.FC<UBXBalanceProps> = ({ onRecharge }) => {
 };
 
 export default UBXBalance;
-

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-import { BoostPackage } from '@/types/boost';
+import { BoostPackage } from '@/types/pulse-boost';
 import BoostPackageCard from '../BoostPackageCard';
 
 interface BoostPackagesProps {
@@ -26,7 +26,7 @@ const BoostPackages: React.FC<BoostPackagesProps> = ({
   usageCount,
   dailyLimit,
   getPrice,
-  formatDuration
+  formatDuration = (duration) => duration
 }) => {
   return (
     <div className="space-y-4">

@@ -2,9 +2,9 @@
 // Analytics types
 
 export interface AnalyticsData {
-  totalBoosts?: number;
-  activeBoosts?: number;
-  averageBoostScore?: number;
+  totalBoosts: number;
+  activeBoosts: number;
+  averageBoostScore: number;
   views?: number;
   impressions?: {
     value: number;
@@ -103,4 +103,31 @@ export interface DetailedMetricViewProps {
     change: number;
   };
   data?: Array<{ date: string; value: number }>;
+}
+
+export interface NeuralMetricsDisplayProps {
+  metrics: {
+    responseTime: number;
+    accuracy: number;
+    engagement: number;
+    satisfaction: number;
+  };
+  trend?: {
+    responseTime: number[];
+    accuracy: number[];
+    engagement: number[];
+    satisfaction: number[];
+  };
+  period?: string;
+}
+
+export interface PerformanceChartProps {
+  data: Array<{
+    name: string;
+    value: number;
+  }>;
+  title?: string;
+  description?: string;
+  height?: number;
+  color?: string;
 }

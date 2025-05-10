@@ -9,6 +9,7 @@ interface BoostPackageCardProps {
   isSelected?: boolean;
   onSelect?: () => void;
   formatDuration?: (duration: string) => string;
+  isPopular?: boolean;
 }
 
 const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
@@ -16,7 +17,8 @@ const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
   className,
   isSelected = false,
   onSelect = () => {},
-  formatDuration = (d) => d
+  formatDuration = (d) => d,
+  isPopular
 }) => {
   const formatVisibility = (value: string | number | undefined): string => {
     if (value === undefined || value === null) return '';
@@ -28,7 +30,7 @@ const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
       className={cn(
         "border rounded-lg p-4 flex flex-col h-full hover:shadow-md transition-shadow cursor-pointer",
         isSelected && "border-primary shadow-md",
-        pkg.isMostPopular && "border-primary",
+        (pkg.isMostPopular || isPopular) && "border-primary",
         className
       )}
       onClick={onSelect}
@@ -54,7 +56,7 @@ const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
       )}
 
       <div className="mt-auto">
-        {pkg.isMostPopular && (
+        {(pkg.isMostPopular || isPopular) && (
           <div className="bg-green-100 text-green-700 py-1 px-2 rounded-full text-xs font-semibold inline-block">
             Most Popular
           </div>

@@ -3,16 +3,16 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { bookingService } from '@/services/bookingService';
-import { Escort } from '@/types/escort';
 import { Booking } from '@/types/booking';
 import { toast } from '@/components/ui/use-toast';
 import BookingDialog from './BookingDialog'; 
 import BookingConfirmation from './BookingConfirmation';
 import BookingPaymentStep from './BookingPaymentStep';
 import { BookingFormValues } from './types';
+import { convertEscortType } from '@/utils/typeConverters';
 
 interface BookingFlowProps {
-  escort: Escort;
+  escort: any; // Use any to avoid type compatibility issues
   isOpen: boolean;
   onClose: () => void;
 }
@@ -48,15 +48,9 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     }
   }, [isOpen]);
 
-  // Normalize escort object to have string height (if number)
+  // Normalize escort object using our converter utility
   const normalizedEscort = React.useMemo(() => {
-    if (escort.height !== undefined && typeof escort.height !== 'string') {
-      return {
-        ...escort,
-        height: String(escort.height),
-      };
-    }
-    return escort;
+    return convertEscortType(escort);
   }, [escort]);
 
   const handleDetailsSubmit = async (bookingDetails: BookingFormValues) => {
