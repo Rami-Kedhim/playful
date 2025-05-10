@@ -1,3 +1,4 @@
+
 import { UberPersona } from '@/types/uberPersona';
 
 class PersonaService {
@@ -8,32 +9,25 @@ class PersonaService {
         const mockPersona: UberPersona = {
           id: '1234',
           name: 'AI Companion',
-          type: 'ai',
-          bio: 'Virtual AI companion for your needs.',
           avatarUrl: '/path/to/avatar.jpg',
           isOnline: true,
           isVerified: false,
           rating: 4.5,
-          reviewCount: 120,
           location: 'Virtual',
-          features: {
-            hasChat: true,
-            hasPhotos: true,
-            hasVideos: false,
-            hasBooking: false,
-            hasLiveStream: true,
-            hasExclusiveContent: false,
-            hasContent: true,
-            hasRealMeets: false,
-            hasStories: false,
-            hasVirtualMeets: true
+          bio: 'Virtual AI companion for your needs.',
+          type: 'ai',
+          tags: ['AI', 'Virtual', 'Companion'],
+          traits: ['Friendly', 'Intelligent', 'Creative'],
+          languages: ['English', 'Spanish'],
+          stats: {
+            views: 2450,
+            likes: 380,
+            rating: 4.5
           },
-          pricing: {
-            acceptsLucoin: true,
-            acceptsTips: true,
-            subscriptionPrice: 9.99,
-            unlockingPrice: 1.99,
-            boostingActive: true,
+          monetization: {
+            acceptsUbx: true,
+            acceptsFiat: true,
+            hourlyRate: 50,
             meetingPrice: 49.99
           }
         };

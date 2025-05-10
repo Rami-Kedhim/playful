@@ -1,74 +1,52 @@
 
-import { UberPersona } from '@/types/uberPersona';
-import { 
-  LucieAISystem, 
-  GenerateContentParams, 
-  GenerateContentResult, 
-  ModerateContentParams, 
-  ModerateContentResult, 
-  SentimentAnalysisResult, 
-  RecommendedAction 
-} from '@/types/core-systems';
+export interface LucieAI {
+  initialized: boolean;
+  initialize(): Promise<boolean>;
+  generateContent(params: any): Promise<{ content: string }>;
+  verifyContentSafety(content: string): Promise<boolean>;
+  generateImagePrompt(context: any): Promise<string>;
+  analyzeUserMessage(message: string): Promise<any>;
+}
 
-export class LucieAI implements LucieAISystem {
-  async initialize(): Promise<void> {
-    console.log('LucieAI initialized');
+export class LucieAI implements LucieAI {
+  initialized: boolean = false;
+
+  constructor() {
+    this.initialized = false;
   }
-  
-  async generateContent(params: GenerateContentParams): Promise<GenerateContentResult> {
+
+  async initialize(): Promise<boolean> {
+    this.initialized = true;
+    return true;
+  }
+
+  async generateContent(params: any): Promise<{ content: string }> {
+    // Mock implementation
     return {
-      content: `Generated content for prompt: ${params.prompt}`,
-      metadata: { generatedAt: new Date().toISOString() }
+      content: `AI generated response about: ${params.prompt}`,
     };
   }
-  
-  async moderateContent(params: ModerateContentParams): Promise<ModerateContentResult> {
-    return {
-      approved: true,
-      score: 0.95,
-      flags: []
-    };
+
+  async verifyContentSafety(content: string): Promise<boolean> {
+    // Mock implementation - in reality, would check for harmful content
+    const lowerContent = content.toLowerCase();
+    const blockedTerms = ['harmful', 'offensive', 'illegal'];
+    
+    return !blockedTerms.some(term => lowerContent.includes(term));
   }
-  
-  async analyzeUserBehavior(userId: string, data: any): Promise<any> {
-    return {
-      insights: ['User is active during evenings', 'User prefers visual content'],
-      score: 0.85
-    };
+
+  async generateImagePrompt(context: any): Promise<string> {
+    // Mock implementation
+    return `A beautiful image of ${context.subject || 'a landscape'}`;
   }
-  
-  async getSentimentAnalysis(text: string): Promise<SentimentAnalysisResult> {
+
+  async analyzeUserMessage(message: string): Promise<any> {
+    // Mock implementation
     return {
-      score: 0.7,
-      sentiment: 'positive',
-      confidence: 0.85
-    };
-  }
-  
-  async predictNextAction(userId: string, context: any): Promise<RecommendedAction> {
-    return {
-      actionType: 'content_suggestion',
-      confidence: 0.65,
-      metadata: { 
-        suggestedContent: 'personal_message'
-      }
-    };
-  }
-  
-  createPersonaResponse(persona: UberPersona, prompt: string): Promise<string> {
-    return Promise.resolve(`Response from ${persona.name}: Thank you for your message!`);
-  }
-  
-  getSystemStatus(): { modules: Record<string, string> } {
-    return {
-      modules: {
-        aiGeneration: 'online',
-        contentModeration: 'online',
-        sentimentAnalysis: 'online'
-      }
+      intent: 'general_query',
+      sentiment: 'neutral',
+      topics: ['general'],
+      safetyCheck: { safe: true }
     };
   }
 }
-
-// Create the instance for the singleton pattern
-export const lucieAI = new LucieAI();

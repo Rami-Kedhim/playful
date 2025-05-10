@@ -1,78 +1,61 @@
 
-import { OxumSystem } from '@/types/core-systems';
-
-export class Oxum implements OxumSystem {
-  private authToken: string | null = null;
-  private userId: string | null = null;
-  private permissions: Record<string, string[]> = {};
-
-  // Fix the return type to match the interface
-  async initialize(): Promise<boolean> {
-    console.log('Oxum security system initialized');
-    
-    try {
-      // Mock implementation
-      this.permissions = {
-        'admin': ['read', 'write', 'delete'],
-        'user': ['read']
-      };
-      return true;
-    } catch (error) {
-      console.error('Failed to initialize Oxum:', error);
-      return false;
-    }
-  }
-
-  // Add this method to fix the BoostManagerContainer error
-  async boostAllocationEigen(profileId: string, boostLevel: number): Promise<any> {
-    // Mock implementation
-    return {
-      allocation: [0.4, 0.3, 0.2, 0.1],
-      profileId,
-      boostLevel,
-      timestamp: new Date()
-    };
-  }
-
-  async processImageFeatures(imageUrl: string): Promise<any> {
-    // Mock implementation
-    return {
-      features: ["face", "outdoor", "smile"],
-      confidence: 0.92,
-      timestamp: new Date()
-    };
-  }
-
-  async validateSession(token: string): Promise<boolean> {
-    if (!token) return false;
-    
-    // Mock implementation
-    this.authToken = token;
-    return true;
-  }
-
-  async checkPermission(userId: string, resource: string, action: string): Promise<boolean> {
-    // Mock implementation
-    const userRole = userId === 'admin-id' ? 'admin' : 'user';
-    const allowedActions = this.permissions[userRole] || [];
-    
-    return allowedActions.includes(action);
-  }
-  
-  getSystemStatus(): { isOperational: boolean; performance: number; lastUpdate: string } {
-    return {
-      isOperational: true,
-      performance: 98,
-      lastUpdate: new Date().toISOString()
-    };
-  }
-  
-  checkSystemStatus(): { operational: boolean; services: string[] } {
-    return {
-      operational: true,
-      services: ['core', 'security', 'analytics']
-    };
-  }
+export interface OxumOptions {
+  boostWeight?: number;
+  ratingWeight?: number;
+  activityWeight?: number;
+  verificationWeight?: number;
 }
 
-export default Oxum;
+export class Oxum {
+  private initialized: boolean = false;
+  private options: OxumOptions;
+
+  constructor(options: OxumOptions = {}) {
+    this.options = {
+      boostWeight: options.boostWeight || 0.4,
+      ratingWeight: options.ratingWeight || 0.3,
+      activityWeight: options.activityWeight || 0.2,
+      verificationWeight: options.verificationWeight || 0.1
+    };
+  }
+
+  async initialize() {
+    // Mock initialization
+    this.initialized = true;
+    return this.initialized;
+  }
+
+  isInitialized() {
+    return this.initialized;
+  }
+
+  calculateScore(profile: any, boostLevel: number = 0): number {
+    if (!profile) return 0;
+    
+    const rating = profile.rating || 0;
+    const activityScore = profile.online_score || profile.activityScore || 0;
+    const verificationScore = profile.isVerified ? 1 : 0;
+    
+    // Calculate weighted score
+    const score = 
+      (boostLevel * this.options.boostWeight) +
+      (rating * this.options.ratingWeight) +
+      (activityScore * this.options.activityWeight) +
+      (verificationScore * this.options.verificationWeight);
+      
+    // Normalize to 0-100 scale
+    return Math.min(Math.max(score * 20, 0), 100);
+  }
+
+  boostAllocationEigen(profileId: string, boostLevel: number) {
+    // This would be a more complex algorithm in reality
+    return [boostLevel * 0.7, boostLevel * 0.2, boostLevel * 0.1];
+  }
+
+  async getVisibilityMultiplier(profile: any) {
+    const baseMultiplier = 1.0;
+    const boostLevel = profile.boostLevel || 0;
+    
+    return baseMultiplier + (boostLevel * 0.5);
+  }
+}

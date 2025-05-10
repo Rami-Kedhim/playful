@@ -1,102 +1,84 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { BoostStatus } from '@/types/pulse-boost';
 
-const useBoostManager = (profileId?: string) => {
+export function useBoostManager() {
   const [boostStatus, setBoostStatus] = useState<BoostStatus>({
     isActive: false,
-    expiresAt: '',
-    remainingDays: 0,
-    boostLevel: 0,
-    isExpiring: false
+    timeRemaining: '',
   });
   
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   
-  const fetchBoostStatus = useCallback(async () => {
-    if (!profileId) return;
-    
+  const applyBoost = useCallback(async (profileId: string, level: number) => {
     setLoading(true);
-    setError(null);
-    
-    try {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Randomly determine if there's an active boost for demo purposes
-      const isActive = Math.random() > 0.5;
-      
-      if (isActive) {
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + Math.floor(Math.random() * 7) + 1);
-        
-        setBoostStatus({
-          isActive: true,
-          expiresAt: expiresAt.toISOString(),
-          remainingDays: Math.floor((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
-          boostLevel: Math.floor(Math.random() * 3) + 1,
-          isExpiring: Math.random() > 0.7
-        });
-      } else {
-        setBoostStatus({
-          isActive: false,
-          expiresAt: '',
-          remainingDays: 0,
-          boostLevel: 0,
-          isExpiring: false
-        });
-      }
-    } catch (err) {
-      console.error('Error fetching boost status:', err);
-      setError('Failed to fetch boost status');
-    } finally {
-      setLoading(false);
-    }
-  }, [profileId]);
-  
-  useEffect(() => {
-    fetchBoostStatus();
-  }, [fetchBoostStatus]);
-  
-  const applyBoost = useCallback(async (packageId: string): Promise<boolean> => {
-    if (!profileId) return false;
-    
-    setLoading(true);
-    setError(null);
     
     try {
       // Mock API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7); // 7 days boost
-      
+      // Update boost status
       setBoostStatus({
         isActive: true,
-        expiresAt: expiresAt.toISOString(),
-        remainingDays: 7,
-        boostLevel: 2,
-        isExpiring: false
+        timeRemaining: '24h',
+        packageId: 'boost-' + level,
+        packageName: 'Premium Boost',
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        isExpiring: false,
       });
       
       return true;
-    } catch (err) {
-      console.error('Error applying boost:', err);
-      setError('Failed to apply boost');
+    } catch (error) {
+      console.error('Error applying boost:', error);
       return false;
     } finally {
       setLoading(false);
     }
-  }, [profileId]);
+  }, []);
+  
+  const cancelBoost = useCallback(async () => {
+    setLoading(true);
+    
+    try {
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Reset boost status
+      setBoostStatus({
+        isActive: false,
+        timeRemaining: '',
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error cancelling boost:', error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  
+  const refreshBoostStatus = useCallback(async (profileId: string) => {
+    setLoading(true);
+    
+    try {
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      return boostStatus;
+    } catch (error) {
+      console.error('Error refreshing boost status:', error);
+      return boostStatus;
+    } finally {
+      setLoading(false);
+    }
+  }, [boostStatus]);
   
   return {
     boostStatus,
     loading,
-    error,
-    fetchBoostStatus,
-    applyBoost
+    applyBoost,
+    cancelBoost,
+    refreshBoostStatus
   };
-};
-
-export default useBoostManager;
+}

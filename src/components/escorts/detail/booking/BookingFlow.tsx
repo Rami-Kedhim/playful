@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,6 +9,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { BookingFormValues } from '../../booking/types';
 import { Escort } from '@/types/Escort';
 import BookingConfirmation from './BookingConfirmation';
+import { normalizeUberPersona } from '@/utils/typeConverters';
 
 interface BookingFlowProps {
   escort: Escort;
@@ -26,9 +27,11 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort }) => {
     message: ''
   });
   
-  const { register, handleSubmit, formState } = useForm<BookingFormValues>();
+  const { register, handleSubmit, formState: { errors } } = useForm<BookingFormValues>({
+    defaultValues: formData
+  });
   
-  const onSubmit: SubmitHandler<BookingFormValues> = (data) => {
+  const onSubmit = (data: BookingFormValues) => {
     setFormData(data);
     setStep('confirmation');
   };

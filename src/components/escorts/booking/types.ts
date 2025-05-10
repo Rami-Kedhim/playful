@@ -1,4 +1,6 @@
 
+import { Escort } from '@/types/Escort';
+
 export interface BookingFormValues {
   date?: Date;
   time?: string;
@@ -9,4 +11,8 @@ export interface BookingFormValues {
   message?: string;
 }
 
-export type BookingFormData = BookingFormValues;
+export interface BookingConfirmationProps {
+  escort: Escort;
+  formData: BookingFormValues;
+  onClose?: () => void;
+}

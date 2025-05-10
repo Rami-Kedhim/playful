@@ -55,4 +55,14 @@ export interface UberPersona {
     acceptsFiat?: boolean;
     meetingPrice?: number;
   };
+  availability?: Array<{
+    start: Date | string;
+    end: Date | string;
+  }> | {
+    nextAvailable?: Date | string;
+    schedule?: Record<string, any>;
+  };
+  imageUrl?: string;
+  profileImage?: string;
+  profileImageUrl?: string;
 }
