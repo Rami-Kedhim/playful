@@ -5,6 +5,7 @@ import { BoostPackage } from '@/types/pulse-boost';
 export function useBoostPackages() {
   const [packages, setPackages] = useState<BoostPackage[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
     const fetchPackages = async () => {
@@ -48,8 +49,10 @@ export function useBoostPackages() {
         ];
         
         setPackages(mockPackages);
+        setError(null);
       } catch (error) {
         console.error('Error fetching boost packages:', error);
+        setError('Failed to fetch boost packages');
       } finally {
         setLoading(false);
       }
@@ -58,5 +61,7 @@ export function useBoostPackages() {
     fetchPackages();
   }, []);
   
-  return { packages, loading };
+  return { packages, loading, error };
 }
+
+export default useBoostPackages;

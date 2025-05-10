@@ -1,95 +1,4 @@
 
-export interface PulseBoost {
-  id: string;
-  profileId?: string;
-  packageId?: string;
-  startTime?: Date;
-  endTime?: Date;
-  status?: string;
-  
-  // Additional properties needed by PulseBoostManager
-  name: string;
-  description: string;
-  duration: string;
-  price: number;
-  price_ubx: number;
-  features: string[];
-  visibility?: string | number;
-  visibility_increase: number;
-  color?: string;
-  badgeColor?: string;
-  durationMinutes: number;
-  boost_power?: number;
-  isMostPopular?: boolean;
-  isPopular?: boolean;
-  isRecommended?: boolean;
-  isActive?: boolean;
-}
-
-export interface PulseBoostStatus {
-  isActive: boolean;
-  isExpiring?: boolean;
-  expiresAt?: string | Date;
-  remainingTime?: string; // in seconds or formatted time
-  boostLevel?: number;
-  boostType?: string;
-  modifiers?: Record<string, number>;
-  packageName?: string;
-  packageId?: string;
-  startedAt?: Date | string;
-  progress?: number;
-  timeRemaining?: string;
-}
-
-export interface PulseBoostManager {
-  boostStatus: PulseBoostStatus | null;
-  loading: boolean;
-  error: string | null;
-  packages: PulseBoost[];
-  activateBoost: (packageId: string) => Promise<boolean>;
-  cancelBoost: () => Promise<boolean>;
-  isEligible: boolean;
-  eligibilityReason?: string;
-  refreshStatus: () => void;
-}
-
-// Define EnhancedBoostStatus as an interface that extends PulseBoostStatus
-export interface EnhancedBoostStatus extends PulseBoostStatus {
-  packageName?: string;
-  expiresAt?: Date;
-  startedAt?: Date;
-  timeRemaining?: string;
-  progress?: number;
-  boostPackage?: BoostPackage;
-  packageId?: string;
-  isActive: boolean; // This property is required
-  remainingMinutes?: number;
-  percentRemaining?: number;
-  isExpired?: boolean;
-}
-
-// Redefine BoostStatus for compatibility
-export interface BoostStatus {
-  isActive: boolean;
-  packageId?: string;
-  expiresAt?: Date | string;
-  startedAt?: Date | string;
-  timeRemaining?: string;
-  remainingTime?: string;
-  packageName?: string;
-  boostPackage?: BoostPackage;
-  progress?: number;
-  startTime?: Date;
-  endTime?: Date;
-  activeBoostId?: string;
-  boostMultiplier?: number;
-  level?: number;
-  remainingDays?: number;
-  boostLevel?: number;
-  isExpiring?: boolean;
-}
-
-// Update the BoostPackage interface
 export interface BoostPackage {
   id: string;
   name: string;
@@ -104,7 +13,47 @@ export interface BoostPackage {
   color?: string;
   badgeColor?: string;
   boost_power?: number;
+  boostMultiplier?: number;
   isMostPopular?: boolean;
+}
+
+export interface BoostStatus {
+  isActive: boolean;
+  packageId?: string;
+  expiresAt?: Date | string;
+  timeRemaining: string;
+  boostPackage?: BoostPackage;
+  progress?: number;
+  packageName?: string;
+  startedAt?: Date | string;
+  activeBoostId?: string;
+  startTime?: Date | string;
+  endTime?: Date | string;
+  isExpiring?: boolean;
+  remainingTime?: string;
+  boostLevel?: number;
+}
+
+export interface BoostEligibility {
+  eligible: boolean;
+  isEligible?: boolean;
+  reason?: string;
+  reasons: string[];
+  nextEligibleTime?: string | Date;
+  remainingBoosts?: number;
+  maxBoostsPerDay?: number;
+}
+
+export interface BoostPurchaseRequest {
+  profileId: string;
+  packageId: string;
+}
+
+export interface BoostPurchaseResult {
+  success: boolean;
+  boostId?: string;
+  error?: string | null;
+  message?: string;
 }
 
 export interface HermesStatus {
@@ -120,17 +69,88 @@ export interface HermesStatus {
   lastUpdateTime?: string;
 }
 
-export interface BoostEligibility {
-  eligible: boolean;
-  isEligible?: boolean;
-  reason?: string;
-  reasons?: string[];
-  nextEligibleTime?: Date | string;
+export interface UserBoost {
+  id: string;
+  profileId?: string;
+  packageId?: string;
+  startTime?: Date;
+  endTime?: Date;
+  status?: string;
 }
 
-export interface BoostPackagesProps {
-  packages: BoostPackage[];
-  profileId: string;
-  onSuccess?: () => void | Promise<void>;
-  onBoost?: () => Promise<boolean>;
+export interface BoostAnalytics {
+  totalBoosts: number;
+  activeBoosts: number;
+  averageBoostScore: number;
+  boostHistory: Array<{
+    date: Date;
+    score: number;
+  }>;
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  views?: number;
+  impressions?: {
+    value: number;
+    change?: number;
+  };
+  interactions?: {
+    value: number;
+    change?: number;
+  };
+}
+
+export interface AnalyticsData {
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  views?: number;
+  impressions?: {
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+    increase?: number;
+    change?: number;
+    value?: number;
+  };
+  interactions?: {
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+    increase?: number;
+    change?: number;
+    value?: number;
+  };
+  rank?: {
+    current?: number;
+    previous?: number;
+    change?: number;
+  };
+  conversionRate?: number;
+  messageRate?: number;
+  bookingRate?: number;
+}
+
+export interface BoostScoreResult {
+  score: number;
+  recommendations?: string[];
+}
+
+// Define EnhancedBoostStatus as an interface that extends BoostStatus
+export interface EnhancedBoostStatus extends BoostStatus {
+  packageName?: string;
+  expiresAt?: Date;
+  startedAt?: Date;
+  timeRemaining?: string;
+  progress?: number;
+  boostPackage?: BoostPackage;
+  packageId?: string;
+  isActive: boolean; // This property is required
+  remainingMinutes?: number;
+  percentRemaining?: number;
+  isExpired?: boolean;
 }

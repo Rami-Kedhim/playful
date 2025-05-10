@@ -6,6 +6,7 @@ export function useBoostManager() {
   const [boostStatus, setBoostStatus] = useState<BoostStatus>({
     isActive: false,
     timeRemaining: '',
+    boostLevel: 0,
   });
   
   const [loading, setLoading] = useState(false);
@@ -25,6 +26,7 @@ export function useBoostManager() {
         packageName: 'Premium Boost',
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         isExpiring: false,
+        boostLevel: level,
       });
       
       return true;
@@ -47,6 +49,7 @@ export function useBoostManager() {
       setBoostStatus({
         isActive: false,
         timeRemaining: '',
+        boostLevel: 0,
       });
       
       return true;
@@ -82,3 +85,5 @@ export function useBoostManager() {
     refreshBoostStatus
   };
 }
+
+export default useBoostManager;

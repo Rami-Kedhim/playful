@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { AnalyticsData } from '@/types/pulse-boost';
+import { AnalyticsData, BoostAnalytics } from '@/types/pulse-boost';
 import { boostService } from '@/services/boostService';
 
 export const useBoostAnalytics = (profileId: string) => {
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsData | BoostAnalytics | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 

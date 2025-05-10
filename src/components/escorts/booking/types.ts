@@ -1,6 +1,16 @@
 
 import { Escort } from '@/types/Escort';
 
+export interface BookingFormData {
+  date?: Date;
+  time?: string;
+  duration?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  message?: string;
+}
+
 export interface BookingFormValues {
   date?: Date;
   time?: string;
@@ -13,6 +23,6 @@ export interface BookingFormValues {
 
 export interface BookingConfirmationProps {
   escort: Escort;
-  formData: BookingFormValues;
+  formData: BookingFormData;
   onClose?: () => void;
 }
