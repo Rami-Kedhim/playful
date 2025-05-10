@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Send } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -60,20 +61,15 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
     
     try {
       // Check content moderation
-      const params = {
-        content: input,
-        type: "text" // Changed from contentType to type
-      };
-      
       const isSafe = await lucieOrchestrator.isSafeContent(input);
       
       let aiResponse: string;
       
       if (isSafe) {
         // Generate AI response
-        aiResponse = await lucieOrchestrator.generateContent(
-          `As ${aiName}, respond to: ${input}`
-        );
+        aiResponse = await lucieOrchestrator.generateContent({
+          prompt: `As ${aiName}, respond to: ${input}`
+        });
       } else {
         aiResponse = "I'm sorry, but I can't respond to that type of content.";
       }

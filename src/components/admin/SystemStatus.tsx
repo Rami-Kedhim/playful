@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { uberCore } from '@/core/UberCore';
+import { uberCore } from '@/core';
 
 const SystemStatus: React.FC = () => {
   const systemHealth = uberCore.checkSubsystemHealth();

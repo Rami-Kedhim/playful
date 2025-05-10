@@ -16,28 +16,39 @@ export class LucieOrchestratorAdapter {
   /**
    * Process user input and generate content through Lucie AI
    */
-  async generateContent(params: GenerateContentParams): Promise<GenerateContentResult> {
+  async generateContent(params: GenerateContentParams): Promise<string> {
     try {
       // Log the request (in a real system, this might go to analytics)
-      console.log(`Content generation request: ${params.prompt.substring(0, 20)}...`);
+      console.log(`Content generation request: ${typeof params === 'string' ? 
+        params.substring(0, 20) : params.prompt.substring(0, 20)}...`);
+      
+      // Handle string input for backward compatibility
+      const formattedParams = typeof params === 'string' ? { prompt: params } : params;
       
       // Execute generation via Lucie
-      const result = await lucieAI.generateContent(params);
+      const result = await lucieAI.generateContent(formattedParams);
       
-      // Post-process result if needed (e.g., add metadata)
-      return {
-        ...result,
-        metadata: {
-          ...result.metadata,
-          processed: new Date().toISOString()
-        }
-      };
+      // Return the content string for simpler usage
+      return result.content;
     } catch (error) {
       console.error('Content generation error:', error);
-      return {
-        content: 'Sorry, I encountered an error while generating content.',
-        rating: 'G'
-      };
+      return 'Sorry, I encountered an error while generating content.';
+    }
+  }
+  
+  /**
+   * Check if content is safe to process
+   */
+  async isSafeContent(content: string, options?: any): Promise<boolean> {
+    try {
+      // Get moderation result
+      const result = await this.moderateContent(content, options);
+      
+      // Content is safe if it's approved
+      return result.isApproved;
+    } catch (error) {
+      console.error('Content safety check error:', error);
+      return false; // Default to unsafe if there's an error
     }
   }
   
@@ -46,21 +57,10 @@ export class LucieOrchestratorAdapter {
    */
   async moderateContent(content: string, options?: any): Promise<ModerateContentResult> {
     try {
-      // Format params to match LucieAI interface
-      const params: ModerateContentParams = {
-        content,
-        context: options?.context,
-        strictness: options?.strictness || 1.0
-      };
-      
       // Get moderation result
       const result = await lucieAI.moderateContent(content, options);
       
-      // Enhance result with category
-      return {
-        ...result,
-        category: result.category || 'general'
-      };
+      return result;
     } catch (error) {
       console.error('Content moderation error:', error);
       return {
@@ -76,11 +76,6 @@ export class LucieOrchestratorAdapter {
    */
   async analyzeSentiment(text: string): Promise<SentimentAnalysisResult> {
     try {
-      // Format params to match LucieAI interface
-      const params: SentimentAnalysisParams = {
-        text
-      };
-      
       // Analyze sentiment
       return await lucieAI.analyzeSentiment(text);
     } catch (error) {

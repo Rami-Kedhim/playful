@@ -1,238 +1,194 @@
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Zap } from 'lucide-react';
-import { BoostStatus, BoostPackage } from '@/types/boost';
-import BoostStatusCard from './boost/BoostStatusCard';
-import BoostEligibilityAlert from './boost/BoostEligibilityAlert';
-import BoostPackageSelection from './boost/BoostPackageSelection';
-import BoostPurchaseConfirmation from './boost/BoostPurchaseConfirmation';
-import HermesOxumQueueVisualization from './boost/HermesOxumQueueVisualization';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Zap, 
+  ChevronRight, 
+  TrendingUp, 
+  Users, 
+  Calendar, 
+  Clock 
+} from 'lucide-react';
 import BoostAnalytics from './boost/BoostAnalytics';
-import { useBoostOperations } from '@/hooks/boost/useBoostOperations';
+import useBoostOperations from '@/hooks/boost/useBoostOperations';
+import { useAuth } from '@/contexts/AuthContext';
+import BoostProfileDialog from '@/components/boost/BoostProfileDialog';
 
-interface CreatorBoostTabProps {
-  creatorId?: string;
-  profileId?: string;
-  ubxBalance: number;
-}
-
-const CreatorBoostTab = ({ 
-  creatorId, 
-  profileId, 
-  ubxBalance = 0 
-}: CreatorBoostTabProps) => {
-  const [activeTab, setActiveTab] = useState('boost');
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
-  const [purchaseStep, setPurchaseStep] = useState<'select' | 'confirm'>('select');
+const CreatorBoostTab: React.FC = () => {
+  const { user } = useAuth();
+  const creatorId = user?.id || '';
   
-  const { toast } = useToast();
+  // State for boost dialog
+  const [showBoostDialog, setShowBoostDialog] = useState(false);
   
+  // Use the hook
   const {
     boostStatus,
     boostEligibility,
     boostPackages,
-    boostProfile,
-    cancelBoost,
     getBoostPrice,
     hermesMetrics,
-    loading
-  } = useBoostOperations(creatorId || profileId);
-
-  // Update selected package when boost packages load
-  useEffect(() => {
-    if (boostPackages.length > 0 && !selectedPackage) {
-      setSelectedPackage(boostPackages[0].id);
-    }
-  }, [boostPackages, selectedPackage]);
-
-  const handleContinueToPayment = () => {
-    if (!selectedPackage) {
-      toast({
-        title: "Please select a boost package",
-        variant: "destructive",
-      });
-      return;
-    }
-    setPurchaseStep('confirm');
-  };
-
-  const handleBackToSelection = () => {
-    setPurchaseStep('select');
-  };
-
-  const handlePurchaseBoost = async () => {
-    if (!selectedPackage || !profileId) {
-      toast({
-        title: "Unable to process",
-        description: "Missing required information",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const success = await boostProfile(profileId, selectedPackage);
-      
-      if (success) {
-        toast({
-          title: "Boost activated!",
-          description: "Your profile boost has been activated successfully.",
-        });
-        setPurchaseStep('select');
-      } else {
-        toast({
-          title: "Boost failed",
-          description: "Unable to activate profile boost.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An error occurred while processing your request.",
-        variant: "destructive",
-      });
+    loading,
+    error,
+    boostProfile
+  } = useBoostOperations(creatorId);
+  
+  // Format relative date for expiry
+  const formatExpiryDate = (date?: Date) => {
+    if (!date) return 'N/A';
+    
+    const now = new Date();
+    const diff = date.getTime() - now.getTime();
+    
+    // If already expired
+    if (diff <= 0) return 'Expired';
+    
+    // Convert to days, hours
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    
+    if (days > 0) {
+      return `${days} day${days > 1 ? 's' : ''} ${hours} hour${hours > 1 ? 's' : ''}`;
+    } else {
+      return `${hours} hour${hours > 1 ? 's' : ''}`;
     }
   };
-
-  const handleCancelBoost = async () => {
-    try {
-      const success = await cancelBoost();
-      
-      if (success) {
-        toast({
-          title: "Boost cancelled",
-          description: "Your profile boost has been cancelled.",
-        });
-      } else {
-        toast({
-          title: "Cancellation failed",
-          description: "Unable to cancel your profile boost.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An error occurred while processing your request.",
-        variant: "destructive",
-      });
-    }
+  
+  // Handle successful boost
+  const handleBoostSuccess = () => {
+    console.log('Boost successful');
+    // Could show a toast notification here
   };
-
+  
   return (
-    <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="boost">Boost Management</TabsTrigger>
-        <TabsTrigger value="analytics">Analytics</TabsTrigger>
-      </TabsList>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold">Profile Boost</h2>
+          <p className="text-muted-foreground">
+            Increase your visibility and get more clients
+          </p>
+        </div>
+        <Button 
+          onClick={() => setShowBoostDialog(true)}
+          variant={boostStatus.isActive ? "outline" : "default"}
+          className="gap-1"
+        >
+          <Zap className="h-4 w-4" />
+          {boostStatus.isActive ? 'Manage Boost' : 'Boost Profile'}
+        </Button>
+      </div>
       
-      <TabsContent value="boost" className="space-y-4 mt-4">
-        <BoostStatusCard 
-          boostStatus={boostStatus}
-          onCancel={handleCancelBoost}
-          loading={loading}
-          dailyBoostUsage={0}
-          dailyBoostLimit={5}
-        />
-        
-        <div className="grid md:grid-cols-2 gap-4">
-          <HermesOxumQueueVisualization 
-            profileId={profileId}
-            userId={creatorId}
-            activeBoosts={boostStatus.isActive ? 1 : 0}
-            activeUsers={hermesMetrics.activeUsers}
-            visibilityScore={hermesMetrics.visibilityScore}
-            impressions={hermesMetrics.impressions}
-            engagement={hermesMetrics.engagement}
-          />
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>Boost Overview</CardTitle>
-              <CardDescription>Enhance your visibility and engagement</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-2 text-center mb-4">
-                <div className="bg-muted p-2 rounded-md">
-                  <p className="text-xl font-semibold">{hermesMetrics.visibilityScore}%</p>
-                  <p className="text-xs text-muted-foreground">Visibility</p>
-                </div>
-                <div className="bg-muted p-2 rounded-md">
-                  <p className="text-xl font-semibold">{hermesMetrics.impressions}</p>
-                  <p className="text-xs text-muted-foreground">Daily Impressions</p>
-                </div>
+      {boostStatus.isActive && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row justify-between">
+              <div>
+                <h3 className="font-medium flex items-center text-primary">
+                  <Zap className="h-4 w-4 mr-2" /> 
+                  Active Boost
+                </h3>
+                <p className="text-muted-foreground mt-1">
+                  Your profile is currently boosted (Level {boostStatus.level})
+                </p>
               </div>
               
-              {!boostStatus.isActive && (
-                <Button 
-                  className="w-full" 
-                  onClick={() => setActiveTab('boost')}
-                  disabled={loading}
-                >
-                  <Zap className="mr-2 h-4 w-4" />
-                  Get a Boost
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-        
-        {!boostStatus.isActive && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Purchase a Boost</CardTitle>
-              <CardDescription>
-                Increase your profile's visibility to potential clients
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <BoostEligibilityAlert 
-                eligible={boostEligibility.isEligible} 
-                reason={boostEligibility.reason || ''} 
-              />
-              
-              {boostEligibility.isEligible && (
-                purchaseStep === 'select' ? (
-                  <BoostPackageSelection
-                    profileCompleteness={85}
-                    rating={4.5}
-                    country="United States"
-                    role="verified"
-                    getBoostPrice={getBoostPrice}
-                    packages={boostPackages}
-                    selectedPackage={selectedPackage}
-                    onSelectPackage={setSelectedPackage}
-                    onContinue={handleContinueToPayment}
-                    loading={loading}
-                  />
-                ) : (
-                  <BoostPurchaseConfirmation
-                    selectedPackage={boostPackages.find(p => p.id === selectedPackage) || null}
-                    ubxBalance={ubxBalance}
-                    onBack={handleBackToSelection}
-                    onPurchase={handlePurchaseBoost}
-                    onCancel={handleBackToSelection}
-                    loading={loading}
-                  />
-                )
-              )}
-            </CardContent>
-          </Card>
-        )}
-      </TabsContent>
+              <div className="mt-4 md:mt-0 space-y-1">
+                <div className="flex items-center text-sm">
+                  <Calendar className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                  <span className="text-muted-foreground">Expires in:</span>
+                  <span className="font-medium ml-1">
+                    {formatExpiryDate(boostStatus.expiresAt)}
+                  </span>
+                </div>
+                
+                <div className="flex items-center text-sm">
+                  <TrendingUp className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                  <span className="text-muted-foreground">Visibility Increase:</span>
+                  <span className="font-medium ml-1">+{boostStatus.level * 50}%</span>
+                </div>
+                
+                <div className="flex items-center text-sm">
+                  <Users className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                  <span className="text-muted-foreground">Package:</span>
+                  <span className="font-medium ml-1">
+                    {boostStatus.level === 1 ? 'Basic' : boostStatus.level === 2 ? 'Standard' : 'Premium'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
-      <TabsContent value="analytics" className="space-y-4 mt-4">
-        <BoostAnalytics 
-          isActive={boostStatus.isActive}
-          creatorId={creatorId || profileId || ''}
-        />
-      </TabsContent>
-    </Tabs>
+      <Tabs defaultValue="analytics">
+        <TabsList className="mb-4">
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="boost-options">Boost Options</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="analytics">
+          <BoostAnalytics 
+            profileId={creatorId} 
+            boostStatus={boostStatus} 
+          />
+        </TabsContent>
+        
+        <TabsContent value="boost-options">
+          <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-3">
+            {boostPackages.map((pkg) => (
+              <Card key={pkg.id} className={`${pkg.level === 2 ? 'border-primary/40' : ''}`}>
+                <CardHeader>
+                  <CardTitle className="flex justify-between items-center">
+                    {pkg.name}
+                    {pkg.level === 2 && (
+                      <span className="bg-primary/20 text-primary text-xs px-2 py-1 rounded-full">Most Popular</span>
+                    )}
+                  </CardTitle>
+                  <CardDescription>{pkg.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-3xl font-bold">${pkg.price.toFixed(2)}</div>
+                  
+                  <div className="space-y-2 text-sm">
+                    {pkg.features?.map((feature, i) => (
+                      <div key={i} className="flex items-center">
+                        <ChevronRight className="h-3 w-3 mr-2 text-primary" />
+                        {feature}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Clock className="h-3.5 w-3.5 mr-1.5" />
+                    {pkg.duration}
+                  </div>
+                  
+                  <Button 
+                    className="w-full mt-4" 
+                    variant={pkg.level === 2 ? "default" : "outline"}
+                    onClick={() => setShowBoostDialog(true)}
+                  >
+                    <Zap className="h-4 w-4 mr-1.5" /> 
+                    Select
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+      
+      {/* Boost Profile Dialog */}
+      <BoostProfileDialog
+        open={showBoostDialog}
+        setOpen={setShowBoostDialog}
+        profileId={creatorId}
+        onSuccess={handleBoostSuccess}
+      />
+    </div>
   );
 };
 

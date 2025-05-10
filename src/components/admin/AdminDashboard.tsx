@@ -9,7 +9,7 @@ import FinanceManagement from './FinanceManagement';
 import ConfigSettings from './ConfigSettings';
 import ContentModeration from './ContentModeration';
 import SystemStatus from './SystemStatus';
-import { uberCore } from '@/core/UberCore';
+import { uberCore } from '@/core';
 
 const AdminDashboard: React.FC = () => {
   useEffect(() => {

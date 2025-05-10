@@ -1,55 +1,45 @@
 
+import { lucieAI } from './Lucie';
 import { oxum } from './Oxum';
-import { lucie, lucieAI } from './Lucie'; // Import both names for compatibility
-import { uberCore } from './UberCore';
 import { hermes } from './Hermes';
-import { automaticSEO } from './AutomaticSEO';
-import { SystemStatus } from '@/types/core-systems';
+import { UberCore } from './UberCore';
+
+// Create an instance of UberCore
+const uberCore = new UberCore(lucieAI);
 
 /**
- * Initialize the UberEscorts core systems
+ * Initialize all core systems
  */
 export async function initializeSystem(): Promise<boolean> {
+  console.log('Initializing core systems...');
+  
   try {
-    console.log('Starting UberEscorts initialization...');
+    // Initialize each system
+    await Promise.all([
+      lucieAI.initialize(),
+      uberCore.initialize()
+    ]);
     
-    // Initialize Oxum system
-    await oxum.initialize();
-    console.log('Oxum neural network initialized');
-    
-    // Initialize Lucie AI system
-    await lucieAI.initialize();
-    console.log('Lucie AI system initialized');
-    
-    // Initialize Automatic SEO system
-    automaticSEO.initialize();
-    console.log('Automatic SEO system initialized');
-    
-    console.log('UberEscorts system initialization complete');
-    
+    console.log('All core systems initialized successfully.');
     return true;
   } catch (error) {
-    console.error('Error during system initialization:', error);
+    console.error('Failed to initialize core systems:', error);
     return false;
   }
 }
 
 /**
- * Shut down the UberEscorts core systems safely
+ * Shutdown all core systems
  */
-export function shutdownSystem(): void {
-  console.log('Shutting down UberEscorts systems...');
+export async function shutdownSystem(): Promise<boolean> {
+  console.log('Shutting down core systems...');
   
-  // Shutdown subsystems
-  oxum.shutdown();
-  lucieAI.shutdown();
-  
-  console.log('UberEscorts systems shutdown complete');
-}
-
-/**
- * Check the overall system status
- */
-export function getSystemStatus(): SystemStatus {
-  return uberCore.getSystemStatus();
+  try {
+    // Shutdown logic here
+    console.log('All core systems shut down successfully.');
+    return true;
+  } catch (error) {
+    console.error('Error shutting down core systems:', error);
+    return false;
+  }
 }

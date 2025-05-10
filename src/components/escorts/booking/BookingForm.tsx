@@ -1,70 +1,97 @@
-
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { CalendarIcon, Clock } from 'lucide-react';
-import { format } from 'date-fns';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
-import { Escort } from '@/types/escort';
-import { bookingFormSchema, BookingFormValues } from './types';
+import React from "react";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import BookingMessage from "./BookingMessage";
+import { BookingFormValues, bookingFormSchema } from './types';
+import { Escort } from '@/types/Escort';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { formatCurrency } from '@/utils/formatters';
 
 interface BookingFormProps {
   escort: Escort;
-  bookingType: 'in-person' | 'virtual';
+  serviceType: "in_person" | "virtual";
   onSubmit: (data: BookingFormValues) => void;
+  isSubmitting?: boolean;
 }
 
-const BookingForm: React.FC<BookingFormProps> = ({ escort, bookingType, onSubmit }) => {
+const BookingForm = ({
+  escort,
+  serviceType,
+  onSubmit,
+  isSubmitting = false,
+}: BookingFormProps) => {
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
     defaultValues: {
       date: new Date(),
-      time: '',
-      duration: '',
-      name: '',
-      email: '',
-      phone: '',
-      message: ''
+      time: "",
+      duration: "",
+      name: "",
+      email: "",
+      phone: "",
+      message: "",
     },
   });
 
-  const availableTimeSlots = [
-    '09:00', '10:00', '11:00', '12:00', '13:00', 
-    '14:00', '15:00', '16:00', '17:00', '18:00',
-    '19:00', '20:00', '21:00', '22:00'
-  ];
+  // Get default location from escort data
+  const defaultLocation = escort.location || '';
+  
+  // Prepare location options - if escort has locations array, use it
+  // otherwise fallback to the single location
+  const locationOptions = Array.isArray(escort.locations) && escort.locations.length > 0 
+    ? escort.locations 
+    : [defaultLocation];
 
+  // Duration options
   const durationOptions = [
-    { value: '1', label: '1 hour' },
-    { value: '2', label: '2 hours' },
-    { value: '3', label: '3 hours' },
-    { value: '4', label: '4 hours' }
+    { value: "1hour", label: "1 hour", price: escort.rates?.hourly || escort.price },
+    { value: "2hours", label: "2 hours", price: escort.rates?.twoHours || (escort.price * 1.8) },
+    { value: "overnight", label: "Overnight", price: escort.rates?.overnight || (escort.price * 5) },
   ];
 
-  // Get the location options
-  const locationOptions = React.useMemo(() => {
-    // Use location as fallback if locations array doesn't exist
-    if (!escort.locations || escort.locations.length === 0) {
-      return escort.location ? [escort.location] : ['Default Location'];
-    }
-    return escort.locations;
-  }, [escort]);
-
-  const handleSubmit = (data: BookingFormValues) => {
-    onSubmit(data);
+  // Calculate price based on duration
+  const calculatePrice = (duration: string) => {
+    const option = durationOptions.find((opt) => opt.value === duration);
+    return option?.price || escort.price;
   };
+
+  // Handle time slot selection
+  const timeSlots = [
+    "10:00", "11:00", "12:00", "13:00", "14:00", 
+    "15:00", "16:00", "17:00", "18:00", "19:00", 
+    "20:00", "21:00", "22:00", "23:00"
+  ];
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
+          {/* Date selector */}
           <FormField
             control={form.control}
             name="date"
@@ -95,7 +122,9 @@ const BookingForm: React.FC<BookingFormProps> = ({ escort, bookingType, onSubmit
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) => date < new Date()}
+                      disabled={(date) =>
+                        date < new Date() || date > new Date(new Date().setMonth(new Date().getMonth() + 1))
+                      }
                       initialFocus
                     />
                   </PopoverContent>
@@ -105,20 +134,24 @@ const BookingForm: React.FC<BookingFormProps> = ({ escort, bookingType, onSubmit
             )}
           />
 
+          {/* Time selector */}
           <FormField
             control={form.control}
             name="time"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Time</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select time" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {availableTimeSlots.map((time) => (
+                    {timeSlots.map((time) => (
                       <SelectItem key={time} value={time}>
                         {time}
                       </SelectItem>
@@ -129,34 +162,37 @@ const BookingForm: React.FC<BookingFormProps> = ({ escort, bookingType, onSubmit
               </FormItem>
             )}
           />
-        </div>
+          
+          {/* Duration selector */}
+          <FormField
+            control={form.control}
+            name="duration"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Duration</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select duration" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {durationOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label} ({formatCurrency(option.price)})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="duration"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Duration</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select duration" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {durationOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
+          {/* Personal information fields */}
           <FormField
             control={form.control}
             name="name"
@@ -164,7 +200,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ escort, bookingType, onSubmit
               <FormItem>
                 <FormLabel>Your Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter your name" {...field} />
+                  <Input {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -178,7 +214,21 @@ const BookingForm: React.FC<BookingFormProps> = ({ escort, bookingType, onSubmit
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="your@email.com" {...field} />
+                  <Input {...field} type="email" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone Number</FormLabel>
+                <FormControl>
+                  <Input {...field} type="tel" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -186,40 +236,15 @@ const BookingForm: React.FC<BookingFormProps> = ({ escort, bookingType, onSubmit
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Phone Number</FormLabel>
-              <FormControl>
-                <Input placeholder="+1 (555) 123-4567" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Message field */}
+        <BookingMessage form={form} />
 
-        <FormField
-          control={form.control}
-          name="message"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Message (Optional)</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Any special requests or details" 
-                  className="resize-none" 
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Button type="submit" className="w-full">
-          Book Appointment
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Submitting..." : "Request Booking"}
         </Button>
       </form>
     </Form>

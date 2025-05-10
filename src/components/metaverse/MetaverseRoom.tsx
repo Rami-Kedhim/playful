@@ -1,71 +1,124 @@
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { hermes } from '@/core/Hermes';
+import { Shield, Users, Map } from 'lucide-react';
 
 interface MetaverseRoomProps {
-  showControls?: boolean;
+  userId: string;
+  destination: string;
+  roomId: string;
+  participants?: number;
 }
 
-const MetaverseRoom = ({ showControls = true }: MetaverseRoomProps) => {
-  const { roomId } = useParams<{ roomId: string }>();
-  const [isConnected, setIsConnected] = useState(false);
-  const [activeUsers, setActiveUsers] = useState(0);
+const MetaverseRoom: React.FC<MetaverseRoomProps> = ({ 
+  userId, 
+  destination, 
+  roomId,
+  participants = 0
+}) => {
+  const [isSafe, setIsSafe] = useState(true);
+  const [isChecking, setIsChecking] = useState(false);
+  const [routeInfo, setRouteInfo] = useState<{ safe: boolean; reason?: string }>({ safe: true });
+  
+  // Check route safety using Hermes
+  const checkSafety = async () => {
+    setIsChecking(true);
+    
+    try {
+      // If Hermes has routeFlow method available, use it
+      if (typeof hermes.routeFlow === 'function') {
+        const result = await hermes.routeFlow(userId, destination);
+        setRouteInfo(result);
+        setIsSafe(result.safe);
+      } else {
+        // Fallback for compatibility
+        console.warn('Hermes.routeFlow method not available');
+        setIsSafe(true);
+      }
+    } catch (error) {
+      console.error('Error checking route safety:', error);
+      setIsSafe(false);
+    } finally {
+      setIsChecking(false);
+    }
+  };
   
   useEffect(() => {
-    if (roomId) {
-      // Track that user entered the room
-      hermes.routeFlow(
-        'user-navigation', 
-        'metaverse-room', 
-        { roomId, action: 'enter' }
-      );
-      
-      // Mock connection
-      setIsConnected(true);
-      
-      // Random number of active users between 5 and 50
-      setActiveUsers(Math.floor(Math.random() * 45) + 5);
-      
-      return () => {
-        // Track that user left the room
-        hermes.routeFlow(
-          'metaverse-room', 
-          'user-navigation', 
-          { roomId, action: 'leave' }
-        );
-      };
+    checkSafety();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, destination]);
+  
+  const handleJoinRoom = async () => {
+    // Re-check safety before joining
+    setIsChecking(true);
+    
+    try {
+      if (typeof hermes.routeFlow === 'function') {
+        const result = await hermes.routeFlow(userId, destination);
+        if (result.safe) {
+          console.log('Joining room', roomId);
+          // Would actually navigate or connect to room here
+        } else {
+          console.warn('Cannot join room, route deemed unsafe:', result.reason);
+        }
+      } else {
+        // If no check is possible, proceed anyway
+        console.log('Joining room', roomId);
+      }
+    } catch (error) {
+      console.error('Error joining room:', error);
+    } finally {
+      setIsChecking(false);
     }
-  }, [roomId]);
+  };
   
   return (
-    <div className="flex flex-col items-center justify-center min-h-[500px] bg-gradient-to-r from-purple-900 to-blue-900 rounded-lg p-6 text-white">
-      <h2 className="text-2xl font-bold mb-4">Virtual Room: {roomId || 'Lobby'}</h2>
-      
-      <div className="mb-4 text-center">
-        <div className="text-lg">Status: {isConnected ? 'Connected' : 'Connecting...'}</div>
-        <div className="text-sm opacity-80">Active Users: {activeUsers}</div>
-      </div>
-      
-      {showControls && (
-        <div className="flex gap-2 mt-4">
-          <Button variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-black">
-            Toggle Audio
-          </Button>
-          <Button variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-black">
-            Toggle Video
-          </Button>
+    <Card>
+      <CardHeader>
+        <CardTitle>Virtual Room: {destination}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Shield className={`h-5 w-5 mr-2 ${isSafe ? 'text-green-500' : 'text-red-500'}`} />
+              <span>Safety Rating: {isSafe ? 'Safe' : 'Check Required'}</span>
+            </div>
+            <div className="flex items-center">
+              <Users className="h-5 w-5 mr-2" />
+              <span>{participants} Participants</span>
+            </div>
+          </div>
+          
+          {!isSafe && routeInfo.reason && (
+            <div className="text-red-500 text-sm p-2 bg-red-50 rounded">
+              Warning: {routeInfo.reason}
+            </div>
+          )}
+          
+          <div className="flex space-x-3 pt-2">
+            <Button 
+              onClick={handleJoinRoom} 
+              disabled={!isSafe || isChecking}
+              className="flex-1"
+            >
+              {isChecking ? 'Checking...' : 'Join Room'}
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={checkSafety} 
+              disabled={isChecking}
+              className="flex items-center"
+            >
+              <Map className="h-4 w-4 mr-2" />
+              Check Route
+            </Button>
+          </div>
         </div>
-      )}
-      
-      <div className="mt-8 p-4 bg-black/20 rounded-lg w-full max-w-md">
-        <p className="text-sm">
-          This is a virtual metaverse room powered by the Hermes system. 
-          In a real implementation, this would connect to our virtual reality servers.
-        </p>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -1,60 +1,65 @@
 
-export type AIModelType = 'text' | 'image' | 'video' | 'audio';
-export type AIModelProvider = 'openai' | 'anthropic' | 'stability' | 'replicate' | 'custom';
-export type AIModelTemperature = 0 | 0.1 | 0.2 | 0.3 | 0.4 | 0.5 | 0.6 | 0.7 | 0.8 | 0.9 | 1.0;
-export type AIModelSize = 'small' | 'medium' | 'large';
-
-export interface AIModel {
-  id: string;
-  name: string;
-  provider: AIModelProvider;
-  type: AIModelType;
-  contextSize?: number;
-  maxOutputTokens?: number;
-  capabilities?: string[];
-  isPremium?: boolean;
-}
+export type AIModelName = 'gpt-4-mini' | 'gpt-4o' | 'claude-3' | 'gemini-pro';
 
 export interface AIPreferences {
-  model?: string;
-  temperature?: AIModelTemperature;
+  theme?: string;
+  model?: AIModelName;
+  temperature?: number;
+  safetySettings?: Record<string, any>;
+  chatHistory?: boolean;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: Date;
+}
+
+export interface AIModelConfig {
+  id: AIModelName;
+  name: string;
+  description: string;
+  maxTokens: number;
+  tokenCost: number;
+  capabilities: string[];
+  modelProvider: 'OpenAI' | 'Anthropic' | 'Google';
+}
+
+export interface AIModelOptions {
+  temperature?: number; // 0.0 to 1.0
   maxTokens?: number;
   topP?: number;
   frequencyPenalty?: number;
   presencePenalty?: number;
-  safetyFilter?: boolean;
-  id?: string; // Add missing property
 }
 
-export interface AIMessage {
+export interface AICompanion {
   id: string;
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-  metadata?: Record<string, any>;
+  name: string;
+  description: string;
+  personality: string;
+  avatarUrl: string;
+  systemPrompt: string;
+  createdAt: Date;
+  lastInteraction?: Date;
+  conversationCount: number;
+  favoriteTopics?: string[];
 }
 
-export interface AIConversation {
+export interface AIConversationHistory {
   id: string;
-  messages: AIMessage[];
-  model: string;
-  title?: string;
+  userId: string;
+  companionId?: string;
+  title: string;
+  messages: ChatMessage[];
   createdAt: Date;
   updatedAt: Date;
-  metadata?: Record<string, any>;
 }
 
-export interface AIContentGenerationConfig {
-  prompt: string;
-  model: string;
-  maxTokens?: number;
-  temperature?: number;
-  responseFormat?: 'text' | 'json';
-  safetySettings?: AIContentSafetySettings;
-}
-
-export interface AIContentSafetySettings {
-  filterProfanity: boolean;
-  filterSensitiveContent: boolean;
-  blockUnsafe: boolean;
+export interface AIError {
+  code: string;
+  message: string;
+  type: 'rate_limit' | 'api_error' | 'token_limit' | 'content_policy' | 'other';
+  timestamp: Date;
 }

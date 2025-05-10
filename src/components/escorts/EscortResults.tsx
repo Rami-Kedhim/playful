@@ -1,126 +1,99 @@
 
 import React from 'react';
-import { Escort } from '@/types/escort';
-import EscortCard from '@/components/escorts/EscortCard';
+import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
+import EscortProfileCard from './EscortProfileCard';
 import { Button } from '@/components/ui/button';
+import useFilters from '@/hooks/useFilters';
+import { Escort } from '@/types/Escort';
 
-export interface EscortResultsProps {
-  escorts: Escort[];
-  clearFilters?: () => void;
-  currentPage?: number;
-  setCurrentPage?: (page: number) => void;
-  totalPages?: number;
-  isLoading?: boolean;
+interface EscortResultsProps {
+  serviceType?: string;
+  limit?: number;
+  showViewAll?: boolean;
+  viewAllLink?: string;
 }
 
 const EscortResults: React.FC<EscortResultsProps> = ({
-  escorts,
-  clearFilters,
-  currentPage = 1,
-  setCurrentPage,
-  totalPages = 1,
-  isLoading = false
+  serviceType,
+  limit = 12,
+  showViewAll = true,
+  viewAllLink = '/escorts'
 }) => {
-  const handlePageChange = (page: number) => {
-    if (setCurrentPage) {
-      setCurrentPage(page);
+  const { escorts, loading } = useEscortContext();
+  const { filters } = useFilters();
+  
+  // Filter escorts based on serviceType if provided
+  const filteredEscorts = React.useMemo(() => {
+    if (!escorts) return [];
+    
+    let result = [...escorts];
+    
+    if (serviceType) {
+      // Filter based on service type (in-person or virtual)
+      if (serviceType === 'in-person') {
+        result = result.filter(escort => escort.providesInPersonServices);
+      } else if (serviceType === 'virtual') {
+        result = result.filter(escort => escort.providesVirtualContent);
+      }
     }
-  };
+    
+    // Apply availability filter if needed
+    if (filters.availableOnly) {
+      result = result.filter(escort => escort.availableNow || escort.isAvailable);
+    }
+    
+    // Apply gender filter if needed
+    if (filters.gender && filters.gender.length > 0) {
+      result = result.filter(escort => 
+        filters.gender.some(g => escort.gender.toLowerCase() === g.toLowerCase())
+      );
+    }
+    
+    // Apply verification filter if needed
+    if (filters.verifiedOnly) {
+      result = result.filter(escort => escort.verified || escort.isVerified);
+    }
+    
+    return limit ? result.slice(0, limit) : result;
+  }, [escorts, serviceType, limit, filters]);
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {Array(8).fill(0).map((_, i) => (
-          <div key={i} className="h-96 rounded-md bg-muted animate-pulse"></div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="bg-muted h-64 animate-pulse rounded-md"></div>
         ))}
       </div>
     );
   }
 
+  if (filteredEscorts.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <h3 className="text-lg font-medium mb-2">No results found</h3>
+        <p className="text-muted-foreground">
+          Try adjusting your filters to see more results
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <>
-      <div className="mb-4">
-        <p className="text-gray-400">Showing {escorts.length} escorts</p>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {filteredEscorts.map((escort) => (
+          <EscortProfileCard key={escort.id} escort={escort} />
+        ))}
       </div>
       
-      {escorts.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {escorts.map((escort) => {
-            // Create a safely normalized escort object with required properties
-            const providesInPersonServices = escort.providesInPersonServices ?? false;
-            const providesVirtualContent = escort.providesVirtualContent ?? false;
-            const featured = escort.featured || false;
-            const isAvailableNow = escort.availableNow || escort.isAvailable || false;
-
-            return (
-              <EscortCard
-                key={escort.id}
-                id={escort.id}
-                name={escort.name}
-                age={escort.age || 0}
-                location={escort.location || ''}
-                rating={escort.rating || 0}
-                reviews={escort.reviewCount || 0}
-                tags={escort.tags || []}
-                imageUrl={escort.imageUrl || escort.profileImage || (escort.images?.[0] || '')}
-                price={escort.price || 0}
-                verified={escort.isVerified || escort.verified || false}
-                gender={escort.gender}
-                sexualOrientation={escort.sexualOrientation}
-                availableNow={isAvailableNow}
-                responseRate={escort.responseRate}
-                featured={featured}
-                providesInPersonServices={providesInPersonServices}
-                providesVirtualContent={providesVirtualContent}
-                lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
-              />
-            );
-          })}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <p className="text-gray-400 mb-4">No escorts found matching your criteria.</p>
-          {clearFilters && (
-            <Button variant="outline" onClick={clearFilters}>
-              Clear filters
-            </Button>
-          )}
-        </div>
-      )}
-      
-      {escorts.length > 0 && totalPages > 1 && (
-        <div className="flex justify-center mt-8">
-          <Button
-            variant="outline"
-            className="mx-1"
-            disabled={currentPage <= 1}
-            onClick={() => handlePageChange(currentPage - 1)}
-          >
-            Previous
-          </Button>
-          
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <Button
-              key={page}
-              variant={page === currentPage ? "default" : "outline"}
-              className="mx-1"
-              onClick={() => handlePageChange(page)}
-            >
-              {page}
-            </Button>
-          ))}
-          
-          <Button
-            variant="outline"
-            className="mx-1"
-            disabled={currentPage >= totalPages}
-            onClick={() => handlePageChange(currentPage + 1)}
-          >
-            Next
+      {showViewAll && limit && filteredEscorts.length >= limit && (
+        <div className="text-center mt-8">
+          <Button variant="outline" asChild>
+            <a href={viewAllLink}>View All</a>
           </Button>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

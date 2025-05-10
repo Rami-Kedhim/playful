@@ -1,96 +1,77 @@
 
-import { useState, useCallback } from 'react';
-import { AIModelPreference } from '@/types/ai';
-import { nsfwAIProviderService } from '@/services/ai/NSFWAIProviderService';
+import { useState } from 'react';
+import { AIPreferences, ChatMessage } from '@/types/ai';
 
-export const useNSFWAIChat = () => {
-  const [messages, setMessages] = useState<any[]>([]);
+export const useNSFWAIChat = (initialPreferences?: AIPreferences) => {
+  const [preferences, setPreferences] = useState<AIPreferences>(
+    initialPreferences || {
+      theme: 'adult',
+      model: 'gpt-4o',
+      temperature: 0.8,
+      safetySettings: {
+        adultContent: 'allowed',
+        hateSpeech: 'blocked',
+        violence: 'limited'
+      },
+      chatHistory: true
+    }
+  );
+  
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Get default provider and model
-  const provider = nsfwAIProviderService.getDefaultProvider();
-  const defaultModel = provider.models.find(m => m.id === provider.defaultModel) || provider.models[0];
-  
-  // Model settings
-  const [modelPreference, setModelPreference] = useState<AIModelPreference>({
-    id: defaultModel.id,
-    name: defaultModel.name,
-    model: defaultModel.model || defaultModel.id,
-    temperature: defaultModel.temperature || 0.7,
-    systemPrompt: defaultModel.systemPrompt || 'You are a helpful assistant'
-  });
-  
-  // Function to send message to AI
-  const sendMessage = useCallback(async (content: string) => {
+  const sendMessage = async (content: string): Promise<void> => {
+    if (!content.trim()) return;
+    
+    const userMessage: ChatMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content,
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
     setError(null);
     
     try {
-      // Add user message to chat
-      const userMessage = {
-        id: Date.now().toString(),
-        role: 'user',
-        content,
-        timestamp: new Date()
-      };
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      setMessages(prev => [...prev, userMessage]);
-      
-      // Simulate AI response
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Create mock AI response
-      const aiMessage = {
-        id: (Date.now() + 1).toString(),
+      const aiResponse: ChatMessage = {
+        id: `ai-${Date.now()}`,
         role: 'assistant',
-        content: `This is a simulated response to: "${content}"`,
+        content: `This is a simulated NSFW AI response to: "${content}"`,
         timestamp: new Date()
       };
       
-      setMessages(prev => [...prev, aiMessage]);
-      return aiMessage;
+      setMessages(prev => [...prev, aiResponse]);
     } catch (err: any) {
-      console.error('Error sending message:', err);
-      setError(err.message || 'Failed to send message');
-      return null;
+      setError(err.message || 'Failed to get AI response');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
   
-  // Function to update model settings
-  const updateModelSettings = useCallback((settings: Partial<AIModelPreference>) => {
-    setModelPreference(prev => ({
-      ...prev,
-      ...settings
-    }));
-  }, []);
-  
-  // Function to clear chat history
-  const clearChat = useCallback(() => {
+  const clearMessages = () => {
     setMessages([]);
-  }, []);
+  };
   
-  // Function to set system prompt
-  const setSystemPrompt = useCallback((prompt: string) => {
-    setModelPreference(prev => ({
+  const updatePreferences = (newPreferences: Partial<AIPreferences>) => {
+    setPreferences(prev => ({
       ...prev,
-      systemPrompt: prompt
+      ...newPreferences
     }));
-  }, []);
+  };
   
   return {
     messages,
     isLoading,
     error,
-    modelPreference,
     sendMessage,
-    updateModelSettings,
-    clearChat,
-    setSystemPrompt,
-    setMessages
+    clearMessages,
+    preferences,
+    updatePreferences
   };
 };
-
-export default useNSFWAIChat;

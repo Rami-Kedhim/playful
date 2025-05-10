@@ -20,12 +20,7 @@ const BrainCore: React.FC<BrainCoreProps> = ({ onGeneratedContent }) => {
     
     setIsLoading(true);
     try {
-      // First check if content is safe - use type instead of contentType
-      const params = {
-        content: input,
-        type: "text" // Using type instead of contentType
-      };
-      
+      // First check if content is safe
       const isSafe = await lucieOrchestrator.isSafeContent(input);
       
       if (!isSafe) {
@@ -33,7 +28,7 @@ const BrainCore: React.FC<BrainCoreProps> = ({ onGeneratedContent }) => {
         return;
       }
       
-      const processedContent = await lucieOrchestrator.generateContent(input);
+      const processedContent = await lucieOrchestrator.generateContent({ prompt: input });
       setResult(processedContent);
       
       if (onGeneratedContent) {

@@ -2,59 +2,52 @@
 import { OxumSystem } from '@/types/core-systems';
 
 class Oxum implements OxumSystem {
-  name = "Oxum";
-  version = "1.0.0";
+  name: string = "Oxum";
+  version: string = "1.0.0";
   
+  /**
+   * Initialize the system
+   */
   async initialize(): Promise<void> {
-    console.log('Oxum neural network initializing...');
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulating initialization
-    console.log('Oxum neural network initialized and ready');
-  }
-  
-  shutdown(): void {
-    console.log('Oxum shutting down...');
+    console.log('Initializing Oxum system...');
   }
   
   /**
-   * Process image features using neural network analysis
+   * Process image features
    */
   async processImageFeatures(imageUrl: string): Promise<any> {
-    console.log(`Processing features for image: ${imageUrl}`);
+    console.log(`Processing image features: ${imageUrl}`);
     
-    // In a real implementation this would call a computer vision API
-    // Here we just return simulated results
+    // Simulate image processing results
     return {
-      colors: ['#3e4147', '#98a2b3', '#f9fafb'],
-      objects: ['person', 'clothing'],
-      tags: ['portrait', 'attractive', 'indoor'],
+      colors: ['#ff5733', '#33ff57', '#5733ff'],
+      objects: ['person', 'building', 'car'],
+      tags: ['outdoor', 'urban', 'daytime'],
       faces: 1,
-      nsfw: {
-        score: 0.05,
-        isNSFW: false
-      }
+      safetyScore: 0.95
     };
   }
   
   /**
-   * Calculate Eigenvector for boost allocation
+   * Calculate eigen values for boost allocation
    */
   async boostAllocationEigen(profileId: string, level: number): Promise<number[]> {
     console.log(`Calculating boost allocation for profile ${profileId} at level ${level}`);
     
-    // Simulate an eigenvector for allocation algorithm
-    // In practice this would be a complex matrix operation
-    const vector = [0.4, 0.2, 0.25, 0.15];
+    // Simulate eigen vector calculation
+    const baseVector = [0.25, 0.25, 0.25, 0.25];
+    const scaledVector = baseVector.map(v => v * level);
     
-    // Scale by level
-    return vector.map(v => v * level);
+    return scaledVector;
   }
   
   /**
-   * Boost a user profile
+   * Boost a profile
    */
   async boostProfile(profileId: string, packageId: string): Promise<boolean> {
     console.log(`Boosting profile ${profileId} with package ${packageId}`);
-    // Implement the boost logic here
+    
+    // Simulate successful boost application
     return true;
   }
   
@@ -63,13 +56,15 @@ class Oxum implements OxumSystem {
    */
   async getBoostStatus(profileId: string): Promise<any> {
     console.log(`Getting boost status for profile ${profileId}`);
+    
+    // Simulate boost status
     return {
       isActive: true,
-      package: "premium",
-      startsAt: new Date(),
-      endsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      boostLevel: 2,
-      visibility: 85
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      level: 3,
+      views: 245,
+      engagementRate: 0.18,
+      timeRemaining: '6 days, 23 hours'
     };
   }
 }

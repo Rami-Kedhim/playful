@@ -8,12 +8,16 @@ import { uberWallet } from './UberWallet';
 import { automaticSEO } from './AutomaticSEO';
 import { initializeSystem, shutdownSystem } from './engine';
 
+// Initialize the UberCore instance
+const uberCore = new UberCore(lucieAI);
+
 // Export the initialized instances
 export {
   oxum,
   hermes,
   lucie,
   lucieAI,
+  uberCore,
   initializeSystem,
   shutdownSystem,
   automaticSEO,
@@ -22,8 +26,3 @@ export {
 
 // Export any utility functions that components might need
 export * from './utils';
-
-// Initialize and export
-const uberCore = new UberCore(lucieAI);
-
-export { uberCore };

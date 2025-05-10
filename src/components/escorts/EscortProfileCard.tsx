@@ -4,18 +4,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 import { CheckCircle, MapPin, DollarSign } from 'lucide-react';
 
 interface EscortProfileCardProps {
-  escort: Escort & {
-    providesVirtualContent?: boolean;
-    providesInPersonServices?: boolean;
-  };
+  escort: Escort;
 }
 
 const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ escort }) => {
-  // Safely check for availableNow or isAvailable property
+  // Safely check for availability status
   const isAvailableNow = escort.availableNow || escort.isAvailable || false;
   
   return (

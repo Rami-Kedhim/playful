@@ -22,7 +22,7 @@ const LucieAIAssistant: React.FC<LucieAIAssistantProps> = ({
     
     setIsLoading(true);
     try {
-      // Check content moderation - use type instead of contentType
+      // Check content moderation
       const isSafe = await lucieOrchestrator.isSafeContent(prompt);
       
       if (!isSafe) {
@@ -31,7 +31,7 @@ const LucieAIAssistant: React.FC<LucieAIAssistantProps> = ({
       }
       
       // Generate content
-      const content = await lucieOrchestrator.generateContent(prompt);
+      const content = await lucieOrchestrator.generateContent({ prompt });
       
       setResult(content);
       if (onGenerate) onGenerate(content);

@@ -1,81 +1,83 @@
 
-import { HermesInsight, HermesSystem } from '@/types/core-systems';
+import { 
+  HermesSystem,
+  HermesInsight
+} from '@/types/core-systems';
 
 class Hermes implements HermesSystem {
-  name = "Hermes";
-  version = "1.0.0";
-  
-  private insights: HermesInsight[] = [];
-  
+  name: string = "Hermes";
+  version: string = "1.0.0";
+
   /**
-   * Gets analytical insights
-   */
-  async getInsights(): Promise<HermesInsight[]> {
-    try {
-      // In a real implementation, this would call an API or process data
-      // For demo, we'll return some pre-defined insights
-      this.insights = [
-        {
-          type: 'engagement',
-          description: 'User engagement has increased by 12% this month',
-          confidence: 0.87,
-          data: {
-            current: 0.76,
-            previous: 0.64
-          }
-        },
-        {
-          type: 'visibility',
-          description: 'Profile visibility is below average',
-          confidence: 0.92,
-          data: {
-            score: 0.38,
-            average: 0.65
-          }
-        },
-        {
-          type: 'recommendation',
-          description: 'Consider adding more media content',
-          confidence: 0.79
-        }
-      ];
-      
-      return this.insights;
-    } catch (error) {
-      console.error('Error in getInsights', error);
-      return [];
-    }
-  }
-  
-  /**
-   * Calculates the boost score for a profile
+   * Calculate boost score for a profile
    */
   async calculateBoostScore(profileId: string): Promise<number> {
-    // Simulated calculation - would be more complex in a real implementation
+    // Simulate boost score calculation
     console.log(`Calculating boost score for profile: ${profileId}`);
-    return Math.random() * 100;
-  }
-  
-  /**
-   * Recommends content for a user
-   */
-  async recommendContent(userId: string): Promise<string[]> {
-    // Simulate recommendation logic
-    console.log(`Recommending content for user: ${userId}`);
-    return [
-      'content-1',
-      'content-2',
-      'content-3'
-    ];
+    return Math.round((Math.random() * 5 + 5) * 10) / 10; // Random score between 5-10
   }
   
   /**
    * Calculate visibility score for a profile
    */
   async calculateVisibilityScore(profileId: string): Promise<number> {
-    console.log(`Calculating visibility score for: ${profileId}`);
-    // This would be a complex algorithm in practice
-    return Math.random() * 10;
+    // Simulate visibility score calculation
+    console.log(`Calculating visibility score for profile: ${profileId}`);
+    return Math.round((Math.random() * 4 + 1) * 10) / 10; // Random score between 1-5
+  }
+  
+  /**
+   * Get insights from Hermes AI
+   */
+  async getInsights(): Promise<HermesInsight[]> {
+    // Return simulated insights
+    return [
+      {
+        type: 'traffic',
+        description: 'User traffic increased by 15% in the last week',
+        confidence: 0.92,
+        data: { previous: 4200, current: 4830 }
+      },
+      {
+        type: 'engagement',
+        description: 'Profile engagement is down 3% compared to last month',
+        confidence: 0.88,
+        data: { previous: 0.65, current: 0.62 }
+      },
+      {
+        type: 'recommendation',
+        description: 'Adding 3 more gallery images could increase visibility by 20%',
+        confidence: 0.75,
+        data: { potentialIncrease: 0.2 }
+      }
+    ];
+  }
+  
+  /**
+   * Recommend content for a user
+   */
+  async recommendContent(userId: string): Promise<string[]> {
+    // Simulate content recommendations
+    console.log(`Generating content recommendations for user: ${userId}`);
+    return [
+      'profile-update',
+      'add-media',
+      'boost-profile',
+      'complete-verification'
+    ];
+  }
+  
+  /**
+   * Route flow calculation for security
+   */
+  async routeFlow(userId: string, destination: string): Promise<{ safe: boolean; reason?: string }> {
+    // Basic security check simulation
+    console.log(`Calculating route flow safety for user ${userId} to ${destination}`);
+    
+    // Always return safe for demo purposes
+    return {
+      safe: true
+    };
   }
 }
 

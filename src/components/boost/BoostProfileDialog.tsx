@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useBoost } from '@/hooks/boost/useBoost';
-import { BoostPackage } from '@/types/boost';
 import { Card, CardContent } from '@/components/ui/card';
 import { Zap, Check } from 'lucide-react';
 
@@ -20,24 +19,22 @@ const BoostProfileDialog: React.FC<BoostProfileDialogProps> = ({
   open, 
   setOpen 
 }) => {
-  const { packages, boostProfile, isActive } = useBoost();
-  const [selectedPackage, setSelectedPackage] = useState<BoostPackage | null>(null);
-  const [processing, setProcessing] = useState(false);
+  const { packages, boostProfile, isLoading, isActive } = useBoost();
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  
+  const selectedPackageDetails = packages.find(pkg => pkg.id === selectedPackage);
 
   const handleBoostProfile = async () => {
     if (!selectedPackage || !profileId) return;
 
-    setProcessing(true);
     try {
-      await boostProfile(profileId, selectedPackage.id);
-      if (onSuccess) onSuccess();
+      const success = await boostProfile(profileId, selectedPackage);
+      if (success && onSuccess) {
+        onSuccess();
+      }
       setOpen(false);
-      return true;
     } catch (error) {
       console.error('Failed to boost profile:', error);
-      return false;
-    } finally {
-      setProcessing(false);
     }
   };
 
@@ -60,8 +57,8 @@ const BoostProfileDialog: React.FC<BoostProfileDialogProps> = ({
             {packages && packages.map((pkg) => (
               <Card 
                 key={pkg.id}
-                className={`cursor-pointer border-2 transition-all ${selectedPackage?.id === pkg.id ? 'border-primary' : 'border-transparent'}`}
-                onClick={() => setSelectedPackage(pkg)}
+                className={`cursor-pointer border-2 transition-all ${selectedPackage === pkg.id ? 'border-primary' : 'border-transparent'}`}
+                onClick={() => setSelectedPackage(pkg.id)}
               >
                 <CardContent className="flex justify-between items-center p-4">
                   <div>
@@ -80,7 +77,7 @@ const BoostProfileDialog: React.FC<BoostProfileDialogProps> = ({
                   </div>
                   <div className="text-right">
                     <div className="font-bold">${pkg.price}</div>
-                    {(pkg.price_ubx !== undefined) && (
+                    {pkg.price_ubx !== undefined && (
                       <div className="text-xs text-muted-foreground">
                         or {pkg.price_ubx} UBX
                       </div>
@@ -96,15 +93,15 @@ const BoostProfileDialog: React.FC<BoostProfileDialogProps> = ({
           <Button
             variant="outline"
             onClick={() => setOpen(false)}
-            disabled={processing}
+            disabled={isLoading}
           >
             Cancel
           </Button>
           <Button 
-            disabled={!selectedPackage || processing} 
+            disabled={!selectedPackage || isLoading} 
             onClick={handleBoostProfile}
           >
-            {processing ? 'Processing...' : 'Boost Profile'}
+            {isLoading ? 'Processing...' : 'Boost Profile'}
           </Button>
         </DialogFooter>
       </DialogContent>
