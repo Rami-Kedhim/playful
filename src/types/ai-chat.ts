@@ -52,3 +52,26 @@ export interface AIMessageResponse {
   price?: number;
   payment_status?: string;
 }
+
+// Message type for AI chat components
+export interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+// Core-systems related types for AI generation
+export interface GenerateContentParams {
+  prompt: string;
+  options?: {
+    temperature?: number;
+    maxTokens?: number; // Use maxTokens instead of maxTokens
+    model?: string;
+  };
+}
+
+export interface GenerateContentResult {
+  content: string;
+  tokens?: number;
+  model?: string;
+}

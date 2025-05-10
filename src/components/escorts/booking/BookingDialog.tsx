@@ -1,87 +1,107 @@
+
 import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import BookingForm, { BookingFormValues } from './BookingForm';
 import { Escort } from '@/types/Escort';
+import BookingForm from './BookingForm';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from '@/components/ui/use-toast';
 
 interface BookingDialogProps {
   escort: Escort;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onBookingSubmit: (data: BookingFormValues) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-const BookingDialog: React.FC<BookingDialogProps> = ({
-  escort,
-  open,
-  onOpenChange,
-  onBookingSubmit
+const BookingDialog: React.FC<BookingDialogProps> = ({ 
+  escort, 
+  isOpen, 
+  onClose 
 }) => {
   const [bookingType, setBookingType] = useState<'in-person' | 'virtual'>('in-person');
-  
-  // Check what booking types this escort offers
-  const providesInPerson = escort.providesInPersonServices !== false;
-  const providesVirtual = escort.providesVirtualContent === true;
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleBookingSubmit = (formData: BookingFormValues) => {
-    // Include booking type in the submission
-    const fullData = { 
-      ...formData,
-      bookingType 
-    };
+  const providesInPersonServices = escort.providesInPersonServices !== false;
+  const providesVirtualContent = escort.providesVirtualContent !== false;
+
+  const handleTabChange = (value: string) => {
+    if (value === 'in-person' || value === 'virtual') {
+      setBookingType(value);
+    }
+  };
+
+  const handleSubmit = async (formData: any) => {
+    setIsSubmitting(true);
     
-    onBookingSubmit(fullData);
-    onOpenChange(false);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast({
+        title: 'Booking request sent',
+        description: `Your booking request with ${escort.name} has been sent. They will contact you soon.`,
+      });
+      
+      onClose();
+    } catch (error) {
+      console.error('Booking error:', error);
+      toast({
+        title: 'Booking failed',
+        description: 'There was an error sending your booking request. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl">Book {escort.name}</DialogTitle>
+          <DialogTitle>Book with {escort.name}</DialogTitle>
+          <DialogDescription>
+            Fill out the form below to request a booking
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="py-4">
-          {/* Only show tabs if both types are available */}
-          {providesInPerson && providesVirtual ? (
-            <Tabs 
-              defaultValue="in-person" 
-              className="w-full"
-              onValueChange={(v) => setBookingType(v as 'in-person' | 'virtual')}
+        <Tabs value={bookingType} onValueChange={handleTabChange}>
+          <TabsList className="grid grid-cols-2 w-full">
+            <TabsTrigger 
+              value="in-person" 
+              disabled={!providesInPersonServices}
             >
-              <TabsList className="grid grid-cols-2 mb-4">
-                <TabsTrigger value="in-person">In-Person</TabsTrigger>
-                <TabsTrigger value="virtual">Virtual</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="in-person">
-                <BookingForm 
-                  escort={escort} 
-                  onSubmit={handleBookingSubmit} 
-                />
-              </TabsContent>
-              
-              <TabsContent value="virtual">
-                <BookingForm 
-                  escort={escort} 
-                  onSubmit={handleBookingSubmit} 
-                />
-              </TabsContent>
-            </Tabs>
-          ) : (
-            // Otherwise just show the form for the available type
-            <BookingForm 
-              escort={escort} 
-              onSubmit={handleBookingSubmit} 
+              In-Person
+            </TabsTrigger>
+            <TabsTrigger 
+              value="virtual" 
+              disabled={!providesVirtualContent}
+            >
+              Virtual
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="in-person">
+            <BookingForm
+              escort={escort}
+              onSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
             />
-          )}
-        </div>
+          </TabsContent>
+          
+          <TabsContent value="virtual">
+            <BookingForm
+              escort={escort}
+              onSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
+            />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

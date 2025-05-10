@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/hooks/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -16,9 +17,9 @@ const AuthStatus: React.FC<AuthStatusProps> = ({
   showUsername = true,
   className = '',
 }) => {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className={`flex items-center gap-2 ${className}`}>
         <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -38,7 +39,7 @@ const AuthStatus: React.FC<AuthStatusProps> = ({
     );
   }
 
-  const profileImage = user?.profileImageUrl || user?.avatarUrl || '';
+  const profileImage = user?.avatar_url || '';
   const username = user?.username || 'U';
 
   return (

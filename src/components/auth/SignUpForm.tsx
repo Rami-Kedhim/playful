@@ -35,7 +35,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSignUpSuccess }) => {
 
     setIsLoading(true);
     try {
-      const result = await register(email, password, confirmPassword);
+      const result = await register(email, password);
       
       if (result.success) {
         toast({

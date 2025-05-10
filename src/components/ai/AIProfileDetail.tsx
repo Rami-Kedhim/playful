@@ -27,9 +27,9 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({
       
       <div className="h-[400px] border rounded-lg">
         <AICompanionChat
-          aiName={profile.name}
-          aiAvatarUrl={profile.avatarUrl}
-          aiDescription={profile.description}
+          name={profile.name}
+          avatarUrl={profile.avatarUrl}
+          description={profile.description}
           initialMessage={`Hello! I'm ${profile.name}. How can I assist you today?`}
         />
       </div>

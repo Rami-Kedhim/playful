@@ -6,79 +6,31 @@ export interface BoostPackage {
   price: number;
   price_ubx?: number;
   duration: string;
-  durationMinutes?: number;
+  visibility?: string | number;
   features?: string[];
-  visibility?: string;
-  visibility_increase?: number;
-  boost_power?: number;
-  color?: string;
-  badgeColor?: string;
-  boostMultiplier?: number;
   isMostPopular?: boolean;
   isPopular?: boolean;
+  boost_power?: number;
+}
+
+export interface BoostEligibility {
+  eligible: boolean;
+  reason: string;
+  reasons?: string[];
+  nextEligibleTime?: string;
 }
 
 export interface BoostStatus {
   isActive: boolean;
   packageId?: string;
-  expiresAt?: Date;
-  timeRemaining?: string;
+  packageName?: string;
+  startTime?: Date | string;
+  endTime?: Date | string;
+  remainingTime?: string;
+  expiresAt?: Date | string;
   boostPackage?: BoostPackage;
   progress?: number;
-  packageName?: string;
-  startedAt?: Date;
-  activeBoostId?: string;
-  startTime?: Date;
-  endTime?: Date;
-}
-
-export interface BoostEligibility {
-  eligible: boolean;
-  reason?: string;
-  reasons?: string[];
-  nextEligibleTime?: string;
-  remainingBoosts?: number;
-  maxBoostsPerDay?: number;
-}
-
-export interface BoostPurchaseRequest {
-  profileId: string;
-  packageId: string;
-}
-
-export interface BoostPurchaseResult {
-  success: boolean;
-  boostId?: string;
-  error?: string | null;
-  message?: string;
-  transactionId?: string;
-}
-
-export interface BoostAnalytics {
-  profileId: string;
-  totalBoosts: number;
-  activeBoosts: number;
-  averageBoostScore: number;
-  viewsBeforeBoost: number;
-  viewsAfterBoost: number;
-  engagementIncrease: number;
-  impressions?: {
-    value: number;
-    change: number;
-    withBoost?: number;
-  };
-  interactions?: {
-    value: number;
-    change: number;
-    withBoost?: number;
-  };
-  views?: number;
-  additionalViews?: number;
-}
-
-export interface EnhancedBoostStatus extends BoostStatus {
-  analytics?: BoostAnalytics;
-  eligibility?: BoostEligibility;
+  timeRemaining?: string;
 }
 
 export interface HermesStatus {
@@ -89,10 +41,33 @@ export interface HermesStatus {
   boostScore?: number;
   effectivenessScore?: number;
   isActive?: boolean;
+}
+
+export interface BoostAnalytics {
+  profileId: string;
+  metrics: {
+    impressions: number;
+    clicks: number;
+    conversion: number;
+    visibility: number;
+  };
+  history: Array<{
+    date: string;
+    impressions: number;
+    clicks: number;
+  }>;
+}
+
+export interface PulseBoost {
+  id: string;
+  profileId: string;
+  packageId: string;
+  startTime: Date;
+  endTime: Date;
+  status: 'active' | 'expired' | 'cancelled';
   metrics?: {
-    velocity: number;
-    engagement: number;
-    retention: number;
+    impressions: number;
+    clicks: number;
     conversion: number;
   };
 }

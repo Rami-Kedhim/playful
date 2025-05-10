@@ -1,77 +1,23 @@
 
-import * as React from "react";
-import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { ButtonProps, Button } from "@/components/ui/button";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PaginationProps {
-  totalPages: number;
   currentPage: number;
+  totalPages: number;
   onPageChange: (page: number) => void;
+  showPageNumbers?: boolean;
   className?: string;
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
-  totalPages,
   currentPage,
+  totalPages,
   onPageChange,
-  className,
+  showPageNumbers = true,
+  className = '',
 }) => {
-  // Don't render pagination if there's only one page or less
-  if (totalPages <= 1) return null;
-
-  // Calculate which page numbers to show
-  const getPageNumbers = () => {
-    const pageNumbers = [];
-    const maxPagesToShow = 5;
-
-    if (totalPages <= maxPagesToShow) {
-      // Show all pages if total is less than or equal to maxPagesToShow
-      for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-      }
-    } else {
-      // Always include the first page
-      pageNumbers.push(1);
-
-      // Calculate middle pages
-      let startPage = Math.max(2, currentPage - 1);
-      let endPage = Math.min(totalPages - 1, currentPage + 1);
-
-      // Adjust if at the beginning
-      if (currentPage <= 3) {
-        startPage = 2;
-        endPage = Math.min(totalPages - 1, 4);
-      }
-      
-      // Adjust if at the end
-      if (currentPage >= totalPages - 2) {
-        startPage = Math.max(2, totalPages - 3);
-        endPage = totalPages - 1;
-      }
-
-      // Add ellipsis after first page if needed
-      if (startPage > 2) {
-        pageNumbers.push("ellipsis-start");
-      }
-
-      // Add middle pages
-      for (let i = startPage; i <= endPage; i++) {
-        pageNumbers.push(i);
-      }
-
-      // Add ellipsis before last page if needed
-      if (endPage < totalPages - 1) {
-        pageNumbers.push("ellipsis-end");
-      }
-
-      // Always include the last page
-      pageNumbers.push(totalPages);
-    }
-
-    return pageNumbers;
-  };
-
   const handlePrevious = () => {
     if (currentPage > 1) {
       onPageChange(currentPage - 1);
@@ -84,86 +30,70 @@ export const Pagination: React.FC<PaginationProps> = ({
     }
   };
 
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(
+        <Button
+          key={i}
+          variant={currentPage === i ? 'default' : 'outline'}
+          size="icon"
+          onClick={() => onPageChange(i)}
+          className="w-8 h-8"
+        >
+          {i}
+        </Button>
+      );
+    }
+    
+    return pageNumbers;
+  };
+
+  if (totalPages <= 1) return null;
+
   return (
     <nav
-      role="navigation"
-      aria-label="pagination"
-      className={cn("mx-auto flex w-full justify-center", className)}
+      className={`flex justify-center items-center space-x-2 ${className}`}
+      aria-label="Pagination"
     >
-      <ul className="flex flex-row items-center gap-1">
-        <li>
-          <PaginationItem
-            onClick={handlePrevious}
-            disabled={currentPage === 1}
-            aria-label="Go to previous page"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            <span className="sr-only">Previous</span>
-          </PaginationItem>
-        </li>
-
-        {getPageNumbers().map((page, index) => {
-          if (page === "ellipsis-start" || page === "ellipsis-end") {
-            return (
-              <li key={`ellipsis-${index}`}>
-                <span className="flex h-9 w-9 items-center justify-center">
-                  <MoreHorizontal className="h-4 w-4" />
-                </span>
-              </li>
-            );
-          }
-
-          return (
-            <li key={page}>
-              <PaginationItem
-                isActive={page === currentPage}
-                onClick={() => onPageChange(page as number)}
-                aria-label={`Page ${page}`}
-                aria-current={page === currentPage ? "page" : undefined}
-              >
-                {page}
-              </PaginationItem>
-            </li>
-          );
-        })}
-
-        <li>
-          <PaginationItem
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            aria-label="Go to next page"
-          >
-            <ChevronRight className="h-4 w-4" />
-            <span className="sr-only">Next</span>
-          </PaginationItem>
-        </li>
-      </ul>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={handlePrevious}
+        disabled={currentPage === 1}
+        className="w-8 h-8"
+      >
+        <span className="sr-only">Previous page</span>
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
+      
+      {showPageNumbers && renderPageNumbers()}
+      
+      {!showPageNumbers && (
+        <div className="text-sm">
+          Page {currentPage} of {totalPages}
+        </div>
+      )}
+      
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={handleNext}
+        disabled={currentPage === totalPages}
+        className="w-8 h-8"
+      >
+        <span className="sr-only">Next page</span>
+        <ChevronRight className="h-4 w-4" />
+      </Button>
     </nav>
   );
 };
-
-interface PaginationItemProps extends ButtonProps {
-  isActive?: boolean;
-}
-
-const PaginationItem = ({
-  className,
-  isActive,
-  ...props
-}: PaginationItemProps) => (
-  <Button
-    variant={isActive ? "default" : "outline"}
-    size="icon"
-    className={cn(
-      "h-9 w-9 rounded-md",
-      {
-        "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground":
-          isActive,
-      },
-      className
-    )}
-    {...props}
-  />
-);
-
-export default Pagination;

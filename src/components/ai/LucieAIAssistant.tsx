@@ -1,41 +1,27 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { useToast } from "@/components/ui/use-toast"
-import { useSpeechSynthesis } from 'react-speech-kit';
 import { lucieAI, lucieOrchestrator } from '@/core';
-import { GenerateContentParams } from '@/types/core-systems';
+import { GenerateContentParams } from '@/types/ai-chat';
 
 const LucieAIAssistant: React.FC = () => {
   const [userMessage, setUserMessage] = useState('');
   const [assistantMessage, setAssistantMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const { speak, speaking, cancel } = useSpeechSynthesis();
-  const { toast } = useToast();
   const [isMuted, setIsMuted] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Initialize Lucie or perform other setup tasks
     console.log('LucieAIAssistant is ready.');
   }, []);
 
-  const speakText = (text: string) => {
-    if (!isMuted) {
-      speak({ text });
-    }
-  };
-
-  const stopSpeaking = () => {
-    cancel();
-  };
-
   const toggleMute = () => {
     setIsMuted(!isMuted);
-    if (!isMuted && speaking) {
-      stopSpeaking();
-    }
   };
 
   const sendMessageToLucie = async (message: string) => {
@@ -58,19 +44,18 @@ const LucieAIAssistant: React.FC = () => {
       }
 
       // Generate AI response
-      const params = {
+      const params: GenerateContentParams = {
         prompt: message,
         options: {
-          maxTokens: 500,
-          temperature: 0.7
+          temperature: 0.7,
+          maxTokens: 500
         }
       };
       
       const response = await lucieAI.generateContent(params);
-      const responseContent: string = response.text || response.content || "I'm not sure how to respond to that.";
+      const responseContent = response.content || "I'm not sure how to respond to that.";
       
       setAssistantMessage(responseContent);
-      speakText(responseContent);
       
       setUserMessage('');
     } catch (error) {

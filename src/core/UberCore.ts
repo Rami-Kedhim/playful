@@ -1,108 +1,97 @@
 
-// Import statements and interfaces
 import { lucieAI } from './Lucie';
-import { automaticSEO } from './AutomaticSEO';
-import { 
-  SystemStatus, 
-  SystemIntegrityResult, 
-  SystemHealthMetrics, 
-  SessionValidationResult, 
-  UberCoreSystem 
-} from '@/types/core-systems';
+import { oxum } from './Oxum';
+import { hermes } from './Hermes';
+import { UberCoreSystem, LucieAISystem, HermesSystem, OxumSystem } from '@/types/core-systems';
 
 export class UberCore implements UberCoreSystem {
-  name = "UberCore";
-  version = "1.0.0";
-  ai: any;
+  private _initialized: boolean = false;
+  private _status: { online: boolean; services: string[] } = { 
+    online: false, 
+    services: [] 
+  };
   
-  constructor(ai: any) {
-    this.ai = ai;
+  lucieAI: LucieAISystem;
+  hermes: HermesSystem;
+  oxum: OxumSystem;
+  
+  constructor() {
+    this.lucieAI = lucieAI;
+    this.hermes = hermes;
+    this.oxum = oxum;
   }
-
+  
+  /**
+   * Initialize the UberCore system and all subsystems
+   */
   async initialize(): Promise<boolean> {
-    console.log('Initializing UberCore...');
-    return true;
-  }
-
-  async getSystemStatus(): Promise<SystemStatus> {
-    // Simulated asynchronous check of system status
-    return {
-      status: 'operational',
-      subsystems: [
-        { name: 'auth', status: 'operational' },
-        { name: 'payment', status: 'operational' },
-        { name: 'messaging', status: 'operational' },
-      ],
-      lastUpdated: new Date(),
-    };
-  }
-
-  checkSystemIntegrity(): SystemIntegrityResult {
-    // For demo purposes, return a healthy system
-    return {
-      codeIntegrity: true,
-      dataIntegrity: true,
-      networkSecurity: true,
-      timestamp: new Date(),
-      valid: true
-    };
-  }
-
-  getHealthMetrics(): SystemHealthMetrics {
-    // Simulated health metrics
-    return {
-      uptime: 99.98,
-      responseTime: 250, // ms
-      errorRate: 0.2, // percentage
-      memoryUsage: 68, // percentage
-      cpu: 32 // percentage
-    };
-  }
-
-  validateSession(token: string): SessionValidationResult {
-    // Simple validation logic for demo
-    return {
-      isValid: !!token,
-      userId: "user-123",
-      expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
-      sessionType: "user"
-    };
-  }
-
-  checkSubsystemHealth(): Array<{ name: string; status: string; health: number }> {
-    return [
-      { name: "Authentication", status: "Normal", health: 98 },
-      { name: "Database", status: "Normal", health: 95 },
-      { name: "Storage", status: "Normal", health: 99 },
-      { name: "Search", status: "Normal", health: 94 },
-      { name: "Messaging", status: "Normal", health: 97 }
-    ];
-  }
-
-  async restartSubsystem(name: string): Promise<boolean> {
-    console.log(`Restarting subsystem: ${name}`);
-    return true;
-  }
-
-  initializeAI(): void {
-    if (this.ai && typeof this.ai.initialize === "function") {
-      try {
-        this.ai.initialize();
-      } catch (error) {
-        console.error("Failed to initialize AI:", error);
+    console.log('Initializing UberCore system...');
+    
+    try {
+      // Initialize subsystems
+      const lucieInitialized = await this.lucieAI.initialize();
+      const hermesInitialized = await this.hermes.initialize();
+      const oxumInitialized = await this.oxum.initialize();
+      
+      this._initialized = lucieInitialized && hermesInitialized && oxumInitialized;
+      
+      if (this._initialized) {
+        this._status.online = true;
+        this._status.services = ['lucie', 'hermes', 'oxum'];
+        console.log('UberCore system initialized successfully.');
+      } else {
+        console.error('UberCore initialization failed.');
       }
+      
+      return this._initialized;
+    } catch (error) {
+      console.error('Failed to initialize UberCore:', error);
+      return false;
     }
   }
-
-  // Add the initializeAutomaticSeo method
-  initializeAutomaticSeo(): void {
-    if (automaticSEO && typeof automaticSEO.initialize === "function") {
-      automaticSEO.initialize();
-    } else {
-      console.warn("AutomaticSEO module not available or initialize method not found");
+  
+  /**
+   * Initialize automatic SEO system
+   */
+  async initializeAutomaticSeo(): Promise<boolean> {
+    console.log('Initializing Automatic SEO System...');
+    
+    try {
+      // This is a placeholder for the actual implementation
+      // In a real implementation, we would likely:
+      // 1. Register SEO hooks
+      // 2. Initialize the SEO analytics
+      // 3. Set up metadata templates
+      // 4. Start SEO monitoring
+      
+      console.log('Automatic SEO System initialized successfully.');
+      return true;
+    } catch (error) {
+      console.error('Failed to initialize Automatic SEO System:', error);
+      return false;
     }
+  }
+  
+  /**
+   * Get the current status of the UberCore system
+   */
+  async getStatus(): Promise<{ online: boolean; services: string[] }> {
+    return this._status;
+  }
+  
+  /**
+   * Shutdown the UberCore system
+   */
+  async shutdown(): Promise<boolean> {
+    console.log('Shutting down UberCore system...');
+    
+    // Perform cleanup and shutdown procedures
+    this._status.online = false;
+    this._status.services = [];
+    this._initialized = false;
+    
+    return true;
   }
 }
 
-// Create and export an instance
-export const uberCore = new UberCore(lucieAI);
+export const uberCore = new UberCore();

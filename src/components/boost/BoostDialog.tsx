@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,6 +9,7 @@ import {
 import { Zap } from 'lucide-react';
 import { useBoostDialog } from '@/hooks/boost/useBoostDialog';
 import BoostDialogTabs from './dialog/BoostDialogTabs';
+import { BoostEligibility } from '@/types/pulse-boost';
 
 interface BoostDialogProps {
   profileId: string;
@@ -28,7 +30,7 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
     handleBoost,
     handleCancelBoost,
     boostStatus,
-    eligibility,
+    eligibility: boostEligibility,
     packages,
     loading,
     dailyBoostUsage,
@@ -38,20 +40,26 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
     formatBoostDuration = (d) => d,
   } = useBoostDialog(profileId);
 
-  // Helper function to initialize eligibility
-  const initializeEligibility = (): BoostEligibility => {
+  // Helper function to ensure eligibility matches the required type
+  const getEligibility = (): BoostEligibility => {
+    if (!boostEligibility) {
+      return {
+        eligible: false,
+        reason: 'Unknown eligibility status',
+        reasons: []
+      };
+    }
+    
+    // Transform if needed (handling potential isEligible vs eligible property mismatch)
     return {
-      eligible: true,
-      reason: '',
-      reasons: [],
+      eligible: boostEligibility.eligible || false,
+      reason: boostEligibility.reason || '',
+      reasons: boostEligibility.reasons || []
     };
   };
 
-  const [eligibility, setEligibility] = useState<BoostEligibility>(initializeEligibility());
-
   const onCancelBoost = () => {
     handleCancelBoost();
-    setEligibility(initializeEligibility());
   };
 
   return (
@@ -65,22 +73,11 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
         </DialogHeader>
 
         <BoostDialogTabs
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
           boostStatus={boostStatus}
-          eligibility={eligibility}
-          boostPackages={packages}
-          selectedPackage={selectedPackage}
-          setSelectedPackage={setSelectedPackage}
-          handleBoost={handleBoost}
-          handleCancel={onCancelBoost}
-          loading={loading}
-          dailyBoostUsage={dailyBoostUsage}
-          dailyBoostLimit={dailyBoostLimit}
-          handleDialogClose={() => onOpenChange(false)}
-          getBoostPrice={getBoostPrice}
-          hermesStatus={hermesStatus}
-          formatBoostDuration={formatBoostDuration}
+          eligibility={getEligibility()}
+          packages={packages}
+          onBoostSuccess={handleBoost}
+          profileId={profileId}
         />
       </DialogContent>
     </Dialog>

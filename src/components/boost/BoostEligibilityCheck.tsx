@@ -1,60 +1,64 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Clock } from 'lucide-react';
-import { BoostEligibility } from '@/types/boost';
+import { AlertCircle, Clock, CheckCircle } from 'lucide-react';
 
 interface BoostEligibilityCheckProps {
-  eligibility: BoostEligibility;
+  eligibility: {
+    eligible: boolean;
+    reason: string;
+    reasons: string[];
+    nextEligibleTime?: string;
+  };
   onClose: () => void;
 }
 
-const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({
+const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({ 
   eligibility,
   onClose
 }) => {
+  if (eligibility.eligible) {
+    return (
+      <Alert variant="success" className="mb-4 bg-green-50 dark:bg-green-950/20 border-green-500/30">
+        <CheckCircle className="h-4 w-4 text-green-600" />
+        <AlertTitle>You can boost this profile</AlertTitle>
+        <AlertDescription>
+          This profile is eligible for boosting. Select a package below to continue.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+  
   return (
-    <Card>
-      <CardContent className="p-4 space-y-4">
-        <div className="flex items-start space-x-3">
-          <div className="rounded-full bg-yellow-100 p-2 dark:bg-yellow-900">
-            <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-          </div>
-          <div>
-            <h3 className="font-medium">Boost Not Available</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              {"You're not eligible to boost at this time"}
-            </p>
-          </div>
+    <Alert variant="destructive" className="mb-4">
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle>This profile cannot be boosted</AlertTitle>
+      <AlertDescription className="space-y-2">
+        <div>
+          {eligibility.reason || "This profile is not eligible for boosting at this time."}
         </div>
         
         {eligibility.reasons && eligibility.reasons.length > 0 && (
-          <div className="bg-muted/50 rounded p-3">
-            <ul className="text-sm space-y-1 list-disc pl-4">
-              {eligibility.reasons.map((reason, i) => (
-                <li key={i}>{reason}</li>
-              ))}
-            </ul>
-          </div>
+          <ul className="list-disc pl-5 space-y-1 text-sm">
+            {eligibility.reasons.map((reason, index) => (
+              <li key={index}>{reason}</li>
+            ))}
+          </ul>
         )}
         
         {eligibility.nextEligibleTime && (
-          <div className="flex items-center justify-center space-x-2 text-sm">
+          <div className="flex items-center gap-2 mt-2 text-sm">
             <Clock className="h-4 w-4" />
-            <span>Next eligible: {eligibility.nextEligibleTime}</span>
+            <span>You can try again in {eligibility.nextEligibleTime}</span>
           </div>
         )}
         
-        <Button 
-          variant="outline" 
-          className="w-full"
-          onClick={onClose}
-        >
-          Got It
+        <Button size="sm" variant="outline" onClick={onClose} className="mt-2">
+          Close
         </Button>
-      </CardContent>
-    </Card>
+      </AlertDescription>
+    </Alert>
   );
 };
 

@@ -1,96 +1,86 @@
+
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Send, Brain } from 'lucide-react';
-import { lucieAI, lucieOrchestrator } from '@/core';
+import { lucieAI } from '@/core';
+import { GenerateContentParams } from '@/types/ai-chat';
 
 const BrainCore: React.FC = () => {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [sentiment, setSentiment] = useState('');
-  const [sentimentScore, setSentimentScore] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const processInput = async (input: string) => {
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!input.trim()) return;
     
+    setIsLoading(true);
+    
     try {
-      setIsProcessing(true);
-      
-      if (lucieOrchestrator && typeof lucieOrchestrator.isSafeContent === 'function') {
-        const safeCheck = await lucieOrchestrator.isSafeContent(input);
-        if (!safeCheck.safe) {
-          console.warn("Content moderation flagged the input as unsafe:", safeCheck.reason);
-          setOutput(`I'm sorry, but I cannot process content that violates safety guidelines. Reason: ${safeCheck.reason}`);
-          return;
-        }
-      }
-      
-      const params = {
+      const params: GenerateContentParams = {
         prompt: input,
-        options: { maxTokens: 500 }
+        options: {
+          temperature: 0.7,
+          maxTokens: 500
+        }
       };
       
       const response = await lucieAI.generateContent(params);
-      const responseContent: string = response.text || response.content || "Unable to process your request.";
+      setOutput(response.content || "I couldn't generate a response.");
       
-      setOutput(responseContent);
-      
-      const sentimentResult = await lucieAI.analyzeSentiment({ text: responseContent });
-      
-      setSentiment(sentimentResult.sentiment);
-      setSentimentScore(sentimentResult.confidence || 0);
+      // Log for analytics
+      console.log(`Query: ${input} | Response length: ${response.content?.length || 0}`);
       
     } catch (error) {
-      console.error("Error processing input:", error);
-      setOutput("An error occurred while processing your request.");
+      console.error('Generation error:', error);
+      setOutput('An error occurred while processing your request.');
     } finally {
-      setIsProcessing(false);
+      setIsLoading(false);
     }
   };
-
+  
   return (
-    <Card className="w-full">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Brain className="h-5 w-5" />
-          Brain Core
+          <Brain className="h-5 w-5 text-primary" />
+          Brain Core Interface
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <Input
-            type="text"
-            placeholder="Enter your prompt..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            disabled={isProcessing}
-            className="flex-1"
-          />
-          <Button onClick={() => processInput(input)} disabled={isProcessing}>
-            <Send className="h-4 w-4 mr-2" />
-            Process
-          </Button>
-        </div>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="prompt" className="text-sm font-medium">Your Query</label>
+            <Input
+              id="prompt"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Enter your instructions or question..."
+              className="min-h-[80px] resize-y"
+            />
+          </div>
+          
+          <div className="flex justify-end">
+            <Button type="submit" disabled={isLoading} className="gap-2">
+              <Send className="h-4 w-4" />
+              {isLoading ? 'Processing...' : 'Submit'}
+            </Button>
+          </div>
+        </form>
+        
         {output && (
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Output:</p>
-            <div className="rounded-md border p-4 bg-muted/50">
-              {output}
-            </div>
-            {sentiment && (
-              <div className="flex items-center space-x-2">
-                <p className="text-sm font-medium">Sentiment:</p>
-                <Badge variant="secondary">
-                  {sentiment} ({sentimentScore.toFixed(2)})
-                </Badge>
-              </div>
-            )}
+          <div className="mt-6">
+            <h3 className="text-sm font-medium mb-2">BrainCore Response:</h3>
+            <div className="p-4 bg-muted rounded-md whitespace-pre-wrap">{output}</div>
           </div>
         )}
       </CardContent>
+      <CardFooter className="flex justify-between text-xs text-muted-foreground">
+        <span>BrainCore v1.0</span>
+        <span>Powered by UberCore</span>
+      </CardFooter>
     </Card>
   );
 };

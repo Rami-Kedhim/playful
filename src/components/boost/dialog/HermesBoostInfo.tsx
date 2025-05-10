@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { HermesStatus } from '@/types/boost';
+import { HermesStatus } from '@/types/pulse-boost';
 import { AlertCircle, BarChart2, Users } from 'lucide-react';
 
 interface HermesBoostInfoProps {
@@ -16,6 +16,8 @@ const HermesBoostInfo: React.FC<HermesBoostInfoProps> = ({
 }) => {
   // Format the last update time
   const lastUpdate = new Date(hermesStatus.lastUpdateTime || Date.now()).toLocaleString();
+  const boostScore = hermesStatus.boostScore || 0;
+  const effectivenessScore = hermesStatus.effectivenessScore || 0;
   
   return (
     <Card className="border border-muted">
@@ -34,17 +36,17 @@ const HermesBoostInfo: React.FC<HermesBoostInfoProps> = ({
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <span className="text-xs">Boost Score</span>
-              <span className="text-xs font-medium">{hermesStatus.boostScore || 0}</span>
+              <span className="text-xs font-medium">{boostScore}</span>
             </div>
-            <Progress value={hermesStatus.boostScore || 0} className="h-1" />
+            <Progress value={boostScore} className="h-1" />
           </div>
           
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <span className="text-xs">Effectiveness</span>
-              <span className="text-xs font-medium">{hermesStatus.effectivenessScore || 0}%</span>
+              <span className="text-xs font-medium">{effectivenessScore}%</span>
             </div>
-            <Progress value={hermesStatus.effectivenessScore || 0} className="h-1" />
+            <Progress value={effectivenessScore} className="h-1" />
           </div>
         </div>
         

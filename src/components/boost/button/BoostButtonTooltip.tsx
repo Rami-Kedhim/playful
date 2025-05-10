@@ -6,7 +6,7 @@ import {
   TooltipProvider, 
   TooltipTrigger 
 } from "@/components/ui/tooltip";
-import { BoostStatus } from "@/types/boost";
+import { BoostStatus } from "@/types/pulse-boost";
 
 interface BoostButtonTooltipProps {
   boostStatus: BoostStatus;
@@ -20,7 +20,7 @@ const BoostButtonTooltip = ({
   children
 }: BoostButtonTooltipProps) => {
   const tooltipText = boostStatus.isActive 
-    ? `Boosted: ${boostStatus.progress}% complete`
+    ? `Boosted: ${boostStatus.progress || 0}% complete`
     : "Boost your profile visibility";
   
   return (

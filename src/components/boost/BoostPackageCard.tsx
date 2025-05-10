@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { BoostPackage } from '@/types/pulse-boost';
@@ -13,7 +14,7 @@ const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
 }) => {
   const formatVisibility = (value: string | number | undefined): string => {
     if (value === undefined || value === null) return '';
-    return typeof value === 'number' ? `${value}%` : value;
+    return typeof value === 'number' ? `${value.toString()}%` : value;
   };
 
   return (

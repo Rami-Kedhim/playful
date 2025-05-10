@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/auth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SignInForm from './SignInForm';
-import { LoginCredentials, AuthResult } from '@/types/user';
+import { LoginCredentials } from '@/types/user';
 
 interface AuthFormProps {
   defaultTab?: 'login' | 'register';
@@ -17,7 +18,6 @@ const AuthForm: React.FC<AuthFormProps> = ({
   redirectUrl
 }) => {
   const [activeTab, setActiveTab] = useState<string>(defaultTab);
-  const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const auth = useAuth();
@@ -44,7 +44,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
     }
   };
 
-  const handleRegister = async (email: string, password: string, username: string) => {
+  const handleRegister = async (email: string, password: string) => {
     setError(null);
     setIsSubmitting(true);
     

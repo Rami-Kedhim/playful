@@ -1,16 +1,28 @@
 
-import { EscortAvailability } from './Escort';
+export interface EscortAvailability {
+  days?: string[];
+  hours?: {
+    start: string;
+    end: string;
+  };
+  locations?: string[];
+  onlineHours?: {
+    start: string;
+    end: string;
+  };
+}
 
 export interface Escort {
   id: string;
   name: string;
-  gender: string; // Required property for compatibility
+  gender: string;
   age?: number;
   location?: string;
+  locations?: string[];
   bio?: string;
   description?: string;
   rating?: number;
-  price: number; // Make this required for compatibility
+  price: number;
   images?: string[];
   services?: string[];
   isVerified?: boolean;
@@ -45,7 +57,7 @@ export interface Escort {
   lastActive?: Date | string;
   clientsServed?: number;
   verificationLevel?: string;
-  availability?: EscortAvailability; // Make sure this is the correct type
+  availability?: EscortAvailability;
   payment_methods?: string[];
   deposit_required?: boolean;
   languages?: string[];
@@ -54,9 +66,9 @@ export interface Escort {
   reviewCount?: number;
   tags?: string[];
   availableNow?: boolean;
+  isAvailable?: boolean;
   responseRate?: number;
   subscriptionPrice?: number;
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
 }
-
-// Create a type alias to ensure compatibility
-export type { EscortAvailability };

@@ -24,6 +24,7 @@ export interface User {
   email: string;
   name?: string;
   avatar_url?: string;
+  avatarUrl?: string;
   username?: string;
   bio?: string;
   website?: string;
@@ -34,6 +35,7 @@ export interface User {
   roles?: string[];
   created_at?: string;
   updated_at?: string;
+  profileImageUrl?: string;
 }
 
 export interface UserProfile {
@@ -43,6 +45,7 @@ export interface UserProfile {
   username?: string;
   bio?: string;
   avatar_url?: string;
+  avatarUrl?: string;
   email?: string;
   phone?: string;
   website?: string;
@@ -66,9 +69,21 @@ export interface AuthContextType {
   profile: UserProfile | null;
   login: (email: string, password: string) => Promise<AuthResult>;
   logout: () => Promise<boolean>;
-  register: (credentials: RegisterCredentials) => Promise<AuthResult>;
+  register: (email: string, password: string, confirmPassword?: string) => Promise<AuthResult>;
   loading: boolean;
+  isLoading: boolean; // Added for compatibility
   isAdmin: boolean;
   isEscort: boolean;
   isClient: boolean;
+  error: string | null;
+  initialized: boolean;
+  updateUser: (userData: Partial<User>) => Promise<boolean>;
+  updateUserProfile: (profileData: Partial<UserProfile>) => Promise<boolean>;
+  updateProfile: (profileData: Partial<UserProfile>) => Promise<boolean>;
+  sendPasswordResetEmail: (email: string) => Promise<boolean>;
+  resetPassword: (password: string, token: string) => Promise<boolean>;
+  checkRole: (role: string) => boolean;
+  signIn: (email: string, password: string) => Promise<AuthResult>;
+  signOut: () => Promise<boolean>;
+  refreshProfile: () => Promise<void>;
 }
