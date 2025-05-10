@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { LucieAI } from '@/core/Lucie';
+import { LucieAI, lucieAI } from '@/core/Lucie';
 import { Oxum } from '@/core/Oxum';
 
 export interface UberEcosystemContextType {
@@ -24,17 +24,16 @@ export const UberEcosystemProvider: React.FC<{ children: React.ReactNode }> = ({
     const initializeEcosystem = async () => {
       try {
         // Initialize Oxum
-        const oxum = new Oxum();
-        await oxum.initialize();
+        const oxumInstance = new Oxum();
+        await oxumInstance.initialize();
         
-        // Initialize LucieAI
-        const lucieAI = new LucieAI();
+        // Using the pre-created lucieAI instance
         await lucieAI.initialize();
         
         setState({
           initialized: true,
           ready: true,
-          oxum,
+          oxum: oxumInstance,
           lucieAI
         });
       } catch (error) {

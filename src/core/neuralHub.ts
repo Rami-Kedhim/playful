@@ -1,4 +1,5 @@
-import { lucieAI } from './index';
+
+import { lucieAI } from './Lucie';
 import { oxum } from './index';
 import { hermes } from './index';
 import { GenerateContentParams } from '@/types/core-systems';

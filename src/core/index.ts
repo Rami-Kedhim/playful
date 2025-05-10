@@ -2,14 +2,13 @@
 import { Hermes } from './Hermes';
 import { LucieAI, lucieAI } from './Lucie';
 import { Oxum } from './Oxum';
-import UberCore from './UberCore';
+import UberCore, { uberCore } from './UberCore';
 import { Orus } from './Orus';
 
 // Create instances
 const hermes = new Hermes();
 const oxum = new Oxum();
 const orus = new Orus();
-const uberCore = new UberCore();
 
 // Export instances and classes
 export {

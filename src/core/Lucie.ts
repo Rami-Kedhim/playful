@@ -6,6 +6,13 @@ export interface LucieAI {
   verifyContentSafety(content: string): Promise<boolean>;
   generateImagePrompt(context: any): Promise<string>;
   analyzeUserMessage(message: string): Promise<any>;
+  getSystemStatus(): {
+    modules: {
+      aiGeneration: 'online' | 'offline' | 'degraded';
+      contentModeration: 'online' | 'offline' | 'degraded';
+      sentimentAnalysis: 'online' | 'offline' | 'degraded';
+    }
+  };
 }
 
 export class LucieAI implements LucieAI {
@@ -49,4 +56,23 @@ export class LucieAI implements LucieAI {
       safetyCheck: { safe: true }
     };
   }
+
+  getSystemStatus(): {
+    modules: {
+      aiGeneration: 'online' | 'offline' | 'degraded';
+      contentModeration: 'online' | 'offline' | 'degraded';
+      sentimentAnalysis: 'online' | 'offline' | 'degraded';
+    }
+  } {
+    return {
+      modules: {
+        aiGeneration: 'online',
+        contentModeration: 'online',
+        sentimentAnalysis: 'online'
+      }
+    };
+  }
 }
+
+// Create and export a singleton instance
+export const lucieAI = new LucieAI();

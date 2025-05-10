@@ -1,16 +1,16 @@
 
-import { LucieAI } from './Lucie';
+import { LucieAI, lucieAI } from './Lucie';
 
 class LucieOrchestrator {
-  private lucieAI: LucieAI;
+  private lucieInstance: LucieAI;
   
   constructor() {
-    this.lucieAI = new LucieAI();
+    this.lucieInstance = lucieAI;
   }
   
   async isSafeContent(content: string): Promise<{ safe: boolean; reason?: string }> {
     try {
-      const isSafe = await this.lucieAI.verifyContentSafety(content);
+      const isSafe = await this.lucieInstance.verifyContentSafety(content);
       return {
         safe: isSafe,
         reason: isSafe ? undefined : 'Content violates safety guidelines'
@@ -34,7 +34,7 @@ class LucieOrchestrator {
     };
     
     try {
-      const result = await this.lucieAI.generateContent(params);
+      const result = await this.lucieInstance.generateContent(params);
       return result.content;
     } catch (error) {
       console.error("Error generating response:", error);
