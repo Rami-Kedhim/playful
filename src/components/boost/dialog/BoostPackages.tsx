@@ -1,68 +1,63 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { BoostPackage } from '@/types/pulse-boost';
 import { Button } from '@/components/ui/button';
-import BoostPackageCard from '@/components/boost/BoostPackageCard';
+import { Loader2 } from 'lucide-react';
+import BoostPackageCard from '../BoostPackageCard';
 
 interface BoostPackagesProps {
   packages: BoostPackage[];
   onBoost: () => Promise<boolean>;
-  profileId?: string; // Add this prop to resolve the error
+  profileId: string;
 }
 
-const BoostPackages: React.FC<BoostPackagesProps> = ({
-  packages,
-  onBoost,
-  profileId
-}) => {
-  const [selectedPackage, setSelectedPackage] = React.useState<string | null>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
+const BoostPackages: React.FC<BoostPackagesProps> = ({ packages, onBoost, profileId }) => {
+  const [selectedPackageId, setSelectedPackageId] = useState<string>(
+    packages.length > 0 ? packages[0].id : ''
+  );
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleBoost = async () => {
-    if (!selectedPackage) return;
+    if (!selectedPackageId) return;
     
     setIsLoading(true);
     try {
       await onBoost();
-    } catch (error) {
-      console.error('Error boosting profile:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Simple duration formatter
-  const formatDuration = (duration: string | number): string => {
-    if (typeof duration === 'number') {
-      // Convert hours to readable format
-      const hours = Math.floor(duration);
-      const minutes = Math.round((duration - hours) * 60);
-      return minutes > 0 ? `${hours}h ${minutes}m` : `${hours} hours`;
-    }
-    return duration;
-  };
+  if (packages.length === 0) {
+    return <div className="text-center py-8">No boost packages available</div>;
+  }
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
+    <div className="space-y-6">
+      <div className="grid gap-4">
         {packages.map((pkg) => (
           <BoostPackageCard
             key={pkg.id}
-            package={pkg}
-            isSelected={selectedPackage === pkg.id}
-            onSelect={() => setSelectedPackage(pkg.id)}
-            formatDuration={formatDuration}
-            isPopular={pkg.isPopular || false}
+            packageData={pkg}
+            isSelected={selectedPackageId === pkg.id}
+            onClick={() => setSelectedPackageId(pkg.id)}
           />
         ))}
       </div>
-      
+
       <Button 
         onClick={handleBoost} 
-        disabled={!selectedPackage || isLoading}
+        disabled={isLoading || !selectedPackageId} 
         className="w-full"
       >
-        {isLoading ? 'Processing...' : 'Boost Profile'}
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          'Apply Boost'
+        )}
       </Button>
     </div>
   );

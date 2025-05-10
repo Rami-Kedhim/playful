@@ -1,149 +1,190 @@
-import { Escort } from '@/types/Escort';
+
+import { Escort } from '@/types/escort';
 
 export const escortProfiles: Escort[] = [
   {
     id: '1',
     name: 'Sophia',
-    age: 28,
+    age: 24,
+    bio: 'Elegant, sophisticated and educated. I love art and good conversations.',
     gender: 'female',
-    price: 250,
+    photos: ['/images/escorts/sophia1.jpg', '/images/escorts/sophia2.jpg'],
+    services: ['Dinner Date', 'Girlfriend Experience', 'Travel Companion'],
+    rates: {
+      hourly: 300,
+      overnight: 1500
+    },
+    location: 'Downtown Miami', // Fixed 'locations' to 'location'
+    availability: {
+      days: ['Monday', 'Tuesday', 'Thursday', 'Friday', 'Saturday']
+    },
+    contactInfo: {
+      phone: '+1-XXX-XXX-XXXX',
+      email: 'sophia@example.com'
+    },
     rating: 4.9,
-    isVerified: true,
-    bio: 'Elegant and sophisticated companion with a passion for art and culture.',
-    location: 'New York, NY', // Changed from locations to location
-    services: ['Dinner Date', 'Cultural Events', 'Travel Companion'],
-    images: [
-      '/images/escorts/sophia1.jpg',
-      '/images/escorts/sophia2.jpg',
-      '/images/escorts/sophia3.jpg'
-    ],
-    featured: true
+    isVerified: true
   },
   {
     id: '2',
     name: 'Isabella',
-    age: 24,
+    age: 26,
+    bio: 'Passionate Latin beauty with a love for dancing and adventure.',
     gender: 'female',
-    price: 300,
+    photos: ['/images/escorts/isabella1.jpg', '/images/escorts/isabella2.jpg'],
+    services: ['Dinner Date', 'Nightclub', 'Private Party'],
+    rates: {
+      hourly: 350,
+      overnight: 1800
+    },
+    location: 'South Beach', // Fixed 'locations' to 'location'
+    availability: {
+      days: ['Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    },
+    contactInfo: {
+      phone: '+1-XXX-XXX-XXXX',
+      email: 'isabella@example.com'
+    },
     rating: 4.8,
-    isVerified: true,
-    bio: 'A charming and adventurous escort ready to explore the city with you.',
-    location: 'Los Angeles, CA', // Changed from locations to location
-    services: ['City Tours', 'Nightlife', 'Gourmet Dining'],
-    images: [
-      '/images/escorts/isabella1.jpg',
-      '/images/escorts/isabella2.jpg',
-      '/images/escorts/isabella3.jpg'
-    ],
-    featured: false
+    isVerified: true
   },
   {
     id: '3',
-    name: 'Ava',
-    age: 26,
+    name: 'Emma',
+    age: 23,
+    bio: 'Sweet and charming college student. Intellectual conversations guaranteed.',
     gender: 'female',
-    price: 280,
+    photos: ['/images/escorts/emma1.jpg', '/images/escorts/emma2.jpg'],
+    services: ['Academic Escort', 'Dinner Date', 'Museum Visits'],
+    rates: {
+      hourly: 250,
+      overnight: 1300
+    },
+    location: 'Coral Gables', // Fixed 'locations' to 'location'
+    availability: {
+      days: ['Monday', 'Wednesday', 'Friday', 'Saturday']
+    },
+    contactInfo: {
+      phone: '+1-XXX-XXX-XXXX',
+      email: 'emma@example.com'
+    },
     rating: 4.7,
-    isVerified: false,
-    bio: 'Passionate and engaging, Ava is the perfect companion for a memorable evening.',
-    location: 'Miami, FL', // Changed from locations to location
-    services: ['Beach Outings', 'Yacht Parties', 'Romantic Dinners'],
-    images: [
-      '/images/escorts/ava1.jpg',
-      '/images/escorts/ava2.jpg',
-      '/images/escorts/ava3.jpg'
-    ],
-    featured: true
+    isVerified: true
   },
   {
     id: '4',
-    name: 'Mia',
-    age: 29,
+    name: 'Olivia',
+    age: 27,
+    bio: 'Exquisite model with a passion for fitness and healthy living.',
     gender: 'female',
-    price: 320,
+    photos: ['/images/escorts/olivia1.jpg', '/images/escorts/olivia2.jpg'],
+    services: ['Fitness Date', 'Beach Time', 'Yacht Parties', 'Travel Companion'],
+    rates: {
+      hourly: 400,
+      overnight: 2000
+    },
+    location: 'Brickell', // Fixed 'locations' to 'location'
+    availability: {
+      days: ['Tuesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    },
+    contactInfo: {
+      phone: '+1-XXX-XXX-XXXX',
+      email: 'olivia@example.com'
+    },
     rating: 4.9,
-    isVerified: true,
-    bio: 'Sophisticated and intelligent, Mia offers stimulating conversation and unforgettable experiences.',
-    location: 'Chicago, IL', // Changed from locations to location
-    services: ['Art Galleries', 'Theater', 'Fine Dining'],
-    images: [
-      '/images/escorts/mia1.jpg',
-      '/images/escorts/mia2.jpg',
-      '/images/escorts/mia3.jpg'
-    ],
-    featured: false
+    isVerified: true
   },
   {
     id: '5',
-    name: 'Chloe',
+    name: 'Ava',
     age: 25,
+    bio: 'Adventurous spirit with a love for outdoor activities and travel.',
     gender: 'female',
-    price: 270,
-    rating: 4.6,
-    isVerified: false,
-    bio: 'Fun-loving and energetic, Chloe is always up for a new adventure.',
-    location: 'Las Vegas, NV', // Changed from locations to location
-    services: ['Pool Parties', 'Casino Nights', 'Shows'],
-    images: [
-      '/images/escorts/chloe1.jpg',
-      '/images/escorts/chloe2.jpg',
-      '/images/escorts/chloe3.jpg'
-    ],
-    featured: true
+    photos: ['/images/escorts/ava1.jpg', '/images/escorts/ava2.jpg'],
+    services: ['Adventure Date', 'Travel Companion', 'Hiking Buddy', 'Beach Day'],
+    rates: {
+      hourly: 300,
+      overnight: 1600
+    },
+    location: 'Key Biscayne', // Fixed 'locations' to 'location'
+    availability: {
+      days: ['Monday', 'Wednesday', 'Thursday', 'Saturday', 'Sunday']
+    },
+    contactInfo: {
+      phone: '+1-XXX-XXX-XXXX',
+      email: 'ava@example.com'
+    },
+    rating: 4.8,
+    isVerified: true
   },
   {
     id: '6',
-    name: 'Emily',
-    age: 27,
+    name: 'Mia',
+    age: 24,
+    bio: 'Artistic soul with a passion for music, poetry and fine dining.',
     gender: 'female',
-    price: 310,
-    rating: 4.8,
-    isVerified: true,
-    bio: 'Charming and elegant, Emily is the perfect companion for any occasion.',
-    location: 'San Francisco, CA', // Changed from locations to location
-    services: ['Wine Tours', 'Sailing', 'Gourmet Picnics'],
-    images: [
-      '/images/escorts/emily1.jpg',
-      '/images/escorts/emily2.jpg',
-      '/images/escorts/emily3.jpg'
-    ],
-    featured: false
+    photos: ['/images/escorts/mia1.jpg', '/images/escorts/mia2.jpg'],
+    services: ['Cultural Events', 'Art Galleries', 'Fine Dining', 'Music Concerts'],
+    rates: {
+      hourly: 350,
+      overnight: 1800
+    },
+    location: 'Wynwood', // Fixed 'locations' to 'location'
+    availability: {
+      days: ['Tuesday', 'Wednesday', 'Friday', 'Saturday', 'Sunday']
+    },
+    contactInfo: {
+      phone: '+1-XXX-XXX-XXXX',
+      email: 'mia@example.com'
+    },
+    rating: 4.9,
+    isVerified: true
   },
   {
     id: '7',
-    name: 'Abigail',
-    age: 23,
+    name: 'Charlotte',
+    age: 26,
+    bio: 'Elegant and sophisticated with European charm. Fluent in multiple languages.',
     gender: 'female',
-    price: 260,
-    rating: 4.5,
-    isVerified: false,
-    bio: 'Sweet and playful, Abigail is a delightful companion for a relaxed and enjoyable time.',
-    location: 'Seattle, WA', // Changed from locations to location
-    services: ['Coffee Dates', 'Museum Visits', 'Hiking'],
-    images: [
-      '/images/escorts/abigail1.jpg',
-      '/images/escorts/abigail2.jpg',
-      '/images/escorts/abigail3.jpg'
-    ],
-    featured: true
+    photos: ['/images/escorts/charlotte1.jpg', '/images/escorts/charlotte2.jpg'],
+    services: ['Business Events', 'International Travel', 'Fine Dining', 'Cultural Experiences'],
+    rates: {
+      hourly: 400,
+      overnight: 2000
+    },
+    location: 'Downtown Miami', // Fixed 'locations' to 'location'
+    availability: {
+      days: ['Monday', 'Tuesday', 'Thursday', 'Friday', 'Saturday']
+    },
+    contactInfo: {
+      phone: '+1-XXX-XXX-XXXX',
+      email: 'charlotte@example.com'
+    },
+    rating: 5.0,
+    isVerified: true
   },
   {
     id: '8',
-    name: 'Madison',
-    age: 30,
+    name: 'Amelia',
+    age: 23,
+    bio: 'Bubbly personality with a love for adventure and trying new experiences.',
     gender: 'female',
-    price: 330,
-    rating: 5.0,
-    isVerified: true,
-    bio: 'Stunning and sophisticated, Madison offers unparalleled companionship and unforgettable experiences.',
-    location: 'Boston, MA', // Changed from locations to location
-    services: ['Historical Tours', 'Classical Music', 'Exclusive Parties'],
-    images: [
-      '/images/escorts/madison1.jpg',
-      '/images/escorts/madison2.jpg',
-      '/images/escorts/madison3.jpg'
-    ],
-    featured: false
+    photos: ['/images/escorts/amelia1.jpg', '/images/escorts/amelia2.jpg'],
+    services: ['Party Companion', 'Nightlife', 'Beach Day', 'Spontaneous Adventures'],
+    rates: {
+      hourly: 300,
+      overnight: 1500
+    },
+    location: 'South Beach', // Fixed 'locations' to 'location'
+    availability: {
+      days: ['Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    },
+    contactInfo: {
+      phone: '+1-XXX-XXX-XXXX',
+      email: 'amelia@example.com'
+    },
+    rating: 4.7,
+    isVerified: true
   }
 ];
 

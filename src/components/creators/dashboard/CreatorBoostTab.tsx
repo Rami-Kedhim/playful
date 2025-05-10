@@ -1,193 +1,177 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
+import { useBoostOperations } from '@/hooks/boost/useBoostOperations';
+import { BoostPackage, BoostStatus } from '@/types/pulse-boost';
+import { formatDistanceToNow } from 'date-fns';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Zap, 
-  ChevronRight, 
-  TrendingUp, 
-  Users, 
-  Calendar, 
-  Clock 
-} from 'lucide-react';
-import BoostAnalytics from './boost/BoostAnalytics';
-import useBoostOperations from '@/hooks/boost/useBoostOperations';
-import { useAuth } from '@/contexts/AuthContext';
-import BoostProfileDialog from '@/components/boost/BoostProfileDialog';
+import { Zap, Clock, BarChart, Award } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import BoostPackageCard from '@/components/boost/BoostPackageCard';
 
-const CreatorBoostTab: React.FC = () => {
-  const { user } = useAuth();
-  const creatorId = user?.id || '';
-  
-  // State for boost dialog
-  const [showBoostDialog, setShowBoostDialog] = useState(false);
-  
-  // Use the hook
+interface UseBoostOperationsReturn {
+  boostStatus: BoostStatus;
+  loading: boolean;
+  error: string | null;
+  activateBoost: (packageId: string) => Promise<boolean>;
+  cancelBoost: () => Promise<boolean>;
+  boostEligibility?: any;
+  boostPackages?: BoostPackage[];
+  getBoostPrice?: () => number;
+  hermesMetrics?: any;
+  boostProfile?: (profileId: string, packageId: string) => Promise<boolean>;
+}
+
+const CreatorBoostTab = ({ creatorId }: { creatorId: string }) => {
   const {
     boostStatus,
+    loading,
+    error,
+    activateBoost,
+    cancelBoost,
     boostEligibility,
     boostPackages,
     getBoostPrice,
     hermesMetrics,
-    loading,
-    error,
-    boostProfile
-  } = useBoostOperations(creatorId);
+    boostProfile,
+  } = useBoostOperations(creatorId) as UseBoostOperationsReturn;
+
+  const [selectedPackage, setSelectedPackage] = React.useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   
-  // Format relative date for expiry
-  const formatExpiryDate = (date?: Date) => {
-    if (!date) return 'N/A';
+  const handleSubmit = async () => {
+    if (!selectedPackage || isSubmitting) return;
     
-    const now = new Date();
-    const diff = date.getTime() - now.getTime();
-    
-    // If already expired
-    if (diff <= 0) return 'Expired';
-    
-    // Convert to days, hours
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    
-    if (days > 0) {
-      return `${days} day${days > 1 ? 's' : ''} ${hours} hour${hours > 1 ? 's' : ''}`;
-    } else {
-      return `${hours} hour${hours > 1 ? 's' : ''}`;
+    setIsSubmitting(true);
+    try {
+      if (boostProfile) {
+        await boostProfile(creatorId, selectedPackage);
+      } else if (activateBoost) {
+        await activateBoost(selectedPackage);
+      }
+    } catch (err) {
+      console.error("Failed to activate boost:", err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
-  // Handle successful boost
-  const handleBoostSuccess = () => {
-    console.log('Boost successful');
-    // Could show a toast notification here
+  const formatTimeRemaining = (date?: Date | string) => {
+    if (!date) return "N/A";
+    try {
+      const expiryDate = typeof date === 'string' ? new Date(date) : date;
+      return formatDistanceToNow(expiryDate, { addSuffix: true });
+    } catch (err) {
+      return "N/A";
+    }
   };
-  
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold">Profile Boost</h2>
-          <p className="text-muted-foreground">
-            Increase your visibility and get more clients
-          </p>
-        </div>
-        <Button 
-          onClick={() => setShowBoostDialog(true)}
-          variant={boostStatus.isActive ? "outline" : "default"}
-          className="gap-1"
-        >
-          <Zap className="h-4 w-4" />
-          {boostStatus.isActive ? 'Manage Boost' : 'Boost Profile'}
-        </Button>
-      </div>
-      
-      {boostStatus.isActive && (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row justify-between">
-              <div>
-                <h3 className="font-medium flex items-center text-primary">
-                  <Zap className="h-4 w-4 mr-2" /> 
-                  Active Boost
-                </h3>
-                <p className="text-muted-foreground mt-1">
-                  Your profile is currently boosted (Level {boostStatus.level})
-                </p>
+
+  // Function to render current boost status if active
+  const renderActiveBoost = () => {
+    if (!boostStatus?.isActive) return null;
+    
+    const boostLevel = boostStatus?.boostPackage?.boost_power || 0;
+    const progress = boostStatus?.progress || 0;
+    const timeRemaining = boostStatus?.timeRemaining || "Unknown";
+    
+    return (
+      <Card className="mb-8 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-primary" />
+            Active Boost
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex justify-between">
+              <div className="space-y-1">
+                <div className="text-sm text-muted-foreground">Package</div>
+                <div className="font-medium">{boostStatus.packageName || 'Standard Boost'}</div>
               </div>
-              
-              <div className="mt-4 md:mt-0 space-y-1">
-                <div className="flex items-center text-sm">
-                  <Calendar className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                  <span className="text-muted-foreground">Expires in:</span>
-                  <span className="font-medium ml-1">
-                    {formatExpiryDate(boostStatus.expiresAt)}
-                  </span>
-                </div>
-                
-                <div className="flex items-center text-sm">
-                  <TrendingUp className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                  <span className="text-muted-foreground">Visibility Increase:</span>
-                  <span className="font-medium ml-1">+{boostStatus.level * 50}%</span>
-                </div>
-                
-                <div className="flex items-center text-sm">
-                  <Users className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                  <span className="text-muted-foreground">Package:</span>
-                  <span className="font-medium ml-1">
-                    {boostStatus.level === 1 ? 'Basic' : boostStatus.level === 2 ? 'Standard' : 'Premium'}
-                  </span>
+              <div className="space-y-1">
+                <div className="text-sm text-muted-foreground">Boost Level</div>
+                <div className="font-medium flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, boostLevel || 1) }).map((_, i) => (
+                    <Award key={i} className="h-4 w-4 text-amber-500" />
+                  ))}
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            
+            <div className="space-y-1">
+              <div className="flex justify-between text-sm">
+                <span>Progress</span>
+                <span>{progress}%</span>
+              </div>
+              <Progress value={progress} className="h-2" />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="text-sm text-muted-foreground">Expires</div>
+                  <div className="font-medium">{formatTimeRemaining(boostStatus.expiresAt)}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <BarChart className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="text-sm text-muted-foreground">Visibility</div>
+                  <div className="font-medium">+{boostStatus?.boostPackage?.visibility_increase || 50}%</div>
+                </div>
+              </div>
+            </div>
+            
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={() => cancelBoost()}
+              disabled={isSubmitting}
+            >
+              Cancel Boost
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  if (loading) {
+    return <div>Loading boost information...</div>;
+  }
+
+  // Show active boost if exists, otherwise show package selection
+  return (
+    <div>
+      {renderActiveBoost()}
       
-      <Tabs defaultValue="analytics">
-        <TabsList className="mb-4">
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="boost-options">Boost Options</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="analytics">
-          <BoostAnalytics 
-            profileId={creatorId} 
-            boostStatus={boostStatus} 
-          />
-        </TabsContent>
-        
-        <TabsContent value="boost-options">
-          <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-3">
-            {boostPackages.map((pkg) => (
-              <Card key={pkg.id} className={`${pkg.level === 2 ? 'border-primary/40' : ''}`}>
-                <CardHeader>
-                  <CardTitle className="flex justify-between items-center">
-                    {pkg.name}
-                    {pkg.level === 2 && (
-                      <span className="bg-primary/20 text-primary text-xs px-2 py-1 rounded-full">Most Popular</span>
-                    )}
-                  </CardTitle>
-                  <CardDescription>{pkg.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-3xl font-bold">${pkg.price.toFixed(2)}</div>
-                  
-                  <div className="space-y-2 text-sm">
-                    {pkg.features?.map((feature, i) => (
-                      <div key={i} className="flex items-center">
-                        <ChevronRight className="h-3 w-3 mr-2 text-primary" />
-                        {feature}
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Clock className="h-3.5 w-3.5 mr-1.5" />
-                    {pkg.duration}
-                  </div>
-                  
-                  <Button 
-                    className="w-full mt-4" 
-                    variant={pkg.level === 2 ? "default" : "outline"}
-                    onClick={() => setShowBoostDialog(true)}
-                  >
-                    <Zap className="h-4 w-4 mr-1.5" /> 
-                    Select
-                  </Button>
-                </CardContent>
-              </Card>
+      {!boostStatus?.isActive && (
+        <div className="space-y-6">
+          <h3 className="text-lg font-medium">Available Boost Packages</h3>
+          
+          <div className="grid gap-4">
+            {(boostPackages || []).map((pkg) => (
+              <BoostPackageCard
+                key={pkg.id}
+                packageData={pkg}
+                isSelected={selectedPackage === pkg.id}
+                onClick={() => setSelectedPackage(pkg.id)}
+              />
             ))}
           </div>
-        </TabsContent>
-      </Tabs>
-      
-      {/* Boost Profile Dialog */}
-      <BoostProfileDialog
-        open={showBoostDialog}
-        setOpen={setShowBoostDialog}
-        profileId={creatorId}
-        onSuccess={handleBoostSuccess}
-      />
+          
+          <Button 
+            onClick={handleSubmit} 
+            disabled={!selectedPackage || isSubmitting}
+            className="w-full"
+          >
+            <Zap className="mr-2 h-4 w-4" />
+            Apply Boost
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

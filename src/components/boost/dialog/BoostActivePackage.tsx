@@ -1,70 +1,72 @@
 
 import React from 'react';
-import { BoostStatus, HermesStatus } from '@/types/boost';
-import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Clock, Zap } from 'lucide-react';
+import { Clock, Zap, Calendar } from 'lucide-react';
 
 interface BoostActivePackageProps {
-  boostStatus: BoostStatus;
-  hermesData: HermesStatus;
+  isActive: boolean;
+  packageName: string;
+  expiresAt: string;
+  progress: number;
+  timeRemaining: string;
 }
 
 const BoostActivePackage: React.FC<BoostActivePackageProps> = ({
-  boostStatus,
-  hermesData
+  isActive,
+  packageName,
+  expiresAt,
+  progress,
+  timeRemaining
 }) => {
-  if (!boostStatus.isActive) {
-    return null;
+  if (!isActive) {
+    return (
+      <div className="text-center py-8">
+        <Zap className="h-12 w-12 mx-auto text-muted-foreground opacity-50" />
+        <h3 className="text-lg font-medium mt-4">No Active Boost</h3>
+        <p className="text-muted-foreground mt-2">
+          You don't have an active boost. Select a package to enhance your profile visibility.
+        </p>
+      </div>
+    );
   }
-  
-  const progress = boostStatus.progress || 0;
-  const remainingTime = boostStatus.remainingTime || '00:00:00';
-  const packageName = boostStatus.packageName || 'Active Boost';
-  const estimatedVisibility = hermesData?.estimatedVisibility || 0;
-  const position = hermesData?.position || 0;
-  
+
   return (
-    <Card>
-      <CardContent className="p-4 space-y-4">
-        <div className="flex justify-between items-start">
+    <div className="space-y-6 py-2">
+      <div className="flex items-center">
+        <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+          <Zap className="h-6 w-6 text-primary" />
+        </div>
+        <div className="ml-4">
+          <h3 className="font-medium">{packageName}</h3>
+          <p className="text-sm text-muted-foreground">Active Boost</p>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm">
+          <span>Progress</span>
+          <span>{progress}% Complete</span>
+        </div>
+        <Progress value={progress} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex items-center">
+          <Clock className="h-5 w-5 mr-2 text-muted-foreground" />
           <div>
-            <h3 className="font-medium flex items-center">
-              <Zap className="h-4 w-4 mr-1 text-yellow-500" />
-              {packageName}
-            </h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Your profile is currently being boosted
-            </p>
-          </div>
-          
-          <Badge variant="outline" className="flex items-center">
-            <Clock className="mr-1 h-3 w-3" />
-            {remainingTime} remaining
-          </Badge>
-        </div>
-        
-        <div className="space-y-1">
-          <div className="flex justify-between text-xs">
-            <span>Progress</span>
-            <span>{progress}%</span>
-          </div>
-          <Progress value={progress} />
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Visibility</p>
-            <p className="font-medium">{estimatedVisibility}%</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Position</p>
-            <p className="font-medium">{position > 0 ? `#${position}` : 'Top'}</p>
+            <p className="text-sm text-muted-foreground">Time Remaining</p>
+            <p className="font-medium">{timeRemaining}</p>
           </div>
         </div>
-      </CardContent>
-    </Card>
+        <div className="flex items-center">
+          <Calendar className="h-5 w-5 mr-2 text-muted-foreground" />
+          <div>
+            <p className="text-sm text-muted-foreground">Expires</p>
+            <p className="font-medium">{expiresAt}</p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

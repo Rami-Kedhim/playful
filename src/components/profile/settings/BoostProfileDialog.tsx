@@ -9,8 +9,8 @@ interface BoostProfileDialogProps {
   profileId: string;
   onSuccess?: () => void;
   buttonText?: string;
-  buttonVariant?: "link" | "default" | "destructive" | "outline" | "secondary" | "ghost"; // Fix this to use valid variants
-  buttonSize?: string;
+  buttonVariant?: "link" | "default" | "destructive" | "outline" | "secondary" | "ghost";
+  buttonSize?: "default" | "sm" | "lg" | "icon"; // Fix the type to match Button component
 }
 
 const BoostProfileDialog = ({ 
@@ -45,7 +45,6 @@ const BoostProfileDialog = ({
       onSuccess={handleSuccess}
       buttonText={buttonText}
       buttonVariant={buttonVariant}
-      buttonSize={buttonSize}
     />
   );
 };

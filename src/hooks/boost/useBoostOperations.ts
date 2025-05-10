@@ -1,108 +1,100 @@
 
-import { useState, useCallback } from 'react';
-import { BoostPackage, BoostStatus } from '@/types/pulse-boost';
-import { Hermes } from '@/core/Hermes';
+import { useEffect, useState } from 'react';
+import { useBoostStatus } from './useBoostStatus';
+import { useBoostPackages } from './useBoostPackages';
+import { BoostStatus, BoostPackage } from '@/types/pulse-boost';
 
-// Add types for the hook return value
-interface UseBoostOperationsReturn {
-  boostStatus: BoostStatus | null;
-  loading: boolean;
-  error: string | null;
-  activateBoost: (packageId: string) => Promise<boolean>;
-  cancelBoost: () => Promise<boolean>;
-}
-
-const hermes = new Hermes();
-
-const useBoostOperations = (profileId?: string): UseBoostOperationsReturn => {
-  const [boostStatus, setBoostStatus] = useState<BoostStatus | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+export function useBoostOperations(profileId?: string) {
+  const { boostStatus, loading: statusLoading, error: statusError, applyBoost, fetchBoostStatus } = useBoostStatus(profileId);
+  const { packages, loading: packagesLoading, error: packagesError } = useBoostPackages();
   
-  const activateBoost = useCallback(async (packageId: string): Promise<boolean> => {
-    if (!profileId) {
-      setError('Profile ID is required to activate a boost');
-      return false;
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Set default package when packages are loaded
+  useEffect(() => {
+    if (packages.length > 0 && !selectedPackage) {
+      setSelectedPackage(packages[0].id);
     }
-    
-    setLoading(true);
-    setError(null);
+  }, [packages, selectedPackage]);
+
+  // Mock boost eligibility
+  const boostEligibility = {
+    eligible: true,
+    reason: '',
+    reasons: [],
+    nextEligibleTime: new Date(Date.now() + 24 * 60 * 60 * 1000)
+  };
+
+  // Mock hermes metrics
+  const hermesMetrics = {
+    score: 85,
+    position: 12,
+    estimatedVisibility: 65,
+    lastUpdateTime: new Date().toISOString()
+  };
+
+  // Get price for selected package
+  const getBoostPrice = (): number => {
+    const pkg = packages.find(p => p.id === selectedPackage);
+    return pkg?.price_ubx || 0;
+  };
+
+  // Function to activate boost
+  const activateBoost = async (packageId: string): Promise<boolean> => {
+    if (!profileId) return false;
+    setIsSubmitting(true);
     
     try {
-      // In a real app, this would call an API to activate the boost
-      // For now, simulate a successful activation
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Get package details (mock implementation)
-      const mockPackage: BoostPackage = {
-        id: packageId,
-        name: "Premium Boost",
-        description: "Boost your profile visibility",
-        price: 29.99,
-        price_ubx: 500,
-        duration: "24 hours",
-        durationMinutes: 1440,
-        features: ["Top search positioning", "Featured section"]
-      };
-      
-      // Calculate boost score using Hermes
-      const boostScore = await hermes.calculateBoostScore(profileId);
-      
-      // Set mock boost status
-      const now = new Date();
-      const expiresAt = new Date(now.getTime() + mockPackage.durationMinutes * 60 * 1000);
-      
-      setBoostStatus({
-        isActive: true,
-        packageId: packageId,
-        packageName: mockPackage.name,
-        startTime: now,
-        expiresAt: expiresAt,
-        timeRemaining: "24:00:00",
-        progress: 0,
-        boostPackage: mockPackage
-      });
-      
-      return true;
-    } catch (err: any) {
-      setError(err.message || 'Failed to activate boost');
+      const result = await applyBoost(packageId);
+      if (result) {
+        await fetchBoostStatus();
+      }
+      return result;
+    } catch (error) {
+      console.error("Error activating boost:", error);
       return false;
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
-  }, [profileId]);
-  
-  const cancelBoost = useCallback(async (): Promise<boolean> => {
-    if (!boostStatus?.isActive) {
-      setError('No active boost to cancel');
-      return false;
-    }
-    
-    setLoading(true);
-    setError(null);
+  };
+
+  // Wrapper for compatibility with older code
+  const boostProfile = async (profileId: string, packageId: string): Promise<boolean> => {
+    return activateBoost(packageId);
+  };
+
+  // Function to cancel boost
+  const cancelBoost = async (): Promise<boolean> => {
+    setIsSubmitting(true);
     
     try {
-      // In a real app, this would call an API to cancel the boost
-      // For now, simulate a successful cancellation
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Mock cancellation
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      setBoostStatus(null);
+      // Reset status
+      await fetchBoostStatus();
+      
       return true;
-    } catch (err: any) {
-      setError(err.message || 'Failed to cancel boost');
+    } catch (error) {
+      console.error("Error cancelling boost:", error);
       return false;
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
-  }, [boostStatus]);
-  
+  };
+
   return {
     boostStatus,
-    loading,
-    error,
+    loading: statusLoading || packagesLoading || isSubmitting,
+    error: statusError || packagesError,
     activateBoost,
-    cancelBoost
+    cancelBoost,
+    // Add properties needed by CreatorBoostTab
+    boostEligibility,
+    boostPackages: packages,
+    getBoostPrice,
+    hermesMetrics,
+    boostProfile
   };
-};
-
-export default useBoostOperations;
+}

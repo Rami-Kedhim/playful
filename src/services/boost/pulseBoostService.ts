@@ -1,5 +1,5 @@
 
-import { BoostPackage } from '@/types/boost';
+import { BoostPackage, BoostPurchaseResult, BoostStatus } from '@/types/pulse-boost';
 
 // Mock implementation of the Pulse Boost Service
 export class PulseBoostService {
@@ -38,10 +38,37 @@ export class PulseBoostService {
     ];
   }
   
+  async getBoostStatus(profileId: string): Promise<BoostStatus> {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // For demo purposes, return a mock status
+    // In a real app, this would fetch from an API
+    const isActive = Math.random() > 0.5;
+    
+    if (isActive) {
+      return {
+        isActive: true,
+        packageId: 'basic',
+        packageName: 'Basic Boost',
+        startedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
+        expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000),
+        progress: 50,
+        timeRemaining: '12:00:00',
+        remainingTime: '12:00:00',
+        boostPackage: this.getBoostPackages()[0]
+      };
+    }
+    
+    return {
+      isActive: false
+    };
+  }
+  
   async purchaseBoost(
     profileId: string,
     packageId: string,
-    userId: string
+    userId?: string
   ): Promise<BoostPurchaseResult> {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -49,6 +76,7 @@ export class PulseBoostService {
     return {
       success: true,
       boostId: 'boost-' + Date.now(),
+      message: 'Boost activated successfully',
       transactionId: 'tx-' + Date.now()
     };
   }
@@ -73,13 +101,6 @@ export class PulseBoostService {
       rankingPosition: 3
     };
   }
-}
-
-export interface BoostPurchaseResult {
-  success: boolean;
-  boostId?: string;
-  error?: string | null;
-  transactionId?: string;
 }
 
 export const pulseBoostService = new PulseBoostService();

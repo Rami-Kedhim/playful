@@ -1,11 +1,12 @@
 
+import React from 'react';
 import { Zap } from "lucide-react";
 
 interface BoostEligibilityMessageProps {
   reason?: string;
 }
 
-const BoostEligibilityMessage = ({ reason }: BoostEligibilityMessageProps) => {
+const BoostEligibilityMessage: React.FC<BoostEligibilityMessageProps> = ({ reason }) => {
   return (
     <div className="text-center py-8">
       <div className="mb-4">

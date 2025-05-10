@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { pulseService } from '@/services/boost/pulseService';
-import { BoostPackage, BoostStatus } from '@/types/pulse-boost';
+import { BoostStatus, BoostPackage } from '@/types/pulse-boost';
 
 /**
  * usePulseBoost hook for managing escort boost status
@@ -10,13 +10,10 @@ export function usePulseBoost(userId?: string) {
   // Initialize state with proper types
   const [boostStatus, setBoostStatus] = useState<BoostStatus>({
     isActive: false,
-    remainingTime: "0",
     timeRemaining: "0",
-    percentRemaining: 0,
+    progress: 0,
     expiresAt: null,
-    startedAt: null,
-    isExpired: true,
-    remainingMinutes: 0
+    startedAt: null
   });
 
   const [packages, setPackages] = useState<BoostPackage[]>([]);
@@ -53,33 +50,28 @@ export function usePulseBoost(userId?: string) {
           const durationInMinutes = packageDetails?.durationMinutes || 0;
 
           // Calculate boost status
-          const status = pulseService.calculateBoostStatus(
+          const calculatedStatus = pulseService.calculateBoostStatus(
             activePurchase.startTime,
             durationInMinutes
           );
 
-          // Convert string properties to numbers where needed
           setBoostStatus({
-            ...status,
-            isExpired: !status.isActive,
-            remainingMinutes: typeof status.remainingMinutes === 'string'
-              ? parseInt(status.remainingMinutes) || 0
-              : status.remainingMinutes || 0,
-            percentRemaining: typeof status.percentRemaining === 'string'
-              ? parseInt(status.percentRemaining) || 0
-              : status.percentRemaining || 0
+            isActive: calculatedStatus.isActive,
+            timeRemaining: calculatedStatus.timeRemaining || "0",
+            progress: 100 - (calculatedStatus.percentRemaining || 0),
+            expiresAt: calculatedStatus.expiresAt || null,
+            startedAt: calculatedStatus.startedAt || null,
+            packageName: packageDetails?.name,
+            packageId: packageDetails?.id
           });
         } else {
           // No active boost
           setBoostStatus({
             isActive: false,
-            remainingTime: "0",
             timeRemaining: "0",
-            percentRemaining: 0,
+            progress: 0,
             expiresAt: null,
-            startedAt: null,
-            isExpired: true,
-            remainingMinutes: 0
+            startedAt: null
           });
         }
       } catch (err) {
@@ -117,13 +109,12 @@ export function usePulseBoost(userId?: string) {
       // Update the boost status immediately for better UX
       setBoostStatus({
         isActive: true,
-        remainingTime: boostPackage.durationMinutes.toString(),
-        timeRemaining: boostPackage.durationMinutes.toString(),
-        percentRemaining: 100,
+        timeRemaining: String(boostPackage.durationMinutes),
+        progress: 0,
         expiresAt: endDate,
         startedAt: startDate,
-        isExpired: false,
-        remainingMinutes: boostPackage.durationMinutes
+        packageName: boostPackage.name,
+        packageId: boostPackage.id
       });
 
       // Perform purchase operation (mocked)
@@ -145,10 +136,15 @@ export function usePulseBoost(userId?: string) {
 
   // Format the remaining time as a human-readable string
   const getFormattedTimeRemaining = useCallback(() => {
-    const minutes = typeof boostStatus.remainingMinutes === 'string'
-      ? parseInt(boostStatus.remainingMinutes) || 0
-      : boostStatus.remainingMinutes || 0;
+    const timeStr = boostStatus.timeRemaining || "0";
     
+    // Try to parse the timeRemaining string - it could be in minutes or in a format like "2h 30m"
+    if (timeStr.includes('h') || timeStr.includes('m')) {
+      return timeStr;
+    }
+    
+    // Assume it's minutes
+    const minutes = parseInt(timeStr, 10);
     const hours = Math.floor(minutes / 60);
     const remainingMins = minutes % 60;
     
@@ -156,7 +152,7 @@ export function usePulseBoost(userId?: string) {
       return `${hours}h ${remainingMins}m`;
     }
     return `${remainingMins}m`;
-  }, [boostStatus.remainingMinutes]);
+  }, [boostStatus.timeRemaining]);
 
   return {
     boostStatus,

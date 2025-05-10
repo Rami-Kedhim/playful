@@ -1,39 +1,90 @@
 
-export interface UserCredentials {
-  email: string;
-  password: string;
-}
-
-export interface UserProfile {
+export interface PulseBoost {
   id: string;
-  name?: string;
-  email?: string;
-  avatar_url?: string;
-  bio?: string;
-}
-
-export interface BoostPackage {
-  id: string;
+  profileId?: string;
+  packageId?: string;
+  startTime?: Date;
+  endTime?: Date;
+  status?: string;
+  
+  // Additional properties needed by PulseBoostManager
   name: string;
   description: string;
+  duration: string;
   price: number;
-  price_ubx: number;
-  duration: number | string;  // Allow both types for compatibility
-  durationMinutes: number; // Duration in minutes
+  price_ubx?: number;
   features: string[];
-  boostLevel?: number;
-  visibility?: number | string;
-  visibility_increase?: number; // Keep original property
-  visibilityIncrease?: number; // Add alias property
-  popularity?: 'high' | 'medium' | 'low';
-  isPopular?: boolean;
-  isMostPopular?: boolean;
-  badgeColor?: string;
-  // Add properties for compatibility
-  packageName?: string;
-  endTime?: Date | string;
+  visibility?: string | number;
+  visibility_increase?: number;
   color?: string;
+  badgeColor?: string;
+  durationMinutes?: number;
   boost_power?: number;
+  isMostPopular?: boolean;
+  isPopular?: boolean;
+  isRecommended?: boolean;
+  isActive?: boolean;
+}
+
+export interface PulseBoostStatus {
+  isActive: boolean;
+  isExpiring?: boolean;
+  expiresAt?: string | Date;
+  remainingTime?: number | string; // in seconds or formatted time
+  boostLevel?: number;
+  boostType?: string;
+  modifiers?: Record<string, number>;
+  packageName?: string;
+  packageId?: string;
+  startedAt?: Date | string;
+  progress?: number;
+  timeRemaining?: string;
+  remainingMinutes?: number; // Add this for usePulseBoost
+  percentRemaining?: number; // Add this for usePulseBoost
+}
+
+export interface PulseBoostManager {
+  boostStatus: PulseBoostStatus | null;
+  loading: boolean;
+  error: string | null;
+  packages: PulseBoost[];
+  activateBoost: (packageId: string) => Promise<boolean>;
+  cancelBoost: () => Promise<boolean>;
+  isEligible: boolean;
+  eligibilityReason?: string;
+  refreshStatus: () => void;
+}
+
+// Define EnhancedBoostStatus as an interface that extends PulseBoostStatus
+export interface EnhancedBoostStatus extends PulseBoostStatus {
+  packageName?: string;
+  expiresAt?: Date;
+  startedAt?: Date;
+  timeRemaining?: string;
+  progress?: number;
+  boostPackage?: BoostPackage;
+  packageId?: string;
+  isActive: boolean; // This property is required
+}
+
+// Redefine BoostStatus for compatibility
+export interface BoostStatus {
+  isActive: boolean;
+  packageId?: string;
+  expiresAt?: Date | string;
+  startedAt?: Date | string;
+  timeRemaining?: string;
+  remainingTime?: string;
+  packageName?: string;
+  boostPackage?: BoostPackage;
+  progress?: number;
+  startTime?: Date;
+  endTime?: Date;
+  activeBoostId?: string;
+  boostMultiplier?: number;
+  level?: number; // Add this for CreatorBoostTab
+  remainingMinutes?: number; // Add this for usePulseBoost
+  percentRemaining?: number; // Add this for usePulseBoost
 }
 
 export interface BoostEligibility {
@@ -41,7 +92,6 @@ export interface BoostEligibility {
   reasons: string[];
   reason?: string; // Add for compatibility
   nextEligibleTime?: string | Date; // Use nextEligibleTime consistently
-  nextEligibleDate?: string | Date; // Add for compatibility
   waitTime?: number;  // Time in minutes until eligible
   // Add properties for backward compatibility
   isEligible?: boolean;
@@ -52,37 +102,20 @@ export interface BoostEligibility {
   };
 }
 
-export interface BoostStatus {
-  isActive: boolean;
-  expiresAt?: string | Date;
-  endTime?: string | Date; // Add for compatibility
-  remainingDays?: number;
-  boostLevel?: number;
-  isExpiring?: boolean;
-  progress?: number;
-  timeRemaining?: string;
-  remainingTime?: string;
-  package?: BoostPackage;
-  packageName?: string;
-  startTime?: string | Date;
-  packageId?: string;
-  boostPackage?: BoostPackage;
-  startedAt?: Date | string;
-  endTime?: Date | string;
-  activeBoostId?: string;
-  boostMultiplier?: number;
-}
-
-export interface HermesStatus {
-  score: number;
-  position?: number;
-  activeUsers?: number;
-  estimatedVisibility?: number;
-  lastUpdated?: string | Date;
-  recommendations?: string[];
-  boostScore?: number;
-  effectivenessScore?: number;
-  lastUpdateTime?: string;
+export interface BoostPackage {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  price_ubx: number;
+  duration: string;
+  durationMinutes: number;
+  features: string[];
+  visibility: string;
+  visibility_increase: number;
+  color?: string;
+  badgeColor?: string;
+  boost_power?: number;
 }
 
 export interface BoostScoreResult {
@@ -133,23 +166,13 @@ export interface BoostAnalytics {
   }>;
 }
 
-// Create PulseBoost interface
-export interface PulseBoost {
-  id: string;
-  name: string;
-  description: string;
-  duration: string;
-  price: number;
-  price_ubx?: number;
-  visibility?: string | number;
-  visibility_increase?: number;
-  features?: string[];
-  durationMinutes?: number;
-  color?: string;
-  badgeColor?: string;
-  boost_power?: number;
-  boostMultiplier?: number;
-}
-
 // Export AnalyticsData from pulse-boost.ts for backward compatibility
 export { AnalyticsData } from '@/types/analytics';
+
+export interface BoostPurchaseResult {
+  success: boolean;
+  boostId?: string;
+  error?: string | null;
+  message?: string; // Add this for useBoostStatus.ts
+  transactionId?: string;
+}

@@ -1,103 +1,43 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import BoostDialogTabs from './BoostDialogTabs';
-import useBoostPackages from '@/hooks/boost/useBoostPackages';
-import { BoostEligibility, BoostStatus, HermesStatus } from '@/types/pulse-boost';
+import { Button } from '@/components/ui/button';
+import { Zap } from 'lucide-react';
+import BoostDialog from './BoostDialog';
 
-interface BoostDialogContainerProps {
-  profileId?: string;
+export interface BoostDialogContainerProps {
+  profileId: string;
+  onSuccess?: () => Promise<boolean>;
   buttonText?: string;
-  buttonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
-  onSuccess?: () => Promise<boolean> | boolean;
-  disabled?: boolean;
-  className?: string;
-  fullWidth?: boolean;
+  buttonVariant?: "link" | "default" | "destructive" | "outline" | "secondary" | "ghost";
+  buttonSize?: "default" | "sm" | "lg" | "icon";
 }
 
-const BoostDialogContainer = ({ 
-  profileId, 
-  buttonText = "Boost Profile", 
-  buttonVariant = "default",
+const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
+  profileId,
   onSuccess,
-  disabled = false,
-  className = "",
-  fullWidth = false,
-}: BoostDialogContainerProps) => {
-  const [open, setOpen] = useState(false);
-  
-  // Fix the type issues by ensuring we're using numbers where required
-  const initialBoostStatus: BoostStatus = {
-    isActive: false,
-    expiresAt: new Date().toISOString(),
-    remainingDays: 0, // Ensure this is a number
-    boostLevel: 0,    // Ensure this is a number
-    isExpiring: false
-  };
-  
-  const [boostStatus, setBoostStatus] = useState<BoostStatus>(initialBoostStatus);
-  
-  // Fix the hermesStatus to match the type definition
-  const initialHermesStatus: HermesStatus = {
-    score: 0,
-    recommendations: [],
-    lastUpdated: new Date().toISOString()
-  };
-  
-  const [hermesStatus, setHermesStatus] = useState<HermesStatus>(initialHermesStatus);
-  
-  const { packages, loading: packagesLoading, error: packagesError } = useBoostPackages();
-  
-  const initialBoostEligibility: BoostEligibility = {
-    eligible: false,
-    reasons: [],
-    requirements: {
-      profileCompletion: false,
-      verification: false,
-      mediaUploaded: false
-    }
-  };
-  
-  const [boostEligibility, setBoostEligibility] = useState<BoostEligibility>(initialBoostEligibility);
-  
-  const handleOpenChange = (isOpen: boolean) => {
-    setOpen(isOpen);
-  };
-  
-  const handleBoostSuccess = async () => {
-    if (onSuccess) {
-      await onSuccess();
-    }
-    setOpen(false);
-  };
-  
-  // When resetting boostStatus, make sure to use the correct type
-  const resetBoostStatus = () => {
-    setBoostStatus({
-      isActive: false,
-      expiresAt: new Date().toISOString(),
-      remainingDays: 0,
-      boostLevel: 0,
-      isExpiring: false
-    });
-  };
-  
+  buttonText = "Boost Profile",
+  buttonVariant = "outline",
+  buttonSize = "sm"
+}) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className={fullWidth ? "max-w-none" : "max-w-md"}>
-        <DialogHeader>
-          <DialogTitle>Boost Your Profile</DialogTitle>
-        </DialogHeader>
-        <BoostDialogTabs
-          profileId={profileId}
-          packages={packages || []}
-          boostStatus={boostStatus}
-          boostEligibility={boostEligibility}
-          onSuccess={handleBoostSuccess}
-          onClose={() => setOpen(false)}
-        />
-      </DialogContent>
-    </Dialog>
+    <>
+      <Button 
+        onClick={() => setDialogOpen(true)}
+        variant={buttonVariant}
+        size={buttonSize}
+      >
+        <Zap className="mr-2 h-4 w-4" />
+        {buttonText}
+      </Button>
+      
+      <BoostDialog 
+        profileId={profileId}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
+    </>
   );
 };
 
