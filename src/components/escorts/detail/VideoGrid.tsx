@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Video } from '@/types/Escort';
+import { Video } from '@/types/Video';
 import { Play } from 'lucide-react';
 
 interface VideoGridProps {

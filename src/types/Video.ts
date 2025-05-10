@@ -1,7 +1,7 @@
 
 export interface Video {
   id: string;
-  url: string;
+  url?: string;
   thumbnail?: string;
   thumbnailUrl?: string;
   title?: string;
@@ -15,4 +15,5 @@ export interface Video {
   videoUrl?: string;
 }
 
+// Export the Video interface for direct usage elsewhere
 export default Video;
