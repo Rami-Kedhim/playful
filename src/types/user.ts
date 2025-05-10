@@ -52,4 +52,23 @@ export interface UserProfile {
   role?: string;
   roles?: string[];
   verification_level?: string;
+  displayName?: string;
+  services?: string[];
+  languages?: string[];
+  availability?: any;
+  rates?: any;
+  gender?: string;
+}
+
+export interface AuthContextType {
+  isAuthenticated: boolean;
+  user: User | null;
+  profile: UserProfile | null;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  logout: () => Promise<boolean>;
+  register: (credentials: RegisterCredentials) => Promise<AuthResult>;
+  loading: boolean;
+  isAdmin: boolean;
+  isEscort: boolean;
+  isClient: boolean;
 }

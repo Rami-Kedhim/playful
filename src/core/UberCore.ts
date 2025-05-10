@@ -2,51 +2,13 @@
 // Import statements and interfaces
 import { lucieAI } from './Lucie';
 import { automaticSEO } from './AutomaticSEO';
-
-export interface SystemStatus {
-  status: 'operational' | 'degraded' | 'maintenance';
-  subsystems: { [key: string]: string };
-  uptime: number;
-  version: string;
-}
-
-export interface SystemIntegrityResult {
-  codeIntegrity: number;
-  dataIntegrity: number;
-  networkSecurity: number;
-  timestamp: Date;
-  valid: boolean;
-}
-
-export interface SessionValidationResult {
-  valid: boolean;
-  userId: string;
-  expiresAt: Date;
-  sessionType: string;
-}
-
-export interface SystemHealthMetrics {
-  requestsPerMinute: number;
-  responseTime: number;
-  errorRate: number;
-  memoryUsage: number;
-  cpu: number;
-  disk: number;
-}
-
-// UberCore implements UberCoreSystem interface
-export interface UberCoreSystem {
-  name: string;
-  version: string;
-  getSystemStatus: () => Promise<SystemStatus>;
-  checkSystemIntegrity: () => SystemIntegrityResult;
-  getHealthMetrics: () => SystemHealthMetrics;
-  validateSession: (token: string) => SessionValidationResult;
-  checkSubsystemHealth: () => Array<{ name: string; status: string; health: number }>;
-  boostProfile?: (profileId: string, boostLevel: number) => Promise<boolean>;
-  getBoostStatus?: (profileId: string) => Promise<any>;
-  initializeAutomaticSeo?: () => void;
-}
+import { 
+  SystemStatus, 
+  SystemIntegrityResult, 
+  SystemHealthMetrics, 
+  SessionValidationResult, 
+  UberCoreSystem 
+} from '@/types/core-systems';
 
 export class UberCore implements UberCoreSystem {
   name = "UberCore";
@@ -57,26 +19,30 @@ export class UberCore implements UberCoreSystem {
     this.ai = ai;
   }
 
-  getSystemStatus(): Promise<SystemStatus> {
+  async initialize(): Promise<boolean> {
+    console.log('Initializing UberCore...');
+    return true;
+  }
+
+  async getSystemStatus(): Promise<SystemStatus> {
     // Simulated asynchronous check of system status
-    return Promise.resolve({
+    return {
       status: 'operational',
-      subsystems: {
-        'auth': 'operational',
-        'payment': 'operational',
-        'messaging': 'operational',
-      },
-      uptime: 99.98,
-      version: '1.0.0',
-    });
+      subsystems: [
+        { name: 'auth', status: 'operational' },
+        { name: 'payment', status: 'operational' },
+        { name: 'messaging', status: 'operational' },
+      ],
+      lastUpdated: new Date(),
+    };
   }
 
   checkSystemIntegrity(): SystemIntegrityResult {
     // For demo purposes, return a healthy system
     return {
-      codeIntegrity: 98,
-      dataIntegrity: 100,
-      networkSecurity: 95,
+      codeIntegrity: true,
+      dataIntegrity: true,
+      networkSecurity: true,
       timestamp: new Date(),
       valid: true
     };
@@ -85,19 +51,18 @@ export class UberCore implements UberCoreSystem {
   getHealthMetrics(): SystemHealthMetrics {
     // Simulated health metrics
     return {
-      requestsPerMinute: 120,
+      uptime: 99.98,
       responseTime: 250, // ms
       errorRate: 0.2, // percentage
       memoryUsage: 68, // percentage
-      cpu: 32, // percentage
-      disk: 45 // percentage
+      cpu: 32 // percentage
     };
   }
 
   validateSession(token: string): SessionValidationResult {
     // Simple validation logic for demo
     return {
-      valid: !!token,
+      isValid: !!token,
       userId: "user-123",
       expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
       sessionType: "user"
@@ -114,9 +79,18 @@ export class UberCore implements UberCoreSystem {
     ];
   }
 
+  async restartSubsystem(name: string): Promise<boolean> {
+    console.log(`Restarting subsystem: ${name}`);
+    return true;
+  }
+
   initializeAI(): void {
     if (this.ai && typeof this.ai.initialize === "function") {
-      this.ai.initialize();
+      try {
+        this.ai.initialize();
+      } catch (error) {
+        console.error("Failed to initialize AI:", error);
+      }
     }
   }
 
@@ -129,3 +103,6 @@ export class UberCore implements UberCoreSystem {
     }
   }
 }
+
+// Create and export an instance
+export const uberCore = new UberCore(lucieAI);

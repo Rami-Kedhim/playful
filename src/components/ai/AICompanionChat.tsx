@@ -1,144 +1,159 @@
-
 import React, { useState, useEffect } from 'react';
-import { Send } from 'lucide-react';
+import { Avatar } from '@/components/ui/avatar';
+import { AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar } from '@/components/ui/avatar';
-import { Card } from '@/components/ui/card';
-import { lucieOrchestrator } from '@/core/LucieOrchestratorAdapter';
+import { Send } from 'lucide-react';
+import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { useToast } from '@/hooks/use-toast';
+import { lucieAI, lucieOrchestrator } from '@/core';
+
+interface AICompanionChatProps {
+  companionId: string;
+  name: string;
+  avatar: string;
+  greeting: string;
+}
 
 interface Message {
   id: string;
+  role: 'user' | 'assistant';
   content: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
 }
 
-interface AICompanionChatProps {
-  aiName: string;
-  aiDescription?: string;
-  aiAvatarUrl?: string;
-  initialMessage?: string;
-}
-
-const AICompanionChat: React.FC<AICompanionChatProps> = ({
-  aiName,
-  aiDescription = '',
-  aiAvatarUrl = '',
-  initialMessage = `Hi, I'm ${aiName}. How can I help you today?`
+const AICompanionChat: React.FC<AICompanionChatProps> = ({ 
+  companionId,
+  name,
+  avatar,
+  greeting,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const { toast } = useToast();
 
-  // Initialize chat with AI greeting
   useEffect(() => {
-    setMessages([
-      {
-        id: '0',
-        content: initialMessage,
-        sender: 'ai',
-        timestamp: new Date()
-      }
-    ]);
-  }, [initialMessage]);
+    // Load initial greeting message
+    setMessages([{ 
+      id: 'greeting', 
+      role: 'assistant', 
+      content: greeting 
+    }]);
+  }, [greeting]);
 
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
-    
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: input,
-      sender: 'user',
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
+  const handleSendMessage = async (content: string) => {
+    if (!content.trim()) return;
     
     try {
-      // Check content moderation
-      const isSafe = await lucieOrchestrator.isSafeContent(input);
-      
-      let aiResponse: string;
-      
-      if (isSafe) {
-        // Generate AI response
-        aiResponse = await lucieOrchestrator.generateContent({
-          prompt: `As ${aiName}, respond to: ${input}`
-        });
-      } else {
-        aiResponse = "I'm sorry, but I can't respond to that type of content.";
+      setIsSending(true);
+      // Add user message to chat
+      const userMessage = { 
+        id: Date.now().toString(), 
+        role: 'user', 
+        content: content 
+      };
+      setMessages(prevMessages => [...prevMessages, userMessage]);
+
+      if (lucieOrchestrator && typeof lucieOrchestrator.isSafeContent === 'function') {
+        const safeCheck = await lucieOrchestrator.isSafeContent(content);
+        if (!safeCheck.safe) {
+          toast({
+            title: "Content Warning",
+            description: "Your message was flagged as potentially unsafe and was not sent.",
+            variant: "destructive"
+          });
+          return;
+        }
       }
-      
-      // Add AI response message
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: aiResponse,
-        sender: 'ai',
-        timestamp: new Date()
+
+      // Generate a response using the AI service
+      const params = {
+        prompt: content,
+        maxTokens: 500
       };
       
-      setMessages(prev => [...prev, aiMessage]);
+      const response = await lucieAI.generateContent(params);
+      const responseContent: string = response.text || response.content || "I'm not sure how to respond to that.";
+      
+      // Add assistant message to chat
+      const assistantMessage = { 
+        id: Date.now().toString(), 
+        role: 'assistant', 
+        content: responseContent 
+      };
+      setMessages(prevMessages => [...prevMessages, assistantMessage]);
     } catch (error) {
-      console.error("Error in AI chat:", error);
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive"
+      });
     } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+      setIsSending(false);
+      setInput('');
     }
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex ${msg.sender === 'ai' ? 'justify-start' : 'justify-end'}`}
-          >
-            {msg.sender === 'ai' && aiAvatarUrl && (
-              <div className="h-8 w-8 rounded-full overflow-hidden mr-2 flex-shrink-0">
-                <img src={aiAvatarUrl} alt={aiName} className="h-full w-full object-cover" />
+    <Card className="h-full flex flex-col">
+      <CardHeader className="py-4">
+        <div className="flex items-center">
+          <Avatar className="mr-3 h-8 w-8">
+            <AvatarImage src={avatar} alt={name} />
+            <AvatarFallback>{name.substring(0, 2)}</AvatarFallback>
+          </Avatar>
+          <h2 className="text-lg font-semibold">{name}</h2>
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1 overflow-y-auto">
+        <ScrollArea className="h-full">
+          <div className="space-y-4">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex flex-col text-sm ${
+                  message.role === 'user' ? 'items-end' : 'items-start'
+                }`}
+              >
+                <div
+                  className={`rounded-md px-3 py-2 inline-block ${
+                    message.role === 'user'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-secondary text-secondary-foreground'
+                  }`}
+                >
+                  {message.content}
+                </div>
               </div>
-            )}
-            <div
-              className={`px-4 py-2 rounded-lg max-w-[80%] ${
-                msg.sender === 'ai'
-                  ? 'bg-secondary text-secondary-foreground'
-                  : 'bg-primary text-primary-foreground'
-              }`}
-            >
-              {msg.content}
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
-      
-      <div className="p-4 border-t">
-        <div className="flex space-x-2">
+        </ScrollArea>
+      </CardContent>
+      <CardFooter className="py-4">
+        <div className="flex items-center w-full">
           <Input
             placeholder="Type a message..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            disabled={isLoading}
-            className="flex-1"
+            className="mr-2"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !isSending) {
+                handleSendMessage(input);
+              }
+            }}
           />
-          <Button onClick={handleSendMessage} disabled={!input.trim() || isLoading}>
-            {isLoading ? "Sending..." : "Send"}
+          <Button
+            onClick={() => handleSendMessage(input)}
+            disabled={isSending}
+          >
+            {isSending ? 'Sending...' : <Send className="h-4 w-4 mr-2" />}
+            Send
           </Button>
         </div>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 };
 

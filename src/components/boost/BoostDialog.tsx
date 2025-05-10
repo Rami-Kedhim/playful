@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -39,6 +38,22 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
     formatBoostDuration = (d) => d,
   } = useBoostDialog(profileId);
 
+  // Helper function to initialize eligibility
+  const initializeEligibility = (): BoostEligibility => {
+    return {
+      eligible: true,
+      reason: '',
+      reasons: [],
+    };
+  };
+
+  const [eligibility, setEligibility] = useState<BoostEligibility>(initializeEligibility());
+
+  const onCancelBoost = () => {
+    handleCancelBoost();
+    setEligibility(initializeEligibility());
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -58,7 +73,7 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
           selectedPackage={selectedPackage}
           setSelectedPackage={setSelectedPackage}
           handleBoost={handleBoost}
-          handleCancel={handleCancelBoost}
+          handleCancel={onCancelBoost}
           loading={loading}
           dailyBoostUsage={dailyBoostUsage}
           dailyBoostLimit={dailyBoostLimit}

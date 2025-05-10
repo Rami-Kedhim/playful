@@ -1,98 +1,98 @@
 
-import { UserRole } from './user';
-
-export interface UserProfile {
-  id: string;
-  name: string;
-  email?: string;
-  role?: UserRole;
-  avatarUrl?: string;
-  boostPoints?: number;
-  lastActive?: Date;
-  memberSince?: Date;
-  subscriptionTier?: 'free' | 'premium' | 'enterprise';
-  verificationStatus?: 'unverified' | 'pending' | 'verified';
-  preferredCategories?: string[];
-  settings?: {
-    notifications: boolean;
-    theme: 'light' | 'dark' | 'system';
-    visibility: 'public' | 'private';
-  };
-}
-
 export interface BoostPackage {
   id: string;
-  name: string;
-  points: number;
-  price: number;
-  price_ubx: number;
-  discount?: number;
-  features: string[];
-  duration: number; // in days
-  durationMinutes: number;
-  description: string;
-  visibility: string;
-  visibility_increase: number;
-  color?: string;
-  badgeColor?: string;
-  boost_power?: number;
-}
-
-export interface BoostResult {
-  success: boolean;
-  pointsUsed: number;
-  remainingPoints: number;
-  boostScore: number;
-  previousRank?: number;
-  newRank?: number;
-  estimatedViews?: number;
-}
-
-export interface PulseScore {
-  profileId: string;
-  score: number;
-  lastUpdated: Date;
-  components: {
-    activity: number;
-    engagement: number;
-    quality: number;
-    popularity: number;
-  };
-}
-
-export interface PulseBoost {
-  id: string;
-  profileId: string;
-  packageId: string;
-  startDate: Date;
-  endDate: Date;
-  status: string;
-  // Adding missing properties for components that use them
   name: string;
   description: string;
   price: number;
   price_ubx?: number;
   duration: string;
-  features: string[];
   durationMinutes?: number;
-  isMostPopular?: boolean;
+  features?: string[];
   visibility?: string;
   visibility_increase?: number;
+  boost_power?: number;
   color?: string;
   badgeColor?: string;
+  boostMultiplier?: number;
+  isMostPopular?: boolean;
+  isPopular?: boolean;
 }
 
-export type BoostStatus = 'active' | 'inactive' | 'pending' | 'expired';
-
-// Redefine EnhancedBoostStatus to be an object type instead of a string union
-export interface EnhancedBoostStatus {
+export interface BoostStatus {
   isActive: boolean;
   packageId?: string;
-  packageName?: string;
   expiresAt?: Date;
-  startedAt?: Date;
   timeRemaining?: string;
-  progress?: number;
-  remainingTime?: string;
   boostPackage?: BoostPackage;
+  progress?: number;
+  packageName?: string;
+  startedAt?: Date;
+  activeBoostId?: string;
+  startTime?: Date;
+  endTime?: Date;
+}
+
+export interface BoostEligibility {
+  eligible: boolean;
+  reason?: string;
+  reasons?: string[];
+  nextEligibleTime?: string;
+  remainingBoosts?: number;
+  maxBoostsPerDay?: number;
+}
+
+export interface BoostPurchaseRequest {
+  profileId: string;
+  packageId: string;
+}
+
+export interface BoostPurchaseResult {
+  success: boolean;
+  boostId?: string;
+  error?: string | null;
+  message?: string;
+  transactionId?: string;
+}
+
+export interface BoostAnalytics {
+  profileId: string;
+  totalBoosts: number;
+  activeBoosts: number;
+  averageBoostScore: number;
+  viewsBeforeBoost: number;
+  viewsAfterBoost: number;
+  engagementIncrease: number;
+  impressions?: {
+    value: number;
+    change: number;
+    withBoost?: number;
+  };
+  interactions?: {
+    value: number;
+    change: number;
+    withBoost?: number;
+  };
+  views?: number;
+  additionalViews?: number;
+}
+
+export interface EnhancedBoostStatus extends BoostStatus {
+  analytics?: BoostAnalytics;
+  eligibility?: BoostEligibility;
+}
+
+export interface HermesStatus {
+  position: number;
+  activeUsers: number;
+  estimatedVisibility: number;
+  lastUpdateTime: string;
+  boostScore?: number;
+  effectivenessScore?: number;
+  isActive?: boolean;
+  metrics?: {
+    velocity: number;
+    engagement: number;
+    retention: number;
+    conversion: number;
+  };
 }

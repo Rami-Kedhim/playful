@@ -2,10 +2,7 @@
 import { lucieAI } from './Lucie';
 import { oxum } from './Oxum';
 import { hermes } from './Hermes';
-import { UberCore } from './UberCore';
-
-// Create an instance of UberCore
-const uberCore = new UberCore(lucieAI);
+import { UberCore, uberCore } from './UberCore';
 
 /**
  * Initialize all core systems

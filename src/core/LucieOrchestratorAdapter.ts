@@ -1,4 +1,3 @@
-
 export interface GenerateContentParams {
   prompt: string;
   options?: any;
@@ -29,7 +28,7 @@ export interface SentimentAnalysisResult {
   score: number;
 }
 
-class LucieOrchestratorAdapter {
+export class LucieOrchestratorAdapter {
   // Generate AI content
   async generateContent(params: GenerateContentParams): Promise<GenerateContentResult> {
     try {
@@ -49,18 +48,22 @@ class LucieOrchestratorAdapter {
   }
   
   // Check if content is safe
-  async isSafeContent(content: string): Promise<boolean> {
-    try {
-      // In a real implementation, this would call a moderation service
-      // For demo purposes, we'll consider most content safe except a few keywords
-      const unsafeKeywords = ["harmful", "violent", "explicit"];
-      return !unsafeKeywords.some(keyword => 
-        content.toLowerCase().includes(keyword)
-      );
-    } catch (error) {
-      console.error("Error checking content safety:", error);
-      return false;
+  async isSafeContent(content: string): Promise<{ safe: boolean; reason?: string }> {
+    if (typeof content !== 'string' || !content) {
+      return { safe: false, reason: "Invalid content" };
     }
+
+    // Simple implementation - in a real app would call moderation service
+    const lowerContent = content.toLowerCase();
+    const forbidden = ['obscenity', 'hate', 'violence', 'self-harm'];
+    
+    for (const word of forbidden) {
+      if (lowerContent.includes(word)) {
+        return { safe: false, reason: `Content contains ${word}` };
+      }
+    }
+    
+    return { safe: true };
   }
 
   // Moderate content
@@ -85,6 +88,26 @@ class LucieOrchestratorAdapter {
       sentiment: "positive",
       score: 0.85
     };
+  }
+
+  // Analyze text
+  async analyzeText(text: string): Promise<any> {
+    // Check if text is valid before processing
+    if (typeof text !== 'string' || !text) {
+      console.error("Invalid text input to analyzeText");
+      return { error: "Invalid text input" };
+    }
+
+    try {
+      // Safely get sample of text for logging (avoid substring on invalid types)
+      const textSample = text.substring(0, 50) + (text.length > 50 ? '...' : '');
+      console.log(`Text analyzed: ${textSample}`);
+
+      return {}; // Replace with actual analysis
+    } catch (err) {
+      console.error("Error analyzing text:", err);
+      return { error: "Text analysis failed" };
+    }
   }
 }
 

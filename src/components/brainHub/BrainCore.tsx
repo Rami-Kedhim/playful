@@ -1,74 +1,93 @@
-
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { lucieOrchestrator } from '@/core/LucieOrchestratorAdapter';
-import { Brain } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Send, Brain } from 'lucide-react';
+import { lucieAI, lucieOrchestrator } from '@/core';
 
-interface BrainCoreProps {
-  onGeneratedContent?: (content: string) => void;
-}
-
-const BrainCore: React.FC<BrainCoreProps> = ({ onGeneratedContent }) => {
+const BrainCore: React.FC = () => {
   const [input, setInput] = useState('');
-  const [result, setResult] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const handleProcess = async () => {
+  const [output, setOutput] = useState('');
+  const [sentiment, setSentiment] = useState('');
+  const [sentimentScore, setSentimentScore] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const processInput = async (input: string) => {
     if (!input.trim()) return;
     
-    setIsLoading(true);
     try {
-      // First check if content is safe
-      const isSafe = await lucieOrchestrator.isSafeContent(input);
+      setIsProcessing(true);
       
-      if (!isSafe) {
-        setResult("This content cannot be processed due to safety policies.");
-        return;
+      if (lucieOrchestrator && typeof lucieOrchestrator.isSafeContent === 'function') {
+        const safeCheck = await lucieOrchestrator.isSafeContent(input);
+        if (!safeCheck.safe) {
+          console.warn("Content moderation flagged the input as unsafe:", safeCheck.reason);
+          setOutput(`I'm sorry, but I cannot process content that violates safety guidelines. Reason: ${safeCheck.reason}`);
+          return;
+        }
       }
       
-      const processedContent = await lucieOrchestrator.generateContent({ prompt: input });
-      setResult(processedContent);
+      const params = {
+        prompt: input,
+        options: { maxTokens: 500 }
+      };
       
-      if (onGeneratedContent) {
-        onGeneratedContent(processedContent);
-      }
+      const response = await lucieAI.generateContent(params);
+      const responseContent: string = response.text || response.content || "Unable to process your request.";
+      
+      setOutput(responseContent);
+      
+      const sentimentResult = await lucieAI.analyzeSentiment({ text: responseContent });
+      
+      setSentiment(sentimentResult.sentiment);
+      setSentimentScore(sentimentResult.confidence || 0);
+      
     } catch (error) {
       console.error("Error processing input:", error);
-      setResult("An error occurred while processing your request.");
+      setOutput("An error occurred while processing your request.");
     } finally {
-      setIsLoading(false);
+      setIsProcessing(false);
     }
   };
-  
+
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center gap-2">
-        <Brain className="h-5 w-5" />
-        <CardTitle>Brain Core</CardTitle>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Brain className="h-5 w-5" />
+          Brain Core
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Textarea
-          placeholder="Enter your prompt..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          rows={5}
-          disabled={isLoading}
-        />
-        
-        <Button
-          onClick={handleProcess}
-          disabled={!input.trim() || isLoading}
-          className="w-full"
-        >
-          {isLoading ? "Processing..." : "Process"}
-        </Button>
-        
-        {result && (
-          <div className="border rounded-md p-3 mt-4 bg-slate-50 dark:bg-slate-900">
-            <h3 className="text-sm font-medium mb-2">Result:</h3>
-            <div className="text-sm whitespace-pre-wrap">{result}</div>
+        <div className="flex items-center space-x-2">
+          <Input
+            type="text"
+            placeholder="Enter your prompt..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            disabled={isProcessing}
+            className="flex-1"
+          />
+          <Button onClick={() => processInput(input)} disabled={isProcessing}>
+            <Send className="h-4 w-4 mr-2" />
+            Process
+          </Button>
+        </div>
+        {output && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Output:</p>
+            <div className="rounded-md border p-4 bg-muted/50">
+              {output}
+            </div>
+            {sentiment && (
+              <div className="flex items-center space-x-2">
+                <p className="text-sm font-medium">Sentiment:</p>
+                <Badge variant="secondary">
+                  {sentiment} ({sentimentScore.toFixed(2)})
+                </Badge>
+              </div>
+            )}
           </div>
         )}
       </CardContent>

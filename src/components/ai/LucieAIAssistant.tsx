@@ -1,86 +1,138 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { lucieOrchestrator } from '@/core/LucieOrchestratorAdapter';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { useToast } from "@/components/ui/use-toast"
+import { useSpeechSynthesis } from 'react-speech-kit';
+import { lucieAI, lucieOrchestrator } from '@/core';
+import { GenerateContentParams } from '@/types/core-systems';
 
-interface LucieAIAssistantProps {
-  initialPrompt?: string;
-  onGenerate?: (content: string) => void;
-}
+const LucieAIAssistant: React.FC = () => {
+  const [userMessage, setUserMessage] = useState('');
+  const [assistantMessage, setAssistantMessage] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { speak, speaking, cancel } = useSpeechSynthesis();
+  const { toast } = useToast();
+  const [isMuted, setIsMuted] = useState(false);
 
-const LucieAIAssistant: React.FC<LucieAIAssistantProps> = ({
-  initialPrompt = '',
-  onGenerate
-}) => {
-  const [prompt, setPrompt] = useState(initialPrompt);
-  const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState('');
+  useEffect(() => {
+    // Initialize Lucie or perform other setup tasks
+    console.log('LucieAIAssistant is ready.');
+  }, []);
 
-  const handleGenerate = async () => {
-    if (!prompt.trim()) return;
+  const speakText = (text: string) => {
+    if (!isMuted) {
+      speak({ text });
+    }
+  };
+
+  const stopSpeaking = () => {
+    cancel();
+  };
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    if (!isMuted && speaking) {
+      stopSpeaking();
+    }
+  };
+
+  const sendMessageToLucie = async (message: string) => {
+    if (!message.trim()) return;
     
-    setIsLoading(true);
     try {
-      // Check content moderation if the method exists
-      if (lucieOrchestrator.isSafeContent) {
-        const isSafe = await lucieOrchestrator.isSafeContent(prompt);
-        
-        if (!isSafe) {
-          setResult("I'm sorry, but I can't respond to that type of content.");
+      setIsProcessing(true);
+      
+      // Check content safety if available
+      if (lucieOrchestrator && typeof lucieOrchestrator.isSafeContent === 'function') {
+        const safeCheck = await lucieOrchestrator.isSafeContent(message);
+        if (!safeCheck.safe) {
+          toast({
+            title: "Content Warning",
+            description: "Your message was flagged as potentially unsafe. Please revise.",
+            variant: "destructive",
+          });
           return;
         }
       }
+
+      // Generate AI response
+      const params = {
+        prompt: message,
+        options: {
+          maxTokens: 500,
+          temperature: 0.7
+        }
+      };
       
-      // Generate content
-      const content = await lucieOrchestrator.generateContent({ 
-        prompt: prompt
-      });
+      const response = await lucieAI.generateContent(params);
+      const responseContent: string = response.text || response.content || "I'm not sure how to respond to that.";
       
-      // Handle the result as string or object
-      let generatedText = '';
-      if (typeof content === 'string') {
-        generatedText = content;
-      } else if (content && typeof content === 'object') {
-        generatedText = content.toString();
-      }
+      setAssistantMessage(responseContent);
+      speakText(responseContent);
       
-      setResult(generatedText);
-      if (onGenerate) onGenerate(generatedText);
+      setUserMessage('');
     } catch (error) {
-      console.error('Error generating content:', error);
-      setResult('An error occurred while generating content.');
+      toast({
+        title: "AI Error",
+        description: "Failed to generate response. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Lucie AI error:", error);
     } finally {
-      setIsLoading(false);
+      setIsProcessing(false);
     }
   };
 
   return (
-    <div className="space-y-4">
-      <Textarea
-        placeholder="Enter your prompt here..."
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-        rows={4}
-        className="resize-none"
-        disabled={isLoading}
-      />
-      
-      <Button 
-        onClick={handleGenerate} 
-        disabled={!prompt.trim() || isLoading}
-        className="w-full"
-      >
-        {isLoading ? 'Generating...' : 'Generate Response'}
-      </Button>
-      
-      {result && (
-        <div className="border rounded-md p-4 bg-muted/30">
-          <h3 className="font-medium mb-2">Generated Response:</h3>
-          <p className="whitespace-pre-wrap">{result}</p>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Lucie AI Assistant</CardTitle>
+        <CardDescription>
+          Get assistance from Lucie, your AI companion.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center space-x-4">
+          <Avatar>
+            <AvatarImage src="/images/avatars/lucie.png" alt="Lucie AI" />
+            <AvatarFallback>LA</AvatarFallback>
+          </Avatar>
+          <div>
+            <h4 className="font-semibold">Lucie</h4>
+            <p className="text-sm text-muted-foreground">
+              Your AI assistant
+            </p>
+          </div>
         </div>
-      )}
-    </div>
+
+        <div className="space-y-2">
+          <Input
+            placeholder="Type your message..."
+            value={userMessage}
+            onChange={(e) => setUserMessage(e.target.value)}
+            disabled={isProcessing}
+          />
+          <Button
+            onClick={() => sendMessageToLucie(userMessage)}
+            disabled={isProcessing || !userMessage.trim()}
+            className="w-full"
+          >
+            {isProcessing ? 'Processing...' : 'Send'}
+          </Button>
+        </div>
+
+        {assistantMessage && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Lucie's Response:</p>
+            <div className="p-3 rounded-md bg-muted">
+              {assistantMessage}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

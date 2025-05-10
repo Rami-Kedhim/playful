@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -17,7 +16,7 @@ interface BoostPackagesProps {
   getBoostPrice?: (pkg?: BoostPackage) => number;
 }
 
-const BoostPackages = ({ 
+const BoostPackages = ({
   packages, 
   selected, // Changed parameter name from selectedId to selected
   onSelect,
@@ -30,6 +29,11 @@ const BoostPackages = ({
   if (!packages || packages.length === 0) {
     return <div className="text-center py-6">No boost packages available</div>;
   }
+
+  const formatVisibility = (value: string | number | undefined): string => {
+    if (value === undefined || value === null) return '';
+    return typeof value === 'number' ? `${value}%` : value;
+  };
 
   return (
     <div className="space-y-4">

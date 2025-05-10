@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import {
   Dialog,
@@ -106,25 +105,44 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
     return pkg?.price_ubx || pkg?.price || 0;
   }, [selectedPackage, boostPackages]);
 
-  // Provide all required properties for HermesStatus
-  const hermesStatusData: HermesStatus = {
-    position: 0,
-    activeUsers: 0,
-    estimatedVisibility: 0,
-    lastUpdateTime: '',
-    boostScore: 0,
-    effectivenessScore: 0
+  // Convert string dates to Date objects
+  const convertDates = (boostStatus: BoostStatus): BoostStatus => {
+    if (!boostStatus) return boostStatus;
+    
+    return {
+      ...boostStatus,
+      expiresAt: boostStatus.expiresAt ? new Date(boostStatus.expiresAt as unknown as string) : undefined,
+      startedAt: boostStatus.startedAt ? new Date(boostStatus.startedAt as unknown as string) : undefined,
+      startTime: boostStatus.startTime ? new Date(boostStatus.startTime as unknown as string) : undefined,
+      endTime: boostStatus.endTime ? new Date(boostStatus.endTime as unknown as string) : undefined
+    };
+  };
+
+  // Helper to initialize eligibility with correct property names
+  const initializeEligibility = (): BoostEligibility => {
+    return {
+      eligible: true,
+      reason: '',
+      reasons: [],
+    };
   };
 
   // Create a default boost status if none is provided
-  const safeBoostStatus: BoostStatus = boostStatus || { 
+  const safeBoostStatus: BoostStatus = convertDates(boostStatus || { 
     isActive: false,
     remainingTime: '0:00:00'
-  };
+  });
 
   // Create default eligibility
-  const safeEligibility: BoostEligibility = {
-    isEligible: true
+  const safeEligibility: BoostEligibility = initializeEligibility();
+
+  const checkEligibility = () => {
+    // Ensure we're using the correct property names for eligibility
+    setEligibility({
+      eligible: true,
+      reason: '',
+      reasons: []
+    });
   };
 
   return (

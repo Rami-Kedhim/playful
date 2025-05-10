@@ -1,55 +1,67 @@
-
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Zap } from "lucide-react";
-import { BoostPackage } from "@/types/boost";
+import { cn } from '@/lib/utils';
+import { BoostPackage as BoostPackageType } from '@/types/pulse-boost';
 
-interface BoostPackageCardProps {
-  boostPackage: BoostPackage;
-  isSelected: boolean;
-  onSelect: () => void;
-  formatDuration: (duration: string) => string;
+interface BoostPackageProps {
+  pkg: BoostPackageType;
+  className?: string;
 }
 
-const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
-  boostPackage,
-  isSelected,
-  onSelect,
-  formatDuration
-}) => {
+const BoostPackage = ({ 
+  pkg,
+  className
+}: BoostPackageProps) => {
+
+  const formatVisibility = (value: string | number | undefined): string => {
+    if (value === undefined || value === null) return '';
+    return typeof value === 'number' ? `${value}%` : value;
+  };
+
   return (
-    <Card 
-      className={`p-4 cursor-pointer transition-all hover:shadow-md ${
-        isSelected ? "ring-2 ring-primary" : ""
-      }`}
-      onClick={onSelect}
-    >
-      <CardContent className="p-0 text-center">
-        <div className="flex items-center justify-center mb-2">
-          <Zap className={`h-5 w-5 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
-        </div>
-        <h3 className="font-medium text-lg">{boostPackage.name}</h3>
-        <div className="text-sm text-muted-foreground my-2">
-          {formatDuration(boostPackage.duration || '')}
-        </div>
-        <div className="mt-2 font-bold text-lg">
-          {boostPackage.price_ubx || boostPackage.price} UBX
-        </div>
-        {boostPackage.features && boostPackage.features.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-muted-foreground">
-            <ul className="space-y-1">
-              {boostPackage.features.map((feature, index) => (
-                <li key={index} className="flex items-center">
-                  <span className="text-primary text-xs mr-1">✓</span>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </div>
+    <div className={cn(
+      "border rounded-lg p-4 flex flex-col h-full hover:shadow-md transition-shadow",
+      pkg.isMostPopular && "border-primary",
+      className
+    )}>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-lg font-semibold">{pkg.name}</h3>
+        {pkg.isMostPopular && (
+          <span className="bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs font-medium">
+            Popular
+          </span>
         )}
-      </CardContent>
-    </Card>
+      </div>
+      <p className="text-sm text-muted-foreground mb-4">{pkg.description}</p>
+
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium">Price:</span>
+        <span className="text-lg font-bold">${pkg.price}</span>
+      </div>
+
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium">Duration:</span>
+        <span className="text-sm">{pkg.duration}</span>
+      </div>
+
+      {pkg.visibility && (
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium">Visibility:</span>
+          <span className="text-sm">{formatVisibility(pkg.visibility)}</span>
+        </div>
+      )}
+
+      {pkg.features && pkg.features.length > 0 && (
+        <div className="mb-4">
+          <span className="text-sm font-medium">Features:</span>
+          <ul className="list-disc list-inside text-sm text-muted-foreground">
+            {pkg.features.map((feature, index) => (
+              <li key={index}>{feature}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 };
 
-export default BoostPackageCard;
+export default BoostPackage;

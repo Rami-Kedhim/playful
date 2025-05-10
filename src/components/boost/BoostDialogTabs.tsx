@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -50,6 +49,98 @@ const BoostDialogTabs: React.FC<DialogTabsProps> = ({
   // Don't show tabs if not eligible or if there's an active boost
   const shouldShowTabs = eligibility.isEligible && !boostStatus.isActive;
 
+  const renderEligibility = () => {
+    if (!eligibility) return null;
+    
+    return (
+      <div className="mb-4">
+        <BoostEligibilityCheck 
+          eligibility={{ 
+            eligible: eligibility.eligible, 
+            reason: eligibility.reason,
+            reasons: eligibility.reasons,
+            nextEligibleTime: eligibility.nextEligibleTime
+          }} 
+        />
+      </div>
+    );
+  };
+
+  const renderPackages = () => {
+    if (!eligibility.eligible) {
+      return (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">
+            You are not eligible for boosting at this time.
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-2 mb-2">
+          <TabsTrigger value="packages" className="flex items-center">
+            <Zap className="mr-2 h-4 w-4" />
+            Packages
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="flex items-center">
+            <BarChart2 className="mr-2 h-4 w-4" />
+            Analytics
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="packages" className="space-y-4">
+          <ScrollArea className="max-h-[400px] pr-4">
+            <BoostPackages 
+              packages={boostPackages}
+              selected={selectedPackage}
+              onSelect={setSelectedPackage}
+              formatDuration={formatBoostDuration}
+              dailyUsage={dailyBoostUsage}
+              dailyLimit={dailyBoostLimit}
+              disabled={loading}
+            />
+          </ScrollArea>
+
+          <div className="flex justify-end pt-2">
+            <Button
+              onClick={() => handleBoost()}
+              disabled={loading || !selectedPackage}
+            >
+              <Zap className="mr-2 h-4 w-4" />
+              {loading ? "Processing..." : `Boost Now (${getBoostPrice()} UBX)`}
+            </Button>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-4">
+          <HermesBoostInfo hermesStatus={hermesStatus} />
+          
+          <div className="bg-secondary/20 p-4 rounded-md">
+            <div className="flex items-center mb-2">
+              <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+              <h3 className="text-sm font-medium">Best Time to Boost</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Based on current platform activity, the optimal time to boost your profile is
+              between 7PM and 10PM.
+            </p>
+          </div>
+          
+          <div className="flex justify-end pt-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setActiveTab("packages")}
+            >
+              View Packages
+            </Button>
+          </div>
+        </TabsContent>
+      </Tabs>
+    );
+  };
+
   return (
     <div className="space-y-4">
       {/* Active Boost Status */}
@@ -74,74 +165,12 @@ const BoostDialogTabs: React.FC<DialogTabsProps> = ({
 
       {/* Eligibility Check */}
       {!boostStatus.isActive && !eligibility.isEligible && (
-        <BoostEligibilityCheck 
-          eligibility={eligibility} 
-          onClose={handleDialogClose}
-        />
+        renderEligibility()
       )}
 
       {/* Boost Package Selection */}
       {shouldShowTabs && (
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-2 mb-2">
-            <TabsTrigger value="packages" className="flex items-center">
-              <Zap className="mr-2 h-4 w-4" />
-              Packages
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center">
-              <BarChart2 className="mr-2 h-4 w-4" />
-              Analytics
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="packages" className="space-y-4">
-            <ScrollArea className="max-h-[400px] pr-4">
-              <BoostPackages 
-                packages={boostPackages}
-                selected={selectedPackage}
-                onSelect={setSelectedPackage}
-                formatDuration={formatBoostDuration}
-                dailyUsage={dailyBoostUsage}
-                dailyLimit={dailyBoostLimit}
-                disabled={loading}
-              />
-            </ScrollArea>
-
-            <div className="flex justify-end pt-2">
-              <Button
-                onClick={() => handleBoost()}
-                disabled={loading || !selectedPackage}
-              >
-                <Zap className="mr-2 h-4 w-4" />
-                {loading ? "Processing..." : `Boost Now (${getBoostPrice()} UBX)`}
-              </Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-4">
-            <HermesBoostInfo hermesStatus={hermesStatus} />
-            
-            <div className="bg-secondary/20 p-4 rounded-md">
-              <div className="flex items-center mb-2">
-                <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                <h3 className="text-sm font-medium">Best Time to Boost</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Based on current platform activity, the optimal time to boost your profile is
-                between 7PM and 10PM.
-              </p>
-            </div>
-            
-            <div className="flex justify-end pt-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setActiveTab("packages")}
-              >
-                View Packages
-              </Button>
-            </div>
-          </TabsContent>
-        </Tabs>
+        renderPackages()
       )}
     </div>
   );

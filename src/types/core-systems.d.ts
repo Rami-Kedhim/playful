@@ -4,6 +4,7 @@ export interface LucieAISystem {
   generateContent(params: GenerateContentParams): Promise<GenerateContentResult>;
   moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
   analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult>;
+  getSystemStatus(): any;
 }
 
 export interface GenerateContentParams {
@@ -15,7 +16,8 @@ export interface GenerateContentParams {
 }
 
 export interface GenerateContentResult {
-  text: string;
+  content: string;
+  text?: string;
   usage?: {
     promptTokens: number;
     completionTokens: number;
@@ -57,6 +59,7 @@ export interface OxumSystem {
   boostAllocationEigen(profileId: string, level: number): Promise<number[]>;
   boostProfile(profileId: string, packageId: string): Promise<boolean>;
   getBoostStatus(profileId: string): Promise<any>;
+  checkSystemStatus(): any;
 }
 
 export interface HermesInsight {
@@ -73,17 +76,22 @@ export interface HermesSystem {
   calculateVisibilityScore(profileId: string): Promise<number>;
   getInsights(): Promise<HermesInsight[]>;
   recommendContent(userId: string): Promise<string[]>;
-  routeFlow(userId: string, destination: string): Promise<{ safe: boolean; reason?: string }>;
+  routeFlow(params: any): Promise<{ safe: boolean; reason?: string }>;
+  getSystemStatus(): any;
 }
 
 export interface UberCoreSystem {
+  name: string;
+  version: string;
   initialize(): Promise<boolean>;
   getSystemStatus(): SystemStatus;
   checkSystemIntegrity(): SystemIntegrityResult;
-  checkSubsystemHealth(): SubsystemHealth[];
+  checkSubsystemHealth(): Array<{ name: string; status: string; health: number }>;
   getHealthMetrics(): SystemHealthMetrics;
   validateSession(token: string): SessionValidationResult;
   restartSubsystem(name: string): Promise<boolean>;
+  initializeAutomaticSeo?(): void;
+  initializeAI?(): void;
 }
 
 export interface SystemStatus {

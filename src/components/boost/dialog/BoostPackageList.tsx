@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Zap, Info } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -15,13 +14,18 @@ interface BoostPackageListProps {
   getBoostPrice: () => number;
 }
 
-const BoostPackageList = ({ 
+const BoostPackageList = ({
   packages, 
   selectedPackage, 
   onSelectPackage,
   formatBoostDuration,
   getBoostPrice
 }: BoostPackageListProps) => {
+  const formatVisibility = (value: string | number | undefined): string => {
+    if (value === undefined || value === null) return '';
+    return typeof value === 'number' ? `${value}%` : value;
+  };
+
   return (
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-4">
