@@ -28,6 +28,8 @@ export interface BoostPackage {
   isMostPopular?: boolean;
   badgeColor?: string;
   visibilityIncrease?: number;
+  // Add this property that was being used
+  packageName?: string;
 }
 
 export interface BoostEligibility {
@@ -35,6 +37,8 @@ export interface BoostEligibility {
   reasons: string[];
   nextEligibleDate?: string | Date;
   waitTime?: number;  // Time in minutes until eligible
+  // Additional properties used in the codebase
+  requirements?: string[];
 }
 
 export interface BoostStatus {
@@ -47,6 +51,9 @@ export interface BoostStatus {
   timeRemaining?: string;
   remainingTime?: string;
   package?: BoostPackage;
+  packageName?: string;
+  startTime?: string | Date;
+  packageId?: string;
 }
 
 export interface HermesStatus {

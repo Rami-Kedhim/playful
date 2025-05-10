@@ -15,7 +15,8 @@ const mockPackages: BoostPackage[] = [
     boostLevel: 1,
     visibility: 25,
     popularity: 'medium',
-    visibilityIncrease: 25
+    visibilityIncrease: 25,
+    packageName: 'Basic Boost'
   },
   {
     id: 'boost-2',
@@ -32,7 +33,8 @@ const mockPackages: BoostPackage[] = [
     isPopular: true,
     isMostPopular: true,
     badgeColor: 'bg-gradient-to-r from-pink-500 to-purple-500',
-    visibilityIncrease: 50
+    visibilityIncrease: 50,
+    packageName: 'Premium Boost'
   },
   {
     id: 'boost-3',
@@ -46,7 +48,8 @@ const mockPackages: BoostPackage[] = [
     boostLevel: 3,
     visibility: 75,
     popularity: 'low',
-    visibilityIncrease: 75
+    visibilityIncrease: 75,
+    packageName: 'Ultra Boost'
   }
 ];
 

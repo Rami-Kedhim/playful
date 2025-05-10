@@ -31,6 +31,10 @@ export interface DetailedMetricViewProps {
   loading?: boolean;
   insights?: string[];
   onBack?: () => void;
+  // Add these new properties from the error messages
+  description?: string;
+  trendData?: any[];
+  metric?: string;
 }
 
 export interface AnalyticsData {

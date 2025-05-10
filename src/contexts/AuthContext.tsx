@@ -1,6 +1,6 @@
 
 import React, { ReactNode } from 'react';
-import { useAuthContext, AuthContext } from '@/hooks/auth/useAuthContext';
+import useAuthContext, { AuthContext } from '@/hooks/auth/useAuthContext';
 import type { AuthContextType } from '@/types/user';
 
 // Provider component that wraps the app and makes auth object available to children
@@ -14,14 +14,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
-// Hook for child components to get the auth object and re-render when it changes
-export const useAuthContext = (): AuthContextType => {
-  const context = React.useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuthContext must be used within an AuthProvider');
-  }
-  return context;
-};
+// Export the useAuthContext hook directly
+export { useAuthContext };
 
 // Export the useAuth hook as an alias to useAuthContext for backward compatibility
 export const useAuth = useAuthContext;

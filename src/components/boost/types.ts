@@ -6,6 +6,8 @@ export interface BoostPackageCardProps {
   isSelected: boolean;
   onSelect: () => void;
   formatDuration?: (duration: number) => string;
+  // Adding this field to match the code usage
+  pkg?: BoostPackage;
 }
 
 export interface BoostDialogTabsProps {
