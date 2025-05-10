@@ -1,279 +1,285 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, AuthResult, UserProfile } from '@/types/auth';
 
-interface AuthContextType {
-  user: User | null;
-  userProfile: UserProfile | null; 
-  isLoading: boolean;
-  isLoggedIn: boolean;
-  isInitialized: boolean;
-  login: (email: string, password: string) => Promise<AuthResult>;
-  logout: () => Promise<boolean>;
-  register: (email: string, password: string, username: string) => Promise<AuthResult>;
-}
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { User, UserProfile } from '@/types/user';
+import { AuthContextType, AuthResult } from '@/types/authTypes';
+import { orus } from '@/core';
 
-// Create a context with default values
-const AuthContext = createContext<AuthContextType>({
+// Create the auth context with default values
+export const AuthContext = createContext<AuthContextType>({
   user: null,
-  userProfile: null,
+  profile: null,
+  loading: true,
   isLoading: true,
-  isLoggedIn: false,
-  isInitialized: false,
-  login: () => Promise.resolve({ success: false }),
-  logout: () => Promise.resolve(false),
-  register: () => Promise.resolve({ success: false }),
+  error: null,
+  isAuthenticated: false,
+  initialized: false,
+  
+  login: async () => ({ success: false }),
+  signIn: async () => ({ success: false }),
+  logout: async () => false,
+  signOut: async () => false,
+  register: async () => ({ success: false }),
+  
+  updateUser: async () => false,
+  updateUserProfile: async () => false,
+  updateProfile: async () => false,
+  loadUserProfile: async () => null,
+  refreshProfile: async () => {},
+  
+  sendPasswordResetEmail: async () => false,
+  resetPassword: async () => false,
+  requestPasswordReset: async () => false,
+  verifyEmail: async () => false,
+  updatePassword: async () => false,
+  
+  deleteAccount: async () => false,
+  checkRole: () => false
 });
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const useAuthContext = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [initialized, setInitialized] = useState(false);
 
-  // Check for existing session on mount
+  // Initialize auth state
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        setIsLoading(true);
-        
-        // Check if there's a stored token
-        const token = localStorage.getItem('auth_token');
-        
-        if (token) {
-          // Validate token with backend
-          const response = await fetch('/api/auth/validate', {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
+        // Mock authentication check for now
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
           
-          if (response.ok) {
-            const userData = await response.json();
+          // Validate session with Orus
+          const sessionResult = orus.validateSession(userData.id);
+          if (sessionResult.isValid) {
+            setUser(userData);
             
-            // Set user data
-            const user: User = {
-              id: userData.id,
-              name: userData.name,
-              username: userData.username,
-              email: userData.email,
-              avatar_url: userData.avatar_url,
-              avatarUrl: userData.avatarUrl,
-              profileImageUrl: userData.profileImageUrl,
-              is_escort: userData.is_escort,
-              is_verified: userData.is_verified,
-              verified: userData.verified
-            };
-            
-            // Set user profile data
-            const userProfile: UserProfile = {
-              id: userData.id,
-              name: userData.name,
-              username: userData.username,
-              email: userData.email,
-              avatar_url: userData.avatar_url,
-              avatarUrl: userData.avatarUrl,
-              profileImageUrl: userData.profileImageUrl,
-              is_escort: userData.is_escort,
-              is_verified: userData.is_verified,
-              verified: userData.verified,
+            // Mock profile data
+            const profileData = {
+              ...userData,
               user_id: userData.id
-            };
+            } as UserProfile;
             
-            setUser(user);
-            setUserProfile(userProfile);
+            setProfile(profileData);
           } else {
-            // Token is invalid, clear it
-            localStorage.removeItem('auth_token');
+            // Session expired, clear local storage
+            localStorage.removeItem('user');
             setUser(null);
-            setUserProfile(null);
+            setProfile(null);
           }
-        } else {
-          setUser(null);
-          setUserProfile(null);
         }
-      } catch (error) {
-        console.error('Auth check failed:', error);
+      } catch (err) {
+        console.error('Auth check failed:', err);
+        setError('Authentication check failed');
         setUser(null);
-        setUserProfile(null);
+        setProfile(null);
       } finally {
-        setIsLoading(false);
-        setIsInitialized(true);
+        setLoading(false);
+        setInitialized(true);
       }
     };
-    
+
     checkAuth();
   }, []);
 
+  // Login method
   const login = async (email: string, password: string): Promise<AuthResult> => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
+      // Mock login for now
+      const mockUser: User = {
+        id: `user-${Date.now()}`,
+        email,
+        name: email.split('@')[0],
+        username: email.split('@')[0],
+        is_verified: true,
+        verified: true,
+        is_escort: false
+      };
       
-      // Call login API
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
+      const mockProfile: UserProfile = {
+        id: mockUser.id,
+        user_id: mockUser.id,
+        name: mockUser.name,
+        email: mockUser.email,
+        username: mockUser.username,
+        verified: true,
+        is_verified: true
+      };
       
-      const data = await response.json();
+      // Store user data in local storage
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      setUser(mockUser);
+      setProfile(mockProfile);
       
-      if (response.ok) {
-        // Store token
-        localStorage.setItem('auth_token', data.token);
-        
-        // Create user object
-        const user: User = {
-          id: data.user.id,
-          name: data.user.name,
-          email: data.user.email,
-          username: data.user.username,
-          is_escort: false,
-          is_verified: true,
-          verified: true
-        };
-        
-        // Create user profile object
-        const userProfile: UserProfile = {
-          id: data.user.id,
-          name: data.user.name,
-          email: data.user.email,
-          username: data.user.username,
-          is_escort: false,
-          is_verified: true,
-          verified: true,
-          user_id: data.user.id
-        };
-        
-        setUser(user);
-        setUserProfile(userProfile);
-        
-        return {
-          success: true,
-          message: 'Login successful',
-          user,
-          token: data.token
-        };
-      } else {
-        return {
-          success: false,
-          message: data.message || 'Login failed'
-        };
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      return {
-        success: false,
-        message: 'An error occurred during login'
+      return { 
+        success: true,
+        user: mockUser,
+        message: 'Login successful'
+      };
+    } catch (err: any) {
+      const errorMsg = err.message || 'Login failed';
+      setError(errorMsg);
+      return { 
+        success: false, 
+        message: errorMsg
       };
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
+  // Register method
+  const register = async (email: string, password: string): Promise<AuthResult> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Mock registration
+      const mockUser: User = {
+        id: `user-${Date.now()}`,
+        email,
+        name: email.split('@')[0],
+        username: email.split('@')[0],
+        is_verified: false,
+        verified: false,
+        is_escort: false
+      };
+      
+      const mockProfile: UserProfile = {
+        id: mockUser.id,
+        user_id: mockUser.id,
+        name: mockUser.name,
+        username: mockUser.username,
+        email: mockUser.email,
+        is_verified: false,
+        verified: false
+      };
+      
+      // Store user data
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      setUser(mockUser);
+      setProfile(mockProfile);
+      
+      return { 
+        success: true,
+        user: mockUser,
+        message: 'Registration successful'
+      };
+    } catch (err: any) {
+      const errorMsg = err.message || 'Registration failed';
+      setError(errorMsg);
+      return { 
+        success: false, 
+        message: errorMsg
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Logout method
   const logout = async (): Promise<boolean> => {
     try {
-      setIsLoading(true);
-      
-      // Call logout API if needed
-      // await fetch('/api/auth/logout', ...);
-      
-      // Clear token and user data
-      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
       setUser(null);
-      setUserProfile(null);
-      
+      setProfile(null);
       return true;
-    } catch (error) {
-      console.error('Logout error:', error);
+    } catch (err) {
+      console.error('Logout failed:', err);
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const register = async (email: string, password: string, username: string): Promise<AuthResult> => {
+  // Update user profile
+  const updateUserProfile = async (profileData: Partial<UserProfile>): Promise<boolean> => {
+    if (!user) return false;
+    
     try {
-      setIsLoading(true);
+      const updatedProfile = { ...profile, ...profileData, user_id: user.id };
+      setProfile(updatedProfile as UserProfile);
       
-      // Call register API
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password, username })
+      // If we're updating fields that are also in the user object, update those too
+      const userFields = ['name', 'username', 'avatar_url', 'avatarUrl'];
+      const userUpdates: Partial<User> = {};
+      
+      userFields.forEach(field => {
+        if (field in profileData) {
+          userUpdates[field as keyof User] = profileData[field as keyof UserProfile] as any;
+        }
       });
       
-      const data = await response.json();
-      
-      if (response.ok) {
-        // Store token
-        localStorage.setItem('auth_token', data.token);
+      if (Object.keys(userUpdates).length > 0) {
+        setUser({ ...user, ...userUpdates });
         
-        // Create user object
-        const user: User = {
-          id: data.user.id,
-          name: data.user.name || username,
-          email: email,
-          username: username,
-          is_escort: false,
-          is_verified: false,
-          verified: false
-        };
-        
-        // Create user profile object
-        const userProfile: UserProfile = {
-          id: data.user.id,
-          name: data.user.name,
-          email: data.user.email,
-          username: data.user.username,
-          is_escort: false,
-          is_verified: false,
-          verified: false,
-          user_id: data.user.id
-        };
-        
-        setUser(user);
-        setUserProfile(userProfile);
-        
-        return {
-          success: true,
-          message: 'Registration successful',
-          user,
-          token: data.token
-        };
-      } else {
-        return {
-          success: false,
-          message: data.message || 'Registration failed'
-        };
+        // Update localStorage
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          localStorage.setItem('user', JSON.stringify({ ...userData, ...userUpdates }));
+        }
       }
-    } catch (error) {
-      console.error('Registration error:', error);
-      return {
-        success: false,
-        message: 'An error occurred during registration'
-      };
-    } finally {
-      setIsLoading(false);
+      
+      return true;
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+      return false;
     }
   };
 
-  // Ensure all values match the context type
-  const contextValue: AuthContextType = {
-    user,
-    userProfile,
-    isLoading,
-    isLoggedIn: !!user,
-    isInitialized,
-    login,
-    logout,
-    register
+  // Check if user has role
+  const checkRole = (role: string): boolean => {
+    if (!user) return false;
+    
+    if (user.roles && Array.isArray(user.roles)) {
+      return user.roles.includes(role);
+    }
+    
+    if (user.role) {
+      return user.role === role;
+    }
+    
+    return false;
   };
 
-  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
+  // We implement the AuthContextType interface
+  const authContextValue: AuthContextType = {
+    user,
+    profile,
+    loading,
+    isLoading: loading,
+    error,
+    isAuthenticated: !!user,
+    initialized,
+    
+    login,
+    signIn: login,
+    logout,
+    signOut: logout,
+    register,
+    
+    updateUser: updateUserProfile,
+    updateUserProfile,
+    updateProfile: updateUserProfile,
+    loadUserProfile: async () => profile,
+    refreshProfile: async () => {},
+    
+    sendPasswordResetEmail: async () => false,
+    requestPasswordReset: async () => false,
+    resetPassword: async () => false,
+    verifyEmail: async () => false,
+    updatePassword: async () => false,
+    
+    deleteAccount: async () => false,
+    checkRole
+  };
+
+  return authContextValue;
 };
 
-export const useAuth = () => useContext(AuthContext);
+export default useAuthContext;

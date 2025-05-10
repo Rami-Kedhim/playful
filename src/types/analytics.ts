@@ -9,6 +9,30 @@ export interface NeuralMetricsDisplayProps {
   showDetails?: boolean;
 }
 
+export interface MetricCardProps {
+  title: string;
+  value: number | string;
+  change?: number;
+  unit?: string;
+  icon?: React.ReactNode;
+  trend?: 'up' | 'down' | 'neutral';
+  className?: string;
+  loading?: boolean;
+}
+
+export interface DetailedMetricViewProps {
+  title: string;
+  value: number | string;
+  previousValue?: number | string;
+  change?: number;
+  unit?: string;
+  timeframe?: string;
+  data?: any[];
+  loading?: boolean;
+  insights?: string[];
+  onBack?: () => void;
+}
+
 export interface AnalyticsData {
   totalBoosts: number;
   activeBoosts: number;

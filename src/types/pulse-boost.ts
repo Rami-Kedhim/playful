@@ -1,87 +1,73 @@
 
+export interface UserCredentials {
+  email: string;
+  password: string;
+}
+
+export interface UserProfile {
+  id: string;
+  name?: string;
+  email?: string;
+  avatar_url?: string;
+  bio?: string;
+}
+
 export interface BoostPackage {
   id: string;
   name: string;
   description: string;
   price: number;
   price_ubx: number;
-  duration: number;
-  durationMinutes: number;
+  duration: number;  // Duration in hours
+  durationMinutes: number; // Duration in minutes
   features: string[];
   boostLevel: number;
   visibility: number;
-  isMostPopular?: boolean;
+  popularity: 'high' | 'medium' | 'low';
   isPopular?: boolean;
+  isMostPopular?: boolean;
   badgeColor?: string;
-  popularity: 'low' | 'medium' | 'high';
-}
-
-export interface BoostStatus {
-  isActive: boolean;
-  expiresAt: string;
-  remainingDays: number;
-  boostLevel: number;
-  isExpiring: boolean;
-  packageName?: string;
-  timeRemaining?: string;
-  remainingTime?: string;
-  packageId?: string;
-  progress?: number;
-  startTime?: string;
-  endTime?: string;
-  boostPackage?: BoostPackage;
-}
-
-export interface HermesStatus {
-  score: number;
-  recommendations: string[];
-  lastUpdated: string;
-  position?: number;
-  activeUsers?: number;
-  estimatedVisibility?: number;
-  lastUpdateTime?: string;
-  boostScore?: number;
-  effectivenessScore?: number;
+  visibilityIncrease?: number;
 }
 
 export interface BoostEligibility {
   eligible: boolean;
   reasons: string[];
-  requirements: {
-    profileCompletion: boolean;
-    verification: boolean;
-    mediaUploaded: boolean;
-  };
+  nextEligibleDate?: string | Date;
+  waitTime?: number;  // Time in minutes until eligible
 }
 
-export interface BoostAnalytics {
-  totalBoosts: number;
-  activeBoosts: number;
-  averageBoostScore: number;
-  views: number;
-  impressions: {
-    value: number;
-    change: number;
-    today?: number;
-    yesterday?: number;
-    weeklyAverage?: number;
-    withBoost?: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-  interactions: {
-    value: number;
-    change: number;
-    today?: number;
-    yesterday?: number;
-    weeklyAverage?: number;
-    withBoost?: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-  additionalViews: number;
-  engagementIncrease: number;
-  rankingPosition: number;
+export interface BoostStatus {
+  isActive: boolean;
+  expiresAt: string | Date;
+  remainingDays: number;
+  boostLevel: number;
+  isExpiring: boolean;
+  progress?: number;
+  timeRemaining?: string;
+  remainingTime?: string;
+  package?: BoostPackage;
 }
 
-export type { AnalyticsData } from './analytics';
+export interface HermesStatus {
+  score: number;
+  position?: number;
+  activeUsers?: number;
+  estimatedVisibility?: number;
+  lastUpdated: string | Date;
+  recommendations: string[];
+  boostScore?: number;
+  effectivenessScore?: number;
+  lastUpdateTime?: string;
+}
+
+export interface BoostScoreResult {
+  score: number;
+  components: {
+    profileCompleteness: number;
+    contentQuality: number;
+    activityLevel: number;
+    responseRate: number;
+  };
+  recommendations: string[];
+}

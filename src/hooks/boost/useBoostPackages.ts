@@ -1,81 +1,86 @@
 
 import { useState, useEffect } from 'react';
-import { BoostPackage } from '@/types/boost';
+import { BoostPackage } from '@/types/pulse-boost';
+
+const mockPackages: BoostPackage[] = [
+  {
+    id: 'boost-1',
+    name: 'Basic Boost',
+    description: 'Essential visibility boost for your profile',
+    price: 9.99,
+    price_ubx: 999,
+    duration: 24,
+    durationMinutes: 24 * 60,
+    features: ['Increased visibility', 'Profile highlighting', 'Higher search ranking'],
+    boostLevel: 1,
+    visibility: 25,
+    popularity: 'medium',
+    visibilityIncrease: 25
+  },
+  {
+    id: 'boost-2',
+    name: 'Premium Boost',
+    description: 'Enhanced visibility for maximum exposure',
+    price: 19.99,
+    price_ubx: 1999,
+    duration: 72,
+    durationMinutes: 72 * 60,
+    features: ['Top search results', 'Featured profile', 'Extended boost duration', 'Analytics insights'],
+    boostLevel: 2,
+    visibility: 50,
+    popularity: 'high',
+    isPopular: true,
+    isMostPopular: true,
+    badgeColor: 'bg-gradient-to-r from-pink-500 to-purple-500',
+    visibilityIncrease: 50
+  },
+  {
+    id: 'boost-3',
+    name: 'Ultra Boost',
+    description: 'Maximum visibility for serious professionals',
+    price: 29.99,
+    price_ubx: 2999,
+    duration: 168,
+    durationMinutes: 168 * 60,
+    features: ['Priority placement', 'Spotlight feature', 'Week-long boost', 'Enhanced profile badge', 'Premium analytics'],
+    boostLevel: 3,
+    visibility: 75,
+    popularity: 'low',
+    visibilityIncrease: 75
+  }
+];
 
 const useBoostPackages = () => {
   const [packages, setPackages] = useState<BoostPackage[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        // Simulate API call to fetch boost packages
-        setTimeout(() => {
-          const boostPackages: BoostPackage[] = [
-            {
-              id: 'boost-1',
-              name: '24 Hour Boost',
-              description: 'Boost your profile for 24 hours',
-              duration: '24:00:00',
-              price: 29.99,
-              price_ubx: 300,
-              boostMultiplier: 1.5,
-              features: ['Top search results', 'Featured profile'],
-              isMostPopular: true,
-              visibility: 'high',
-              visibility_increase: 50,
-              boost_power: 50,
-              color: '#4CAF50',
-              badgeColor: '#388E3C',
-              durationMinutes: 1440
-            },
-            {
-              id: 'boost-2',
-              name: 'Weekend Boost',
-              description: 'Boost your profile for the entire weekend',
-              duration: '72:00:00',
-              price: 69.99,
-              price_ubx: 700,
-              boostMultiplier: 2,
-              features: ['Top search results', 'Featured profile', 'Homepage feature'],
-              visibility: 'premium',
-              visibility_increase: 75,
-              boost_power: 75,
-              color: '#2196F3',
-              badgeColor: '#1976D2',
-              durationMinutes: 4320
-            },
-            {
-              id: 'boost-3',
-              name: 'Full Week Spotlight',
-              description: 'Maximum visibility for a full week',
-              duration: '168:00:00',
-              price: 129.99,
-              price_ubx: 1200,
-              boostMultiplier: 3,
-              features: ['Top of all searches', 'Featured everywhere', 'Priority matching', 'Analytics dashboard'],
-              visibility: 'ultimate',
-              visibility_increase: 100,
-              boost_power: 100,
-              color: '#9C27B0',
-              badgeColor: '#7B1FA2',
-              durationMinutes: 10080
-            }
-          ];
-          
-          setPackages(boostPackages);
-          setLoading(false);
-        }, 1000);
-      } catch (error) {
-        console.error('Error fetching boost packages:', error);
+        setLoading(true);
+        
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        setPackages(mockPackages);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch boost packages');
+        console.error('Error fetching boost packages:', err);
+      } finally {
         setLoading(false);
       }
     };
-    
+
     fetchPackages();
   }, []);
-  
-  return { packages, loading };
+
+  return {
+    packages,
+    loading,
+    error
+  };
 };
 
 export default useBoostPackages;

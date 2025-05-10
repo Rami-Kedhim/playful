@@ -1,63 +1,40 @@
 
-import { BoostPackage, BoostStatus, BoostEligibility, HermesStatus } from '@/types/boost';
+import { BoostPackage, BoostStatus, HermesStatus, BoostEligibility, BoostScoreResult } from '@/types/pulse-boost';
 
-export interface BoostDialogContainerProps {
-  profileId: string;
-  onSuccess?: () => Promise<boolean>;
-  buttonText?: string;
-  buttonVariant?: string;
-  buttonSize?: string;
-  buttonProps?: {
-    text: string;
-    variant: string;
-    size: string;
-  };
-  open?: boolean;
-  setOpen?: (open: boolean) => void;
+export interface BoostPackageCardProps {
+  package: BoostPackage;
+  isSelected: boolean;
+  onSelect: () => void;
+  formatDuration?: (duration: number) => string;
 }
 
 export interface BoostDialogTabsProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  loading: boolean;
+  profileId: string;
+  packages: BoostPackage[];
   boostStatus: BoostStatus;
-  eligibility: BoostEligibility;
-  boostPackages: BoostPackage[];
-  selectedPackage: string;
-  setSelectedPackage: (id: string) => void;
-  handleBoost: () => void;
-  handleCancel: () => Promise<boolean>;
-  dailyBoostUsage: number;
-  dailyBoostLimit: number;
   hermesStatus: HermesStatus;
-  formatBoostDuration?: (duration: string) => string;
-  getBoostPrice?: () => number;
-  handleDialogClose: () => void;
+  boostEligibility: BoostEligibility;
+  onSuccess: () => Promise<void>;
+  onClose: () => void;
 }
 
-export interface UseBoostManagerResult {
-  loading: boolean;
-  error: string | null;
-  boostStatus: BoostStatus;
-  eligibility: BoostEligibility;
-  boostPackages: BoostPackage[];
-  dailyBoostUsage: number;
-  dailyBoostLimit: number;
-  purchaseBoost: (pkg: BoostPackage) => Promise<boolean>;
-  cancelBoost: () => Promise<boolean>;
-  formatBoostDuration: (duration: string) => string;
-  getBoostAnalytics: () => Promise<any>;
-  fetchBoostPackages: () => Promise<BoostPackage[]>;
-  adaptGetBoostPrice: (fn: (pkg: BoostPackage) => number) => (pkg: BoostPackage) => number;
+export interface BoostDialogProps {
+  profileId: string;
+  open: boolean;
+  onClose: () => void;
+  onSuccess?: () => Promise<void>;
 }
 
-export interface BoostActivePackageProps {
-  boostStatus: BoostStatus;
-  formatDuration?: (duration: string) => string;
-  onCancel?: () => Promise<boolean>;
+export interface BoostManagerProps {
+  profileId: string;
 }
 
-export interface HermesBoostInfoProps {
-  hermesStatus: HermesStatus;
-  isActive?: boolean;
+export interface BoostAnalyticsProps {
+  profileId: string;
+}
+
+export interface BoostScoreCardProps {
+  score: number | BoostScoreResult;
+  recommendations?: string[];
+  loading?: boolean;
 }
