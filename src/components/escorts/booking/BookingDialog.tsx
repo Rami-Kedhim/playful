@@ -11,12 +11,13 @@ import { Escort } from '@/types/Escort';
 import BookingForm from './BookingForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
+import { BookingFormValues } from './types';
 
 interface BookingDialogProps {
   escort: Escort;
   isOpen: boolean;
   onClose: () => void;
-  onSubmit?: (bookingDetails: any) => Promise<void>;
+  onSubmit?: (bookingDetails: BookingFormValues) => Promise<void>;
 }
 
 const BookingDialog: React.FC<BookingDialogProps> = ({ 
@@ -37,7 +38,7 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
     }
   };
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: BookingFormValues) => {
     setIsSubmitting(true);
     
     try {
@@ -97,6 +98,7 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
               escort={escort}
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
+              bookingType="in-person"
             />
           </TabsContent>
           
@@ -105,6 +107,7 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
               escort={escort}
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
+              bookingType="virtual"
             />
           </TabsContent>
         </Tabs>

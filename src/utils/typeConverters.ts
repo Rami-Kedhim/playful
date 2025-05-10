@@ -4,6 +4,7 @@ import { Escort as EscortTypeLower } from '@/types/escort';
 import { AvailabilityDay } from '@/types/availability';
 import { BoostStatus as BoostStatusType } from '@/types/boost';
 import { BoostStatus as PulseBoostStatusType } from '@/types/pulse-boost';
+import { UberPersona } from '@/types/uberPersona';
 
 // Normalize the video objects to ensure compatible types
 export const normalizeVideoType = (video: any): { id?: string; url: string; thumbnail?: string; title?: string; duration?: number } => {
@@ -79,8 +80,25 @@ export const convertBoostStatus = (status: any): BoostStatusType => {
   };
 };
 
+// Convert PulseBoostStatus to BoostStatus
+export const convertPulseBoostStatus = (status: PulseBoostStatusType): BoostStatusType => {
+  return {
+    isActive: status.isActive,
+    isExpiring: status.isExpiring || false,
+    expiresAt: status.expiresAt ? new Date(status.expiresAt) : undefined,
+    startedAt: status.startedAt ? new Date(status.startedAt) : undefined,
+    timeRemaining: status.timeRemaining || '',
+    remainingTime: status.timeRemaining || '',
+    packageName: status.packageName,
+    packageId: status.packageId,
+    boostPackage: status.boostPackage,
+    progress: status.progress || 0,
+    boostLevel: status.boostLevel || 0,
+  };
+};
+
 // Normalize UberPersona to ensure all required properties exist
-export const normalizeUberPersona = (persona: any) => {
+export const normalizeUberPersona = (persona: UberPersona): UberPersona => {
   return {
     ...persona,
     id: persona.id || '',
@@ -106,6 +124,7 @@ export const normalizeUberPersona = (persona: any) => {
       likes: persona.stats?.likes || 0,
       responseRate: persona.stats?.responseRate || 0,
       responseTime: persona.stats?.responseTime || 0,
+      rating: persona.stats?.rating || 0,
     },
     monetization: {
       ...(persona.monetization || {}),

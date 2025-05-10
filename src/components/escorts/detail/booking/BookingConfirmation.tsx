@@ -1,10 +1,12 @@
 
-// Update import to use consistent casing
-import { Escort } from '@/types/Escort';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, CalendarDays, Clock, MapPin } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { BookingFormValues } from '../../../escorts/booking/types';
+import { Escort } from '@/types/Escort';
+import { format } from 'date-fns';
 
 interface BookingConfirmationProps {
   escort: Escort;
@@ -13,7 +15,9 @@ interface BookingConfirmationProps {
   duration?: string;
   location?: string;
   onClose: () => void;
-  status?: string; // Status property is now properly included
+  status?: string;
+  // Allow formData as an alternative way to provide booking details
+  formData?: BookingFormValues;
 }
 
 const BookingConfirmation = ({ 
@@ -22,15 +26,17 @@ const BookingConfirmation = ({
   bookingTime, 
   duration, 
   location,
+  formData,
   status = 'pending',
   onClose 
 }: BookingConfirmationProps) => {
-  const formattedDate = bookingDate?.toLocaleDateString(undefined, {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }) || 'Date to be confirmed';
+  // Use either direct props or extract from formData if provided
+  const date = bookingDate || formData?.date;
+  const time = bookingTime || formData?.time;
+  const durationValue = duration || formData?.duration;
+  const locationValue = location || 'Location to be confirmed';
+  
+  const formattedDate = date ? format(date, 'EEEE, MMMM d, yyyy') : 'Date to be confirmed';
 
   return (
     <Dialog open={true} onOpenChange={() => onClose()}>
@@ -64,7 +70,7 @@ const BookingConfirmation = ({
               <div>
                 <p className="text-sm font-medium leading-none">Time</p>
                 <p className="text-sm text-muted-foreground">
-                  {bookingTime || 'Time to be confirmed'} ({duration || 'Duration to be confirmed'})
+                  {time || 'Time to be confirmed'} ({durationValue || 'Duration to be confirmed'})
                 </p>
               </div>
             </div>
@@ -72,7 +78,7 @@ const BookingConfirmation = ({
               <MapPin className="h-4 w-4 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium leading-none">Location</p>
-                <p className="text-sm text-muted-foreground">{location || 'Location to be confirmed'}</p>
+                <p className="text-sm text-muted-foreground">{locationValue}</p>
               </div>
             </div>
           </CardContent>

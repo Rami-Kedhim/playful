@@ -42,6 +42,8 @@ export interface UberPersona {
   };
   monetization?: {
     hourlyRate?: number;
+    minRate?: number;
+    maxRate?: number;
     packages?: {
       id?: string;
       name: string;
