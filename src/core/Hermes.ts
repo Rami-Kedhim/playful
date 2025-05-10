@@ -1,4 +1,3 @@
-
 import { HermesSystem, HermesInsight } from '@/types/core-systems'; 
 
 // Updated Hermes class to implement HermesSystem interface
@@ -40,6 +39,12 @@ export class Hermes implements HermesSystem {
   
   calculateVisibilityScore(profileId: string): number {
     return 85; // Mock implementation
+  }
+  
+  // Add the missing calculateBoostScore method
+  calculateBoostScore(profileId: string): Promise<number> {
+    console.log(`Calculating boost score for profile ${profileId}`);
+    return Promise.resolve(75); // Mock implementation
   }
   
   recommendNextAction(userId: string): { action: string; confidence: number } {

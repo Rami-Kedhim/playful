@@ -1,60 +1,89 @@
 
-import { useState, useEffect } from 'react';
-import { BoostStatus } from '@/types/boost';
+import { useState, useEffect, useCallback } from 'react';
+import { BoostStatus } from '@/types/pulse-boost';
 
-export const useBoostStatus = (profileId?: string) => {
-  const [status, setStatus] = useState<BoostStatus>({
-    isActive: false,
-    remainingTime: '00:00:00'
-  });
+const useBoostStatus = (profileId?: string) => {
+  const [boostStatus, setBoostStatus] = useState<BoostStatus | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  const fetchBoostStatus = async () => {
+  const [error, setError] = useState<string>('');
+
+  const fetchBoostStatus = useCallback(async () => {
     if (!profileId) {
       setLoading(false);
       return;
     }
-    
+
     setLoading(true);
     try {
-      // Mock data - note: we're creating proper Date objects
-      const now = new Date();
-      const endTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
-      
-      setStatus({
-        isActive: Math.random() > 0.5, // Randomly active for demo
-        packageName: '24 Hour Boost',
-        startTime: now,
-        endTime: endTime,
-        remainingTime: '18:45:30',
-        packageId: 'boost-1',
-        progress: 25
-      });
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch boost status');
+      // In a real app, this would be an API call
+      // Simulating API call for now
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const mockStatus: BoostStatus = {
+        isActive: true,
+        packageName: 'Premium Boost',
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        startTime: new Date(),
+        timeRemaining: '6 days, 23 hours',
+        progress: 85,
+        boostLevel: 3,
+        isExpiring: false,
+        packageId: 'premium'
+      };
+
+      setBoostStatus(mockStatus);
+      setError('');
+    } catch (err) {
+      console.error('Error fetching boost status:', err);
+      setError('Failed to load boost status');
+    } finally {
+      setLoading(false);
+    }
+  }, [profileId]);
+
+  const applyBoost = async (packageId: string): Promise<boolean> => {
+    if (!profileId) return false;
+
+    setLoading(true);
+    try {
+      // In a real app, this would be an API call
+      // Simulating API call for now
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      const mockStatus: BoostStatus = {
+        isActive: true,
+        packageName: 'Premium Boost',
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        startTime: new Date(),
+        timeRemaining: '7 days',
+        progress: 100,
+        boostLevel: 3,
+        isExpiring: false,
+        packageId
+      };
+
+      setBoostStatus(mockStatus);
+      setError('');
+      return true;
+    } catch (err) {
+      console.error('Error applying boost:', err);
+      setError('Failed to apply boost');
+      return false;
     } finally {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchBoostStatus();
-    
-    // Poll for updates every minute
-    const interval = setInterval(fetchBoostStatus, 60000);
-    return () => clearInterval(interval);
-  }, [profileId]);
-  
-  const refetch = () => {
-    fetchBoostStatus();
-  };
-  
+  }, [fetchBoostStatus]);
+
   return {
-    status,
+    boostStatus,
     loading,
     error,
-    refetch
+    fetchBoostStatus,
+    applyBoost
   };
 };
 

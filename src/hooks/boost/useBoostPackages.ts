@@ -2,54 +2,51 @@
 import { useState, useEffect } from 'react';
 import { BoostPackage } from '@/types/pulse-boost';
 
-const mockPackages: BoostPackage[] = [
+// Mock data for boost packages
+const mockBoostPackages: BoostPackage[] = [
   {
-    id: 'boost-1',
+    id: 'basic',
     name: 'Basic Boost',
-    description: 'Essential visibility boost for your profile',
+    description: 'Increase your visibility with a basic boost',
     price: 9.99,
-    price_ubx: 999,
+    price_ubx: 99,
     duration: 24,
-    durationMinutes: 24 * 60,
-    features: ['Increased visibility', 'Profile highlighting', 'Higher search ranking'],
+    durationMinutes: 1440,
+    features: ['Higher search ranking', 'Featured in browse'],
     boostLevel: 1,
-    visibility: 25,
-    popularity: 'medium',
-    visibilityIncrease: 25,
-    packageName: 'Basic Boost'
-  },
-  {
-    id: 'boost-2',
-    name: 'Premium Boost',
-    description: 'Enhanced visibility for maximum exposure',
-    price: 19.99,
-    price_ubx: 1999,
-    duration: 72,
-    durationMinutes: 72 * 60,
-    features: ['Top search results', 'Featured profile', 'Extended boost duration', 'Analytics insights'],
-    boostLevel: 2,
-    visibility: 50,
-    popularity: 'high',
-    isPopular: true,
-    isMostPopular: true,
-    badgeColor: 'bg-gradient-to-r from-pink-500 to-purple-500',
-    visibilityIncrease: 50,
-    packageName: 'Premium Boost'
-  },
-  {
-    id: 'boost-3',
-    name: 'Ultra Boost',
-    description: 'Maximum visibility for serious professionals',
-    price: 29.99,
-    price_ubx: 2999,
-    duration: 168,
-    durationMinutes: 168 * 60,
-    features: ['Priority placement', 'Spotlight feature', 'Week-long boost', 'Enhanced profile badge', 'Premium analytics'],
-    boostLevel: 3,
-    visibility: 75,
+    visibility: 30,
     popularity: 'low',
-    visibilityIncrease: 75,
-    packageName: 'Ultra Boost'
+    visibilityIncrease: 30
+  },
+  {
+    id: 'standard',
+    name: 'Standard Boost',
+    description: 'Our most popular visibility boost package',
+    price: 19.99,
+    price_ubx: 199,
+    duration: 72,
+    durationMinutes: 4320,
+    features: ['Higher search ranking', 'Featured in browse', 'Priority matching'],
+    boostLevel: 2,
+    visibility: 60,
+    popularity: 'medium',
+    isPopular: true,
+    visibilityIncrease: 60
+  },
+  {
+    id: 'premium',
+    name: 'Premium Boost',
+    description: 'Maximum visibility and exposure',
+    price: 29.99,
+    price_ubx: 299,
+    duration: 168,
+    durationMinutes: 10080,
+    features: ['Top search ranking', 'Featured in browse', 'Priority matching', 'Homepage feature'],
+    boostLevel: 3,
+    visibility: 100,
+    popularity: 'high',
+    isMostPopular: true,
+    visibilityIncrease: 100
   }
 ];
 
@@ -61,17 +58,12 @@ const useBoostPackages = () => {
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        setLoading(true);
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        setPackages(mockPackages);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch boost packages');
+        // In a real app, this would be an API call
+        setPackages(mockBoostPackages);
+        setLoading(false);
+      } catch (err) {
         console.error('Error fetching boost packages:', err);
-      } finally {
+        setError('Failed to load boost packages');
         setLoading(false);
       }
     };
@@ -79,11 +71,7 @@ const useBoostPackages = () => {
     fetchPackages();
   }, []);
 
-  return {
-    packages,
-    loading,
-    error
-  };
+  return { packages, loading, error };
 };
 
 export default useBoostPackages;

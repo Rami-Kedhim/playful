@@ -1,125 +1,95 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import PerformanceChart from '@/components/neural/PerformanceChart';
+import { ArrowLeft, HelpCircle } from 'lucide-react';
 import { DetailedMetricViewProps } from '@/types/analytics';
 
 const DetailedMetricView: React.FC<DetailedMetricViewProps> = ({
   title,
-  description,
   value,
+  previousValue,
+  change,
   unit = '',
-  change = 0,
-  trendData = [],
+  timeframe = '7 days',
+  data = [],
+  loading = false,
+  insights = [],
   onBack,
-  metric,
-  data = []
+  description,
+  trendData,
+  metric
 }) => {
-  // Use either direct props or extract from metric object if it's an object
-  const displayTitle = title || (metric && typeof metric === 'object' ? metric.title : '');
-  const displayDescription = description || (metric && typeof metric === 'object' ? metric.description : '');
-  
-  // Ensure data is properly formatted for the chart
-  const formattedData = React.useMemo(() => {
-    if (data.length > 0) {
-      return data.map(item => {
-        // Type checking with safeguards
-        const dataItem = item as any;
-        if (dataItem && ('date' in dataItem || 'name' in dataItem)) {
-          return {
-            name: 'date' in dataItem ? dataItem.date : 'name' in dataItem ? dataItem.name : '',
-            value: 'value' in dataItem ? dataItem.value : 0
-          };
-        }
-        return { name: '', value: 0 };
-      });
-    } 
-    return trendData;
-  }, [data, trendData]);
-  
-  // Map data to ensure it has name/value structure required by PerformanceChart
-  const chartData = React.useMemo(() => {
-    return formattedData.map(item => ({
-      name: typeof item === 'object' && item !== null ? ('name' in item ? item.name : '') : '',
-      value: typeof item === 'object' && item !== null ? ('value' in item ? item.value : 0) : 0
-    }));
-  }, [formattedData]);
-  
-  // Format change as percentage or absolute value
-  const formatChange = () => {
-    const prefix = change >= 0 ? '+' : '';
-    return `${prefix}${change}${unit.includes('%') ? '%' : unit}`;
-  };
-  
-  // Determine if trend is positive or negative
-  const trend = change >= 0 ? 'up' : 'down';
-  
+  // Handle title as either string or object with title and description
+  const metricTitle = typeof title === 'string' ? title : title.title;
+  const metricDescription = typeof title === 'string' ? description : title.description;
+
   return (
-    <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <div className="space-y-1">
-          <CardTitle className="text-2xl">{displayTitle}</CardTitle>
-          {displayDescription && <CardDescription>{displayDescription}</CardDescription>}
-        </div>
-        <Button variant="ghost" onClick={onBack} className="h-8 w-8 p-0">
-          <ArrowLeft className="h-4 w-4" />
-          <span className="sr-only">Back</span>
-        </Button>
-      </CardHeader>
-      <CardContent>
-        {(value !== undefined) && (
-          <div className="flex items-baseline justify-between mb-6">
-            <div>
-              <div className="text-4xl font-bold">
-                {value}{unit}
-              </div>
-              <div className={`text-sm font-medium ${trend === 'up' ? 'text-green-500' : 'text-red-500'}`}>
-                {formatChange()} from previous period
-              </div>
-            </div>
-          </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        {onBack && (
+          <Button variant="ghost" size="sm" onClick={onBack} className="flex items-center gap-1">
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back</span>
+          </Button>
         )}
-        
-        <div className="space-y-8">
-          <div>
-            <h3 className="text-lg font-medium mb-2">Trend Analysis</h3>
-            <PerformanceChart 
-              data={chartData}
-              title=""
-            />
+      </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>{metricTitle}</CardTitle>
+            <Button variant="ghost" size="icon">
+              <HelpCircle className="h-4 w-4" />
+            </Button>
           </div>
-          
-          {chartData && chartData.length > 0 && (
-            <div>
-              <h3 className="text-lg font-medium mb-2">Key Insights</h3>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <strong>Peak Value:</strong> {Math.max(...chartData.map(d => d.value))}{unit}
-                </li>
-                <li>
-                  <strong>Minimum Value:</strong> {Math.min(...chartData.map(d => d.value))}{unit}
-                </li>
-                <li>
-                  <strong>Average:</strong> {(chartData.reduce((sum, d) => sum + d.value, 0) / chartData.length).toFixed(2)}{unit}
-                </li>
-                <li>
-                  <strong>Volatility:</strong> {
-                    (() => {
-                      const values = chartData.map(d => d.value);
-                      const max = Math.max(...values);
-                      const min = Math.min(...values);
-                      return ((max - min) / ((max + min) / 2) * 100).toFixed(1);
-                    })()
-                  }%
-                </li>
-              </ul>
+          {metricDescription && <p className="text-sm text-muted-foreground mt-1">{metricDescription}</p>}
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-300 rounded w-1/3 mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-end gap-2">
+                  <div className="text-3xl font-bold">{value}{unit}</div>
+                  {change !== undefined && (
+                    <div className={`text-sm ${change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {change >= 0 ? '+' : ''}{change}%
+                    </div>
+                  )}
+                </div>
+                {previousValue !== undefined && (
+                  <div className="text-sm text-muted-foreground mt-1">
+                    Previously: {previousValue}{unit} ({timeframe} ago)
+                  </div>
+                )}
+              </div>
+
+              {/* Chart would go here */}
+              <div className="h-40 bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center">
+                <span className="text-muted-foreground">Metric trend visualization</span>
+              </div>
+
+              {insights.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Insights</h4>
+                  <ul className="space-y-1">
+                    {insights.map((insight, i) => (
+                      <li key={i} className="text-sm">{insight}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

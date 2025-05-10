@@ -5,7 +5,7 @@ import NeuralMetricsDisplay from './NeuralMetricsDisplay';
 
 const NeuralAnalyticsPage: React.FC = () => {
   // Sample neural metrics data conforming to the expected type
-  const neurMetrics = {
+  const neuralMetrics = {
     accuracy: 92,  // Use the expected property names
     speed: 85,     // from NeuralMetricsDisplayProps
     completeness: 78,
@@ -26,10 +26,12 @@ const NeuralAnalyticsPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <NeuralMetricsDisplay 
-              metrics={neurMetrics}
+              metrics={neuralMetrics}
               showDetails={true}
               title="Neural Network Performance"
               period="7d"
+              trend="up"
+              refreshInterval={60000}
             />
           </CardContent>
         </Card>

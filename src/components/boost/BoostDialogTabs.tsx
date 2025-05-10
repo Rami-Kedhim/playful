@@ -5,15 +5,6 @@ import BoostEligibilityCheck from './BoostEligibilityCheck';
 import BoostPackageList from './dialog/BoostPackageList';
 import { BoostEligibility, BoostStatus, BoostPackage } from '@/types/pulse-boost';
 
-interface BoostEligibilityCheckProps {
-  eligibility: {
-    eligible: boolean;
-    reasons: string[];
-    nextEligibleDate?: string;
-  };
-  onClose: () => void;
-}
-
 interface BoostDialogTabsProps {
   boostStatus: BoostStatus | null;
   packages: BoostPackage[];
@@ -42,7 +33,8 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
           eligibility={{ 
             eligible: boostEligibility.eligible, 
             reasons: boostEligibility.reasons || [],
-            nextEligibleDate: boostEligibility.nextEligibleDate
+            nextEligibleDate: boostEligibility.nextEligibleDate,
+            nextEligibleTime: boostEligibility.nextEligibleTime || boostEligibility.nextEligibleDate
           }}
           onClose={onClose}
         />

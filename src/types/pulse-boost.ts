@@ -38,10 +38,10 @@ export interface BoostEligibility {
   eligible: boolean;
   reasons: string[];
   nextEligibleDate?: string | Date;
+  nextEligibleTime?: string | Date; // Adding both for backward compatibility
   waitTime?: number;  // Time in minutes until eligible
   // Add properties for backward compatibility
   reason?: string;
-  nextEligibleTime?: string;
   isEligible?: boolean;
   requirements?: {
     profileCompletion: boolean;
@@ -52,10 +52,10 @@ export interface BoostEligibility {
 
 export interface BoostStatus {
   isActive: boolean;
-  expiresAt: string | Date;
-  remainingDays: number;
-  boostLevel: number;
-  isExpiring: boolean;
+  expiresAt?: string | Date;
+  remainingDays?: number;
+  boostLevel?: number;
+  isExpiring?: boolean;
   progress?: number;
   timeRemaining?: string;
   remainingTime?: string;

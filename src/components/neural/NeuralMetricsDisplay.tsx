@@ -1,70 +1,99 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { NeuralMetricsDisplayProps } from '@/types/analytics';
+import { Activity, BarChart3, Clock, Shield } from 'lucide-react';
 
 const NeuralMetricsDisplay: React.FC<NeuralMetricsDisplayProps> = ({
   metrics,
   showDetails = false,
-  // Add optional properties with default values
-  trend = 'neutral',
-  period = '24h',
-  title = 'Neural Metrics',
-  refreshInterval = 60000
+  trend, // Now properly defined in NeuralMetricsDisplayProps
+  period, // Now properly defined in NeuralMetricsDisplayProps
+  title, // Now properly defined in NeuralMetricsDisplayProps
+  refreshInterval // Now properly defined in NeuralMetricsDisplayProps
 }) => {
-  const [isLoading, setIsLoading] = React.useState(false);
-
-  // Function to refresh metrics
-  const refreshMetrics = React.useCallback(() => {
-    setIsLoading(true);
-    // Simulate metrics refresh
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-  }, []);
-
-  // Format metric value (0-100) as a percentage
-  const formatMetric = (value: number): string => {
-    return `${Math.round(value)}%`;
-  };
-
-  // Format metric value for display
-  const getMetricDisplay = (key: keyof typeof metrics, name: string) => {
-    return (
-      <div key={key} className="flex flex-col">
-        <span className="text-sm text-muted-foreground">{name}</span>
-        <span className="text-xl font-semibold">
-          {isLoading ? "..." : formatMetric(metrics[key])}
-        </span>
-      </div>
-    );
-  };
-
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-2">
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>
-          Neural network performance metrics for the {period} period
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {getMetricDisplay("accuracy", "Accuracy")}
-          {getMetricDisplay("speed", "Speed")}
-          {getMetricDisplay("completeness", "Completeness")}
-          {getMetricDisplay("consistency", "Consistency")}
+    <div className="space-y-4">
+      {title && (
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-medium">{title}</h3>
+          {period && <span className="text-sm text-muted-foreground">{period}</span>}
         </div>
+      )}
+      
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <MetricCard
+          icon={<Shield className="h-5 w-5 text-blue-500" />}
+          title="Accuracy"
+          value={metrics.accuracy}
+          unit="%"
+          trend={trend}
+        />
         
-        {showDetails && (
-          <div className="mt-4 pt-4 border-t border-border">
-            <button
-              onClick={refreshMetrics}
-              className="text-sm text-primary hover:underline"
-              disabled={isLoading}
-            >
-              {isLoading ? "Refreshing..." : "Refresh metrics"}
-            </button>
+        <MetricCard
+          icon={<Clock className="h-5 w-5 text-green-500" />}
+          title="Speed"
+          value={metrics.speed}
+          unit="%"
+          trend={trend}
+        />
+        
+        <MetricCard
+          icon={<Activity className="h-5 w-5 text-purple-500" />}
+          title="Completeness"
+          value={metrics.completeness}
+          unit="%"
+          trend={trend}
+        />
+        
+        <MetricCard
+          icon={<BarChart3 className="h-5 w-5 text-amber-500" />}
+          title="Consistency"
+          value={metrics.consistency}
+          unit="%"
+          trend={trend}
+        />
+      </div>
+      
+      {showDetails && (
+        <Card className="mt-4">
+          <CardContent className="pt-6">
+            <div className="space-y-1 text-sm">
+              <p>Last refreshed: {new Date().toLocaleTimeString()}</p>
+              {refreshInterval && <p>Auto-refresh: Every {refreshInterval / 1000} seconds</p>}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};
+
+const MetricCard: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+  value: number;
+  unit?: string;
+  trend?: 'up' | 'down' | 'neutral';
+}> = ({ icon, title, value, unit = '', trend }) => {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm text-muted-foreground">{title}</span>
+          {icon}
+        </div>
+        <div className="flex items-baseline">
+          <span className="text-2xl font-bold">{value}</span>
+          {unit && <span className="ml-1 text-sm text-muted-foreground">{unit}</span>}
+        </div>
+        {trend && (
+          <div className={`flex items-center mt-2 text-xs ${
+            trend === 'up' ? 'text-green-500' :
+            trend === 'down' ? 'text-red-500' : 'text-gray-500'
+          }`}>
+            {trend === 'up' ? '↑ ' : trend === 'down' ? '↓ ' : '→ '}
+            {trend === 'up' ? 'Improving' : trend === 'down' ? 'Declining' : 'Stable'}
           </div>
         )}
       </CardContent>

@@ -26,7 +26,7 @@ export interface MetricCardProps {
 }
 
 export interface DetailedMetricViewProps {
-  title: string;
+  title: string | { title: string; description?: string };
   value: number | string;
   previousValue?: number | string;
   change?: number;

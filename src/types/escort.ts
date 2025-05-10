@@ -1,26 +1,6 @@
 
-export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
-export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium' | 'verified';
-
-// Define EscortAvailabilityDay interface for better type checking
-export interface EscortAvailabilityDay {
-  day: string;
-  available: boolean;
-  hours?: { start: string; end: string }[];
-}
-
 export interface EscortAvailability {
-  monday?: string[];
-  tuesday?: string[];
-  wednesday?: string[];
-  thursday?: string[];
-  friday?: string[];
-  saturday?: string[];
-  sunday?: string[];
-  days?: string[] | EscortAvailabilityDay[];
-  day?: string;
-  notes?: string;
-  isAvailableNow?: boolean;
+  days?: string[];
   hours?: {
     start: string;
     end: string;
@@ -35,98 +15,68 @@ export interface EscortAvailability {
 export interface Escort {
   id: string;
   name: string;
-  age?: number;
   gender: string;
+  age?: number;
   location?: string;
+  locations?: string[]; // Added to match usage in escortProfiles.ts
+  bio?: string;
+  description?: string;
   rating?: number;
-  reviewCount?: number;
   price: number;
-  tags?: string[];
-  imageUrl?: string;
-  profileImage?: string;
   images?: string[];
+  services?: string[];
   isVerified?: boolean;
   verified?: boolean;
-  availableNow?: boolean;
-  isAvailable?: boolean;
-  responseRate?: number;
-  description?: string;
-  services?: string[];
-  languages?: string[];
-  providesInPersonServices?: boolean;
-  providesVirtualContent?: boolean;
-  locations?: string[];
-  
-  // Additional properties
-  bio?: string;
-  sexualOrientation?: string;
+  featured?: boolean;
+  isAI?: boolean;
+  profileType?: string;
+  boostLevel?: number;
+  contactInfo?: {
+    phone?: string;
+    email?: string;
+    website?: string;
+  };
+  rates?: Record<string, any>;
+  gallery?: string[];
+  stats?: Record<string, any>;
   height?: string | number;
   weight?: string | number;
   measurements?: string;
   hairColor?: string;
   eyeColor?: string;
   ethnicity?: string;
+  sexualOrientation?: string;
+  interests?: string[];
+  specialties?: string[];
+  limitations?: string[];
   bodyType?: string;
-  stats?: {
-    averageRating?: number;
-    totalReviews?: number;
-    reviewCount?: number;
-    height?: string | number;
-    weight?: string | number;
-    bust?: string | number;
-    waist?: string | number;
-    hips?: string | number;
-    rating?: number;
-  };
-  verificationLevel?: VerificationLevel | string;
   avatar?: string;
   avatar_url?: string;
   avatarUrl?: string;
   isFavorited?: boolean;
-  lastActive?: string | Date;
+  lastActive?: Date | string;
   clientsServed?: number;
-  rates?: {
-    [key: string]: number | Record<string, number>;
-    hourly?: number;
-    overnight?: number;
-    twoHours?: number;
-    weekend?: number;
-    incall?: Record<string, number>;
-    outcall?: Record<string, number>;
-  };
+  verificationLevel?: string;
+  availability?: EscortAvailability | string | string[];
   payment_methods?: string[];
   deposit_required?: boolean;
-  specialties?: string[];
-  limitations?: string[];
-  interests?: string[];
-  
-  // Gallery and media
-  gallery?: string[];
-  gallery_images?: string[];
-  videos?: Video[];
-  
-  // Additional fields
-  availability?: string | string[] | EscortAvailability;
-  featured?: boolean;
-  boosted?: boolean;
-  boostLevel?: number;
-  isAI?: boolean;
-  profileType?: string;
-  contactInfo?: {
-    email?: string;
-    phone?: string;
-    website?: string;
-    socialMedia?: Record<string, string>;
-  };
-  city?: string;
-  shortDescription?: string;
-  contentStats?: any;
+  languages?: string[];
+  profileImage?: string;
+  imageUrl?: string;
+  reviewCount?: number;
+  tags?: string[];
+  availableNow?: boolean;
+  isAvailable?: boolean;
+  responseRate?: number;
   subscriptionPrice?: number;
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  videos?: Video[];
 }
 
 export interface Video {
   id: string;
-  url: string; // Make url required to match usage
+  url: string;
   thumbnail?: string;
   thumbnailUrl?: string;
   title?: string;
@@ -139,7 +89,3 @@ export interface Video {
   escortId?: string;
   videoUrl?: string;
 }
-
-// Explicitly export types
-export { Video };
-export type { EscortAvailability };

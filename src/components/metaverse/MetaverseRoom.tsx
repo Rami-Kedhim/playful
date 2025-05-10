@@ -2,121 +2,99 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { hermes } from '@/core';
-import { Shield, Users, Map } from 'lucide-react';
 
 interface MetaverseRoomProps {
-  userId: string;
-  destination: string;
   roomId: string;
-  participants?: number;
+  title: string;
+  capacity: number;
+  currentUsers?: number;
 }
 
 const MetaverseRoom: React.FC<MetaverseRoomProps> = ({ 
-  userId, 
-  destination, 
-  roomId,
-  participants = 0
+  roomId, 
+  title, 
+  capacity, 
+  currentUsers = 0 
 }) => {
-  const [isSafe, setIsSafe] = useState(true);
-  const [isChecking, setIsChecking] = useState(false);
-  const [routeInfo, setRouteInfo] = useState<{ safe: boolean; reason?: string }>({ safe: true });
-  
-  // Check route safety using Hermes
-  const checkSafety = async () => {
-    setIsChecking(true);
-    
-    try {
-      // If Hermes has routeFlow method available, use it
-      if (typeof hermes.routeFlow === 'function') {
-        const result = await hermes.routeFlow(userId, destination);
-        setRouteInfo(result);
-        setIsSafe(result.safe);
-      } else {
-        // Fallback for compatibility
-        console.warn('Hermes.routeFlow method not available');
-        setIsSafe(true);
-      }
-    } catch (error) {
-      console.error('Error checking route safety:', error);
-      setIsSafe(false);
-    } finally {
-      setIsChecking(false);
-    }
-  };
-  
+  const [safetyCheck, setSafetyCheck] = useState<{ safe: boolean; reason?: string }>({ 
+    safe: true 
+  });
+  const [isJoining, setIsJoining] = useState<boolean>(false);
+
   useEffect(() => {
-    checkSafety();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, destination]);
-  
-  const handleJoinRoom = async () => {
-    // Re-check safety before joining
-    setIsChecking(true);
-    
+    // Check room safety when component mounts
+    checkRoomSafety();
+  }, [roomId]);
+
+  const checkRoomSafety = async () => {
     try {
-      if (typeof hermes.routeFlow === 'function') {
-        const result = await hermes.routeFlow(userId, destination);
-        if (result.safe) {
-          console.log('Joining room', roomId);
-          // Would actually navigate or connect to room here
-        } else {
-          console.warn('Cannot join room, route deemed unsafe:', result.reason);
-        }
-      } else {
-        // If no check is possible, proceed anyway
-        console.log('Joining room', roomId);
-      }
+      // Simulate API call to check room safety
+      const result = { safe: true };
+      setSafetyCheck(result);
     } catch (error) {
-      console.error('Error joining room:', error);
-    } finally {
-      setIsChecking(false);
+      console.error("Error checking room safety:", error);
+      setSafetyCheck({ safe: false, reason: "Error checking room safety" });
     }
   };
-  
+
+  const joinRoom = async () => {
+    setIsJoining(true);
+    try {
+      // Simulate room joining process
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Redirect to room or update UI
+      console.log(`Joining room ${roomId}`);
+    } catch (error) {
+      console.error("Error joining room:", error);
+      // Error handling
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
+  const checkModerationStatus = async () => {
+    try {
+      // Simulate API call to check moderation status
+      const result = { safe: true };
+      setSafetyCheck(result);
+      return result.safe;
+    } catch (error) {
+      console.error("Error checking moderation status:", error);
+      const result = { safe: false, reason: "Error checking moderation" };
+      setSafetyCheck(result);
+      return false;
+    }
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Virtual Room: {destination}</CardTitle>
+    <Card className="overflow-hidden">
+      <CardHeader className="bg-primary/10">
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Shield className={`h-5 w-5 mr-2 ${isSafe ? 'text-green-500' : 'text-red-500'}`} />
-              <span>Safety Rating: {isSafe ? 'Safe' : 'Check Required'}</span>
-            </div>
-            <div className="flex items-center">
-              <Users className="h-5 w-5 mr-2" />
-              <span>{participants} Participants</span>
-            </div>
+      <CardContent className="p-4">
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-sm text-muted-foreground">
+            <span>{currentUsers}/{capacity} users</span>
           </div>
-          
-          {!isSafe && routeInfo.reason && (
-            <div className="text-red-500 text-sm p-2 bg-red-50 rounded">
-              Warning: {routeInfo.reason}
-            </div>
-          )}
-          
-          <div className="flex space-x-3 pt-2">
-            <Button 
-              onClick={handleJoinRoom} 
-              disabled={!isSafe || isChecking}
-              className="flex-1"
-            >
-              {isChecking ? 'Checking...' : 'Join Room'}
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={checkSafety} 
-              disabled={isChecking}
-              className="flex items-center"
-            >
-              <Map className="h-4 w-4 mr-2" />
-              Check Route
-            </Button>
+          <div className="flex items-center gap-2">
+            <span className={`h-2 w-2 rounded-full ${currentUsers < capacity ? 'bg-green-500' : 'bg-red-500'}`}></span>
+            <span className="text-xs">{currentUsers < capacity ? 'Available' : 'Full'}</span>
           </div>
         </div>
+        
+        {!safetyCheck.safe ? (
+          <div className="bg-red-100 text-red-800 p-2 rounded mb-4 text-sm">
+            This room has been flagged: {safetyCheck.reason || 'Safety concern'}
+          </div>
+        ) : null}
+        
+        <Button 
+          onClick={joinRoom} 
+          disabled={isJoining || currentUsers >= capacity || !safetyCheck.safe}
+          className="w-full"
+        >
+          {isJoining ? 'Joining...' : 'Enter Room'}
+        </Button>
       </CardContent>
     </Card>
   );

@@ -8,7 +8,8 @@ interface BoostEligibilityCheckProps {
   eligibility: {
     eligible: boolean;
     reasons: string[];
-    nextEligibleDate?: string;
+    nextEligibleDate?: string | Date;
+    nextEligibleTime?: string | Date;
   };
   onClose: () => void;
 }
@@ -46,10 +47,13 @@ const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({
           </ul>
         )}
         
-        {eligibility.nextEligibleDate && (
+        {(eligibility.nextEligibleDate || eligibility.nextEligibleTime) && (
           <div className="flex items-center gap-2 mt-2 text-sm">
             <Clock className="h-4 w-4" />
-            <span>You can try again in {eligibility.nextEligibleDate}</span>
+            <span>You can try again in {
+              eligibility.nextEligibleDate?.toString() || 
+              eligibility.nextEligibleTime?.toString()
+            }</span>
           </div>
         )}
         

@@ -6,6 +6,12 @@ import {
 } from '@/types/core-systems';
 
 export class LucieAI implements LucieAISystem {
+  // Add initialize method
+  async initialize(): Promise<void> {
+    console.log('LucieAI system initialized');
+    // Implementation logic
+  }
+  
   async generateContent(params: GenerateContentParams): Promise<GenerateContentResult> {
     console.log('Generating content with prompt:', params.prompt);
     
