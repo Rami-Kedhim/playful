@@ -1,16 +1,17 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import NeuralMetricsDisplay, { NeuralMetricItem } from './NeuralMetricsDisplay';
+import NeuralMetricsDisplay from './NeuralMetricsDisplay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NeuralMetric } from '@/types/analytics';
 
 const NeuralAnalyticsPage: React.FC = () => {
   // Transform the metrics into the correct format
-  const performanceMetrics: NeuralMetricItem[] = [
-    { title: "Accuracy", value: 94, unit: "%", change: 2.5, timespan: "7d" },
-    { title: "Speed", value: 87, unit: "%", change: -1.2, timespan: "7d" },
-    { title: "Completeness", value: 91, unit: "%", change: 3.8, timespan: "7d" },
-    { title: "Consistency", value: 89, unit: "%", change: 1.5, timespan: "7d" }
+  const performanceMetrics: NeuralMetric[] = [
+    { name: "Accuracy", value: 94, change: 2.5, target: 100 },
+    { name: "Speed", value: 87, change: -1.2, target: 100 },
+    { name: "Completeness", value: 91, change: 3.8, target: 100 },
+    { name: "Consistency", value: 89, change: 1.5, target: 100 }
   ];
 
   return (
@@ -28,7 +29,6 @@ const NeuralAnalyticsPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <NeuralMetricsDisplay 
               metrics={performanceMetrics}
-              period="7d"
               refreshInterval={60}
             />
             

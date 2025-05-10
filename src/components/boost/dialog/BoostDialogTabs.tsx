@@ -48,7 +48,15 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
     );
   };
 
-  // Create a wrapper function that safely handles the promise
+  // Create a wrapper function that safely returns a Promise<boolean>
+  const handleBoostSuccess = async (): Promise<boolean> => {
+    if (onBoostSuccess) {
+      return await onBoostSuccess();
+    }
+    return true;
+  };
+
+  // Create a wrapper for onSuccess that returns void
   const handleSuccess = async () => {
     if (onSuccess) {
       const result = onSuccess();
@@ -56,13 +64,6 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
       if (result instanceof Promise) {
         await result;
       }
-    }
-  };
-
-  // Create a wrapper for onBoostSuccess that returns void
-  const handleBoostSuccess = async () => {
-    if (onBoostSuccess) {
-      await onBoostSuccess();
     }
   };
 

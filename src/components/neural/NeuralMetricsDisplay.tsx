@@ -4,7 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { NeuralMetric, NeuralMetricsDisplayProps } from '@/types/analytics';
 import { Loader2 } from 'lucide-react';
 
-export interface NeuralMetricItem extends NeuralMetric {}
+export interface NeuralMetricItem extends NeuralMetric {
+  title?: string;
+  unit?: string;
+  timespan?: string;
+}
 
 const NeuralMetricsDisplay: React.FC<NeuralMetricsDisplayProps> = ({ 
   metrics,

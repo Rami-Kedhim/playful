@@ -105,6 +105,10 @@ export interface BoostStatus {
   endTime?: Date;
   activeBoostId?: string;
   boostMultiplier?: number;
+  isExpiring?: boolean;
+  boostLevel?: number;
+  remainingDays?: number;
+  level?: number;
 }
 
 export interface BoostEligibility {
