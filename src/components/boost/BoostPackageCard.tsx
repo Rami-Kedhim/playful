@@ -6,11 +6,17 @@ import { BoostPackage } from '@/types/pulse-boost';
 interface BoostPackageCardProps {
   pkg: BoostPackage;
   className?: string;
+  isSelected?: boolean;
+  onSelect?: () => void;
+  formatDuration?: (duration: string) => string;
 }
 
 const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
   pkg,
-  className
+  className,
+  isSelected = false,
+  onSelect = () => {},
+  formatDuration = (d) => d
 }) => {
   const formatVisibility = (value: string | number | undefined): string => {
     if (value === undefined || value === null) return '';
@@ -18,11 +24,15 @@ const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
   };
 
   return (
-    <div className={cn(
-      "border rounded-lg p-4 flex flex-col h-full hover:shadow-md transition-shadow",
-      pkg.isMostPopular && "border-primary",
-      className
-    )}>
+    <div 
+      className={cn(
+        "border rounded-lg p-4 flex flex-col h-full hover:shadow-md transition-shadow cursor-pointer",
+        isSelected && "border-primary shadow-md",
+        pkg.isMostPopular && "border-primary",
+        className
+      )}
+      onClick={onSelect}
+    >
       <h3 className="text-lg font-semibold mb-2">{pkg.name}</h3>
       <p className="text-muted-foreground text-sm mb-4">{pkg.description}</p>
 
@@ -33,7 +43,7 @@ const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
 
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium">Duration:</span>
-        <span className="text-primary">{pkg.duration}</span>
+        <span className="text-primary">{formatDuration(pkg.duration)}</span>
       </div>
 
       {pkg.visibility && (

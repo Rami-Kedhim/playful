@@ -3,11 +3,11 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { EnhancedBoostStatus } from '@/types/pulse-boost';
+import { BoostStatus } from '@/types/pulse-boost';
 import { Zap, Clock } from 'lucide-react';
 
 interface BoostStatusIndicatorProps {
-  status: EnhancedBoostStatus;
+  status: BoostStatus;
 }
 
 const BoostStatusIndicator: React.FC<BoostStatusIndicatorProps> = ({ status }) => {
@@ -51,8 +51,8 @@ const BoostStatusIndicator: React.FC<BoostStatusIndicatorProps> = ({ status }) =
         </div>
         
         <div className="text-xs text-muted-foreground">
-          Started: {status.startedAt ? 
-            new Date(status.startedAt).toLocaleString(undefined, {
+          Started: {status.startTime ? 
+            new Date(status.startTime).toLocaleString(undefined, {
               month: 'short',
               day: 'numeric',
               hour: '2-digit',

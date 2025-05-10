@@ -2,8 +2,15 @@
 import React from 'react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { BoostPackage } from "@/types/boost";
-import BoostPackageCard from './BoostPackage';
+import { BoostPackage } from "@/types/pulse-boost";
+import BoostPackageCard from './BoostPackageCard';
+
+interface BoostPackageProps {
+  pkg: BoostPackage;
+  isSelected: boolean;
+  onSelect: () => void;
+  formatDuration: (duration: string) => string;
+}
 
 interface BoostPackageSelectionProps {
   packages: BoostPackage[];
@@ -51,7 +58,7 @@ const BoostPackageSelection: React.FC<BoostPackageSelectionProps> = ({
         {packages.map((pkg) => (
           <BoostPackageCard
             key={pkg.id}
-            boostPackage={pkg}
+            pkg={pkg}
             isSelected={selectedPackage === pkg.id}
             onSelect={() => onSelectPackage(pkg.id)}
             formatDuration={formatBoostDuration}

@@ -1,101 +1,150 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Check, Zap } from "lucide-react";
-import { BoostPackage } from "@/types/boost";
+
+import React from 'react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Zap } from 'lucide-react';
+import { BoostPackage } from '@/types/boost';
+import { cn } from '@/lib/utils';
 
 interface BoostPackagesProps {
   packages: BoostPackage[];
-  selected: string | null; // Changed from selectedId to selected
-  onSelect: (id: string) => void;
-  formatDuration?: (duration: string) => string;
+  selectedPackage: string | null;
+  onSelectPackage: (id: string) => void;
+  onBoost: () => void;
+  formatDuration: (duration: string) => string;
+  loading?: boolean;
   disabled?: boolean;
-  dailyUsage?: number;
-  dailyLimit?: number;
-  getBoostPrice?: (pkg?: BoostPackage) => number;
 }
 
-const BoostPackages = ({
-  packages, 
-  selected, // Changed parameter name from selectedId to selected
-  onSelect,
-  formatDuration = (duration) => duration || '',
-  disabled = false,
-  dailyUsage = 0,
-  dailyLimit = 5,
-  getBoostPrice = (pkg) => pkg?.price || 0
-}: BoostPackagesProps) => {
-  if (!packages || packages.length === 0) {
-    return <div className="text-center py-6">No boost packages available</div>;
-  }
-
-  const formatVisibility = (value: string | number | undefined): string => {
+const BoostPackages: React.FC<BoostPackagesProps> = ({
+  packages,
+  selectedPackage,
+  onSelectPackage,
+  onBoost,
+  formatDuration,
+  loading = false,
+  disabled = false
+}) => {
+  // Helper function to format visibility properly
+  const formatVisibility = (value?: string | number): string => {
     if (value === undefined || value === null) return '';
-    return typeof value === 'number' ? `${value}%` : value;
+    
+    // If it's a number, convert it to string with % sign
+    if (typeof value === 'number') {
+      return `${value}%`;
+    }
+    
+    // If it's already a string, just return it
+    return value;
   };
-
+  
+  const getColorClass = (isPrimary: boolean = false) => {
+    return isPrimary ? 'border-primary' : '';
+  };
+  
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[1, 2, 3].map(i => (
+          <Card key={i} className="animate-pulse">
+            <CardHeader className="pb-3">
+              <div className="h-7 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <div className="h-9 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+  
+  if (!packages || packages.length === 0) {
+    return <p>No boost packages available.</p>;
+  }
+  
   return (
-    <div className="space-y-4">
-      {dailyLimit > 0 && (
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-muted-foreground">Daily boost usage:</span>
-          <span className="font-medium">{dailyUsage} / {dailyLimit}</span>
-        </div>
-      )}
-      
-      <RadioGroup value={selected || undefined} onValueChange={onSelect}>
-        <div className="space-y-3">
-          {packages.map((pkg) => (
-            <div key={pkg.id} className="relative">
-              <RadioGroupItem
-                id={pkg.id}
-                value={pkg.id}
-                className="sr-only"
-                disabled={disabled}
-              />
-              <Label
-                htmlFor={pkg.id}
-                className={`
-                  flex cursor-pointer rounded-lg border border-muted p-4
-                  ${selected === pkg.id ? "bg-primary/5 border-primary" : "hover:bg-accent"}
-                  ${disabled ? "opacity-50 cursor-not-allowed" : ""}
-                `}
-              >
-                <div className="flex flex-1 items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="font-medium">{pkg.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {formatDuration(pkg.duration || '')}
-                    </div>
-                    {pkg.features && pkg.features.length > 0 && (
-                      <ul className="text-xs space-y-1 mt-1">
-                        {pkg.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-center gap-1">
-                            <Check className="h-3 w-3 text-green-500" />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                  
-                  <div className="flex flex-col items-end">
-                    <Badge className="bg-primary mb-2">
-                      <Zap className="h-3 w-3 mr-1" />
-                      {pkg.boost_power ? `+${pkg.boost_power}%` : 'Boost'}
-                    </Badge>
-                    
-                    <div className="text-sm font-medium">
-                      {getBoostPrice(pkg)} UBX
-                    </div>
-                  </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {packages.map(pkg => {
+        const isSelected = selectedPackage === pkg.id;
+        const isPrimary = pkg.boost_power && pkg.boost_power >= 20;
+        
+        return (
+          <Card 
+            key={pkg.id}
+            className={cn(
+              'relative cursor-pointer border-2 transition-all',
+              isSelected ? 'border-primary shadow-md' : getColorClass(isPrimary)
+            )}
+            onClick={() => onSelectPackage(pkg.id)}
+          >
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-start">
+                <CardTitle>{pkg.name}</CardTitle>
+                {pkg.boost_power && (
+                  <Badge variant="outline">{pkg.boost_power}x</Badge>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">{pkg.description}</p>
+            </CardHeader>
+            
+            <CardContent>
+              <div className="mb-4">
+                <span className="text-2xl font-bold">${pkg.price}</span>
+                <span className="text-sm text-muted-foreground ml-1">/ {formatDuration(pkg.duration)}</span>
+              </div>
+              
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Visibility Boost:</span>
+                  <span>{formatVisibility(pkg.visibility)}</span>
                 </div>
-              </Label>
-            </div>
-          ))}
-        </div>
-      </RadioGroup>
+                
+                {pkg.features && pkg.features.length > 0 && (
+                  <ul className="space-y-1">
+                    {pkg.features.map((feature, i) => (
+                      <li key={i} className="flex">
+                        <span className="text-green-500 mr-2">✓</span>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </CardContent>
+            
+            <CardFooter>
+              {isSelected ? (
+                <Button 
+                  className="w-full" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onBoost();
+                  }}
+                  disabled={disabled}
+                >
+                  <Zap className="mr-2 h-4 w-4" />
+                  Boost Now
+                </Button>
+              ) : (
+                <Button variant="outline" className="w-full" disabled={disabled}>
+                  Select
+                </Button>
+              )}
+            </CardFooter>
+          </Card>
+        );
+      })}
     </div>
   );
 };

@@ -14,7 +14,7 @@ import { UberCore } from '@/core';
 const AdminDashboard: React.FC = () => {
   useEffect(() => {
     // Create a temporary UberCore instance for initialization
-    const core = new UberCore(null);
+    const core = new UberCore();
     
     // Initialize SEO automation
     core.initializeAutomaticSeo();

@@ -1,100 +1,105 @@
-import { useState } from "react";
-import { Zap, Info } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { BoostPackage } from "@/types/boost";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { GLOBAL_UBX_RATE } from "@/utils/oxum/globalPricing";
-import UBXPriceDisplay from "@/components/oxum/UBXPriceDisplay";
+
+import React from 'react';
+import { BoostPackage } from '@/types/pulse-boost';
+import { Alert } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface BoostPackageListProps {
   packages: BoostPackage[];
   selectedPackage: string | null;
-  onSelectPackage: (packageId: string) => void;
+  onSelectPackage: (id: string) => void;
   formatBoostDuration: (duration: string) => string;
-  getBoostPrice: () => number;
+  getBoostPrice?: () => number;
+  onPurchase?: () => void;
 }
 
 const BoostPackageList = ({
-  packages, 
-  selectedPackage, 
+  packages,
+  selectedPackage,
   onSelectPackage,
   formatBoostDuration,
-  getBoostPrice
+  getBoostPrice,
+  onPurchase
 }: BoostPackageListProps) => {
-  const formatVisibility = (value: string | number | undefined): string => {
-    if (value === undefined || value === null) return '';
-    return typeof value === 'number' ? `${value}%` : value;
-  };
+  if (!packages || packages.length === 0) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <p>No boost packages are currently available.</p>
+      </Alert>
+    );
+  }
 
+  // Helper function to format visibility properly (handling string or number types)
+  const formatVisibility = (value?: string | number): string => {
+    if (value === undefined || value === null) return '';
+    
+    // Convert to string with % if it's a number
+    if (typeof value === 'number') {
+      return `${value}%`;
+    }
+    
+    return value;
+  };
+  
   return (
-    <div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-4">
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-4">
         {packages.map((pkg) => (
-          <Card 
-            key={pkg.id}
-            className={`p-4 cursor-pointer transition-all ${
-              selectedPackage === pkg.id 
-                ? "ring-2 ring-primary" 
-                : "hover:shadow-md"
+          <div 
+            key={pkg.id} 
+            className={`border rounded-lg p-4 cursor-pointer hover:border-primary ${
+              selectedPackage === pkg.id ? 'border-primary bg-primary/5' : 'border-border'
             }`}
             onClick={() => onSelectPackage(pkg.id)}
           >
-            <div className="text-center">
-              <h3 className="font-medium">{pkg.name}</h3>
-              <div className="text-sm text-muted-foreground my-2">
-                {formatBoostDuration(pkg.duration || '')}
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-medium">{pkg.name}</h3>
+                <p className="text-sm text-muted-foreground">{pkg.description}</p>
               </div>
-              <div className="flex items-center justify-center gap-1 mt-2">
-                <Zap className="h-4 w-4 text-yellow-500" />
-                <UBXPriceDisplay 
-                  amount={GLOBAL_UBX_RATE}
-                  isGlobalPrice={true}
-                />
+              <div className="text-right">
+                <span className="font-bold">${pkg.price}</span>
               </div>
-              {pkg.features && pkg.features.length > 0 && (
-                <div className="mt-3 text-xs text-left">
-                  <p className="font-medium mb-1">Includes:</p>
-                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    {pkg.features.map((feature, i) => (
-                      <li key={i}>{feature}</li>
-                    ))}
-                  </ul>
-                </div>
+            </div>
+            
+            <div className="mt-3 grid grid-cols-2 text-sm gap-y-1">
+              <div>Duration:</div>
+              <div className="text-right">{formatBoostDuration(pkg.duration)}</div>
+              
+              {pkg.visibility && (
+                <>
+                  <div>Visibility:</div>
+                  <div className="text-right">{formatVisibility(pkg.visibility)}</div>
+                </>
               )}
             </div>
-          </Card>
+            
+            {pkg.features && pkg.features.length > 0 && (
+              <div className="mt-2">
+                <p className="text-xs text-muted-foreground mb-1">Features:</p>
+                <ul className="text-xs text-muted-foreground">
+                  {pkg.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-center">
+                      <span className="text-green-500 mr-1">✓</span> {feature}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         ))}
       </div>
       
-      <div className="flex justify-between items-center bg-muted p-3 rounded-md">
-        <div className="flex items-center">
-          <Zap className="h-4 w-4 text-yellow-500 mr-2" />
-          <span className="text-sm">Your balance:</span>
-          <span className="ml-2 font-medium">1000 UBX</span>
-        </div>
-        
-        <div className="flex items-center text-muted-foreground text-sm">
-          <span>Oxum Global Price:</span>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-4 w-4 mx-1 cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-xs">
-                  Following Oxum Rule #001 on Global Price Symmetry, boost pricing is uniform worldwide.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <UBXPriceDisplay 
-            amount={GLOBAL_UBX_RATE}
-            isGlobalPrice={true}
-            showConversion={false}
-            size="sm"
-          />
-        </div>
-      </div>
+      {selectedPackage && onPurchase && (
+        <Button 
+          className="w-full" 
+          onClick={onPurchase}
+        >
+          Boost Now ({getBoostPrice ? getBoostPrice() : '$0'})
+        </Button>
+      )}
     </div>
   );
 };

@@ -6,11 +6,16 @@ export interface BoostPackage {
   price: number;
   price_ubx?: number;
   duration: string;
+  durationMinutes?: number;
   visibility?: string | number;
+  visibility_increase?: number;
   features?: string[];
   isMostPopular?: boolean;
   isPopular?: boolean;
   boost_power?: number;
+  badgeColor?: string;
+  color?: string;
+  boostMultiplier?: number;
 }
 
 export interface BoostEligibility {
@@ -56,6 +61,27 @@ export interface BoostAnalytics {
     impressions: number;
     clicks: number;
   }>;
+  totalBoosts?: number;
+  activeBoosts?: number;
+  averageBoostScore?: number;
+  views?: number;
+  impressions?: {
+    value: number;
+    change?: number;
+    today?: number;
+    yesterday?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+  };
+  interactions?: {
+    value: number;
+    change?: number;
+    today?: number;
+    yesterday?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+  };
+  additionalViews?: number;
 }
 
 export interface PulseBoost {
@@ -70,4 +96,52 @@ export interface PulseBoost {
     clicks: number;
     conversion: number;
   };
+  name: string;
+  description: string;
+  duration: string;
+  price: number;
+  price_ubx?: number;
+  features: string[];
+  isMostPopular?: boolean;
+}
+
+export interface EnhancedBoostStatus extends BoostStatus {
+  packageName?: string;
+  expiresAt?: Date;
+  startedAt?: Date;
+  timeRemaining?: string;
+  progress?: number;
+  boostPackage?: BoostPackage;
+  packageId?: string;
+  isActive: boolean;
+  percentRemaining?: number;
+  remainingMinutes?: number;
+  isExpired?: boolean;
+}
+
+// Define analytics data for boost components
+export interface AnalyticsData {
+  totalBoosts: number;
+  activeBoosts: number;
+  averageBoostScore: number;
+  views?: number;
+  impressions?: {
+    value: number;
+    change?: number;
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+  };
+  interactions?: {
+    value: number;
+    change?: number;
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
+  };
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
 }

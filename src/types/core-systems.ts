@@ -41,11 +41,19 @@ export interface OxumSystem {
   getBalance: (userId: string) => Promise<number>;
 }
 
+export interface SubsystemHealth {
+  name: string;
+  status: string;
+  health: number;
+}
+
 export interface UberCoreSystem {
   initialize: () => Promise<boolean>;
-  initializeAutomaticSeo?: () => Promise<boolean>;
+  initializeAutomaticSeo: () => Promise<boolean>;
   getStatus: () => Promise<{ online: boolean; services: string[] }>;
   lucieAI: LucieAISystem;
   hermes: HermesSystem;
   oxum: OxumSystem;
+  checkSubsystemHealth: () => SubsystemHealth[];
 }
+

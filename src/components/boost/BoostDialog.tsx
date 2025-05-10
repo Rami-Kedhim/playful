@@ -51,11 +51,17 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
     }
     
     // Transform if needed (handling potential isEligible vs eligible property mismatch)
-    return {
-      eligible: boostEligibility.eligible || false,
+    const eligibilityObj: BoostEligibility = {
+      eligible: boostEligibility.eligible || boostEligibility.isEligible || false,
       reason: boostEligibility.reason || '',
       reasons: boostEligibility.reasons || []
     };
+
+    if (boostEligibility.nextEligibleTime) {
+      eligibilityObj.nextEligibleTime = boostEligibility.nextEligibleTime;
+    }
+    
+    return eligibilityObj;
   };
 
   const onCancelBoost = () => {

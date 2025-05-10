@@ -1,66 +1,154 @@
+// User role types
+export type UserRole = 'USER' | 'ADMIN' | 'MODERATOR' | 'ESCORT' | 'CLIENT';
 
-// Update the BoostPackage interface to include all required fields
+export const UserRoleEnum = {
+  USER: 'USER' as UserRole,
+  ADMIN: 'ADMIN' as UserRole,
+  MODERATOR: 'MODERATOR' as UserRole,
+  ESCORT: 'ESCORT' as UserRole,
+  CLIENT: 'CLIENT' as UserRole
+};
+
+// Define the PulseBoost type
+export interface PulseBoost {
+  id: string;
+  name: string;
+  description: string;
+  duration: string;
+  durationMinutes?: number;
+  price: number;
+  price_ubx?: number;
+  visibility?: string;
+  visibility_increase?: number;
+  features?: string[];
+  color?: string;
+  badgeColor?: string;
+  boost_power?: number;
+  boostMultiplier?: number;
+}
+
+// Define types for the Boost Package and related operations
 export interface BoostPackage {
   id: string;
   name: string;
   description?: string;
-  duration: string | number;
-  durationInSeconds: number;
   price: number;
   price_ubx?: number;
-  level: number;
-  visibility: number;
+  duration: string;
+  durationMinutes?: number;
+  durationInSeconds?: number;
   features?: string[];
-  recommended?: boolean;
-  position?: number;
-  isMostPopular?: boolean;
-  isPopular?: boolean;
+  visibility?: string;
+  visibility_increase?: number;
   boost_power?: number;
+  color?: string;
+  badgeColor?: string;
+  boostMultiplier?: number;
+  isMostPopular?: boolean;
+  isRecommended?: boolean;
+  level?: number;
+  isPopular?: boolean;
 }
 
-// Update the BoostStatus interface with all necessary fields
+export interface BoostPurchaseRequest {
+  profileId: string;
+  packageId: string;
+}
+
+export interface BoostPurchaseResult {
+  success: boolean;
+  boostId?: string;
+  error?: string | null;
+  message?: string;
+  transactionId?: string;
+}
+
+export interface BoostAnalytics {
+  totalBoosts: number;
+  activeBoosts: number;
+  averageBoostScore: number;
+  boostHistory: Array<{
+    date: Date;
+    score: number;
+  }>;
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  views?: number;
+  impressions?: {
+    value: number;
+    change?: number;
+  };
+  interactions?: {
+    value: number;
+    change?: number;
+  };
+}
+
+export interface BoostHistory {
+  items: Array<{
+    id: string;
+    packageId: string;
+    startDate: Date;
+    endDate: Date;
+    price: number;
+    status: string;
+  }>;
+  userId?: string;
+  startTime?: Date;
+  endTime?: Date;
+  boostType?: string;
+  price?: number;
+  status?: string;
+}
+
 export interface BoostStatus {
   isActive: boolean;
-  expiresAt?: Date | string | null;
-  level?: number;
   packageId?: string;
-  packageName?: string;
-  startedAt?: Date | string;
-  remainingTime?: string | number;
+  expiresAt?: Date;
+  startedAt?: Date;
   timeRemaining?: string | number;
-  timeProgress?: number;
-  progress?: number;
-  startTime?: Date | string;
-  endTime?: Date | string;
+  remainingTime?: string | number;
+  packageName?: string;
   boostPackage?: BoostPackage;
+  progress?: number;
+  startTime?: Date;
+  endTime?: Date;
+  activeBoostId?: string;
+  boostMultiplier?: number;
 }
 
-// Update BoostEligibility to use eligible instead of isEligible
 export interface BoostEligibility {
-  eligible: boolean;
+  isEligible?: boolean;
+  eligible?: boolean;
   reason?: string;
   reasons?: string[];
-  cooldownRemaining?: number;
-  dailyBoostsRemaining?: number;
-  level?: number;
-  requiredVerificationLevel?: string;
   nextEligibleTime?: string;
+  remainingBoosts?: number;
+  maxBoostsPerDay?: number;
 }
 
 export interface HermesStatus {
   position?: number;
   activeUsers?: number;
   estimatedVisibility?: number;
-  lastUpdateTime?: Date;
-  metrics?: {
-    velocity?: number;
-    engagement?: number;
-    retention?: number;
-    conversion?: number;
-  };
-  isActive?: boolean;
+  lastUpdateTime?: string;
   boostScore?: number;
   effectivenessScore?: number;
+  isActive?: boolean;
+}
+
+export interface EnhancedBoostStatus {
+  isActive: boolean;
+  packageId?: string;
+  packageName?: string;
+  expiresAt?: Date;
+  startedAt?: Date;
+  timeRemaining?: string;
+  boostPackage?: BoostPackage;
+  progress?: number;
+  boostMultiplier?: number;
+  remainingTime?: string;
 }
 
 export interface BoostAnalyticsData {
