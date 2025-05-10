@@ -15,6 +15,10 @@ export interface GenerateContentParams {
   maxLength?: number;
   temperature?: number;
   format?: string;
+  options?: {
+    temperature?: number;
+    maxTokens?: number;
+  };
 }
 
 export interface GenerateContentResult {
@@ -95,4 +99,17 @@ export class LucieAI implements LucieAISystem {
   createPersonaResponse(persona: UberPersona, prompt: string): Promise<string> {
     return Promise.resolve(`Response from ${persona.name}: Thank you for your message!`);
   }
+  
+  getSystemStatus(): { modules: Record<string, string> } {
+    return {
+      modules: {
+        aiGeneration: 'online',
+        contentModeration: 'online',
+        sentimentAnalysis: 'online'
+      }
+    };
+  }
 }
+
+// Create the instance for the singleton pattern
+export const lucieAI = new LucieAI();
