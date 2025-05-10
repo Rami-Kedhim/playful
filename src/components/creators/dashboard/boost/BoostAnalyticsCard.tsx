@@ -1,6 +1,7 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AnalyticsData } from '@/hooks/boost/useBoostAnalytics';
+import { AnalyticsData } from '@/types/pulse-boost';
 import { ArrowUp, ArrowDown, TrendingUp, Users, Eye, MousePointerClick } from 'lucide-react';
 
 interface BoostAnalyticsCardProps {
@@ -95,28 +96,28 @@ const BoostAnalyticsCard: React.FC<BoostAnalyticsCardProps> = ({
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {renderMetricCard(
+            {analytics?.views !== undefined && renderMetricCard(
               'Profile Views', 
               analytics.views, 
               analytics.impressions?.change,
               <Eye className="h-5 w-5 text-primary" />
             )}
             
-            {renderMetricCard(
+            {analytics?.impressions?.value !== undefined && renderMetricCard(
               'Impressions', 
-              analytics.impressions?.value, 
-              analytics.impressions?.change,
+              analytics.impressions.value, 
+              analytics.impressions.change,
               <Users className="h-5 w-5 text-primary" />
             )}
             
-            {renderMetricCard(
+            {analytics?.interactions?.value !== undefined && renderMetricCard(
               'Interactions', 
-              analytics.interactions?.value, 
-              analytics.interactions?.change,
+              analytics.interactions.value, 
+              analytics.interactions.change,
               <MousePointerClick className="h-5 w-5 text-primary" />
             )}
             
-            {analytics.additionalViews !== undefined && renderMetricCard(
+            {analytics?.additionalViews !== undefined && renderMetricCard(
               'Additional Views', 
               analytics.additionalViews, 
               undefined,

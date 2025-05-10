@@ -16,10 +16,14 @@ export interface BoostPackage {
   badgeColor?: string;
   color?: string;
   boostMultiplier?: number;
+  durationInSeconds?: number;
+  level?: number;
+  isRecommended?: boolean;
 }
 
 export interface BoostEligibility {
   eligible: boolean;
+  isEligible?: boolean; // For backward compatibility
   reason: string;
   reasons?: string[];
   nextEligibleTime?: string;
@@ -46,63 +50,6 @@ export interface HermesStatus {
   boostScore?: number;
   effectivenessScore?: number;
   isActive?: boolean;
-}
-
-export interface BoostAnalytics {
-  profileId: string;
-  metrics: {
-    impressions: number;
-    clicks: number;
-    conversion: number;
-    visibility: number;
-  };
-  history: Array<{
-    date: string;
-    impressions: number;
-    clicks: number;
-  }>;
-  totalBoosts?: number;
-  activeBoosts?: number;
-  averageBoostScore?: number;
-  views?: number;
-  impressions?: {
-    value: number;
-    change?: number;
-    today?: number;
-    yesterday?: number;
-    withBoost?: number;
-    withoutBoost?: number;
-  };
-  interactions?: {
-    value: number;
-    change?: number;
-    today?: number;
-    yesterday?: number;
-    withBoost?: number;
-    withoutBoost?: number;
-  };
-  additionalViews?: number;
-}
-
-export interface PulseBoost {
-  id: string;
-  profileId: string;
-  packageId: string;
-  startTime: Date;
-  endTime: Date;
-  status: 'active' | 'expired' | 'cancelled';
-  metrics?: {
-    impressions: number;
-    clicks: number;
-    conversion: number;
-  };
-  name: string;
-  description: string;
-  duration: string;
-  price: number;
-  price_ubx?: number;
-  features: string[];
-  isMostPopular?: boolean;
 }
 
 export interface EnhancedBoostStatus extends BoostStatus {
@@ -140,8 +87,35 @@ export interface AnalyticsData {
     today?: number;
     yesterday?: number;
     weeklyAverage?: number;
+    withBoost?: number;
+    withoutBoost?: number;
   };
   additionalViews?: number;
   engagementIncrease?: number;
   rankingPosition?: number;
+}
+
+export interface PulseBoost {
+  id: string;
+  name: string; 
+  description: string;
+  duration: string;
+  durationMinutes?: number;
+  price: number;
+  price_ubx?: number;
+  visibility?: string;
+  visibility_increase?: number;
+  features?: string[];
+  color?: string;
+  badgeColor?: string;
+  boost_power?: number;
+  boostMultiplier?: number;
+  isMostPopular?: boolean;
+  profileId?: string;
+  packageId?: string;
+  startTime?: Date;
+  endTime?: Date;
+  status?: string;
+  isPopular?: boolean;
+  isActive?: boolean;
 }

@@ -9,7 +9,7 @@ import {
 import { Zap } from 'lucide-react';
 import { useBoostDialog } from '@/hooks/boost/useBoostDialog';
 import BoostDialogTabs from './dialog/BoostDialogTabs';
-import { BoostEligibility } from '@/types/pulse-boost';
+import { BoostEligibility, BoostStatus, BoostPackage } from '@/types/pulse-boost';
 
 interface BoostDialogProps {
   profileId: string;
@@ -45,6 +45,7 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
     if (!boostEligibility) {
       return {
         eligible: false,
+        isEligible: false,
         reason: 'Unknown eligibility status',
         reasons: []
       };
@@ -52,7 +53,8 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
     
     // Transform if needed (handling potential isEligible vs eligible property mismatch)
     const eligibilityObj: BoostEligibility = {
-      eligible: boostEligibility.eligible || boostEligibility.isEligible || false,
+      eligible: boostEligibility.eligible || false,
+      isEligible: boostEligibility.eligible || boostEligibility.isEligible || false,
       reason: boostEligibility.reason || '',
       reasons: boostEligibility.reasons || []
     };
@@ -62,6 +64,22 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
     }
     
     return eligibilityObj;
+  };
+
+  // Ensure boostPackages meet the types required by pulse-boost.ts
+  const sanitizePackages = (pkgs: any[]): BoostPackage[] => {
+    return pkgs.map(pkg => ({
+      ...pkg,
+      description: pkg.description || '',
+    })) as BoostPackage[];
+  };
+
+  // Also make sure boostStatus meets type requirements
+  const sanitizeBoostStatus = (status: any): BoostStatus => {
+    return {
+      ...status,
+      remainingTime: status?.remainingTime ? String(status.remainingTime) : '',
+    };
   };
 
   const onCancelBoost = () => {
@@ -79,11 +97,11 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
         </DialogHeader>
 
         <BoostDialogTabs
-          boostStatus={boostStatus}
+          boostStatus={sanitizeBoostStatus(boostStatus)}
           eligibility={getEligibility()}
-          packages={packages}
-          onBoostSuccess={handleBoost}
+          packages={sanitizePackages(packages)}
           profileId={profileId}
+          onBoostSuccess={handleBoost}
         />
       </DialogContent>
     </Dialog>

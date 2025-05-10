@@ -1,8 +1,10 @@
 
+// Analytics types
+
 export interface AnalyticsData {
-  totalBoosts: number;
-  activeBoosts: number;
-  averageBoostScore: number;
+  totalBoosts?: number;
+  activeBoosts?: number;
+  averageBoostScore?: number;
   views?: number;
   impressions?: {
     value: number;
@@ -72,4 +74,33 @@ export interface DashboardAnalytics {
     views: number;
     revenue: number;
   }>;
+}
+
+export interface MetricCardProps {
+  title: string;
+  value: string | number;
+  change?: number;
+  unit?: string;
+}
+
+export interface ExtendedMetricCardProps extends MetricCardProps {
+  onClick?: () => void;
+}
+
+export interface DetailedMetricViewProps {
+  title?: string;
+  description?: string;
+  value?: number;
+  unit?: string;
+  change?: number;
+  trendData?: Array<{ date: string; value: number }>;
+  onBack: () => void;
+  metric?: {
+    title: string;
+    description: string;
+    value: number;
+    unit: string;
+    change: number;
+  };
+  data?: Array<{ date: string; value: number }>;
 }

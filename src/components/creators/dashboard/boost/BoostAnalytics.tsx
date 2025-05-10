@@ -9,6 +9,7 @@ import { AnalyticsHeader, AnalyticsHeaderProps } from '../analytics';
 import { AnalyticsStats } from '../analytics';
 import { AnalyticsCharts } from '../analytics';
 import { AnalyticsSummary } from '../analytics';
+import { AnalyticsData } from '@/types/pulse-boost';
 
 interface BoostAnalyticsProps {
   profileId?: string;
@@ -33,6 +34,11 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
   // Check if boostStatus exists and if it has isActive property
   const isActiveBoost = boostStatus && (boostStatus.isActive === true);
 
+  // Safely access analytics properties with defaults
+  const totalBoosts = analytics?.totalBoosts || 0;
+  const activeBoosts = analytics?.activeBoosts || 0;
+  const averageBoostScore = analytics?.averageBoostScore || 0;
+
   return (
     <div className="space-y-6">
       <AnalyticsHeader {...headerProps} />
@@ -48,7 +54,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
             ) : errorObj ? (
               <div>Error: {errorObj?.message || 'Unknown error'}</div>
             ) : (
-              <div>{analytics?.totalBoosts || 0}</div>
+              <div>{totalBoosts}</div>
             )}
           </CardContent>
         </Card>
@@ -63,7 +69,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
             ) : errorObj ? (
               <div>Error: {errorObj?.message || 'Unknown error'}</div>
             ) : (
-              <div>{analytics?.activeBoosts || 0}</div>
+              <div>{activeBoosts}</div>
             )}
           </CardContent>
         </Card>
@@ -78,7 +84,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
             ) : errorObj ? (
               <div>Error: {errorObj?.message || 'Unknown error'}</div>
             ) : (
-              <div>{analytics?.averageBoostScore || 0}</div>
+              <div>{averageBoostScore}</div>
             )}
           </CardContent>
         </Card>

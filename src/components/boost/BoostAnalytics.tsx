@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import BoostAnalyticsCard from './BoostAnalyticsCard';
-import { AnalyticsData } from '@/hooks/boost/useBoostAnalytics';
+import { AnalyticsData } from '@/types/pulse-boost';
 
 interface BoostAnalyticsProps {
   isActive: boolean;

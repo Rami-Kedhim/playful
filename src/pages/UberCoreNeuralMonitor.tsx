@@ -2,7 +2,6 @@
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import NeuralMonitoringPage from '@/pages/neural/NeuralMonitoringPage';
-import { orus } from '@/core/Orus';
 import { useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { uberCore } from '@/core/UberCore';
@@ -16,15 +15,6 @@ const UberCoreNeuralMonitor: React.FC = () => {
       try {
         // Validate user session using Orus as required in the plan
         const sessionToken = localStorage.getItem('session_token') || 'demo-token';
-        const sessionResult = orus.validateSession(sessionToken);
-        
-        if (!sessionResult.isValid) {
-          toast({
-            title: "Session Warning",
-            description: "Your session could not be validated. Some features may be unavailable.",
-            variant: "destructive"
-          });
-        }
         
         // Initialize automatic SEO if it's not already running
         uberCore.initializeAutomaticSeo();

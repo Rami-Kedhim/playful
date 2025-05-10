@@ -1,10 +1,10 @@
 
-import { UberCoreSystem, SubsystemHealth } from '@/types/core-systems';
+import { UberCoreSystem, SubsystemHealth, LucieAISystem, HermesSystem, OxumSystem } from '@/types/core-systems';
 
 export class UberCore implements UberCoreSystem {
-  private lucieAI: any = {};
-  private hermes: any = {}; 
-  private oxum: any = {};
+  private lucieAI: LucieAISystem | any = {};
+  private hermes: HermesSystem | any = {}; 
+  private oxum: OxumSystem | any = {};
   
   constructor() {
     // Default constructor with no parameters
@@ -51,5 +51,8 @@ export class UberCore implements UberCoreSystem {
     ];
   }
 }
+
+// Export a default instance for use across the app
+export const uberCore = new UberCore();
 
 export default UberCore;

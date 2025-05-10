@@ -5,13 +5,6 @@ import { AlertCircle } from "lucide-react";
 import { BoostPackage } from "@/types/pulse-boost";
 import BoostPackageCard from './BoostPackageCard';
 
-interface BoostPackageProps {
-  pkg: BoostPackage;
-  isSelected: boolean;
-  onSelect: () => void;
-  formatDuration: (duration: string) => string;
-}
-
 interface BoostPackageSelectionProps {
   packages: BoostPackage[];
   selectedPackage: string | null;

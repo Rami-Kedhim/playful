@@ -106,7 +106,7 @@ export interface Escort {
   videos?: Video[];
   
   // Additional fields
-  availability?: EscortAvailability | string[] | string;
+  availability?: string | string[] | EscortAvailability;
   featured?: boolean;
   boosted?: boolean;
   boostLevel?: number;
