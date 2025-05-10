@@ -1,6 +1,7 @@
 
 import { Escort as EscortType } from '@/types/Escort';
 import { Escort as EscortTypeNew } from '@/types/escort';
+import { EscortAvailabilityDay } from '@/types/Escort';
 
 /**
  * Converts between different Escort types to resolve the type incompatibilities
@@ -26,11 +27,13 @@ export function convertEscortType(escort: any): EscortTypeNew {
       // Ensure days property is properly typed
       if (availability.days) {
         // If it's a string array, convert it to a compatible format
-        if (Array.isArray(availability.days) && typeof availability.days[0] === 'string') {
-          availability.days = availability.days.map(day => ({
-            day,
-            available: true
-          }));
+        if (Array.isArray(availability.days)) {
+          if (typeof availability.days[0] === 'string') {
+            availability.days = availability.days.map(day => ({
+              day,
+              available: true
+            })) as EscortAvailabilityDay[];
+          }
         }
       }
       

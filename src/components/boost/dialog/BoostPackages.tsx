@@ -28,6 +28,12 @@ const BoostPackages: React.FC<BoostPackagesProps> = ({
   getPrice,
   formatDuration = (duration) => duration
 }) => {
+  // Create normalized packages with required description field if missing
+  const normalizedPackages = packages.map(pkg => ({
+    ...pkg,
+    description: pkg.description || pkg.name || ""
+  }));
+
   return (
     <div className="space-y-4">
       <div className="text-sm text-muted-foreground mb-2">
@@ -35,7 +41,7 @@ const BoostPackages: React.FC<BoostPackagesProps> = ({
       </div>
       
       <div className="space-y-3">
-        {packages.map((pkg) => (
+        {normalizedPackages.map((pkg) => (
           <BoostPackageCard
             key={pkg.id}
             pkg={pkg}

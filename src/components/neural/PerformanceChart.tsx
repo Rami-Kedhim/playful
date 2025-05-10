@@ -9,7 +9,8 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   title = "Performance Metrics",
   description,
   height = 300,
-  color = "#2563eb" 
+  color = "#2563eb",
+  dataKey = "value"
 }) => {
   return (
     <Card className="w-full">
@@ -33,7 +34,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="value" fill={color} />
+              <Bar dataKey={dataKey} fill={color} />
             </BarChart>
           </ResponsiveContainer>
         </div>

@@ -21,7 +21,17 @@ const DetailedMetricView: React.FC<DetailedMetricViewProps> = ({
   // Use either direct props or extract from metric object
   const displayTitle = title || metric?.title || '';
   const displayDescription = description || metric?.description || '';
-  const displayData = data.length > 0 ? data : trendData;
+  
+  // Map data if it has date instead of name to ensure compatibility with PerformanceChart
+  const formattedData = data.length > 0 ? data.map(item => {
+    if ('date' in item && !('name' in item)) {
+      return {
+        name: item.date,
+        value: item.value
+      };
+    }
+    return item;
+  }) : trendData;
   
   // Format change as percentage or absolute value
   const formatChange = () => {
@@ -62,29 +72,28 @@ const DetailedMetricView: React.FC<DetailedMetricViewProps> = ({
           <div>
             <h3 className="text-lg font-medium mb-2">Trend Analysis</h3>
             <PerformanceChart 
-              data={displayData}
-              dataKey="value"
+              data={formattedData}
               title=""
             />
           </div>
           
-          {displayData.length > 0 && (
+          {formattedData && formattedData.length > 0 && (
             <div>
               <h3 className="text-lg font-medium mb-2">Key Insights</h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <strong>Peak Value:</strong> {Math.max(...displayData.map(d => d.value))}{unit}
+                  <strong>Peak Value:</strong> {Math.max(...formattedData.map(d => d.value))}{unit}
                 </li>
                 <li>
-                  <strong>Minimum Value:</strong> {Math.min(...displayData.map(d => d.value))}{unit}
+                  <strong>Minimum Value:</strong> {Math.min(...formattedData.map(d => d.value))}{unit}
                 </li>
                 <li>
-                  <strong>Average:</strong> {(displayData.reduce((sum, d) => sum + d.value, 0) / displayData.length).toFixed(2)}{unit}
+                  <strong>Average:</strong> {(formattedData.reduce((sum, d) => sum + d.value, 0) / formattedData.length).toFixed(2)}{unit}
                 </li>
                 <li>
                   <strong>Volatility:</strong> {
                     (() => {
-                      const values = displayData.map(d => d.value);
+                      const values = formattedData.map(d => d.value);
                       const max = Math.max(...values);
                       const min = Math.min(...values);
                       return ((max - min) / ((max + min) / 2) * 100).toFixed(1);

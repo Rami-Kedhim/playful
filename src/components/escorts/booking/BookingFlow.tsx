@@ -3,17 +3,16 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { bookingService } from '@/services/bookingService';
-import { Escort } from '@/types/escort';
 import { Booking } from '@/types/booking';
 import { toast } from '@/components/ui/use-toast';
-import BookingDialog from '../detail/booking/BookingDialog';
+import BookingDialog from './BookingDialog'; 
 import BookingConfirmation from './BookingConfirmation';
 import BookingPaymentStep from './BookingPaymentStep';
 import { BookingFormValues } from './types';
 import { convertEscortType } from '@/utils/typeConverters';
 
 interface BookingFlowProps {
-  escort: any; // Accept any type to avoid the circular reference issue
+  escort: any; // Use any to avoid type compatibility issues
   isOpen: boolean;
   onClose: () => void;
 }
@@ -49,20 +48,12 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     }
   }, [isOpen]);
 
-  // Convert escort to the compatible type
+  // Normalize escort object using our converter utility
   const normalizedEscort = React.useMemo(() => {
-    // Use the converter utility
-    const convertedEscort = convertEscortType(escort);
-
-    // Ensure height is a string
-    if (convertedEscort.height !== undefined && typeof convertedEscort.height !== 'string') {
-      convertedEscort.height = String(convertedEscort.height);
-    }
-    
-    return convertedEscort;
+    return convertEscortType(escort);
   }, [escort]);
 
-  const handleDetailsSubmit = async (bookingDetails: any) => {
+  const handleDetailsSubmit = async (bookingDetails: BookingFormValues) => {
     if (!user) {
       toast({
         title: 'Authentication Required',
@@ -96,7 +87,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
         status: BookingStatus.PENDING,
         totalPrice: booking.price || 0,
         duration: booking.duration?.toString() || ''
-      } as unknown as Booking;
+      } as Booking;
 
       const result = await bookingService.createBooking(bookingData);
 

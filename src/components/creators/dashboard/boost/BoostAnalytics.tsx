@@ -9,7 +9,7 @@ import { AnalyticsHeader, AnalyticsHeaderProps } from '../analytics';
 import { AnalyticsStats } from '../analytics';
 import { AnalyticsCharts } from '../analytics';
 import { AnalyticsSummary } from '../analytics';
-import { AnalyticsData } from '@/types/pulse-boost';
+import { AnalyticsData } from '@/types/analytics';
 
 interface BoostAnalyticsProps {
   profileId?: string;
@@ -34,7 +34,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
   // Check if boostStatus exists and if it has isActive property
   const isActiveBoost = boostStatus && (boostStatus.isActive === true);
 
-  // Ensure analytics data has all necessary properties
+  // Ensure analytics data has all necessary properties 
   const analyticData: AnalyticsData = {
     totalBoosts: analytics?.totalBoosts || 0,
     activeBoosts: analytics?.activeBoosts || 0,

@@ -93,7 +93,7 @@ export interface DetailedMetricViewProps {
   value?: number;
   unit?: string;
   change?: number;
-  trendData?: Array<{ date: string; value: number }>;
+  trendData?: Array<{ name: string; value: number }>;
   onBack: () => void;
   metric?: {
     title: string;
@@ -102,7 +102,7 @@ export interface DetailedMetricViewProps {
     unit: string;
     change: number;
   };
-  data?: Array<{ date: string; value: number }>;
+  data?: Array<{ name: string; value: number }>;
 }
 
 export interface NeuralMetricsDisplayProps {
@@ -130,4 +130,5 @@ export interface PerformanceChartProps {
   description?: string;
   height?: number;
   color?: string;
+  dataKey?: string;
 }
