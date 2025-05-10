@@ -37,6 +37,13 @@ export interface User {
   updated_at?: string;
   profileImageUrl?: string;
   ubxBalance?: number;
+  
+  // Adding missing properties referenced in UserProfile.tsx
+  birth_date?: string;
+  birthDate?: string;
+  location?: string;
+  gender?: string;
+  joined_date?: string;
 }
 
 export interface UserProfile {
@@ -62,6 +69,11 @@ export interface UserProfile {
   availability?: any;
   rates?: any;
   gender?: string;
+  
+  // Add properties needed for types to match
+  ubx_balance?: number;
+  ubxBalance?: number;
+  is_escort?: boolean;
 }
 
 export interface AuthContextType {
@@ -73,9 +85,6 @@ export interface AuthContextType {
   register: (email: string, password: string, confirmPassword?: string) => Promise<AuthResult>;
   loading: boolean;
   isLoading: boolean; // Added for compatibility
-  isAdmin: boolean;
-  isEscort: boolean;
-  isClient: boolean;
   error: string | null;
   initialized: boolean;
   updateUser: (userData: Partial<User>) => Promise<boolean>;
@@ -88,5 +97,15 @@ export interface AuthContextType {
   signOut: () => Promise<boolean>;
   refreshProfile: () => Promise<void>;
   updatePassword?: (oldPassword: string, newPassword: string) => Promise<boolean>;
-  deleteAccount?: (password: string) => Promise<boolean>;
+  deleteAccount: () => Promise<boolean>;
+  
+  // Add missing properties referenced in hooks
+  loadUserProfile?: () => Promise<UserProfile | null>;
+  requestPasswordReset?: (email: string) => Promise<boolean>;
+  verifyEmail?: (token: string) => Promise<boolean>;
+  
+  // These are used in SecureRouteWrapper
+  isAdmin?: boolean;
+  isEscort?: boolean;
+  isClient?: boolean;
 }

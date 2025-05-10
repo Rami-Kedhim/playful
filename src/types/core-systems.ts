@@ -1,123 +1,105 @@
 
-// Core system type definitions
+// Core system types
 
-// UberCore
-export interface UberCoreSystem {
-  initialize: () => Promise<boolean>;
-  initializeAutomaticSeo: () => Promise<boolean>;
-  getStatus: () => Promise<{ online: boolean; services: string[] }>;
-  checkSubsystemHealth: () => SubsystemHealth[];
-  lucieAI: LucieAISystem;
-  hermes: HermesSystem;
-  oxum: OxumSystem;
-}
-
-export interface SubsystemHealth {
-  name: string;
-  status: 'Online' | 'Offline' | 'Degraded';
-  health: number;
-}
-
-// Lucie AI System
-export interface LucieAISystem {
-  name: string;
-  version: string;
-  generateContent: (params: GenerateContentParams) => Promise<GenerateContentResult>;
-  moderateContent?: (params: GenerateContentParams) => Promise<GenerateContentResult>;
-  analyzeSentiment?: (params: GenerateContentParams) => Promise<GenerateContentResult>;
-  summarize?: (text: string) => Promise<string>;
-  analyze?: (text: string) => Promise<any>;
-  extractEntities?: (text: string) => Promise<any>;
-  verifyContentSafety?: (content: string) => Promise<boolean>;
+export interface ModerateContentParams {
+  content: string;
+  options?: any;
 }
 
 export interface GenerateContentParams {
   prompt: string;
-  context?: string;
-  maxTokens?: number;
-  temperature?: number;
+  options?: any;
+}
+
+export interface ModerateContentResult {
+  isApproved: boolean;
+  reasons?: string[];
+  score?: number;
 }
 
 export interface GenerateContentResult {
   content: string;
-  tokensUsed: number;
-  truncated: boolean;
+  rating?: number;
+  sentiment?: string;
 }
 
-export type ModerateContentParams = GenerateContentParams;
-export type ModerateContentResult = GenerateContentResult & { rating?: 'safe' | 'unsafe' | 'sensitive' };
-export type SentimentAnalysisParams = GenerateContentParams;
-export type SentimentAnalysisResult = GenerateContentResult;
-
-// Hermes System
-export interface HermesSystem {
-  name: string;
-  version: string;
-  calculateBoostScore: (profileId: string) => Promise<number>;
-  calculateVisibilityScore: (profileId: string) => Promise<number>;
-  getInsights: () => Promise<HermesInsight[]>;
-  recommendContent: (userId: string) => Promise<string[]>;
-  routeFlow: (userId: string, destination: string) => Promise<{ safe: boolean; reason?: string }>;
-  initialize: () => Promise<boolean>;
-  trackEvent: (eventName: string, data: any) => void;
-  getMetrics: () => Promise<any>;
+export interface SentimentAnalysisParams {
+  text: string;
 }
 
-export interface HermesInsight {
-  type: string;
-  description: string;
-  confidence: number;
-  data: any;
+export interface SentimentAnalysisResult {
+  sentiment: string;
+  score: number;
 }
 
-// Oxum System
-export interface OxumSystem {
-  name: string;
-  version: string;
-  processImageFeatures: (imageUrl: string) => Promise<any>;
-  boostAllocationEigen: (profileId: string, level: number) => Promise<number[]>;
-  boostProfile: (profileId: string, packageId: string) => Promise<boolean>;
-  getBoostStatus: (profileId: string) => Promise<any>;
-  initialize: () => Promise<boolean>;
-}
-
-// System status and integrity
 export interface SystemStatus {
-  status: 'operational' | 'degraded' | 'offline';
-  version: string;
-  lastChecked: Date;
-  components: {
-    security: 'operational' | 'degraded' | 'offline';
-    core: 'operational' | 'degraded' | 'offline';
-    [key: string]: 'operational' | 'degraded' | 'offline';
-  };
+  isOperational: boolean;
+  metrics?: any;
 }
 
 export interface SystemIntegrityResult {
-  codeIntegrity: boolean;
-  dataIntegrity: boolean;
-  networkSecurity: boolean;
-  timestamp: Date;
-  valid: boolean;
+  isPassed: boolean;
+  details: string[];
 }
 
-// Boost Analytics
+export interface SystemHealthMetrics {
+  cpuUsage: number;
+  memoryUsage: number;
+  responseTime: number;
+}
+
+export interface SessionValidationResult {
+  isValid: boolean;
+  userId?: string;
+}
+
+export interface LucieAISystem {
+  generateContent: (params: GenerateContentParams) => Promise<GenerateContentResult>;
+  moderateContent: (params: GenerateContentParams) => Promise<GenerateContentResult>;
+  analyzeSentiment: (params: GenerateContentParams) => Promise<GenerateContentResult>;
+  summarize: (text: string) => Promise<string>;
+  analyze: (content: string) => Promise<any>;
+  extractEntities: (text: string) => Promise<any[]>;
+  verifyContentSafety: (content: string) => Promise<boolean>;
+}
+
+export interface OxumSystem {
+  initialize: () => Promise<boolean>;
+  validateSession: (token: string) => Promise<boolean>;
+  checkPermission: (userId: string, resource: string, action: string) => Promise<boolean>;
+}
+
+export interface HermesSystem {
+  initialize: () => Promise<void>;
+  trackEvent: (eventName: string, data: any) => void;
+  getMetrics: () => Promise<any>;
+  // Additional properties can be added as needed
+}
+
+export interface HermesInsight {
+  title: string;
+  description: string;
+  importance: 'high' | 'medium' | 'low';
+  actionable: boolean;
+}
+
+export interface UberCoreSystem {
+  hermesSystem: HermesSystem;
+  lucieAI: LucieAISystem;
+  oxumSystem: OxumSystem;
+}
+
+export interface RecommendedAction {
+  id: string;
+  title: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+  action: () => void;
+}
+
 export interface BoostAnalytics {
-  profileId: string;
-  totalBoosts: number;
-  activeBoosts: number;
-  averageBoostScore: number;
-  viewsBeforeBoost?: number;
-  viewsAfterBoost?: number;
-  engagementIncrease?: number;
-  impressions?: {
-    value: number;
-    change?: number;
-  };
-  interactions?: {
-    value: number;
-    change?: number;
-  };
-  views?: number;
-  additionalViews?: number;
+  impressions: number;
+  clicks: number;
+  conversionRate: number;
+  engagementScore: number;
 }
