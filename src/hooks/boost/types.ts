@@ -1,82 +1,67 @@
 
-/**
- * Boost System Type Definitions
- */
-
-export interface BoostStatus {
-  isActive: boolean;
-  isExpiring?: boolean;
-  expiresAt?: string | Date;
-  remainingTime?: number | string; // in seconds or formatted time
-  boostLevel?: number;
-  boostType?: string;
-  modifiers?: Record<string, number>;
-  packageName?: string;
-  packageId?: string;
-  startedAt?: Date | string;
-  progress?: number;
-  timeRemaining?: string;
-}
+import { BoostPackage, BoostStatus } from "@/types/boost";
 
 export interface HermesStatus {
-  isActive: boolean;
-  metrics?: {
-    velocity: number;
-    engagement: number;
-    retention: number;
-    conversion: number;
-  };
   position?: number;
   activeUsers?: number;
   estimatedVisibility?: number;
-  lastUpdateTime?: string;
-  boostScore?: number;
-  effectivenessScore?: number;
-}
-
-export interface BoostPackage {
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-  price_ubx?: number;
-  duration: string; // e.g., "1d", "7d", "30d"
-  boostLevel?: number;
-  features?: string[];
-  visibility?: string | number;
-  visibility_increase?: number;
-  color?: string;
-  badgeColor?: string;
-  durationMinutes?: number;
-  boost_power?: number;
-  isMostPopular?: boolean;
-  isPopular?: boolean;
-  isRecommended?: boolean;
+  lastUpdateTime?: Date;
+  metrics?: {
+    velocity?: number;
+    engagement?: number;
+    retention?: number;
+    conversion?: number;
+  };
   isActive?: boolean;
 }
 
-export interface BoostManagerHook {
-  boostStatus: BoostStatus | null;
-  hermesStatus: HermesStatus | null;
+export interface BoostState {
+  isActive: boolean;
+  expiresAt: Date | null;
+  level: number;
+  packageId: string | null;
+  packageName: string | null;
+  remainingTime: string;
+  timeProgress: number;
   loading: boolean;
   error: string | null;
+  hermesStatus: HermesStatus;
   packages: BoostPackage[];
-  activateBoost: (packageId: string) => Promise<boolean>;
+  boostStatus: BoostStatus | null;
+}
+
+export interface BoostAnalyticsData {
+  totalBoosts: number;
+  activeBoosts: number;
+  viewIncrease: number;
+  engagementRate: number;
+  averageBoostScore: number;
+  historicalData: {
+    date: string;
+    views: number;
+    engagement: number;
+    score: number;
+  }[];
+}
+
+export interface BoostAnalytics {
+  data: BoostAnalyticsData | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export interface BoostOperationsResult {
+  boostProfile: (profileId: string, packageId: string) => Promise<boolean>;
   cancelBoost: () => Promise<boolean>;
-  isEligible: boolean;
-  eligibilityReason?: string;
-  refreshStatus: () => void;
-  // Add missing properties
-  eligibility?: {
-    isEligible: boolean;
+  refreshBoostStatus: () => Promise<void>;
+  formatRemainingTime: (seconds: number) => string;
+  boostStatus?: BoostStatus;
+  boostEligibility?: {
+    eligible: boolean;
     reason?: string;
-    reasons?: string[];
   };
-  dailyBoostUsage?: number;
-  dailyBoostLimit?: number;
-  purchaseBoost?: (profileId: string, packageId: string) => Promise<boolean>;
-  formatBoostDuration?: (duration: string) => string;
-  getBoostAnalytics?: () => Promise<any>;
-  fetchBoostPackages?: () => Promise<BoostPackage[]>;
-  adaptGetBoostPrice?: (fn?: (pkg: BoostPackage) => number) => number;
+  boostPackages?: BoostPackage[];
+  getBoostPrice?: (packageId: string) => number;
+  hermesMetrics?: HermesStatus;
+  loading?: boolean;
 }

@@ -1,120 +1,109 @@
 
 import React from "react";
-import EscortResults from "@/components/escorts/EscortResults";
+import { Escort } from "@/types/Escort";
+import { EscortContext } from "@/contexts/EscortContext";
+import EscortGrid from "@/components/escorts/EscortGrid";
+import EscortList from "@/components/escorts/EscortList";
 import { Pagination } from "@/components/ui/pagination";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { Escort } from "@/types/escort";
+import { Skeleton } from "@/components/ui/skeleton";
+import FilterSidebar from "../filters/FilterSidebar";
+import EscortResults from "../EscortResults";
 
 interface ResultsSectionProps {
   escorts: Escort[];
-  totalPages: number;
+  isLoading: boolean;
+  viewType?: "grid" | "list";
   currentPage: number;
+  totalPages: number;
   setCurrentPage: (page: number) => void;
-  clearFilters: () => void;
-  isLoading?: boolean;
-  resultsPerPage?: number;
-  totalEscorts?: number;
+  showFilters?: boolean;
 }
 
 const ResultsSection: React.FC<ResultsSectionProps> = ({
   escorts,
-  totalPages,
+  isLoading,
+  viewType = "grid",
   currentPage,
+  totalPages,
   setCurrentPage,
-  clearFilters,
-  isLoading = false,
-  resultsPerPage = 12,
-  totalEscorts = 0,
+  showFilters = true,
 }) => {
-  const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    searchParams.set('page', page.toString());
-    setSearchParams(searchParams);
+    // Scroll to top of results
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
-  const renderPageNumbers = () => {
-    const pageNumbers = [];
-    const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+  // Render loading skeletons
+  if (isLoading) {
+    return (
+      <div className="w-full">
+        <div className="mb-4">
+          <Skeleton className="h-10 w-1/3" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 12 }).map((_, index) => (
+            <Skeleton key={index} className="h-[350px] rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
+  // Render empty state
+  if (escorts.length === 0) {
+    return (
+      <div className="w-full text-center py-12">
+        <h3 className="text-xl font-medium mb-2">No results found</h3>
+        <p className="text-muted-foreground mb-6">
+          Try adjusting your filters or search criteria.
+        </p>
+      </div>
+    );
+  }
 
-    if (startPage > 1) {
-      pageNumbers.push(
-        <Button
-          key="1"
-          variant="outline"
-          size="icon"
-          onClick={() => handlePageChange(1)}
-        >
-          1
-        </Button>
-      );
-      if (startPage > 2) {
-        pageNumbers.push(<span key="ellipsis1">...</span>);
-      }
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(
-        <Button
-          key={i}
-          variant={i === currentPage ? "default" : "outline"}
-          size="icon"
-          onClick={() => handlePageChange(i)}
-        >
-          {i}
-        </Button>
-      );
-    }
-
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        pageNumbers.push(<span key="ellipsis2">...</span>);
-      }
-      pageNumbers.push(
-        <Button
-          key={totalPages}
-          variant="outline"
-          size="icon"
-          onClick={() => handlePageChange(totalPages)}
-        >
-          {totalPages}
-        </Button>
-      );
-    }
-
-    return pageNumbers;
+  // Provide context value with escorts
+  const escortContextValue = {
+    escorts,
+    loading: isLoading,
   };
 
   return (
-    <div>
-      <EscortResults
-        escorts={escorts}
-        isLoading={isLoading}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        totalPages={totalPages}
-      />
+    <EscortContext.Provider value={escortContextValue}>
+      <div className="w-full">
+        <div className="flex flex-col gap-6">
+          {viewType === "grid" && (
+            <EscortGrid 
+              escorts={escorts}
+              loading={isLoading}
+              totalPages={totalPages}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+            />
+          )}
+          
+          {viewType === "list" && (
+            <EscortList 
+              escorts={escorts}
+              loading={isLoading}
+            />
+          )}
 
-      {totalPages > 1 && (
-        <div className="mt-8">
-          <Pagination 
-            totalPages={totalPages} 
-            currentPage={currentPage}
-            onPageChange={handlePageChange}
-          />
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-6">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+    </EscortContext.Provider>
   );
 };
 

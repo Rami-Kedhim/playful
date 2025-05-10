@@ -31,10 +31,14 @@ const LucieAIAssistant: React.FC<LucieAIAssistantProps> = ({
       }
       
       // Generate content
-      const content = await lucieOrchestrator.generateContent({ prompt });
+      const content = await lucieOrchestrator.generateContent({ 
+        prompt,
+        maxTokens: 1000
+      });
       
-      setResult(content);
-      if (onGenerate) onGenerate(content);
+      const generatedText = typeof content === 'string' ? content : content.text || '';
+      setResult(generatedText);
+      if (onGenerate) onGenerate(generatedText);
     } catch (error) {
       console.error('Error generating content:', error);
       setResult('An error occurred while generating content.');

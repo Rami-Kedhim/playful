@@ -1,142 +1,127 @@
 
-// Core System Type Definitions
-
-export interface SystemStatus {
-  operational: boolean;
-  isActive?: boolean; // Added for UberCore support
-  services?: {
-    auth: string;
-    analytics: string;
-    ai: string;
-    wallet: string;
-    seo: string;
-  };
-  queueLength?: number;
-  processing?: boolean;
-  uptime?: number;
-  lastReboot?: string;
-  // Oxum-specific properties
-  performance?: number;
-  lastUpdate?: string;
-  serviceStatus?: {
-    payments: string;
-    wallet: string;
-    credits: string;
-    analytics: string;
-    exchange: string;
-    boosts: string;
-  };
-}
-
-export interface SystemIntegrityResult {
-  valid: boolean;
-  status?: string;
-  errors?: string[];
-  warnings?: string[];
-  lastChecked: string;
-  integrity?: number;
-  checks?: {
-    database: boolean;
-    cache: boolean;
-    filesystem: boolean;
-    network: boolean;
-  }
-}
-
-export interface SystemHealthMetrics {
-  cpu: number;
-  memory: number;
-  storage: number;
-  network: number;
-  load: number;
-}
-
-export interface SessionValidationResult {
-  isValid: boolean;
-  userId: string;
-  expiresAt: string;
-  timestamp?: string; // Added for Orus support
-  username?: string;  // Added for UberCore support
-}
-
-export interface ModerateContentResult {
-  safe?: boolean;
-  approved: boolean;
-  categories: string[];
-  score: number;
-  reason?: string;
-  isSafe?: boolean; // Compatible property
-  issues?: string[];
-  blockedCategories?: string[];
-  category?: string;
-  action?: string;
-}
-
-export interface SentimentAnalysisResult {
-  sentiment: 'positive' | 'neutral' | 'negative';
-  score: number;
-  confidence?: number; // Added for compatibility
-}
-
-export interface UberCoreSystem {
-  getSystemStatus(): Promise<SystemStatus>;
-  checkSystemIntegrity(): Promise<SystemIntegrityResult>;
-  validateSession(token: string): Promise<SessionValidationResult>;
-  getSystemHealthMetrics(): Promise<SystemHealthMetrics>;
-  initialize(): Promise<boolean>;
-  getSystemHealth(): Promise<SystemHealthMetrics>;
-}
-
-export interface OxumSystem {
-  initialize(): Promise<void>;
-  getSystemStatus(): Promise<SystemStatus>;
-  shutdown(): void;
-  calculatePayment?: (amount: number, currency: string) => Promise<number>;
-  verifyTransaction?: (transactionId: string) => Promise<boolean>;
-  processPayment?: (amount: number, currency: string) => Promise<boolean>;
-  validateTransaction?: (txId: string) => Promise<boolean>;
-  getExchangeRate?: (from: string, to: string) => Promise<number>;
-  boostAllocationEigen?: (userId: string, boostLevel: number) => Promise<number[]>;
-  calculateScore?: (inputs: number[]) => Promise<number>;
-  emitEvent?: (event: string, data: any) => void;
-  checkSystemStatus?: () => { operational: boolean; traffic: string; loadFactor: number };
-}
-
 export interface LucieAISystem {
   initialize(): Promise<boolean>;
-  generateText(prompt: string): Promise<string>;
-  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
   generateContent(params: GenerateContentParams): Promise<GenerateContentResult>;
+  moderateContent(params: ModerateContentParams): Promise<ModerateContentResult>;
   analyzeSentiment(params: SentimentAnalysisParams): Promise<SentimentAnalysisResult>;
-  getSystemStatus(): Promise<SystemStatus>;
-  configure(options: Record<string, any>): void;
-  generateResponse(params: GenerateContentParams): Promise<GenerateContentResult>;
-  shutdown(): void;
-}
-
-export interface ModerateContentParams {
-  content: string;
-  type?: 'text' | 'image' | 'video';
-  options?: Record<string, any>;
 }
 
 export interface GenerateContentParams {
   prompt: string;
+  maxTokens?: number;
+  temperature?: number;
+  model?: string;
   options?: Record<string, any>;
 }
 
 export interface GenerateContentResult {
-  content: string;
-  moderated: boolean;
-  warnings: string[];
-  usage: {
+  text: string;
+  usage?: {
     promptTokens: number;
     completionTokens: number;
     totalTokens: number;
   };
 }
 
+export interface ModerateContentParams {
+  content: string;
+  strictness?: 'low' | 'medium' | 'high';
+}
+
+export interface ModerateContentResult {
+  flagged: boolean;
+  reason?: string;
+}
+
 export interface SentimentAnalysisParams {
   text: string;
   options?: Record<string, any>;
+}
+
+export interface SentimentAnalysisResult {
+  sentiment: "positive" | "negative" | "neutral" | "mixed";
+  confidence?: number;
+  scores?: {
+    positive: number;
+    negative: number;
+    neutral: number;
+    mixed?: number;
+  };
+}
+
+export interface OxumSystem {
+  name: string;
+  version: string;
+  initialize(): Promise<void>;
+  processImageFeatures(imageUrl: string): Promise<any>;
+  boostAllocationEigen(profileId: string, level: number): Promise<number[]>;
+  boostProfile(profileId: string, packageId: string): Promise<boolean>;
+  getBoostStatus(profileId: string): Promise<any>;
+}
+
+export interface HermesInsight {
+  type: string;
+  description: string;
+  confidence: number;
+  data: Record<string, any>;
+}
+
+export interface HermesSystem {
+  name: string;
+  version: string;
+  calculateBoostScore(profileId: string): Promise<number>;
+  calculateVisibilityScore(profileId: string): Promise<number>;
+  getInsights(): Promise<HermesInsight[]>;
+  recommendContent(userId: string): Promise<string[]>;
+  routeFlow(userId: string, destination: string): Promise<{ safe: boolean; reason?: string }>;
+}
+
+export interface UberCoreSystem {
+  initialize(): Promise<boolean>;
+  getSystemStatus(): SystemStatus;
+  checkSystemIntegrity(): SystemIntegrityResult;
+  checkSubsystemHealth(): SubsystemHealth[];
+  getHealthMetrics(): SystemHealthMetrics;
+  validateSession(token: string): SessionValidationResult;
+  restartSubsystem(name: string): Promise<boolean>;
+}
+
+export interface SystemStatus {
+  status: 'operational' | 'degraded' | 'maintenance' | 'outage';
+  subsystems: Array<{
+    name: string;
+    status: 'operational' | 'degraded' | 'maintenance' | 'outage';
+  }>;
+  lastUpdated: Date;
+}
+
+export interface SystemIntegrityResult {
+  codeIntegrity: boolean;
+  dataIntegrity: boolean;
+  networkSecurity: boolean;
+  timestamp: Date;
+  valid?: boolean;
+}
+
+export interface SystemHealthMetrics {
+  uptime: number; // percentage
+  responseTime: number; // milliseconds
+  errorRate: number; // percentage
+  memoryUsage: number; // percentage
+  cpu?: number; // percentage
+}
+
+export interface SessionValidationResult {
+  userId: string;
+  isValid: boolean;
+  expiresAt: Date;
+  sessionType: 'user' | 'admin' | 'system';
+  permissions?: string[];
+}
+
+export interface SubsystemHealth {
+  name: string;
+  status: 'operational' | 'degraded' | 'maintenance' | 'outage';
+  health: number; // 0-100 percentage
+  lastChecked: Date;
 }

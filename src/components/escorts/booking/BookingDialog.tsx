@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import BookingForm from './BookingForm';
@@ -74,7 +74,7 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
           <>
             <BookingForm 
               escort={escort} 
-              bookingType={selectedType} 
+              bookingType={selectedType}
               onSubmit={handleBookingSubmit}
             />
             <DialogFooter className="mt-4">

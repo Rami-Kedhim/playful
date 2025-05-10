@@ -7,6 +7,7 @@ import { hermes } from './Hermes';
 import { uberWallet } from './UberWallet';
 import { automaticSEO } from './AutomaticSEO';
 import { initializeSystem, shutdownSystem } from './engine';
+import { lucieOrchestrator } from './LucieOrchestratorAdapter';
 
 // Initialize the UberCore instance
 const uberCore = new UberCore(lucieAI);
@@ -17,11 +18,13 @@ export {
   hermes,
   lucie,
   lucieAI,
+  UberCore,
   uberCore,
   initializeSystem,
   shutdownSystem,
   automaticSEO,
-  uberWallet
+  uberWallet,
+  lucieOrchestrator
 };
 
 // Export any utility functions that components might need

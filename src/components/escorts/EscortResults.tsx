@@ -3,7 +3,7 @@ import React from 'react';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import EscortProfileCard from './EscortProfileCard';
 import { Button } from '@/components/ui/button';
-import useFilters from '@/hooks/useFilters';
+import { useFilters } from '@/hooks/useFilters';
 import { Escort } from '@/types/Escort';
 
 interface EscortResultsProps {

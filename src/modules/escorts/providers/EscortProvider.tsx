@@ -1,117 +1,82 @@
 
-// Fix import path casing for Escort to exact casing
-
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  ReactNode,
-} from 'react';
-import escortService from '@/services/escorts/escortService';
-import { Escort } from '@/types/escort';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { Escort } from '@/types/Escort';
 
 interface EscortContextType {
   escorts: Escort[];
   loading: boolean;
   error: string | null;
-  fetchEscorts: () => Promise<void>;
-  loadEscorts: (useUberSystem?: boolean) => Promise<void>;
-  state: {
-    escorts: Escort[];
-    loading: boolean;
-    error: string | null;
-  };
-  createEscort: (escort: Partial<Escort>) => Promise<Escort | undefined>;
-  updateEscort: (id: string, updates: Partial<Escort>) => Promise<Escort | undefined>;
-  deleteEscort: (id: string) => Promise<boolean>;
+  setEscorts: React.Dispatch<React.SetStateAction<Escort[]>>;
 }
 
-const EscortContext = createContext<EscortContextType | undefined>(undefined);
+const EscortContext = createContext<EscortContextType>({
+  escorts: [],
+  loading: false,
+  error: null,
+  setEscorts: () => {},
+});
 
-export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [escorts, setEscorts] = useState<Escort[]>([]);
-  const [loading, setLoading] = useState(false);
+export const useEscortContext = () => useContext(EscortContext);
+
+interface EscortProviderProps {
+  children: React.ReactNode;
+  initialEscorts?: Escort[];
+}
+
+export const EscortProvider: React.FC<EscortProviderProps> = ({
+  children,
+  initialEscorts = [],
+}) => {
+  const [escorts, setEscorts] = useState<Escort[]>(initialEscorts);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchEscortsData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await escortService.getEscorts();
-      setEscorts(data);
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch escorts');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const createEscort = async (escort: Partial<Escort>): Promise<Escort | undefined> => {
-    return undefined;
-  };
-
-  const updateEscort = async (id: string, updates: Partial<Escort>): Promise<Escort | undefined> => {
-    return undefined;
-  };
-
-  const deleteEscort = async (id: string): Promise<boolean> => {
-    return false;
-  };
-
-  const loadEscorts = async (useUberSystem = false) => {
-    try {
-      setLoading(true);
-      const data = await escortService.getEscorts();
-
-      if (useUberSystem) {
-        console.log("Loading escorts with UberCore integration");
-        setEscorts(data.map(escort => ({
-          ...escort,
-          bio: (escort.bio ?? '') + " [Enhanced by UberCore]",
-          rating: escort.rating && escort.rating * 1.1 > 5 ? 5 : escort.rating,
-        })));
-      } else {
-        setEscorts(data);
-      }
-
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load escorts');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchEscortsData();
-  }, [fetchEscortsData]);
+    if (initialEscorts.length > 0) {
+      setEscorts(initialEscorts);
+      return;
+    }
 
-  const value: EscortContextType = {
-    escorts,
-    loading,
-    error,
-    fetchEscorts: fetchEscortsData,
-    loadEscorts,
-    state: { escorts, loading, error },
-    createEscort,
-    updateEscort,
-    deleteEscort,
-  };
+    const loadEscorts = async () => {
+      setLoading(true);
+      try {
+        // For now, just use a timeout to simulate loading
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Simulate escort data
+        const demoEscorts: Escort[] = Array(12).fill(null).map((_, index) => ({
+          id: `escort-${index + 1}`,
+          name: `Escort ${index + 1}`,
+          age: 20 + Math.floor(Math.random() * 15),
+          gender: index % 3 === 0 ? 'male' : 'female',
+          location: ['New York', 'Los Angeles', 'Miami', 'Chicago', 'Las Vegas'][index % 5],
+          price: 100 + Math.floor(Math.random() * 400),
+          rating: Math.floor(Math.random() * 5) + 1,
+          reviewCount: Math.floor(Math.random() * 100),
+          imageUrl: `https://source.unsplash.com/random/300x400?portrait&sig=${index}`,
+          tags: ['Professional', 'Friendly', 'Verified'],
+          isVerified: Math.random() > 0.3,
+          providesInPersonServices: Math.random() > 0.2,
+          providesVirtualContent: Math.random() > 0.4,
+          availableNow: Math.random() > 0.5,
+          isAvailable: Math.random() > 0.5
+        }));
+        
+        setEscorts(demoEscorts);
+      } catch (err) {
+        console.error('Failed to load escorts:', err);
+        setError('Failed to load escorts. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadEscorts();
+  }, [initialEscorts]);
 
   return (
-    <EscortContext.Provider value={value}>
+    <EscortContext.Provider value={{ escorts, loading, error, setEscorts }}>
       {children}
     </EscortContext.Provider>
   );
 };
-
-export const useEscortContext = (): EscortContextType => {
-  const context = useContext(EscortContext);
-  if (!context) {
-    throw new Error('useEscortContext must be used within a EscortProvider');
-  }
-  return context;
-};
-

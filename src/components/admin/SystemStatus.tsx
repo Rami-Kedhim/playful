@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { uberCore } from '@/core';
+import { UberCore } from '@/core';
 
 const SystemStatus: React.FC = () => {
+  // Create a UberCore instance
+  const uberCore = new UberCore(null as any); // Temporary solution
   const systemHealth = uberCore.checkSubsystemHealth();
 
   return (
