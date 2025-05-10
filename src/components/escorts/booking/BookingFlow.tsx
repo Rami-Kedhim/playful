@@ -48,7 +48,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     }
   }, [isOpen]);
 
-  // Normalize escort object using our converter utility
+  // Always use convertEscortType to normalize the escort object
   const normalizedEscort = React.useMemo(() => {
     return convertEscortType(escort);
   }, [escort]);

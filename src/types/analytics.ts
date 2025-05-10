@@ -131,4 +131,5 @@ export interface PerformanceChartProps {
   height?: number;
   color?: string;
   dataKey?: string;
+  onRefresh?: () => void;
 }

@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import HermesOxumQueueVisualization from '@/components/creators/dashboard/boost/HermesOxumQueueVisualization';
 import { useBoostAnalytics } from '@/hooks/boost/useBoostAnalytics';
 import { BoostStatus } from '@/types/boost';
@@ -34,7 +34,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
   // Check if boostStatus exists and if it has isActive property
   const isActiveBoost = boostStatus && (boostStatus.isActive === true);
 
-  // Ensure analytics data has all necessary properties 
+  // Ensure analytics data has all necessary properties
   const analyticData: AnalyticsData = {
     totalBoosts: analytics?.totalBoosts || 0,
     activeBoosts: analytics?.activeBoosts || 0,

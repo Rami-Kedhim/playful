@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PerformanceChart from '@/components/neural/PerformanceChart';
-import { MetricDetail } from '@/hooks/useNeuralAnalyticsDashboard';
 import { DetailedMetricViewProps } from '@/types/analytics';
 
 const DetailedMetricView: React.FC<DetailedMetricViewProps> = ({
@@ -26,7 +25,7 @@ const DetailedMetricView: React.FC<DetailedMetricViewProps> = ({
   const formattedData = data.length > 0 ? data.map(item => {
     if ('date' in item && !('name' in item)) {
       return {
-        name: item.date,
+        name: item.date as string,
         value: item.value
       };
     }

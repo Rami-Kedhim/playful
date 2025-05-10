@@ -3,6 +3,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { PerformanceChartProps } from '@/types/analytics';
+import { RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const PerformanceChart: React.FC<PerformanceChartProps> = ({ 
   data, 
@@ -10,13 +12,22 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   description,
   height = 300,
   color = "#2563eb",
-  dataKey = "value"
+  dataKey = "value",
+  onRefresh
 }) => {
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        {description && <p className="text-sm text-muted-foreground">{description}</p>}
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <div>
+          <CardTitle>{title}</CardTitle>
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+        </div>
+        {onRefresh && (
+          <Button variant="ghost" size="sm" onClick={onRefresh}>
+            <RefreshCw className="h-4 w-4" />
+            <span className="sr-only">Refresh</span>
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         <div style={{ width: '100%', height }}>
