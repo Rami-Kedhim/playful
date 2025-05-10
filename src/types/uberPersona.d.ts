@@ -2,7 +2,7 @@
 export interface UberPersona {
   id: string;
   name: string;
-  type: string;
+  type?: string;
   avatarUrl?: string;
   personality?: string;
   traits?: string[];
@@ -27,6 +27,7 @@ export interface UberPersona {
   bio?: string;
   roleFlags?: number;
   isActive?: boolean;
+  metadata?: Record<string, any>;
   stats?: {
     popularity?: number;
     intelligence?: number;

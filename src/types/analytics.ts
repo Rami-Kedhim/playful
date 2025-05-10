@@ -17,18 +17,19 @@ export interface DetailedMetricViewProps {
 }
 
 export interface AnalyticsData {
-  metrics: {
+  // Original properties
+  metrics?: {
     views: number;
     engagement: number;
     conversion: number;
     revenue: number;
   };
-  trends: {
+  trends?: {
     daily: any[];
     weekly: any[];
     monthly: any[];
   };
-  comparisons: {
+  comparisons?: {
     previousPeriod: {
       views: number;
       engagement: number;
@@ -42,6 +43,47 @@ export interface AnalyticsData {
       revenue: number;
     };
   };
+  // Additional properties from analytics.d.ts
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  views?: number;
+  impressions?: {
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+    increase?: number;
+    change?: number;
+    value?: number;
+  };
+  interactions?: {
+    today?: number;
+    yesterday?: number;
+    weeklyAverage?: number;
+    withBoost?: number;
+    withoutBoost?: number;
+    increase?: number;
+    change?: number;
+    value?: number;
+  };
+  rank?: {
+    current?: number;
+    previous?: number;
+    change?: number;
+  };
+  conversionRate?: number;
+  messageRate?: number;
+  bookingRate?: number;
+  // Boost analytics properties
+  totalBoosts?: number;
+  activeBoosts?: number;
+  averageBoostScore?: number;
+  boostHistory?: Array<{
+    date: Date;
+    score: number;
+  }>;
 }
 
 export interface NeuralMetric {
@@ -51,4 +93,20 @@ export interface NeuralMetric {
   change?: number;
   target?: number;
   history?: number[];
+}
+
+export interface MetricCardProps {
+  title: string;
+  value: string | number;
+  change?: number;
+  unit?: string;
+  timespan?: string;
+  onClick?: () => void;
+}
+
+export interface NeuralMetricsDisplayProps {
+  metrics: NeuralMetric[];
+  refreshInterval?: number;
+  loading?: boolean;
+  error?: string | null;
 }

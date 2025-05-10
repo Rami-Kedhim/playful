@@ -1,120 +1,115 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DatePicker } from '@/components/ui/date-picker';
-import { Button } from '@/components/ui/button';
-import { RefreshCcw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import NeuralMetricsDisplay from './NeuralMetricsDisplay';
-import useNeuralAnalytics from '@/hooks/useNeuralAnalytics';
-import PerformanceChart from '@/components/neural/PerformanceChart';
+import { NeuralMetric } from '@/types/analytics';
 
-const NeuralAnalytics: React.FC = () => {
-  const [startDate, setStartDate] = React.useState<Date>(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)); // One week ago
-  const [endDate, setEndDate] = React.useState<Date>(new Date());
-  const { analyticsData, detailedMetrics, loading, error, refreshAnalytics } = useNeuralAnalytics();
-  
-  const handleRefreshData = () => {
-    console.log('Refreshing data...');
-    refreshAnalytics();
-  };
+interface NeuralAnalyticsProps {
+  userId?: string;
+  systemId?: string;
+}
 
-  // Sample performance metrics data for demonstration
-  const responseTimeData = [
-    { name: 'Mon', value: 120 },
-    { name: 'Tue', value: 132 },
-    { name: 'Wed', value: 101 },
-    { name: 'Thu', value: 134 },
-    { name: 'Fri', value: 90 },
-    { name: 'Sat', value: 110 },
-    { name: 'Sun', value: 120 },
-  ];
+const NeuralAnalytics: React.FC<NeuralAnalyticsProps> = ({ userId, systemId }) => {
+  const [activeTab, setActiveTab] = useState('metrics');
+  const [loading, setLoading] = useState(true);
+  const [metrics, setMetrics] = useState<NeuralMetric[]>([]);
 
-  const accuracyData = [
-    { name: 'Mon', value: 94 },
-    { name: 'Tue', value: 92 },
-    { name: 'Wed', value: 97 },
-    { name: 'Thu', value: 95 },
-    { name: 'Fri', value: 98 },
-    { name: 'Sat', value: 96 },
-    { name: 'Sun', value: 97 },
-  ];
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        // Mock data for example
+        const mockMetrics: NeuralMetric[] = [
+          {
+            name: 'Accuracy',
+            value: 97.2,
+            previousValue: 94.8,
+            change: 2.5,
+            target: 99
+          },
+          {
+            name: 'Speed',
+            value: 382,
+            previousValue: 412,
+            change: -7.3,
+            history: [350, 375, 400, 412, 382]
+          },
+          {
+            name: 'Completeness',
+            value: 89.5,
+            previousValue: 85.2,
+            change: 5.0,
+            target: 95
+          },
+          {
+            name: 'Consistency',
+            value: 94.1,
+            previousValue: 93.5,
+            change: 0.6,
+            target: 97
+          }
+        ];
 
-  // Default metrics in case analytics data is not loaded yet
-  const defaultMetrics = {
-    responseTime: 120,
-    accuracy: 96,
-    engagement: 85,
-    satisfaction: 92
-  };
+        setMetrics(mockMetrics);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching neural metrics:', error);
+        setLoading(false);
+      }
+    };
 
-  // Use actual metrics if available, otherwise use defaults
-  const metrics = analyticsData?.metrics || defaultMetrics;
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 60000); // Refresh every minute
+    
+    return () => clearInterval(interval);
+  }, [userId, systemId]);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Neural Analytics</h1>
-        <Button variant="outline" size="sm" onClick={handleRefreshData}>
-          <RefreshCcw className="h-4 w-4 mr-2" />
-          Refresh Data
-        </Button>
-      </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Date Range</CardTitle>
-        </CardHeader>
-        <CardContent className="flex gap-4">
-          <DatePicker
-            selected={startDate}
-            onSelect={setStartDate}
-            label="Start Date"
-          />
-          <DatePicker
-            selected={endDate}
-            onSelect={setEndDate}
-            label="End Date"
-          />
-        </CardContent>
-      </Card>
-      
-      {/* Display metrics overview */}
-      <NeuralMetricsDisplay 
-        metrics={metrics}
-        period={`${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`}
-        refreshInterval={60}
-      />
-      
-      {/* Performance charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Response Time (ms)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PerformanceChart 
-              data={responseTimeData}
-              dataKey="value"
-              title="Response Time"
-              onRefresh={handleRefreshData}
-            />
-          </CardContent>
-        </Card>
+      <Tabs defaultValue="metrics" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="metrics">Metrics</TabsTrigger>
+          <TabsTrigger value="trends">Trends</TabsTrigger>
+          <TabsTrigger value="predictions">Predictions</TabsTrigger>
+        </TabsList>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Accuracy (%)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PerformanceChart 
-              data={accuracyData}
-              dataKey="value"
-              title="Accuracy"
-              onRefresh={handleRefreshData}
-            />
-          </CardContent>
-        </Card>
-      </div>
+        <TabsContent value="metrics" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Neural Performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <NeuralMetricsDisplay 
+                metrics={metrics} 
+                loading={loading}
+                refreshInterval={60000}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="trends" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Performance Trends</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>Trend analysis content will appear here.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="predictions" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>AI Predictions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>Prediction data will appear here.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

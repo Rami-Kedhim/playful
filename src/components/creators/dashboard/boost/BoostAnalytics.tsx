@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import HermesOxumQueueVisualization from '@/components/creators/dashboard/boost/HermesOxumQueueVisualization';
 import { useBoostAnalytics } from '@/hooks/boost/useBoostAnalytics';
 import { BoostStatus } from '@/types/boost';
-import { AnalyticsData } from '@/types/analytics';
 
 interface BoostAnalyticsProps {
   profileId?: string;
@@ -24,25 +23,6 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
   // Check if boostStatus exists and if it has isActive property
   const isActiveBoost = boostStatus && (boostStatus.isActive === true);
 
-  // Ensure analytics data has all necessary properties
-  const analyticData: AnalyticsData = {
-    totalBoosts: analytics?.totalBoosts || 0,
-    activeBoosts: analytics?.activeBoosts || 0,
-    averageBoostScore: analytics?.averageBoostScore || 0,
-    views: analytics?.views || 0,
-    impressions: {
-      value: analytics?.impressions?.value || 0,
-      change: analytics?.impressions?.change || 0
-    },
-    interactions: {
-      value: analytics?.interactions?.value || 0,
-      change: analytics?.interactions?.change || 0
-    },
-    additionalViews: analytics?.additionalViews || 0,
-    engagementIncrease: analytics?.engagementIncrease || 0,
-    rankingPosition: analytics?.rankingPosition || 0
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -60,7 +40,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
             ) : errorObj ? (
               <div>Error: {errorObj?.message || 'Unknown error'}</div>
             ) : (
-              <div className="text-2xl font-bold">{analyticData.totalBoosts}</div>
+              <div className="text-2xl font-bold">{analytics?.totalBoosts || 0}</div>
             )}
           </CardContent>
         </Card>
@@ -75,7 +55,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
             ) : errorObj ? (
               <div>Error: {errorObj?.message || 'Unknown error'}</div>
             ) : (
-              <div className="text-2xl font-bold">{analyticData.activeBoosts}</div>
+              <div className="text-2xl font-bold">{analytics?.activeBoosts || 0}</div>
             )}
           </CardContent>
         </Card>
@@ -90,7 +70,7 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
             ) : errorObj ? (
               <div>Error: {errorObj?.message || 'Unknown error'}</div>
             ) : (
-              <div className="text-2xl font-bold">{analyticData.averageBoostScore}</div>
+              <div className="text-2xl font-bold">{analytics?.averageBoostScore || 0}</div>
             )}
           </CardContent>
         </Card>

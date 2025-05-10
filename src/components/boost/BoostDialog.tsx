@@ -55,7 +55,7 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
       eligible: boostEligibility.eligible || boostEligibility.isEligible || false,
       reason: boostEligibility.reason || '',
       reasons: boostEligibility.reasons || [],
-      nextEligibleTime: boostEligibility.nextEligibleTime || boostEligibility.nextEligibleTime // Use nextEligibleTime consistently
+      nextEligibleTime: boostEligibility.nextEligibleTime
     };
     
     return eligibilityObj;
@@ -93,10 +93,12 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
 
         <BoostDialogTabs
           boostStatus={sanitizeBoostStatus(boostStatus)}
-          eligibility={getEligibility()}
           packages={sanitizePackages(packages)}
-          profileId={profileId}
+          eligibility={getEligibility()}
+          onSuccess={handleBoost}
           onBoostSuccess={handleBoost}
+          profileId={profileId}
+          onClose={onOpenChange}
         />
       </DialogContent>
     </Dialog>

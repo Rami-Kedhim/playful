@@ -25,6 +25,10 @@ const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
   // Use either pkg or packageData, prioritizing pkg
   const boostPackage = pkg || packageData;
   
+  if (!boostPackage) {
+    return null; // Ensure we have a package before rendering
+  }
+  
   const handleClick = () => {
     if (onClick) onClick();
     if (onSelect) onSelect();

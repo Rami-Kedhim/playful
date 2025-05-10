@@ -1,90 +1,73 @@
 
 import React, { useState } from 'react';
-import { BoostPackage } from '@/types/pulse-boost';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from "@/components/ui/button";
+import { BoostPackage } from "@/types/pulse-boost";
 import BoostPackageCard from '../BoostPackageCard';
 
-export interface BoostPackagesProps {
+interface BoostPackagesProps {
   packages: BoostPackage[];
-  onBoost?: (packageId: string) => Promise<boolean>;
   profileId: string;
-  onSuccess?: () => Promise<void>;
+  onSuccess?: () => void | Promise<void>;
+  onBoost?: () => Promise<boolean>;
 }
 
-const BoostPackages: React.FC<BoostPackagesProps> = ({ packages, onBoost, profileId, onSuccess }) => {
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+const BoostPackages: React.FC<BoostPackagesProps> = ({
+  packages,
+  profileId,
+  onSuccess,
+  onBoost
+}) => {
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(
+    packages.length > 0 ? packages[0].id : null
+  );
+  const [loading, setLoading] = useState(false);
 
-  const handleSelectPackage = (packageId: string) => {
+  const handlePackageSelect = (packageId: string) => {
     setSelectedPackage(packageId);
   };
 
-  const handleApplyBoost = async () => {
-    if (!selectedPackage) {
-      toast({
-        title: 'No package selected',
-        description: 'Please select a boost package first.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
+  const handleBoost = async () => {
+    if (!selectedPackage) return;
+    
+    setLoading(true);
     try {
-      // Call the provided onBoost function if available, otherwise use a dummy success
-      const success = onBoost ? await onBoost(selectedPackage) : true;
-      
-      if (success) {
-        toast({
-          title: 'Boost applied successfully',
-          description: 'Your profile has been boosted!'
-        });
-        
-        if (onSuccess) {
-          await onSuccess();
+      if (onBoost) {
+        await onBoost();
+      }
+      if (onSuccess) {
+        const result = onSuccess();
+        if (result instanceof Promise) {
+          await result;
         }
-      } else {
-        toast({
-          title: 'Failed to apply boost',
-          description: 'Please try again or contact support.',
-          variant: 'destructive'
-        });
       }
     } catch (error) {
-      console.error('Error applying boost:', error);
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred',
-        variant: 'destructive'
-      });
+      console.error("Error applying boost:", error);
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {packages.map((pkg) => (
           <BoostPackageCard
             key={pkg.id}
             pkg={pkg}
             isSelected={selectedPackage === pkg.id}
-            onSelect={() => handleSelectPackage(pkg.id)}
-            formatDuration={(duration) => typeof duration === 'string' ? duration : `${duration} minutes`}
+            onSelect={() => handlePackageSelect(pkg.id)}
           />
         ))}
       </div>
-
-      <Button 
-        className="w-full" 
-        disabled={!selectedPackage || isSubmitting}
-        onClick={handleApplyBoost}
-      >
-        {isSubmitting ? 'Applying boost...' : 'Apply Selected Boost'}
-      </Button>
+      
+      <div className="flex justify-end mt-4">
+        <Button
+          onClick={handleBoost}
+          disabled={!selectedPackage || loading}
+        >
+          {loading ? "Processing..." : "Apply Boost"}
+        </Button>
+      </div>
     </div>
   );
 };

@@ -5,11 +5,13 @@ import BoostEligibilityCheck from '../BoostEligibilityCheck';
 import BoostPackages from './BoostPackages';
 import { BoostEligibility, BoostStatus, BoostPackage } from '@/types/pulse-boost';
 
-interface BoostDialogTabsProps {
+export interface BoostDialogTabsProps {
   boostStatus: BoostStatus | null;
   packages: BoostPackage[];
-  boostEligibility: BoostEligibility | null;
-  onSuccess: () => void;
+  boostEligibility?: BoostEligibility | null;
+  eligibility?: BoostEligibility | null;
+  onSuccess: () => void | Promise<void>;
+  onBoostSuccess?: () => Promise<boolean>;
   profileId?: string;
   onClose: () => void;
 }
@@ -18,27 +20,43 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   boostStatus,
   packages,
   boostEligibility,
+  eligibility,
   onSuccess,
+  onBoostSuccess,
   profileId,
   onClose
 }) => {
   const [activeTab, setActiveTab] = React.useState('boost-packages');
 
+  // Use either boostEligibility or eligibility, prioritizing boostEligibility
+  const eligibilityData = boostEligibility || eligibility;
+
   const renderEligibility = () => {
-    if (!boostEligibility) return null;
+    if (!eligibilityData) return null;
     
     return (
       <div className="mb-4">
         <BoostEligibilityCheck 
           eligibility={{ 
-            eligible: boostEligibility.eligible, 
-            reasons: boostEligibility.reasons || [],
-            nextEligibleTime: boostEligibility.nextEligibleTime
+            eligible: eligibilityData.eligible, 
+            reasons: eligibilityData.reasons || [],
+            nextEligibleTime: eligibilityData.nextEligibleTime
           }}
           onClose={onClose}
         />
       </div>
     );
+  };
+
+  // Create a wrapper function that safely handles the promise
+  const handleSuccess = async () => {
+    if (onSuccess) {
+      const result = onSuccess();
+      // If it returns a promise, await it, otherwise just return
+      if (result instanceof Promise) {
+        await result;
+      }
+    }
   };
 
   return (
@@ -53,7 +71,8 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
         <BoostPackages
           packages={packages}
           profileId={profileId || ''}
-          onSuccess={onSuccess}
+          onSuccess={handleSuccess}
+          onBoost={onBoostSuccess}
         />
       </TabsContent>
 

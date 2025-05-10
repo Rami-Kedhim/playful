@@ -1,3 +1,4 @@
+
 export interface PulseBoost {
   id: string;
   profileId?: string;
@@ -68,8 +69,8 @@ export interface EnhancedBoostStatus extends PulseBoostStatus {
 export interface BoostStatus {
   isActive: boolean;
   packageId?: string;
-  expiresAt?: Date;
-  startedAt?: Date;
+  expiresAt?: Date | string;
+  startedAt?: Date | string;
   timeRemaining?: string;
   remainingTime?: string;
   packageName?: string;
@@ -81,6 +82,8 @@ export interface BoostStatus {
   boostMultiplier?: number;
   level?: number;
   remainingDays?: number;
+  boostLevel?: number;
+  isExpiring?: boolean;
 }
 
 // Update the BoostPackage interface
@@ -102,11 +105,11 @@ export interface BoostPackage {
 }
 
 export interface HermesStatus {
-  score: number;
-  position: number;
-  estimatedVisibility: number;
-  recommendations: string[];
-  lastUpdated: Date;
+  score?: number;
+  position?: number;
+  estimatedVisibility?: number;
+  recommendations?: string[];
+  lastUpdated?: Date;
   boostScore?: number;
   effectivenessScore?: number;
   isActive?: boolean;
@@ -121,3 +124,11 @@ export interface BoostEligibility {
   reasons?: string[];
   nextEligibleTime?: Date | string;
 }
+
+export interface BoostPackagesProps {
+  packages: BoostPackage[];
+  profileId: string;
+  onSuccess?: () => void | Promise<void>;
+  onBoost?: () => Promise<boolean>;
+}
+
