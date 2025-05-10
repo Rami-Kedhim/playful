@@ -77,8 +77,13 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
     };
   };
 
-  const onCancelBoost = () => {
-    handleCancelBoost();
+  // Create wrapper functions to match expected return types
+  const handleBoostSuccess = async (): Promise<void> => {
+    await handleBoost();
+  };
+  
+  const handleClose = () => {
+    onOpenChange(false);
   };
 
   return (
@@ -95,10 +100,10 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
           boostStatus={sanitizeBoostStatus(boostStatus)}
           packages={sanitizePackages(packages)}
           eligibility={getEligibility()}
-          onSuccess={handleBoost}
+          onSuccess={handleBoostSuccess}
           onBoostSuccess={handleBoost}
           profileId={profileId}
-          onClose={onOpenChange}
+          onClose={handleClose}
         />
       </DialogContent>
     </Dialog>

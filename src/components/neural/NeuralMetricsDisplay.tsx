@@ -4,11 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { NeuralMetric, NeuralMetricsDisplayProps } from '@/types/analytics';
 import { Loader2 } from 'lucide-react';
 
+export interface NeuralMetricItem extends NeuralMetric {}
+
 const NeuralMetricsDisplay: React.FC<NeuralMetricsDisplayProps> = ({ 
   metrics,
   loading = false,
   error = null,
-  refreshInterval
+  refreshInterval,
+  period
 }) => {
   if (loading) {
     return (
@@ -55,6 +58,12 @@ const NeuralMetricsDisplay: React.FC<NeuralMetricsDisplayProps> = ({
           </CardContent>
         </Card>
       ))}
+      
+      {period && (
+        <div className="text-sm text-muted-foreground mt-2">
+          Period: {period}
+        </div>
+      )}
     </div>
   );
 };

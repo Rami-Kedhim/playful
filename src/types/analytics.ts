@@ -109,4 +109,5 @@ export interface NeuralMetricsDisplayProps {
   refreshInterval?: number;
   loading?: boolean;
   error?: string | null;
+  period?: string;
 }

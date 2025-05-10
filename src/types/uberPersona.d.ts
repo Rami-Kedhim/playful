@@ -27,6 +27,7 @@ export interface UberPersona {
   bio?: string;
   roleFlags?: number;
   isActive?: boolean;
+  gender?: string;
   metadata?: Record<string, any>;
   stats?: {
     popularity?: number;

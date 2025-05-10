@@ -131,4 +131,3 @@ export interface BoostPackagesProps {
   onSuccess?: () => void | Promise<void>;
   onBoost?: () => Promise<boolean>;
 }
-

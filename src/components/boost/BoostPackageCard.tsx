@@ -1,81 +1,67 @@
 
 import React from 'react';
 import { BoostPackage } from '@/types/pulse-boost';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Check } from 'lucide-react';
 
-interface BoostPackageCardProps {
+export interface BoostPackageCardProps {
   pkg: BoostPackage;
-  packageData?: BoostPackage; // Added for backward compatibility
   isSelected: boolean;
   onSelect?: () => void;
-  onClick?: () => void; // Added for compatibility with CreatorBoostTab
-  formatDuration?: (duration: string | number) => string;
+  onClick?: () => void;
+  formatDuration?: (duration: number) => string;
 }
 
 const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
   pkg,
-  packageData, // Support both pkg and packageData
   isSelected,
   onSelect,
   onClick,
-  formatDuration = (duration) => duration.toString()
+  formatDuration
 }) => {
-  // Use either pkg or packageData, prioritizing pkg
-  const boostPackage = pkg || packageData;
-  
-  if (!boostPackage) {
-    return null; // Ensure we have a package before rendering
-  }
-  
   const handleClick = () => {
-    if (onClick) onClick();
     if (onSelect) onSelect();
+    if (onClick) onClick();
   };
 
   return (
     <Card 
-      className={`cursor-pointer transition-all border-2 ${isSelected ? 'border-primary' : 'border-transparent'}`}
+      className={`p-4 cursor-pointer transition-all ${
+        isSelected 
+          ? 'border-2 border-primary shadow-md' 
+          : 'border hover:border-primary/50'
+      }`}
       onClick={handleClick}
     >
-      <CardHeader className="relative pb-2">
-        <CardTitle className="text-lg flex items-center justify-between">
-          {boostPackage.name}
-          {boostPackage.isMostPopular && (
-            <span className="bg-amber-500/20 text-amber-500 text-xs px-2 py-1 rounded-full flex items-center">
-              <Sparkles className="h-3 w-3 mr-1" />
-              Popular
-            </span>
-          )}
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">{formatDuration(boostPackage.duration)}</p>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div>
-            <p className="font-semibold text-xl">{boostPackage.price_ubx} UBX</p>
-            <p className="text-sm text-muted-foreground">${boostPackage.price.toFixed(2)} USD</p>
-          </div>
-          
-          <div className="space-y-2">
-            {boostPackage.features.map((feature, idx) => (
-              <div key={idx} className="flex items-start gap-2">
-                <Check className="h-4 w-4 text-green-500 mt-0.5" />
-                <span className="text-sm">{feature}</span>
-              </div>
-            ))}
-          </div>
-          
-          <Button 
-            variant={isSelected ? "default" : "outline"}
-            className="w-full"
-            onClick={handleClick}
-          >
-            {isSelected ? "Selected" : "Select"}
-          </Button>
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="font-semibold">{pkg.name}</h3>
+          <p className="text-sm text-muted-foreground">{pkg.description}</p>
         </div>
-      </CardContent>
+        {isSelected && <Check className="h-5 w-5 text-primary" />}
+      </div>
+      
+      <div className="mt-4">
+        <div className="text-lg font-bold">{pkg.price_ubx} UBX</div>
+        <div className="text-sm text-muted-foreground">
+          {formatDuration ? formatDuration(pkg.durationMinutes) : pkg.duration}
+        </div>
+      </div>
+      
+      <div className="mt-4 space-y-2">
+        {pkg.features.map((feature, i) => (
+          <div key={i} className="flex items-start gap-2">
+            <Check className="h-4 w-4 text-green-500 mt-0.5" />
+            <span className="text-sm">{feature}</span>
+          </div>
+        ))}
+      </div>
+      
+      {pkg.isMostPopular && (
+        <div className="absolute top-2 right-2 bg-primary/15 text-primary text-xs px-2 py-1 rounded-full">
+          Most Popular
+        </div>
+      )}
     </Card>
   );
 };

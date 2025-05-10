@@ -10,10 +10,10 @@ export interface BoostDialogTabsProps {
   packages: BoostPackage[];
   boostEligibility?: BoostEligibility | null;
   eligibility?: BoostEligibility | null;
-  onSuccess: () => void | Promise<void>;
+  onSuccess?: () => void | Promise<void>;
   onBoostSuccess?: () => Promise<boolean>;
   profileId?: string;
-  onClose: () => void;
+  onClose: (open?: boolean) => void;
 }
 
 const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
@@ -42,7 +42,7 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
             reasons: eligibilityData.reasons || [],
             nextEligibleTime: eligibilityData.nextEligibleTime
           }}
-          onClose={onClose}
+          onClose={() => onClose()}
         />
       </div>
     );
@@ -59,6 +59,13 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
     }
   };
 
+  // Create a wrapper for onBoostSuccess that returns void
+  const handleBoostSuccess = async () => {
+    if (onBoostSuccess) {
+      await onBoostSuccess();
+    }
+  };
+
   return (
     <>
       {renderEligibility()}
@@ -72,7 +79,7 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
           packages={packages}
           profileId={profileId || ''}
           onSuccess={handleSuccess}
-          onBoost={onBoostSuccess}
+          onBoost={handleBoostSuccess}
         />
       </TabsContent>
 

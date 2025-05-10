@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BoostPackage } from '@/types/pulse-boost';
 import BoostPackageCard from '@/components/boost/BoostPackageCard';
-import { convertBoostPackage } from './boost/helpers';
 
 // Example implementation
 const CreatorBoostTab: React.FC = () => {

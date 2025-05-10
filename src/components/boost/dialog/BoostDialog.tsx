@@ -35,11 +35,11 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
   selectedPackage,
   setSelectedPackage
 }) => {
-  const handleSuccess = async () => {
+  // Create wrapper functions to match expected return types
+  const handleSuccess = async (): Promise<void> => {
     if (selectedPackage) {
-      return onBoost(selectedPackage);
+      await onBoost(selectedPackage);
     }
-    return false;
   };
 
   return (
