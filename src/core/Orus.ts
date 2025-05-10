@@ -4,12 +4,12 @@ import { SystemIntegrityResult, SessionValidationResult } from '@/types/core-sys
 export class Orus {
   validateSession(token: string): SessionValidationResult {
     if (!token) {
-      return { isValid: false, reason: 'No token provided' };
+      return { valid: false, reason: 'No token provided' };
     }
     
     // Mock implementation
     return {
-      isValid: true,
+      valid: true,
       userId: 'user-123',
       expiry: new Date(Date.now() + 24 * 60 * 60 * 1000)
     };
@@ -18,7 +18,7 @@ export class Orus {
   checkIntegrity(): SystemIntegrityResult {
     // Mock implementation
     return {
-      isValid: true,
+      valid: true,
       overallStatus: 'Operational',
       modules: {
         authentication: 'active',

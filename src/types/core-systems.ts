@@ -1,125 +1,57 @@
 
-import { LucieAI } from '@/core/Lucie';
-import { Hermes } from '@/core/Hermes';
-import { Oxum } from '@/core/Oxum';
-import { Orus } from '@/core/Orus';
+export interface HermesSystem {
+  initialize(): Promise<void>;
+  trackEvent(eventName: string, data: any): void;
+  getMetrics(): Promise<any>;
+  calculateBoostScore(profileId: string): Promise<number>;
+  getInsights(): Promise<HermesInsight[]>;
+}
 
-export interface LucieAISystem extends LucieAI {}
-export interface HermesSystem extends Hermes {}
-export interface OxumSystem extends Oxum {}
-export interface OrusSystem extends Orus {}
+export interface HermesInsight {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  priority: number;
+  timestamp: Date;
+  metadata?: Record<string, any>;
+}
+
+export interface LucieAISystem {
+  initialize(): Promise<void>;
+  getSystemStatus(): any;
+  processInput(input: string, context: any): Promise<string>;
+}
+
+export interface OxumSystem {
+  initialize(): Promise<boolean>;
+  processImageFeatures(imageUrl: string): Promise<any>;
+  boostAllocationEigen(profileId: string, boostLevel?: number): Promise<number[]>;
+  calculateScore(profile: any): Promise<number>;
+}
 
 export interface UberCoreSystem {
   lucieAI: LucieAISystem;
   hermesSystem: HermesSystem;
   oxumSystem: OxumSystem;
   initialize(): Promise<void>;
-  checkSubsystemHealth(): Array<{
-    name: string;
-    status: string;
-    health: number;
-  }>;
-  initializeAutomaticSeo(): {
-    success: boolean;
-    message: string;
-  };
-}
-
-export interface GenerateContentParams {
-  prompt: string;
-  options?: {
-    temperature?: number;
-    maxTokens?: number;
-    topP?: number;
-    frequencyPenalty?: number;
-    presencePenalty?: number;
-  };
-}
-
-export interface GenerateContentResult {
-  content: string;
-  usage?: {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  };
-}
-
-export interface ModerateContentParams {
-  content: string;
-  context?: string;
-}
-
-export interface ModerateContentResult {
-  isSafe: boolean;
-  categories: {
-    sexual: boolean;
-    hate: boolean;
-    harassment: boolean;
-    selfHarm: boolean;
-    violence: boolean;
-  };
-  categoryScores: {
-    sexual: number;
-    hate: number;
-    harassment: number;
-    selfHarm: number;
-    violence: number;
-  };
-  flagged: boolean;
-}
-
-export interface SentimentAnalysisResult {
-  sentiment: 'positive' | 'negative' | 'neutral';
-  score: number;
-  entities?: Array<{
-    text: string;
-    sentiment: string;
-    score: number;
-  }>;
-}
-
-export interface SystemStatus {
-  healthy: boolean;
-  version: string;
-  components: Record<string, {
-    status: 'online' | 'offline' | 'degraded';
-    lastChecked: Date;
-  }>;
-}
-
-export interface SystemIntegrityResult {
-  passed: boolean;
-  issues: string[];
-  score: number;
 }
 
 export interface SessionValidationResult {
   valid: boolean;
+  userId?: string;
+  expiry?: Date;
   reason?: string;
-  trustScore?: number;
 }
 
-export interface SystemHealthMetrics {
-  cpuUsage: number;
-  memoryUsage: number;
-  requestsPerSecond: number;
-  averageLatency: number;
-  errorRate: number;
-}
-
-export interface RecommendedAction {
-  id: string;
-  type: string;
-  priority: number;
-  title: string;
-  description: string;
-  action: string;
-}
-
-export interface HermesInsight {
-  score: number;
+export interface SystemIntegrityResult {
+  valid: boolean;
+  overallStatus: string;
+  modules: {
+    authentication: string;
+    encryption: string;
+    validation: string;
+  };
   recommendations: string[];
-  metrics: Record<string, number>;
-  analysis: string;
+  timestamp: Date;
 }

@@ -1,5 +1,5 @@
 
-import { BoostPackage, BoostStatus, HermesStatus, BoostEligibility, BoostScoreResult } from '@/types/pulse-boost';
+import { BoostPackage, BoostStatus, HermesStatus, BoostEligibility } from '@/types/pulse-boost';
 
 export interface BoostPackageCardProps {
   package: BoostPackage;
@@ -36,7 +36,12 @@ export interface BoostAnalyticsProps {
 }
 
 export interface BoostScoreCardProps {
-  score: number | BoostScoreResult;
+  score: number | null;
   recommendations?: string[];
   loading?: boolean;
+  profileId: string;
+  isOwnProfile: boolean;
+  boostScore: number | null;
+  error: string | null;
+  onRefresh: () => Promise<void>;
 }

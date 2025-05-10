@@ -11,7 +11,7 @@ interface BoostScoreCardContainerProps {
 
 const BoostScoreCardContainer = ({ profileId, isOwnProfile }: BoostScoreCardContainerProps) => {
   const { boostScore, loading, error, fetchBoostScore, updateBoostScore } = useBoostScore();
-  const boostManager = useBoostManager(profileId);
+  const boostManager = useBoostManager();
 
   useEffect(() => {
     if (profileId) {

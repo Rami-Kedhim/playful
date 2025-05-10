@@ -55,3 +55,67 @@ export interface BoostPurchaseResult {
   error?: string | null;
   message?: string;
 }
+
+export interface HermesStatus {
+  score?: number;
+  position?: number;
+  activeUsers?: number;
+  estimatedVisibility?: number;
+  lastUpdateTime?: string;
+  boostScore?: number;
+  effectivenessScore?: number;
+  isActive?: boolean;
+}
+
+export interface UserBoost {
+  id: string;
+  userId: string;
+  packageId: string;
+  startTime: Date | string;
+  endTime: Date | string;
+  status: string;
+}
+
+export interface BoostAnalytics {
+  totalBoosts: number;
+  activeBoosts: number;
+  averageBoostScore: number;
+  boostHistory: Array<{
+    date: Date;
+    score: number;
+  }>;
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
+  views?: number;
+  impressions?: {
+    value: number;
+    change?: number;
+    withBoost?: number;
+  };
+  interactions?: {
+    value: number;
+    change?: number;
+  };
+}
+
+export interface AnalyticsData {
+  views: number;
+  impressions: number;
+  clicks: number;
+  conversions: number;
+  boostScore: number;
+  visibilityScore: number;
+  positionChange: number;
+  timeRange: string;
+}
+
+export interface BoostScoreResult {
+  score: number;
+  factors: {
+    profileCompleteness: number;
+    activityScore: number;
+    engagementRate: number;
+  };
+  recommendations: string[];
+}

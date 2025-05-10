@@ -5,7 +5,8 @@ import { pulseBoostService } from '@/services/boost/pulseBoostService';
 
 export const useBoostStatus = (profileId?: string) => {
   const [boostStatus, setBoostStatus] = useState<BoostStatus>({
-    isActive: false
+    isActive: false,
+    timeRemaining: ''
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');

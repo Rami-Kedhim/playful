@@ -1,9 +1,9 @@
 
-import { BoostPackage, BoostStatus, HermesStatus, UserBoost, BoostAnalytics } from '@/types/pulse-boost';
+import { BoostPackage, BoostStatus, HermesStatus, BoostAnalytics } from '@/types/pulse-boost';
 
 export interface BoostManagerHook {
   availablePackages: BoostPackage[];
-  activeBoost: UserBoost | null;
+  activeBoost: any | null;  // Using 'any' instead of UserBoost since we don't have that type
   boostStatus: BoostStatus;
   hermesStatus: HermesStatus;
   isLoadingPackages: boolean;
