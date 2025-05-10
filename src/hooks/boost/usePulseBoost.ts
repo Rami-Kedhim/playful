@@ -1,95 +1,171 @@
 
-import { useState, useEffect } from 'react';
-import { PulseBoost, BoostPackage } from '@/types/pulse-boost';
+import { useState, useEffect, useCallback } from 'react';
+import { pulseService } from '@/services/boost/pulseService';
+import { BoostPackage, BoostStatus } from '@/types/pulse-boost';
 
-export const usePulseBoost = (profileId?: string) => {
-  const [pulseBoostPackages, setPulseBoostPackages] = useState<BoostPackage[]>([]);
-  const [activeBoosts, setActiveBoosts] = useState<PulseBoost[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [userEconomy, setUserEconomy] = useState<{ubxBalance: number}>({ ubxBalance: 0 });
-  
+/**
+ * usePulseBoost hook for managing escort boost status
+ */
+export function usePulseBoost(userId?: string) {
+  // Initialize state with proper types
+  const [boostStatus, setBoostStatus] = useState<BoostStatus>({
+    isActive: false,
+    remainingTime: "0",
+    timeRemaining: "0",
+    percentRemaining: 0,
+    expiresAt: null,
+    startedAt: null,
+    isExpired: true,
+    remainingMinutes: 0
+  });
+
+  const [packages, setPackages] = useState<BoostPackage[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [refreshCounter, setRefreshCounter] = useState(0);
+
+  // Fetch boost packages
   useEffect(() => {
-    const fetchPulseBoosts = async () => {
-      if (!profileId) return;
-      
-      setIsLoading(true);
+    const fetchPackages = async () => {
       try {
-        // Mock data - use BoostPackage instead of directly using PulseBoost
-        const mockPackages: BoostPackage[] = [
-          {
-            id: 'pulse-1',
-            name: 'Pulse Boost Basic',
-            description: 'Boost your visibility for 24 hours',
-            price: 29.99,
-            price_ubx: 300,
-            duration: '24:00:00',
-            durationMinutes: 1440,
-            visibility: '300%',
-            visibility_increase: 200,
-            color: '#3b82f6',
-            badgeColor: '#3b82f6',
-            features: ['3x visibility', '24-hour duration', 'Top placement']
-          },
-          {
-            id: 'pulse-2',
-            name: 'Pulse Boost Premium',
-            description: 'Premium visibility boost for 48 hours',
-            price: 49.99,
-            price_ubx: 500,
-            duration: '48:00:00',
-            durationMinutes: 2880,
-            visibility: '500%',
-            visibility_increase: 400,
-            color: '#7c3aed',
-            badgeColor: '#7c3aed',
-            features: ['5x visibility', '48-hour duration', 'Top placement', 'Homepage feature']
-          }
-        ];
-        
-        setPulseBoostPackages(mockPackages);
-        setUserEconomy({ ubxBalance: 1250 });
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch Pulse Boost data');
-      } finally {
-        setIsLoading(false);
+        const fetchedPackages = pulseService.getPackages();
+        setPackages(fetchedPackages);
+      } catch (err) {
+        console.error('Error fetching boost packages:', err);
       }
     };
+
+    fetchPackages();
+  }, []);
+
+  // Load user's active boost status
+  useEffect(() => {
+    const fetchBoostStatus = async () => {
+      if (!userId) return;
+
+      setLoading(true);
+      try {
+        // Get mock boost purchase for the user
+        const activePurchase = pulseService.getMockBoostPurchase(userId);
+
+        if (activePurchase) {
+          // Get package details
+          const packageDetails = packages.find(pkg => pkg.id === activePurchase.packageId);
+          const durationInMinutes = packageDetails?.durationMinutes || 0;
+
+          // Calculate boost status
+          const status = pulseService.calculateBoostStatus(
+            activePurchase.startTime,
+            durationInMinutes
+          );
+
+          // Convert string properties to numbers where needed
+          setBoostStatus({
+            ...status,
+            isExpired: !status.isActive,
+            remainingMinutes: typeof status.remainingMinutes === 'string'
+              ? parseInt(status.remainingMinutes) || 0
+              : status.remainingMinutes || 0,
+            percentRemaining: typeof status.percentRemaining === 'string'
+              ? parseInt(status.percentRemaining) || 0
+              : status.percentRemaining || 0
+          });
+        } else {
+          // No active boost
+          setBoostStatus({
+            isActive: false,
+            remainingTime: "0",
+            timeRemaining: "0",
+            percentRemaining: 0,
+            expiresAt: null,
+            startedAt: null,
+            isExpired: true,
+            remainingMinutes: 0
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching boost status:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBoostStatus();
+  }, [userId, refreshCounter, packages]);
+
+  // Manually refresh the boost status
+  const refreshStatus = useCallback(() => {
+    setRefreshCounter(prev => prev + 1);
+  }, []);
+
+  // Purchase a boost for the user
+  const purchaseBoost = useCallback(async (packageId: string) => {
+    if (!userId) return { success: false, message: 'User ID is required' };
+
+    try {
+      setLoading(true);
+      
+      // Find package details
+      const boostPackage = packages.find(p => p.id === packageId);
+      if (!boostPackage) {
+        return { success: false, message: 'Invalid package selected' };
+      }
+
+      const now = new Date();
+      const startDate = now;
+      const endDate = new Date(now.getTime() + boostPackage.durationMinutes * 60 * 1000);
+
+      // Update the boost status immediately for better UX
+      setBoostStatus({
+        isActive: true,
+        remainingTime: boostPackage.durationMinutes.toString(),
+        timeRemaining: boostPackage.durationMinutes.toString(),
+        percentRemaining: 100,
+        expiresAt: endDate,
+        startedAt: startDate,
+        isExpired: false,
+        remainingMinutes: boostPackage.durationMinutes
+      });
+
+      // Perform purchase operation (mocked)
+      // In a real app, this would call an API endpoint
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      refreshStatus();
+      return { success: true, message: 'Boost activated successfully' };
+    } catch (error: any) {
+      console.error('Error purchasing boost:', error);
+      return { 
+        success: false, 
+        message: error.message || 'Failed to purchase boost'
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, packages, refreshStatus]);
+
+  // Format the remaining time as a human-readable string
+  const getFormattedTimeRemaining = useCallback(() => {
+    const minutes = typeof boostStatus.remainingMinutes === 'string'
+      ? parseInt(boostStatus.remainingMinutes) || 0
+      : boostStatus.remainingMinutes || 0;
     
-    fetchPulseBoosts();
-  }, [profileId]);
-  
-  const purchaseBoost = async (boostPackage: BoostPackage): Promise<boolean> => {
-    try {
-      console.log(`Purchasing ${boostPackage.name} boost for profile ${profileId}`);
-      // This would be a real API call
-      return true;
-    } catch (error) {
-      console.error('Failed to purchase boost', error);
-      return false;
+    const hours = Math.floor(minutes / 60);
+    const remainingMins = minutes % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${remainingMins}m`;
     }
-  };
-  
-  const cancelBoost = async (): Promise<boolean> => {
-    try {
-      console.log('Cancelling active pulse boost');
-      // This would be a real API call
-      return true;
-    } catch (error) {
-      console.error('Failed to cancel boost', error);
-      return false;
-    }
-  };
-  
+    return `${remainingMins}m`;
+  }, [boostStatus.remainingMinutes]);
+
   return {
-    pulseBoostPackages,
-    activeBoosts,
-    isLoading,
-    error,
-    userEconomy,
+    boostStatus,
+    packages,
+    loading,
+    refreshStatus,
     purchaseBoost,
-    cancelBoost
+    getFormattedTimeRemaining
   };
-};
+}
 
 export default usePulseBoost;

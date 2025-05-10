@@ -1,74 +1,69 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
 import { BoostPackage } from '@/types/pulse-boost';
-import BoostPackageCard from '../BoostPackageCard';
+import { Button } from '@/components/ui/button';
+import BoostPackageCard from '@/components/boost/BoostPackageCard';
 
 interface BoostPackagesProps {
   packages: BoostPackage[];
-  selected: string;
-  onSelect: (id: string) => void;
-  onBoost: () => void;
-  isLoading: boolean;
-  usageCount: number;
-  dailyLimit: number;
-  getPrice?: () => number;
-  formatDuration?: (duration: string | number) => string;
+  onBoost: () => Promise<boolean>;
+  profileId?: string; // Add this prop to resolve the error
 }
 
 const BoostPackages: React.FC<BoostPackagesProps> = ({
   packages,
-  selected,
-  onSelect,
   onBoost,
-  isLoading,
-  usageCount,
-  dailyLimit,
-  getPrice,
-  formatDuration = (duration) => duration.toString()
+  profileId
 }) => {
-  // Create normalized packages with required description field if missing
-  const normalizedPackages = packages.map(pkg => ({
-    ...pkg,
-    description: pkg.description || pkg.name || ""
-  }));
+  const [selectedPackage, setSelectedPackage] = React.useState<string | null>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const handleBoost = async () => {
+    if (!selectedPackage) return;
+    
+    setIsLoading(true);
+    try {
+      await onBoost();
+    } catch (error) {
+      console.error('Error boosting profile:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Simple duration formatter
+  const formatDuration = (duration: string | number): string => {
+    if (typeof duration === 'number') {
+      // Convert hours to readable format
+      const hours = Math.floor(duration);
+      const minutes = Math.round((duration - hours) * 60);
+      return minutes > 0 ? `${hours}h ${minutes}m` : `${hours} hours`;
+    }
+    return duration;
+  };
 
   return (
     <div className="space-y-4">
-      <div className="text-sm text-muted-foreground mb-2">
-        Select a boost package ({usageCount}/{dailyLimit} today)
-      </div>
-      
-      <div className="space-y-3">
-        {normalizedPackages.map((pkg) => (
+      <div className="space-y-2">
+        {packages.map((pkg) => (
           <BoostPackageCard
             key={pkg.id}
             package={pkg}
-            isSelected={selected === pkg.id}
-            onSelect={() => onSelect(pkg.id)}
-            isPopular={pkg.isPopular || pkg.isMostPopular}
+            isSelected={selectedPackage === pkg.id}
+            onSelect={() => setSelectedPackage(pkg.id)}
             formatDuration={formatDuration}
+            isPopular={pkg.isPopular || false}
           />
         ))}
       </div>
       
-      <div className="flex items-center justify-between pt-3 border-t">
-        <div className="text-sm">
-          <div className="font-medium">Total</div>
-          <div className="text-muted-foreground">
-            {getPrice ? `${getPrice()} credits` : 'Select a package'}
-          </div>
-        </div>
-        
-        <Button 
-          onClick={onBoost}
-          disabled={!selected || isLoading}
-          className="min-w-[100px]"
-        >
-          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Boost Now'}
-        </Button>
-      </div>
+      <Button 
+        onClick={handleBoost} 
+        disabled={!selectedPackage || isLoading}
+        className="w-full"
+      >
+        {isLoading ? 'Processing...' : 'Boost Profile'}
+      </Button>
     </div>
   );
 };

@@ -8,21 +8,17 @@ interface BoostSummaryPanelProps {
 }
 
 const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({ profileId }) => {
-  const { boostStatus, loading, error, fetchBoostStatus, applyBoost } = useBoostStatus(profileId);
+  const { boostStatus, loading, error, fetchBoostStatus, applyBoost, hermesStatus } = useBoostStatus(profileId);
+
+  // Provide fallback for hermesStatus if it's undefined
+  const boostScore = hermesStatus?.score ?? 0;
+  const estimatedVisibility = hermesStatus?.estimatedVisibility ?? 0;
 
   const formatRemainingTime = (timeString?: string) => {
     if (!timeString) return "N/A";
     
     // Simple formatting, could be enhanced
     return timeString;
-  };
-
-  // Added placeholder for hermesStatus since it doesn't exist in useBoostStatus
-  const hermesStatus = {
-    score: 0,
-    position: 0,
-    estimatedVisibility: 0,
-    recommendations: []
   };
 
   return (
@@ -54,7 +50,7 @@ const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({ profileId }) => {
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Visibility Score:</span>
-              <span className="font-medium">{hermesStatus.score}</span>
+              <span className="font-medium">{boostScore}</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
               <div 

@@ -31,8 +31,10 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
         eligibility={{ 
           eligible: eligibility.eligible,
           reasons: eligibility.reasons || [],
-          nextEligibleDate: eligibility.nextEligibleDate,
-          nextEligibleTime: eligibility.nextEligibleTime || eligibility.nextEligibleDate
+          // Convert Date objects to strings if needed
+          nextEligibleTime: typeof eligibility.nextEligibleTime === 'string' 
+            ? eligibility.nextEligibleTime 
+            : eligibility.nextEligibleTime?.toString() || ''
         }} 
         onClose={handleClose} 
       />
@@ -46,7 +48,6 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
         <BoostPackages 
           packages={packages} 
           onBoost={onBoostSuccess} 
-          profileId={profileId} 
         />
       </TabsContent>
       

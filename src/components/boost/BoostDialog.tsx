@@ -55,7 +55,7 @@ const BoostDialog: React.FC<BoostDialogProps> = ({
       eligible: boostEligibility.eligible || boostEligibility.isEligible || false,
       reason: boostEligibility.reason || '',
       reasons: boostEligibility.reasons || [],
-      nextEligibleDate: boostEligibility.nextEligibleDate || boostEligibility.nextEligibleTime
+      nextEligibleTime: boostEligibility.nextEligibleTime || boostEligibility.nextEligibleDate // Use nextEligibleTime consistently
     };
     
     return eligibilityObj;

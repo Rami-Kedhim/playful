@@ -9,7 +9,7 @@ interface BoostProfileDialogProps {
   profileId: string;
   onSuccess?: () => void;
   buttonText?: string;
-  buttonVariant?: string; 
+  buttonVariant?: "link" | "default" | "destructive" | "outline" | "secondary" | "ghost"; // Fix this to use valid variants
   buttonSize?: string;
 }
 

@@ -1,4 +1,3 @@
-
 export interface AuthUser {
   id: string;
   email?: string;
@@ -13,6 +12,7 @@ export interface AuthResult {
   user?: AuthUser | null;
   session?: any;
   error?: string | null;
+  success?: boolean; // Add this field for compatibility
 }
 
 export interface UserProfile {
@@ -33,6 +33,16 @@ export interface UserProfile {
   phone?: string;
   website?: string;
 }
+
+export type UserRole = 'USER' | 'ADMIN' | 'MODERATOR' | 'ESCORT' | 'CLIENT';
+
+export const UserRoleEnum = {
+  USER: 'USER' as UserRole,
+  ADMIN: 'ADMIN' as UserRole,
+  MODERATOR: 'MODERATOR' as UserRole,
+  ESCORT: 'ESCORT' as UserRole,
+  CLIENT: 'CLIENT' as UserRole
+};
 
 export interface LoginCredentials {
   email: string;

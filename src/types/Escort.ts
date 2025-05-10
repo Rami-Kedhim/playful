@@ -1,13 +1,12 @@
 
-// Adding this file to ensure the Escort type has all needed properties
-
+// Update the EscortAvailability interface to be compatible
 export interface EscortAvailabilityDay {
   day: string;
   available: boolean;
 }
 
 export interface EscortAvailability {
-  days?: EscortAvailabilityDay[];
+  days?: string[] | EscortAvailabilityDay[]; // Allow both types for compatibility
   hours?: { start: string; end: string };
   monday?: string[];
   tuesday?: string[];
@@ -28,7 +27,7 @@ export interface EscortAvailability {
 
 export interface Video {
   id: string;
-  url?: string;
+  url?: string; // Make url optional for compatibility
   thumbnail?: string;
   thumbnailUrl?: string;
   title?: string;
@@ -55,6 +54,7 @@ export interface Escort {
   bio?: string;
   description?: string;
   location?: string;
+  locations?: string[]; // Add this for compatibility
   images?: string[];
   imageUrls?: string[];
   imageUrl?: string;
@@ -63,8 +63,6 @@ export interface Escort {
   languages?: string[];
   height?: string | number;
   weight?: string | number;
-  
-  // Add missing properties
   measurements?: string;
   hairColor?: string;
   eyeColor?: string;
@@ -77,8 +75,6 @@ export interface Escort {
   payment_methods?: string[];
   deposit_required?: boolean;
   responseRate?: number;
-  
-  // Additional properties referenced in error messages
   availability?: string | string[] | EscortAvailability;
   contact?: {
     phone?: string;
@@ -137,6 +133,15 @@ export interface Escort {
   subscriptionPrice?: number;
 }
 
-// Explicitly export types
+// Add VerificationLevel enum for compatibility
+export enum VerificationLevel {
+  NONE = 'none',
+  BASIC = 'basic',
+  VERIFIED = 'verified',
+  ENHANCED = 'enhanced',
+  PREMIUM = 'premium'
+}
+
+// Export types
 export { Video };
 export type { EscortAvailability };

@@ -1,214 +1,149 @@
-
 import { Escort } from '@/types/Escort';
 
 export const escortProfiles: Escort[] = [
   {
-    id: "escort-001",
-    name: "Sophia Bell",
-    age: 25,
-    gender: "female",
-    location: "Los Angeles",
-    rating: 4.8,
-    reviewCount: 42,
-    price: 300,
-    isVerified: true,
-    tags: ["gfe", "dinner date", "travel companion"],
-    imageUrl: "/assets/escorts/sophia.jpg",
-    sexualOrientation: "bisexual",
-    lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-    availableNow: true,
-    responseRate: 95,
-    providesInPersonServices: true,
-    providesVirtualContent: true,
-    locations: ["Downtown", "Hollywood", "Beverly Hills"],
-    contentStats: {
-      photos: 32,
-      videos: 8,
-      totalViews: 12500
-    },
-    subscriptionPrice: 19.99
-  },
-  {
-    id: "escort-002",
-    name: "Marcus Wright",
+    id: '1',
+    name: 'Sophia',
     age: 28,
-    gender: "male",
-    location: "New York",
-    rating: 4.6,
-    reviewCount: 36,
-    price: 350,
+    gender: 'female',
+    price: 250,
+    rating: 4.9,
     isVerified: true,
-    tags: ["massage", "dinner date", "bodybuilder"],
-    imageUrl: "/assets/escorts/marcus.jpg",
-    sexualOrientation: "straight",
-    lastActive: new Date(Date.now() - 18 * 60 * 60 * 1000), // 18 hours ago
-    availableNow: false,
-    responseRate: 89,
-    providesInPersonServices: true,
-    providesVirtualContent: false,
-    locations: ["Manhattan", "Brooklyn"],
-    contentStats: {
-      photos: 24,
-      videos: 4,
-      totalViews: 8700
-    },
-    subscriptionPrice: 24.99
+    bio: 'Elegant and sophisticated companion with a passion for art and culture.',
+    location: 'New York, NY', // Changed from locations to location
+    services: ['Dinner Date', 'Cultural Events', 'Travel Companion'],
+    images: [
+      '/images/escorts/sophia1.jpg',
+      '/images/escorts/sophia2.jpg',
+      '/images/escorts/sophia3.jpg'
+    ],
+    featured: true
   },
   {
-    id: "escort-003",
-    name: "Jasmine Lee",
+    id: '2',
+    name: 'Isabella',
     age: 24,
-    gender: "female",
-    location: "Miami",
-    rating: 4.9,
-    reviewCount: 58,
-    price: 400,
-    isVerified: true,
-    tags: ["gfe", "travel companion", "fetish friendly"],
-    imageUrl: "/assets/escorts/jasmine.jpg",
-    sexualOrientation: "bisexual",
-    lastActive: new Date(Date.now() - 35 * 60 * 1000), // 35 minutes ago
-    availableNow: true,
-    responseRate: 98,
-    providesInPersonServices: true,
-    providesVirtualContent: true,
-    locations: ["South Beach", "Downtown Miami", "Coral Gables"],
-    contentStats: {
-      photos: 48,
-      videos: 12,
-      totalViews: 19800
-    },
-    subscriptionPrice: 29.99
-  },
-  {
-    id: "escort-004",
-    name: "Alex Chen",
-    age: 26,
-    gender: "non-binary",
-    location: "San Francisco",
-    rating: 4.7,
-    reviewCount: 29,
-    price: 380,
-    isVerified: true,
-    tags: ["massage", "dinner date", "event companion"],
-    imageUrl: "/assets/escorts/alex.jpg",
-    sexualOrientation: "pansexual",
-    lastActive: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
-    availableNow: false,
-    responseRate: 92,
-    providesInPersonServices: true,
-    providesVirtualContent: true,
-    locations: ["Mission District", "SoMa", "Castro"],
-    contentStats: {
-      photos: 36,
-      videos: 7,
-      totalViews: 9300
-    },
-    subscriptionPrice: 19.99
-  },
-  {
-    id: "escort-005",
-    name: "Victoria Adams",
-    age: 29,
-    gender: "female",
-    location: "London",
-    rating: 4.9,
-    reviewCount: 64,
-    price: 450,
-    isVerified: true,
-    tags: ["gfe", "dinner date", "elite companion", "travel"],
-    imageUrl: "/assets/escorts/victoria.jpg",
-    sexualOrientation: "straight",
-    lastActive: new Date(Date.now() - 125 * 60 * 1000), // 125 minutes ago
-    availableNow: true,
-    responseRate: 97,
-    providesInPersonServices: true,
-    providesVirtualContent: true,
-    locations: ["Chelsea", "Kensington", "Mayfair"],
-    contentStats: {
-      photos: 56,
-      videos: 15,
-      totalViews: 25400
-    },
-    subscriptionPrice: 34.99
-  },
-  {
-    id: "escort-006",
-    name: "James King",
-    age: 32,
-    gender: "male",
-    location: "Chicago",
-    rating: 4.5,
-    reviewCount: 27,
+    gender: 'female',
     price: 300,
-    isVerified: false,
-    tags: ["massage", "fitness trainer", "dinner date"],
-    imageUrl: "/assets/escorts/james.jpg",
-    sexualOrientation: "bisexual",
-    lastActive: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
-    availableNow: false,
-    responseRate: 85,
-    providesInPersonServices: true,
-    providesVirtualContent: false,
-    locations: ["The Loop", "River North", "Lincoln Park"],
-    contentStats: {
-      photos: 18,
-      videos: 2,
-      totalViews: 4600
-    },
-    subscriptionPrice: 19.99
-  },
-  {
-    id: "escort-007",
-    name: "Emma Rodriguez",
-    age: 23,
-    gender: "female",
-    location: "Las Vegas",
-    rating: 4.4,
-    reviewCount: 19,
-    price: 320,
+    rating: 4.8,
     isVerified: true,
-    tags: ["gfe", "party companion", "dancer"],
-    imageUrl: "/assets/escorts/emma.jpg",
-    sexualOrientation: "bisexual",
-    lastActive: new Date(Date.now() - 48 * 60 * 60 * 1000), // 48 hours ago
-    availableNow: false,
-    responseRate: 88,
-    providesInPersonServices: true,
-    providesVirtualContent: true,
-    locations: ["The Strip", "Downtown", "Henderson"],
-    contentStats: {
-      photos: 28,
-      videos: 9,
-      totalViews: 7900
-    },
-    subscriptionPrice: 24.99
+    bio: 'A charming and adventurous escort ready to explore the city with you.',
+    location: 'Los Angeles, CA', // Changed from locations to location
+    services: ['City Tours', 'Nightlife', 'Gourmet Dining'],
+    images: [
+      '/images/escorts/isabella1.jpg',
+      '/images/escorts/isabella2.jpg',
+      '/images/escorts/isabella3.jpg'
+    ],
+    featured: false
   },
   {
-    id: "escort-008",
-    name: "Zoe Thomson",
-    age: 27,
-    gender: "female",
-    location: "Sydney",
+    id: '3',
+    name: 'Ava',
+    age: 26,
+    gender: 'female',
+    price: 280,
     rating: 4.7,
-    reviewCount: 33,
-    price: 380,
+    isVerified: false,
+    bio: 'Passionate and engaging, Ava is the perfect companion for a memorable evening.',
+    location: 'Miami, FL', // Changed from locations to location
+    services: ['Beach Outings', 'Yacht Parties', 'Romantic Dinners'],
+    images: [
+      '/images/escorts/ava1.jpg',
+      '/images/escorts/ava2.jpg',
+      '/images/escorts/ava3.jpg'
+    ],
+    featured: true
+  },
+  {
+    id: '4',
+    name: 'Mia',
+    age: 29,
+    gender: 'female',
+    price: 320,
+    rating: 4.9,
     isVerified: true,
-    tags: ["elite companion", "travel companion", "dinner date"],
-    imageUrl: "/assets/escorts/zoe.jpg",
-    sexualOrientation: "straight",
-    lastActive: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
-    availableNow: true,
-    responseRate: 94,
-    providesInPersonServices: true,
-    providesVirtualContent: true,
-    locations: ["Sydney CBD", "Darling Harbour", "Bondi"],
-    contentStats: {
-      photos: 42,
-      videos: 6,
-      totalViews: 13700
-    },
-    subscriptionPrice: 29.99
+    bio: 'Sophisticated and intelligent, Mia offers stimulating conversation and unforgettable experiences.',
+    location: 'Chicago, IL', // Changed from locations to location
+    services: ['Art Galleries', 'Theater', 'Fine Dining'],
+    images: [
+      '/images/escorts/mia1.jpg',
+      '/images/escorts/mia2.jpg',
+      '/images/escorts/mia3.jpg'
+    ],
+    featured: false
+  },
+  {
+    id: '5',
+    name: 'Chloe',
+    age: 25,
+    gender: 'female',
+    price: 270,
+    rating: 4.6,
+    isVerified: false,
+    bio: 'Fun-loving and energetic, Chloe is always up for a new adventure.',
+    location: 'Las Vegas, NV', // Changed from locations to location
+    services: ['Pool Parties', 'Casino Nights', 'Shows'],
+    images: [
+      '/images/escorts/chloe1.jpg',
+      '/images/escorts/chloe2.jpg',
+      '/images/escorts/chloe3.jpg'
+    ],
+    featured: true
+  },
+  {
+    id: '6',
+    name: 'Emily',
+    age: 27,
+    gender: 'female',
+    price: 310,
+    rating: 4.8,
+    isVerified: true,
+    bio: 'Charming and elegant, Emily is the perfect companion for any occasion.',
+    location: 'San Francisco, CA', // Changed from locations to location
+    services: ['Wine Tours', 'Sailing', 'Gourmet Picnics'],
+    images: [
+      '/images/escorts/emily1.jpg',
+      '/images/escorts/emily2.jpg',
+      '/images/escorts/emily3.jpg'
+    ],
+    featured: false
+  },
+  {
+    id: '7',
+    name: 'Abigail',
+    age: 23,
+    gender: 'female',
+    price: 260,
+    rating: 4.5,
+    isVerified: false,
+    bio: 'Sweet and playful, Abigail is a delightful companion for a relaxed and enjoyable time.',
+    location: 'Seattle, WA', // Changed from locations to location
+    services: ['Coffee Dates', 'Museum Visits', 'Hiking'],
+    images: [
+      '/images/escorts/abigail1.jpg',
+      '/images/escorts/abigail2.jpg',
+      '/images/escorts/abigail3.jpg'
+    ],
+    featured: true
+  },
+  {
+    id: '8',
+    name: 'Madison',
+    age: 30,
+    gender: 'female',
+    price: 330,
+    rating: 5.0,
+    isVerified: true,
+    bio: 'Stunning and sophisticated, Madison offers unparalleled companionship and unforgettable experiences.',
+    location: 'Boston, MA', // Changed from locations to location
+    services: ['Historical Tours', 'Classical Music', 'Exclusive Parties'],
+    images: [
+      '/images/escorts/madison1.jpg',
+      '/images/escorts/madison2.jpg',
+      '/images/escorts/madison3.jpg'
+    ],
+    featured: false
   }
 ];
 

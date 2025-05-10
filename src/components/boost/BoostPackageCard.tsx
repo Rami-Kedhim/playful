@@ -1,96 +1,67 @@
 
 import React from 'react';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Check, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { ArrowUp, Check } from 'lucide-react';
 import { BoostPackage } from '@/types/pulse-boost';
 
 interface BoostPackageCardProps {
-  package?: BoostPackage;
-  pkg?: BoostPackage;  // Alternative name for backward compatibility
+  package: BoostPackage;
   isSelected: boolean;
   onSelect: () => void;
   formatDuration?: (duration: string | number) => string;
   isPopular?: boolean;
-  compact?: boolean;
 }
 
-const BoostPackageCard: React.FC<BoostPackageCardProps> = ({ 
-  package: boostPackage,
-  pkg,
-  isSelected = false,
-  onSelect, 
-  formatDuration,
-  isPopular,
-  compact = false
+const BoostPackageCard: React.FC<BoostPackageCardProps> = ({
+  package: pkg,
+  isSelected,
+  onSelect,
+  formatDuration = (d) => String(d),
+  isPopular = false
 }) => {
-  // Use either package or pkg prop for compatibility
-  const packageData = boostPackage || pkg;
-  
-  if (!packageData) {
-    return <div>Invalid package data</div>;
-  }
-  
-  const handleSelect = () => {
-    if (onSelect) {
-      onSelect();
-    }
-  };
-
-  // Format duration if formatDuration function is provided
-  const formattedDuration = formatDuration 
-    ? formatDuration(packageData.duration) 
-    : typeof packageData.duration === 'string' 
-      ? packageData.duration 
-      : `${packageData.duration}h`;
-
-  // Format price
-  const formattedPrice = `$${packageData.price.toString()}`;
-  
   return (
-    <Card className="border rounded-lg p-4 flex flex-col h-full hover:shadow-md transition-shadow cursor-pointer">
-      <CardHeader>
-        <h3 className="text-lg font-semibold mb-2">{packageData.name}</h3>
-      </CardHeader>
-      <CardContent>
-        <p className="text-muted-foreground text-sm mb-4">{packageData.description}</p>
-
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium">Price:</span>
-          <span className="text-primary font-bold">{formattedPrice}</span>
-        </div>
-
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium">Duration:</span>
-          <span className="text-primary">{formattedDuration}</span>
-        </div>
-
-        {packageData.visibility && (
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Visibility:</span>
-            <span className="text-primary">{packageData.visibility}</span>
+    <Card 
+      className={`cursor-pointer transition border-2 ${isSelected ? 'border-primary' : 'border-gray-200 dark:border-gray-800'}`}
+      onClick={onSelect}
+    >
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold">{pkg.name}</h3>
+              {isPopular && <Badge variant="outline" className="bg-primary/10">Popular</Badge>}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {formatDuration(pkg.duration)}
+            </p>
+            
+            {pkg.features && pkg.features.length > 0 && (
+              <ul className="mt-2 space-y-1">
+                {pkg.features.map((feature, index) => (
+                  <li key={index} className="text-xs flex items-center gap-1">
+                    <Check className="h-3 w-3 text-primary" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-        )}
+          
+          <div className="text-right">
+            <div className="font-bold text-lg">${pkg.price}</div>
+            {pkg.price_ubx && (
+              <div className="text-xs text-muted-foreground">{pkg.price_ubx} UBX</div>
+            )}
+            {pkg.visibility_increase && (
+              <div className="text-xs mt-1 flex items-center justify-end gap-1">
+                <Zap className="h-3 w-3 text-yellow-500" />
+                +{pkg.visibility_increase}% visibility
+              </div>
+            )}
+          </div>
+        </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        {((packageData.isMostPopular || packageData.isPopular || isPopular) || isSelected) && (
-          <Badge variant="outline" className="text-green-700">
-            Most Popular
-          </Badge>
-        )}
-        {compact ? (
-          <Button variant="outline" onClick={handleSelect}>
-            <ArrowUp className="mr-2" />
-            Select
-          </Button>
-        ) : (
-          <Button variant="outline" onClick={handleSelect}>
-            <Check className="mr-2" />
-            Select
-          </Button>
-        )}
-      </CardFooter>
     </Card>
   );
 };
