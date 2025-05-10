@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { BoostStatus, BoostPackage } from '@/types/pulse-boost';
 import { formatDistanceToNow } from 'date-fns';
@@ -23,7 +22,10 @@ interface PulseBoostManagerProps {
   eligibilityCheck?: boolean;
 }
 
-const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId, eligibilityCheck = true }) => {
+const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({
+  profileId,
+  eligibilityCheck = true
+}) => {
   const [boostStatus, setBoostStatus] = useState<BoostStatus>({
     isActive: false,
     expiresAt: "",
@@ -154,6 +156,11 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId, eligib
         )}
       </div>
     ));
+  };
+
+  // Fix the line with the replace method by ensuring we're working with a string
+  const formattedPrice = (price: number): string => {
+    return `$${price.toString()}`;
   };
 
   return (

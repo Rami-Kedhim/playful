@@ -1,8 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { hermes } from '@/core/Hermes';
+import { hermes } from '@/core';
 
 interface RecommendedAction {
   id: string;

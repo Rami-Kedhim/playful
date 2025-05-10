@@ -1,44 +1,47 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { UserProfile } from '@/types/user'; // Fixed import from user.ts instead of pulse-boost
+import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { uberCore } from '@/core';
 
-export interface UberEcosystemContextType {
-  user?: UserProfile | null;
-  loading?: boolean;
-  error?: string | null;
-  lucieAI?: any;
-  state?: any;
+interface UberEcosystemContextType {
+  isSystemReady: boolean;
+  initialize: () => Promise<void>;
+  shutdown: () => Promise<void>;
 }
 
 const UberEcosystemContext = createContext<UberEcosystemContextType>({
-  user: null,
-  loading: false,
-  error: null,
-  lucieAI: {},
-  state: {}
+  isSystemReady: false,
+  initialize: () => Promise.resolve(),
+  shutdown: () => Promise.resolve(),
 });
 
-export const useUberEcosystem = () => {
-  return useContext(UberEcosystemContext);
-};
+export const UberEcosystemProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [isSystemReady, setIsSystemReady] = useState(false);
 
-interface UberEcosystemProviderProps {
-  children: ReactNode;
-}
+  const initialize = async () => {
+    try {
+      await uberCore.initialize();
+      setIsSystemReady(true);
+    } catch (error) {
+      console.error("Failed to initialize Uber Ecosystem:", error);
+      setIsSystemReady(false);
+    }
+  };
 
-export const UberEcosystemProvider: React.FC<UberEcosystemProviderProps> = ({ children }) => {
-  // This is a simplified implementation
+  const shutdown = async () => {
+    // Add shutdown logic here
+    setIsSystemReady(false);
+  };
+
+  const value: UberEcosystemContextType = {
+    isSystemReady,
+    initialize,
+    shutdown,
+  };
+
   return (
-    <UberEcosystemContext.Provider value={{
-      user: null,
-      loading: false,
-      error: null,
-      lucieAI: {},
-      state: {}
-    }}>
+    <UberEcosystemContext.Provider value={value}>
       {children}
     </UberEcosystemContext.Provider>
   );
 };
 
-export default UberEcosystemContext;
+export const useUberEcosystem = () => useContext(UberEcosystemContext);

@@ -1,8 +1,7 @@
-
-import { lucieAI } from './Lucie';
-import { oxum } from './Oxum';
-import { hermes } from './Hermes';
-import { UberCore, uberCore } from './UberCore';
+import { lucieAI } from './index';
+import { oxum } from './index';
+import { hermes } from './index';
+import { uberCore } from './index';
 
 /**
  * Initialize all core systems

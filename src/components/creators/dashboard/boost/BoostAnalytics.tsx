@@ -30,13 +30,13 @@ const BoostAnalytics: React.FC<BoostAnalyticsProps> = ({
     activeBoosts: analytics?.activeBoosts || 0,
     averageBoostScore: analytics?.averageBoostScore || 0,
     views: analytics?.views || 0,
-    impressions: analytics?.impressions || {
-      value: 0,
-      change: 0
+    impressions: {
+      value: analytics?.impressions?.value || 0,
+      change: analytics?.impressions?.change || 0
     },
-    interactions: analytics?.interactions || {
-      value: 0,
-      change: 0
+    interactions: {
+      value: analytics?.interactions?.value || 0,
+      change: analytics?.interactions?.change || 0
     },
     additionalViews: analytics?.additionalViews || 0,
     engagementIncrease: analytics?.engagementIncrease || 0,

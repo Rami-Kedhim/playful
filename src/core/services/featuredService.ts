@@ -1,4 +1,4 @@
-import { lucieAI } from '../Lucie';
+import { lucieAI } from '../index';
 
 // Define types for featured content
 export interface FeaturedUser {

@@ -28,7 +28,7 @@ export interface EscortAvailability {
 
 export interface Video {
   id: string;
-  url: string;
+  url?: string;
   thumbnail?: string;
   thumbnailUrl?: string;
   title?: string;
@@ -64,7 +64,21 @@ export interface Escort {
   height?: string | number;
   weight?: string | number;
   
-  // Adding missing properties referenced in error messages
+  // Add missing properties
+  measurements?: string;
+  hairColor?: string;
+  eyeColor?: string;
+  ethnicity?: string;
+  bodyType?: string;
+  sexualOrientation?: string;
+  specialties?: string[];
+  limitations?: string[];
+  interests?: string[];
+  payment_methods?: string[];
+  deposit_required?: boolean;
+  responseRate?: number;
+  
+  // Additional properties referenced in error messages
   availability?: string | string[] | EscortAvailability;
   contact?: {
     phone?: string;
@@ -72,7 +86,6 @@ export interface Escort {
     website?: string;
   };
   orientation?: string;
-  sexualOrientation?: string;
   rates?: any;
   rate?: number;
   created_at?: string;
@@ -81,6 +94,7 @@ export interface Escort {
   joined_date?: string;
   avatar_url?: string;
   avatarUrl?: string;
+  avatar?: string;
   profileImage?: string;
   tags?: string[];
   availableNow?: boolean;
@@ -88,10 +102,6 @@ export interface Escort {
   reviewCount?: number;
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
-  hairColor?: string;
-  eyeColor?: string;
-  ethnicity?: string;
-  bodyType?: string;
   stats?: {
     averageRating?: number;
     totalReviews?: number;
@@ -104,11 +114,9 @@ export interface Escort {
     rating?: number;
   };
   verificationLevel?: string;
-  avatar?: string;
   isFavorited?: boolean;
   lastActive?: string | Date;
   clientsServed?: number;
-  measurements?: string;
   gallery?: string[];
   gallery_images?: string[];
   videos?: Video[];

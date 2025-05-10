@@ -1,237 +1,279 @@
-import { useState, useEffect, createContext, useContext } from 'react';
-import type { UserProfile, AuthContextType } from '@/types/user';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User, AuthResult, UserProfile } from '@/types/auth';
 
-// Create the context with default values
-export const AuthContext = createContext<AuthContextType>({
+interface AuthContextType {
+  user: User | null;
+  userProfile: UserProfile | null; 
+  isLoading: boolean;
+  isLoggedIn: boolean;
+  isInitialized: boolean;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  logout: () => Promise<boolean>;
+  register: (email: string, password: string, username: string) => Promise<AuthResult>;
+}
+
+// Create a context with default values
+const AuthContext = createContext<AuthContextType>({
   user: null,
-  profile: null,
-  isAuthenticated: false,
+  userProfile: null,
   isLoading: true,
-  signIn: async () => false,
-  signOut: async () => {},
-  signUp: async () => false,
-  resetPassword: async () => false,
-  updateProfile: async () => false,
-  // Add missing methods needed by components
-  login: async () => ({ success: false }),
-  logout: async () => false,
-  register: async () => ({ success: false }),
-  sendPasswordResetEmail: async () => false,
-  checkRole: () => false
+  isLoggedIn: false,
+  isInitialized: false,
+  login: () => Promise.resolve({ success: false }),
+  logout: () => Promise.resolve(false),
+  register: () => Promise.resolve({ success: false }),
 });
 
-export const useAuthContext = () => {
-  const [user, setUserProfile] = useState<UserProfile | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
+  // Check for existing session on mount
   useEffect(() => {
     const checkAuth = async () => {
-      setIsLoading(true);
       try {
-        // Check if user is logged in
+        setIsLoading(true);
+        
+        // Check if there's a stored token
         const token = localStorage.getItem('auth_token');
+        
         if (token) {
-          // Mock user data for development
-          const mockUser = {
-            id: 'mock-user-1',
-            name: 'Test User',
-            username: 'testuser',
-            avatar_url: '/path/to/avatar.jpg', // Use avatar_url to match UserProfile type
-            avatarUrl: '/path/to/avatar.jpg', // Keep avatarUrl for backward compatibility
-            profileImageUrl: '/path/to/avatar.jpg', // Add profileImageUrl for backward compatibility
-            region: 'US',
-            aiPreferences: { theme: 'dark' },
-            lastAiInteraction: new Date().toISOString(),
-            aiConversationCount: 5,
-            aiFavoriteTopics: ['travel', 'technology'],
-            aiEnabled: true,
-            role: 'user',
-            roles: ['user'], // Add roles array
-            email: 'test@example.com', // Add email
-            is_verified: true, // Add verification status
-            verified: true, // Add verification status (alternative name)
-            website: 'https://example.com', // Add website property
-            phone: '+1234567890', // Add phone property
-            ubx_balance: 100, // Add UBX balance
-            ubxBalance: 100, // Add alternative UBX balance
-          };
+          // Validate token with backend
+          const response = await fetch('/api/auth/validate', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
           
-          setUserProfile(mockUser as UserProfile);
-          setProfile(mockUser as UserProfile);
-          setIsAuthenticated(true);
+          if (response.ok) {
+            const userData = await response.json();
+            
+            // Set user data
+            const user: User = {
+              id: userData.id,
+              name: userData.name,
+              username: userData.username,
+              email: userData.email,
+              avatar_url: userData.avatar_url,
+              avatarUrl: userData.avatarUrl,
+              profileImageUrl: userData.profileImageUrl,
+              is_escort: userData.is_escort,
+              is_verified: userData.is_verified,
+              verified: userData.verified
+            };
+            
+            // Set user profile data
+            const userProfile: UserProfile = {
+              id: userData.id,
+              name: userData.name,
+              username: userData.username,
+              email: userData.email,
+              avatar_url: userData.avatar_url,
+              avatarUrl: userData.avatarUrl,
+              profileImageUrl: userData.profileImageUrl,
+              is_escort: userData.is_escort,
+              is_verified: userData.is_verified,
+              verified: userData.verified,
+              user_id: userData.id
+            };
+            
+            setUser(user);
+            setUserProfile(userProfile);
+          } else {
+            // Token is invalid, clear it
+            localStorage.removeItem('auth_token');
+            setUser(null);
+            setUserProfile(null);
+          }
         } else {
+          setUser(null);
           setUserProfile(null);
-          setProfile(null);
-          setIsAuthenticated(false);
         }
       } catch (error) {
         console.error('Auth check failed:', error);
+        setUser(null);
         setUserProfile(null);
-        setProfile(null);
-        setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
+        setIsInitialized(true);
       }
     };
-
+    
     checkAuth();
   }, []);
 
-  // Main auth methods 
-  const signIn = async (email: string, password: string): Promise<boolean> => {
-    // Mock sign-in implementation
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const mockUser: UserProfile = {
-          id: '1',
-          name: 'Test User',
-          email: email,
-          username: 'testuser',
+  const login = async (email: string, password: string): Promise<AuthResult> => {
+    try {
+      setIsLoading(true);
+      
+      // Call login API
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Store token
+        localStorage.setItem('auth_token', data.token);
+        
+        // Create user object
+        const user: User = {
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+          username: data.user.username,
           is_escort: false,
           is_verified: true,
           verified: true
         };
-        setUserProfile(mockUser);
-        setIsAuthenticated(true);
-        localStorage.setItem('user', JSON.stringify(mockUser));
-        resolve(true);
-      }, 500);
-    });
+        
+        // Create user profile object
+        const userProfile: UserProfile = {
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+          username: data.user.username,
+          is_escort: false,
+          is_verified: true,
+          verified: true,
+          user_id: data.user.id
+        };
+        
+        setUser(user);
+        setUserProfile(userProfile);
+        
+        return {
+          success: true,
+          message: 'Login successful',
+          user,
+          token: data.token
+        };
+      } else {
+        return {
+          success: false,
+          message: data.message || 'Login failed'
+        };
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      return {
+        success: false,
+        message: 'An error occurred during login'
+      };
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const signOut = async (): Promise<void> => {
-    // Mock sign-out implementation
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        setUserProfile(null);
-        setProfile(null);
-        setIsAuthenticated(false);
-        localStorage.removeItem('user');
-        resolve();
-      }, 500);
-    });
+  const logout = async (): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      
+      // Call logout API if needed
+      // await fetch('/api/auth/logout', ...);
+      
+      // Clear token and user data
+      localStorage.removeItem('auth_token');
+      setUser(null);
+      setUserProfile(null);
+      
+      return true;
+    } catch (error) {
+      console.error('Logout error:', error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const signUp = async (email: string, password: string, userData?: any): Promise<boolean> => {
-    // Mock sign-up implementation
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const mockUser: UserProfile = {
-          id: '2',
-          name: userData?.name || 'New User',
+  const register = async (email: string, password: string, username: string): Promise<AuthResult> => {
+    try {
+      setIsLoading(true);
+      
+      // Call register API
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password, username })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Store token
+        localStorage.setItem('auth_token', data.token);
+        
+        // Create user object
+        const user: User = {
+          id: data.user.id,
+          name: data.user.name || username,
           email: email,
-          username: userData?.username || 'newuser',
+          username: username,
           is_escort: false,
           is_verified: false,
           verified: false
         };
-        setUserProfile(mockUser);
-        setIsAuthenticated(true);
-        localStorage.setItem('user', JSON.stringify(mockUser));
-        resolve(true);
-      }, 500);
-    });
-  };
-
-  const resetPassword = async (email: string): Promise<boolean> => {
-    // Mock reset password implementation
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log('Password reset email sent to:', email);
-        resolve(true);
-      }, 500);
-    });
-  };
-
-  const updateProfile = async (data: Partial<UserProfile>): Promise<boolean> => {
-    // Mock update profile implementation
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        setProfile(prevProfile => ({ ...prevProfile, ...data }));
-        resolve(true);
-      }, 500);
-    });
-  };
-
-  const createUserProfile = async (userData: any) => {
-    // Mock user profile creation
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        setProfile(userData);
-        resolve(true);
-      }, 500);
-    });
-  };
-
-  // Add these methods to match other components expectations
-  const login = async (email: string, password: string) => {
-    const success = await signIn(email, password);
-    return { success, user: success ? user : null };
-  };
-
-  const logout = async () => {
-    await signOut();
-    return true;
-  };
-
-  const register = async (email: string, password: string, confirmPassword: string) => {
-    const success = await signUp(email, password, { confirmPassword });
-    return { success, user: success ? user : null };
-  };
-
-  const sendPasswordResetEmail = async (email: string) => {
-    return await resetPassword(email);
-  };
-
-  // Add role checking functionality
-  const checkRole = (role: string): boolean => {
-    if (!user) return false;
-    
-    // Check user.roles array first
-    if (user.roles && Array.isArray(user.roles)) {
-      return user.roles.includes(role);
+        
+        // Create user profile object
+        const userProfile: UserProfile = {
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+          username: data.user.username,
+          is_escort: false,
+          is_verified: false,
+          verified: false,
+          user_id: data.user.id
+        };
+        
+        setUser(user);
+        setUserProfile(userProfile);
+        
+        return {
+          success: true,
+          message: 'Registration successful',
+          user,
+          token: data.token
+        };
+      } else {
+        return {
+          success: false,
+          message: data.message || 'Registration failed'
+        };
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      return {
+        success: false,
+        message: 'An error occurred during registration'
+      };
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Then check user.role string
-    if (user.role) {
-      return user.role === role;
-    }
-    
-    return false;
   };
 
-  // Create the auth context value
-  const authContextValue: AuthContextType = {
+  // Ensure all values match the context type
+  const contextValue: AuthContextType = {
     user,
-    profile,
-    isAuthenticated,
+    userProfile,
     isLoading,
-    signIn,
-    signOut,
-    signUp,
-    resetPassword,
-    updateProfile,
-    // Add the new methods to the context value
+    isLoggedIn: !!user,
+    isInitialized,
     login,
     logout,
-    register,
-    sendPasswordResetEmail,
-    checkRole,
-    setUser: setUserProfile  // Add this for components that need direct access
+    register
   };
 
-  return authContextValue;
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
 
-// Export the useAuth hook as an alias to useContext(AuthContext)
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-export default useAuth;
+export const useAuth = () => useContext(AuthContext);

@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { useToast } from "@/components/ui/use-toast"
-import { lucieAI, lucieOrchestrator } from '@/core';
+import { lucieAI } from '@/core';
+import { lucieOrchestrator } from '@/core/LucieOrchestratorAdapter';
 import { GenerateContentParams } from '@/types/ai-chat';
 
 const LucieAIAssistant: React.FC = () => {

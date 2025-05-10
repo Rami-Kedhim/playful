@@ -1,6 +1,5 @@
-
-import { hermes } from './Hermes';
-import { oxum } from './Oxum';
+import { hermes } from './index';
+import { oxum } from './index';
 
 /**
  * Integration layer between Hermes and Oxum systems for advanced AI processing

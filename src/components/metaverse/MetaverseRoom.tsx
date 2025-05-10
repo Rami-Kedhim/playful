@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { hermes } from '@/core/Hermes';
+import { hermes } from '@/core';
 import { Shield, Users, Map } from 'lucide-react';
 
 interface MetaverseRoomProps {

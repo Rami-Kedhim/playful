@@ -1,7 +1,7 @@
 
-import { hermes } from './Hermes';
-import { lucieAI } from './Lucie';
-import { oxum } from './Oxum';
+import { hermes } from './index';
+import { lucieAI } from './index';
+import { oxum } from './index';
 import { lucieOrchestrator } from './LucieOrchestrator';
 
 export {

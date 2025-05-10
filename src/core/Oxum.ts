@@ -34,6 +34,15 @@ export class Oxum implements OxumSystem {
     };
   }
 
+  async processImageFeatures(imageUrl: string): Promise<any> {
+    // Mock implementation
+    return {
+      features: ["face", "outdoor", "smile"],
+      confidence: 0.92,
+      timestamp: new Date()
+    };
+  }
+
   async validateSession(token: string): Promise<boolean> {
     if (!token) return false;
     

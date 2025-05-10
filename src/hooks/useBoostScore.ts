@@ -1,114 +1,80 @@
 
 import { useState, useCallback } from 'react';
-import { toast } from "@/components/ui/use-toast";
+import { hermes } from '@/core';
 
-interface UseBoostScoreOptions {
-  initialScore?: number | null;
+interface BoostScoreResult {
+  score: number;
+  lastUpdated: string;
+  factors: Record<string, number>;
 }
 
-const useBoostScore = (options: UseBoostScoreOptions = {}) => {
-  const [boostScore, setBoostScore] = useState<number | null>(options.initialScore || null);
-  const [loading, setLoading] = useState<boolean>(false);
+const useBoostScore = () => {
+  const [boostScore, setBoostScore] = useState<BoostScoreResult | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  
   const fetchBoostScore = useCallback(async (profileId: string) => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      setLoading(true);
-      setError(null);
+      // Simulate API call with hermes
+      const score = 85;
       
-      // In a real implementation, this would be an API call
-      // Mock data for demonstration
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Calculate a random score between 20 and 95
-      const randomScore = Math.floor(Math.random() * 75) + 20;
-      setBoostScore(randomScore);
-    } catch (err: any) {
+      setBoostScore({
+        score,
+        lastUpdated: new Date().toISOString(),
+        factors: {
+          profileCompleteness: 0.8,
+          engagementRate: 0.7,
+          mediaQuality: 0.9
+        }
+      });
+    } catch (err) {
       console.error('Error fetching boost score:', err);
-      setError(err.message || 'Failed to fetch boost score');
+      setError('Failed to fetch boost score');
     } finally {
       setLoading(false);
     }
   }, []);
-
+  
   const updateBoostScore = useCallback(async (profileId: string) => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      setLoading(true);
-      setError(null);
+      // Simulation of updating boost score
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // In a real implementation, this would be an API call
-      // Mock data for demonstration
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Calculate a random score between 20 and 95
-      const randomScore = Math.floor(Math.random() * 75) + 20;
-      setBoostScore(randomScore);
-      
-      toast({
-        title: "Boost score updated",
-        description: "Your profile boost score has been refreshed."
+      setBoostScore(prev => {
+        const newScore = Math.min((prev?.score || 80) + Math.floor(Math.random() * 5), 100);
+        return {
+          score: newScore,
+          lastUpdated: new Date().toISOString(),
+          factors: {
+            profileCompleteness: Math.min((prev?.factors.profileCompleteness || 0.8) + 0.05, 1),
+            engagementRate: Math.min((prev?.factors.engagementRate || 0.7) + 0.05, 1),
+            mediaQuality: Math.min((prev?.factors.mediaQuality || 0.9) + 0.02, 1)
+          }
+        };
       });
-      
-      return randomScore;
-    } catch (err: any) {
-      console.error('Error updating boost score:', err);
-      setError(err.message || 'Failed to update boost score');
-      
-      toast({
-        title: "Error updating boost score",
-        description: err.message || "There was a problem refreshing your boost score",
-        variant: "destructive"
-      });
-      
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Add the missing purchaseBoostCredits function
-  const purchaseBoostCredits = useCallback(async (amount: number) => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // In a real implementation, this would be an API call
-      // Mock data for demonstration
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: "Boost credits purchased",
-        description: `Successfully purchased ${amount} boost credits.`
-      });
-      
-      // Increase the boost score after purchase
-      const newScore = (boostScore || 50) + Math.floor(amount / 10);
-      setBoostScore(Math.min(newScore, 100)); // Cap at 100
       
       return true;
-    } catch (err: any) {
-      console.error('Error purchasing boost credits:', err);
-      setError(err.message || 'Failed to purchase boost credits');
-      
-      toast({
-        title: "Error purchasing boost credits",
-        description: err.message || "There was a problem with your purchase",
-        variant: "destructive"
-      });
-      
+    } catch (err) {
+      console.error('Error updating boost score:', err);
+      setError('Failed to update boost score');
       return false;
     } finally {
       setLoading(false);
     }
-  }, [boostScore]);
-
+  }, []);
+  
   return {
     boostScore,
     loading,
     error,
     fetchBoostScore,
-    updateBoostScore,
-    purchaseBoostCredits
+    updateBoostScore
   };
 };
 

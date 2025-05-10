@@ -1,9 +1,11 @@
+
 export interface GenerateContentParams {
   prompt: string;
   options?: any;
 }
 
 export interface GenerateContentResult {
+  content: string;
   toString: () => string;
 }
 

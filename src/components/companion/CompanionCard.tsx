@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Heart, MessageSquare, Star } from 'lucide-react';
-import { lucie } from '@/core/Lucie';
+import { lucieAI } from '@/core';
 
 interface CompanionCardProps {
   id: string;

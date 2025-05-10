@@ -1,8 +1,4 @@
 
-// Export all boost-related hooks
-export * from './useBoost';
-export * from './useBoostManager';
-export * from './useBoostAnalytics';
-export * from './usePulseBoost';
-export * from './usePulseBoostAdapter';
-export * from './useBoostStatus';
+export { default as useBoostManager } from './useBoostManager';
+export { default as useBoostPackages } from './useBoostPackages';
+export { default as useBoostAnalytics } from './useBoostAnalytics';
