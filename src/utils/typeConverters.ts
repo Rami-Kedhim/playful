@@ -12,7 +12,7 @@ export function convertEscortType(escort: any): EscortTypeNew {
   
   const convertedEscort: EscortTypeNew = {
     ...escort,
-    id: escort.id,
+    id: escort.id || '',
     name: escort.name || 'Unknown',
     gender: escort.gender || 'unknown',
     price: escort.price || 0,
@@ -34,7 +34,7 @@ export function convertEscortType(escort: any): EscortTypeNew {
             availability.days = availability.days.map(day => ({
               day,
               available: true
-            }));
+            })) as EscortAvailabilityDay[];
           }
         }
       }
@@ -69,7 +69,7 @@ export function ensureCompatibleAvailabilityDays(days: any): EscortAvailabilityD
       return days.map(day => ({
         day,
         available: true
-      }));
+      })) as EscortAvailabilityDay[];
     }
   }
   

@@ -14,6 +14,7 @@ export interface AnalyticsData {
     weeklyAverage?: number;
     withBoost?: number;
     withoutBoost?: number;
+    increase?: number;
   };
   interactions?: {
     value: number;
@@ -23,10 +24,19 @@ export interface AnalyticsData {
     weeklyAverage?: number;
     withBoost?: number;
     withoutBoost?: number;
+    increase?: number;
   };
   additionalViews?: number;
   engagementIncrease?: number;
   rankingPosition?: number;
+  rank?: {
+    current: number;
+    previous: number;
+    change: number;
+  };
+  conversionRate?: number;
+  messageRate?: number;
+  bookingRate?: number;
   // Add any additional properties that may be needed
   boostHistory?: Array<{
     date: string;

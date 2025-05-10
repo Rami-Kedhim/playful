@@ -58,7 +58,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({
 
   return (
     <BookingDialog 
-      escort={processedEscort as Escort} 
+      escort={processedEscort as unknown as Escort} 
       isOpen={isDialogOpen} 
       onClose={() => setIsDialogOpen(false)}
     />

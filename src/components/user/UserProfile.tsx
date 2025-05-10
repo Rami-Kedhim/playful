@@ -18,7 +18,9 @@ const UserProfile: React.FC<UserProfileProps> = ({
   onEdit,
   onContact
 }) => {
-  const userBirthDate = user.birth_date ? new Date(user.birth_date) : null;
+  // Safely handle birth_date which might not exist on User
+  const userBirthDate = user.birth_date ? new Date(user.birth_date) : 
+                        user.birthDate ? new Date(user.birthDate) : null;
 
   return (
     <Card className="w-full">
@@ -35,8 +37,9 @@ const UserProfile: React.FC<UserProfileProps> = ({
           {user.username && user.username !== user.name && (
             <CardDescription>@{user.username}</CardDescription>
           )}
-          {user.location && (
-            <CardDescription>{user.location}</CardDescription>
+          {/* Handle location property that might not exist */}
+          {(user.location || user?.user_metadata?.location) && (
+            <CardDescription>{user.location || user?.user_metadata?.location}</CardDescription>
           )}
         </div>
       </CardHeader>
@@ -54,16 +57,18 @@ const UserProfile: React.FC<UserProfileProps> = ({
               <div>{userBirthDate.toLocaleDateString()}</div>
             </div>
           )}
-          {user.gender && (
+          {/* Handle gender property that might not exist */}
+          {(user.gender || user?.user_metadata?.gender) && (
             <div>
               <div className="font-medium">Gender</div>
-              <div>{user.gender}</div>
+              <div>{user.gender || user?.user_metadata?.gender}</div>
             </div>
           )}
-          {user.joined_date && (
+          {/* Handle joined_date property that might not exist */}
+          {(user.joined_date || user.created_at) && (
             <div>
               <div className="font-medium">Joined</div>
-              <div>{new Date(user.joined_date).toLocaleDateString()}</div>
+              <div>{new Date(user.joined_date || user.created_at).toLocaleDateString()}</div>
             </div>
           )}
         </div>

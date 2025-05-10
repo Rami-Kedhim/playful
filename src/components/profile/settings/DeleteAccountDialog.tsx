@@ -9,52 +9,44 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/hooks/auth/useAuth';
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/hooks/auth";
+import { useToast } from "@/components/ui/use-toast";
 
 interface DeleteAccountDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ open, onOpenChange }) => {
-  const [confirmation, setConfirmation] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({
+  open,
+  onOpenChange
+}) => {
+  const [confirmText, setConfirmText] = useState("");
   const { deleteAccount } = useAuth();
   const { toast } = useToast();
 
   const handleDelete = async () => {
-    if (confirmation !== 'DELETE') {
-      toast({
-        title: 'Error',
-        description: 'Please type DELETE to confirm account deletion',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsLoading(true);
     try {
-      // Pass an empty object as argument to fix the error
-      await deleteAccount({});
+      // Fix: Remove the argument if deleteAccount doesn't accept any
+      await deleteAccount();
+      
       toast({
-        title: 'Account deleted',
-        description: 'Your account has been successfully deleted.',
+        title: "Account deleted",
+        description: "Your account has been permanently deleted."
       });
+      
       onOpenChange(false);
     } catch (error) {
-      console.error('Error deleting account:', error);
+      console.error("Error deleting account:", error);
       toast({
-        title: 'Error',
-        description: 'Could not delete your account. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to delete account. Please try again.",
+        variant: "destructive"
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -62,33 +54,34 @@ const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ open, onOpenC
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>Delete Account</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove all your data from our servers.
+            This action cannot be undone. This will permanently delete your account
+            and remove your data from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <div className="space-y-2">
-          <Label htmlFor="confirmation">
-            Type <span className="font-bold">DELETE</span> to confirm
-          </Label>
-          <Input
-            id="confirmation"
-            value={confirmation}
-            onChange={(e) => setConfirmation(e.target.value)}
-            autoComplete="off"
-            placeholder="DELETE"
-          />
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="confirmation">
+              Type "DELETE" to confirm
+            </Label>
+            <Input
+              id="confirmation"
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              placeholder="DELETE"
+            />
+          </div>
         </div>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <Button
-            variant="destructive"
+          <AlertDialogAction
             onClick={handleDelete}
-            disabled={confirmation !== 'DELETE' || isLoading}
+            disabled={confirmText !== "DELETE"}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {isLoading ? 'Deleting...' : 'Delete Account'}
-          </Button>
+            Delete Account
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

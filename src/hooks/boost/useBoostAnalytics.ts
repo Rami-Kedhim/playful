@@ -1,8 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { BoostAnalytics } from '@/types/core-systems';
-
-export interface AnalyticsData extends BoostAnalytics {}
+import { AnalyticsData } from '@/types/analytics';
 
 export const useBoostAnalytics = (profileId: string) => {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
@@ -26,13 +24,10 @@ export const useBoostAnalytics = (profileId: string) => {
         
         // Mock data
         const mockAnalytics: AnalyticsData = {
-          profileId,
           totalBoosts: 12,
           activeBoosts: 1,
           averageBoostScore: 8.4,
-          viewsBeforeBoost: 120,
-          viewsAfterBoost: 350,
-          engagementIncrease: 42,
+          views: 850,
           impressions: {
             value: 4200,
             change: 65
@@ -41,8 +36,9 @@ export const useBoostAnalytics = (profileId: string) => {
             value: 280,
             change: 48
           },
-          views: 850,
-          additionalViews: 230
+          additionalViews: 230,
+          engagementIncrease: 42,
+          rankingPosition: 3
         };
         
         setAnalytics(mockAnalytics);
