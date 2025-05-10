@@ -19,6 +19,9 @@ const EscortContactCard: React.FC<EscortContactCardProps> = ({
   isFavorite = false,
   onFavoriteToggle
 }) => {
+  // Get the price from rates.hourly if price isn't directly available
+  const displayPrice = escort.price || (escort.rates?.hourly ?? 0);
+
   return (
     <Card>
       <CardHeader>
@@ -27,11 +30,11 @@ const EscortContactCard: React.FC<EscortContactCardProps> = ({
       
       <CardContent>
         <div className="space-y-4">
-          {escort.price && (
+          {displayPrice > 0 && (
             <div className="bg-muted/50 p-3 rounded-md">
               <p className="text-sm font-medium">Starting Price</p>
               <p className="text-2xl font-bold">
-                {formatCurrency(escort.price)}/hr
+                {formatCurrency(displayPrice)}/hr
               </p>
             </div>
           )}
@@ -48,7 +51,7 @@ const EscortContactCard: React.FC<EscortContactCardProps> = ({
             </div>
           )}
           
-          {escort.responseRate && (
+          {typeof escort.responseRate !== 'undefined' && (
             <div>
               <p className="text-sm font-medium mb-1">Response Rate</p>
               <div className="text-sm">

@@ -51,7 +51,7 @@ const BoostPackageSelection: React.FC<BoostPackageSelectionProps> = ({
         {packages.map((boostPackage) => (
           <BoostPackageCard
             key={boostPackage.id}
-            package={boostPackage}
+            pkg={boostPackage}
             isSelected={selectedPackage === boostPackage.id}
             onSelect={() => onSelectPackage(boostPackage.id)}
             formatDuration={formatBoostDuration}

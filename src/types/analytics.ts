@@ -1,4 +1,3 @@
-
 export interface AnalyticsData {
   additionalViews?: number;
   engagementIncrease?: number;
@@ -47,9 +46,20 @@ export interface MetricCardProps {
 }
 
 export interface DetailedMetricViewProps {
-  title: string;
-  data: any;
+  title: string | { title: string; description?: string };
+  value?: number | string;
+  previousValue?: number | string;
+  change?: number;
+  unit?: string;
+  timeframe?: string;
+  data?: any;
+  loading?: boolean;
+  insights?: string[];
+  onBack?: () => void;
   onClose: () => void;
+  description?: string;
+  trendData?: any;
+  metric?: string;
 }
 
 export interface ExtendedMetricCardProps extends MetricCardProps {

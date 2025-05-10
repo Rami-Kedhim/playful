@@ -1,98 +1,95 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Clock, Calendar } from 'lucide-react';
-import type { Escort, EscortAvailabilityDay } from '@/types/escort';
+import { Card, CardContent } from '@/components/ui/card';
+import { Escort, EscortAvailabilityDay } from '@/types/escort';
+import { Calendar, Clock } from 'lucide-react';
 
 interface EscortAvailabilityProps {
   escort: Escort;
 }
 
+// Helper function to convert various availability formats to days array
+const formatAvailability = (availability?: string | string[] | { days: string[] | EscortAvailabilityDay[] }): EscortAvailabilityDay[] => {
+  if (!availability) {
+    return [];
+  }
+  
+  // Handle string format
+  if (typeof availability === 'string') {
+    return [{ day: 'General', available: true, hours: [{ start: availability, end: '' }] }];
+  }
+  
+  // Handle string[] format
+  if (Array.isArray(availability)) {
+    if (typeof availability[0] === 'string') {
+      return (availability as string[]).map(day => ({
+        day,
+        available: true
+      }));
+    }
+    // It's already EscortAvailabilityDay[]
+    return availability as EscortAvailabilityDay[];
+  }
+  
+  // Handle object format with days
+  if ('days' in availability) {
+    const days = availability.days;
+    
+    if (Array.isArray(days)) {
+      if (typeof days[0] === 'string') {
+        return (days as string[]).map(day => ({
+          day,
+          available: true
+        }));
+      }
+      // It's already EscortAvailabilityDay[]
+      return days as EscortAvailabilityDay[];
+    }
+  }
+  
+  return [];
+};
+
 const EscortAvailability: React.FC<EscortAvailabilityProps> = ({ escort }) => {
-  const renderAvailabilityDays = () => {
+  const availabilityDays = React.useMemo(() => {
     if (!escort.availability) {
-      return <p>No availability information provided.</p>;
-    }
-
-    // Handle string availability
-    if (typeof escort.availability === 'string') {
-      return <p>{escort.availability}</p>;
-    }
-
-    // Handle string array availability
-    if (Array.isArray(escort.availability) && typeof escort.availability[0] === 'string') {
-      return (
-        <div className="grid grid-cols-2 gap-2">
-          {(escort.availability as string[]).map((day, index) => (
-            <div key={index} className="flex items-center">
-              <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-              <span>{day}</span>
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    // Handle structured availability (for EscortAvailability object with days property)
-    const days = 'days' in escort.availability ? 
-      (escort.availability.days || []) : 
-      [];
-    
-    // Handle if days is array of strings
-    if (Array.isArray(days) && days.length > 0 && typeof days[0] === 'string') {
-      return (
-        <div className="grid grid-cols-2 gap-2">
-          {(days as string[]).map((day, index) => (
-            <div key={index} className="flex items-center">
-              <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-              <span>{day}</span>
-            </div>
-          ))}
-        </div>
-      );
+      return [{ day: 'Flexible', available: true }];
     }
     
-    // Handle if days is array of EscortAvailabilityDay objects
-    const availabilityDays: EscortAvailabilityDay[] = days as EscortAvailabilityDay[];
-    
-    return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {availabilityDays.map((day, index) => (
-          <Card key={index} className={day.available ? "" : "opacity-60"}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">{day.day}</CardTitle>
-              <CardDescription>
-                {day.available ? "Available" : "Not Available"}
-              </CardDescription>
-            </CardHeader>
-            {day.available && day.hours && day.hours.length > 0 && (
-              <CardContent>
-                <div className="space-y-1">
-                  {day.hours.map((hour, hourIndex) => (
-                    <div key={hourIndex} className="flex items-center text-sm">
-                      <Clock className="h-3 w-3 mr-2" />
-                      <span>
-                        {hour.start} - {hour.end}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            )}
-          </Card>
-        ))}
-      </div>
-    );
-  };
-
+    return formatAvailability(escort.availability);
+  }, [escort.availability]);
+  
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold flex items-center">
-        <Calendar className="h-6 w-6 mr-2" />
-        Availability
-      </h2>
-      {renderAvailabilityDays()}
-    </div>
+    <Card>
+      <CardContent className="p-5">
+        <h3 className="text-lg font-medium flex items-center gap-2 mb-4">
+          <Calendar className="h-5 w-5" />
+          Availability
+        </h3>
+        
+        <div className="space-y-4">
+          {availabilityDays.map((day, index) => (
+            <div key={index} className="flex justify-between items-center border-b pb-2">
+              <div className="font-medium">{day.day}</div>
+              <div className="flex items-center gap-1 text-sm">
+                {day.hours && day.hours.length > 0 ? (
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span>
+                      {day.hours.map(h => `${h.start}${h.end ? ' - ' + h.end : ''}`).join(', ')}
+                    </span>
+                  </div>
+                ) : (
+                  <span className={day.available ? 'text-green-500' : 'text-red-500'}>
+                    {day.available ? 'Available' : 'Unavailable'}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

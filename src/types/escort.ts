@@ -30,6 +30,7 @@ export interface Escort {
     hourly?: number;
     overnight?: number;
     weekend?: number;
+    twoHours?: number;
   };
   location?: string;
   availability?: string | string[] | EscortAvailability;
@@ -57,6 +58,12 @@ export interface Escort {
     hairColor?: string;
     ethnicity?: string;
   };
+  price?: number;
+  responseRate?: number;
+  height?: string;
+  imageUrl?: string;
+  profileImage?: string;
+  reviewCount?: number;
 }
 
 export type VerificationLevel = 'NONE' | 'BASIC' | 'VERIFIED' | 'PREMIUM';

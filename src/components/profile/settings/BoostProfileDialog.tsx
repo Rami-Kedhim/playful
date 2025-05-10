@@ -1,51 +1,55 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Zap } from 'lucide-react';
-import BoostDialogContainer from "@/components/boost/BoostDialogContainer";
-import { toast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Zap } from "lucide-react";
+import BoostDialogContainer from '@/components/boost/BoostDialogContainer';
+import { useAuth } from '@/hooks/auth';
 
 interface BoostProfileDialogProps {
-  profileId: string;
-  onSuccess?: () => void;
-  buttonText?: string;
-  buttonVariant?: "link" | "default" | "destructive" | "outline" | "secondary" | "ghost";
-  buttonSize?: "default" | "sm" | "lg" | "icon"; // Fix the type to match Button component
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  profileId?: string;
 }
 
-const BoostProfileDialog = ({ 
-  profileId, 
-  onSuccess = () => {},
-  buttonText = "Boost Profile",
-  buttonVariant = "outline",
-  buttonSize = "sm"
-}: BoostProfileDialogProps) => {
-  // Create a wrapper function that accepts the boolean result and calls onSuccess
-  const handleSuccess = async () => {
-    try {
-      // Call the onSuccess callback from props
-      onSuccess();
-      
-      // Show success toast
-      toast({
-        title: "Profile boosted!",
-        description: "Your profile boost has been activated successfully.",
-      });
-      
-      return true; // Return true to satisfy the Promise<boolean> requirement
-    } catch (error) {
-      console.error("Error in boost success handler:", error);
-      return false;
-    }
+const BoostProfileDialog: React.FC<BoostProfileDialogProps> = ({
+  open,
+  onOpenChange,
+  profileId
+}) => {
+  const { user } = useAuth();
+  const userId = profileId || user?.id;
+  
+  const handleBoostSuccess = async () => {
+    // Simulate success after boosting
+    return true;
   };
 
+  if (!userId) {
+    return null;
+  }
+  
   return (
-    <BoostDialogContainer
-      profileId={profileId}
-      onSuccess={handleSuccess}
-      buttonText={buttonText}
-      buttonVariant={buttonVariant}
-    />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Boost Your Profile</DialogTitle>
+        </DialogHeader>
+        
+        <div className="py-4">
+          <p className="text-center text-muted-foreground mb-6">
+            Get more visibility and appear higher in search results with a profile boost.
+          </p>
+          
+          <BoostDialogContainer 
+            profileId={userId} 
+            onSuccess={handleBoostSuccess}
+            buttonText="Boost Now"
+            buttonVariant="default"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

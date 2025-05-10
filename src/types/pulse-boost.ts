@@ -1,4 +1,3 @@
-
 export interface PulseBoost {
   id: string;
   profileId?: string;
@@ -116,6 +115,9 @@ export interface BoostPackage {
   color?: string;
   badgeColor?: string;
   boost_power?: number;
+  isMostPopular?: boolean;
+  isPopular?: boolean;
+  isRecommended?: boolean;
 }
 
 export interface BoostScoreResult {
@@ -175,4 +177,16 @@ export interface BoostPurchaseResult {
   error?: string | null;
   message?: string; // Add this for useBoostStatus.ts
   transactionId?: string;
+}
+
+export interface HermesStatus {
+  position: number;
+  activeUsers: number;
+  estimatedVisibility: number;
+  lastUpdateTime: string;
+  boostScore?: number;
+  effectivenessScore?: number;
+  isActive?: boolean;
+  score?: number;
+  recommendations?: string[];
 }

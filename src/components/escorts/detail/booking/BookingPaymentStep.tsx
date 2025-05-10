@@ -39,7 +39,7 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
       case '1hr':
         return baseRate;
       case '2hrs':
-        return baseRate * 2;
+        return escort.rates?.twoHours || baseRate * 2;
       case '3hrs':
         return baseRate * 3;
       default:
@@ -51,6 +51,9 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
     if (!date) return 'Not selected';
     return typeof date === 'string' ? date : format(date, 'EEEE, MMMM d, yyyy');
   };
+
+  // Use escort.height directly if it exists, or try to get it from body.height
+  const displayHeight = escort.height || (escort.body?.height ? `${escort.body.height}cm` : 'Not specified');
 
   return (
     <Card className="max-w-md mx-auto">
